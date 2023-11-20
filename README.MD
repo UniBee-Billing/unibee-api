@@ -1,4 +1,4 @@
-# GoFrame Template For SingleRepo
+# GoFrame Template For oversea-pay
 
 Quick Start: 
 - https://goframe.org/pages/viewpage.action?pageId=1114399
