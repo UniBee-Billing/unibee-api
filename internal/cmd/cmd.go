@@ -8,6 +8,7 @@ import (
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/controller/hello"
+	"go-oversea-pay/utility/liberr"
 )
 
 var (
@@ -31,6 +32,14 @@ var (
 				group.Middleware(ghttp.MiddlewareHandlerResponse)
 				router.Tools(ctx, group) //工具接口
 			})
+
+			{
+				_, err := g.Redis().Set(ctx, "g_check", "checked")
+				liberr.ErrIsNil(ctx, err, "redis write check failure")
+				value, err := g.Redis().Get(ctx, "g_check")
+				liberr.ErrIsNil(ctx, err, "redis read check failure")
+				g.Log().Infof(ctx, "redis check success: %s ", value.String())
+			}
 
 			s.Run()
 
