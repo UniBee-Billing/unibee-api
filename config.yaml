@@ -1,0 +1,16 @@
+server:
+  address:     ":8080"
+  openapiPath: "/api.json"
+#  swaggerPath: "/swagger"
+
+logger:
+  level : "all"
+  stdout: true
+
+
+
+database:
+  xin:
+    link:    "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/xin"
+    debug:   true
+    type:    mysql

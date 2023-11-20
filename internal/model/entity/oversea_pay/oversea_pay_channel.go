@@ -1,0 +1,27 @@
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
+
+package entity
+
+import (
+	"github.com/gogf/gf/v2/os/gtime"
+)
+
+// OverseaPayChannel is the golang structure for table oversea_pay_channel.
+type OverseaPayChannel struct {
+	Id               uint64      `json:"id"               ` // 主键id
+	EnumKey          int64       `json:"enumKey"          ` // 支付渠道枚举（内部定义）
+	Channel          string      `json:"channel"          ` // 支付方式枚举（渠道定义）
+	Name             string      `json:"name"             ` // 支付方式名称
+	SubChannel       string      `json:"subChannel"       ` // 渠道子支付方式枚举
+	BrandData        string      `json:"brandData"        ` //
+	Logo             string      `json:"logo"             ` // 支付方式logo
+	ChannelAccountId string      `json:"channelAccountId" ` // 渠道账户Id
+	ChannelKey       string      `json:"channelKey"       ` //
+	ChannelSecret    string      `json:"channelSecret"    ` // secret
+	Custom           string      `json:"custom"           ` // custom
+	GmtCreate        *gtime.Time `json:"gmtCreate"        ` // 创建时间
+	GmtModify        *gtime.Time `json:"gmtModify"        ` // 修改时间
+	Description      string      `json:"description"      ` // 支付方式描述
+}

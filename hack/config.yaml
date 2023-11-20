@@ -1,0 +1,26 @@
+
+# CLI tool, only in development environment.
+# https://goframe.org/pages/viewpage.action?pageId=3673173
+gfcli:
+  docker:
+    build: "-a amd64 -s linux -p temp -ew"
+    tagPrefixes:
+      - my.image.pub/my-app
+  gen:
+    dao:
+      - link:     "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/xin"
+        tables:   "test"
+        group: "xin"
+        daoPath:  "dao/xin"
+        doPath:  "model/do/xin"
+        entityPath:  "model/entity/xin"
+#        jsonCase: "CamelLower"
+
+      - link:   "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/oversea_pay"
+#        path:   "oversea_pay"
+#        prefix: "primary_"
+        group: "oversea_pay"
+        daoPath:  "dao/oversea_pay"
+        doPath:  "model/do/oversea_pay"
+        entityPath:  "model/entity/oversea_pay"
+        tables: ""
