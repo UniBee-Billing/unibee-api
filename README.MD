@@ -5,6 +5,12 @@ Quick Start:
 - goland api 自动生成配置 https://goframe.org/pages/viewpage.action?pageId=93880327
 - gf gen dao https://goframe.org/pages/viewpage.action?pageId=3673173
 
+mysql 集成
+- _ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+    
+redis集成
+- _ "github.com/gogf/gf/contrib/nosql/redis/v2"
+
 nacos 集成
 命令行参数
 --nacos-ip
