@@ -13,6 +13,6 @@ func DoChannelCapture(overseaPay *entity.OverseaPay) (result interface{}, err er
 	utility.Assert(overseaPay.BuyerPayFee > 0, "capture value should > 0")
 	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
 
-	// todo mark 实现 channel capture
+	// todo mark 事务实现 channel capture
 	return overseaPay, nil
 }
