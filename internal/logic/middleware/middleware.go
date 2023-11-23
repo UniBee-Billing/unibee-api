@@ -27,26 +27,44 @@ func New() *SMiddleware {
 	}
 }
 
+func Try(fun func(), handler func(interface{})) {
+	defer func() {
+		if err := recover(); err != nil {
+			handler(err)
+		}
+	}()
+	fun()
+}
+
 // ResponseHandler 返回处理中间件
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
-	r.Middleware.Next()
 
-	// 如果已经有返回内容，那么该中间件什么也不做
-	if r.Response.BufferLength() > 0 {
+	Try(r.Middleware.Next, func(err interface{}) {
+		json, _ := r.GetJson()
+		g.Log().Errorf(r.Context(), "Global_exception panic url: %s params:%s code:%d error:%s", r.GetUrl(), json, err)
 		return
-	}
+	})
 
 	var (
 		err             = r.GetError()
 		res             = r.GetHandlerResponse()
 		code gcode.Code = gcode.CodeOK
 	)
+
+	// 如果已经有返回内容，那么该中间件什么也不做
+	if err == nil && r.Response.BufferLength() > 0 {
+		return
+	}
+
 	if err != nil {
 		code = gerror.Code(err)
 		if code == gcode.CodeNil {
 			code = gcode.CodeInternalError
 		}
+		json, _ := r.GetJson()
+		g.Log().Errorf(r.Context(), "Global_exception err url: %s params:%s code:%d error:%s", r.GetUrl(), json, code.Code(), err.Error())
 		//if r.IsAjaxRequest() {
+		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
 		response.JsonExit(r, code.Code(), err.Error())
 		//} else {
 		//service.View().Render500(r.Context(), model.Vie w{
