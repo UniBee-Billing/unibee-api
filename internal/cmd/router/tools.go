@@ -10,7 +10,6 @@ import (
 func Tools(ctx context.Context, group *ghttp.RouterGroup) {
 	// xin_service 库相关接口
 	group.Group("/", func(group *ghttp.RouterGroup) {
-		//group.Middleware(service.Middleware().Auth)
 		group.Bind(
 			xin.NewV1(), //测试 xin_service 库接口
 		)

@@ -5,6 +5,7 @@ import (
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
 	"go-oversea-pay/internal/cmd/nacos"
+	_ "go-oversea-pay/internal/logic"
 
 	_ "go-oversea-pay/internal/packed"
 

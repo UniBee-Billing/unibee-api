@@ -1,0 +1,31 @@
+package service
+
+//import (
+//	"context"
+//	"go-oversea-pay/internal/model"
+//)
+//
+//type IView interface {
+//	GetBreadCrumb(ctx context.Context, in *model.ViewGetBreadCrumbInput) []model.ViewBreadCrumb
+//	GetTitle(ctx context.Context, in *model.ViewGetTitleInput) string
+//	RenderTpl(ctx context.Context, tpl string, data ...model.View)
+//	Render(ctx context.Context, data ...model.View)
+//	Render302(ctx context.Context, data ...model.View)
+//	Render401(ctx context.Context, data ...model.View)
+//	Render403(ctx context.Context, data ...model.View)
+//	Render404(ctx context.Context, data ...model.View)
+//	Render500(ctx context.Context, data ...model.View)
+//}
+//
+//var localView IView
+//
+//func View() IView {
+//	if localView == nil {
+//		panic("implement not found for interface IView, forgot register?")
+//	}
+//	return localView
+//}
+//
+//func RegisterView(i IView) {
+//	localView = i
+//}

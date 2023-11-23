@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
-	"go-oversea-pay/internal/controller/hello"
+	"go-oversea-pay/internal/service"
 	"go-oversea-pay/utility/liberr"
 )
 
@@ -23,14 +23,28 @@ var (
 				group.GET("/swagger", func(r *ghttp.Request) {
 					r.Response.Write(swagger.SwaggerUIPageContent)
 				})
-				group.Middleware(ghttp.MiddlewareHandlerResponse)
-				group.Bind(
-					hello.NewV1(),
+				group.Middleware(
+					service.Middleware().Ctx,
+					service.Middleware().ResponseHandler,
 				)
+				//group.Bind(
+				//	hello.NewV1(), //测试接口
+				//)
 			})
-			s.Group("/tools", func(group *ghttp.RouterGroup) {
-				group.Middleware(ghttp.MiddlewareHandlerResponse)
+			s.Group("/xin", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					service.Middleware().Ctx,
+					service.Middleware().ResponseHandler,
+				)
 				router.Tools(ctx, group) //工具接口
+			})
+
+			s.Group("/out", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					service.Middleware().Ctx,
+					service.Middleware().ResponseHandler,
+				)
+				router.Outs(ctx, group) //开放平台接口
 			})
 
 			{
