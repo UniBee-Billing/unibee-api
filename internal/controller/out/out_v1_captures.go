@@ -22,8 +22,7 @@ func (c *ControllerV1) Captures(ctx context.Context, req *v1.CapturesReq) (res *
 	utility.Assert(one != nil, "payment not found")
 	utility.Assert(one.Currency == req.Amount.Currency, "Currency not match the payment")
 	one.BuyerPayFee = req.Amount.Value
-	result, err := oversea_pay_service.DoChannelCapture(ctx, one)
-	utility.Assert(err == nil, err.Error())
-	utility.SuccessJsonExit(g.RequestFromCtx(ctx), result)
+	err = oversea_pay_service.DoChannelCapture(ctx, one)
+	utility.SuccessJsonExit(g.RequestFromCtx(ctx), err == nil)
 	return
 }
