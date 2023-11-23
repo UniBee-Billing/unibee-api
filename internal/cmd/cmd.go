@@ -24,8 +24,8 @@ var (
 					r.Response.Write(swagger.SwaggerUIPageContent)
 				})
 				group.Middleware(
-					service.Middleware().PreAuth,
 					service.Middleware().ResponseHandler,
+					service.Middleware().PreAuth,
 				)
 				//group.Bind(
 				//	hello.NewV1(), //测试接口
@@ -33,16 +33,16 @@ var (
 			})
 			s.Group("/xin", func(group *ghttp.RouterGroup) {
 				group.Middleware(
-					service.Middleware().PreAuth,
 					service.Middleware().ResponseHandler,
+					service.Middleware().PreAuth,
 				)
 				router.Tools(ctx, group) //工具接口
 			})
 
 			s.Group("/out", func(group *ghttp.RouterGroup) {
 				group.Middleware(
-					service.Middleware().PreAuth,
 					service.Middleware().ResponseHandler,
+					service.Middleware().PreAuth,
 				)
 				router.Outs(ctx, group) //开放平台接口
 			})

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/api/out/v1"
-	response "go-oversea-pay/utility"
+	utility "go-oversea-pay/utility"
 )
 
 func (c *ControllerV1) Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1.RefundsRes, err error) {
@@ -15,6 +15,6 @@ func (c *ControllerV1) Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1
 	//})
 	//g.RequestFromCtx(ctx).Exit()
 	//response.JsonExit(g.RequestFromCtx(ctx), 200, "success", "Hello Refund")
-	response.SuccessJsonExit(g.RequestFromCtx(ctx), "Hello Refund")
+	utility.SuccessJsonExit(g.RequestFromCtx(ctx), "Hello Refund")
 	return
 }

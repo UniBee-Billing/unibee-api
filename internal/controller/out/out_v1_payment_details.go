@@ -10,5 +10,6 @@ import (
 )
 
 func (c *ControllerV1) PaymentDetails(ctx context.Context, req *v1.PaymentDetailsReq) (res *v1.PaymentDetailsRes, err error) {
+	panic("capture panic error moke")
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
