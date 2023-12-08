@@ -1,0 +1,35 @@
+package utility
+
+import (
+	"math/rand"
+	"runtime"
+	"strconv"
+	"time"
+)
+
+func GetLineSeparator() string {
+	switch runtime.GOOS {
+	case "windows":
+		return "\r\n"
+	default:
+		return "\n"
+	}
+}
+
+func CurrentTimeMillis() (s string) {
+	return strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
+}
+
+func GenerateRandomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(result)
+}
+
+func JodaTimePrefix() (prefix string) {
+	return time.Now().Format("20060102")
+}

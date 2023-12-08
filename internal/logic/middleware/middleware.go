@@ -10,7 +10,7 @@ import (
 	_ "go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/model"
 	"go-oversea-pay/internal/service"
-	response "go-oversea-pay/utility"
+	utility "go-oversea-pay/utility"
 )
 
 type SMiddleware struct {
@@ -27,20 +27,10 @@ func New() *SMiddleware {
 	}
 }
 
-// Try Cache 模拟，捕获内部异常，实际上框架已实现恢复机制
-func Try(fun func(), handler func(interface{})) {
-	defer func() {
-		if err := recover(); err != nil {
-			handler(err)
-		}
-	}()
-	fun()
-}
-
 // ResponseHandler 返回处理中间件
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 
-	Try(r.Middleware.Next, func(err interface{}) {
+	utility.Try(r.Middleware.Next, func(err interface{}) {
 		json, _ := r.GetJson()
 		g.Log().Errorf(r.Context(), "Global_exception panic url: %s params:%s code:%d error:%s", r.GetUrl(), json, err)
 		return
@@ -66,7 +56,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		g.Log().Errorf(r.Context(), "Global_exception err url: %s params:%s code:%d error:%s", r.GetUrl(), json, code.Code(), err.Error())
 		//if r.IsAjaxRequest() {
 		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
-		response.JsonExit(r, code.Code(), err.Error())
+		utility.JsonExit(r, code.Code(), err.Error())
 		//} else {
 		//service.View().Render500(r.Context(), model.Vie w{
 		//	Error: err.Error(),
@@ -74,7 +64,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		//}
 	} else {
 		//if r.IsAjaxRequest() {
-		response.JsonExit(r, code.Code(), "", res)
+		utility.JsonExit(r, code.Code(), "", res)
 		//} else {
 		// 什么都不做，业务API自行处理模板渲染的成功逻辑。
 		//}
@@ -120,7 +110,7 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 		}
 		// 根据当前请求方式执行不同的返回数据结构
 		if r.IsAjaxRequest() {
-			response.JsonRedirectExit(r, 1, "", s.LoginUrl)
+			utility.JsonRedirectExit(r, 1, "", s.LoginUrl)
 		} else {
 			r.Response.RedirectTo(s.LoginUrl)
 		}
