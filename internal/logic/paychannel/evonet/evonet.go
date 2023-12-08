@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/paychannel/ro"
 	"go-oversea-pay/internal/logic/paychannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -23,11 +25,6 @@ const ENDPOINT = "https://hkg-online-uat.everonet.com"
 
 type Evonet struct{}
 
-func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res interface{}, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext interface{}) (res interface{}, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -40,19 +37,19 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 	urlPath := "/g2/v1/payment/mer/" + channel.ChannelAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + pay.MerchantOrderNo
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":   "",
+			"merchantTransID":   utility.CreateMerchantOrderNo(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"transAmount": map[string]interface{}{
 			"currency": pay.Currency,
-			"value":    pay.BuyerPayFee,
+			"value":    utility.ConvertFenToYuanMinUnitStr(pay.BuyerPayFee),
 		},
-		"webhook": fmt.Sprintf("/evonet/notify/webhooks/notifications?payId=%d", pay.Id),
+		"webhook": fmt.Sprintf("%s/evonet/notify/webhooks/notifications?payId=%d", consts.GetNacosConfigInstance().HostPath, pay.Id),
 	}
 	data, err := sendEvonetRequest(ctx, "POST", urlPath, channel.ChannelKey, param)
-	utility.Assert(err != nil, fmt.Sprintf("call evonet error %s", err))
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
-	utility.Assert(err != nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
 	utility.Assert(responseJson.Contains("result"), "Evonetpay捕获失败 result is null")
 	resultJson := responseJson.GetJson("result")
 	captureJson := responseJson.GetJson("capture")
@@ -64,31 +61,178 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 		fmt.Sprintf("Evonetpay捕获失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := captureJson.Get("status").String()
 	pspReference := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	res = ro.OutPayCaptureRo{}
-	res.PspReference = pspReference
-	res.Status = status
+	res = ro.OutPayCaptureRo{
+		PspReference: pspReference,
+		Status:       status,
+	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res interface{}, err error) {
-	//TODO implement me
-	panic("implement me")
+func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayCancelRo, err error) {
+	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
+	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
+	utility.Assert(channel != nil, "支付渠道异常 channel not found")
+	urlPath := "/g2/v1/payment/mer/" + channel.ChannelAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + pay.MerchantOrderNo
+	param := map[string]interface{}{
+		"merchantTransInfo": map[string]interface{}{
+			"merchantTransID":   utility.CreateMerchantOrderNo(),
+			"merchantTransTime": getCurrentDateTime(),
+		},
+		"webhook": fmt.Sprintf("%s/evonet/notify/webhooks/notifications?payId=%d", consts.GetNacosConfigInstance().HostPath, pay.Id),
+	}
+	data, err := sendEvonetRequest(ctx, "POST", urlPath, channel.ChannelKey, param)
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
+	responseJson, err := gjson.LoadJson(string(data))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(responseJson.Contains("result"), "Evonetpay取消失败 result is null")
+	resultJson := responseJson.GetJson("result")
+	cancelJson := responseJson.GetJson("cancel")
+	utility.Assert(resultJson.Contains("code") &&
+		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
+		cancelJson != nil &&
+		cancelJson.Contains("evoTransInfo") &&
+		cancelJson.GetJson("evoTransInfo").Contains("evoTransID"),
+		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
+	status := cancelJson.Get("status").String()
+	pspReference := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	res = ro.OutPayCancelRo{
+		PspReference: pspReference,
+		Status:       status,
+	}
+	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res interface{}, err error) {
-	//TODO implement me
-	panic("implement me")
+func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayRo, err error) {
+	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
+	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
+	utility.Assert(channel != nil, "支付渠道异常 channel not found")
+	urlPath := "/g2/v1/payment/mer/" + channel.ChannelAccountId + "/evo.e-commerce.payment"
+	param := map[string]interface{}{
+		"merchantTransID": pay.MerchantOrderNo,
+	}
+	data, err := sendEvonetRequest(ctx, "GET", urlPath, channel.ChannelKey, param)
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
+	responseJson, err := gjson.LoadJson(string(data))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(responseJson.Contains("result"), "Evonetpay支付查询失败 result is null")
+	resultJson := responseJson.GetJson("result")
+	payment := responseJson.GetJson("payment")
+	utility.Assert(resultJson.Contains("code") &&
+		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
+		payment != nil &&
+		payment.Contains("status") &&
+		payment.Contains("evoTransInfo") &&
+		payment.GetJson("evoTransInfo").Contains("evoTransID") &&
+		payment.GetJson("merchantTransInfo").Contains("merchantTransID"),
+		fmt.Sprintf("Evonetpay支付查询失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
+	status := payment.Get("status").String()
+	pspReference := payment.GetJson("evoTransInfo").Get("evoTransID").String()
+	merchantPspReference := payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
+	utility.Assert(strings.Compare(merchantPspReference, pay.MerchantOrderNo) == 0, "merchantPspReference not match")
+	res = ro.OutPayRo{
+		PayFee:    pay.PaymentFee,
+		PayStatus: consts.TO_BE_PAID,
+	}
+	if strings.Compare(status, "Failed") == 0 || strings.Compare(status, "Cancelled") == 0 {
+		res.PayStatus = consts.PAY_FAILED
+		res.Reason = "from_query:" + payment.Get("failureReason").String()
+	} else if strings.Compare(status, "Captured") == 0 {
+		res.PayStatus = consts.PAY_SUCCESS
+		res.ChannelTradeNo = pspReference
+		res.PayTime = gtime.Now()
+	}
+	return res, nil
+}
+
+func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
+	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
+	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
+	utility.Assert(channel != nil, "支付渠道异常 channel not found")
+	urlPath := "/g2/v1/payment/mer/" + channel.ChannelAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + pay.MerchantOrderNo
+	param := map[string]interface{}{
+		"merchantTransInfo": map[string]interface{}{
+			"merchantTransID":   utility.CreateMerchantOrderNo(),
+			"merchantTransTime": getCurrentDateTime(),
+		},
+		"transAmount": map[string]interface{}{
+			"currency": pay.Currency,
+			"value":    utility.ConvertFenToYuanMinUnitStr(refund.RefundFee),
+		},
+		"webhook": fmt.Sprintf("%s/evonet/notify/webhooks/notifications?payId=%d", consts.GetNacosConfigInstance().HostPath, pay.Id),
+	}
+	data, err := sendEvonetRequest(ctx, "POST", urlPath, channel.ChannelKey, param)
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
+	responseJson, err := gjson.LoadJson(string(data))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(responseJson.Contains("result"), "Evonetpay退款失败 result is null")
+	resultJson := responseJson.GetJson("result")
+	refundJson := responseJson.GetJson("refund")
+	utility.Assert(resultJson.Contains("code") &&
+		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
+		refundJson != nil &&
+		refundJson.Contains("evoTransInfo") &&
+		refundJson.GetJson("evoTransInfo").Contains("evoTransID"),
+		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
+	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	res = ro.OutPayRefundRo{
+		ChannelRefundNo: pspReference,
+		RefundStatus:    consts.REFUND_ING,
+	}
+	return res, nil
+}
+
+func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
+	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
+	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
+	utility.Assert(channel != nil, "支付渠道异常 channel not found")
+	urlPath := "/g2/v1/payment/mer/" + channel.ChannelAccountId + "/evo.e-commerce.refund"
+	param := map[string]interface{}{
+		"merchantTransID": refund.OutRefundNo,
+	}
+	data, err := sendEvonetRequest(ctx, "GET", urlPath, channel.ChannelKey, param)
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
+	responseJson, err := gjson.LoadJson(string(data))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(responseJson.Contains("result"), "Evonetpay退款查询失败 result is null")
+	resultJson := responseJson.GetJson("result")
+	refundJson := responseJson.GetJson("refund")
+	utility.Assert(resultJson.Contains("code") &&
+		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
+		refundJson != nil &&
+		refundJson.Contains("status") &&
+		refundJson.Contains("evoTransInfo") &&
+		refundJson.GetJson("evoTransInfo").Contains("evoTransID") &&
+		refundJson.GetJson("merchantTransInfo").Contains("merchantTransID"),
+		fmt.Sprintf("Evonetpay退款查询失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
+	status := refundJson.Get("status").String()
+	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	merchantPspReference := refundJson.GetJson("merchantTransInfo").Get("merchantTransID").String()
+	utility.Assert(strings.Compare(merchantPspReference, refund.OutRefundNo) == 0, "merchantPspReference not match")
+	res = ro.OutPayRefundRo{
+		RefundFee:    refund.RefundFee,
+		RefundStatus: consts.REFUND_ING,
+	}
+	if strings.Compare(status, "Failed") == 0 {
+		res.RefundStatus = consts.REFUND_FAILED
+		res.Reason = "from_query:" + refundJson.Get("failureReason").String()
+	} else if strings.Compare(status, "Success") == 0 {
+		res.RefundStatus = consts.REFUND_SUCCESS
+		res.ChannelRefundNo = pspReference
+		res.RefundTime = gtime.Now()
+	}
+	return res, nil
 }
 
 func sendEvonetRequest(ctx context.Context, method string, urlPath string, key string, param map[string]interface{}) (res []byte, err error) {
-	g.Log().Infof(ctx, "Evonet start %s %s %s %s", method, urlPath, key, param)
 	utility.Assert(param != nil, "param is null")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
 	jsonData, err := gjson.Marshal(param)
-	utility.Assert(err != nil, fmt.Sprintf("json format error %s", err))
-	body := []byte(string(jsonData))
+	jsonString := string(jsonData)
+	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
+	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, key, jsonString)
+	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Type":  "application/json",
 		"Msgid":         msgId,
@@ -97,7 +241,7 @@ func sendEvonetRequest(ctx context.Context, method string, urlPath string, key s
 		"Signtype":      "SHA256",
 	}
 	response, err := sendRequest(ENDPOINT+urlPath, method, body, headers)
-	g.Log().Infof(ctx, "Evonet end %s %s response: %s error %s", method, urlPath, response, err)
+	g.Log().Infof(ctx, "\nEvonet_End %s %s response: %s error %s\n", method, urlPath, response, err)
 	return response, nil
 }
 
@@ -158,7 +302,7 @@ func sign(method string, urlPath string, msgId string, dateTime string, key stri
 }
 
 func generateMsgId() (msgId string) {
-	return fmt.Sprintf("%s%s%s", utility.JodaTimePrefix(), utility.GenerateRandomString(5), utility.CurrentTimeMillis())
+	return fmt.Sprintf("%s%s%s", utility.JodaTimePrefix(), utility.GenerateRandomAlphanumeric(5), utility.CurrentTimeMillis())
 }
 
 func getCurrentDateTime() (datetime string) {

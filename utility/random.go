@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"fmt"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -20,8 +21,8 @@ func CurrentTimeMillis() (s string) {
 	return strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
 }
 
-func GenerateRandomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
+func GenerateRandomAlphanumeric(length int) string {
+	//rand.Seed(time.Now().UnixNano())
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
 	for i := range result {
@@ -32,4 +33,8 @@ func GenerateRandomString(length int) string {
 
 func JodaTimePrefix() (prefix string) {
 	return time.Now().Format("20060102")
+}
+
+func CreateMerchantOrderNo() string {
+	return fmt.Sprintf("mon%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }

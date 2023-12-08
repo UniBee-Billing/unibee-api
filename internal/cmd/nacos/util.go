@@ -1,9 +1,12 @@
 package nacos
 
 import (
+	"fmt"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
+	"go-oversea-pay/internal/consts"
+	"gopkg.in/yaml.v3"
 )
 
 func GetNacosConfig(ip string, port uint64, namespace string, group string, dataId string) (string, error) {
@@ -36,6 +39,13 @@ func GetNacosConfig(ip string, port uint64, namespace string, group string, data
 
 	if err != nil {
 		return "", err
+	}
+
+	err = yaml.Unmarshal([]byte(content), consts.GetNacosConfigInstance())
+	if err != nil {
+		fmt.Println("Error unmarshalling YAML:", err)
+	} else {
+		fmt.Printf(`Load Nacos Config: %+v\n`, consts.GetNacosConfigInstance())
 	}
 
 	return content, err

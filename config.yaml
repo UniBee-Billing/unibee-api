@@ -1,3 +1,6 @@
+env: hklocal
+host_path: https://daily.hknet-inc.com/overseapay
+
 server:
   address:     ":8080"
   openapiPath: "/api.json"

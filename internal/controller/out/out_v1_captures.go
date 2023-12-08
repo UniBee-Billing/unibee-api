@@ -15,6 +15,8 @@ func (c *ControllerV1) Captures(ctx context.Context, req *v1.CapturesReq) (res *
 	var (
 		one *entity.OverseaPay
 	)
+	//参数有效性校验 todo mark merchantAccount
+
 	err = dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: req.PaymentsPspReference}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil, err
@@ -23,6 +25,9 @@ func (c *ControllerV1) Captures(ctx context.Context, req *v1.CapturesReq) (res *
 	utility.Assert(one.Currency == req.Amount.Currency, "Currency not match the payment")
 	one.BuyerPayFee = req.Amount.Value
 	err = oversea_pay_service.DoChannelCapture(ctx, one)
+	if err != nil {
+		return nil, err
+	}
 	utility.SuccessJsonExit(g.RequestFromCtx(ctx), err == nil)
 	return
 }

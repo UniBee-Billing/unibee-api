@@ -51,7 +51,7 @@ func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity
 	return p.getRemoteChannel().DoRemoteChannelCapture(ctx, pay)
 }
 
-func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res interface{}, err error) {
+func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayCancelRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -66,7 +66,7 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 	return p.getRemoteChannel().DoRemoteChannelCancel(ctx, pay)
 }
 
-func (p PayChannelProxy) DoRemoteChannelStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res interface{}, err error) {
+func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -78,10 +78,10 @@ func (p PayChannelProxy) DoRemoteChannelStatusCheck(ctx context.Context, pay *en
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelStatusCheck(ctx, pay)
+	return p.getRemoteChannel().DoRemoteChannelPayStatusCheck(ctx, pay)
 }
 
-func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res interface{}, err error) {
+func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -94,4 +94,20 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 		}
 	}()
 	return p.getRemoteChannel().DoRemoteChannelRefund(ctx, pay, refund)
+}
+
+func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+
+	return p.getRemoteChannel().DoRemoteChannelRefundStatusCheck(ctx, pay, refund)
 }

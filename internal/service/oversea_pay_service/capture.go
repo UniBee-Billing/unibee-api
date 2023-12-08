@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
+	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/paychannel"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
@@ -18,7 +19,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
 
 	// todo mark 事务实现 channel capture
-	return g.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 channel capture
 		result, err := transaction.Update("oversea_pay", g.Map{"authorize_status": consts.CAPTURE_REQUEST, "buyer_pay_fee": overseaPay.BuyerPayFee},
 			g.Map{"id": overseaPay.Id, "pay_status": consts.TO_BE_PAID})
