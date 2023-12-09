@@ -403,7 +403,7 @@ func sign(method string, urlPath string, msgId string, dateTime string, key stri
 }
 
 func generateMsgId() (msgId string) {
-	return fmt.Sprintf("%s%s%s", utility.JodaTimePrefix(), utility.GenerateRandomAlphanumeric(5), utility.CurrentTimeMillis())
+	return fmt.Sprintf("%s%s%d", utility.JodaTimePrefix(), utility.GenerateRandomAlphanumeric(5), utility.CurrentTimeMillis())
 }
 
 func getCurrentDateTime() (datetime string) {

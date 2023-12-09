@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"runtime"
-	"strconv"
 	"time"
 )
 
@@ -17,8 +16,8 @@ func GetLineSeparator() string {
 	}
 }
 
-func CurrentTimeMillis() (s string) {
-	return strconv.FormatInt(time.Now().UnixNano()/int64(time.Millisecond), 10)
+func CurrentTimeMillis() (s int64) {
+	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
 func GenerateRandomAlphanumeric(length int) string {
