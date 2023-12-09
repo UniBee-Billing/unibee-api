@@ -3,8 +3,15 @@ package consts
 import "sync"
 
 type NacosConfig struct {
-	Env      string `yaml:"env"`
-	HostPath string `yaml:"host_path"`
+	Env         string      `yaml:"env"`
+	HostPath    string      `yaml:"host_path"`
+	RedisConfig RedisConfig `yaml:"redismq"`
+}
+
+type RedisConfig struct {
+	Address string `yaml:"address"`
+	DB      int    `yaml:"db"`
+	Pass    string `yaml:"pass"`
 }
 
 var instance *NacosConfig

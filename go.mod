@@ -7,6 +7,7 @@ require (
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.5.6
 	github.com/gogf/gf/v2 v2.5.6
 	github.com/nacos-group/nacos-sdk-go v1.1.4
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -48,5 +49,4 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 	gopkg.in/ini.v1 v1.42.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

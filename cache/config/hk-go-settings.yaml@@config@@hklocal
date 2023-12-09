@@ -33,6 +33,13 @@ redis:
     minIdle: 10
     idleTimeout: 1d    
 
+# RedisMQ 配置示例
+redismq:
+  address: frps.hknet-inc.com:7112
+  db:      0
+  pass: p9KIMXc8OXI5HnaA
+    
+
   # # 单实例配置示例2
   # cache:
   #   address:     127.0.0.1:6379
