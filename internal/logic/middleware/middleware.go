@@ -71,7 +71,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
-// PreAuth 自定义上下文对象
+// PreAuth 从 Session 中获取用户
 func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	// 初始化，务必最开始执行
 	customCtx := &model.Context{
@@ -88,9 +88,14 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 			IsAdmin:     false,
 		}
 	}
+	if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
+		//openapikey 转化未api 用户
+		customCtx.Data[consts.ApiKey] = key
+		customCtx.OpenApiConfig = service.OpenApi().GetOpenApiConfig(r.Context(), key)
+	}
 	// 将自定义的上下文对象传递到模板变量中使用
 	r.Assigns(g.Map{
-		"Context": customCtx,
+		consts.ContextKey: customCtx,
 	})
 	// 执行下一步请求逻辑
 	r.Middleware.Next()
@@ -113,6 +118,18 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 			utility.JsonRedirectExit(r, 1, "", s.LoginUrl)
 		} else {
 			r.Response.RedirectTo(s.LoginUrl)
+		}
+	}
+	r.Middleware.Next()
+}
+
+func (s *SMiddleware) ApiAuth(r *ghttp.Request) {
+	openApiConfig := service.BizCtx().Get(r.Context()).OpenApiConfig
+	if openApiConfig == nil {
+		if key := service.BizCtx().Get(r.Context()).Data[consts.ApiKey]; key == nil {
+			utility.Json(r, 401, "key require in header")
+		} else {
+			utility.Json(r, 401, "invalid key")
 		}
 	}
 	r.Middleware.Next()

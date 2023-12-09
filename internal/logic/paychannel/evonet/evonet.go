@@ -27,7 +27,7 @@ const ENDPOINT = "https://hkg-online-uat.everonet.com"
 
 type Evonet struct{}
 
-func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res interface{}, err error) {
+func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(createPayContext.PayChannel != nil, "pay channel config is nil")
 
@@ -93,8 +93,8 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		}
 	}
 
-	if createPayContext.ShopperName != nil && createPayContext.ShopperName.Contains("firstName") && createPayContext.ShopperName.Contains("lastName") {
-		param["userinfo"].(map[string]interface{})["name"] = createPayContext.ShopperName.Get("firstName").String() + " " + createPayContext.ShopperName.Get("lastName").String()
+	if createPayContext.ShopperName != nil && len(createPayContext.ShopperName.FirstName) > 0 && len(createPayContext.ShopperName.LastName) > 0 {
+		param["userinfo"].(map[string]interface{})["name"] = createPayContext.ShopperName.FirstName + " " + createPayContext.ShopperName.LastName
 	}
 	match, _ := regexp.MatchString(createPayContext.Mobile, "[0-9]+")
 	if len(createPayContext.Mobile) > 0 && match {
@@ -124,14 +124,14 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		fmt.Sprintf("Evonetpay字符失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	//status := paymentJson.Get("status").String()
 	//pspReference := paymentJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	res = ro.CreatePayInternalResp{
+	res = &ro.CreatePayInternalResp{
 		Action:         responseJson.GetJson("action"),
 		AdditionalData: responseJson.GetJson("paymentMethod"),
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayCaptureRo, err error) {
+func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
 	utility.Assert(channel != nil, "支付渠道异常 channel not found")
@@ -162,14 +162,14 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 		fmt.Sprintf("Evonetpay捕获失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := captureJson.Get("status").String()
 	pspReference := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	res = ro.OutPayCaptureRo{
+	res = &ro.OutPayCaptureRo{
 		PspReference: pspReference,
 		Status:       status,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayCancelRo, err error) {
+func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
 	utility.Assert(channel != nil, "支付渠道异常 channel not found")
@@ -196,14 +196,14 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPa
 		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := cancelJson.Get("status").String()
 	pspReference := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	res = ro.OutPayCancelRo{
+	res = &ro.OutPayCancelRo{
 		PspReference: pspReference,
 		Status:       status,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayRo, err error) {
+func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
 	utility.Assert(channel != nil, "支付渠道异常 channel not found")
@@ -230,7 +230,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.O
 	pspReference := payment.GetJson("evoTransInfo").Get("evoTransID").String()
 	merchantPspReference := payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	utility.Assert(strings.Compare(merchantPspReference, pay.MerchantOrderNo) == 0, "merchantPspReference not match")
-	res = ro.OutPayRo{
+	res = &ro.OutPayRo{
 		PayFee:    pay.PaymentFee,
 		PayStatus: consts.TO_BE_PAID,
 	}
@@ -245,7 +245,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.O
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
+func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
 	utility.Assert(channel != nil, "支付渠道异常 channel not found")
@@ -275,14 +275,14 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPa
 		refundJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	res = ro.OutPayRefundRo{
+	res = &ro.OutPayRefundRo{
 		ChannelRefundNo: pspReference,
 		RefundStatus:    consts.REFUND_ING,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res ro.OutPayRefundRo, err error) {
+func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channel := util.GetOverseaPayChannel(ctx, uint64(pay.ChannelId))
 	utility.Assert(channel != nil, "支付渠道异常 channel not found")
@@ -309,7 +309,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	merchantPspReference := refundJson.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	utility.Assert(strings.Compare(merchantPspReference, refund.OutRefundNo) == 0, "merchantPspReference not match")
-	res = ro.OutPayRefundRo{
+	res = &ro.OutPayRefundRo{
 		RefundFee:    refund.RefundFee,
 		RefundStatus: consts.REFUND_ING,
 	}

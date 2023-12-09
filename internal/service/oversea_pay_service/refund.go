@@ -115,5 +115,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		}
 		return nil
 	})
-	return nil, err
+	if err != nil {
+		return nil, err
+	}
+	return overseaRefund, nil
 }

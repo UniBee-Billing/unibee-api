@@ -3,13 +3,13 @@ package ro
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
+	v1 "go-oversea-pay/api/out/v1"
 	"go-oversea-pay/api/out/vo"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
 type CreatePayContext struct {
-	PayBizType               int                       `json:"payBizType"`
-	OpenApiId                string                    `json:"openApiId"`
+	OpenApiId                int64                     `json:"openApiId"`
 	AppId                    string                    `json:"appId"`
 	Desc                     string                    `json:"desc"`
 	Pay                      *entity.OverseaPay        `json:"pay"`
@@ -21,10 +21,10 @@ type CreatePayContext struct {
 	ShopperLocale            string                    `json:"shopperLocale"`
 	Mobile                   string                    `json:"mobile"`
 	MediaInfo                *gjson.Json               `json:"mediaInfo"`
-	Items                    []*gjson.Json             `json:"items"`
-	BillingDetails           *gjson.Json               `json:"billingDetails"`
-	ShippingDetails          *gjson.Json               `json:"shippingDetails"`
-	ShopperName              *gjson.Json               `json:"shopperName"`
+	Items                    []*v1.OutLineItem         `json:"items"`
+	BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
+	ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`
+	ShopperName              *v1.OutShopperName        `json:"shopperName"`
 	ShopperInteraction       string                    `json:"shopperInteraction"`
 	RecurringProcessingModel string                    `json:"recurringProcessingModel"`
 	StorePaymentMethod       bool                      `json:"storePaymentMethod"`
@@ -37,6 +37,15 @@ type CreatePayContext struct {
 }
 
 type CreatePayInternalResp struct {
+	AlipayOrderNo  string      `json:"alipayOrderNo"`
+	PayOrderNo     string      `json:"payOrderNo"`
+	AlreadyPaid    bool        `json:"alreadyPaid"`
+	OrderString    string      `json:"orderString"`
+	Message        string      `json:"message"`
+	TppOrderNo     string      `json:"tppOrderNo"`
+	TppPayId       string      `json:"tppPayId"`
+	PayChannel     int64       `json:"payChannel"`
+	PayChannelType string      `json:"payChannelType"`
 	Action         *gjson.Json `json:"action"`
 	AdditionalData *gjson.Json `json:"additionalData"`
 }

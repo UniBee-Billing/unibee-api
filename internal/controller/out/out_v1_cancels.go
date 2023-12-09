@@ -14,7 +14,8 @@ func (c *ControllerV1) Cancels(ctx context.Context, req *v1.CancelsReq) (res *v1
 	var (
 		one *entity.OverseaPay
 	)
-	//参数有效性校验 todo mark merchantAccount
+	//参数有效性校验 todo mark
+	merchantCheck(ctx, req.MerchantAccount)
 
 	err = dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: req.PaymentsPspReference}).OmitEmpty().Scan(&one)
 	if err != nil {
