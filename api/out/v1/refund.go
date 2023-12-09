@@ -13,4 +13,8 @@ type RefundsReq struct {
 	Amount               *vo.PayAmountVo `json:"amount"   in:"query" dc:"具体金额" v:"required"`
 }
 type RefundsRes struct {
+	Status              string `p:"status" dc:"交易状态"`
+	PspReference        string `p:"pspReference" dc:"系统交易唯一编码-平台订单号"`
+	Reference           string `p:"reference" dc:"商户订单号"`
+	PaymentPspReference string `p:"paymentPspReference" dc:"系统交易唯一编码-平台支付订单号"`
 }
