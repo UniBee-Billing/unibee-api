@@ -1,6 +1,8 @@
 package consts
 
 const (
+	PAYMENT_BIZ_TYPE_ORDER = 1 //支付交易上游订单类型-
+
 	TO_BE_PAID  = 10 //待支付
 	PAY_SUCCESS = 20 // 支付成功
 	PAY_FAILED  = 30 //支付失败

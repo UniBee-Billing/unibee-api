@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
@@ -16,6 +17,7 @@ import (
 	"go-oversea-pay/utility"
 	"io"
 	"net/http"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -25,9 +27,108 @@ const ENDPOINT = "https://hkg-online-uat.everonet.com"
 
 type Evonet struct{}
 
-func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext interface{}) (res interface{}, err error) {
-	//TODO implement me
-	panic("implement me")
+func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res interface{}, err error) {
+	utility.Assert(createPayContext.Pay != nil, "pay is nil")
+	utility.Assert(createPayContext.PayChannel != nil, "pay channel config is nil")
+
+	//其他渠道所需参数校验
+	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
+	utility.Assert(createPayContext.Pay.PaymentFee > 0, "paymentFee is nil")
+	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
+	utility.Assert(len(createPayContext.Pay.MerchantOrderNo) > 0, "merchantOrderNo is nil")
+	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
+	utility.Assert(len(createPayContext.UserId) > 0, "shopperReference is nil")
+	utility.Assert(createPayContext.Items != nil, "lineItems is nil")
+	urlPath := "/g2/v1/payment/mer/" + createPayContext.PayChannel.ChannelKey + "/evo.e-commerce.payment"
+	channelType := createPayContext.PayChannel.SubChannel
+	if len(channelType) == 0 {
+		channelType = createPayContext.PayChannel.Channel
+	}
+	param := map[string]interface{}{
+		"merchantTransInfo": map[string]interface{}{
+			"merchantTransID":        createPayContext.Pay.MerchantOrderNo,
+			"merchantOrderReference": createPayContext.MerchantOrderReference,
+			"merchantTransTime":      getCurrentDateTime(),
+		},
+		"transAmount": map[string]interface{}{
+			"currency": createPayContext.Pay.Currency,
+			"value":    utility.ConvertFenToYuanMinUnitStr(createPayContext.Pay.PaymentFee),
+		},
+		"paymentMethod": map[string]interface{}{
+			"recurringProcessingModel": createPayContext.RecurringProcessingModel,
+			"type":                     channelType,
+		},
+		"userinfo": map[string]interface{}{
+			"email":     createPayContext.ShopperEmail,
+			"reference": createPayContext.UserId,
+		},
+		"transInitiator": map[string]interface{}{
+			"browserInfo": map[string]interface{}{
+				"language": createPayContext.ShopperLocale,
+			},
+			"platform":   createPayContext.Platform,
+			"deviceType": createPayContext.DeviceType,
+		},
+		"tradeInfo": map[string]string{
+			"tradeType":     "Sale of goods",
+			"totalQuantity": fmt.Sprintf("%v", createPayContext.Items),
+		},
+		"returnUrl": fmt.Sprintf("%s/evonet/notify/redirect?payId=%d", consts.GetNacosConfigInstance().HostPath, createPayContext.Pay.Id),
+		"webhook":   fmt.Sprintf("%s/evonet/notify/webhooks/notifications?payId=%d", consts.GetNacosConfigInstance().HostPath, createPayContext.Pay.Id),
+	}
+
+	if len(createPayContext.PayChannel.BrandData) > 0 {
+		var data map[string]interface{}
+		// 使用 json.Unmarshal 解析 JSON 字符串
+		err := json.Unmarshal([]byte(createPayContext.PayChannel.BrandData), &data)
+		if err == nil {
+			//_, ok := data[channelType]
+			//if ok {
+			//
+			//}
+			// payeasy 和 payeasy 渠道支持 todo mark
+			for key, value := range data {
+				param["paymentMethod"].(map[string]interface{})[key] = value
+			}
+		}
+	}
+
+	if createPayContext.ShopperName != nil && createPayContext.ShopperName.Contains("firstName") && createPayContext.ShopperName.Contains("lastName") {
+		param["userinfo"].(map[string]interface{})["name"] = createPayContext.ShopperName.Get("firstName").String() + " " + createPayContext.ShopperName.Get("lastName").String()
+	}
+	match, _ := regexp.MatchString(createPayContext.Mobile, "[0-9]+")
+	if len(createPayContext.Mobile) > 0 && match {
+		param["authentication"] = map[string]interface{}{
+			"securePlus": map[string]string{
+				"mobilePhone": createPayContext.Mobile,
+			},
+		}
+	}
+
+	if createPayContext.Pay.CaptureDelayHours > 0 {
+		param["captureAfterHours"] = createPayContext.Pay.CaptureDelayHours
+	}
+
+	data, err := sendEvonetRequest(ctx, "POST", urlPath, createPayContext.PayChannel.ChannelKey, param)
+	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
+	responseJson, err := gjson.LoadJson(string(data))
+	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
+	utility.Assert(responseJson.Contains("result"), "Evonetpay捕获失败 result is nil")
+	resultJson := responseJson.GetJson("result")
+	paymentJson := responseJson.GetJson("payment")
+	utility.Assert(resultJson.Contains("code") &&
+		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
+		paymentJson != nil &&
+		paymentJson.Contains("evoTransInfo") &&
+		paymentJson.GetJson("evoTransInfo").Contains("evoTransID"),
+		fmt.Sprintf("Evonetpay字符失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
+	//status := paymentJson.Get("status").String()
+	//pspReference := paymentJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	res = ro.CreatePayInternalResp{
+		Action:         responseJson.GetJson("action"),
+		AdditionalData: responseJson.GetJson("paymentMethod"),
+	}
+	return res, nil
 }
 
 func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res ro.OutPayCaptureRo, err error) {
@@ -50,7 +151,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
-	utility.Assert(responseJson.Contains("result"), "Evonetpay捕获失败 result is null")
+	utility.Assert(responseJson.Contains("result"), "Evonetpay捕获失败 result is nil")
 	resultJson := responseJson.GetJson("result")
 	captureJson := responseJson.GetJson("capture")
 	utility.Assert(resultJson.Contains("code") &&
@@ -84,7 +185,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPa
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
-	utility.Assert(responseJson.Contains("result"), "Evonetpay取消失败 result is null")
+	utility.Assert(responseJson.Contains("result"), "Evonetpay取消失败 result is nil")
 	resultJson := responseJson.GetJson("result")
 	cancelJson := responseJson.GetJson("cancel")
 	utility.Assert(resultJson.Contains("code") &&
@@ -114,7 +215,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.O
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
-	utility.Assert(responseJson.Contains("result"), "Evonetpay支付查询失败 result is null")
+	utility.Assert(responseJson.Contains("result"), "Evonetpay支付查询失败 result is nil")
 	resultJson := responseJson.GetJson("result")
 	payment := responseJson.GetJson("payment")
 	utility.Assert(resultJson.Contains("code") &&
@@ -164,7 +265,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPa
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
-	utility.Assert(responseJson.Contains("result"), "Evonetpay退款失败 result is null")
+	utility.Assert(responseJson.Contains("result"), "Evonetpay退款失败 result is nil")
 	resultJson := responseJson.GetJson("result")
 	refundJson := responseJson.GetJson("refund")
 	utility.Assert(resultJson.Contains("code") &&
@@ -193,7 +294,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
-	utility.Assert(responseJson.Contains("result"), "Evonetpay退款查询失败 result is null")
+	utility.Assert(responseJson.Contains("result"), "Evonetpay退款查询失败 result is nil")
 	resultJson := responseJson.GetJson("result")
 	refundJson := responseJson.GetJson("refund")
 	utility.Assert(resultJson.Contains("code") &&
@@ -224,7 +325,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 }
 
 func sendEvonetRequest(ctx context.Context, method string, urlPath string, key string, param map[string]interface{}) (res []byte, err error) {
-	utility.Assert(param != nil, "param is null")
+	utility.Assert(param != nil, "param is nil")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()

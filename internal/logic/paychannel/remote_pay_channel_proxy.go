@@ -21,7 +21,7 @@ func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelServ
 	return &evonet.Evonet{}
 }
 
-func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext interface{}) (res interface{}, err error) {
+func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res interface{}, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
