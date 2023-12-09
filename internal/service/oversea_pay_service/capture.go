@@ -18,7 +18,6 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 	utility.Assert(overseaPay.BuyerPayFee > 0, "capture value should > 0")
 	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
 
-	// todo mark 事务实现 channel capture
 	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 channel capture
 		result, err := transaction.Update("oversea_pay", g.Map{"authorize_status": consts.CAPTURE_REQUEST, "buyer_pay_fee": overseaPay.BuyerPayFee},
@@ -36,6 +35,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
 		_, err = paychannel.GetPayChannelServiceProvider(int(overseaPay.ChannelId)).DoRemoteChannelCapture(ctx, overseaPay)
 		if err != nil {
+			_ = transaction.Rollback()
 			return err
 		}
 		return nil

@@ -17,7 +17,7 @@ type PayChannelProxy struct {
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelService) {
 	utility.Assert(p.channel > 0, "channel is not set")
-	//目前只有一个渠道
+	//目前只有一个渠道 todo mark
 	return &evonet.Evonet{}
 }
 

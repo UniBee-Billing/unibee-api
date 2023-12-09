@@ -38,3 +38,12 @@ func JodaTimePrefix() (prefix string) {
 func CreateMerchantOrderNo() string {
 	return fmt.Sprintf("mon%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
+
+func CreateOutRefundNo() string {
+	return fmt.Sprintf("orn%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+}
+
+func GenerateNextInt() int64 {
+	//todo mark 工作机器 ID
+	return NewSnowflake(1).GenerateID()
+}
