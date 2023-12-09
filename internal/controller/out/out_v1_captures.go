@@ -18,8 +18,7 @@ func (c *ControllerV1) Captures(ctx context.Context, req *v1.CapturesReq) (res *
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantAccount)
 
-	err = dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: req.PaymentsPspReference}).OmitEmpty().Scan(&one)
-	if err != nil {
+	if err = dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: req.PaymentsPspReference}).OmitEmpty().Scan(&one); err != nil {
 		return nil, err
 	}
 	utility.Assert(one != nil, "payment not found")
