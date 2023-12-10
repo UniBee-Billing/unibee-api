@@ -14,14 +14,14 @@ type Message struct {
 	Tag              string                 `p:"tag" dc:"消息Tag"`
 	Body             []byte                 `p:"body" dc:"消息Body"`
 	Key              string                 `p:"key" dc:"消息Key"`
-	StartDeliverTime int                    `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
+	StartDeliverTime int64                  `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
 	ReconsumeTimes   int                    `p:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
 	CustomData       map[string]interface{} `p:"customData" dc:"自定义数据"`
 	SendTime         int64                  `p:"sendTime" dc:"消息发送时间"`
 }
 
 type MessageMetaData struct {
-	StartDeliverTime int                    `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
+	StartDeliverTime int64                  `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
 	ReconsumeTimes   int                    `p:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
 	CustomData       map[string]interface{} `p:"customData" dc:"自定义数据"`
 	Key              string                 `p:"key" dc:"消息Key"`
@@ -81,7 +81,7 @@ func (message *Message) paseStreamMessage(value map[string]interface{}) {
 				}
 			}()
 			message.ReconsumeTimes = json.Get("reconsumeTimes").Int()
-			message.StartDeliverTime = json.Get("startDeliverTime").Int()
+			message.StartDeliverTime = json.Get("startDeliverTime").Int64()
 			message.SendTime = json.Get("sendTime").Int64()
 			message.CustomData = json.Get("sendTime").Map()
 			message.Key = json.Get("key").String()
