@@ -25,6 +25,8 @@ func StartRedisMqConsumer() {
 		fmt.Println("StartRedisMqConsumer failed while ConsumerName invalid")
 		return
 	}
+	StartDelayBackgroundThread()
+	fmt.Println("redismq 启动延迟队列后台任务！！！！！！")
 	deathQueueName := GetDeathQueueName()
 	createStreamGroup(deathQueueName, "death_message")
 	fmt.Printf("redismq Stream 初始化死信队列 deathQueueName:%s", deathQueueName)
@@ -351,7 +353,7 @@ func pushTaskToResumeLater(consumer listener.IMessageListener, message *Message)
 	} else {
 		//延长时间重新发送消息
 		message.ReconsumeTimes = message.ReconsumeTimes + 1
-		message.StartDeliverTime = utility.CurrentTimeMillis() + (20 * 1000 * int64(message.ReconsumeTimes))
+		message.StartDeliverTime = utility.CurrentTimeMillis() + (20 * 1000 * int64(message.ReconsumeTimes)) // 20 秒
 		return sendDelayMessage(message)
 	}
 }

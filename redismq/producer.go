@@ -48,7 +48,12 @@ func SendTransaction(message *Message, transactionExecuter func(messageToSend *M
 
 func sendDelayMessage(message *Message) bool {
 	// todo mark 完善延迟消息
-	return false
+	send, err := SendDelay(message, message.StartDeliverTime-utility.CurrentTimeMillis())
+	fmt.Printf("redismq SendDelayMessage result:%v", send)
+	if err != nil {
+		return false
+	}
+	return send
 }
 
 func sendMessage(message *Message, source string) (bool, error) {
@@ -92,8 +97,11 @@ func sendTransactionPrepareMessage(message *Message) (bool, error) {
 		}
 	}(client)
 	messageJson, err := gjson.Marshal(message)
-	jsonString := string(messageJson)
 
+	jsonString := string(messageJson)
+	if err != nil {
+		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err, message))
+	}
 	// 执行事务
 	_, err = client.TxPipelined(context.Background(), func(pipe redis.Pipeliner) error {
 		// 在事务中执行多个命令
