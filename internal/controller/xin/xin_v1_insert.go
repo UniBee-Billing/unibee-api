@@ -8,6 +8,7 @@ import (
 )
 
 func (c *ControllerV1) Insert(ctx context.Context, req *v1.InsertReq) (res *v1.InsertRes, err error) {
+
 	test, err := xin_service.InsertTest(ctx, req.Name)
 	if err != nil {
 		return nil, err

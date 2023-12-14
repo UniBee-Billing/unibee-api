@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
+	"go-oversea-pay/internal/logic/webhooks"
 	"go-oversea-pay/internal/service"
 	"go-oversea-pay/utility/liberr"
 )
@@ -46,6 +47,11 @@ var (
 				)
 				router.Outs(ctx, group) //开放平台接口
 			})
+
+			// 通道支付 Webhook 回调
+			s.BindHandler("POST:/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
+			// 通道支付 Redirect 回调
+			s.BindHandler("GET:/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
 
 			{
 				_, err := g.Redis().Set(ctx, "g_check", "checked")

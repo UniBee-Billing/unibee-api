@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/paychannel/evonet"
 	"go-oversea-pay/internal/logic/paychannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -12,13 +13,21 @@ import (
 )
 
 type PayChannelProxy struct {
-	channel int
+	channel int // todo mark 应该使用 enum key
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelService) {
 	utility.Assert(p.channel > 0, "channel is not set")
 	//目前只有一个渠道 todo mark
 	return &evonet.Evonet{}
+}
+
+func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request) {
+	p.getRemoteChannel().DoRemoteChannelWebhook(r)
+}
+
+func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request) {
+	p.getRemoteChannel().DoRemoteChannelRedirect(r)
 }
 
 func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {

@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/paychannel/ro"
@@ -26,6 +27,20 @@ import (
 const ENDPOINT = "https://hkg-online-uat.everonet.com"
 
 type Evonet struct{}
+
+func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
+	jsonData, err := r.GetJson()
+	if err != nil {
+		r.Response.Writeln(err)
+	}
+	r.Response.Writeln(jsonData)
+	//r.Response.Writeln(r.GetBody())
+}
+
+func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request) {
+	//r.Response.Writeln(r.Get("channelId"))
+	r.Response.Writeln(r.GetRequestMap())
+}
 
 func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")

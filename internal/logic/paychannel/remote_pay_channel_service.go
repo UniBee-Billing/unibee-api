@@ -2,11 +2,14 @@ package paychannel
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/paychannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
 type RemotePayChannelService interface {
+	DoRemoteChannelWebhook(r *ghttp.Request)
+	DoRemoteChannelRedirect(r *ghttp.Request)
 	DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error)
 	DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error)
 	DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error)
