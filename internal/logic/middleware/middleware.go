@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/consts"
 	_ "go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/model"
-	"go-oversea-pay/internal/service"
 	utility "go-oversea-pay/utility"
 )
 
@@ -18,7 +18,7 @@ type SMiddleware struct {
 }
 
 func init() {
-	service.RegisterMiddleware(New())
+	_interface.RegisterMiddleware(New())
 }
 
 func New() *SMiddleware {
@@ -58,7 +58,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
 		utility.JsonExit(r, code.Code(), err.Error())
 		//} else {
-		//service.View().Render500(r.Context(), model.Vie w{
+		//interface.View().Render500(r.Context(), model.Vie w{
 		//	Error: err.Error(),
 		//})
 		//}
@@ -78,8 +78,8 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
-	service.BizCtx().Init(r, customCtx)
-	if userEntity := service.Session().GetUser(r.Context()); userEntity != nil {
+	_interface.BizCtx().Init(r, customCtx)
+	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id:          userEntity.Id,
 			MobilePhone: userEntity.MobilePhone,
@@ -91,7 +91,7 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
 		//openapikey 转化未api 用户
 		customCtx.Data[consts.ApiKey] = key
-		customCtx.OpenApiConfig = service.OpenApi().GetOpenApiConfig(r.Context(), key)
+		customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
 	}
 	// 将自定义的上下文对象传递到模板变量中使用
 	r.Assigns(g.Map{
@@ -103,15 +103,15 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 
 // Auth 前台系统权限控制，用户必须登录才能访问
 func (s *SMiddleware) Auth(r *ghttp.Request) {
-	user := service.Session().GetUser(r.Context())
+	user := _interface.Session().GetUser(r.Context())
 	if user == nil {
-		_ = service.Session().SetNotice(r.Context(), &model.SessionNotice{
+		_ = _interface.Session().SetNotice(r.Context(), &model.SessionNotice{
 			Type:    consts.SessionNoticeTypeWarn,
 			Content: "未登录或会话已过期，请您登录后再继续",
 		})
 		// 只有GET请求才支持保存当前URL，以便后续登录后再跳转回来。
 		if r.Method == "GET" {
-			_ = service.Session().SetLoginReferer(r.Context(), r.GetUrl())
+			_ = _interface.Session().SetLoginReferer(r.Context(), r.GetUrl())
 		}
 		// 根据当前请求方式执行不同的返回数据结构
 		if r.IsAjaxRequest() {
@@ -124,9 +124,9 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) ApiAuth(r *ghttp.Request) {
-	openApiConfig := service.BizCtx().Get(r.Context()).OpenApiConfig
+	openApiConfig := _interface.BizCtx().Get(r.Context()).OpenApiConfig
 	if openApiConfig == nil {
-		if key := service.BizCtx().Get(r.Context()).Data[consts.ApiKey]; key == nil {
+		if key := _interface.BizCtx().Get(r.Context()).Data[consts.ApiKey]; key == nil {
 			utility.Json(r, 401, "key require in header")
 		} else {
 			utility.Json(r, 401, "invalid key")

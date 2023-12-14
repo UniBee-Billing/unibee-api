@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
+	"go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/webhooks"
-	"go-oversea-pay/internal/service"
 	"go-oversea-pay/utility/liberr"
 )
 
@@ -25,8 +25,8 @@ var (
 					r.Response.Write(swagger.SwaggerUIPageContent)
 				})
 				group.Middleware(
-					service.Middleware().ResponseHandler,
-					service.Middleware().PreAuth,
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreAuth,
 				)
 				//group.Bind(
 				//	hello.NewV1(), //测试接口
@@ -34,16 +34,16 @@ var (
 			})
 			s.Group("/xin", func(group *ghttp.RouterGroup) {
 				group.Middleware(
-					service.Middleware().ResponseHandler,
-					service.Middleware().PreAuth,
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreAuth,
 				)
 				router.Tools(ctx, group) //工具接口
 			})
 
 			s.Group("/out", func(group *ghttp.RouterGroup) {
 				group.Middleware(
-					service.Middleware().ResponseHandler,
-					service.Middleware().PreAuth,
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreAuth,
 				)
 				router.Outs(ctx, group) //开放平台接口
 			})

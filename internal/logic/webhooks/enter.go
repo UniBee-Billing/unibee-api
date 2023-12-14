@@ -3,7 +3,7 @@ package webhooks
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/paychannel"
+	"go-oversea-pay/internal/logic/payment/outchannel"
 	"strconv"
 )
 
@@ -14,8 +14,8 @@ func ChannelPaymentWebhookEntrance(r *ghttp.Request) {
 		g.Log().Errorf(r.Context(), "ChannelPaymentWebhookEntrance panic channelId: %s err:%s", r.GetUrl(), channelId, err)
 		return
 	}
-	//channel := util.GetOverseaPayChannel(r.Context(), uint64(channelIdInt))
-	paychannel.GetPayChannelServiceProvider(channelIdInt).DoRemoteChannelWebhook(r)
+	//outchannel := util.GetOverseaPayChannel(r.Context(), uint64(channelIdInt))
+	outchannel.GetPayChannelServiceProvider(channelIdInt).DoRemoteChannelWebhook(r)
 }
 
 func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
@@ -25,5 +25,5 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		g.Log().Errorf(r.Context(), "ChannelPaymentRedirectEntrance panic channelId: %s err:%s", r.GetUrl(), channelId, err)
 		return
 	}
-	paychannel.GetPayChannelServiceProvider(channelIdInt).DoRemoteChannelRedirect(r)
+	outchannel.GetPayChannelServiceProvider(channelIdInt).DoRemoteChannelRedirect(r)
 }

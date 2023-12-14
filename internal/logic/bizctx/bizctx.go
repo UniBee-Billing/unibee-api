@@ -3,8 +3,8 @@ package bizctx
 import (
 	"context"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/model"
-	"go-oversea-pay/internal/service"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -13,7 +13,7 @@ import (
 type sBizCtx struct{}
 
 func init() {
-	service.RegisterBizCtx(New())
+	_interface.RegisterBizCtx(New())
 }
 
 func New() *sBizCtx {

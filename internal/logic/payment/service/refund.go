@@ -1,4 +1,4 @@
-package oversea_pay_service
+package service
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 	v1 "go-oversea-pay/api/out/v1"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/paychannel"
-	"go-oversea-pay/internal/logic/paychannel/util"
+	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"strings"
@@ -31,7 +31,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(overseaPay.PayStatus == consts.PAY_SUCCESS, "payment not success")
 
 	channel := util.GetOverseaPayChannel(ctx, uint64(overseaPay.ChannelId))
-	utility.Assert(channel != nil, "支付渠道异常 channel not found")
+	utility.Assert(channel != nil, "支付渠道异常 outchannel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Value <= overseaPay.PaymentFee, "refund value should <= PaymentFee value")
@@ -82,7 +82,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 
 	err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		//事务处理 channel refund
+		//事务处理 outchannel refund
 		insert, err := transaction.Insert("oversea_refund", overseaRefund, 100)
 		if err != nil {
 			_ = transaction.Rollback()
@@ -96,7 +96,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		overseaRefund.Id = id
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		channelResult, err := paychannel.GetPayChannelServiceProvider(int(overseaPay.ChannelId)).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
+		channelResult, err := outchannel.GetPayChannelServiceProvider(int(overseaPay.ChannelId)).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err

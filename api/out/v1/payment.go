@@ -20,7 +20,7 @@ type PaymentsReq struct {
 	TelephoneNumber          string             `p:"telephoneNumber" dc:"手机号" v:"required"`
 	ShopperEmail             string             `p:"shopperEmail" dc:"用户邮箱" v:"required"`
 	ShopperReference         string             `p:"shopperReference" dc:"shopper唯一Id" v:"required"`
-	Channel                  string             `p:"channel" dc:"设备类型（WEB，WAP，APP, MINI, INWALLET）" v:"required"`
+	Channel                  string             `p:"outchannel" dc:"设备类型（WEB，WAP，APP, MINI, INWALLET）" v:"required"`
 	LineItems                []*OutLineItem     `p:"lineItems" dc:"订单物品" v:"required"`
 	DeviceType               string             `p:"deviceType" dc:"手机类型（Android、iOS）" v:"required"`
 	ShopperIP                string             `p:"shopperIP" dc:"用户ip（v4，v6）" v:"required"`

@@ -2,9 +2,9 @@ package session
 
 import (
 	"context"
+	"go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/model"
 	entity "go-oversea-pay/internal/model/entity/auth"
-	"go-oversea-pay/internal/service"
 )
 
 type sSession struct{}
@@ -16,7 +16,7 @@ const (
 )
 
 func init() {
-	service.RegisterSession(New())
+	_interface.RegisterSession(New())
 }
 
 func New() *sSession {
@@ -25,12 +25,12 @@ func New() *sSession {
 
 // SetUser 设置用户Session.
 func (s *sSession) SetUser(ctx context.Context, user *entity.UserAccount) error {
-	return service.BizCtx().Get(ctx).Session.Set(sessionKeyUser, user)
+	return _interface.BizCtx().Get(ctx).Session.Set(sessionKeyUser, user)
 }
 
 // GetUser 获取当前登录的用户信息对象，如果用户未登录返回nil。
 func (s *sSession) GetUser(ctx context.Context) *entity.UserAccount {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		v, _ := customCtx.Session.Get(sessionKeyUser)
 		if !v.IsNil() {
@@ -44,7 +44,7 @@ func (s *sSession) GetUser(ctx context.Context) *entity.UserAccount {
 
 // RemoveUser 删除用户Session。
 func (s *sSession) RemoveUser(ctx context.Context) error {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		return customCtx.Session.Remove(sessionKeyUser)
 	}
@@ -54,7 +54,7 @@ func (s *sSession) RemoveUser(ctx context.Context) error {
 // SetLoginReferer 设置LoginReferer.
 func (s *sSession) SetLoginReferer(ctx context.Context, referer string) error {
 	if s.GetLoginReferer(ctx) == "" {
-		customCtx := service.BizCtx().Get(ctx)
+		customCtx := _interface.BizCtx().Get(ctx)
 		if customCtx != nil {
 			return customCtx.Session.Set(sessionKeyLoginReferer, referer)
 		}
@@ -64,7 +64,7 @@ func (s *sSession) SetLoginReferer(ctx context.Context, referer string) error {
 
 // GetLoginReferer 获取LoginReferer.
 func (s *sSession) GetLoginReferer(ctx context.Context) string {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		return customCtx.Session.MustGet(sessionKeyLoginReferer).String()
 	}
@@ -73,7 +73,7 @@ func (s *sSession) GetLoginReferer(ctx context.Context) string {
 
 // RemoveLoginReferer 删除LoginReferer.
 func (s *sSession) RemoveLoginReferer(ctx context.Context) error {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		return customCtx.Session.Remove(sessionKeyLoginReferer)
 	}
@@ -82,7 +82,7 @@ func (s *sSession) RemoveLoginReferer(ctx context.Context) error {
 
 // SetNotice 设置Notice
 func (s *sSession) SetNotice(ctx context.Context, message *model.SessionNotice) error {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		return customCtx.Session.Set(sessionKeyNotice, message)
 	}
@@ -91,7 +91,7 @@ func (s *sSession) SetNotice(ctx context.Context, message *model.SessionNotice) 
 
 // GetNotice 获取Notice
 func (s *sSession) GetNotice(ctx context.Context) (*model.SessionNotice, error) {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		var message *model.SessionNotice
 		v, err := customCtx.Session.Get(sessionKeyNotice)
@@ -108,7 +108,7 @@ func (s *sSession) GetNotice(ctx context.Context) (*model.SessionNotice, error) 
 
 // RemoveNotice 删除Notice
 func (s *sSession) RemoveNotice(ctx context.Context) error {
-	customCtx := service.BizCtx().Get(ctx)
+	customCtx := _interface.BizCtx().Get(ctx)
 	if customCtx != nil {
 		return customCtx.Session.Remove(sessionKeyNotice)
 	}

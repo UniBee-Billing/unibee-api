@@ -77,7 +77,7 @@ var merchantAccountOrderColumns = MerchantAccountOrderColumns{
 	MerchantReference:             "merchant_reference",
 	ChannelOrderNo:                "channel_order_no",
 	MerchantOrderNo:               "merchant_order_no",
-	Channel:                       "channel",
+	Channel:                       "outchannel",
 	PaymentCurrency:               "payment_currency",
 	Authorised:                    "authorised",
 	Captured:                      "captured",

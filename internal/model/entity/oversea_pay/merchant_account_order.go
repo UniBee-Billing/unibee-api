@@ -31,7 +31,7 @@ type MerchantAccountOrder struct {
 	MerchantReference             string      `json:"merchantReference"             ` // 客户订单号
 	ChannelOrderNo                string      `json:"channelOrderNo"                ` //
 	MerchantOrderNo               string      `json:"merchantOrderNo"               ` //
-	Channel                       string      `json:"channel"                       ` //
+	Channel                       string      `json:"outchannel"                       ` //
 	PaymentCurrency               string      `json:"paymentCurrency"               ` //
 	Authorised                    int64       `json:"authorised"                    ` //
 	Captured                      int64       `json:"captured"                      ` //

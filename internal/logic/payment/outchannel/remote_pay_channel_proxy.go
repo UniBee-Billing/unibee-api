@@ -1,4 +1,4 @@
-package paychannel
+package outchannel
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/paychannel/evonet"
-	"go-oversea-pay/internal/logic/paychannel/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel/evonet"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
@@ -17,7 +17,7 @@ type PayChannelProxy struct {
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelService) {
-	utility.Assert(p.channel > 0, "channel is not set")
+	utility.Assert(p.channel > 0, "outchannel is not set")
 	//目前只有一个渠道 todo mark
 	return &evonet.Evonet{}
 }

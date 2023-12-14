@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/paychannel/ro"
-	"go-oversea-pay/internal/logic/paychannel/util"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel/util"
+	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/service/oversea_pay_service"
 	"go-oversea-pay/utility"
 	"strings"
 
@@ -33,8 +33,8 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	utility.Assert(len(req.ShopperReference) > 0, "shopperReference type is nil")
 	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
-	utility.Assert(len(req.Channel) > 0, "channel is nil")
-	utility.Assert(strings.Contains("WEB，WAP，APP, MINI, INWALLET", req.Channel), "channel is invalid, should be WEB，WAP，APP, MINI, INWALLET")
+	utility.Assert(len(req.Channel) > 0, "outchannel is nil")
+	utility.Assert(strings.Contains("WEB，WAP，APP, MINI, INWALLET", req.Channel), "outchannel is invalid, should be WEB，WAP，APP, MINI, INWALLET")
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantAccount)
 	payChannel := util.GetOverseaPayChannelByType(ctx, req.PaymentMethod.Type)
@@ -77,7 +77,7 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
 	}
 
-	resp, err := oversea_pay_service.DoChannelPay(ctx, createPayContext)
+	resp, err := service.DoChannelPay(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &v1.PaymentsRes{
 		Status:       "Pending",

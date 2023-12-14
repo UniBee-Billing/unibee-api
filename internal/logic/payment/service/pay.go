@@ -1,4 +1,4 @@
-package oversea_pay_service
+package service
 
 import (
 	"context"
@@ -9,14 +9,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/paychannel"
-	"go-oversea-pay/internal/logic/paychannel/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/utility"
 )
 
 func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
-	utility.Assert(createPayContext.PayChannel != nil, "pay channel is nil")
+	utility.Assert(createPayContext.PayChannel != nil, "pay outchannel is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "支付单号为空")
 	utility.Assert(createPayContext.Pay.ChannelId > 0, "pay channelId is nil")
@@ -48,7 +48,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	}
 
 	err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		//事务处理 channel refund
+		//事务处理 outchannel refund
 		insert, err := transaction.Insert("oversea_pay", createPayContext.Pay, 100)
 		if err != nil {
 			_ = transaction.Rollback()
@@ -62,7 +62,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		createPayContext.Pay.Id = id
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		channelInternalPayResult, err = paychannel.GetPayChannelServiceProvider(int(createPayContext.Pay.ChannelId)).DoRemoteChannelPayment(ctx, createPayContext)
+		channelInternalPayResult, err = outchannel.GetPayChannelServiceProvider(int(createPayContext.Pay.ChannelId)).DoRemoteChannelPayment(ctx, createPayContext)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err

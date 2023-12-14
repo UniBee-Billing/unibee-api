@@ -1,4 +1,4 @@
-package paychannel
+package outchannel
 
 func GetPayChannelServiceProvider(channel int) (channelService RemotePayChannelService) {
 	proxy := &PayChannelProxy{}

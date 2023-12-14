@@ -4,7 +4,7 @@ import (
 	"context"
 	"go-oversea-pay/api/out/v1"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/service/oversea_pay_service"
+	"go-oversea-pay/internal/logic/payment/service"
 )
 
 func (c *ControllerV1) Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1.RefundsRes, err error) {
@@ -13,7 +13,7 @@ func (c *ControllerV1) Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1
 	merchantCheck(ctx, req.MerchantAccount)
 
 	// openApiId todo mark
-	resp, err := oversea_pay_service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_ORDER, req, 0)
+	resp, err := service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_ORDER, req, 0)
 	if err != nil {
 		return nil, err
 	}

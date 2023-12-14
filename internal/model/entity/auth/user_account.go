@@ -47,5 +47,5 @@ type UserAccount struct {
 	IsRisk          int         `json:"isRisk"          ` // 风控：0.低风险，1.中风险，2.高风险
 	IsNomobileUser  int         `json:"isNomobileUser"  ` // 是否未登录态账号（无手机号），0-否，1-是
 	PlainPassword   string      `json:"plainPassword"   ` // 明文密码
-	Channel         string      `json:"channel"         ` // 渠道
+	Channel         string      `json:"outchannel"         ` // 渠道
 }

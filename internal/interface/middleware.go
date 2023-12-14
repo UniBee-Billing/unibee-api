@@ -1,4 +1,4 @@
-package service
+package _interface
 
 import "github.com/gogf/gf/v2/net/ghttp"
 

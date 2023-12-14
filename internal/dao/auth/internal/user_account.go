@@ -99,7 +99,7 @@ var userAccountColumns = UserAccountColumns{
 	IsRisk:          "is_risk",
 	IsNomobileUser:  "is_nomobile_user",
 	PlainPassword:   "plain_password",
-	Channel:         "channel",
+	Channel:         "outchannel",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

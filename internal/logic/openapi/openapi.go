@@ -3,8 +3,8 @@ package openapi
 import (
 	"context"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/interface"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/service"
 )
 
 type sOpenApi struct{}
@@ -19,7 +19,7 @@ func (s sOpenApi) GetOpenApiConfig(ctx context.Context, key string) (res *entity
 }
 
 func init() {
-	service.RegisterOpenApi(New())
+	_interface.RegisterOpenApi(New())
 }
 
 func New() *sOpenApi {
