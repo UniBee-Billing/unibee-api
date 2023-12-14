@@ -7,7 +7,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-type RemotePayChannelService interface {
+type RemotePayChannelInterface interface {
 	DoRemoteChannelWebhook(r *ghttp.Request)
 	DoRemoteChannelRedirect(r *ghttp.Request)
 	DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error)

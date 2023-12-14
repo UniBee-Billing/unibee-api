@@ -16,7 +16,7 @@ type PayChannelProxy struct {
 	channel int // todo mark 应该使用 enum key
 }
 
-func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelService) {
+func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
 	utility.Assert(p.channel > 0, "outchannel is not set")
 	//目前只有一个渠道 todo mark
 	return &evonet.Evonet{}
