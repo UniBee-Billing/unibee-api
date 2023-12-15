@@ -9,23 +9,23 @@ import (
 )
 
 type Message struct {
-	MessageId        string                 `p:"messageId" dc:"消息Id"`
-	Topic            string                 `p:"topic" dc:"消息Topic"`
-	Tag              string                 `p:"tag" dc:"消息Tag"`
-	Body             []byte                 `p:"body" dc:"消息Body"`
-	Key              string                 `p:"key" dc:"消息Key"`
-	StartDeliverTime int64                  `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
-	ReconsumeTimes   int                    `p:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
-	CustomData       map[string]interface{} `p:"customData" dc:"自定义数据"`
-	SendTime         int64                  `p:"sendTime" dc:"消息发送时间"`
+	MessageId        string                 `json:"messageId" dc:"消息Id"`
+	Topic            string                 `json:"topic" dc:"消息Topic"`
+	Tag              string                 `json:"tag" dc:"消息Tag"`
+	Body             []byte                 `json:"body" dc:"消息Body"`
+	Key              string                 `json:"key" dc:"消息Key"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
+	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
+	CustomData       map[string]interface{} `json:"customData" dc:"自定义数据"`
+	SendTime         int64                  `json:"sendTime" dc:"消息发送时间"`
 }
 
 type MessageMetaData struct {
-	StartDeliverTime int64                  `p:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
-	ReconsumeTimes   int                    `p:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
-	CustomData       map[string]interface{} `p:"customData" dc:"自定义数据"`
-	Key              string                 `p:"key" dc:"消息Key"`
-	SendTime         int64                  `p:"sendTime" dc:"消息发送时间"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
+	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
+	CustomData       map[string]interface{} `json:"customData" dc:"自定义数据"`
+	Key              string                 `json:"key" dc:"消息Key"`
+	SendTime         int64                  `json:"sendTime" dc:"消息发送时间"`
 }
 
 func (message *Message) getUniqueKey() string {

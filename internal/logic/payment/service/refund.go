@@ -12,19 +12,13 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 )
 
 func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.OverseaRefund, err error) {
-	var (
-		overseaPay *entity.OverseaPay
-	)
-	err = dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: req.PaymentsPspReference}).OmitEmpty().Scan(&overseaPay)
-	if err != nil {
-		return nil, err
-	}
-
+	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")
 	utility.Assert(overseaPay.PaymentFee > 0, "payment fee error")
 	utility.Assert(strings.Compare(overseaPay.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
