@@ -67,7 +67,7 @@ func innerSettingConsumerName() {
 				// 判断是否为 IPv4 地址
 				if ip.To4() != nil {
 					fmt.Printf("IPv4 Address: %s\n", ip)
-					consumerName = string(ip)
+					consumerName = ip.String()
 				}
 			}
 		}

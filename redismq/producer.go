@@ -47,7 +47,6 @@ func SendTransaction(message *Message, transactionExecuter func(messageToSend *M
 }
 
 func sendDelayMessage(message *Message) bool {
-	// todo mark 完善延迟消息
 	send, err := SendDelay(message, message.StartDeliverTime-utility.CurrentTimeMillis())
 	fmt.Printf("redismq SendDelayMessage result:%v", send)
 	if err != nil {

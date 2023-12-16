@@ -67,7 +67,7 @@ func pollingCore(key string) {
 	}(client)
 	result, err := client.ZRangeByScore(context.Background(), key, &redis.ZRangeBy{
 		Min:    "0",
-		Max:    strconv.FormatInt(utility.CurrentTimeMillis(), 10), // todo mark formatint base 值可能存在问题
+		Max:    strconv.FormatInt(utility.CurrentTimeMillis(), 10),
 		Offset: 0,
 		Count:  1,
 	}).Result()

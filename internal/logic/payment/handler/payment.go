@@ -10,6 +10,7 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -36,12 +37,12 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("支付不存在")
 	}
 
-	SaveEvent(ctx, entity.OverseaPayEvent{
+	event.SaveEvent(ctx, entity.OverseaPayEvent{
 		BizType:   0,
 		BizId:     pay.Id,
 		Fee:       pay.PaymentFee,
-		EventType: Expird.Type,
-		Event:     Expird.Desc,
+		EventType: event.Expird.Type,
+		Event:     event.Expird.Desc,
 		UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Expird"),
 	})
 
@@ -60,12 +61,12 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("支付不存在")
 	}
 	//交易事件记录
-	SaveEvent(ctx, entity.OverseaPayEvent{
+	event.SaveEvent(ctx, entity.OverseaPayEvent{
 		BizType:   0,
 		BizId:     pay.Id,
 		Fee:       req.CaptureFee,
-		EventType: CaptureFailed.Type,
-		Event:     CaptureFailed.Desc,
+		EventType: event.CaptureFailed.Type,
+		Event:     event.CaptureFailed.Desc,
 		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "CaptureFailed", req.ChannelPayId),
 		Message:   req.Reason,
 	})
@@ -105,12 +106,12 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
-		SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
 			BizType:   0,
 			BizId:     pay.Id,
 			Fee:       pay.PaymentFee,
-			EventType: Authorised.Type,
-			Event:     Authorised.Desc,
+			EventType: event.Authorised.Type,
+			Event:     event.Authorised.Desc,
 			UniqueNo:  fmt.Sprintf("%s_%s", pay.ChannelTradeNo, "Authorised"),
 		})
 	}
@@ -169,12 +170,12 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
 		//交易事件记录
-		SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
 			BizType:   0,
 			BizId:     pay.Id,
 			Fee:       0,
-			EventType: Cancelled.Type,
-			Event:     Cancelled.Desc,
+			EventType: event.Cancelled.Type,
+			Event:     event.Cancelled.Desc,
 			UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Cancelled"),
 			Message:   req.Reason,
 		})
@@ -237,12 +238,12 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if err == nil {
 		//try {
 		//交易事件记录
-		SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
 			BizType:   0,
 			BizId:     pay.Id,
 			Fee:       req.ReceiptFee,
-			EventType: Settled.Type,
-			Event:     Settled.Desc,
+			EventType: event.Settled.Type,
+			Event:     event.Settled.Desc,
 			UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Settled"),
 			Message:   req.Reason,
 		})

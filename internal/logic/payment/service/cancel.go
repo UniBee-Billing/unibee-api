@@ -29,8 +29,8 @@ func DoChannelCancel(ctx context.Context, overseaPay *entity.OverseaPay) (err er
 		//	return err
 		//}
 
-		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		_, err = outchannel.GetPayChannelServiceProvider(int(overseaPay.ChannelId)).DoRemoteChannelCancel(ctx, overseaPay)
+		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
+		_, err = outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCancel(ctx, overseaPay)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err

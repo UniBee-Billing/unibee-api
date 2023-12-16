@@ -7,10 +7,14 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 )
 
@@ -46,49 +50,66 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.MerchantOrderNo), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			//事务处理 outchannel refund
+			insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
+			if err != nil {
+				_ = transaction.Rollback()
+				return err
+			}
+			id, err := insert.LastInsertId()
+			if err != nil {
+				_ = transaction.Rollback()
+				return err
+			}
+			createPayContext.Pay.Id = id
 
-	err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		//事务处理 outchannel refund
-		insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
-		if err != nil {
-			_ = transaction.Rollback()
-			return err
+			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
+			channelInternalPayResult, err = outchannel.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
+			if err != nil {
+				_ = transaction.Rollback()
+				return err
+			}
+			channelInternalPayResult.PayChannel = createPayContext.Pay.ChannelId
+			channelInternalPayResult.PayOrderNo = createPayContext.Pay.MerchantOrderNo
+			jsonData, err := gjson.Marshal(channelInternalPayResult)
+			if err != nil {
+				return err
+			}
+			createPayContext.Pay.PaymentData = string(jsonData)
+			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
+				g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+			if err != nil || result == nil {
+				_ = transaction.Rollback()
+				return err
+			}
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				_ = transaction.Rollback()
+				return err
+			}
+			return nil
+		})
+		if err == nil {
+			return redismq.CommitTransaction
+		} else {
+			return redismq.RollbackTransaction
 		}
-		id, err := insert.LastInsertId()
-		if err != nil {
-			_ = transaction.Rollback()
-			return err
-		}
-		createPayContext.Pay.Id = id
-
-		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		channelInternalPayResult, err = outchannel.GetPayChannelServiceProvider(int(createPayContext.Pay.ChannelId)).DoRemoteChannelPayment(ctx, createPayContext)
-		if err != nil {
-			_ = transaction.Rollback()
-			return err
-		}
-		channelInternalPayResult.PayChannel = createPayContext.Pay.ChannelId
-		channelInternalPayResult.PayOrderNo = createPayContext.Pay.MerchantOrderNo
-		jsonData, err := gjson.Marshal(channelInternalPayResult)
-		if err != nil {
-			return err
-		}
-		createPayContext.Pay.PaymentData = string(jsonData)
-		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
-			g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
-		if err != nil || result == nil {
-			_ = transaction.Rollback()
-			return err
-		}
-		affected, err := result.RowsAffected()
-		if err != nil || affected != 1 {
-			_ = transaction.Rollback()
-			return err
-		}
-		return nil
 	})
+
 	if err != nil {
 		return nil, err
+	} else {
+		//交易事件记录
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
+			BizType:   0,
+			BizId:     createPayContext.Pay.Id,
+			Fee:       createPayContext.Pay.PaymentFee,
+			EventType: event.SentForSettle.Type,
+			Event:     event.SentForSettle.Desc,
+			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.MerchantOrderNo, "SentForSettle"),
+		})
 	}
 	return channelInternalPayResult, nil
 }

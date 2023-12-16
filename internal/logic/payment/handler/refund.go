@@ -10,6 +10,7 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -71,12 +72,12 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
 			BizType:   0,
 			BizId:     pay.Id,
 			Fee:       one.RefundFee,
-			EventType: RefundFailed.Type,
-			Event:     RefundFailed.Desc,
+			EventType: event.RefundFailed.Type,
+			Event:     event.RefundFailed.Desc,
 			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "RefundFailed", one.OutRefundNo),
 			Message:   req.Reason,
 		})
@@ -157,12 +158,12 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveEvent(ctx, entity.OverseaPayEvent{
 			BizType:   0,
 			BizId:     pay.Id,
 			Fee:       one.RefundFee,
-			EventType: Refunded.Type,
-			Event:     Refunded.Desc,
+			EventType: event.Refunded.Type,
+			Event:     event.Refunded.Desc,
 			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "Refunded", one.OutRefundNo),
 			Message:   req.Reason,
 		})
@@ -202,12 +203,12 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		return gerror.New("支付记录不存在")
 	}
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
-	SaveEvent(ctx, entity.OverseaPayEvent{
+	event.SaveEvent(ctx, entity.OverseaPayEvent{
 		BizType:   0,
 		BizId:     pay.Id,
 		Fee:       one.RefundFee,
-		EventType: RefundedReversed.Type,
-		Event:     RefundedReversed.Desc,
+		EventType: event.RefundedReversed.Type,
+		Event:     event.RefundedReversed.Desc,
 		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "RefundedReversed", one.OutRefundNo),
 		Message:   req.Reason,
 	})

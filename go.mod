@@ -3,13 +3,13 @@ module go-oversea-pay
 go 1.18
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.5.6
 	github.com/gogf/gf/contrib/nosql/redis/v2 v2.5.6
 	github.com/gogf/gf/v2 v2.5.6
 	github.com/google/uuid v1.4.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/redis/go-redis/v9 v9.0.5
-	golang.org/x/net v0.17.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -45,6 +45,7 @@ require (
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.15.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

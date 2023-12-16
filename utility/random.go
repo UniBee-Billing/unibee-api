@@ -7,6 +7,22 @@ import (
 	"time"
 )
 
+//var (
+//	LocalIP       = ""
+//	WorkId  int64 = 1
+//)
+//
+//func workIdFromIP() {
+//	if WorkId == 1 {
+//		LocalIP = DetectLocalIP()
+//		WorkIdStr := strings.Replace(LocalIP, ".", "", -1)
+//		one, err := strconv.Atoi(WorkIdStr)
+//		if err == nil {
+//			WorkId = int64(one)
+//		}
+//	}
+//}
+
 func GetLineSeparator() string {
 	switch runtime.GOOS {
 	case "windows":
@@ -42,7 +58,14 @@ func CreateOutRefundNo() string {
 	return fmt.Sprintf("orn%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-func GenerateNextInt() int64 {
-	//todo mark 工作机器 ID
-	return NewSnowflake(1).GenerateID()
-}
+// todo mark 高并发情况下生成结果不稳定
+//func GenerateNextInt() int64 {
+//	workIdFromIP()
+//	//return NewSnowflake(WorkId).GenerateID()
+//	node, err := snowflake.NewNode(WorkId % 1000)
+//	if err != nil {
+//		return NewSnowflake(WorkId).GenerateID()
+//	} else {
+//		return node.Generate().Int64()
+//	}
+//}

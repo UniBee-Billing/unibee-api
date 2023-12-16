@@ -6,20 +6,42 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/payment/outchannel/evonet"
+	"go-oversea-pay/internal/logic/payment/outchannel/out"
+	"go-oversea-pay/internal/logic/payment/outchannel/out/evonet"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
 
+type PayChannelKeyEnum struct {
+	Code int64
+	Desc string
+}
+
+var (
+	Invalid  = PayChannelKeyEnum{-1, "无效支付"}
+	Grab     = PayChannelKeyEnum{0, "Grab支付"}
+	Klarna   = PayChannelKeyEnum{1, "Klarna支付"}
+	Evonet   = PayChannelKeyEnum{2, "Evonet支付"}
+	Blank    = PayChannelKeyEnum{50, "0金额支付专用"}
+	AutoTest = PayChannelKeyEnum{500, "自动化测试支付专用"}
+)
+
 type PayChannelProxy struct {
-	channel int // todo mark 应该使用 enum key
+	channel *entity.OverseaPayChannel
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
-	utility.Assert(p.channel > 0, "outchannel is not set")
-	//目前只有一个渠道 todo mark
-	return &evonet.Evonet{}
+	utility.Assert(p.channel != nil, "channel is not set")
+	if p.channel.EnumKey == Evonet.Code {
+		return &evonet.Evonet{}
+	} else if p.channel.EnumKey == Blank.Code {
+		return &out.Blank{}
+	} else if p.channel.EnumKey == AutoTest.Code {
+		return &out.AutoTest{}
+	} else {
+		return &out.Invalid{}
+	}
 }
 
 func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request) {

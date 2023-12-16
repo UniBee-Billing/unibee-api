@@ -33,7 +33,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 		}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		_, err = outchannel.GetPayChannelServiceProvider(int(overseaPay.ChannelId)).DoRemoteChannelCapture(ctx, overseaPay)
+		_, err = outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCapture(ctx, overseaPay)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err

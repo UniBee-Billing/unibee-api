@@ -1,7 +1,12 @@
 package outchannel
 
-func GetPayChannelServiceProvider(channel int) (channelService RemotePayChannelInterface) {
+import (
+	"context"
+	"go-oversea-pay/internal/query"
+)
+
+func GetPayChannelServiceProvider(ctx context.Context, channelId int64) (channelService RemotePayChannelInterface) {
 	proxy := &PayChannelProxy{}
-	proxy.channel = channel
+	proxy.channel = query.GetOverseaPayChannelById(ctx, channelId)
 	return proxy
 }

@@ -8,7 +8,7 @@ import (
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/webhooks"
+	"go-oversea-pay/internal/logic/payment/webhooks"
 	"go-oversea-pay/utility/liberr"
 )
 

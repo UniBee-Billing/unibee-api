@@ -16,7 +16,7 @@ gfcli:
         entityPath:  "model/entity/xin"
 #        jsonCase: "CamelLower"
 
-      - link:   "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/oversea_pay"
+      - link:   "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/gooversea_pay"
 #        path:   "oversea_pay"
 #        prefix: "primary_"
         group: "oversea_pay"

@@ -18,7 +18,7 @@ database:
     debug:   true
     type:    mysql
   oversea_pay:
-    link:    "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/oversea_pay"
+    link:    "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/gooversea_pay"
     debug:   true
     type:    mysql    
 
