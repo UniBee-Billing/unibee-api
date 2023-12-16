@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"strconv"
 )
 
-func GetPaymentWebhookEntrancePath(channelId int) string  {
-	return fmt.Sprintf("/webhooks/%d/notifications",channelId)
+func GetPaymentWebhookEntranceUrl(pay *entity.OverseaPay) string {
+	return fmt.Sprintf("%s/webhooks/%s/notifications?payId=%d", consts.GetConfigInstance().HostPath, pay.ChannelPayId, pay.Id)
 }
 
-func GetPaymentRedirectEntrancePath(channelId int) string  {
-	return fmt.Sprintf("/redirect/%d/forward",channelId)
+func GetPaymentRedirectEntranceUrl(pay *entity.OverseaPay) string {
+	return fmt.Sprintf("%s/redirect/%s/forward?payId=%d", consts.GetConfigInstance().HostPath, pay.ChannelPayId, pay.Id)
 }
 
 func ChannelPaymentWebhookEntrance(r *ghttp.Request) {

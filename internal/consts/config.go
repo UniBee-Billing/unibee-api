@@ -2,7 +2,7 @@ package consts
 
 import "sync"
 
-type NacosConfig struct {
+type Config struct {
 	Env         string      `yaml:"env"`
 	HostPath    string      `yaml:"host_path"`
 	RedisConfig RedisConfig `yaml:"redismq"`
@@ -14,13 +14,13 @@ type RedisConfig struct {
 	Pass    string `yaml:"pass"`
 }
 
-var instance *NacosConfig
+var instance *Config
 var once sync.Once
 
-// GetNacosConfigInstance 返回 Singleton 的唯一实例
-func GetNacosConfigInstance() *NacosConfig {
+// GetConfigInstance 返回 Singleton 的唯一实例
+func GetConfigInstance() *Config {
 	once.Do(func() {
-		instance = &NacosConfig{}
+		instance = &Config{}
 	})
 	return instance
 }
