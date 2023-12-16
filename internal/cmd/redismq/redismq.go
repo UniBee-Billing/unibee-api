@@ -7,16 +7,16 @@ import (
 )
 
 var (
-	TopicTest1                      = redismq.MQTopicEnum{"overseamq", "test1", "redismq测试1"}
-	TopicTest2                      = redismq.MQTopicEnum{"overseamq", "test2", "redismq测试2"}
-	TopicChannelPayV2WebHookReceive = redismq.MQTopicEnum{"overseamq", "channelpaywebhookreceivev2", "channelpaywebhookv2消息接收"}
-	TopicPayCreated                 = redismq.MQTopicEnum{"overseamq_pay", "paycreated", "支付单创建"}
-	TopicPayCancelld                = redismq.MQTopicEnum{"overseamq_pay", "payCancelld", "支付单取消成功"}
-	TopicPayAuthorized              = redismq.MQTopicEnum{"overseamq_pay", "payauthorized", "支付单授权"}
-	TopicPaySuccess                 = redismq.MQTopicEnum{"overseamq_pay", "paysuccess", "支付成功"}
-	TopicRefundCreated              = redismq.MQTopicEnum{"overseamq_refund", "refundcreated", "退款单创建"}
-	TopicRefundSuccess              = redismq.MQTopicEnum{"overseamq_refund", "refundsuccess", "退款成功"}
-	TopicRefundFailed               = redismq.MQTopicEnum{"overseamq_refund", "refundfailed", "退款失败"}
+	TopicTest1                      = redismq.MQTopicEnum{"gooverseamq", "test1", "redismq测试1"}
+	TopicTest2                      = redismq.MQTopicEnum{"gooverseamq", "test2", "redismq测试2"}
+	TopicChannelPayV2WebHookReceive = redismq.MQTopicEnum{"gooverseamq", "channelpaywebhookreceivev2", "channelpaywebhookv2消息接收"}
+	TopicPayCreated                 = redismq.MQTopicEnum{"gooverseamq_pay", "paycreated", "支付单创建"}
+	TopicPayCancelld                = redismq.MQTopicEnum{"gooverseamq_pay", "payCancelld", "支付单取消成功"}
+	TopicPayAuthorized              = redismq.MQTopicEnum{"gooverseamq_pay", "payauthorized", "支付单授权"}
+	TopicPaySuccess                 = redismq.MQTopicEnum{"gooverseamq_pay", "paysuccess", "支付成功"}
+	TopicRefundCreated              = redismq.MQTopicEnum{"gooverseamq_refund", "refundcreated", "退款单创建"}
+	TopicRefundSuccess              = redismq.MQTopicEnum{"gooverseamq_refund", "refundsuccess", "退款成功"}
+	TopicRefundFailed               = redismq.MQTopicEnum{"gooverseamq_refund", "refundfailed", "退款失败"}
 )
 
 type SRedisMqConfig struct{}

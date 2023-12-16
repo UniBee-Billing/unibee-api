@@ -14,9 +14,9 @@ import (
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/handler"
 	"go-oversea-pay/internal/logic/payment/outchannel/log"
+	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
-	"go-oversea-pay/internal/logic/payment/webhooks"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -394,8 +394,8 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			"tradeType":     "Sale of goods",
 			"totalQuantity": fmt.Sprintf("%v", createPayContext.Items),
 		},
-		"returnUrl": webhooks.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
-		"webhook":   webhooks.GetPaymentWebhookEntranceUrl(createPayContext.Pay),
+		"returnUrl": out.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
+		"webhook":   out.GetPaymentWebhookEntranceUrl(createPayContext.Pay),
 	}
 
 	if len(createPayContext.PayChannel.BrandData) > 0 {
@@ -467,7 +467,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 			"currency": pay.Currency,
 			"value":    utility.ConvertFenToYuanMinUnitStr(pay.BuyerPayFee),
 		},
-		"webhook": webhooks.GetPaymentWebhookEntranceUrl(pay),
+		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
 	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -502,7 +502,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPa
 			"merchantTransID":   utility.CreateMerchantOrderNo(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
-		"webhook": webhooks.GetPaymentWebhookEntranceUrl(pay),
+		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
 	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -584,7 +584,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPa
 			"currency": pay.Currency,
 			"value":    utility.ConvertFenToYuanMinUnitStr(refund.RefundFee),
 		},
-		"webhook": webhooks.GetPaymentWebhookEntranceUrl(pay),
+		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
 	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
