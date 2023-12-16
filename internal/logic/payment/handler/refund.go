@@ -25,6 +25,7 @@ type HandleRefundReq struct {
 }
 
 func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) {
+	g.Log().Infof(ctx, "HandleRefundFailure, req=%s", req)
 	if len(req.ChargeRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
@@ -85,6 +86,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 }
 
 func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) {
+	g.Log().Infof(ctx, "HandleRefundSuccess, req=%s", req)
 	if len(req.ChargeRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
@@ -139,6 +141,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			payAffected, err := update.RowsAffected()
+			g.Log().Printf(ctx, "HandleRefundSuccess Blank incrTotalRefundFee, updateCount=%s", payAffected)
 			if err != nil || payAffected != 1 {
 				_ = transaction.Rollback()
 				return err
@@ -180,6 +183,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 }
 
 func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error) {
+	g.Log().Infof(ctx, "HandleRefundReversed, req=%s", req)
 	if len(req.ChargeRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
