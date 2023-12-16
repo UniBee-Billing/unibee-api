@@ -20,8 +20,8 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 
 	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 outchannel capture
-		result, err := transaction.Update("oversea_pay", g.Map{"authorize_status": consts.CAPTURE_REQUEST, "buyer_pay_fee": overseaPay.BuyerPayFee},
-			g.Map{"id": overseaPay.Id, "pay_status": consts.TO_BE_PAID})
+		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.OverseaPay.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
+			g.Map{dao.OverseaPay.Columns().Id: overseaPay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 		if err != nil || result == nil {
 			_ = transaction.Rollback()
 			return err

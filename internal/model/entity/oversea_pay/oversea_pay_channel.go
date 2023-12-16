@@ -12,7 +12,7 @@ import (
 type OverseaPayChannel struct {
 	Id               uint64      `json:"id"               ` // 主键id
 	EnumKey          int64       `json:"enumKey"          ` // 支付渠道枚举（内部定义）
-	Channel          string      `json:"outchannel"          ` // 支付方式枚举（渠道定义）
+	Channel          string      `json:"channel"          ` // 支付方式枚举（渠道定义）
 	Name             string      `json:"name"             ` // 支付方式名称
 	SubChannel       string      `json:"subChannel"       ` // 渠道子支付方式枚举
 	BrandData        string      `json:"brandData"        ` //

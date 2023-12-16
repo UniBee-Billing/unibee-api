@@ -40,7 +40,7 @@ type OverseaPayChannelColumns struct {
 var overseaPayChannelColumns = OverseaPayChannelColumns{
 	Id:               "id",
 	EnumKey:          "enum_key",
-	Channel:          "outchannel",
+	Channel:          "channel",
 	Name:             "name",
 	SubChannel:       "sub_channel",
 	BrandData:        "brand_data",

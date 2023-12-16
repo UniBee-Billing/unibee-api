@@ -77,7 +77,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 
 	err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 outchannel refund
-		insert, err := transaction.Insert("oversea_refund", overseaRefund, 100)
+		insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err
@@ -96,8 +96,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			return err
 		}
 
-		result, err := transaction.Update("oversea_refund", g.Map{"channel_refund_no": channelResult.ChannelRefundNo},
-			g.Map{"id": overseaRefund.Id, "refund_status": consts.REFUND_ING})
+		result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().ChannelRefundNo: channelResult.ChannelRefundNo},
+			g.Map{dao.OverseaRefund.Columns().Id: overseaRefund.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
 		if err != nil || result == nil {
 			_ = transaction.Rollback()
 			return err

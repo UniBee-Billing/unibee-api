@@ -49,7 +49,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 
 	err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 outchannel refund
-		insert, err := transaction.Insert("oversea_pay", createPayContext.Pay, 100)
+		insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
 		if err != nil {
 			_ = transaction.Rollback()
 			return err
@@ -74,8 +74,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			return err
 		}
 		createPayContext.Pay.PaymentData = string(jsonData)
-		result, err := transaction.Update("oversea_pay", g.Map{"payment_data": createPayContext.Pay.PaymentData},
-			g.Map{"id": id, "pay_status": consts.TO_BE_PAID})
+		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
+			g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 		if err != nil || result == nil {
 			_ = transaction.Rollback()
 			return err

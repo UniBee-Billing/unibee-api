@@ -8,9 +8,11 @@ import (
 	"go-oversea-pay/internal/cmd/nacos"
 	_ "go-oversea-pay/internal/logic"
 	_ "go-oversea-pay/internal/packed"
+	"go-oversea-pay/redismq"
 )
 
 func main() {
 	nacos.Init()
+	redismq.StartRedisMqConsumer()
 	cmd.Main.Run(gctx.GetInitCtx())
 }
