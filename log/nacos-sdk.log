@@ -274,3 +274,5 @@
 2023-12-16T20:38:18.691+0800	[34mINFO[0m	clients/client_factory.go:47	logDir:<log>   cacheDir:</Users/fuzehua/Desktop/golang/go-oversea-pay/cache>
 2023-12-16T20:41:27.411+0800	[34mINFO[0m	clients/client_factory.go:47	logDir:<log>   cacheDir:</Users/fuzehua/Desktop/golang/go-oversea-pay/cache>
 2023-12-16T20:41:58.555+0800	[34mINFO[0m	clients/client_factory.go:47	logDir:<log>   cacheDir:</Users/fuzehua/Desktop/golang/go-oversea-pay/cache>
+2023-12-16T20:57:44.053+0800	[34mINFO[0m	clients/client_factory.go:47	logDir:<log>   cacheDir:</Users/fuzehua/Desktop/golang/go-oversea-pay/cache>
+2023-12-16T21:49:27.878+0800	[34mINFO[0m	clients/client_factory.go:47	logDir:<log>   cacheDir:</Users/fuzehua/Desktop/golang/go-oversea-pay/cache>

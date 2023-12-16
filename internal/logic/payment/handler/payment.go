@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -34,15 +35,15 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", req.MerchantOrderNo)
 		return errors.New("支付不存在")
 	}
-	//OverseaPayEvent overseaPayEvent = new OverseaPayEvent();
-	//overseaPayEvent.setBizType(0);
-	//overseaPayEvent.setBizId(pay.getId());
-	//overseaPayEvent.setFee(pay.getPaymentFee());
-	//overseaPayEvent.setEventType(TradeEventTypeEnum.Expird.getId());
-	//overseaPayEvent.setEvent(TradeEventTypeEnum.Expird.getDesc());
-	//overseaPayEvent.setUniqueNo(merchantOrderNo+"_Expird");
-	//boolean save = iOverseaPayEventService.save(overseaPayEvent);
-	//Assert.isTrue(save,"save event failure");
+
+	SaveEvent(ctx, entity.OverseaPayEvent{
+		BizType:   0,
+		BizId:     pay.Id,
+		Fee:       pay.PaymentFee,
+		EventType: Expird.Type,
+		Event:     Expird.Desc,
+		UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Expird"),
+	})
 
 	return HandlePayFailure(ctx, &HandlePayReq{
 		MerchantOrderNo: req.MerchantOrderNo,
@@ -59,15 +60,15 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("支付不存在")
 	}
 	//交易事件记录
-	//OverseaPayEvent overseaPayEvent = new OverseaPayEvent();
-	//overseaPayEvent.setBizType(0);
-	//overseaPayEvent.setBizId(pay.Id);
-	//overseaPayEvent.setFee(req.CaptureFee);
-	//overseaPayEvent.setEventType(TradeEventTypeEnum.CaptureFailed.getId());
-	//overseaPayEvent.setEvent(TradeEventTypeEnum.CaptureFailed.getDesc());
-	//overseaPayEvent.setUniqueNo(merchantOrderNo+"_CaptureFailed_"+req.ChannelPayId);
-	//overseaPayEvent.setMessage(req.Reason);
-	//boolean save = iOverseaPayEventService.save(overseaPayEvent);
+	SaveEvent(ctx, entity.OverseaPayEvent{
+		BizType:   0,
+		BizId:     pay.Id,
+		Fee:       req.CaptureFee,
+		EventType: CaptureFailed.Type,
+		Event:     CaptureFailed.Desc,
+		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "CaptureFailed", req.ChannelPayId),
+		Message:   req.Reason,
+	})
 	return nil
 }
 
@@ -103,15 +104,15 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 		}
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
-	if err != nil {
-		//OverseaPayEvent overseaPayEvent = new OverseaPayEvent();
-		//overseaPayEvent.setBizType(0);
-		//overseaPayEvent.setBizId(overseaPay.getId());
-		//overseaPayEvent.setFee(overseaPay.getPaymentFee());
-		//overseaPayEvent.setEventType(TradeEventTypeEnum.Authorised.getId());
-		//overseaPayEvent.setEvent(TradeEventTypeEnum.Authorised.getDesc());
-		//overseaPayEvent.setUniqueNo(overseaPay.getChannelTradeNo()+"_Authorised");
-		//boolean save = iOverseaPayEventService.save(overseaPayEvent);
+	if err == nil {
+		SaveEvent(ctx, entity.OverseaPayEvent{
+			BizType:   0,
+			BizId:     pay.Id,
+			Fee:       pay.PaymentFee,
+			EventType: Authorised.Type,
+			Event:     Authorised.Desc,
+			UniqueNo:  fmt.Sprintf("%s_%s", pay.ChannelTradeNo, "Authorised"),
+		})
 	}
 
 	return err
@@ -167,22 +168,16 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
-		//try {
-		//	//交易事件记录 todo mark
-		//	OverseaPayEvent overseaPayEvent = new OverseaPayEvent();
-		//	overseaPayEvent.setBizType(0);
-		//	overseaPayEvent.setBizId(pay.getId());
-		//	overseaPayEvent.setFee(0L);
-		//	overseaPayEvent.setEventType(TradeEventTypeEnum.Cancelled.getId());
-		//	overseaPayEvent.setEvent(TradeEventTypeEnum.Cancelled.getDesc());
-		//	overseaPayEvent.setUniqueNo(pay.getMerchantOrderNo()+"_Cancelled");
-		//	overseaPayEvent.setMessage(req.getReason());
-		//	boolean save = iOverseaPayEventService.save(overseaPayEvent);
-		//	Assert.isTrue(save,"save event failure");
-		//} catch (Exception e) {
-		//	e.printStackTrace();
-		//	log.info("save_event exception:{}",e.toString());
-		//}
+		//交易事件记录
+		SaveEvent(ctx, entity.OverseaPayEvent{
+			BizType:   0,
+			BizId:     pay.Id,
+			Fee:       0,
+			EventType: Cancelled.Type,
+			Event:     Cancelled.Desc,
+			UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Cancelled"),
+			Message:   req.Reason,
+		})
 	}
 	return err
 }
@@ -241,17 +236,16 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if err == nil {
 		//try {
-		//	//交易事件记录
-		//	OverseaPayEvent overseaPayEvent = new OverseaPayEvent();
-		//	overseaPayEvent.setBizType(0);
-		//	overseaPayEvent.setBizId(pay.getId());
-		//	overseaPayEvent.setFee(req.getReceiptFee());
-		//	overseaPayEvent.setEventType(TradeEventTypeEnum.Settled.getId());
-		//	overseaPayEvent.setEvent(TradeEventTypeEnum.Settled.getDesc());
-		//	overseaPayEvent.setUniqueNo(pay.getMerchantOrderNo()+"_Settled");
-		//	overseaPayEvent.setMessage(req.getReason());
-		//	boolean save = iOverseaPayEventService.save(overseaPayEvent);
-		//	Assert.isTrue(save,"save event failure");
+		//交易事件记录
+		SaveEvent(ctx, entity.OverseaPayEvent{
+			BizType:   0,
+			BizId:     pay.Id,
+			Fee:       req.ReceiptFee,
+			EventType: Settled.Type,
+			Event:     Settled.Desc,
+			UniqueNo:  fmt.Sprintf("%s_%s", pay.MerchantOrderNo, "Settled"),
+			Message:   req.Reason,
+		})
 		//} catch (Exception e) {
 		//	e.printStackTrace();
 		//	log.info("save_event exception:{}",e.toString());

@@ -16,6 +16,7 @@ var (
 	TopicPaySuccess                 = redismq.MQTopicEnum{"overseamq_pay", "paysuccess", "支付成功"}
 	TopicRefundCreated              = redismq.MQTopicEnum{"overseamq_refund", "refundcreated", "退款单创建"}
 	TopicRefundSuccess              = redismq.MQTopicEnum{"overseamq_refund", "refundsuccess", "退款成功"}
+	TopicRefundFailed               = redismq.MQTopicEnum{"overseamq_refund", "refundfailed", "退款失败"}
 )
 
 type SRedisMqConfig struct{}
