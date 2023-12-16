@@ -51,7 +51,7 @@ func Init() {
 	}
 }
 
-const nacosConfigSyncFilePath = "./nacos.config.yaml"
+const nacosConfigSyncFilePath = "./config.yaml"
 
 type Nacos struct {
 	ip                                       string
