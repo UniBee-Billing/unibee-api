@@ -38,3 +38,13 @@ func (status TransactionStatus) Description() string {
 		return "CommitTransaction"
 	}
 }
+
+type MQTopicEnum struct {
+	Topic       string
+	Tag         string
+	Description string
+}
+
+var (
+	TopicBlank = MQTopicEnum{"blank", "blank", "redis 空消息"}
+)

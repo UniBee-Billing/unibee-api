@@ -28,6 +28,15 @@ type MessageMetaData struct {
 	SendTime         int64                  `json:"sendTime" dc:"消息发送时间"`
 }
 
+func NewRedisMQMessage(topicWrappper MQTopicEnum, body interface{}) *Message {
+	return &Message{
+		Topic:    topicWrappper.Topic,
+		Tag:      topicWrappper.Tag,
+		Body:     Serialize(body),
+		SendTime: utility.CurrentTimeMillis(),
+	}
+}
+
 func (message *Message) getUniqueKey() string {
 	uniqueKey := message.CustomData["uniqueKey"].(string)
 	if len(uniqueKey) == 0 && len(message.MessageId) > 0 {

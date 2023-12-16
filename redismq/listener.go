@@ -1,15 +1,14 @@
-package listener
+package redismq
 
 import (
 	"fmt"
-	"go-oversea-pay/redismq"
 	"strings"
 )
 
 type IMessageListener interface {
 	GetTopic() string
 	GetTag() string
-	Consume(message *redismq.Message) redismq.Action
+	Consume(message *Message) Action
 }
 
 var listeners map[string]IMessageListener
@@ -41,10 +40,10 @@ func RegisterListener(i IMessageListener) {
 		fmt.Printf("redismq 注册默认消费者失败 无效topic:%s,已忽略\n", i.GetTopic())
 		return
 	}
-	if Listeners()[redismq.GetMessageKey(i.GetTopic(), i.GetTag())] != nil {
-		fmt.Printf("redismq 多个消费者%s,消费同一个消息:%s,已忽略\n", i, redismq.GetMessageKey(i.GetTopic(), i.GetTag()))
+	if Listeners()[GetMessageKey(i.GetTopic(), i.GetTag())] != nil {
+		fmt.Printf("redismq 多个消费者%s,消费同一个消息:%s,已忽略\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
 	} else {
-		messageKey := redismq.GetMessageKey(i.GetTopic(), i.GetTag())
+		messageKey := GetMessageKey(i.GetTopic(), i.GetTag())
 		Listeners()[messageKey] = i
 		Topics = append(Topics, messageKey)
 		fmt.Printf("redismq 注册MQ消费者 IMessageListener:%s,消费消息:%s\n", i, messageKey)

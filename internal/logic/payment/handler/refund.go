@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 )
@@ -14,10 +15,10 @@ type HandleRefundReq struct {
 	Reason           string
 }
 
-func HandleRefundFailure(req *HandleRefundReq) (err error) {
+func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) {
 	return nil
 }
 
-func HandleRefundSuccess(req *HandleRefundReq) (err error) {
+func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) {
 	return nil
 }

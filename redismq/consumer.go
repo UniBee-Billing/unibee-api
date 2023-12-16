@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/redis/go-redis/v9"
-	"go-oversea-pay/redismq/checker"
-	"go-oversea-pay/redismq/listener"
 	"go-oversea-pay/utility"
 	"net"
 	"strings"
@@ -148,7 +146,7 @@ func tryCreateConsumer(queueName string, topic string) {
 }
 
 func innerLoadConsumer() {
-	for _, topic := range listener.Topics {
+	for _, topic := range Topics {
 		blockConsumerTopic(topic)
 	}
 }
@@ -187,7 +185,7 @@ func loopConsumer(topic string) {
 			count++
 		}
 		//当所有的队列都为空时休眠1s
-		if count == len(listener.Topics) {
+		if count == len(Topics) {
 			time.Sleep(1 * time.Second)
 		}
 	}
@@ -203,7 +201,7 @@ func loopTransactionChecker(topic string) {
 		}()
 		messages := fetchTransactionPrepareMessagesForChecker(topic)
 		for _, message := range messages {
-			if ck := checker.Checkers()[GetMessageKey(message.Topic, message.Tag)]; ck != nil {
+			if ck := Checkers()[GetMessageKey(message.Topic, message.Tag)]; ck != nil {
 				status := ck.Checker(message)
 				if status == CommitTransaction {
 					_, _ = commitTransactionPrepareMessage(message)
@@ -229,14 +227,14 @@ func loopTransactionChecker(topic string) {
 	}
 }
 
-func getConsumer(message *Message) listener.IMessageListener {
+func getConsumer(message *Message) IMessageListener {
 	if strings.Compare(message.Tag, "blank") == 0 {
 		return nil
 	}
-	return listener.Listeners()[GetMessageKey(message.Topic, message.Tag)]
+	return Listeners()[GetMessageKey(message.Topic, message.Tag)]
 }
 
-func runConsumeMessage(consumer listener.IMessageListener, message *Message) {
+func runConsumeMessage(consumer IMessageListener, message *Message) {
 	if message.isBoardCastingMessage() {
 		// todo mark 出现这种情况属于bug
 		fmt.Printf("RedisMQ_收到Stream消息 Exception Group通道收到广播消息，丢弃 messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
@@ -346,7 +344,7 @@ func blockReceiveConsumerMessage(topic string) *Message {
 	return nil
 }
 
-func pushTaskToResumeLater(consumer listener.IMessageListener, message *Message) bool {
+func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
 	ResumeTimesMax := 10
 	if message.ReconsumeTimes > ResumeTimesMax {
 		return putMessageToDeathQueue(message.Topic, message.MessageId, message)
@@ -453,7 +451,7 @@ func startScheduleTrimStream() {
 					return
 				}
 			}()
-			for _, topic := range listener.Topics {
+			for _, topic := range Topics {
 				queueName := GetQueueName(topic)
 				client.XTrimMaxLen(context.Background(), queueName, int64(maxLen))
 				fmt.Printf("MQ STREAM 修剪长度 maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)

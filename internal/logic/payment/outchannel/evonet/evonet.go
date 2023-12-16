@@ -72,7 +72,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 			one.PaymentFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			one.ChannelTradeNo = channelTradeNo
-			err := handler.HandlePayAuthorized(one)
+			err := handler.HandlePayAuthorized(r.Context(), one)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
@@ -130,7 +130,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 				PayStatusEnum:  consts.PAY_FAILED,
 				Reason:         reason,
 			}
-			err := handler.HandlePayFailure(req)
+			err := handler.HandlePayFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
@@ -194,7 +194,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 				ReceiptFee:     receiveFee,
 				PaidTime:       gtime.Now(),
 			}
-			err := handler.HandlePaySuccess(req)
+			err := handler.HandlePaySuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
@@ -234,7 +234,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 				RefundStatusEnum: consts.REFUND_SUCCESS,
 				RefundTime:       gtime.Now(),
 			}
-			err := handler.HandleRefundSuccess(req)
+			err := handler.HandleRefundSuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
@@ -276,7 +276,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 				RefundTime:       gtime.Now(),
 				Reason:           reason,
 			}
-			err := handler.HandleRefundFailure(req)
+			err := handler.HandleRefundFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
