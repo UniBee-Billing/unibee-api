@@ -18,3 +18,5 @@ temp.yaml
 bin
 **/config/config.yaml
 **/**/*.log
+cache
+config.yaml
