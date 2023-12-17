@@ -173,6 +173,6 @@ func commitTransactionPrepareMessage(message *Message) (bool, error) {
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("提交MQ事务半消息异常 exception:%s message:%v\n", err, message))
 	}
-	fmt.Printf("commitTransactionPrepareMessage success message:%v prepareMessageId:%s targetMessageId:%s ", message, oldMessageId, streamMessageId)
+	fmt.Printf("redismq commitTransactionPrepareMessage success message:%v prepareMessageId:%s targetMessageId:%s ", message, oldMessageId, streamMessageId)
 	return true, nil
 }

@@ -20,3 +20,11 @@ type SamplePaymentNetherlandsRes struct {
 	Reference    string      `p:"reference" dc:"商户订单号"`
 	Action       *gjson.Json `p:"action" dc:"action"`
 }
+
+type DetailPayReq struct {
+	g.Meta              `path:"/detail_pay" tags:"Mock-Controller" method:"post" summary:"1.5支付单详情"`
+	PaymentPspReference string `p:"paymentPspReference" dc:"平台支付单号" v:"required"`
+	MerchantId          int64  `p:"merchantAccount" d:"15621" dc:"商户号" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
+}
+type DetailPayRes struct {
+}
