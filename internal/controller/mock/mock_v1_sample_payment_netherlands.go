@@ -10,5 +10,6 @@ import (
 )
 
 func (c *ControllerV1) SamplePaymentNetherlands(ctx context.Context, req *v1.SamplePaymentNetherlandsReq) (res *v1.SamplePaymentNetherlandsRes, err error) {
+
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

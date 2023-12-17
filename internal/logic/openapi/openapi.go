@@ -7,9 +7,9 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-type sOpenApi struct{}
+type SOpenApi struct{}
 
-func (s sOpenApi) GetOpenApiConfig(ctx context.Context, key string) (res *entity.OpenApiConfig) {
+func (s SOpenApi) GetOpenApiConfig(ctx context.Context, key string) (res *entity.OpenApiConfig) {
 	err := dao.OpenApiConfig.Ctx(ctx).Where(entity.OpenApiConfig{ApiKey: key}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return nil
@@ -22,6 +22,6 @@ func init() {
 	_interface.RegisterOpenApi(New())
 }
 
-func New() *sOpenApi {
-	return &sOpenApi{}
+func New() *SOpenApi {
+	return &SOpenApi{}
 }
