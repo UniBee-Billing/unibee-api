@@ -2,19 +2,21 @@
 # CLI tool, only in development environment.
 # https://goframe.org/pages/viewpage.action?pageId=3673173
 gfcli:
-  build:
-    name:     "main"
-    arch:     "amd64"
-    system:   "linux,darwin"
-    mod:      "none"
-    packSrc:  "resource,manifest"
-    version:  "v1.0.0"
-    output:   "./bin"
-    extra:    ""
+#  build:
+#    name:     "main"
+#    arch:     "amd64"
+#    system:   "linux,darwin"
+#    mod:      "none"
+#    packSrc:  "resource,manifest"
+#    version:  "v1.0.0"
+#    output:   "./bin"
+#    extra:    ""
   docker:
     build: "-a amd64 -s linux -p temp -ew"
     tagPrefixes:
-      - my.image.pub/my-app
+      - registry.cn-shenzhen.aliyuncs.com/heiku
+#    tagName:
+#      - heiku_gooverseapay:daily
   gen:
     dao:
       - link:     "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/xin"
