@@ -3,7 +3,7 @@
 # https://goframe.org/pages/viewpage.action?pageId=3673173
 gfcli:
   build:
-    name:     "gf"
+    name:     "main"
     arch:     "all"
     system:   "all"
     mod:      "none"
