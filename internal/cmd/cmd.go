@@ -48,6 +48,13 @@ var (
 				router.Outs(ctx, group) //开放平台接口
 			})
 
+			s.Group("/mock", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+				)
+				router.Mocks(ctx, group) //本地测试用Mock接口
+			})
+
 			// 通道支付 Webhook 回调
 			s.BindHandler("POST:/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
 			// 通道支付 Redirect 回调
