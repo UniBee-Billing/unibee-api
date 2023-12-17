@@ -48,7 +48,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
 		return gerror.New("支付记录不存在")
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.Id), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_FAILED, dao.OverseaRefund.Columns().RefundComment: req.Reason},
 				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
@@ -64,9 +64,9 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 	if err != nil {
@@ -122,7 +122,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	//	}
 	//	return BusinessWrapper.success();
 	//}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.Id), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_SUCCESS, dao.OverseaRefund.Columns().RefundTime: req.RefundTime},
 				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
@@ -150,9 +150,9 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 	if err != nil {

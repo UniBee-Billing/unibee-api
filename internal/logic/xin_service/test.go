@@ -23,7 +23,7 @@ func InsertTest(ctx context.Context, name string) (out *entity.Test, err error) 
 	test := &entity.Test{
 		Name: name,
 	}
-	result, err := dao.Test.Ctx(ctx).Data(test).Insert(test)
+	result, err := dao.Test.Ctx(ctx).Data(test).OmitEmpty().Insert(test)
 	if err != nil {
 		err = gerror.Newf(`record insert failure %s`, err)
 		return

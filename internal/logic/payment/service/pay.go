@@ -50,17 +50,18 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.MerchantOrderNo), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.MerchantOrderNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 outchannel refund
-			insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
+			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
+			insert, err := dao.OverseaPay.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			id, err := insert.LastInsertId()
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			createPayContext.Pay.Id = id
@@ -68,7 +69,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
 			channelInternalPayResult, err = outchannel.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			channelInternalPayResult.PayChannel = createPayContext.Pay.ChannelId
@@ -86,15 +87,15 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 

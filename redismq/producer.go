@@ -16,7 +16,7 @@ func Send(message *Message) (bool, error) {
 	}
 	return sendMessage(message, "ProducerWrapper")
 }
-func SendTransaction(message *Message, transactionExecuter func(messageToSend *Message) TransactionStatus) (bool, error) {
+func SendTransaction(message *Message, transactionExecuter func(messageToSend *Message) (TransactionStatus, error)) (bool, error) {
 	if strings.Compare(message.Tag, "blank") == 0 {
 		return false, errors.New("blank空消息")
 	}
@@ -29,12 +29,12 @@ func SendTransaction(message *Message, transactionExecuter func(messageToSend *M
 	if err != nil || !send {
 		return send, err
 	}
-	status := transactionExecuter(message)
+	status, err := transactionExecuter(message)
 	if status == RollbackTransaction {
 		//事务执行失败，回滚半消息
 		_, rollBackErr := rollbackTransactionPrepareMessage(message)
 		if rollBackErr != nil {
-			fmt.Printf("rollbackTransactionPrepareMessage error:%s\n", rollBackErr)
+			fmt.Printf("rollbackTransactionPrepareMessage err:%s rollBackError:%s\n", err, rollBackErr)
 		}
 		return false, err
 	} else if status == CommitTransaction {

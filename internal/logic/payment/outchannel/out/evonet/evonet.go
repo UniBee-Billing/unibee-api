@@ -360,7 +360,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(len(createPayContext.UserId) > 0, "shopperReference is nil")
 	utility.Assert(createPayContext.Items != nil, "lineItems is nil")
-	urlPath := "/g2/v1/payment/mer/" + createPayContext.PayChannel.ChannelKey + "/evo.e-commerce.payment"
+	urlPath := "/g2/v1/payment/mer/" + createPayContext.PayChannel.ChannelAccountId + "/evo.e-commerce.payment"
 	channelType := createPayContext.PayChannel.SubChannel
 	if len(channelType) == 0 {
 		channelType = createPayContext.PayChannel.Channel
@@ -392,9 +392,9 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		},
 		"tradeInfo": map[string]string{
 			"tradeType":     "Sale of goods",
-			"totalQuantity": fmt.Sprintf("%v", createPayContext.Items),
+			"totalQuantity": fmt.Sprintf("%d", len(createPayContext.Items)),
 		},
-		"returnUrl": out.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
+		"returnURL": out.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
 		"webhook":   out.GetPaymentWebhookEntranceUrl(createPayContext.Pay),
 	}
 

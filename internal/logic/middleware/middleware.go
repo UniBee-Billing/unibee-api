@@ -88,6 +88,31 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 			IsAdmin:     false,
 		}
 	}
+	// 将自定义的上下文对象传递到模板变量中使用
+	r.Assigns(g.Map{
+		consts.ContextKey: customCtx,
+	})
+	// 执行下一步请求逻辑
+	r.Middleware.Next()
+}
+
+// PreOpenApiAuth 从 Session 中获取用户
+func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
+	// 初始化，务必最开始执行
+	customCtx := &model.Context{
+		Session: r.Session,
+		Data:    make(g.Map),
+	}
+	_interface.BizCtx().Init(r, customCtx)
+	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
+		customCtx.User = &model.ContextUser{
+			Id:          userEntity.Id,
+			MobilePhone: userEntity.MobilePhone,
+			UserName:    userEntity.UserName,
+			AvatarUrl:   userEntity.AvatarUrl,
+			IsAdmin:     false,
+		}
+	}
 	if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
 		//openapikey 转化未api 用户
 		customCtx.Data[consts.ApiKey] = key

@@ -34,7 +34,7 @@ var (
 )
 
 func SaveEvent(ctx context.Context, overseaPayEvent entity.OverseaPayEvent) {
-	_, err := dao.OverseaPayEvent.Ctx(ctx).Data(overseaPayEvent).Insert(overseaPayEvent)
+	_, err := dao.OverseaPayEvent.Ctx(ctx).Data(overseaPayEvent).OmitEmpty().Insert(overseaPayEvent)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)
 	}

@@ -21,7 +21,7 @@ func (c *ControllerV1) SamplePaymentNetherlands(ctx context.Context, req *v1.Sam
 		MerchantId: req.MerchantId,
 		Reference:  uuid.New().String(),
 		Amount: &vo.PayAmountVo{
-			Currency: "JPY",
+			Currency: req.Currency,
 			Value:    req.Amount,
 		},
 		PaymentMethod: &v12.PaymentMethodsReq{

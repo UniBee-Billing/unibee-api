@@ -83,7 +83,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 		return nil
 	}
 
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, pay.Id), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.OverseaPay.Columns().ChannelTradeNo: pay.ChannelTradeNo},
 				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID, dao.OverseaPay.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
@@ -99,9 +99,9 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
@@ -142,7 +142,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	if pay.AuthorizeStatus != consts.WAITING_AUTHORIZED {
 		refundFee = pay.PaymentFee
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PayStatus: consts.PAY_FAILED, dao.OverseaPay.Columns().RefundFee: refundFee},
 				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
@@ -158,9 +158,9 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 	if err != nil {
@@ -202,7 +202,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		return nil
 	}
 
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, pay.Id), func(messageToSend *redismq.Message) redismq.TransactionStatus {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{
 				dao.OverseaPay.Columns().PayStatus:      consts.PAY_SUCCESS,
@@ -224,9 +224,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			return nil
 		})
 		if err == nil {
-			return redismq.CommitTransaction
+			return redismq.CommitTransaction, nil
 		} else {
-			return redismq.RollbackTransaction
+			return redismq.RollbackTransaction, err
 		}
 	})
 	if err != nil {

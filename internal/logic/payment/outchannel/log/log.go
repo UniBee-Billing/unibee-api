@@ -18,7 +18,7 @@ func DoSaveChannelLog(ctx context.Context, request string, url string, response 
 		Mamo:      memo,
 		ChannelId: channelId,
 	}
-	_, err := dao.ChannelHttpLog.Ctx(ctx).Data(log).Insert(log)
+	_, err := dao.ChannelHttpLog.Ctx(ctx).Data(log).OmitEmpty().Insert(log)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)
 	}
