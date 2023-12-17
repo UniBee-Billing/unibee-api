@@ -12,9 +12,6 @@ import (
 	"go-oversea-pay/utility"
 	"strings"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-
 	"go-oversea-pay/api/out/v1"
 )
 
@@ -26,7 +23,7 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	//类似日元的小数尾数必须为 0 检查
 	currencyNumberCheck(req.Amount)
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
-	utility.Assert(len(req.MerchantAccount) > 0, "merchantAccount is nil")
+	utility.Assert(req.MerchantId > 0, "merchantId is nil")
 	utility.Assert(req.PaymentMethod != nil, "paymentmethod is nil")
 	utility.Assert(len(req.PaymentMethod.Type) > 0, "paymentmethod type is nil")
 	utility.Assert(len(req.Reference) > 0, "reference is nil")
@@ -36,7 +33,7 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	utility.Assert(len(req.Channel) > 0, "outchannel is nil")
 	utility.Assert(strings.Contains("WEB，WAP，APP, MINI, INWALLET", req.Channel), "outchannel is invalid, should be WEB，WAP，APP, MINI, INWALLET")
 
-	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantAccount)
+	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
 	payChannel := util.GetOverseaPayChannelByType(ctx, req.PaymentMethod.Type)
 	utility.Assert(payChannel != nil, "找不到支付方式 type:"+req.PaymentMethod.Type)
 	//支付方式绑定校验 todo mark
@@ -85,5 +82,5 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 		Reference:    req.Reference,
 		Action:       resp.Action,
 	}
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	return
 }

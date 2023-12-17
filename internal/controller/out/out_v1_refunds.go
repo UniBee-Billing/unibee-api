@@ -10,7 +10,7 @@ import (
 func (c *ControllerV1) Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1.RefundsRes, err error) {
 	currencyNumberCheck(req.Amount)
 	//参数有效性校验 todo mark
-	merchantCheck(ctx, req.MerchantAccount)
+	merchantCheck(ctx, req.MerchantId)
 
 	// openApiId todo mark
 	resp, err := service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_ORDER, req, 0)

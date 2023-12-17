@@ -12,7 +12,7 @@ import (
 
 func (c *ControllerV1) Captures(ctx context.Context, req *v1.CapturesReq) (res *v1.CapturesRes, err error) {
 	//参数有效性校验 todo mark
-	merchantCheck(ctx, req.MerchantAccount)
+	merchantCheck(ctx, req.MerchantId)
 
 	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")

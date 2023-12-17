@@ -11,7 +11,7 @@ import (
 
 func (c *ControllerV1) Cancels(ctx context.Context, req *v1.CancelsReq) (res *v1.CancelsRes, err error) {
 	//参数有效性校验 todo mark
-	merchantCheck(ctx, req.MerchantAccount)
+	merchantCheck(ctx, req.MerchantId)
 
 	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")

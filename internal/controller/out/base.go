@@ -7,7 +7,6 @@ import (
 	"go-oversea-pay/internal/interface"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
-	"strconv"
 	"strings"
 )
 
@@ -18,10 +17,10 @@ func currencyNumberCheck(amount *vo.PayAmountVo) {
 	}
 }
 
-func merchantCheck(ctx context.Context, merchantAccount string) (apiconfig *entity.OpenApiConfig, res *entity.MerchantInfo) {
+func merchantCheck(ctx context.Context, merchantAccount int64) (apiconfig *entity.OpenApiConfig, res *entity.MerchantInfo) {
 	openApiConfig := _interface.BizCtx().Get(ctx).OpenApiConfig
 	utility.Assert(openApiConfig != nil, "api config not found")
-	utility.Assert(strings.Compare(strconv.FormatInt(openApiConfig.MerchantId, 10), merchantAccount) == 0, "api config not found")
+	utility.Assert(openApiConfig.MerchantId == merchantAccount, "api config not found")
 	err := dao.MerchantInfo.Ctx(ctx).Where(entity.MerchantInfo{Id: openApiConfig.MerchantId}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return openApiConfig, res
