@@ -8,7 +8,7 @@ gfcli:
     system:   "linux,darwin"
     mod:      "none"
     packSrc:  "resource,manifest"
-    version:  "v1.0.0"
+#    version:  "v1.0.0"
     output:   "./bin"
     extra:    ""
   docker:
