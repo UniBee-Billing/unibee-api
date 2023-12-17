@@ -28,3 +28,6 @@ nacos.data.id
 http://daily-local.wangqubi.cn/nacos/
 
 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
+
+打包：go build -o main main.go
+临时环境运行：./main --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
