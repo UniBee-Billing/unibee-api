@@ -42,7 +42,7 @@ spec:
             - name: nacos.port
               value: "8848"
             - name: nacos.namespace
-              value: "hklocal"
+              value: "hkdaily"
             - name: nacos.group
               value: "config"
             - name: nacos.data.id
