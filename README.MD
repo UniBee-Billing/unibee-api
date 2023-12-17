@@ -26,3 +26,5 @@ nacos.group
 nacos.data.id
 日常 nacos配置环境
 http://daily-local.wangqubi.cn/nacos/
+
+设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
