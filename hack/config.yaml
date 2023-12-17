@@ -15,8 +15,6 @@ gfcli:
     build: "-a amd64 -s linux -p temp -ew"
     tagPrefixes:
       - registry.cn-shenzhen.aliyuncs.com/heiku
-#    tagName:
-#      - heiku_gooverseapay:daily
   gen:
     dao:
       - link:     "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/xin"
