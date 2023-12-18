@@ -34,12 +34,12 @@ http://daily-local.wangqubi.cn/nacos/
 [//]: # (打包上传：gf docker -tn heiku_gooverseapay:daily -p)
 打包上传：sh buildAndPush.sh
 
-数据库账号
-地址：frps.hknet-inc.com
-端口：7111
-账号：gooverseapay
-密码：1lc3BhY2UiOiJrdWJlcm5
-create user 'gooverseapay'@'%' identified with mysql_native_password by '1lc3BhY2UiOiJrdWJlcm5';
-GRANT ALL ON gooversea_pay.* TO 'gooverseapay'@'%';
-GRANT ALL ON xin.* TO 'gooverseapay'@'%';
-FLUSH PRIVILEGES;
+#### 数据库账号
+#### 地址：frps.hknet-inc.com
+#### 端口：7111
+#### 账号：gooverseapay
+#### 密码：1lc3BhY2UiOiJrdWJlcm5
+#### create user 'gooverseapay'@'%' identified with mysql_native_password by '1lc3BhY2UiOiJrdWJlcm5';
+#### GRANT ALL ON gooversea_pay.* TO 'gooverseapay'@'%';
+#### GRANT ALL ON xin.* TO 'gooverseapay'@'%';
+#### FLUSH PRIVILEGES;
