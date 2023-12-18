@@ -230,6 +230,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 			transAmount != nil &&
 			len(transAmount.Get("value").String()) > 0 &&
 			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
+			one.RefundFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				MerchantRefundNo: merchantRefundNo,
