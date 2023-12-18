@@ -1,5 +1,9 @@
 # GoFrame Template For oversea-pay
 
+#### 日常开发环境地址：https://daily.hknet-inc.com/gooverseapay/swagger
+##### Mock-Controller 模拟 OpenApi 测试使用
+##### Open-Controller OpenApi 接口-需 token 调用
+
 #### 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
 
 #### 本地环境运行，添加Program Arguments: --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
