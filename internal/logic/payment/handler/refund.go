@@ -17,7 +17,7 @@ import (
 )
 
 type HandleRefundReq struct {
-	ChargeRefundNo   string
+	MerchantRefundNo string
 	ChannelRefundNo  string
 	RefundFee        int64
 	RefundStatusEnum consts.RefundStatusEnum
@@ -27,12 +27,12 @@ type HandleRefundReq struct {
 
 func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundFailure, req=%s", req)
-	if len(req.ChargeRefundNo) == 0 {
+	if len(req.MerchantRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.ChargeRefundNo)
+	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.ChargeRefundNo)
+		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
 	}
 	if one.RefundStatus == consts.REFUND_FAILED {
@@ -88,15 +88,15 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 
 func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundSuccess, req=%s", req)
-	if len(req.ChargeRefundNo) == 0 {
+	if len(req.MerchantRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	if len(req.ChargeRefundNo) == 0 && req.RefundFee > 0 {
+	if len(req.MerchantRefundNo) == 0 && req.RefundFee > 0 {
 		return gerror.New("invalid param RefundFee, should > 0")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.ChargeRefundNo)
+	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.ChargeRefundNo)
+		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
 	}
 	if one.RefundStatus == consts.REFUND_SUCCESS {
@@ -185,12 +185,12 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 
 func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundReversed, req=%s", req)
-	if len(req.ChargeRefundNo) == 0 {
+	if len(req.MerchantRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.ChargeRefundNo)
+	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.ChargeRefundNo)
+		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
 	}
 	if one.RefundStatus == consts.REFUND_FAILED {

@@ -222,9 +222,9 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 		//退款成功
 		data := refund
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
-		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetOverseaRefundByMerchantRefundNo(r.Context(), merchantTradeNo)
+		merchantRefundNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
+		channelRefundNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		one := query.GetOverseaRefundByMerchantRefundNo(r.Context(), merchantRefundNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil &&
 			transAmount != nil &&
@@ -232,13 +232,13 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
-				ChargeRefundNo:   merchantTradeNo,
-				ChannelRefundNo:  channelTradeNo,
+				MerchantRefundNo: merchantRefundNo,
+				ChannelRefundNo:  channelRefundNo,
 				RefundStatusEnum: consts.REFUND_SUCCESS,
 				RefundTime:       gtime.Now(),
 			}
 			err := handler.HandleRefundSuccess(r.Context(), req)
-			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
+			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
@@ -262,9 +262,9 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 		//退款失败
 		data := refund
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
-		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetOverseaRefundByMerchantRefundNo(r.Context(), merchantTradeNo)
+		merchantRefundNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
+		channelRefundNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		one := query.GetOverseaRefundByMerchantRefundNo(r.Context(), merchantRefundNo)
 		transAmount := data.GetJson("transAmount")
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
 		if one != nil &&
@@ -273,14 +273,14 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
-				ChargeRefundNo:   merchantTradeNo,
-				ChannelRefundNo:  channelTradeNo,
+				MerchantRefundNo: merchantRefundNo,
+				ChannelRefundNo:  channelRefundNo,
 				RefundStatusEnum: consts.REFUND_FAILED,
 				RefundTime:       gtime.Now(),
 				Reason:           reason,
 			}
 			err := handler.HandleRefundFailure(r.Context(), req)
-			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
+			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
