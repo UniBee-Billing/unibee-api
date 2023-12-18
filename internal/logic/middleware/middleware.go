@@ -82,7 +82,7 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id:          userEntity.Id,
-			MobilePhone: userEntity.MobilePhone,
+			MobilePhone: userEntity.Mobile,
 			UserName:    userEntity.UserName,
 			AvatarUrl:   userEntity.AvatarUrl,
 			IsAdmin:     false,
@@ -107,7 +107,7 @@ func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id:          userEntity.Id,
-			MobilePhone: userEntity.MobilePhone,
+			MobilePhone: userEntity.Mobile,
 			UserName:    userEntity.UserName,
 			AvatarUrl:   userEntity.AvatarUrl,
 			IsAdmin:     false,

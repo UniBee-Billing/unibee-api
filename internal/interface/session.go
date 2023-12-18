@@ -7,7 +7,7 @@ package _interface
 import (
 	"context"
 	"go-oversea-pay/internal/model"
-	entity "go-oversea-pay/internal/model/entity/auth"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
 type ISession interface {
