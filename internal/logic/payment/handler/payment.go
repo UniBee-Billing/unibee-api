@@ -189,16 +189,19 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if req.PaidTime == nil {
 		return errors.New("invalid param PaidTime is nil")
 	}
+	if len(req.MerchantOrderNo) == 0 {
+		return errors.New("invalid param MerchantOrderNo is nil")
+	}
 	pay := query.GetOverseaPayByMerchantOrderNo(ctx, req.MerchantOrderNo)
 
 	if pay == nil {
-		g.Log().Infof(ctx, "pay null, merchantOrderNo=%s", req.MerchantOrderNo)
+		g.Log().Infof(ctx, "pay not found, merchantOrderNo=%s", req.MerchantOrderNo)
 		return errors.New("支付不存在")
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
 	if pay.PayStatus == consts.PAY_SUCCESS {
-		g.Log().Infof(ctx, "payment already success")
+		g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.MerchantOrderNo)
 		return nil
 	}
 
