@@ -20,12 +20,12 @@ func DoChannelCancel(ctx context.Context, overseaPay *entity.OverseaPay) (err er
 		//result, err := transaction.Update("oversea_pay", g.Map{"pay_status": consts.PAY_FAILED},
 		//	g.Map{"id": overseaPay.Id, "pay_status": consts.TO_BE_PAID})
 		//if err != nil || result == nil {
-		//	_ = transaction.Rollback()
+		//	//_ = transaction.Rollback()
 		//	return err
 		//}
 		//affected, err := result.RowsAffected()
 		//if err != nil || affected != 1 {
-		//	_ = transaction.Rollback()
+		//	//_ = transaction.Rollback()
 		//	return err
 		//}
 
