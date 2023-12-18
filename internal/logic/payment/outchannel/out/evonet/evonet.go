@@ -579,7 +579,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPa
 	urlPath := "/g2/v1/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + pay.MerchantOrderNo
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":   utility.CreateMerchantOrderNo(),
+			"merchantTransID":   refund.OutRefundNo,
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"transAmount": map[string]interface{}{
