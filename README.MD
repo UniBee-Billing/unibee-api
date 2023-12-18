@@ -1,13 +1,13 @@
 # GoFrame Template For oversea-pay
 
-设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
+#### 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
 
 #### 本地环境运行，添加Program Arguments: --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
 
 [//]: # (打包上传：gf docker -tn heiku_gooverseapay:daily -p)
-生成 api 代码：sh generate_ctrl.sh
-生成 dao 代码：sh generale_dao.sh
-打包上传：sh buildAndPush.sh
+#### 生成 api 代码：sh generate_ctrl.sh
+#### 生成 dao 代码：sh generale_dao.sh
+#### 打包上传：sh buildAndPush.sh
 
 #### 数据库账号
 #### 地址：frps.hknet-inc.com
