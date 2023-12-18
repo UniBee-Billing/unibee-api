@@ -88,12 +88,12 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.OverseaPay.Columns().ChannelTradeNo: pay.ChannelTradeNo},
 				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID, dao.OverseaPay.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -147,12 +147,12 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PayStatus: consts.PAY_FAILED, dao.OverseaPay.Columns().RefundFee: refundFee},
 				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -216,12 +216,12 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.OverseaPay.Columns().RefundFee:      pay.PaymentFee - req.ReceiptFee},
 				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil

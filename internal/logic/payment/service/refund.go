@@ -82,12 +82,12 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
 			insert, err := dao.OverseaRefund.Ctx(ctx).Data(overseaRefund).OmitEmpty().Insert(overseaRefund)
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			id, err := insert.LastInsertId()
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			overseaRefund.Id = id
@@ -95,7 +95,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
 			channelResult, err := outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
 			if err != nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 
@@ -103,12 +103,12 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().ChannelRefundNo: channelResult.ChannelRefundNo},
 				g.Map{dao.OverseaRefund.Columns().Id: overseaRefund.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil

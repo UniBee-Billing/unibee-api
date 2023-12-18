@@ -23,19 +23,19 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.OverseaPay.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
 			g.Map{dao.OverseaPay.Columns().Id: overseaPay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 		if err != nil || result == nil {
-			_ = transaction.Rollback()
+			//_ = transaction.Rollback()
 			return err
 		}
 		affected, err := result.RowsAffected()
 		if err != nil || affected != 1 {
-			_ = transaction.Rollback()
+			//_ = transaction.Rollback()
 			return err
 		}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
 		_, err = outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCapture(ctx, overseaPay)
 		if err != nil {
-			_ = transaction.Rollback()
+			//_ = transaction.Rollback()
 			return err
 		}
 		return nil

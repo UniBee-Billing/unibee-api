@@ -82,7 +82,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
 				g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()

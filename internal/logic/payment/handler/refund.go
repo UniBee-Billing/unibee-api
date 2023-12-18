@@ -53,12 +53,12 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_FAILED, dao.OverseaRefund.Columns().RefundComment: req.Reason},
 				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -127,24 +127,24 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_SUCCESS, dao.OverseaRefund.Columns().RefundTime: req.RefundTime},
 				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			//支付单补充退款金额
 			update, err := transaction.Update(dao.OverseaPay.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", req.RefundFee, pay.Id, req.RefundFee, req.RefundFee)
 			if err != nil || update == nil {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			payAffected, err := update.RowsAffected()
 			g.Log().Printf(ctx, "HandleRefundSuccess Blank incrTotalRefundFee, updateCount=%s", payAffected)
 			if err != nil || payAffected != 1 {
-				_ = transaction.Rollback()
+				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
