@@ -136,7 +136,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.OverseaPay.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", req.RefundFee, pay.Id, req.RefundFee, req.RefundFee)
+			update, err := transaction.Update(dao.OverseaPay.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundFee, pay.Id, one.RefundFee, one.RefundFee)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
