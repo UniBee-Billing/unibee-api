@@ -8,6 +8,8 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/out/evonet"
+	"go-oversea-pay/internal/logic/payment/outchannel/out/paypal"
+	"go-oversea-pay/internal/logic/payment/outchannel/out/stripe"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
@@ -23,6 +25,8 @@ var (
 	Grab     = PayChannelKeyEnum{0, "Grab支付"}
 	Klarna   = PayChannelKeyEnum{1, "Klarna支付"}
 	Evonet   = PayChannelKeyEnum{2, "Evonet支付"}
+	Paypal   = PayChannelKeyEnum{3, "Paypal支付"}
+	Stripe   = PayChannelKeyEnum{4, "Stripe支付"}
 	Blank    = PayChannelKeyEnum{50, "0金额支付专用"}
 	AutoTest = PayChannelKeyEnum{500, "自动化测试支付专用"}
 )
@@ -35,6 +39,10 @@ func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInte
 	utility.Assert(p.channel != nil, "channel is not set")
 	if p.channel.EnumKey == Evonet.Code {
 		return &evonet.Evonet{}
+	} else if p.channel.EnumKey == Paypal.Code {
+		return &paypal.Paypal{}
+	} else if p.channel.EnumKey == Stripe.Code {
+		return &stripe.Stripe{}
 	} else if p.channel.EnumKey == Blank.Code {
 		return &out.Blank{}
 	} else if p.channel.EnumKey == AutoTest.Code {
