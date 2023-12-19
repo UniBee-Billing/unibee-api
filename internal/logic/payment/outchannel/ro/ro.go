@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/out/v1"
 	"go-oversea-pay/api/out/vo"
+	"go-oversea-pay/internal/consts"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -96,7 +97,8 @@ type CreateProductInternalResp struct {
 }
 
 type CreatePlanInternalResp struct {
-	ChannelPlanId     string      `json:"channelPlanId"`
-	ChannelPlanStatus string      `json:"channelPlanStatus"`
-	Data              *gjson.Json `json:"data"`
+	ChannelPlanId     string                            `json:"channelPlanId"`
+	ChannelPlanStatus string                            `json:"channelPlanStatus"`
+	Data              *gjson.Json                       `json:"data"`
+	Status            consts.SubscriptionPlanStatusEnum `json:"status"`
 }

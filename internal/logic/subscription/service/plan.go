@@ -101,7 +101,7 @@ func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelI
 			ChannelPlanId:     res.ChannelPlanId,
 			ChannelPlanStatus: res.ChannelPlanStatus,
 			Data:              res.Data.String(),
-			Status:            consts.PlanStatusCreate,
+			Status:            int(res.Status),
 		})
 		if err != nil {
 			return err
@@ -113,10 +113,8 @@ func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelI
 		planChannel.ChannelPlanId = res.ChannelPlanId
 		planChannel.ChannelPlanStatus = res.ChannelPlanStatus
 		planChannel.Data = res.Data.String()
-		planChannel.Status = consts.PlanStatusCreate
+		planChannel.Status = int(res.Status)
 	}
-
-	//激活流程 todo mark
 
 	return nil
 }
