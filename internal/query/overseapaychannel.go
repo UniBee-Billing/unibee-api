@@ -28,3 +28,13 @@ func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *enti
 	}
 	return
 }
+
+func GetListSubscriptionTypePayChannels(ctx context.Context) (list *[]entity.OverseaPayChannel) {
+	m := dao.OverseaPayChannel.Ctx(ctx)
+	err := m.Where(entity.OverseaPayChannel{ChannelType: consts.PayChannelTypeSubscription}).
+		OmitEmpty().Scan(&list)
+	if err != nil {
+		list = nil
+	}
+	return
+}
