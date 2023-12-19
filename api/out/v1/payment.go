@@ -74,7 +74,7 @@ type OutLineItem struct {
 type PaymentMethodsReq struct {
 	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"1.0 根据配置⽀付⽅式的信息，通过请求字段筛选可以返回的⽀付⽅式(Klarna、Evonet支持）"`
 	TokenId string                   `p:"tokenId" dc:"令牌id，如果有绑定过" v:""`
-	Type    string                   `p:"type" dc:"支付方式类型" v:"required"`
+	Channel string                   `p:"type" dc:"支付方式类型" v:"required"`
 	Issuer  []*OutPaymentMethodIssur `p:"issuer" dc:"银行信息" v:""`
 }
 type PaymentMethodsRes struct {

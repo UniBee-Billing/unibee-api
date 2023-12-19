@@ -710,11 +710,11 @@ func sendEvonetRequest(ctx context.Context, method string, urlPath string, key s
 	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, key, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
-		"Content-Type":  "application/json",
-		"Msgid":         msgId,
-		"Datetime":      datetime,
-		"Authorization": sign("POST", urlPath, msgId, datetime, key, body),
-		"Signtype":      "SHA256",
+		"Content-Channel": "application/json",
+		"Msgid":           msgId,
+		"Datetime":        datetime,
+		"Authorization":   sign("POST", urlPath, msgId, datetime, key, body),
+		"Signtype":        "SHA256",
 	}
 	response, err := sendRequest(ENDPOINT+urlPath, method, body, headers)
 	g.Log().Infof(ctx, "\nEvonet_End %s %s response: %s error %s\n", method, urlPath, response, err)

@@ -26,7 +26,7 @@ func (c *ControllerV1) SamplePaymentNetherlands(ctx context.Context, req *v1.Sam
 		},
 		PaymentMethod: &v12.PaymentMethodsReq{
 			TokenId: "",
-			Type:    req.PaymentMethod,
+			Channel: req.Channel,
 		},
 		PaymentBrandAddition: nil,
 		StorePaymentMethod:   false,

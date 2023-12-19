@@ -25,7 +25,7 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.MerchantId > 0, "merchantId is nil")
 	utility.Assert(req.PaymentMethod != nil, "paymentmethod is nil")
-	utility.Assert(len(req.PaymentMethod.Type) > 0, "paymentmethod type is nil")
+	utility.Assert(len(req.PaymentMethod.Channel) > 0, "paymentmethod type is nil")
 	utility.Assert(len(req.Reference) > 0, "reference is nil")
 	utility.Assert(len(req.ShopperReference) > 0, "shopperReference type is nil")
 	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
@@ -34,8 +34,8 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	utility.Assert(strings.Contains("WEB，WAP，APP, MINI, INWALLET", req.Channel), "outchannel is invalid, should be WEB，WAP，APP, MINI, INWALLET")
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
-	payChannel := util.GetOverseaPayChannelByType(ctx, req.PaymentMethod.Type)
-	utility.Assert(payChannel != nil, "找不到支付方式 type:"+req.PaymentMethod.Type)
+	payChannel := util.GetOverseaPayChannelByChannel(ctx, req.PaymentMethod.Channel)
+	utility.Assert(payChannel != nil, "找不到支付方式 type:"+req.PaymentMethod.Channel)
 	//支付方式绑定校验 todo mark
 
 	createPayContext := &ro.CreatePayContext{

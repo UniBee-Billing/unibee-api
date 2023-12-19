@@ -17,11 +17,8 @@ func GetOverseaPayChannel(ctx context.Context, id uint64) (channel *entity.Overs
 	return one
 }
 
-func GetOverseaPayChannelByType(ctx context.Context, channelType string) (channel *entity.OverseaPayChannel) {
-	var (
-		one *entity.OverseaPayChannel
-	)
-	err := dao.OverseaPayChannel.Ctx(ctx).Where(entity.OverseaPayChannel{Channel: channelType}).OmitEmpty().Scan(&one)
+func GetOverseaPayChannelByChannel(ctx context.Context, channel string) (one *entity.OverseaPayChannel) {
+	err := dao.OverseaPayChannel.Ctx(ctx).Where(entity.OverseaPayChannel{Channel: channel}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
