@@ -13,6 +13,16 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request) {
 	//TODO implement me
 	panic("implement me")

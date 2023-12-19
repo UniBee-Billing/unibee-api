@@ -10,6 +10,16 @@ import (
 type Blank struct {
 }
 
+func (b Blank) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (b Blank) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) DoRemoteChannelWebhook(r *ghttp.Request) {
 	//TODO implement me
 	panic("implement me")

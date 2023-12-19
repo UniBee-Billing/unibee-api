@@ -23,5 +23,5 @@ type SubscriptionPlanChannel struct {
 	ChannelProductStatus interface{} // channel_product_status
 	Data                 interface{} // 渠道额外参数，JSON格式
 	IsDeleted            interface{} //
-	Status               interface{} // 渠道绑定状态，0-Create｜1-Active｜2-Inactive
+	Status               interface{} // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 }

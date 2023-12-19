@@ -22,6 +22,7 @@ type OverseaPayChannelDao struct {
 type OverseaPayChannelColumns struct {
 	Id               string // 主键id
 	EnumKey          string // 支付渠道枚举（内部定义）
+	ChannelType      string // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
 	Channel          string // 支付方式枚举（渠道定义）
 	Name             string // 支付方式名称
 	SubChannel       string // 渠道子支付方式枚举
@@ -40,6 +41,7 @@ type OverseaPayChannelColumns struct {
 var overseaPayChannelColumns = OverseaPayChannelColumns{
 	Id:               "id",
 	EnumKey:          "enum_key",
+	ChannelType:      "channel_type",
 	Channel:          "channel",
 	Name:             "name",
 	SubChannel:       "sub_channel",

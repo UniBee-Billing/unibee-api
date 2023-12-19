@@ -31,7 +31,7 @@ type SubscriptionPlanChannelColumns struct {
 	ChannelProductStatus string // channel_product_status
 	Data                 string // 渠道额外参数，JSON格式
 	IsDeleted            string //
-	Status               string // 渠道绑定状态，0-Create｜1-Active｜2-Inactive
+	Status               string // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 }
 
 // subscriptionPlanChannelColumns holds the columns for table subscription_plan_channel.

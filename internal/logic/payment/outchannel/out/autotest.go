@@ -10,6 +10,16 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a AutoTest) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) DoRemoteChannelWebhook(r *ghttp.Request) {
 	//TODO implement me
 	panic("implement me")

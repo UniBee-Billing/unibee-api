@@ -33,6 +33,16 @@ const ENDPOINT = "https://hkg-online-uat.everonet.com"
 
 type Evonet struct{}
 
+func (e Evonet) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (e Evonet) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request) {
 	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 webhooks 结果通知:%s", r.GetBody())
 	notificationJson, err := r.GetJson()
@@ -340,7 +350,7 @@ func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request) {
 	utility.Assert(err == nil, "参数错误，payId 需 int 类型 %s")
 	overseaPay := query.GetOverseaPayById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
-	channelEntity := query.GetOverseaPayChannelById(r.Context(), overseaPay.ChannelId)
+	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.ChannelId)
 	utility.Assert(channelEntity != nil, fmt.Sprintf("支付渠道异常 payId: %s", payIdStr))
 	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.NotifyUrl)
 	if len(overseaPay.NotifyUrl) > 0 {

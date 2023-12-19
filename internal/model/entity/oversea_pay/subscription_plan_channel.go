@@ -21,5 +21,5 @@ type SubscriptionPlanChannel struct {
 	ChannelProductStatus string      `json:"channelProductStatus" ` // channel_product_status
 	Data                 string      `json:"data"                 ` // 渠道额外参数，JSON格式
 	IsDeleted            int         `json:"isDeleted"            ` //
-	Status               int         `json:"status"               ` // 渠道绑定状态，0-Create｜1-Active｜2-Inactive
+	Status               int         `json:"status"               ` // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 }

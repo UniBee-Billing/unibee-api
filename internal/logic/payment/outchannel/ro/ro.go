@@ -89,3 +89,14 @@ type OutPayRo struct {
 	PayFee          int64       `json:"PayFee"              ` // 业务id-即商户订单号
 	PayTime         *gtime.Time `json:"PayTime" `             // 创建时间
 }
+
+type CreateProductInternalResp struct {
+	ChannelProductId     string `json:"channelProductId"`
+	ChannelProductStatus string `json:"channelProductStatus"`
+}
+
+type CreatePlanInternalResp struct {
+	ChannelPlanId     string      `json:"channelPlanId"`
+	ChannelPlanStatus string      `json:"channelPlanStatus"`
+	Data              *gjson.Json `json:"data"`
+}

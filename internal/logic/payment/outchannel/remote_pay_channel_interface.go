@@ -8,6 +8,10 @@ import (
 )
 
 type RemotePayChannelInterface interface {
+	//Subscription 订阅接口
+	DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error)
+	DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error)
+	//Payment 是支付接口
 	DoRemoteChannelWebhook(r *ghttp.Request)
 	DoRemoteChannelRedirect(r *ghttp.Request)
 	DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error)

@@ -10,6 +10,16 @@ import (
 type Stripe struct {
 }
 
+func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s Stripe) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request) {
 	//TODO implement me
 	panic("implement me")
