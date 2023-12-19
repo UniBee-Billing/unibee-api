@@ -57,9 +57,9 @@ var (
 			})
 
 			// 通道支付 Webhook 回调
-			s.BindHandler("POST:/gooverseapay/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
+			s.BindHandler("POST:/gooverseapay/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
 			// 通道支付 Redirect 回调
-			s.BindHandler("GET:/gooverseapay/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
+			s.BindHandler("GET:/gooverseapay/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
 
 			{
 				_, err := g.Redis().Set(ctx, "g_check", "checked")

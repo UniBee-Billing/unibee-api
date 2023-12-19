@@ -7,6 +7,9 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
+// 接口文档：https://developer.paypal.com/docs/api/payments/v1/#payment_create
+// clientId ATaWQ8G9oJNFyle9YCt59
+// Secret EHUy5GALkYr1Qp0n6MepJY8LnUwYCBIWElG4Iv_DO3mdYcbB2l6zwJxk99OrPhbdNRLk7GkHEqb5RHEA
 type Paypal struct {
 }
 
