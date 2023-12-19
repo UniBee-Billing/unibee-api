@@ -24,7 +24,7 @@ func (i Invalid) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *en
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelSubscriptionLists(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ListSubscriptionInternalResp, err error) {
+func (i Invalid) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -39,7 +39,7 @@ func (i Invalid) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Sub
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelPlanInActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
+func (i Invalid) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -49,7 +49,7 @@ func (i Invalid) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+func (i Invalid) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

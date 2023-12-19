@@ -42,6 +42,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/plutov/paypal/v4 v4.7.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/stripe/stripe-go/v72 v72.122.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect

@@ -99,23 +99,22 @@ type CreateProductInternalResp struct {
 type CreatePlanInternalResp struct {
 	ChannelPlanId     string                            `json:"channelPlanId"`
 	ChannelPlanStatus string                            `json:"channelPlanStatus"`
-	Data              *gjson.Json                       `json:"data"`
+	Data              string                            `json:"data"`
 	Status            consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
 type CreateSubscriptionInternalResp struct {
+	ChannelUserId             string                            `json:"channelUserId"`
 	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
-	Data                      *gjson.Json                       `json:"data"`
+	Data                      string                            `json:"data"`
 	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
 type CancelSubscriptionInternalResp struct {
-	Status consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
 type UpdateSubscriptionInternalResp struct {
-	Status consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
 type ListSubscriptionInternalResp struct {

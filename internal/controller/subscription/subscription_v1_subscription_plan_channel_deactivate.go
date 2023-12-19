@@ -9,6 +9,6 @@ import (
 	"go-oversea-pay/api/subscription/v1"
 )
 
-func (c *ControllerV1) SubscriptionPlanChannelActive(ctx context.Context, req *v1.SubscriptionPlanChannelActiveReq) (res *v1.SubscriptionPlanChannelActiveRes, err error) {
+func (c *ControllerV1) SubscriptionPlanChannelDeactivate(ctx context.Context, req *v1.SubscriptionPlanChannelDeactivateReq) (res *v1.SubscriptionPlanChannelDeactivateRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

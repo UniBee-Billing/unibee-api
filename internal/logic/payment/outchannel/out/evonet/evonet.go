@@ -29,7 +29,8 @@ import (
 	"time"
 )
 
-const ENDPOINT = "https://hkg-online-uat.everonet.com"
+//const DEV_ENDPOINT = "https://hkg-online-uat.everonet.com"
+//const PROD_ENDPOINT = "https://hkg-online.everonet.com"
 
 type Evonet struct{}
 
@@ -48,7 +49,7 @@ func (e Evonet) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *ent
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionLists(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ListSubscriptionInternalResp, err error) {
+func (e Evonet) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -63,7 +64,7 @@ func (e Evonet) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Subs
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPlanInActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
+func (e Evonet) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -73,7 +74,7 @@ func (e Evonet) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+func (e Evonet) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -478,7 +479,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		param["captureAfterHours"] = createPayContext.Pay.CaptureDelayHours
 	}
 
-	data, err := sendEvonetRequest(ctx, "POST", urlPath, createPayContext.PayChannel.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, createPayContext.PayChannel, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -517,7 +518,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaP
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
-	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -552,7 +553,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPa
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
-	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -583,7 +584,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.O
 	param := map[string]interface{}{
 		"merchantTransID": pay.MerchantOrderNo,
 	}
-	data, err := sendEvonetRequest(ctx, "GET", urlPath, channelEntity.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -634,7 +635,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPa
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay),
 	}
-	data, err := sendEvonetRequest(ctx, "POST", urlPath, channelEntity.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -664,7 +665,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	param := map[string]interface{}{
 		"merchantTransID": refund.OutRefundNo,
 	}
-	data, err := sendEvonetRequest(ctx, "GET", urlPath, channelEntity.ChannelKey, param)
+	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -699,7 +700,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	return res, nil
 }
 
-func sendEvonetRequest(ctx context.Context, method string, urlPath string, key string, param map[string]interface{}) (res []byte, err error) {
+func sendEvonetRequest(ctx context.Context, channelEntity *entity.OverseaPayChannel, method string, urlPath string, param map[string]interface{}) (res []byte, err error) {
 	utility.Assert(param != nil, "param is nil")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
@@ -707,16 +708,16 @@ func sendEvonetRequest(ctx context.Context, method string, urlPath string, key s
 	jsonData, err := gjson.Marshal(param)
 	jsonString := string(jsonData)
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
-	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, key, jsonString)
+	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, channelEntity.ChannelKey, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Channel": "application/json",
 		"Msgid":           msgId,
 		"Datetime":        datetime,
-		"Authorization":   sign("POST", urlPath, msgId, datetime, key, body),
+		"Authorization":   sign("POST", urlPath, msgId, datetime, channelEntity.ChannelKey, body),
 		"Signtype":        "SHA256",
 	}
-	response, err := sendRequest(ENDPOINT+urlPath, method, body, headers)
+	response, err := sendRequest(channelEntity.Host+urlPath, method, body, headers)
 	g.Log().Infof(ctx, "\nEvonet_End %s %s response: %s error %s\n", method, urlPath, response, err)
 	return response, nil
 }

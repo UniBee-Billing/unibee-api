@@ -80,7 +80,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, plan, planChannel, subscription)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionLists(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ListSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -92,7 +92,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionLists(ctx context.Context, p
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionLists(ctx, plan, planChannel)
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
@@ -114,7 +114,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *en
 	return p.getRemoteChannel().DoRemoteChannelPlanActive(ctx, plan, planChannel)
 }
 
-func (p PayChannelProxy) DoRemoteChannelPlanInActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
+func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -126,7 +126,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanInActive(ctx context.Context, plan *
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPlanInActive(ctx, plan, planChannel)
+	return p.getRemoteChannel().DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
 }
 
 func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
@@ -144,7 +144,7 @@ func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan 
 	return p.getRemoteChannel().DoRemoteChannelProductCreate(ctx, plan, planChannel)
 }
 
-func (p PayChannelProxy) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -156,7 +156,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreate(ctx context.Context, plan *en
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPlanCreate(ctx, plan, planChannel)
+	return p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {

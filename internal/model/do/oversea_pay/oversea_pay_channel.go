@@ -20,6 +20,7 @@ type OverseaPayChannel struct {
 	SubChannel       interface{} // 渠道子支付方式枚举
 	BrandData        interface{} //
 	Logo             interface{} // 支付方式logo
+	Host             interface{} // pay host
 	ChannelAccountId interface{} // 渠道账户Id
 	ChannelKey       interface{} //
 	ChannelSecret    interface{} // secret
@@ -27,4 +28,6 @@ type OverseaPayChannel struct {
 	GmtCreate        *gtime.Time // 创建时间
 	GmtModify        *gtime.Time // 修改时间
 	Description      interface{} // 支付方式描述
+	WebhookKey       interface{} // webhook_key
+	WebhookSecret    interface{} // webhook_secret
 }

@@ -18,16 +18,24 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+	if len(req.ProductName) == 0 {
+		req.ProductName = req.PlanName
+	}
+	if len(req.ProductDescription) == 0 {
+		req.ProductDescription = req.Description
+	}
 	one = &entity.SubscriptionPlan{
-		CompanyId:    merchantInfo.CompanyId,
-		MerchantId:   req.MerchantId,
-		PlanName:     req.PlanName,
-		Amount:       strconv.FormatInt(req.Amount, 10),
-		Currency:     req.Currency,
-		IntervalUnit: req.IntervalUnit,
-		Description:  req.Description,
-		ImageUrl:     req.ImageUrl,
-		HomeUrl:      req.HomeUrl,
+		CompanyId:                 merchantInfo.CompanyId,
+		MerchantId:                req.MerchantId,
+		PlanName:                  req.PlanName,
+		Amount:                    strconv.FormatInt(req.Amount, 10),
+		Currency:                  req.Currency,
+		IntervalUnit:              req.IntervalUnit,
+		Description:               req.Description,
+		ImageUrl:                  req.ImageUrl,
+		HomeUrl:                   req.HomeUrl,
+		ChannelProductName:        req.ProductName,
+		ChannelProductDescription: req.ProductDescription,
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
@@ -40,7 +48,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	return one, nil
 }
 
-func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelId int64) error {
+func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, channelId int64) error {
 	plan := query.GetSubscriptionPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
@@ -66,10 +74,6 @@ func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelI
 		}
 		planChannel.Id = uint64(uint(id))
 	}
-	if len(planChannel.ChannelPlanId) > 0 && planChannel.Status == consts.PlanStatusActive {
-		//已成功
-		return nil
-	}
 	if len(planChannel.ChannelProductId) == 0 {
 		//产品尚未创建
 		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
@@ -92,15 +96,15 @@ func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelI
 		planChannel.ChannelProductStatus = res.ChannelProductStatus
 	}
 	if len(planChannel.ChannelPlanId) == 0 {
-		//创建 Plan
-		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreate(ctx, plan, planChannel)
+		//创建 并激活 Plan
+		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 		if err != nil {
 			return err
 		}
 		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{Id: planChannel.Id}).Update(entity.SubscriptionPlanChannel{
 			ChannelPlanId:     res.ChannelPlanId,
 			ChannelPlanStatus: res.ChannelPlanStatus,
-			Data:              res.Data.String(),
+			Data:              res.Data,
 			Status:            int(res.Status),
 		})
 		if err != nil {
@@ -112,7 +116,7 @@ func SubscriptionPlanChannelTransfer(ctx context.Context, planId int64, channelI
 		}
 		planChannel.ChannelPlanId = res.ChannelPlanId
 		planChannel.ChannelPlanStatus = res.ChannelPlanStatus
-		planChannel.Data = res.Data.String()
+		planChannel.Data = res.Data
 		planChannel.Status = int(res.Status)
 	}
 

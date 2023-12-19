@@ -18,6 +18,7 @@ type OverseaPayChannel struct {
 	SubChannel       string      `json:"subChannel"       ` // 渠道子支付方式枚举
 	BrandData        string      `json:"brandData"        ` //
 	Logo             string      `json:"logo"             ` // 支付方式logo
+	Host             string      `json:"host"             ` // pay host
 	ChannelAccountId string      `json:"channelAccountId" ` // 渠道账户Id
 	ChannelKey       string      `json:"channelKey"       ` //
 	ChannelSecret    string      `json:"channelSecret"    ` // secret
@@ -25,4 +26,6 @@ type OverseaPayChannel struct {
 	GmtCreate        *gtime.Time `json:"gmtCreate"        ` // 创建时间
 	GmtModify        *gtime.Time `json:"gmtModify"        ` // 修改时间
 	Description      string      `json:"description"      ` // 支付方式描述
+	WebhookKey       string      `json:"webhookKey"       ` // webhook_key
+	WebhookSecret    string      `json:"webhookSecret"    ` // webhook_secret
 }

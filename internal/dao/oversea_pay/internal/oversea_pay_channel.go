@@ -28,6 +28,7 @@ type OverseaPayChannelColumns struct {
 	SubChannel       string // 渠道子支付方式枚举
 	BrandData        string //
 	Logo             string // 支付方式logo
+	Host             string // pay host
 	ChannelAccountId string // 渠道账户Id
 	ChannelKey       string //
 	ChannelSecret    string // secret
@@ -35,6 +36,8 @@ type OverseaPayChannelColumns struct {
 	GmtCreate        string // 创建时间
 	GmtModify        string // 修改时间
 	Description      string // 支付方式描述
+	WebhookKey       string // webhook_key
+	WebhookSecret    string // webhook_secret
 }
 
 // overseaPayChannelColumns holds the columns for table oversea_pay_channel.
@@ -47,6 +50,7 @@ var overseaPayChannelColumns = OverseaPayChannelColumns{
 	SubChannel:       "sub_channel",
 	BrandData:        "brand_data",
 	Logo:             "logo",
+	Host:             "host",
 	ChannelAccountId: "channel_account_id",
 	ChannelKey:       "channel_key",
 	ChannelSecret:    "channel_secret",
@@ -54,6 +58,8 @@ var overseaPayChannelColumns = OverseaPayChannelColumns{
 	GmtCreate:        "gmt_create",
 	GmtModify:        "gmt_modify",
 	Description:      "description",
+	WebhookKey:       "webhook_key",
+	WebhookSecret:    "webhook_secret",
 }
 
 // NewOverseaPayChannelDao creates and returns a new DAO object for table data access.

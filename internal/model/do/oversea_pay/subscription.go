@@ -27,4 +27,5 @@ type Subscription struct {
 	ResponseData          interface{} // 渠道返回参数，JSON格式
 	IsDeleted             interface{} //
 	Status                interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
+	ChannelUserId         interface{} // 渠道用户 Id
 }

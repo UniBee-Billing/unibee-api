@@ -25,4 +25,5 @@ type Subscription struct {
 	ResponseData          string      `json:"responseData"          ` // 渠道返回参数，JSON格式
 	IsDeleted             int         `json:"isDeleted"             ` //
 	Status                int         `json:"status"                ` // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
+	ChannelUserId         string      `json:"channelUserId"         ` // 渠道用户 Id
 }

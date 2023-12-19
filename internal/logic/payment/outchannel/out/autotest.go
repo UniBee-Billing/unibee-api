@@ -25,7 +25,7 @@ func (a AutoTest) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelSubscriptionLists(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ListSubscriptionInternalResp, err error) {
+func (a AutoTest) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -40,7 +40,7 @@ func (a AutoTest) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Su
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelPlanInActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
+func (a AutoTest) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -50,7 +50,7 @@ func (a AutoTest) DoRemoteChannelProductCreate(ctx context.Context, plan *entity
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelPlanCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
+func (a AutoTest) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

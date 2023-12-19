@@ -20,36 +20,40 @@ type SubscriptionPlanDao struct {
 
 // SubscriptionPlanColumns defines and stores column names for table subscription_plan.
 type SubscriptionPlanColumns struct {
-	Id           string //
-	GmtCreate    string // 创建时间
-	GmtModify    string // 修改时间
-	CompanyId    string // 公司ID
-	MerchantId   string // 商户Id
-	PlanName     string // 计划名称
-	Amount       string // 金额,单位：分
-	Currency     string // 货币
-	IntervalUnit string // 周期,day|month|year|week
-	Description  string //
-	IsDeleted    string //
-	ImageUrl     string // image_url
-	HomeUrl      string // home_url
+	Id                        string //
+	GmtCreate                 string // 创建时间
+	GmtModify                 string // 修改时间
+	CompanyId                 string // 公司ID
+	MerchantId                string // 商户Id
+	PlanName                  string // 计划名称
+	Amount                    string // 金额,单位：分
+	Currency                  string // 货币
+	IntervalUnit              string // 周期,day|month|year|week
+	Description               string //
+	IsDeleted                 string //
+	ImageUrl                  string // image_url
+	HomeUrl                   string // home_url
+	ChannelProductName        string // 支付渠道product_name
+	ChannelProductDescription string // 支付渠道product_description
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
 var subscriptionPlanColumns = SubscriptionPlanColumns{
-	Id:           "id",
-	GmtCreate:    "gmt_create",
-	GmtModify:    "gmt_modify",
-	CompanyId:    "company_id",
-	MerchantId:   "merchant_id",
-	PlanName:     "plan_name",
-	Amount:       "amount",
-	Currency:     "currency",
-	IntervalUnit: "interval_unit",
-	Description:  "description",
-	IsDeleted:    "is_deleted",
-	ImageUrl:     "image_url",
-	HomeUrl:      "home_url",
+	Id:                        "id",
+	GmtCreate:                 "gmt_create",
+	GmtModify:                 "gmt_modify",
+	CompanyId:                 "company_id",
+	MerchantId:                "merchant_id",
+	PlanName:                  "plan_name",
+	Amount:                    "amount",
+	Currency:                  "currency",
+	IntervalUnit:              "interval_unit",
+	Description:               "description",
+	IsDeleted:                 "is_deleted",
+	ImageUrl:                  "image_url",
+	HomeUrl:                   "home_url",
+	ChannelProductName:        "channel_product_name",
+	ChannelProductDescription: "channel_product_description",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.
