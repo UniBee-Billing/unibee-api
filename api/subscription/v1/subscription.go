@@ -35,8 +35,24 @@ type SubscriptionPlanChannelTransferReq struct {
 type SubscriptionPlanChannelTransferRes struct {
 }
 
+type SubscriptionPlanChannelActiveReq struct {
+	g.Meta    `path:"/subscription_plan_channel_active" tags:"Subscription-Controller" method:"post" summary:"1.4订阅计划支付通道激活"`
+	PlanId    int64 `p:"planId" d:"15621" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
+	ChannelId int64 `p:"channelId"    v:"required|请输入 ChannelId" `
+}
+type SubscriptionPlanChannelActiveRes struct {
+}
+
+type SubscriptionPlanChannelInActiveReq struct {
+	g.Meta    `path:"/subscription_plan_channel_inactive" tags:"Subscription-Controller" method:"post" summary:"1.5订阅计划支付通道取消激活"`
+	PlanId    int64 `p:"planId" d:"15621" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
+	ChannelId int64 `p:"channelId"    v:"required|请输入 ChannelId" `
+}
+type SubscriptionPlanChannelInActiveRes struct {
+}
+
 type SubscriptionPlanDetailReq struct {
-	g.Meta `path:"/subscription_plan_detail" tags:"Subscription-Controller" method:"post" summary:"1.4订阅计划明细"`
+	g.Meta `path:"/subscription_plan_detail" tags:"Subscription-Controller" method:"post" summary:"1.6订阅计划明细"`
 	PlanId int64 `p:"planId" d:"15621" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
 }
 type SubscriptionPlanDetailRes struct {
