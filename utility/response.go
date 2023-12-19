@@ -36,7 +36,7 @@ func SuccessJsonExit(r *ghttp.Request, data ...interface{}) {
 	JsonExit(r, 200, "success", data)
 }
 
-func failureJsonExit(r *ghttp.Request, message string) {
+func FailureJsonExit(r *ghttp.Request, message string) {
 	JsonExit(r, 400, message, nil)
 }
 

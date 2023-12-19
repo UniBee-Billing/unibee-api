@@ -32,13 +32,13 @@ var (
 				//	hello.NewV1(), //测试接口
 				//)
 			})
-			s.Group("/gooverseapay/xin", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
-				)
-				router.Tools(ctx, group) //工具接口
-			})
+			//s.Group("/gooverseapay/xin", func(group *ghttp.RouterGroup) {
+			//	group.Middleware(
+			//		_interface.Middleware().ResponseHandler,
+			//		_interface.Middleware().PreOpenApiAuth,
+			//	)
+			//	router.Tools(ctx, group) //工具接口
+			//})
 
 			s.Group("/gooverseapay/out", func(group *ghttp.RouterGroup) {
 				group.Middleware(
@@ -48,12 +48,20 @@ var (
 				router.Outs(ctx, group) //开放平台接口
 			})
 
+			s.Group("/gooverseapay/subscription", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreAuth,
+				)
+				router.Subscription(ctx, group) //订阅接口
+			})
+
 			s.Group("/gooverseapay/mock", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
 				)
-				router.Mocks(ctx, group) //本地测试用Mock接口
+				router.Mocks(ctx, group) //Out本地测试用Mock接口
 			})
 
 			// 通道支付 Webhook 回调
