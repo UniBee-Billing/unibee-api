@@ -102,3 +102,24 @@ type CreatePlanInternalResp struct {
 	Data              *gjson.Json                       `json:"data"`
 	Status            consts.SubscriptionPlanStatusEnum `json:"status"`
 }
+
+type CreateSubscriptionInternalResp struct {
+	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
+	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
+	Data                      *gjson.Json                       `json:"data"`
+	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
+}
+
+type CancelSubscriptionInternalResp struct {
+	Status consts.SubscriptionPlanStatusEnum `json:"status"`
+}
+
+type UpdateSubscriptionInternalResp struct {
+	Status consts.SubscriptionPlanStatusEnum `json:"status"`
+}
+
+type ListSubscriptionInternalResp struct {
+}
+
+type WebhookSubscriptionInternalResp struct {
+}
