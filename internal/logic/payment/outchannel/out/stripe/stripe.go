@@ -94,6 +94,7 @@ func (s Stripe) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
 	panic("implement me")
 }
 
+// todo mark 使用 price 代替 plan  https://stripe.com/docs/api/plans
 func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
