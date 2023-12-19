@@ -31,6 +31,7 @@ type SubscriptionPlanChannelColumns struct {
 	ChannelProductStatus string // channel_product_status
 	Data                 string // 渠道额外参数，JSON格式
 	IsDeleted            string //
+	Status               string // 渠道绑定状态，0-Create｜1-Active｜2-Inactive
 }
 
 // subscriptionPlanChannelColumns holds the columns for table subscription_plan_channel.
@@ -46,6 +47,7 @@ var subscriptionPlanChannelColumns = SubscriptionPlanChannelColumns{
 	ChannelProductStatus: "channel_product_status",
 	Data:                 "data",
 	IsDeleted:            "is_deleted",
+	Status:               "status",
 }
 
 // NewSubscriptionPlanChannelDao creates and returns a new DAO object for table data access.

@@ -3,20 +3,20 @@ package consts
 type SubscriptionPlanStatusEnum int
 
 const (
-	CREATE   = 0 //创建
-	ACTIVE   = 1 //有效
-	INACTIVE = 2 //无效
+	PlanStatusCreate   = 0 //创建
+	PlanStatusActive   = 1 //有效
+	PlanStatusInActive = 2 //无效
 )
 
 func (status SubscriptionPlanStatusEnum) Description() string {
 	switch status {
-	case CREATE:
-		return "CREATE"
-	case ACTIVE:
-		return "ACTIVE"
-	case INACTIVE:
-		return "INACTIVE"
+	case PlanStatusCreate:
+		return "STATUES_CREATE"
+	case PlanStatusActive:
+		return "PlanStatusActive"
+	case PlanStatusInActive:
+		return "PlanStatusInActive"
 	default:
-		return "ACTIVE"
+		return "PlanStatusActive"
 	}
 }
