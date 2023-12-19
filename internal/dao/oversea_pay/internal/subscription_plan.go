@@ -31,6 +31,8 @@ type SubscriptionPlanColumns struct {
 	IntervalUnit string // 周期,day|month|year|week
 	Description  string //
 	IsDeleted    string //
+	ImageUrl     string // image_url
+	HomeUrl      string // home_url
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
@@ -46,6 +48,8 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	IntervalUnit: "interval_unit",
 	Description:  "description",
 	IsDeleted:    "is_deleted",
+	ImageUrl:     "image_url",
+	HomeUrl:      "home_url",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.

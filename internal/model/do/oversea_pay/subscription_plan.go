@@ -23,4 +23,6 @@ type SubscriptionPlan struct {
 	IntervalUnit interface{} // 周期,day|month|year|week
 	Description  interface{} //
 	IsDeleted    interface{} //
+	ImageUrl     interface{} // image_url
+	HomeUrl      interface{} // home_url
 }

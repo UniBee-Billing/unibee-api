@@ -21,4 +21,6 @@ type SubscriptionPlan struct {
 	IntervalUnit string      `json:"intervalUnit" ` // 周期,day|month|year|week
 	Description  string      `json:"description"  ` //
 	IsDeleted    int         `json:"isDeleted"    ` //
+	ImageUrl     string      `json:"imageUrl"     ` // image_url
+	HomeUrl      string      `json:"homeUrl"      ` // home_url
 }

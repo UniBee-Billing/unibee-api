@@ -20,28 +20,32 @@ type SubscriptionPlanChannelDao struct {
 
 // SubscriptionPlanChannelColumns defines and stores column names for table subscription_plan_channel.
 type SubscriptionPlanChannelColumns struct {
-	Id               string //
-	GmtCreate        string // 创建时间
-	GmtModify        string // 修改时间
-	PlanId           string // 计划ID
-	ChannelId        string // 支付渠道Id
-	ChannelPlanId    string // 支付渠道plan_Id
-	ChannelProductId string // 支付渠道product_Id
-	Data             string // 渠道额外参数，JSON格式
-	IsDeleted        string //
+	Id                   string //
+	GmtCreate            string // 创建时间
+	GmtModify            string // 修改时间
+	PlanId               string // 计划ID
+	ChannelId            string // 支付渠道Id
+	ChannelPlanId        string // 支付渠道plan_Id
+	ChannelProductId     string // 支付渠道product_Id
+	ChannelPlanStatus    string // channel_plan_status
+	ChannelProductStatus string // channel_product_status
+	Data                 string // 渠道额外参数，JSON格式
+	IsDeleted            string //
 }
 
 // subscriptionPlanChannelColumns holds the columns for table subscription_plan_channel.
 var subscriptionPlanChannelColumns = SubscriptionPlanChannelColumns{
-	Id:               "id",
-	GmtCreate:        "gmt_create",
-	GmtModify:        "gmt_modify",
-	PlanId:           "plan_id",
-	ChannelId:        "channel_id",
-	ChannelPlanId:    "channel_plan_id",
-	ChannelProductId: "channel_product_id",
-	Data:             "data",
-	IsDeleted:        "is_deleted",
+	Id:                   "id",
+	GmtCreate:            "gmt_create",
+	GmtModify:            "gmt_modify",
+	PlanId:               "plan_id",
+	ChannelId:            "channel_id",
+	ChannelPlanId:        "channel_plan_id",
+	ChannelProductId:     "channel_product_id",
+	ChannelPlanStatus:    "channel_plan_status",
+	ChannelProductStatus: "channel_product_status",
+	Data:                 "data",
+	IsDeleted:            "is_deleted",
 }
 
 // NewSubscriptionPlanChannelDao creates and returns a new DAO object for table data access.
