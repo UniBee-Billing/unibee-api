@@ -21,7 +21,7 @@ var (
 
 			s := g.Server()
 			s.Group("/gooverseapay", func(group *ghttp.RouterGroup) {
-				group.GET("/swagger", func(r *ghttp.Request) {
+				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.SwaggerUIPageContent)
 				})
 				group.Middleware(
