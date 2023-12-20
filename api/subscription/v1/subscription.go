@@ -31,31 +31,31 @@ type SubscriptionPlanCreateRes struct {
 
 type SubscriptionPlanChannelTransferAndActivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_transfer_and_activate" tags:"Subscription-Controller" method:"post" summary:"1.3订阅计划支付通道开通并激活"`
-	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required|请输入 ChannelId" `
+	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
 }
 type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
 type SubscriptionPlanChannelActivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Controller" method:"post" summary:"1.4订阅计划支付通道激活"`
-	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required|请输入 ChannelId" `
+	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
 }
 type SubscriptionPlanChannelActivateRes struct {
 }
 
 type SubscriptionPlanChannelDeactivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Controller" method:"post" summary:"1.5订阅计划支付通道取消激活"`
-	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required|请输入 ChannelId" `
+	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
 }
 type SubscriptionPlanChannelDeactivateRes struct {
 }
 
 type SubscriptionPlanDetailReq struct {
 	g.Meta `path:"/subscription_plan_detail" tags:"Subscription-Controller" method:"post" summary:"1.6订阅计划详情"`
-	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
+	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 }
 type SubscriptionPlanDetailRes struct {
 	Plan     *entity.SubscriptionPlan          `json:"plan" dc:"订阅计划"`
@@ -64,8 +64,8 @@ type SubscriptionPlanDetailRes struct {
 
 type SubscriptionCreateReq struct {
 	g.Meta        `path:"/subscription_create" tags:"Subscription-Controller" method:"post" summary:"1.7用户订阅创建"`
-	PlanId        int64 `p:"planId" dc:"订阅计划 ID" v:"required|请输入订阅计划 ID"`
-	ChannelId     int64 `p:"channelId" dc:"支付通道 ID"   v:"required|请输入 ChannelId" `
+	PlanId        int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId     int64 `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
 	UserId        int64 `p:"UserId" dc:"UserId" v:"required|length:4,30#请输入UserId长度为:{min}到:{max}位"`
 	ChannelUserId int64 `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
 }
@@ -74,14 +74,14 @@ type SubscriptionCreateRes struct {
 
 type SubscriptionCancelReq struct {
 	g.Meta         `path:"/subscription_cancel" tags:"Subscription-Controller" method:"post" summary:"1.8用户订阅取消"`
-	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required|请输入订阅 ID"`
+	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionCancelRes struct {
 }
 
 type SubscriptionDetailReq struct {
 	g.Meta         `path:"/subscription_detail" tags:"Subscription-Controller" method:"post" summary:"1.9用户订阅详情"`
-	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required|请输入订阅 ID"`
+	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
 }

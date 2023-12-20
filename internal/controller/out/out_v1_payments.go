@@ -6,9 +6,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
-	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 
@@ -34,7 +34,7 @@ func (c *ControllerV1) Payments(ctx context.Context, req *v1.PaymentsReq) (res *
 	utility.Assert(strings.Contains("WEB，WAP，APP, MINI, INWALLET", req.Channel), "outchannel is invalid, should be WEB，WAP，APP, MINI, INWALLET")
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
-	payChannel := util.GetOverseaPayChannelByChannel(ctx, req.PaymentMethod.Channel)
+	payChannel := query.GetPayChannelByChannel(ctx, req.PaymentMethod.Channel)
 	utility.Assert(payChannel != nil, "找不到支付方式 type:"+req.PaymentMethod.Channel)
 	//支付方式绑定校验 todo mark
 

@@ -2,25 +2,10 @@ package util
 
 import (
 	"context"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 )
 
-func GetOverseaPayChannel(ctx context.Context, id uint64) (channel *entity.OverseaPayChannel) {
-	var (
-		one *entity.OverseaPayChannel
-	)
-	err := dao.OverseaPayChannel.Ctx(ctx).Where(entity.OverseaPayChannel{Id: id}).OmitEmpty().Scan(&one)
-	if err != nil {
-		return nil
-	}
-	return one
-}
-
-func GetOverseaPayChannelByChannel(ctx context.Context, channel string) (one *entity.OverseaPayChannel) {
-	err := dao.OverseaPayChannel.Ctx(ctx).Where(entity.OverseaPayChannel{Channel: channel}).OmitEmpty().Scan(&one)
-	if err != nil {
-		return nil
-	}
-	return one
+func GetOverseaPayChannel(ctx context.Context, id int64) (channel *entity.OverseaPayChannel) {
+	return query.GetPayChannelById(ctx, id)
 }

@@ -12,7 +12,6 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/payment/outchannel"
-	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -27,7 +26,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(strings.Compare(overseaPay.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(overseaPay.PayStatus == consts.PAY_SUCCESS, "payment not success")
 
-	channel := util.GetOverseaPayChannel(ctx, uint64(overseaPay.ChannelId))
+	channel := query.GetPayChannelById(ctx, overseaPay.ChannelId)
 	utility.Assert(channel != nil, "支付渠道异常 outchannel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")

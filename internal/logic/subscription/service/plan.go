@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	v1 "go-oversea-pay/api/subscription/v1"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -12,6 +13,62 @@ import (
 	"go-oversea-pay/utility"
 	"strings"
 )
+
+func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelId int64) (err error) {
+	utility.Assert(planId > 0, "invalid planId")
+	utility.Assert(channelId > 0, "invalid channelId")
+	plan := query.GetSubscriptionPlanById(ctx, planId)
+	utility.Assert(plan != nil, "invalid planId")
+	planChannel := query.GetSubscriptionPlanChannel(ctx, planId, channelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
+	utility.Assert(payChannel != nil, "payChannel not found")
+
+	err = outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanActive(ctx, plan, planChannel)
+	if err != nil {
+		return
+	}
+	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusActive,
+		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusActive,// todo mark
+	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("update err:%s", update)
+	}
+	return
+}
+
+func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channelId int64) (err error) {
+	utility.Assert(planId > 0, "invalid planId")
+	utility.Assert(channelId > 0, "invalid channelId")
+	plan := query.GetSubscriptionPlanById(ctx, planId)
+	utility.Assert(plan != nil, "invalid planId")
+	planChannel := query.GetSubscriptionPlanChannel(ctx, planId, channelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
+	utility.Assert(payChannel != nil, "payChannel not found")
+
+	err = outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
+	if err != nil {
+		return
+	}
+	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusInActive,
+		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusInActive,// todo mark
+	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("update err:%s", update)
+	}
+	return
+}
 
 func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateReq) (one *entity.SubscriptionPlan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
@@ -83,10 +140,10 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			return err
 		}
 		//更新 planChannel
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{Id: planChannel.Id}).Update(entity.SubscriptionPlanChannel{
-			ChannelProductId:     res.ChannelProductId,
-			ChannelProductStatus: res.ChannelProductStatus,
-		})
+		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
+			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 		if err != nil {
 			return err
 		}
@@ -103,12 +160,12 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if err != nil {
 			return err
 		}
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{Id: planChannel.Id}).Update(entity.SubscriptionPlanChannel{
-			ChannelPlanId:     res.ChannelPlanId,
-			ChannelPlanStatus: res.ChannelPlanStatus,
-			Data:              res.Data,
-			Status:            int(res.Status),
-		})
+		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+			dao.SubscriptionPlanChannel.Columns().ChannelPlanId:     res.ChannelPlanId,
+			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
+			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
+			dao.SubscriptionPlanChannel.Columns().Status:            int(res.Status),
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 		if err != nil {
 			return err
 		}

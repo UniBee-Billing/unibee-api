@@ -20,8 +20,11 @@ import (
 // clientId ATaWQ8G9oJNFyle9YCt59
 // Secret EHUy5GALkYr1Qp0n6MepJY8LnUwYCBIWElG4Iv_DO3mdYcbB2l6zwJxk99OrPhbdNRLk7GkHEqb5RHEA
 
-//APIBaseSandBox = "https://api.sandbox.paypal.com"
-//APIBaseLive = "https://api.paypal.com"
+// Other ClientId AXy9orp-CDaHhBZ9C78QHW2BKZpACgroqo85_NIOa9mIfJ9QnSVKzY-X_rivR_fTUUr6aLjcJsj6sDur
+// Other Secret EBoIiUSkCKeSk49hHSgTem1qnjzzJgRQHDEHvGpzlLEf_nIoJd91xu8rPOBDCdR_UYNKVxJE-UgS2iCw
+
+//APIBaseSandBox = "https://api-m.sandbox.paypal.com"
+//APIBaseLive = "https://api-m.paypal.com"
 
 type Paypal struct {
 }
@@ -47,9 +50,13 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CreateSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	createSubscription, err := client.CreateSubscription(ctx, paypal.SubscriptionBase{
 		PlanID: planChannel.ChannelPlanId,
 		// todo mark
@@ -79,9 +86,13 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CancelSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	err = client.CancelSubscription(ctx, subscription.ChannelSubscriptionId, "")
 	if err != nil {
 		return nil, err
@@ -93,9 +104,13 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	err = client.UpdateSubscription(ctx, paypal.Subscription{}) //todo mark
 	if err != nil {
 		return nil, err
@@ -107,9 +122,13 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *ent
 func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	_, err = client.GetSubscriptionDetails(ctx, subscription.ChannelSubscriptionId)
 	if err != nil {
 		return nil, err
@@ -126,10 +145,14 @@ func (p Paypal) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
 func (p Paypal) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
-	err = client.ActivatePlan(ctx, planChannel.ChannelPlanId)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return err
+	}
+	err = client.ActivateSubscriptionPlan(ctx, planChannel.ChannelPlanId)
 	if err != nil {
 		return err
 	}
@@ -139,9 +162,13 @@ func (p Paypal) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Subs
 func (p Paypal) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return err
+	}
 	err = client.DeactivateSubscriptionPlans(ctx, planChannel.ChannelPlanId)
 	if err != nil {
 		return err
@@ -151,9 +178,13 @@ func (p Paypal) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.
 
 func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	productResult, err := client.CreateProduct(ctx, paypal.Product{
 		Name:        plan.ChannelProductName,
 		Description: plan.ChannelProductDescription,
@@ -174,9 +205,13 @@ func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreatePlanInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return nil, err
+	}
 	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, paypal.SubscriptionPlan{
 		ProductId:   planChannel.ChannelProductId,
 		Name:        plan.PlanName,
