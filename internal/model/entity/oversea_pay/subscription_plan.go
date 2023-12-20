@@ -16,7 +16,7 @@ type SubscriptionPlan struct {
 	CompanyId                 int64       `json:"companyId"                 ` // 公司ID
 	MerchantId                int64       `json:"merchantId"                ` // 商户Id
 	PlanName                  string      `json:"planName"                  ` // 计划名称
-	Amount                    string      `json:"amount"                    ` // 金额,单位：分
+	Amount                    int64       `json:"amount"                    ` // 金额,单位：分
 	Currency                  string      `json:"currency"                  ` // 货币
 	IntervalUnit              string      `json:"intervalUnit"              ` // 周期,day|month|year|week
 	Description               string      `json:"description"               ` //

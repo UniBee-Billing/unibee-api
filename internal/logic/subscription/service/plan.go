@@ -10,14 +10,16 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
-	"strconv"
+	"strings"
 )
 
 func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateReq) (one *entity.SubscriptionPlan, err error) {
+	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
 	if len(req.ProductName) == 0 {
 		req.ProductName = req.PlanName
 	}
@@ -28,9 +30,9 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		CompanyId:                 merchantInfo.CompanyId,
 		MerchantId:                req.MerchantId,
 		PlanName:                  req.PlanName,
-		Amount:                    strconv.FormatInt(req.Amount, 10),
+		Amount:                    req.Amount,
 		Currency:                  req.Currency,
-		IntervalUnit:              req.IntervalUnit,
+		IntervalUnit:              strings.ToLower(req.IntervalUnit),
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,

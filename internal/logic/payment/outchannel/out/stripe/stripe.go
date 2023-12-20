@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
-	"github.com/stripe/stripe-go/v72/plan"
+	"github.com/stripe/stripe-go/v72/price"
 	"github.com/stripe/stripe-go/v72/product"
 	"github.com/stripe/stripe-go/v72/sub"
 	"go-oversea-pay/internal/consts"
@@ -17,6 +17,7 @@ import (
 	"go-oversea-pay/utility"
 	"log"
 	"strconv"
+	"strings"
 )
 
 type Stripe struct {
@@ -54,11 +55,11 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 		Customer: stripe.String(subscription.ChannelUserId),
 		Items: []*stripe.SubscriptionItemsParams{
 			{
-				// todo mark
-				//Price: stripe.String(req.PriceID),
+				Price: stripe.String(planChannel.ChannelPlanId),
 			},
 		},
-		PaymentBehavior: stripe.String("default_incomplete"),
+		PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
+		CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
 	}
 	subscriptionParams.AddExpand("latest_invoice.payment_intent")
 	createSubscription, err := sub.New(subscriptionParams)
@@ -75,18 +76,45 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CancelSubscriptionInternalResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.SubscriptionCancelParams{}
+	_, err = sub.Cancel(subscription.ChannelSubscriptionId, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.CancelSubscriptionInternalResp{}, nil //todo mark
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.SubscriptionParams{}
+	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.UpdateSubscriptionInternalResp{}, nil //todo mark
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
+	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.SubscriptionParams{}
+	_, err = sub.Get("sub_1MowQVLkdIwHu7ixeRlqHVzs", params)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil //todo mark
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
@@ -94,16 +122,16 @@ func (s Stripe) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
 	panic("implement me")
 }
 
-// todo mark 使用 price 代替 plan  https://stripe.com/docs/api/plans
+// 使用 price 代替 plan  https://stripe.com/docs/api/plans
 func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, uint64(planChannel.ChannelId))
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.PlanParams{}
+	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(true) // todo mark 使用这种方式可能不能用
-	_, err = plan.Update(planChannel.ChannelPlanId, params)
+	_, err = price.Update(planChannel.ChannelPlanId, params)
 	if err != nil {
 		return err
 	}
@@ -116,9 +144,9 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.PlanParams{}
+	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
-	_, err = plan.Update(planChannel.ChannelPlanId, params)
+	_, err = price.Update(planChannel.ChannelPlanId, params)
 	if err != nil {
 		return err
 	}
@@ -154,15 +182,25 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.PlanParams{
-		//todo mark
-		Active:   stripe.Bool(true),
-		Amount:   stripe.Int64(1200),
-		Currency: stripe.String(string(stripe.CurrencyUSD)),
-		Interval: stripe.String(string(stripe.PlanIntervalMonth)),
-		Product:  &stripe.PlanProductParams{ID: stripe.String("prod_NjpI7DbZx6AlWQ")},
+	//params := &stripe.PlanParams{
+	//	//todo mark
+	//	Active:   stripe.Bool(true),
+	//	Amount:   stripe.Int64(1200),
+	//	Currency: stripe.String(string(stripe.CurrencyUSD)),
+	//	Interval: stripe.String(string(stripe.PlanIntervalMonth)),
+	//	Product:  &stripe.PlanProductParams{ID: stripe.String("prod_NjpI7DbZx6AlWQ")},
+	//}
+	//result, err := plan.New(params)
+	// 使用 Price 代替 Plan https://stripe.com/docs/api/plans
+	params := &stripe.PriceParams{
+		Currency:   stripe.String(strings.ToLower(targetPlan.Currency)),
+		UnitAmount: stripe.Int64(targetPlan.Amount),
+		Recurring: &stripe.PriceRecurringParams{
+			Interval: stripe.String(targetPlan.IntervalUnit),
+		},
+		ProductData: &stripe.PriceProductDataParams{ID: stripe.String(planChannel.ChannelProductId)},
 	}
-	result, err := plan.New(params)
+	result, err := price.New(params)
 	if err != nil {
 		return nil, err
 	}
