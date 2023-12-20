@@ -170,6 +170,7 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 	if err != nil {
 		return nil, err
 	}
+	//Prod 创建好了之后似乎并不是Active 状态 todo mark
 	return &ro.CreateProductInternalResp{
 		ChannelProductId:     result.ID,
 		ChannelProductStatus: fmt.Sprintf("%v", result.Active),
@@ -198,7 +199,11 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		Recurring: &stripe.PriceRecurringParams{
 			Interval: stripe.String(targetPlan.IntervalUnit),
 		},
-		ProductData: &stripe.PriceProductDataParams{ID: stripe.String(planChannel.ChannelProductId)},
+		Product: stripe.String(planChannel.ChannelProductId),
+		//ProductData: &stripe.PriceProductDataParams{
+		//	ID:   stripe.String(planChannel.ChannelProductId),
+		//	Name: stripe.String(targetPlan.PlanName),
+		//},//这里是创建的意思
 	}
 	result, err := price.New(params)
 	if err != nil {
