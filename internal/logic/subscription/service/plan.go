@@ -28,17 +28,18 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	if err != nil {
 		return
 	}
-	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusActive,// todo mark
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("update err:%s", update)
-	}
+	// todo mark update 值没变化会报错
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("update err:%s", update)
+	//}
 	return
 }
 
@@ -56,17 +57,18 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	if err != nil {
 		return
 	}
-	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusInActive,// todo mark
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("update err:%s", update)
-	}
+	// todo mark update 值没变化会报错
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("update err:%s", update)
+	//}
 	return
 }
 
