@@ -64,12 +64,13 @@ type SubscriptionPlanDetailRes struct {
 
 type SubscriptionCreateReq struct {
 	g.Meta        `path:"/subscription_create" tags:"Subscription-Controller" method:"post" summary:"1.7用户订阅创建"`
-	PlanId        int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId     int64 `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
-	UserId        int64 `p:"UserId" dc:"UserId" v:"required|length:4,30#请输入UserId长度为:{min}到:{max}位"`
-	ChannelUserId int64 `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
+	PlanId        int64  `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId     int64  `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+	UserId        int64  `p:"UserId" dc:"UserId" v:"required|length:4,30#请输入UserId长度为:{min}到:{max}位"`
+	ChannelUserId string `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
 }
 type SubscriptionCreateRes struct {
+	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
 }
 
 type SubscriptionCancelReq struct {
