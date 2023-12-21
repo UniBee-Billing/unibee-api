@@ -36,6 +36,8 @@ type SubscriptionColumns struct {
 	IsDeleted             string //
 	Status                string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelUserId         string // 渠道用户 Id
+	CustomerName          string // customer_name
+	CustomerEmail         string // customer_email
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -56,6 +58,8 @@ var subscriptionColumns = SubscriptionColumns{
 	IsDeleted:             "is_deleted",
 	Status:                "status",
 	ChannelUserId:         "channel_user_id",
+	CustomerName:          "customer_name",
+	CustomerEmail:         "customer_email",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

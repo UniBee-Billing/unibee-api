@@ -20,7 +20,7 @@ type SubscriptionPlan struct {
 	PlanName                  interface{} // 计划名称
 	Amount                    interface{} // 金额,单位：分
 	Currency                  interface{} // 货币
-	IntervalUnit              interface{} // 周期,day|month|year|week
+	IntervalUnit              interface{} // 周期-全小写存放,day|month|year|week
 	Description               interface{} //
 	IsDeleted                 interface{} //
 	ImageUrl                  interface{} // image_url

@@ -26,4 +26,6 @@ type Subscription struct {
 	IsDeleted             int         `json:"isDeleted"             ` //
 	Status                int         `json:"status"                ` // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelUserId         string      `json:"channelUserId"         ` // 渠道用户 Id
+	CustomerName          string      `json:"customerName"          ` // customer_name
+	CustomerEmail         string      `json:"customerEmail"         ` // customer_email
 }

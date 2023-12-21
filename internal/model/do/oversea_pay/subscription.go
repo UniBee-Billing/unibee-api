@@ -28,4 +28,6 @@ type Subscription struct {
 	IsDeleted             interface{} //
 	Status                interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelUserId         interface{} // 渠道用户 Id
+	CustomerName          interface{} // customer_name
+	CustomerEmail         interface{} // customer_email
 }

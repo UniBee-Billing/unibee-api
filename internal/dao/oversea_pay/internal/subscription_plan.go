@@ -28,7 +28,7 @@ type SubscriptionPlanColumns struct {
 	PlanName                  string // 计划名称
 	Amount                    string // 金额,单位：分
 	Currency                  string // 货币
-	IntervalUnit              string // 周期,day|month|year|week
+	IntervalUnit              string // 周期-全小写存放,day|month|year|week
 	Description               string //
 	IsDeleted                 string //
 	ImageUrl                  string // image_url

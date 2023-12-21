@@ -27,17 +27,22 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
+	//plan 是否活跃检查
+
 	one := &entity.Subscription{
 		CompanyId:             merchantInfo.CompanyId,
 		MerchantId:            merchantInfo.Id,
 		PlanId:                req.PlanId,
 		ChannelId:             req.ChannelId,
 		UserId:                req.UserId,
-		Quantity:              12, // todo mark 按照逻辑计算数量
+		Quantity:              12,                 // todo mark 按照逻辑计算数量
+		CustomerName:          "jack",             // todo mark
+		CustomerEmail:         "jack.fu@wowow.io", // todo mark
 		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
 		ChannelSubscriptionId: "",
 		Status:                consts.SubStatusInit,
 		ChannelUserId:         req.ChannelUserId,
+		Data:                  "", //额外参数配置
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
@@ -56,6 +61,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate, //todo mark createRes 判断状态
+		dao.Subscription.Columns().ResponseData:          res.Data,
 	}).Where(dao.Subscription.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err

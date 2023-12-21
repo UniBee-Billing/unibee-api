@@ -18,7 +18,7 @@ type SubscriptionPlan struct {
 	PlanName                  string      `json:"planName"                  ` // 计划名称
 	Amount                    int64       `json:"amount"                    ` // 金额,单位：分
 	Currency                  string      `json:"currency"                  ` // 货币
-	IntervalUnit              string      `json:"intervalUnit"              ` // 周期,day|month|year|week
+	IntervalUnit              string      `json:"intervalUnit"              ` // 周期-全小写存放,day|month|year|week
 	Description               string      `json:"description"               ` //
 	IsDeleted                 int         `json:"isDeleted"                 ` //
 	ImageUrl                  string      `json:"imageUrl"                  ` // image_url

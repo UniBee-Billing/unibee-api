@@ -16,7 +16,6 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"log"
-	"strconv"
 	"strings"
 )
 
@@ -40,8 +39,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 	if len(subscription.ChannelUserId) == 0 {
 		params := &stripe.CustomerParams{
 			// todo mark 创建 customer 需要这两个字段 https://stripe.com/docs/api/customers/create
-			Name:  stripe.String(strconv.FormatInt(subscription.UserId, 10)),
-			Email: stripe.String(strconv.FormatInt(subscription.UserId, 10)),
+			Name:  stripe.String(subscription.CustomerName),
+			Email: stripe.String(subscription.CustomerEmail),
 		}
 
 		createCustomResult, err := customer.New(params)
