@@ -60,7 +60,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	//更新 planChannel
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
-		dao.Subscription.Columns().Status:                consts.SubStatusCreate, //todo mark createRes 判断状态
+		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
 	}).Where(dao.Subscription.Columns().Id, one.Id).Update()
 	if err != nil {
@@ -71,7 +71,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 		return nil, gerror.Newf("update err:%s", update)
 	}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
-	one.Status = consts.PlanStatusCreate //todo mark createRes 判断状态
+	one.Status = consts.PlanStatusCreate
 
 	return one, nil
 }
