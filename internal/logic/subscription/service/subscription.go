@@ -13,7 +13,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res *entity.Subscription, err error) {
+func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*entity.Subscription, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.ChannelId > 0, "ChannelId invalid")
@@ -61,7 +61,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate, //todo mark createRes 判断状态
-		dao.Subscription.Columns().ResponseData:          res.Data,
+		dao.Subscription.Columns().ResponseData:          createRes.Data,
 	}).Where(dao.Subscription.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err
@@ -71,6 +71,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res
 		return nil, gerror.Newf("update err:%s", update)
 	}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
+	one.Status = consts.PlanStatusCreate //todo mark createRes 判断状态
 
 	return one, nil
 }
