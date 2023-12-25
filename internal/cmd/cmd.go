@@ -74,8 +74,10 @@ var (
 				liberr.ErrIsNil(ctx, err, "redis write check failure")
 				value, err := g.Redis().Get(ctx, "g_check")
 				liberr.ErrIsNil(ctx, err, "redis read check failure")
+				_, err = g.Redis().Expire(ctx, "g_check", 10)
+				liberr.ErrIsNil(ctx, err, "redis write expire failure")
 				g.Log().Infof(ctx, "redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "swagger address: http://127.0.0.1:8080/gooverseapay/swagger")
+				g.Log().Infof(ctx, "swagger address: http://127.0.0.1:8088/gooverseapay/swagger")
 			}
 
 			s.Run()
