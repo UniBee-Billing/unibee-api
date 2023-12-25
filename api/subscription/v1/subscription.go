@@ -32,7 +32,7 @@ type SubscriptionPlanCreateRes struct {
 type SubscriptionPlanChannelTransferAndActivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_transfer_and_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"1.3订阅计划支付通道开通并激活"`
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
@@ -40,7 +40,7 @@ type SubscriptionPlanChannelTransferAndActivateRes struct {
 type SubscriptionPlanChannelActivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"1.4订阅计划支付通道激活"`
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionPlanChannelActivateRes struct {
 }
@@ -48,7 +48,7 @@ type SubscriptionPlanChannelActivateRes struct {
 type SubscriptionPlanChannelDeactivateReq struct {
 	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"1.5订阅计划支付通道取消激活"`
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId int64 `p:"channelId"    v:"required#请输入 ChannelId" `
+	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionPlanChannelDeactivateRes struct {
 }
@@ -65,7 +65,7 @@ type SubscriptionPlanDetailRes struct {
 type SubscriptionCreateReq struct {
 	g.Meta        `path:"/subscription_create" tags:"Subscription-Controller" method:"post" summary:"1.7用户订阅创建"`
 	PlanId        int64  `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId     int64  `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+	ChannelId     int64  `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
 	UserId        int64  `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
 	ChannelUserId string `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
 }
@@ -88,10 +88,10 @@ type SubscriptionDetailRes struct {
 }
 
 type SubscriptionUpdateReq struct {
-	g.Meta         `path:"/subscription_update" tags:"Subscription-Controller" method:"post" summary:"1.10用户订阅更新"`
-	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId      int64 `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId      int64 `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+	g.Meta           `path:"/subscription_update" tags:"Subscription-Controller" method:"post" summary:"1.10用户订阅更新"`
+	SubscriptionId   int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId        int64 `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ConfirmChannelId int64 `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionUpdateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`

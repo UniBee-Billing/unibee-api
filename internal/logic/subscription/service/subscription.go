@@ -18,7 +18,7 @@ import (
 func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*entity.Subscription, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.ChannelId > 0, "ChannelId invalid")
+	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetSubscriptionPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
@@ -86,23 +86,23 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*entity.Subscription, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "NewPlanId invalid")
-	utility.Assert(req.ChannelId > 0, "ChannelId invalid")
+	utility.Assert(req.ConfirmChannelId > 0, "ConfirmChannelId invalid")
 	utility.Assert(req.SubscriptionId > 0, "SubscriptionId invalid")
 	plan := query.GetSubscriptionPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetSubscriptionPlanChannel(ctx, req.NewPlanId, req.ChannelId)
+	planChannel := query.GetSubscriptionPlanChannel(ctx, req.NewPlanId, req.ConfirmChannelId)
 	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ConfirmChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	subscription := query.GetSubscriptionById(ctx, req.SubscriptionId)
 	utility.Assert(subscription != nil, "subscription not found")
-	utility.Assert(subscription.ChannelId == req.ChannelId, "channel not match")
+	utility.Assert(subscription.ChannelId == req.ConfirmChannelId, "channel not match")
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlan := query.GetSubscriptionPlanById(ctx, subscription.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
-	oldPlanChannel := query.GetSubscriptionPlanChannel(ctx, int64(oldPlan.Id), req.ChannelId)
+	oldPlanChannel := query.GetSubscriptionPlanChannel(ctx, int64(oldPlan.Id), req.ConfirmChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
 	//todo mark subscription 检查
