@@ -396,6 +396,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		return
 	}
 	if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
+		g.Log().Info(r.Context(), "Receive_Webhook_Channel:%s hook:%s", payChannel.Channel, jsonData.String())
 		eventType := jsonData.Get("event_type").String()
 		switch eventType {
 		case "BILLING.SUBSCRIPTION.EXPIRED":

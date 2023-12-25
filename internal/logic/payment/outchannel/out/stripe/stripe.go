@@ -409,6 +409,8 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
+	data, _ := gjson.Marshal(event)
+	g.Log().Info(r.Context(), "Receive_Webhook_Channel:%s hook:%s", payChannel.Channel, string(data))
 
 	switch event.Type {
 	case "customer.subscription.deleted":
