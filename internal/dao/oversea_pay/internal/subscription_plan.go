@@ -35,6 +35,8 @@ type SubscriptionPlanColumns struct {
 	HomeUrl                   string // home_url
 	ChannelProductName        string // 支付渠道product_name
 	ChannelProductDescription string // 支付渠道product_description
+	TaxPercentage             string // 税费比例： 1 =1%
+	TaxInclusive              string // 税费是否包含，1-包含，0-不包含
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
@@ -54,6 +56,8 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	HomeUrl:                   "home_url",
 	ChannelProductName:        "channel_product_name",
 	ChannelProductDescription: "channel_product_description",
+	TaxPercentage:             "tax_percentage",
+	TaxInclusive:              "tax_inclusive",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.

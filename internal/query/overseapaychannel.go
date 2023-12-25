@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -56,4 +57,18 @@ func GetListSubscriptionTypePayChannels(ctx context.Context) (list *[]entity.Ove
 		return nil
 	}
 	return &data
+}
+
+func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId string) error {
+	update, err := dao.OverseaPayChannel.Ctx(ctx).Data(g.Map{
+		dao.OverseaPayChannel.Columns().UniqueProductId: productId,
+	}).Where(dao.OverseaPayChannel.Columns().Id, id).Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("savePayChannelUniqueProductId update err:%s", update)
+	}
+	return nil
 }

@@ -25,4 +25,6 @@ type SubscriptionPlan struct {
 	HomeUrl                   string      `json:"homeUrl"                   ` // home_url
 	ChannelProductName        string      `json:"channelProductName"        ` // 支付渠道product_name
 	ChannelProductDescription string      `json:"channelProductDescription" ` // 支付渠道product_description
+	TaxPercentage             int         `json:"taxPercentage"             ` // 税费比例： 1 =1%
+	TaxInclusive              int         `json:"taxInclusive"              ` // 税费是否包含，1-包含，0-不包含
 }

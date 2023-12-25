@@ -10,8 +10,11 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -50,10 +53,10 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 	}, nil
 }
 
-func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CreateSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.CreateSubscriptionRo) (res *ro.CreateSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
+	utility.Assert(len(subscriptionRo.PlanChannel.ChannelProductId) > 0, "Product未创建")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
 	_, err = client.GetAccessToken(context.Background())
@@ -61,17 +64,20 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 		return nil, err
 	}
 	createSubscription, err := client.CreateSubscription(ctx, paypal.SubscriptionBase{
-		PlanID: planChannel.ChannelPlanId,
+		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
 		// todo mark
-		StartTime:          nil,
-		EffectiveTime:      nil,
-		Quantity:           "",
-		ShippingAmount:     nil,
+		StartTime:     nil,
+		EffectiveTime: nil,
+		Quantity:      "",
+		//Plan: &paypal.PlanOverride{
+		//	BillingCycles:      nil,
+		//	PaymentPreferences: nil,
+		//	Taxes:              nil,
+		//},
 		Subscriber:         nil,
 		AutoRenewal:        false,
 		ApplicationContext: nil,
 		CustomID:           "",
-		Plan:               nil,
 	})
 	if err != nil {
 		return nil, err
@@ -104,17 +110,22 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.CancelSubscriptionInternalResp{}, nil //todo mark
 }
 
-func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+// DoRemoteChannelSubscriptionUpdate 新旧 Plan 需要在同一个 Product 下，你这个 Product 有什么用，stripe 不需要
+// 需要支付之后才能更新，stripe 不需要
+func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
+	utility.Assert(len(subscriptionRo.PlanChannel.ChannelProductId) > 0, "Product未创建")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
 	}
-	err = client.UpdateSubscription(ctx, paypal.Subscription{}) //todo mark
+	_, err = client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, paypal.SubscriptionBase{
+		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
+		//todo mark
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +193,14 @@ func (p Paypal) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.
 func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.CreateProductInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	if len(channelEntity.UniqueProductId) > 0 {
+		//paypal 保证只创建一个 Product
+		return &ro.CreateProductInternalResp{
+			ChannelProductId:     channelEntity.UniqueProductId,
+			ChannelProductStatus: "",
+		}, nil
+	}
 	client, _ := NewClient(channelEntity.ChannelKey, channelEntity.ChannelSecret, channelEntity.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
@@ -193,9 +211,13 @@ func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 		Description: plan.ChannelProductDescription,
 		Category:    paypal.ProductCategorySoftware,
 		Type:        paypal.ProductTypeService,
-		ImageUrl:    plan.ImageUrl,
-		HomeUrl:     plan.HomeUrl,
+		ImageUrl:    plan.ImageUrl, //paypal 通道可为空
+		HomeUrl:     plan.HomeUrl,  //paypal 通道可为空
 	})
+	if err != nil {
+		return nil, err
+	}
+	err = query.SavePayChannelUniqueProductId(ctx, int64(channelEntity.Id), productResult.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -215,6 +237,12 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 	if err != nil {
 		return nil, err
 	}
+	//税费是否包含处理
+	taxInclusive := true
+	if plan.TaxInclusive == 0 {
+		//税费不包含
+		taxInclusive = false
+	}
 	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, paypal.SubscriptionPlan{
 		ProductId:   planChannel.ChannelProductId,
 		Name:        plan.PlanName,
@@ -226,8 +254,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 				PricingScheme: paypal.PricingScheme{
 					Version: 1,
 					FixedPrice: paypal.Money{
-						Currency: "EUR",
-						Value:    "5",
+						Currency: strings.ToUpper(plan.Currency),
+						Value:    utility.ConvertFenToYuanMinUnitStr(plan.Amount), //paypal 需要元为单位，小数点处理
 					},
 					CreateTime: time.Now(),
 					UpdateTime: time.Now(),
@@ -248,8 +276,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 			PaymentFailureThreshold: 0,
 		},
 		Taxes: &paypal.Taxes{
-			Percentage: "19",
-			Inclusive:  false,
+			Percentage: strconv.Itoa(plan.TaxPercentage),
+			Inclusive:  taxInclusive, //传递 false 表示由 paypal 帮助计算税率并加到价格上，true 反之
 		},
 		QuantitySupported: false,
 	})

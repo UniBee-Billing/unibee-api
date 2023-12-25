@@ -38,6 +38,7 @@ type OverseaPayChannelColumns struct {
 	Description      string // 支付方式描述
 	WebhookKey       string // webhook_key
 	WebhookSecret    string // webhook_secret
+	UniqueProductId  string // 渠道唯一 ProductId，目前仅限 Paypal 使用
 }
 
 // overseaPayChannelColumns holds the columns for table oversea_pay_channel.
@@ -60,6 +61,7 @@ var overseaPayChannelColumns = OverseaPayChannelColumns{
 	Description:      "description",
 	WebhookKey:       "webhook_key",
 	WebhookSecret:    "webhook_secret",
+	UniqueProductId:  "unique_product_id",
 }
 
 // NewOverseaPayChannelDao creates and returns a new DAO object for table data access.

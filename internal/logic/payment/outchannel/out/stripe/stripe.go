@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/customer"
@@ -30,17 +31,17 @@ func (s Stripe) setUnibeeAppInfo() {
 	})
 }
 
-func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CreateSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.CreateSubscriptionRo) (res *ro.CreateSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	if len(subscription.ChannelUserId) == 0 {
+	if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
 		params := &stripe.CustomerParams{
 			// todo mark 创建 customer 需要这两个字段 https://stripe.com/docs/api/customers/create
-			Name:  stripe.String(subscription.CustomerName),
-			Email: stripe.String(subscription.CustomerEmail),
+			Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
+			Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
 		}
 
 		createCustomResult, err := customer.New(params)
@@ -48,14 +49,41 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *ent
 			log.Printf("customer.New: %v", err)
 			return nil, err
 		}
-		subscription.ChannelUserId = createCustomResult.ID
+		subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
 	}
+	taxInclusive := true
+	if subscriptionRo.Plan.TaxInclusive == 0 {
+		//税费不包含
+		taxInclusive = false
+	}
+
 	subscriptionParams := &stripe.SubscriptionParams{
-		Customer: stripe.String(subscription.ChannelUserId),
+		Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 		Items: []*stripe.SubscriptionItemsParams{
 			{
-				Price: stripe.String(planChannel.ChannelPlanId),
+				Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+				//TaxRates: stripe.TaxRate{ // todo mark 取消 stripe 计算费率
+				//	APIResource:  stripe.APIResource{},
+				//	Active:       false,
+				//	Country:      "",
+				//	Created:      0,
+				//	Description:  "",
+				//	DisplayName:  "",
+				//	ID:           "",
+				//	Inclusive:    false,
+				//	Jurisdiction: "",
+				//	Livemode:     false,
+				//	Metadata:     nil,
+				//	Object:       "",
+				//	Percentage:   0,
+				//	State:        "",
+				//	TaxType:      "",
+				//},
 			},
+		},
+		AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
+			Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
 		},
 		PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
 		CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
@@ -88,18 +116,46 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.CancelSubscriptionInternalResp{}, nil //todo mark
 }
 
-func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+// DoRemoteChannelSubscriptionUpdate 需保证同一个 Price 在 Items 中不能出现两份
+func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.SubscriptionParams{}
-	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
+
+	detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
 	if err != nil {
 		return nil, err
 	}
-	return &ro.UpdateSubscriptionInternalResp{}, nil //todo mark
+	//遍历
+	var targetItems []*stripe.SubscriptionItemsParams
+	for _, item := range detail.Items.Data {
+		if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
+			targetItems = append(targetItems, &stripe.SubscriptionItemsParams{
+				ID:    stripe.String(item.ID),
+				Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+			})
+		}
+	}
+	if len(targetItems) == 0 {
+		return nil, gerror.New("items not match")
+	}
+
+	params := &stripe.SubscriptionParams{
+		Items: targetItems,
+	}
+	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
+	if err != nil {
+		return nil, err
+	}
+	jsonData, _ := gjson.Marshal(updateSubscription)
+	return &ro.UpdateSubscriptionInternalResp{
+		ChannelSubscriptionId:     updateSubscription.ID,
+		ChannelSubscriptionStatus: string(updateSubscription.Status),
+		Data:                      string(jsonData),
+		Status:                    0, //todo mark
+	}, nil //todo mark
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {
@@ -160,10 +216,14 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 	s.setUnibeeAppInfo()
 	params := &stripe.ProductParams{
 		Active:      stripe.Bool(true),
-		Description: stripe.String(plan.ChannelProductDescription),
-		Images:      stripe.StringSlice([]string{plan.ImageUrl}),
+		Description: stripe.String(plan.ChannelProductDescription), // todo mark 暂时不确定 description 如果为空会怎么样
 		Name:        stripe.String(plan.ChannelProductName),
-		URL:         stripe.String(plan.HomeUrl),
+	}
+	if len(plan.ImageUrl) > 0 {
+		params.Images = stripe.StringSlice([]string{plan.ImageUrl})
+	}
+	if len(plan.HomeUrl) > 0 {
+		params.URL = stripe.String(plan.HomeUrl)
 	}
 	result, err := product.New(params)
 	if err != nil {
@@ -194,11 +254,12 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	// 使用 Price 代替 Plan https://stripe.com/docs/api/plans
 	params := &stripe.PriceParams{
 		Currency:   stripe.String(strings.ToLower(targetPlan.Currency)),
-		UnitAmount: stripe.Int64(targetPlan.Amount),
+		UnitAmount: stripe.Int64(targetPlan.Amount), //todo mark 小数点可能不用处理
 		Recurring: &stripe.PriceRecurringParams{
 			Interval: stripe.String(targetPlan.IntervalUnit),
 		},
 		Product: stripe.String(planChannel.ChannelProductId),
+
 		//ProductData: &stripe.PriceProductDataParams{
 		//	ID:   stripe.String(planChannel.ChannelProductId),
 		//	Name: stripe.String(targetPlan.PlanName),

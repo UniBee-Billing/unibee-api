@@ -30,4 +30,5 @@ type OverseaPayChannel struct {
 	Description      interface{} // 支付方式描述
 	WebhookKey       interface{} // webhook_key
 	WebhookSecret    interface{} // webhook_secret
+	UniqueProductId  interface{} // 渠道唯一 ProductId，目前仅限 Paypal 使用
 }

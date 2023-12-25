@@ -4,10 +4,12 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/subscription/v1"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -27,7 +29,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
-	//plan 是否活跃检查
+	//todo mark plan 是否活跃检查
 
 	one := &entity.Subscription{
 		CompanyId:             merchantInfo.CompanyId,
@@ -53,11 +55,16 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, plan, planChannel, one)
+	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.CreateSubscriptionRo{
+		Plan:         plan,
+		SubPlans:     nil,
+		PlanChannel:  planChannel,
+		Subscription: one,
+	})
 	if err != nil {
 		return nil, err
 	}
-	//更新 planChannel
+	//更新 Subscription
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
@@ -74,4 +81,60 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	one.Status = consts.PlanStatusCreate
 
 	return one, nil
+}
+
+func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*entity.Subscription, error) {
+	utility.Assert(req != nil, "req not found")
+	utility.Assert(req.NewPlanId > 0, "NewPlanId invalid")
+	utility.Assert(req.ChannelId > 0, "ChannelId invalid")
+	utility.Assert(req.SubscriptionId > 0, "SubscriptionId invalid")
+	plan := query.GetSubscriptionPlanById(ctx, req.NewPlanId)
+	utility.Assert(plan != nil, "invalid planId")
+	planChannel := query.GetSubscriptionPlanChannel(ctx, req.NewPlanId, req.ChannelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
+	utility.Assert(payChannel != nil, "payChannel not found")
+	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	utility.Assert(merchantInfo != nil, "merchant not found")
+	subscription := query.GetSubscriptionById(ctx, req.SubscriptionId)
+	utility.Assert(subscription != nil, "subscription not found")
+	utility.Assert(subscription.ChannelId == req.ChannelId, "channel not match")
+	//暂时不开放不同通道升级功能 todo mark
+	oldPlan := query.GetSubscriptionPlanById(ctx, subscription.PlanId)
+	utility.Assert(oldPlan != nil, "oldPlan not found")
+	oldPlanChannel := query.GetSubscriptionPlanChannel(ctx, int64(oldPlan.Id), req.ChannelId)
+	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
+
+	//todo mark subscription 检查
+
+	//todo mark plan 是否活跃检查
+	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.UpdateSubscriptionRo{
+		Plan:           plan,
+		OldPlan:        oldPlan,
+		SubPlans:       nil,
+		PlanChannel:    planChannel,
+		OldPlanChannel: oldPlanChannel,
+		Subscription:   subscription,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	//更新 Subscription
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().PlanId:       plan.Id,
+		dao.Subscription.Columns().ResponseData: updateRes.Data,
+		dao.Subscription.Columns().GmtModify:    gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, subscription.Id).Update()
+	if err != nil {
+		return nil, err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return nil, gerror.Newf("update err:%s", update)
+	}
+	subscription.ChannelSubscriptionId = updateRes.ChannelSubscriptionId
+	subscription.Status = consts.PlanStatusCreate
+
+	return subscription, nil
 }

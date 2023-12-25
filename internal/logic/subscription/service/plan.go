@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/subscription/v1"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -57,18 +58,19 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	if err != nil {
 		return
 	}
-	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusInActive,// todo mark
+		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
 	// todo mark update 值没变化会报错
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("update err:%s", update)
-	//}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("update err:%s", update)
+	}
 	return
 }
 
@@ -76,6 +78,8 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
+	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
+	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
@@ -90,7 +94,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		MerchantId:                req.MerchantId,
 		PlanName:                  req.PlanName,
 		Amount:                    req.Amount,
-		Currency:                  req.Currency,
+		Currency:                  strings.ToUpper(req.Currency),
 		IntervalUnit:              strings.ToLower(req.IntervalUnit),
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,

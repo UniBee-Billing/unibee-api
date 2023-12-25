@@ -28,4 +28,5 @@ type OverseaPayChannel struct {
 	Description      string      `json:"description"      ` // 支付方式描述
 	WebhookKey       string      `json:"webhookKey"       ` // webhook_key
 	WebhookSecret    string      `json:"webhookSecret"    ` // webhook_secret
+	UniqueProductId  string      `json:"uniqueProductId"  ` // 渠道唯一 ProductId，目前仅限 Paypal 使用
 }

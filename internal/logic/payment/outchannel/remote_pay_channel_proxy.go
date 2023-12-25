@@ -35,7 +35,7 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CreateSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.CreateSubscriptionRo) (res *ro.CreateSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -47,7 +47,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, plan, planChannel, subscription)
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CancelSubscriptionInternalResp, err error) {
@@ -65,7 +65,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, plan, planChannel, subscription)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -77,7 +77,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, plan, planChannel, subscription)
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, subscriptionRo)
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {

@@ -20,6 +20,7 @@ type ISubscriptionV1 interface {
 	SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (res *v1.SubscriptionCreateRes, err error)
 	SubscriptionCancel(ctx context.Context, req *v1.SubscriptionCancelReq) (res *v1.SubscriptionCancelRes, err error)
 	SubscriptionDetail(ctx context.Context, req *v1.SubscriptionDetailReq) (res *v1.SubscriptionDetailRes, err error)
+	SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (res *v1.SubscriptionUpdateRes, err error)
 }
 
 

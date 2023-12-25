@@ -111,10 +111,31 @@ type CreateSubscriptionInternalResp struct {
 	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
+type CreateSubscriptionRo struct {
+	Plan         *entity.SubscriptionPlan        `json:"plan"`
+	SubPlans     *[]entity.SubscriptionPlan      `json:"subPlans"`
+	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
+	Subscription *entity.Subscription            `json:"subscription"`
+}
+
+type UpdateSubscriptionRo struct {
+	Plan           *entity.SubscriptionPlan        `json:"plan"`
+	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
+	SubPlans       *[]entity.SubscriptionPlan      `json:"subPlans"`
+	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
+	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
+	Subscription   *entity.Subscription            `json:"subscription"`
+}
+
 type CancelSubscriptionInternalResp struct {
 }
 
 type UpdateSubscriptionInternalResp struct {
+	ChannelUserId             string                            `json:"channelUserId"`
+	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
+	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
+	Data                      string                            `json:"data"`
+	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
 type ListSubscriptionInternalResp struct {

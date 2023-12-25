@@ -22,7 +22,7 @@ type SubscriptionPlanCreateReq struct {
 	Description        string `p:"description"  `                                                    //
 	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                 //
 	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                        //
-	ImageUrl           string `p:"imageUrl"     `                                                    // image_url
+	ImageUrl           string `p:"imageUrl"     v:"required#请输入ImageUrl,需 http 开头" `                 // image_url
 	HomeUrl            string `p:"homeUrl"      `                                                    // home_url
 }
 type SubscriptionPlanCreateRes struct {
@@ -85,4 +85,14 @@ type SubscriptionDetailReq struct {
 	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
+}
+
+type SubscriptionUpdateReq struct {
+	g.Meta         `path:"/subscription_update" tags:"Subscription-Controller" method:"post" summary:"1.10用户订阅更新"`
+	SubscriptionId int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId      int64 `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId      int64 `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+}
+type SubscriptionUpdateRes struct {
+	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
 }

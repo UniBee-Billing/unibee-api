@@ -9,7 +9,7 @@ import (
 
 type Invalid struct{}
 
-func (i Invalid) DoRemoteChannelSubscriptionCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CreateSubscriptionInternalResp, err error) {
+func (i Invalid) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.CreateSubscriptionRo) (res *ro.CreateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -19,7 +19,7 @@ func (i Invalid) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *en
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelSubscriptionUpdate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.UpdateSubscriptionInternalResp, err error) {
+func (i Invalid) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

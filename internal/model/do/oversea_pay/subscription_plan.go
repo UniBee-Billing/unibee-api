@@ -27,4 +27,6 @@ type SubscriptionPlan struct {
 	HomeUrl                   interface{} // home_url
 	ChannelProductName        interface{} // 支付渠道product_name
 	ChannelProductDescription interface{} // 支付渠道product_description
+	TaxPercentage             interface{} // 税费比例： 1 =1%
+	TaxInclusive              interface{} // 税费是否包含，1-包含，0-不包含
 }
