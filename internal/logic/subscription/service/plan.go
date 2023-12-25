@@ -29,18 +29,19 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	if err != nil {
 		return
 	}
-	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusActive,// todo mark
+		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
 	// todo mark update 值没变化会报错
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("update err:%s", update)
-	//}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("SubscriptionPlanChannelActivate update err:%s", update)
+	}
 	return
 }
 
@@ -69,7 +70,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	// todo mark update 值没变化会报错
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return gerror.Newf("update err:%s", update)
+		return gerror.Newf("SubscriptionPlanChannelDeactivate update err:%s", update)
 	}
 	return
 }
@@ -104,7 +105,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`record insert failure %s`, err)
+		err = gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
 		one = nil
 		return
 	}
@@ -128,7 +129,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		//保存planChannel
 		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitEmpty().Insert(planChannel)
 		if err != nil {
-			err = gerror.Newf(`record insert failure %s`, err)
+			err = gerror.Newf(`SubscriptionPlanChannelTransferAndActivate record insert failure %s`, err)
 			planChannel = nil
 			return err
 		}
@@ -155,7 +156,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		}
 		rowAffected, err := update.RowsAffected()
 		if rowAffected != 1 {
-			return gerror.Newf("update err:%s", update)
+			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
 		}
 		planChannel.ChannelProductId = res.ChannelProductId
 		planChannel.ChannelProductStatus = res.ChannelProductStatus
@@ -177,7 +178,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		}
 		rowAffected, err := update.RowsAffected()
 		if rowAffected != 1 {
-			return gerror.Newf("update err:%s", update)
+			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
 		}
 		planChannel.ChannelPlanId = res.ChannelPlanId
 		planChannel.ChannelPlanStatus = res.ChannelPlanStatus

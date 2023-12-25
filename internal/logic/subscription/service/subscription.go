@@ -49,7 +49,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`record insert failure %s`, err)
+		err = gerror.Newf(`SubscriptionCreate record insert failure %s`, err)
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
@@ -75,7 +75,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return nil, gerror.Newf("update err:%s", update)
+		return nil, gerror.Newf("SubscriptionCreate update err:%s", update)
 	}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
 	one.Status = consts.PlanStatusCreate
@@ -131,7 +131,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return nil, gerror.Newf("update err:%s", update)
+		return nil, gerror.Newf("SubscriptionUpdate update err:%s", update)
 	}
 	subscription.ChannelSubscriptionId = updateRes.ChannelSubscriptionId
 	subscription.Status = consts.PlanStatusCreate
