@@ -410,7 +410,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		return
 	}
 	data, _ := gjson.Marshal(event)
-	g.Log().Info(r.Context(), "Receive_Webhook_Channel:%s hook:%s", payChannel.Channel, string(data))
+	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", payChannel.Channel, " hook:", string(data))
 
 	switch event.Type {
 	case "customer.subscription.deleted":
