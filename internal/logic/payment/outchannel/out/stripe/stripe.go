@@ -430,7 +430,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, subscription.ID)
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription)
 		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionUpdated(subscription)
 	case "customer.subscription.created":
@@ -441,7 +441,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, subscription.ID)
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription)
 		// Then define and call a func to handle the successful attachment of a PaymentMethod.
 		// handleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
