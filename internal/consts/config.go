@@ -6,6 +6,11 @@ type Config struct {
 	Env         string      `yaml:"env"`
 	HostPath    string      `yaml:"host_path"`
 	RedisConfig RedisConfig `yaml:"redismq"`
+	Server      Server      `yaml:"server"`
+}
+
+type Server struct {
+	Address string `yaml:"address"`
 }
 
 type RedisConfig struct {

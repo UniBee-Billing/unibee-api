@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
+	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller/webhooks"
 	"go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
@@ -80,7 +81,7 @@ var (
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
 				liberr.ErrIsNil(ctx, err, "redis write expire failure")
 				g.Log().Infof(ctx, "redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "swagger address: http://127.0.0.1:8088/gooverseapay/swagger")
+				g.Log().Infof(ctx, "swagger address: http://127.0.0.1%s/gooverseapay/swagger", consts.GetConfigInstance().Server.Address)
 			}
 
 			s.Run()
