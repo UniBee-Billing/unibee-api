@@ -9,6 +9,7 @@ import (
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/controller/webhooks"
 	"go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/utility/liberr"
 )
 
@@ -64,10 +65,12 @@ var (
 				router.Mocks(ctx, group) //Out本地测试用Mock接口
 			})
 
-			// 通道支付 Webhook 回调
-			s.BindHandler("POST:/gooverseapay/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
 			// 通道支付 Redirect 回调
 			s.BindHandler("GET:/gooverseapay/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
+			// 通道支付 Webhook 回调
+			s.BindHandler("POST:/gooverseapay/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
+			// 初始化通道 Webhook 配置
+			outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
 				_, err := g.Redis().Set(ctx, "g_check", "checked")

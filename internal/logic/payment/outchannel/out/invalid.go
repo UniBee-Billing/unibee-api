@@ -29,7 +29,7 @@ func (i Invalid) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
+func (i Invalid) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -54,11 +54,11 @@ func (i Invalid) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan 
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelWebhook(r *ghttp.Request) {
+func (i Invalid) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	panic("invalid pay channel")
 }
 
-func (i Invalid) DoRemoteChannelRedirect(r *ghttp.Request) {
+func (i Invalid) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	panic("invalid pay channel")
 }
 

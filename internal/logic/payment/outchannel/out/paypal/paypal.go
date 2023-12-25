@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -159,9 +161,80 @@ func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	return nil, nil //todo mark
 }
 
-func (p Paypal) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
-	//TODO implement me
-	panic("implement me")
+// DoRemoteChannelCheckAndSetupWebhook https://developer.paypal.com/docs/subscriptions/webhooks/
+func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
+	utility.Assert(payChannel != nil, "payChannel is nil")
+	client, _ := NewClient(payChannel.ChannelKey, payChannel.ChannelSecret, payChannel.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		return err
+	}
+	result, err := client.ListWebhooks(ctx, paypal.AncorTypeApplication)
+	if err != nil {
+		return err
+	}
+	if len(result.Webhooks) > 1 {
+		return gerror.New("webhook endpoints count > 1")
+	}
+	//过滤不可用
+	if len(result.Webhooks) == 0 {
+		//创建
+		_, err := client.CreateWebhook(ctx, &paypal.CreateWebhookRequest{
+			URL: out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+			EventTypes: []paypal.WebhookEventType{
+				{Name: "BILLING.SUBSCRIPTION.CREATED"},
+				{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
+				{Name: "BILLING.SUBSCRIPTION.UPDATED"},
+				{Name: "BILLING.SUBSCRIPTION.EXPIRED"},
+				{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
+				{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
+				{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+			},
+		})
+		if err != nil {
+			return err
+		}
+		if err != nil {
+			return nil
+		}
+		//更新 secret
+		//utility.Assert(len(result.Secret) > 0, "secret is nil")
+		//err = query.UpdatePayChannelWebhookSecret(ctx, int64(payChannel.Id), result.Secret)
+		//if err != nil {
+		//	return err
+		//}
+	} else {
+		utility.Assert(len(result.Webhooks) == 1, "internal webhook update, count is not 1")
+		//检查并更新, todo mark 优化检查逻辑，如果 evert 一致不用发起更新
+		webhook := result.Webhooks[0]
+		//utility.Assert(strings.Compare(result.Status, "enabled") == 0, "webhook not status enabled after updated")// todo mark 需要检查里面的每一项
+		_, err := client.UpdateWebhook(ctx, webhook.ID, []paypal.WebhookField{
+			{
+				Operation: "replace",
+				Path:      "/event_types",
+				Value: []paypal.WebhookEventType{
+					{Name: "BILLING.SUBSCRIPTION.CREATED"},
+					{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
+					{Name: "BILLING.SUBSCRIPTION.UPDATED"},
+					{Name: "BILLING.SUBSCRIPTION.EXPIRED"},
+					{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
+					{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
+					{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+				},
+			},
+			{
+				Operation: "replace",
+				Path:      "/url",
+				Value:     out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+			},
+		})
+		if err != nil && strings.Compare(err.(*paypal.ErrorResponse).Name, "WEBHOOK_PATCH_REQUEST_NO_CHANGE") != 0 {
+			//WEBHOOK_PATCH_REQUEST_NO_CHANGE 忽略没有更改的错误
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (p Paypal) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
@@ -301,12 +374,13 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 	}, nil
 }
 
-func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request) {
+func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
+
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelRedirect(r *ghttp.Request) {
+func (p Paypal) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }

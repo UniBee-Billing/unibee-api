@@ -2,21 +2,27 @@ package stripe
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/stripe/stripe-go/v72"
-	"github.com/stripe/stripe-go/v72/checkout/session"
-	"github.com/stripe/stripe-go/v72/price"
-	"github.com/stripe/stripe-go/v72/product"
-	"github.com/stripe/stripe-go/v72/sub"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
+	"github.com/stripe/stripe-go/v76/price"
+	"github.com/stripe/stripe-go/v76/product"
+	sub "github.com/stripe/stripe-go/v76/subscription"
+	"github.com/stripe/stripe-go/v76/webhook"
+	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"net/http"
 	"strings"
 )
 
@@ -137,6 +143,9 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	//}
 	{
 		checkoutParams := &stripe.CheckoutSessionParams{
+			Metadata: map[string]string{
+				"orderId": subscriptionRo.Subscription.SubscriptionId,
+			},
 			Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 			LineItems: []*stripe.CheckoutSessionLineItemParams{
 				{
@@ -233,9 +242,61 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	return nil, nil //todo mark
 }
 
-func (s Stripe) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
-	//TODO implement me
-	panic("implement me")
+// DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks
+func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
+	utility.Assert(payChannel != nil, "payChannel is nil")
+	stripe.Key = payChannel.ChannelSecret
+	params := &stripe.WebhookEndpointListParams{}
+	params.Limit = stripe.Int64(10)
+	result := webhookendpoint.List(params)
+	if len(result.WebhookEndpointList().Data) > 1 {
+		return gerror.New("webhook endpoints count > 1")
+	}
+	//过滤不可用
+	if len(result.WebhookEndpointList().Data) == 0 {
+		//创建
+		params := &stripe.WebhookEndpointParams{
+			EnabledEvents: []*string{
+				stripe.String("charge.succeeded"),
+				stripe.String("charge.failed"),
+			},
+			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
+		}
+		result, err := webhookendpoint.New(params)
+		if err != nil {
+			return nil
+		}
+		//更新 secret
+		utility.Assert(len(result.Secret) > 0, "secret is nil")
+		err = query.UpdatePayChannelWebhookSecret(ctx, int64(payChannel.Id), result.Secret)
+		if err != nil {
+			return err
+		}
+	} else {
+		utility.Assert(len(result.WebhookEndpointList().Data) == 1, "internal webhook update, count is not 1")
+		//检查并更新, todo mark 优化检查逻辑，如果 evert 一致不用发起更新
+		webhook := result.WebhookEndpointList().Data[0]
+		utility.Assert(strings.Compare(webhook.Status, "enabled") == 0, "webhook not status enabled")
+		params := &stripe.WebhookEndpointParams{
+			EnabledEvents: []*string{
+				//订阅相关 webhook
+				stripe.String("customer.subscription.deleted"),
+				stripe.String("customer.subscription.updated"),
+				stripe.String("customer.subscription.created"),
+				stripe.String("customer.subscription.trial_will_end"),
+				stripe.String("customer.subscription.paused"),
+				stripe.String("customer.subscription.resumed"),
+			},
+			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
+		}
+		result, err := webhookendpoint.Update(webhook.ID, params)
+		if err != nil {
+			return err
+		}
+		utility.Assert(strings.Compare(result.Status, "enabled") == 0, "webhook not status enabled after updated")
+	}
+
+	return nil
 }
 
 // DoRemoteChannelPlanActive 使用 price 代替 plan  https://stripe.com/docs/api/plans
@@ -339,12 +400,68 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request) {
-	//TODO implement me
-	panic("implement me")
+func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+	endpointSecret := payChannel.WebhookSecret
+	signatureHeader := r.Header.Get("Stripe-Signature")
+	event, err := webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
+	if err != nil {
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel, err)
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+
+	switch event.Type {
+	case "customer.subscription.deleted":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
+		// Then define and call a func to handle the deleted subscription.
+		// handleSubscriptionCanceled(subscription)
+	case "customer.subscription.updated":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, subscription.ID)
+		// Then define and call a func to handle the successful attachment of a PaymentMethod.
+		// handleSubscriptionUpdated(subscription)
+	case "customer.subscription.created":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, subscription.ID)
+		// Then define and call a func to handle the successful attachment of a PaymentMethod.
+		// handleSubscriptionCreated(subscription)
+	case "customer.subscription.trial_will_end":
+		var subscription stripe.Subscription
+		err := json.Unmarshal(event.Data.Raw, &subscription)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription trial will end for %d.", payChannel.Channel, subscription.ID)
+		// Then define and call a func to handle the successful attachment of a PaymentMethod.
+		// handleSubscriptionTrialWillEnd(subscription)
+	default:
+		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
+	}
+	r.Response.WriteHeader(http.StatusOK)
 }
 
-func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request) {
+func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }

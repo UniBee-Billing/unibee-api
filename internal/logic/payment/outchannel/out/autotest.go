@@ -30,7 +30,7 @@ func (a AutoTest) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
+func (a AutoTest) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -55,12 +55,12 @@ func (a AutoTest) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelWebhook(r *ghttp.Request) {
+func (a AutoTest) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelRedirect(r *ghttp.Request) {
+func (a AutoTest) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }

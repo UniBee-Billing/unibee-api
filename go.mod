@@ -12,6 +12,7 @@ require (
 	github.com/google/uuid v1.5.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/redis/go-redis/v9 v9.3.0
+	github.com/stripe/stripe-go/v76 v76.9.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -42,7 +43,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/plutov/paypal/v4 v4.7.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
-	github.com/stripe/stripe-go/v72 v72.122.0 // indirect
 	go.opentelemetry.io/otel v1.14.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.14.0 // indirect
 	go.opentelemetry.io/otel/trace v1.14.0 // indirect

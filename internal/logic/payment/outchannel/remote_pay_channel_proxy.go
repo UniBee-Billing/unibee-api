@@ -35,6 +35,23 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
+func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
+	utility.Assert(p.channel != nil, "channel is not set")
+	if p.channel.EnumKey == Evonet.Code {
+		return &evonet.Evonet{}
+	} else if p.channel.EnumKey == Paypal.Code {
+		return &paypal.Paypal{}
+	} else if p.channel.EnumKey == Stripe.Code {
+		return &stripe.Stripe{}
+	} else if p.channel.EnumKey == Blank.Code {
+		return &out.Blank{}
+	} else if p.channel.EnumKey == AutoTest.Code {
+		return &out.AutoTest{}
+	} else {
+		return &out.Invalid{}
+	}
+}
+
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.CreateSubscriptionRo) (res *ro.CreateSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -95,8 +112,19 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
-	p.getRemoteChannel().DoRemoteChannelSubscriptionWebhook(r)
+func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
 }
 
 func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
@@ -159,29 +187,12 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 	return p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 }
 
-func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
-	utility.Assert(p.channel != nil, "channel is not set")
-	if p.channel.EnumKey == Evonet.Code {
-		return &evonet.Evonet{}
-	} else if p.channel.EnumKey == Paypal.Code {
-		return &paypal.Paypal{}
-	} else if p.channel.EnumKey == Stripe.Code {
-		return &stripe.Stripe{}
-	} else if p.channel.EnumKey == Blank.Code {
-		return &out.Blank{}
-	} else if p.channel.EnumKey == AutoTest.Code {
-		return &out.AutoTest{}
-	} else {
-		return &out.Invalid{}
-	}
+func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
 }
 
-func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request) {
-	p.getRemoteChannel().DoRemoteChannelWebhook(r)
-}
-
-func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request) {
-	p.getRemoteChannel().DoRemoteChannelRedirect(r)
+func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+	p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
 }
 
 func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {

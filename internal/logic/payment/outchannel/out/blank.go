@@ -30,7 +30,7 @@ func (b Blank) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *ent
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelSubscriptionWebhook(r *ghttp.Request) {
+func (b Blank) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -55,12 +55,12 @@ func (b Blank) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelWebhook(r *ghttp.Request) {
+func (b Blank) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelRedirect(r *ghttp.Request) {
+func (b Blank) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	//TODO implement me
 	panic("implement me")
 }

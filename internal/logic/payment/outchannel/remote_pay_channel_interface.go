@@ -17,10 +17,10 @@ type RemotePayChannelInterface interface {
 	DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CancelSubscriptionInternalResp, err error)
 	DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error)
 	DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error)
-	DoRemoteChannelSubscriptionWebhook(r *ghttp.Request)
 	//Payment 是支付接口
-	DoRemoteChannelWebhook(r *ghttp.Request)
-	DoRemoteChannelRedirect(r *ghttp.Request)
+	DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error)
+	DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel)
+	DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel)
 	DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error)
 	DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error)
 	DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error)
