@@ -122,15 +122,23 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
-	_, err = client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, paypal.SubscriptionBase{
+	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, paypal.SubscriptionBase{
 		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
 		//todo mark
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	return &ro.UpdateSubscriptionInternalResp{}, nil //todo mark
+	if err != nil {
+		return nil, err
+	}
+	jsonData, _ := gjson.Marshal(updateSubscription)
+	return &ro.UpdateSubscriptionInternalResp{
+		ChannelSubscriptionId:     updateSubscription.ID,
+		ChannelSubscriptionStatus: string(updateSubscription.SubscriptionStatus),
+		Data:                      string(jsonData),
+		Status:                    0, //todo mark
+	}, nil //todo mark
 }
 
 func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ListSubscriptionInternalResp, err error) {

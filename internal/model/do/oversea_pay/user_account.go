@@ -32,4 +32,5 @@ type UserAccount struct {
 	Wid        interface{} // 盟有wid
 	IsRisk     interface{} // 风控：0.低风险，1.中风险，2.高风险
 	Channel    interface{} // 渠道
+	Version    interface{} // 版本
 }

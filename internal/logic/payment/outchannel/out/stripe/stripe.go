@@ -56,7 +56,35 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		//税费不包含
 		taxInclusive = false
 	}
-
+	//stripe.CheckoutSessionParams{
+	//	Params:                   stripe.Params{},
+	//	AfterExpiration:          nil,
+	//	AllowPromotionCodes:      nil,
+	//	AutomaticTax:             nil,
+	//	BillingAddressCollection: nil,
+	//	CancelURL:                nil,
+	//	ClientReferenceID:        nil,
+	//	ConsentCollection:        nil,
+	//	Currency:                 nil,
+	//	Customer:                 nil,
+	//	CustomerCreation:         nil,
+	//	CustomerEmail:            nil,
+	//	CustomerUpdate:           nil,
+	//	Discounts:                nil,
+	//	ExpiresAt:                nil,
+	//	LineItems:                nil,
+	//	Locale:                   nil,
+	//	Mode:                     nil,
+	//	PaymentIntentData:        nil,
+	//	PaymentMethodOptions:     nil,
+	//	PaymentMethodTypes:       nil,
+	//	PhoneNumberCollection:    nil,
+	//	SetupIntentData:          nil,
+	//	SubmitType:               nil,
+	//	SubscriptionData:         nil,
+	//	SuccessURL:               nil,
+	//	TaxIDCollection:          nil,
+	//}
 	subscriptionParams := &stripe.SubscriptionParams{
 		Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
 		Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
