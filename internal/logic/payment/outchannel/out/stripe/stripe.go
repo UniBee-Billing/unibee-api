@@ -7,16 +7,16 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v72"
-	"github.com/stripe/stripe-go/v72/customer"
+	"github.com/stripe/stripe-go/v72/checkout/session"
 	"github.com/stripe/stripe-go/v72/price"
 	"github.com/stripe/stripe-go/v72/product"
 	"github.com/stripe/stripe-go/v72/sub"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
-	"log"
 	"strings"
 )
 
@@ -37,97 +37,130 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
-		params := &stripe.CustomerParams{
-			// todo mark 创建 customer 需要这两个字段 https://stripe.com/docs/api/customers/create
-			Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
-			Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
+	//{
+	//	if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
+	//		params := &stripe.CustomerParams{
+	//			// todo mark 创建 customer 需要这两个字段 https://stripe.com/docs/api/customers/create
+	//			Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
+	//			Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
+	//		}
+	//
+	//		createCustomResult, err := customer.New(params)
+	//		if err != nil {
+	//			log.Printf("customer.New: %v", err)
+	//			return nil, err
+	//		}
+	//		subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
+	//	}
+	//	taxInclusive := true
+	//	if subscriptionRo.Plan.TaxInclusive == 0 {
+	//		//税费不包含
+	//		taxInclusive = false
+	//	}
+	//	subscriptionParams := &stripe.SubscriptionParams{
+	//		Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
+	//		Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
+	//		Items: []*stripe.SubscriptionItemsParams{
+	//			{
+	//				Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//			},
+	//		},
+	//		AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
+	//			Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+	//		},
+	//		PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
+	//		CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
+	//	}
+	//	subscriptionParams.AddExpand("latest_invoice.payment_intent")
+	//	createSubscription, err := sub.New(subscriptionParams)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	////尝试创建发票
+	//	//params := &stripe.InvoiceParams{
+	//	//	Customer:     stripe.String(subscriptionRo.Subscription.ChannelUserId),
+	//	//	Subscription: stripe.String(createSubscription.ID),
+	//	//}
+	//	//createInvoice, err := invoice.New(params)
+	//	//if err != nil {
+	//	//	return nil, err
+	//	//}
+	//	//createPayInvoice, err := invoice.Pay(createInvoice.ID, &stripe.InvoicePayParams{})
+	//	//if err != nil {
+	//	//	return nil, err
+	//	//}
+	//	//createPayInvoiceJson, _ := gjson.Marshal(createPayInvoice)
+	//	//g.Log().Infof(ctx, "pay invoice:%s", string(createPayInvoiceJson))
+	//
+	//	jsonData, _ := gjson.Marshal(createSubscription)
+	//	return &ro.CreateSubscriptionInternalResp{
+	//		ChannelSubscriptionId:     createSubscription.ID,
+	//		ChannelSubscriptionStatus: string(createSubscription.Status),
+	//		Data:                      string(jsonData),
+	//		Status:                    0, //todo mark
+	//	}, nil
+	//}
+	//{
+	//	//付款链接方式可能存在多次重复付款问题
+	//	params := &stripe.PaymentLinkParams{
+	//		LineItems: []*stripe.PaymentLinkLineItemParams{
+	//			{
+	//				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//				Quantity: stripe.Int64(1),
+	//			},
+	//			//{
+	//			//	Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//			//},
+	//		},
+	//		AfterCompletion: &stripe.PaymentLinkAfterCompletionParams{
+	//			Type: stripe.String(string(stripe.PaymentLinkAfterCompletionTypeRedirect)),
+	//			Redirect: &stripe.PaymentLinkAfterCompletionRedirectParams{
+	//				URL: stripe.String("https://www.baidu.com"),
+	//			},
+	//		},
+	//		//不启用试用期
+	//		//SubscriptionData: &stripe.PaymentLinkSubscriptionDataParams{
+	//		//	TrialPeriodDays: stripe.Int64(7),
+	//		//},
+	//	}
+	//	createSubscription, err := paymentlink.New(params)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	jsonData, _ := gjson.Marshal(createSubscription)
+	//	return &ro.CreateSubscriptionInternalResp{
+	//		ChannelSubscriptionId:     createSubscription.ID,
+	//		ChannelSubscriptionStatus: "true",
+	//		Data:                      string(jsonData),
+	//		Status:                    0, //todo mark
+	//	}, nil
+	//}
+	{
+		checkoutParams := &stripe.CheckoutSessionParams{
+			Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+			LineItems: []*stripe.CheckoutSessionLineItemParams{
+				{
+					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(1),
+				},
+			},
+			SuccessURL: stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
+			CancelURL:  stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, false)),
 		}
 
-		createCustomResult, err := customer.New(params)
+		result, err := session.New(checkoutParams)
 		if err != nil {
-			log.Printf("customer.New: %v", err)
 			return nil, err
 		}
-		subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
+		jsonData, _ := gjson.Marshal(result)
+		return &ro.CreateSubscriptionInternalResp{
+			ChannelSubscriptionId:     result.ID,
+			ChannelSubscriptionStatus: "true",
+			Data:                      string(jsonData),
+			Status:                    0, //todo mark
+		}, nil
 	}
-	taxInclusive := true
-	if subscriptionRo.Plan.TaxInclusive == 0 {
-		//税费不包含
-		taxInclusive = false
-	}
-	//stripe.CheckoutSessionParams{
-	//	Params:                   stripe.Params{},
-	//	AfterExpiration:          nil,
-	//	AllowPromotionCodes:      nil,
-	//	AutomaticTax:             nil,
-	//	BillingAddressCollection: nil,
-	//	CancelURL:                nil,
-	//	ClientReferenceID:        nil,
-	//	ConsentCollection:        nil,
-	//	Currency:                 nil,
-	//	Customer:                 nil,
-	//	CustomerCreation:         nil,
-	//	CustomerEmail:            nil,
-	//	CustomerUpdate:           nil,
-	//	Discounts:                nil,
-	//	ExpiresAt:                nil,
-	//	LineItems:                nil,
-	//	Locale:                   nil,
-	//	Mode:                     nil,
-	//	PaymentIntentData:        nil,
-	//	PaymentMethodOptions:     nil,
-	//	PaymentMethodTypes:       nil,
-	//	PhoneNumberCollection:    nil,
-	//	SetupIntentData:          nil,
-	//	SubmitType:               nil,
-	//	SubscriptionData:         nil,
-	//	SuccessURL:               nil,
-	//	TaxIDCollection:          nil,
-	//}
-	subscriptionParams := &stripe.SubscriptionParams{
-		Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
-		Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
-		Items: []*stripe.SubscriptionItemsParams{
-			{
-				Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-				//TaxRates: stripe.TaxRate{ // todo mark 取消 stripe 计算费率
-				//	APIResource:  stripe.APIResource{},
-				//	Active:       false,
-				//	Country:      "",
-				//	Created:      0,
-				//	Description:  "",
-				//	DisplayName:  "",
-				//	ID:           "",
-				//	Inclusive:    false,
-				//	Jurisdiction: "",
-				//	Livemode:     false,
-				//	Metadata:     nil,
-				//	Object:       "",
-				//	Percentage:   0,
-				//	State:        "",
-				//	TaxType:      "",
-				//},
-			},
-		},
-		AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
-			Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
-		},
-		PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
-		CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
-	}
-	subscriptionParams.AddExpand("latest_invoice.payment_intent")
-	createSubscription, err := sub.New(subscriptionParams)
-	if err != nil {
-		return nil, err
-	}
-	jsonData, _ := gjson.Marshal(createSubscription)
-	return &ro.CreateSubscriptionInternalResp{
-		ChannelSubscriptionId:     createSubscription.ID,
-		ChannelSubscriptionStatus: string(createSubscription.Status),
-		Data:                      string(jsonData),
-		Status:                    0, //todo mark
-	}, nil
+
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.CancelSubscriptionInternalResp, err error) {
