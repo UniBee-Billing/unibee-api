@@ -5,8 +5,10 @@ import (
 	"errors"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
+	"github.com/stripe/stripe-go/v76"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel/out"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
@@ -375,9 +377,70 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 }
 
 func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	//TODO implement me
-
-	panic("implement me")
+	jsonData, err := r.GetJson()
+	if err != nil {
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.Channel, err)
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+	client, _ := NewClient(payChannel.ChannelKey, payChannel.ChannelSecret, payChannel.Host)
+	_, err = client.GetAccessToken(context.Background())
+	if err != nil {
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+	signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
+	if err != nil {
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification success\n", payChannel.Channel)
+		r.Response.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
+		eventType := jsonData.Get("event_type").String()
+		switch eventType {
+		case "BILLING.SUBSCRIPTION.EXPIRED":
+			var subscription stripe.Subscription
+			err := jsonData.Get("resource").UnmarshalValue(&subscription)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the deleted subscription.
+			// handleSubscriptionCanceled(subscription)
+		case "BILLING.SUBSCRIPTION.UPDATED":
+			var subscription stripe.Subscription
+			err := jsonData.Get("resource").UnmarshalValue(&subscription)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionUpdated(subscription)
+		case "BILLING.SUBSCRIPTION.CREATED":
+			var subscription stripe.Subscription
+			err := jsonData.Get("resource").UnmarshalValue(&subscription)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				return
+			}
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionCreated(subscription)
+		default:
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, eventType)
+		}
+		r.Response.WriteHeader(http.StatusOK)
+		return
+	} else {
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel)
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
 }
 
 func (p Paypal) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
