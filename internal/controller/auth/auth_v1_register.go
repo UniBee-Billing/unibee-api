@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/email"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 
 	"go-oversea-pay/api/auth/v1"
@@ -26,10 +28,12 @@ func (c *ControllerV1) Register(ctx context.Context, req *v1.RegisterReq) (res *
 	id, _ := result.LastInsertId()
 	user.Id = uint64(id)
 	var newOne *entity.UserAccount
-	err = dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Id: user.Id}).OmitEmpty().Scan(&newOne)
-	if err != nil {
-		return nil, err
+	newOne = query.GetUserAccountById(ctx, user.Id)
+	if newOne == nil {
+		return nil, gerror.New("internal err:user query")
 	}
+
+	email.SendEmailToUser(newOne)
 
 	return &v1.RegisterRes{User: newOne}, nil
 }
