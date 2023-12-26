@@ -1,6 +1,9 @@
 package v1
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+)
 
 type LoginReq struct {
 	g.Meta `path:"/sso/login" tags:"Auth-Controller" method:"post" summary:"1.1 用户登录"`
@@ -15,4 +18,5 @@ type RegisterReq struct {
 	Gender string `p:"gender" dc:"性别" `
 }
 type RegisterRes struct {
+	User *entity.UserAccount `p:"user" dc:"user"`
 }
