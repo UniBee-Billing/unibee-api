@@ -30,4 +30,5 @@ type Subscription struct {
 	ChannelUserId         interface{} // 渠道用户 Id
 	CustomerName          interface{} // customer_name
 	CustomerEmail         interface{} // customer_email
+	Link                  interface{} //
 }

@@ -108,6 +108,7 @@ type CreateSubscriptionInternalResp struct {
 	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
 	Data                      string                            `json:"data"`
+	Link                      string                            `json:"link"`
 	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 
@@ -135,6 +136,7 @@ type UpdateSubscriptionInternalResp struct {
 	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
 	Data                      string                            `json:"data"`
+	Link                      string                            `json:"link"`
 	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
 }
 

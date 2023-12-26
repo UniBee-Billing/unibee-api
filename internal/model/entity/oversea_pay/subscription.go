@@ -28,4 +28,5 @@ type Subscription struct {
 	ChannelUserId         string      `json:"channelUserId"         ` // 渠道用户 Id
 	CustomerName          string      `json:"customerName"          ` // customer_name
 	CustomerEmail         string      `json:"customerEmail"         ` // customer_email
+	Link                  string      `json:"link"                  ` //
 }

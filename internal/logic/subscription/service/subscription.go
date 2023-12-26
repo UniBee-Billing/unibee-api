@@ -66,10 +66,12 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	}
 	//更新 Subscription
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId,
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
+		dao.Subscription.Columns().Link:                  createRes.Link,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
-	}).Where(dao.Subscription.Columns().Id, one.Id).Update()
+	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +81,8 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
 	one.Status = consts.PlanStatusCreate
+	one.Link = createRes.Link
+	one.ChannelUserId = createRes.ChannelUserId
 
 	return one, nil
 }
@@ -125,7 +129,8 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 		dao.Subscription.Columns().PlanId:       plan.Id,
 		dao.Subscription.Columns().ResponseData: updateRes.Data,
 		dao.Subscription.Columns().GmtModify:    gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, subscription.Id).Update()
+		dao.Subscription.Columns().Link:         updateRes.Link,
+	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +140,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	}
 	subscription.ChannelSubscriptionId = updateRes.ChannelSubscriptionId
 	subscription.Status = consts.PlanStatusCreate
+	subscription.Link = updateRes.Link
 
 	return subscription, nil
 }

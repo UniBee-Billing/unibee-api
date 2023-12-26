@@ -63,7 +63,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusInActive,// todo mark
 		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
 			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
 		if err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
 			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
 			dao.SubscriptionPlanChannel.Columns().Status:            int(res.Status),
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
 		if err != nil {
 			return err
 		}

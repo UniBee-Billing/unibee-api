@@ -38,6 +38,7 @@ type SubscriptionColumns struct {
 	ChannelUserId         string // 渠道用户 Id
 	CustomerName          string // customer_name
 	CustomerEmail         string // customer_email
+	Link                  string //
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -60,6 +61,7 @@ var subscriptionColumns = SubscriptionColumns{
 	ChannelUserId:         "channel_user_id",
 	CustomerName:          "customer_name",
 	CustomerEmail:         "customer_email",
+	Link:                  "link",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

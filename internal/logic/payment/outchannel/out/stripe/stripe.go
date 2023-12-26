@@ -30,6 +30,13 @@ import (
 type Stripe struct {
 }
 
+// 测试数据
+// 付款成功
+// 4242 4242 4242 4242
+// 付款需要验证
+// 4000 0025 0000 3155
+// 付款被拒绝
+// 4000 0000 0000 9995
 func (s Stripe) setUnibeeAppInfo() {
 	stripe.SetAppInfo(&stripe.AppInfo{
 		Name:    "unibee.server",
@@ -101,6 +108,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 		jsonData, _ := gjson.Marshal(createSubscription)
 		return &ro.CreateSubscriptionInternalResp{
+			ChannelUserId:             subscriptionRo.Subscription.ChannelUserId,
+			Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
 			ChannelSubscriptionId:     createSubscription.ID,
 			ChannelSubscriptionStatus: string(createSubscription.Status),
 			Data:                      string(jsonData),
@@ -214,17 +223,39 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	params := &stripe.SubscriptionParams{
-		Items: targetItems,
+		Items:             targetItems,
+		PaymentBehavior:   stripe.String("pending_if_incomplete"),
+		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	if err != nil {
 		return nil, err
 	}
+	////尝试创建发票
+	//invoiceParams := &stripe.InvoiceParams{
+	//	Customer:     stripe.String(subscriptionRo.Subscription.ChannelUserId),
+	//	Subscription: stripe.String(updateSubscription.ID),
+	//}
+	//createInvoice, err := invoice.New(invoiceParams)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//createInvoiceJsonData, _ := gjson.Marshal(createInvoice)
+	//g.Log().Infof(ctx, "create invoice:", createInvoiceJsonData)
+	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
+	//createPayInvoice, err := invoice.Pay(createInvoice.ID, &stripe.InvoicePayParams{})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//createPayInvoiceJson, _ := gjson.Marshal(createPayInvoice)
+	//g.Log().Infof(ctx, "pay invoice:%s", string(createPayInvoiceJson))
+
 	jsonData, _ := gjson.Marshal(updateSubscription)
 	return &ro.UpdateSubscriptionInternalResp{
 		ChannelSubscriptionId:     updateSubscription.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
 		Data:                      string(jsonData),
+		Link:                      updateSubscription.LatestInvoice.HostedInvoiceURL,
 		Status:                    0, //todo mark
 	}, nil //todo mark
 }

@@ -86,8 +86,17 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
+	//获取 Link
+	var link string
+	for _, item := range createSubscription.Links {
+		if strings.Compare(item.Rel, "approve") == 0 {
+			link = item.Href
+		}
+	}
 	jsonData, _ := gjson.Marshal(createSubscription)
 	return &ro.CreateSubscriptionInternalResp{
+		ChannelUserId:             createSubscription.CustomID,
+		Link:                      link,
 		ChannelSubscriptionId:     createSubscription.ID,
 		ChannelSubscriptionStatus: string(createSubscription.SubscriptionStatus),
 		Data:                      string(jsonData),
