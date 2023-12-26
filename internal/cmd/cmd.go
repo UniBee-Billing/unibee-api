@@ -66,6 +66,14 @@ var (
 				router.Mocks(ctx, group) //Out本地测试用Mock接口
 			})
 
+			s.Group("/gooverseapay/auth", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreAuth,
+				)
+				router.Auth(ctx, group) //Out本地测试用Mock接口
+			})
+
 			// 通道支付 Redirect 回调
 			s.BindHandler("GET:/gooverseapay/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
 			// 通道支付 Webhook 回调
