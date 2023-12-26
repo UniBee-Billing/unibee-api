@@ -32,14 +32,14 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	//todo mark plan 是否活跃检查
 
 	one := &entity.Subscription{
-		CompanyId:             merchantInfo.CompanyId,
-		MerchantId:            merchantInfo.Id,
-		PlanId:                req.PlanId,
-		ChannelId:             req.ChannelId,
-		UserId:                req.UserId,
-		Quantity:              12,                 // todo mark 按照逻辑计算数量
-		CustomerName:          "jack",             // todo mark
-		CustomerEmail:         "jack.fu@wowow.io", // todo mark
+		CompanyId:  merchantInfo.CompanyId,
+		MerchantId: merchantInfo.Id,
+		PlanId:     req.PlanId,
+		ChannelId:  req.ChannelId,
+		UserId:     req.UserId,
+		Quantity:   12, // todo mark 按照逻辑计算数量
+		//CustomerName:          "jack3",             // todo mark
+		//CustomerEmail:         "jack3.fu@wowow.io", // todo mark
 		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
 		ChannelSubscriptionId: "",
 		Status:                consts.SubStatusInit,
