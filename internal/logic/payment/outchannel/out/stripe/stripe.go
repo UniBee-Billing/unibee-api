@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/invoice"
 	"github.com/stripe/stripe-go/v76/price"
 	"github.com/stripe/stripe-go/v76/product"
 	sub "github.com/stripe/stripe-go/v76/subscription"
@@ -243,19 +244,16 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	//createInvoiceJsonData, _ := gjson.Marshal(createInvoice)
 	//g.Log().Infof(ctx, "create invoice:", createInvoiceJsonData)
 	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
-	//createPayInvoice, err := invoice.Pay(createInvoice.ID, &stripe.InvoicePayParams{})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//createPayInvoiceJson, _ := gjson.Marshal(createPayInvoice)
-	//g.Log().Infof(ctx, "pay invoice:%s", string(createPayInvoiceJson))
+	queryParams := &stripe.InvoiceParams{}
+	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	jsonData, _ := gjson.Marshal(updateSubscription)
 	return &ro.UpdateSubscriptionInternalResp{
 		ChannelSubscriptionId:     updateSubscription.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
 		Data:                      string(jsonData),
-		Link:                      updateSubscription.LatestInvoice.HostedInvoiceURL,
+		Link:                      queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
 	}, nil //todo mark
 }

@@ -73,11 +73,49 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		StartTime:     nil,
 		EffectiveTime: nil,
 		Quantity:      "",
-		//Plan: &paypal.PlanOverride{
-		//	BillingCycles:      nil,
-		//	PaymentPreferences: nil,
-		//	Taxes:              nil,
-		//},
+		//测试安装费
+		ShippingAmount: &paypal.Money{
+			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+			Value:    "10",
+		},
+		Plan: &paypal.PlanOverride{
+			BillingCycles: []paypal.BillingCycleOverride{
+				{
+					PricingScheme: paypal.PricingScheme{
+						Version: 1,
+						FixedPrice: paypal.Money{
+							Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount), //paypal 需要元为单位，小数点处理
+						},
+						CreateTime: time.Now(),
+						UpdateTime: time.Now(),
+					},
+					Sequence: Int(1),
+				},
+				//{
+				//	PricingScheme: paypal.PricingScheme{
+				//		Version: 1,
+				//		FixedPrice: paypal.Money{
+				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+				//			Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
+				//		},
+				//		CreateTime: time.Now(),
+				//		UpdateTime: time.Now(),
+				//	},
+				//	Sequence: Int(1),
+				//},
+			},
+			PaymentPreferences: &paypal.PaymentPreferencesOverride{
+				AutoBillOutstanding: false,
+				SetupFee: paypal.Money{
+					Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+					Value:    "0",
+				},
+				SetupFeeFailureAction:   paypal.SetupFeeFailureActionCancel,
+				PaymentFailureThreshold: 2,
+			},
+			Taxes: nil,
+		},
 		Subscriber:         nil,
 		AutoRenewal:        false,
 		ApplicationContext: nil,
@@ -123,6 +161,11 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.CancelSubscriptionInternalResp{}, nil //todo mark
 }
 
+// Int returns a pointer to the int64 value passed in.
+func Int(v int) *int {
+	return &v
+}
+
 // DoRemoteChannelSubscriptionUpdate 新旧 Plan 需要在同一个 Product 下，你这个 Product 有什么用，stripe 不需要
 // 需要支付之后才能更新，stripe 不需要
 func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.UpdateSubscriptionRo) (res *ro.UpdateSubscriptionInternalResp, err error) {
@@ -137,6 +180,49 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, paypal.SubscriptionBase{
 		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
+		//测试安装费
+		ShippingAmount: &paypal.Money{
+			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+			Value:    "15",
+		},
+		Plan: &paypal.PlanOverride{
+			BillingCycles: []paypal.BillingCycleOverride{
+				{
+					PricingScheme: paypal.PricingScheme{
+						Version: 1,
+						FixedPrice: paypal.Money{
+							Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount), //paypal 需要元为单位，小数点处理
+						},
+						CreateTime: time.Now(),
+						UpdateTime: time.Now(),
+					},
+					Sequence: Int(1),
+				},
+				//{
+				//	PricingScheme: paypal.PricingScheme{
+				//		Version: 1,
+				//		FixedPrice: paypal.Money{
+				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+				//			Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
+				//		},
+				//		CreateTime: time.Now(),
+				//		UpdateTime: time.Now(),
+				//	},
+				//	Sequence: Int(1),
+				//},
+			},
+			PaymentPreferences: &paypal.PaymentPreferencesOverride{
+				AutoBillOutstanding: false,
+				SetupFee: paypal.Money{
+					Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
+					Value:    "25", //todo mark 开户费在更新的时候似乎没有用处
+				},
+				SetupFeeFailureAction:   paypal.SetupFeeFailureActionCancel,
+				PaymentFailureThreshold: 2,
+			},
+			Taxes: nil,
+		},
 		//todo mark
 	})
 	if err != nil {
@@ -146,10 +232,17 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		return nil, err
 	}
 	jsonData, _ := gjson.Marshal(updateSubscription)
+	var link string
+	for _, item := range updateSubscription.Links {
+		if strings.Compare(item.Rel, "approve") == 0 {
+			link = item.Href
+		}
+	}
 	return &ro.UpdateSubscriptionInternalResp{
 		ChannelSubscriptionId:     updateSubscription.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.SubscriptionStatus),
 		Data:                      string(jsonData),
+		Link:                      link,
 		Status:                    0, //todo mark
 	}, nil //todo mark
 }
@@ -353,7 +446,7 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 					UpdateTime: time.Now(),
 				},
 				Frequency: paypal.Frequency{
-					IntervalUnit:  paypal.IntervalUnitYear,
+					IntervalUnit:  paypal.IntervalUnitMonth,
 					IntervalCount: 1,
 				},
 				TenureType:  paypal.TenureTypeRegular,
