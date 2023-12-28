@@ -11,6 +11,7 @@ import (
 	"github.com/stripe/stripe-go/v76"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel/out"
+	"go-oversea-pay/internal/logic/payment/outchannel/out/log"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -67,7 +68,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
-	createSubscription, err := client.CreateSubscription(ctx, paypal.SubscriptionBase{
+	param := paypal.SubscriptionBase{
 		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
 		// todo mark
 		StartTime:     nil,
@@ -120,7 +121,9 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		AutoRenewal:        false,
 		ApplicationContext: nil,
 		CustomID:           "",
-	})
+	}
+	createSubscription, err := client.CreateSubscription(ctx, param)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", param, createSubscription, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -154,6 +157,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 		return nil, err
 	}
 	err = client.CancelSubscription(ctx, subscription.ChannelSubscriptionId, "")
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCancel", nil, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	} // cancelReason
@@ -178,7 +182,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
-	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, paypal.SubscriptionBase{
+	param := paypal.SubscriptionBase{
 		PlanID: subscriptionRo.PlanChannel.ChannelPlanId,
 		//测试安装费
 		ShippingAmount: &paypal.Money{
@@ -224,7 +228,9 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 			Taxes: nil,
 		},
 		//todo mark
-	})
+	}
+	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, param)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -257,7 +263,8 @@ func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	if err != nil {
 		return nil, err
 	}
-	_, err = client.GetSubscriptionDetails(ctx, subscription.ChannelSubscriptionId)
+	response, err := client.GetSubscriptionDetails(ctx, subscription.ChannelSubscriptionId)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionDetails", subscription.ChannelSubscriptionId, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +290,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 	//过滤不可用
 	if len(result.Webhooks) == 0 {
 		//创建
-		_, err := client.CreateWebhook(ctx, &paypal.CreateWebhookRequest{
+		param := &paypal.CreateWebhookRequest{
 			URL: out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
 			EventTypes: []paypal.WebhookEventType{
 				{Name: "BILLING.SUBSCRIPTION.CREATED"},
@@ -294,7 +301,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
 				{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
 			},
-		})
+		}
+		response, err := client.CreateWebhook(ctx, param)
+		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", param, response, err, "", nil, payChannel)
 		if err != nil {
 			return err
 		}
@@ -312,7 +321,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 		//检查并更新, todo mark 优化检查逻辑，如果 evert 一致不用发起更新
 		webhook := result.Webhooks[0]
 		//utility.Assert(strings.Compare(result.Status, "enabled") == 0, "webhook not status enabled after updated")// todo mark 需要检查里面的每一项
-		_, err := client.UpdateWebhook(ctx, webhook.ID, []paypal.WebhookField{
+		param := []paypal.WebhookField{
 			{
 				Operation: "replace",
 				Path:      "/event_types",
@@ -331,7 +340,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				Path:      "/url",
 				Value:     out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
 			},
-		})
+		}
+		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
+		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", param, response, err, webhook.ID, nil, payChannel)
 		if err != nil && strings.Compare(err.(*paypal.ErrorResponse).Name, "WEBHOOK_PATCH_REQUEST_NO_CHANGE") != 0 {
 			//WEBHOOK_PATCH_REQUEST_NO_CHANGE 忽略没有更改的错误
 			return err
@@ -352,6 +363,7 @@ func (p Paypal) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Subs
 		return err
 	}
 	err = client.ActivateSubscriptionPlan(ctx, planChannel.ChannelPlanId)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanActive", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -369,6 +381,7 @@ func (p Paypal) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.
 		return err
 	}
 	err = client.DeactivateSubscriptionPlans(ctx, planChannel.ChannelPlanId)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanDeactivate", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -391,14 +404,16 @@ func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 	if err != nil {
 		return nil, err
 	}
-	productResult, err := client.CreateProduct(ctx, paypal.Product{
+	param := paypal.Product{
 		Name:        plan.ChannelProductName,
 		Description: plan.ChannelProductDescription,
 		Category:    paypal.ProductCategorySoftware,
 		Type:        paypal.ProductTypeService,
 		ImageUrl:    plan.ImageUrl, //paypal 通道可为空
 		HomeUrl:     plan.HomeUrl,  //paypal 通道可为空
-	})
+	}
+	productResult, err := client.CreateProduct(ctx, param)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelProductCreate", param, productResult, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +443,7 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 		//税费不包含
 		taxInclusive = false
 	}
-	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, paypal.SubscriptionPlan{
+	param := paypal.SubscriptionPlan{
 		ProductId:   planChannel.ChannelProductId,
 		Name:        plan.PlanName,
 		Status:      paypal.SubscriptionPlanStatusActive,
@@ -465,7 +480,9 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 			Inclusive:  taxInclusive, //传递 false 表示由 paypal 帮助计算税率并加到价格上，true 反之
 		},
 		QuantitySupported: false,
-	})
+	}
+	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, param)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanCreateAndActivate", param, subscriptionPlan, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -500,6 +517,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
 		g.Log().Info(r.Context(), "Receive_Webhook_Channel:", payChannel.Channel, " hook:", jsonData.String())
 		eventType := jsonData.Get("event_type").String()
+		var responseBack = http.StatusOK
 		switch eventType {
 		case "BILLING.SUBSCRIPTION.EXPIRED":
 			var subscription stripe.Subscription
@@ -507,37 +525,41 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
-				return
+				responseBack = http.StatusBadRequest
+			} else {
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
+				// Then define and call a func to handle the deleted subscription.
+				// handleSubscriptionCanceled(subscription)
 			}
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the deleted subscription.
-			// handleSubscriptionCanceled(subscription)
 		case "BILLING.SUBSCRIPTION.UPDATED":
 			var subscription stripe.Subscription
 			err := jsonData.Get("resource").UnmarshalValue(&subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
-				return
+				responseBack = http.StatusBadRequest
+			} else {
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, subscription.ID)
+				// Then define and call a func to handle the successful attachment of a PaymentMethod.
+				// handleSubscriptionUpdated(subscription)
 			}
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionUpdated(subscription)
 		case "BILLING.SUBSCRIPTION.CREATED":
 			var subscription stripe.Subscription
 			err := jsonData.Get("resource").UnmarshalValue(&subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
-				return
+				responseBack = http.StatusBadRequest
+			} else {
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, subscription.ID)
+				// Then define and call a func to handle the successful attachment of a PaymentMethod.
+				// handleSubscriptionCreated(subscription)
 			}
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionCreated(subscription)
 		default:
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, eventType)
 		}
 		r.Response.WriteHeader(http.StatusOK)
+		log.SaveChannelHttpLog(r.Context(), "DoRemoteChannelWebhook", jsonData, responseBack, err, "", nil, payChannel)
 		return
 	} else {
 		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel)

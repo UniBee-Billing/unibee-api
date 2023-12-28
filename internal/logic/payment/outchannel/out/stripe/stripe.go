@@ -18,12 +18,12 @@ import (
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/outchannel/out"
+	"go-oversea-pay/internal/logic/payment/outchannel/out/log"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -62,7 +62,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 			createCustomResult, err := customer.New(params)
 			if err != nil {
-				log.Printf("customer.New: %v", err)
+				g.Log().Printf(ctx, "customer.New: %v", err)
 				return nil, err
 			}
 			subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
@@ -88,6 +88,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		}
 		subscriptionParams.AddExpand("latest_invoice.payment_intent")
 		createSubscription, err := sub.New(subscriptionParams)
+		log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
 		if err != nil {
 			return nil, err
 		}
@@ -190,7 +191,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionCancelParams{}
-	_, err = sub.Cancel(subscription.ChannelSubscriptionId, params)
+	response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", params, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -229,6 +231,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -246,6 +249,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
 	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	jsonData, _ := gjson.Marshal(updateSubscription)
@@ -265,7 +269,8 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionParams{}
-	_, err = sub.Get("sub_1MowQVLkdIwHu7ixeRlqHVzs", params)
+	response, err := sub.Get(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionDetails", params, response, err, subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -293,6 +298,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.New(params)
+		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", params, result, err, "", nil, payChannel)
 		if err != nil {
 			return nil
 		}
@@ -320,6 +326,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.Update(webhook.ID, params)
+		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", params, result, err, webhook.ID, nil, payChannel)
 		if err != nil {
 			return err
 		}
@@ -338,7 +345,8 @@ func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entit
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(true) // todo mark 使用这种方式可能不能用
-	_, err = price.Update(planChannel.ChannelPlanId, params)
+	result, err := price.Update(planChannel.ChannelPlanId, params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanActive", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -353,7 +361,8 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
-	_, err = price.Update(planChannel.ChannelPlanId, params)
+	result, err := price.Update(planChannel.ChannelPlanId, params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanDeactivate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -378,6 +387,7 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 		params.URL = stripe.String(plan.HomeUrl)
 	}
 	result, err := product.New(params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelProductCreate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -418,6 +428,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		//},//这里是创建的意思
 	}
 	result, err := price.New(params)
+	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanCreateAndActivate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -442,6 +453,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	data, _ := gjson.Marshal(event)
 	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", payChannel.Channel, " hook:", string(data))
 
+	var responseBack = http.StatusOK
 	switch event.Type {
 	case "customer.subscription.deleted":
 		var subscription stripe.Subscription
@@ -449,47 +461,52 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 			r.Response.WriteHeader(http.StatusBadRequest)
-			return
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the deleted subscription.
+			// handleSubscriptionCanceled(subscription)
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
-		// Then define and call a func to handle the deleted subscription.
-		// handleSubscriptionCanceled(subscription)
 	case "customer.subscription.updated":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 			r.Response.WriteHeader(http.StatusBadRequest)
-			return
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionUpdated(subscription)
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
-		// handleSubscriptionUpdated(subscription)
 	case "customer.subscription.created":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 			r.Response.WriteHeader(http.StatusBadRequest)
-			return
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionCreated(subscription)
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
-		// handleSubscriptionCreated(subscription)
 	case "customer.subscription.trial_will_end":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
 			r.Response.WriteHeader(http.StatusBadRequest)
-			return
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription trial will end for %d.", payChannel.Channel, subscription.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionTrialWillEnd(subscription)
 		}
-		g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription trial will end for %d.", payChannel.Channel, subscription.ID)
-		// Then define and call a func to handle the successful attachment of a PaymentMethod.
-		// handleSubscriptionTrialWillEnd(subscription)
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
 	}
+	log.SaveChannelHttpLog(r.Context(), "DoRemoteChannelWebhook", event, responseBack, err, "", nil, payChannel)
 	r.Response.WriteHeader(http.StatusOK)
 }
 
