@@ -7,8 +7,6 @@ go-build:
     - main
   stage: go-build
   image: golang # 利用Golang容器进行打包Golang项目
-  tags:
-    - golang
   script:
     - go env -w GOPROXY=https://goproxy.cn,direct
     - go env -w GOPRIVATE='gitlab.hknet-inc.com'
