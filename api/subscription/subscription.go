@@ -21,4 +21,5 @@ type ISubscriptionV1 interface {
 	SubscriptionCancel(ctx context.Context, req *v1.SubscriptionCancelReq) (res *v1.SubscriptionCancelRes, err error)
 	SubscriptionDetail(ctx context.Context, req *v1.SubscriptionDetailReq) (res *v1.SubscriptionDetailRes, err error)
 	SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (res *v1.SubscriptionUpdateRes, err error)
+	SubscriptionWebhookCheckAndSetup(ctx context.Context, req *v1.SubscriptionWebhookCheckAndSetupReq) (res *v1.SubscriptionWebhookCheckAndSetupRes, err error)
 }

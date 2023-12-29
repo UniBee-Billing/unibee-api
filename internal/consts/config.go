@@ -4,13 +4,14 @@ import "sync"
 
 type Config struct {
 	Env         string      `yaml:"env"`
-	HostPath    string      `yaml:"host_path"`
 	RedisConfig RedisConfig `yaml:"redismq"`
 	Server      Server      `yaml:"server"`
 }
 
 type Server struct {
-	Address string `yaml:"address"`
+	Address    string `yaml:"address"`
+	Name       string `yaml:"name"`
+	DomainPath string `yaml:"domainPath"`
 }
 
 type RedisConfig struct {

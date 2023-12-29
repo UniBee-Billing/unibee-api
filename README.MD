@@ -10,9 +10,9 @@
 
 #### 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
 
-#### 本地环境运行，添加 Program Arguments: --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
+#### 本地环境运行，添加 Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
 
-##### go run main.go --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
+##### go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
 
 [//]: # "打包上传：gf docker -tn heiku_gooverseapay:daily -p"
 
@@ -40,6 +40,10 @@
 
 #### FLUSH PRIVILEGES;
 
+#### AWS 开发环境
+
+https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
+
 Quick Start:
 
 - https://goframe.org/pages/viewpage.action?pageId=1114399
@@ -66,6 +70,11 @@ nacos.ip
 nacos.port
 nacos.namespace
 nacos.group
+<<<<<<< HEAD
 nacos.data.id
 日常 nacos 配置环境
 http://daily-local.wangqubi.cn/nacos/
+=======
+nacos.data.id
+
+> > > > > > > origin/main
