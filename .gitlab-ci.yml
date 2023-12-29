@@ -1,11 +1,20 @@
 stages:
-  - go-build
-  - docker
+  - build
+  - deploy
 
-go-build:
+variables:
+  IMAGE_GROUP: xxx
+  NAME_SPACE: xxx
+  GOPATH: ${CI_PROJECT_DIR}/.go
+  GOMODCACHE: ${CI_PROJECT_DIR}/.go/pkg/mod
+  GOCACHE: ${CI_PROJECT_DIR}/.go/.cache/go-build
+  GOLANGCI_LINT_CACHE: ${CI_PROJECT_DIR}/.go/.cache/golangci-lint
+
+
+build:
   only:
     - main
-  stage: go-build
+  stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
     - go env -w GOPROXY=https://goproxy.cn,direct
@@ -14,10 +23,10 @@ go-build:
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x temp/linux_amd64/main
 
-docker-build:
+deploy:
   only:
     - main
   image: maven:3.6.3-jdk-8-slim
-  stage: docker
+  stage: deploy
   script:
     - echo 'hello docker build'
