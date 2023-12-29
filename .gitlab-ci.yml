@@ -7,14 +7,14 @@ stages:
 
 package-build:
   only:
-    - master
+    - main
   stage: package
   script:
     - echo 'hello package build'
 
 docker-build:
   only:
-    - master
+    - main
   stage: docker
   script:
     - echo 'hello docker build'
