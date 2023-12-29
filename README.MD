@@ -7,23 +7,16 @@
 ### 本地开发
 #### 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
 
-#### 本地环境运行，添加Program Arguments: --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
-##### go run main.go --nacos-port=7113 --nacos-namespace=hklocal --nacos-group=config --nacos-data-id=hk-go-settings.yaml --nacos-ip=frps.hknet-inc.com
+#### 本地环境运行，添加Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
+##### go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
 
 [//]: # (打包上传：gf docker -tn heiku_gooverseapay:daily -p)
 #### 生成 api 代码：sh generate_ctrl.sh
 #### 生成 dao 代码：sh generale_dao.sh
 #### 打包上传：sh buildAndPush.sh
 
-#### 数据库账号
-#### 地址：frps.hknet-inc.com
-#### 端口：7111
-#### 账号：gooverseapay
-#### 密码：1lc3BhY2UiOiJrdWJlcm5
-#### create user 'gooverseapay'@'%' identified with mysql_native_password by '1lc3BhY2UiOiJrdWJlcm5';
-#### GRANT ALL ON gooversea_pay.* TO 'gooverseapay'@'%';
-#### GRANT ALL ON xin.* TO 'gooverseapay'@'%';
-#### FLUSH PRIVILEGES;
+#### AWS 开发环境
+https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
 
 
 Quick Start:
