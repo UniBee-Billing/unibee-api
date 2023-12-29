@@ -13,6 +13,8 @@ variables:
 build:
   only:
     - main
+  tags:
+    - unib
   stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
@@ -25,6 +27,8 @@ build:
 deploy:
   only:
     - main
+  tags:
+    - unib
   image: docker
   stage: deploy
   script:
