@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func SaveChannelHttpLog(ctx context.Context, url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, channel *entity.OverseaPayChannel) {
+func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, channel *entity.OverseaPayChannel) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -20,7 +20,7 @@ func SaveChannelHttpLog(ctx context.Context, url string, request interface{}, re
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				g.Log().Errorf(ctx, "SaveChannelHttpLog exception panic error:%s\n", err)
+				g.Log().Errorf(context.Background(), "SaveChannelHttpLog exception panic error:%s\n", err)
 				return
 			}
 		}()
@@ -32,6 +32,7 @@ func SaveChannelHttpLog(ctx context.Context, url string, request interface{}, re
 			Mamo:      memo,
 			ChannelId: strconv.FormatUint(channel.Id, 10),
 		}
-		_, _ = dao.ChannelHttpLog.Ctx(ctx).Data(httpLog).OmitEmpty().Insert(httpLog)
+		_, _ = dao.ChannelHttpLog.Ctx(context.Background()).Data(httpLog).OmitEmpty().Insert(httpLog)
+		g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)
 	}()
 }

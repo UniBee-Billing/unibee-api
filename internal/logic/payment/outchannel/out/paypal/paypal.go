@@ -123,7 +123,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		CustomID:           "",
 	}
 	createSubscription, err := client.CreateSubscription(ctx, param)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", param, createSubscription, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", param, createSubscription, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +157,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 		return nil, err
 	}
 	err = client.CancelSubscription(ctx, subscription.ChannelSubscriptionId, "")
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCancel", nil, nil, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", nil, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	} // cancelReason
@@ -230,7 +230,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		//todo mark
 	}
 	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, param)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +264,7 @@ func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 		return nil, err
 	}
 	response, err := client.GetSubscriptionDetails(ctx, subscription.ChannelSubscriptionId)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionDetails", subscription.ChannelSubscriptionId, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionDetails", subscription.ChannelSubscriptionId, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			},
 		}
 		response, err := client.CreateWebhook(ctx, param)
-		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", param, response, err, "", nil, payChannel)
+		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", param, response, err, "", nil, payChannel)
 		if err != nil {
 			return err
 		}
@@ -342,7 +342,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
-		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", param, response, err, webhook.ID, nil, payChannel)
+		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", param, response, err, webhook.ID, nil, payChannel)
 		if err != nil && strings.Compare(err.(*paypal.ErrorResponse).Name, "WEBHOOK_PATCH_REQUEST_NO_CHANGE") != 0 {
 			//WEBHOOK_PATCH_REQUEST_NO_CHANGE 忽略没有更改的错误
 			return err
@@ -363,7 +363,7 @@ func (p Paypal) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.Subs
 		return err
 	}
 	err = client.ActivateSubscriptionPlan(ctx, planChannel.ChannelPlanId)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanActive", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanActive", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -381,7 +381,7 @@ func (p Paypal) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.
 		return err
 	}
 	err = client.DeactivateSubscriptionPlans(ctx, planChannel.ChannelPlanId)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanDeactivate", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanDeactivate", planChannel.ChannelPlanId, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -413,7 +413,7 @@ func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 		HomeUrl:     plan.HomeUrl,  //paypal 通道可为空
 	}
 	productResult, err := client.CreateProduct(ctx, param)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelProductCreate", param, productResult, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelProductCreate", param, productResult, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -482,7 +482,7 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 		QuantitySupported: false,
 	}
 	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, param)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanCreateAndActivate", param, subscriptionPlan, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanCreateAndActivate", param, subscriptionPlan, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -559,7 +559,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, eventType)
 		}
 		r.Response.WriteHeader(http.StatusOK)
-		log.SaveChannelHttpLog(r.Context(), "DoRemoteChannelWebhook", jsonData, responseBack, err, "", nil, payChannel)
+		log.SaveChannelHttpLog("DoRemoteChannelWebhook", jsonData, responseBack, err, "", nil, payChannel)
 		return
 	} else {
 		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel)

@@ -88,7 +88,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		}
 		subscriptionParams.AddExpand("latest_invoice.payment_intent")
 		createSubscription, err := sub.New(subscriptionParams)
-		log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
+		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
 		if err != nil {
 			return nil, err
 		}
@@ -192,7 +192,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionCancelParams{}
 	response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionCreate", params, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", params, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -231,7 +231,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
 	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	jsonData, _ := gjson.Marshal(updateSubscription)
@@ -270,7 +270,7 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionParams{}
 	response, err := sub.Get(subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelSubscriptionDetails", params, response, err, subscription.ChannelSubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionDetails", params, response, err, subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +298,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.New(params)
-		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", params, result, err, "", nil, payChannel)
+		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", params, result, err, "", nil, payChannel)
 		if err != nil {
 			return nil
 		}
@@ -326,7 +326,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.Update(webhook.ID, params)
-		log.SaveChannelHttpLog(ctx, "DoRemoteChannelCheckAndSetupWebhook", params, result, err, webhook.ID, nil, payChannel)
+		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", params, result, err, webhook.ID, nil, payChannel)
 		if err != nil {
 			return err
 		}
@@ -346,7 +346,7 @@ func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entit
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(true) // todo mark 使用这种方式可能不能用
 	result, err := price.Update(planChannel.ChannelPlanId, params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanActive", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanActive", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -362,7 +362,7 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
 	result, err := price.Update(planChannel.ChannelPlanId, params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanDeactivate", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanDeactivate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
 	}
@@ -387,7 +387,7 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 		params.URL = stripe.String(plan.HomeUrl)
 	}
 	result, err := product.New(params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelProductCreate", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelProductCreate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +428,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		//},//这里是创建的意思
 	}
 	result, err := price.New(params)
-	log.SaveChannelHttpLog(ctx, "DoRemoteChannelPlanCreateAndActivate", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelPlanCreateAndActivate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -506,7 +506,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
 	}
-	log.SaveChannelHttpLog(r.Context(), "DoRemoteChannelWebhook", event, responseBack, err, "", nil, payChannel)
+	log.SaveChannelHttpLog("DoRemoteChannelWebhook", event, responseBack, err, "", nil, payChannel)
 	r.Response.WriteHeader(http.StatusOK)
 }
 
