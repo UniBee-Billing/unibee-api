@@ -21,6 +21,7 @@ build:
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x temp/linux_amd64/main
+  interruptible: true
 
 deploy:
   only:
@@ -29,3 +30,4 @@ deploy:
   stage: deploy
   script:
     - echo 'hello docker build'
+  interruptible: true
