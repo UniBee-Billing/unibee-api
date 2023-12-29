@@ -22,7 +22,7 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 
 			s := g.Server()
-			s.Group("/gooverseapay", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.SwaggerUIPageContent)
 				})
@@ -42,7 +42,7 @@ var (
 			//	router.Tools(ctx, group) //工具接口
 			//})
 
-			s.Group("/gooverseapay/out", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/out", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreOpenApiAuth,
@@ -50,7 +50,7 @@ var (
 				router.Outs(ctx, group) //开放平台接口
 			})
 
-			s.Group("/gooverseapay/subscription", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
@@ -58,7 +58,7 @@ var (
 				router.Subscription(ctx, group) //订阅接口
 			})
 
-			s.Group("/gooverseapay/mock", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/mock", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
@@ -66,7 +66,7 @@ var (
 				router.Mocks(ctx, group) //Out本地测试用Mock接口
 			})
 
-			s.Group("/gooverseapay/auth", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
@@ -75,9 +75,9 @@ var (
 			})
 
 			// 通道支付 Redirect 回调
-			s.BindHandler("GET:/gooverseapay/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
+			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
 			// 通道支付 Webhook 回调
-			s.BindHandler("POST:/gooverseapay/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
+			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
 			// 初始化通道 Webhook 配置
 			outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 
@@ -89,7 +89,7 @@ var (
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
 				liberr.ErrIsNil(ctx, err, "redis write expire failure")
 				g.Log().Infof(ctx, "redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "swagger address: http://127.0.0.1%s/gooverseapay/swagger", consts.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
 			}
 
 			s.Run()

@@ -7,7 +7,7 @@ import (
 )
 
 func GetPaymentWebhookEntranceUrl(channelId int64) string {
-	return fmt.Sprintf("%s/payment/webhooks/%d/notifications", consts.GetConfigInstance().HostPath, channelId)
+	return fmt.Sprintf("%s/payment/webhooks/%d/notifications", consts.GetConfigInstance().Server.DomainPath, channelId)
 }
 
 //func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
@@ -15,9 +15,9 @@ func GetPaymentWebhookEntranceUrl(channelId int64) string {
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.OverseaPay) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?payId=%d", consts.GetConfigInstance().HostPath, pay.ChannelId, pay.Id)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?payId=%d", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.Id)
 }
 
 func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%d&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().HostPath, subscription.ChannelId, subscription.Id, success)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%d&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, subscription.ChannelId, subscription.Id, success)
 }
