@@ -10,7 +10,6 @@ import (
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller/webhooks"
 	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/utility/liberr"
 )
 
@@ -78,8 +77,8 @@ var (
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
 			// 通道支付 Webhook 回调
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
-			// 初始化通道 Webhook 配置
-			outchannel.CheckAndSetupPayChannelWebhooks(ctx)
+			//// 初始化通道 Webhook 配置
+			//outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
 				g.Log().Infof(ctx, "server name: %s ", consts.GetConfigInstance().Server.Name)

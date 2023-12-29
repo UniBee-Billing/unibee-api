@@ -96,3 +96,9 @@ type SubscriptionUpdateReq struct {
 type SubscriptionUpdateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
 }
+
+type SubscriptionWebhookCheckAndSetupReq struct {
+	g.Meta `path:"/subscription_webhook_check_and_setup" tags:"Subscription-Controller" method:"post" summary:"1.11 Webhook 初始化"`
+}
+type SubscriptionWebhookCheckAndSetupRes struct {
+}
