@@ -1,25 +1,8 @@
-# This template uses jdk8 for verifying and deploying images
-image: maven:3.6.3-jdk-8-slim
-
 stages:
   - go-build
   - docker
 
-package-build:
-  only:
-    - main
-  stage: package
-  script:
-    - echo 'hello package build'
-
-docker-build:
-  only:
-    - main
-  stage: docker
-  script:
-    - echo 'hello docker build'
-
-golang-build:
+go-build:
   only:
     - main
   stage: go-build
@@ -32,3 +15,13 @@ golang-build:
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x app
+
+docker-build:
+  only:
+    - main
+  image: maven:3.6.3-jdk-8-slim
+  stage: docker
+  script:
+    - echo 'hello docker build'
+
+
