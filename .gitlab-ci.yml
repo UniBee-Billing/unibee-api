@@ -21,5 +21,3 @@ docker-build:
   stage: docker
   script:
     - echo 'hello docker build'
-
-
