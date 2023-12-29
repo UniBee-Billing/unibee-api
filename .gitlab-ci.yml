@@ -12,7 +12,7 @@ go-build:
     - go env -w GOPRIVATE='gitlab.hknet-inc.com'
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
-    - chmod +x app
+    - chmod +x temp/linux_amd64/main
 
 docker-build:
   only:
