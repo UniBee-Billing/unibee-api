@@ -1,22 +1,58 @@
 package v1
 
 import (
-	"github.com/gogf/gf/v2/frame/g"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+
+	"github.com/gogf/gf/v2/frame/g"
 )
 
 type LoginReq struct {
 	g.Meta `path:"/sso/login" tags:"Auth-Controller" method:"post" summary:"1.1 用户登录"`
+	Email string `p:"email" dc:"email" v:"required"`
+	Password  string `p:"password" dc:"password" v:"required"`
 }
+// with token to be implemented in the future
 type LoginRes struct {
+	User *entity.UserAccount `p:"user" dc:"user"`
+}
+
+type LoginOtpReq struct {
+	g.Meta `path:"/sso/loginOTP" tags:"Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
+	Email string `p:"email" dc:"email" v:"required"`
+}
+
+type LoginOtpRes struct {
+}
+
+type LoginOtpVerifyReq struct {
+	g.Meta `path:"/sso/loginOTPVerify" tags:"Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
+	Email string `p:"email" dc:"email" v:"required"`
+	VerificationCode  string `p:"verificationCode" dc:"verificationCode" v:"required"`
+}
+
+type LoginOtpVerifyRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta `path:"/sso/register" tags:"Auth-Controller" method:"post" summary:"1.2 用户注册"`
-	Email  string `p:"email" dc:"email" v:"required"`
-	Phone  string `p:"Phone" dc:"手机号" `
-	Gender string `p:"gender" dc:"性别" `
+	g.Meta `path:"/sso/register" tags:"Auth-Controller" method:"post" summary:"1.1 用户注册"`
+	FirstName   string `p:"firstName" dc:"first name" v:"required"`
+	LastName  string `p:"lastName" dc:"last name" v:"required"`
+	Email string `p:"email" dc:"email" v:"required"`
+	Password  string `p:"password" dc:"password" v:"required"`
+	Phone  string `p:"phone" dc:"phone" `
+	Address string `p:"address" dc:"adderss"`
+	UserName string `p:"userName" dc:"userName" v:"required"`
 }
 type RegisterRes struct {
+	// User *entity.UserAccount `p:"user" dc:"user"`
+}
+
+type RegisterVerifyReq struct {
+	g.Meta `path:"/sso/registerVerify" tags:"Auth-Controller" method:"post" summary:"1.2 用户注册(verify email)"`
+	Email string `p:"email" dc:"email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"verification code" v:"required"`
+}
+
+type RegisterVerifyRes struct {
 	User *entity.UserAccount `p:"user" dc:"user"`
 }

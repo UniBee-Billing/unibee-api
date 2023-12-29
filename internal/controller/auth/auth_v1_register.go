@@ -2,24 +2,93 @@ package auth
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"time"
+
+	"github.com/gogf/gf/v2/frame/g"
+
+	v1 "go-oversea-pay/api/auth/v1"
 	"go-oversea-pay/internal/logic/email"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 
-	"go-oversea-pay/api/auth/v1"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func (c *ControllerV1) Register(ctx context.Context, req *v1.RegisterReq) (res *v1.RegisterRes, err error) {
-	utility.Assert(len(req.Phone) > 0, "phone not null")
-	user := &entity.UserAccount{
-		UserName: req.Email,
-		Email:    req.Email,
-		Mobile:   req.Phone,
-		Gender:   req.Gender,
+
+const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+func generateRandomString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+	   b[i] = charset[seededRand.Intn(len(charset))]
 	}
+	return string(b)
+ }
+
+func hashAndSalt(pwd []byte) string {
+    hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
+    if err != nil {
+        log.Println(err)
+    }
+    return string(hash)
+}
+
+func (c *ControllerV1) Register(ctx context.Context, req *v1.RegisterReq) (res *v1.RegisterRes, err error) {
+	var newOne *entity.UserAccount
+	newOne = query.GetUserAccountByEmail(ctx, req.Email) //Id(ctx, user.Id)
+	if newOne != nil {
+		return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
+	}
+	
+		userStr, err := json.Marshal(
+			struct {
+				FirstName, LastName, Email, Password, Phone, Address, UserName string
+			}{
+				FirstName: req.FirstName,
+				LastName: req.LastName,
+				Email: req.Email,
+				Password: hashAndSalt([]byte(req.Password)),
+				Phone: req.Phone,
+				Address: req.Address,
+				UserName: req.UserName,
+			},
+		)
+		if err != nil {
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+		
+		_, err = g.Redis().Set(ctx, req.Email, userStr)
+		if err != nil {
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+	
+		_, err = g.Redis().Expire(ctx, req.Email, 3*60)
+		if err != nil {
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+
+		verificationCode := generateRandomString(6)
+		fmt.Printf("verification ", verificationCode)
+		_, err = g.Redis().Set(ctx, req.Email + "-verify", verificationCode)
+		if err != nil {
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+		_, err = g.Redis().Expire(ctx, req.Email + "-verify", 3*60)
+		if err != nil {
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+
+		email.SendEmailToUser(req.Email, "Verification Code from Unibee", verificationCode)
+
+		return &v1.RegisterRes{}, nil 
+
+	/*
 	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)
 	if err != nil {
 		err = gerror.Newf(`record insert failure %s`, err)
@@ -34,6 +103,9 @@ func (c *ControllerV1) Register(ctx context.Context, req *v1.RegisterReq) (res *
 	}
 
 	email.SendEmailToUser(newOne)
+	*/
 
-	return &v1.RegisterRes{User: newOne}, nil
+	// return &v1.RegisterRes{User: newOne}, nil
 }
+
+

@@ -13,3 +13,12 @@ func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount
 	}
 	return one
 }
+
+func GetUserAccountByEmail(ctx context.Context, email string) (one *entity.UserAccount) {
+	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Email: email}).OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+

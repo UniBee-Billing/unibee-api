@@ -7,6 +7,7 @@ type IMiddleware interface {
 	PreAuth(r *ghttp.Request)
 	PreOpenApiAuth(r *ghttp.Request)
 	Auth(r *ghttp.Request)
+	CORS(r *ghttp.Request)
 }
 
 var localMiddleware IMiddleware

@@ -1,16 +1,17 @@
 package middleware
 
 import (
+	"go-oversea-pay/internal/consts"
+	_ "go-oversea-pay/internal/consts"
+	_interface "go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/model"
+	utility "go-oversea-pay/utility"
+
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	_ "github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/consts"
-	_ "go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/model"
-	utility "go-oversea-pay/utility"
 )
 
 type SMiddleware struct {
@@ -25,6 +26,11 @@ func New() *SMiddleware {
 	return &SMiddleware{
 		LoginUrl: "/login",
 	}
+}
+
+func (s *SMiddleware) CORS(r *ghttp.Request) {
+	r.Response.CORSDefault()
+	r.Middleware.Next()
 }
 
 // ResponseHandler 返回处理中间件

@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/gogf/gf/v2/os/gcmd"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller/webhooks"
-	"go-oversea-pay/internal/interface"
+	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/utility/liberr"
+
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gcmd"
 )
 
 var (
@@ -68,6 +69,7 @@ var (
 
 			s.Group("/gooverseapay/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
+					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
 				)

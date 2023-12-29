@@ -31,4 +31,8 @@ type UserAccount struct {
 	IsRisk     int         `json:"isRisk"     ` // 风控：0.低风险，1.中风险，2.高风险
 	Channel    string      `json:"channel"    ` // 渠道
 	Version    int         `json:"version"    ` // 版本
+	FirstName  string      `json:"firstName"  `
+	LastName   string      `json:"lastName"   `
+	Phone      string      `json:"phone"      ` // 
+	Address    string      `json:"address"    `		
 }

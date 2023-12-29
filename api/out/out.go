@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package out
 
 import (
 	"context"
-	
+
 	"go-oversea-pay/api/out/v1"
 )
 
@@ -20,5 +20,3 @@ type IOutV1 interface {
 	ListRecurringDetails(ctx context.Context, req *v1.ListRecurringDetailsReq) (res *v1.ListRecurringDetailsRes, err error)
 	Refunds(ctx context.Context, req *v1.RefundsReq) (res *v1.RefundsRes, err error)
 }
-
-
