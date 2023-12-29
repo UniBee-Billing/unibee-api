@@ -25,7 +25,7 @@ build:
 deploy:
   only:
     - main
-  image: maven:3.6.3-jdk-8-slim
+  image: docker
   stage: deploy
   script:
-    - echo 'hello docker build'
+    - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
