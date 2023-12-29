@@ -43,5 +43,3 @@ nacos.port
 nacos.namespace
 nacos.group
 nacos.data.id
-日常 nacos配置环境
-http://daily-local.wangqubi.cn/nacos/
