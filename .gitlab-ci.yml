@@ -6,11 +6,15 @@ stages:
   - docker
 
 package-build:
+  only:
+    - develop
   stage: package
   script:
     - echo 'hello package build'
 
 docker-build:
+  only:
+    - develop
   stage: docker
   script:
     - echo 'hello docker build'
