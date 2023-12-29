@@ -10,7 +10,6 @@ variables:
   GOCACHE: ${CI_PROJECT_DIR}/.go/.cache/go-build
   GOLANGCI_LINT_CACHE: ${CI_PROJECT_DIR}/.go/.cache/golangci-lint
 
-
 build:
   only:
     - main
