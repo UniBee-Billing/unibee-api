@@ -82,6 +82,9 @@ var (
 			outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
+				g.Log().Infof(ctx, "server name: %s ", consts.GetConfigInstance().Server.Name)
+				g.Log().Infof(ctx, "server port: %s ", consts.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
 				liberr.ErrIsNil(ctx, err, "redis write check failure")
 				value, err := g.Redis().Get(ctx, "g_check")
