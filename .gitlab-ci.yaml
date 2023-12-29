@@ -1,0 +1,16 @@
+# This template uses jdk8 for verifying and deploying images
+image: maven:3.6.3-jdk-8-slim
+
+stages:
+  - package
+  - docker
+
+package-build:
+  stage: package
+  script:
+    - echo 'hello package build'
+
+docker-build:
+  stage: docker
+  script:
+    - echo 'hello docker build'
