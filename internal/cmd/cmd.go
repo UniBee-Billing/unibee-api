@@ -5,6 +5,7 @@ import (
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/controller"
 	"go-oversea-pay/internal/controller/webhooks"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/utility/liberr"
@@ -74,6 +75,8 @@ var (
 				)
 				router.Auth(ctx, group) //Out本地测试用Mock接口
 			})
+
+			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// 通道支付 Redirect 回调
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
