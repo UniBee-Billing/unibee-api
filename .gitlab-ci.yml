@@ -33,3 +33,4 @@ deploy:
   stage: deploy
   script:
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
+
