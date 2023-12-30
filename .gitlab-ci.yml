@@ -18,12 +18,13 @@ build:
   stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
+    - ls -al /data/
     - go env -w GOPROXY=https://goproxy.cn,direct
     - go env -w GOPRIVATE='gitlab.hknet-inc.com'
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x temp/linux_amd64/main
-    - cp temp/linux_amd64/main /opt/cache/main
+    - cp temp/linux_amd64/main /data/artifacts/main
 
 deploy:
   only:
@@ -33,6 +34,6 @@ deploy:
   image: docker
   stage: deploy
   script:
-    - cp /opt/cache/main temp/linux_amd64/main
+    - cp /data/artifacts/main temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
 
