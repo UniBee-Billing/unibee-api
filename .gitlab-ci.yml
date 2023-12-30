@@ -1,5 +1,6 @@
 stages:
   - build
+  - push
   - deploy
 
 variables:
@@ -13,8 +14,6 @@ variables:
 build:
   only:
     - main
-#  tags:
-#    - unib
   stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
@@ -26,13 +25,11 @@ build:
     - chmod +x temp/linux_amd64/main
     - cp temp/linux_amd64/main /data/artifacts/main
 
-deploy:
+push:
   only:
     - main
-#  tags:
-#    - unib
   image: docker
-  stage: deploy
+  stage: push
   script:
     - mkdir -p temp/linux_amd64
     - cp /data/artifacts/main temp/linux_amd64/main
@@ -40,3 +37,12 @@ deploy:
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
     - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
 
+deploy:
+  only:
+    - main
+  image: kubectl
+  stage: deploy
+  script:
+    - kubectl --kubeconfigs /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
+    - kubectl --kubeconfigs /data/kubeconfigs/unib_dev_configs rollout status deployment/yd-unib-server-daily
+    - kubectl --kubeconfigs /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily
