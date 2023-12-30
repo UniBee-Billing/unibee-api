@@ -40,3 +40,4 @@ deploy:
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
     - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
 
+
