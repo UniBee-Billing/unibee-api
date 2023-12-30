@@ -34,6 +34,7 @@ deploy:
   image: docker
   stage: deploy
   script:
+    - mkdir -p temp/linux_amd64
     - cp /data/artifacts/main temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
 
