@@ -37,6 +37,6 @@ deploy:
     - mkdir -p temp/linux_amd64
     - cp /data/artifacts/main temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
-    - docker login --username=黑酷网络技术 --password=123456abc registry.cn-shenzhen.aliyuncs.com
+    - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
     - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
 
