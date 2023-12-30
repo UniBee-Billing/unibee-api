@@ -32,6 +32,7 @@ push:
   stage: push
   script:
     - mkdir -p temp/linux_amd64
+    - ls -al .
     - cp /data/artifacts/main temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
@@ -45,4 +46,4 @@ deploy:
   script:
     - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
     - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout status deployment/yd-unib-server-daily
-    - kubectl --kubeconfig /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily
+#    - kubectl --kubeconfig /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily
