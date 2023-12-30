@@ -40,7 +40,7 @@ push:
 deploy:
   only:
     - main
-  image: kubectl
+  image: registry.cn-shenzhen.aliyuncs.com/heiku/kubectl:latest
   stage: deploy
   script:
     - kubectl --kubeconfigs /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
