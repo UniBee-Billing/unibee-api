@@ -13,7 +13,7 @@ variables:
 
 build:
   only:
-    - mains
+    - main
   stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
