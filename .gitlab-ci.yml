@@ -1,7 +1,7 @@
 stages:
-  - build
+#  - build
   - push
-  - deploy
+#  - deploy
 
 variables:
   IMAGE_GROUP: xxx
@@ -32,7 +32,8 @@ push:
   stage: push
   script:
     - mkdir -p temp/linux_amd64
-    - ls -al .
+    - ls -al /data/artifacts/main
+    - ls -al temp/linux_amd64/main
     - cp /data/artifacts/main temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
