@@ -35,6 +35,7 @@ push:
     - ls -al /data/artifacts/main
     - cp /data/artifacts/main temp/linux_amd64/main
     - ls -al temp/linux_amd64/main
+    - cat manifest/docker/Dockerfile
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily .
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
     - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
