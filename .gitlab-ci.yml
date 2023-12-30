@@ -1,7 +1,7 @@
 stages:
-#  - build
+  - build
   - push
-#  - deploy
+  - deploy
 
 variables:
   IMAGE_GROUP: xxx
@@ -13,7 +13,7 @@ variables:
 
 build:
   only:
-    - main
+    - mains
   stage: build
   image: golang # 利用Golang容器进行打包Golang项目
   script:
@@ -41,7 +41,7 @@ push:
 
 deploy:
   only:
-    - main
+    - mains
   image: registry.cn-shenzhen.aliyuncs.com/heiku/kubectl:latest
   stage: deploy
   script:
