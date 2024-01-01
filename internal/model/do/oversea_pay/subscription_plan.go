@@ -32,4 +32,5 @@ type SubscriptionPlan struct {
 	TaxInclusive              interface{} // 税费是否包含，1-包含，0-不包含
 	Type                      interface{} // 类型，0-main plan，1-addon plan
 	Status                    interface{} // 状态，0-编辑中，2-已发布，4-过期
+	BindingAddonIds           interface{} // 绑定的 Addon PlanIds，以逗号隔开
 }

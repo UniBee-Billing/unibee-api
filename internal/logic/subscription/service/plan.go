@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -12,6 +13,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strconv"
 	"strings"
 )
 
@@ -83,6 +85,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+	utility.Assert(req.Type == 0 || req.Type == 1, "type should be 0 or 1")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
@@ -102,6 +105,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		Currency:                  strings.ToUpper(req.Currency),
 		IntervalUnit:              strings.ToLower(req.IntervalUnit),
 		IntervalCount:             req.IntervalCount,
+		Type:                      req.Type,
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
@@ -117,6 +121,114 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 	return one, nil
+}
+
+func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) (one *entity.SubscriptionPlan, err error) {
+	intervals := []string{"day", "month", "year", "week"}
+	utility.Assert(req != nil, "req not found")
+	utility.Assert(req.Amount > 0, "amount value should > 0")
+	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
+	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
+	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
+	if req.IntervalCount < 1 {
+		req.IntervalCount = 1
+	}
+	utility.Assert(req.PlanId > 0, "PlanId should > 0")
+	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+	utility.Assert(one.Status == 0, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
+
+	one.PlanName = req.PlanName
+	one.Amount = req.Amount
+	one.Currency = strings.ToUpper(req.Currency)
+	one.IntervalUnit = strings.ToLower(req.IntervalUnit)
+	one.IntervalCount = req.IntervalCount
+	one.Description = req.Description
+	one.ImageUrl = req.ImageUrl
+	one.HomeUrl = req.HomeUrl
+	one.ChannelProductName = req.ProductName
+	one.ChannelProductDescription = req.ProductDescription
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Update(one)
+	if err != nil {
+		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
+		one = nil
+		return
+	}
+
+	return one, nil
+}
+
+func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
+	utility.Assert(req != nil, "req not found")
+	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
+	utility.Assert(req.PlanId > 0, "PlanId should > 0")
+	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+	var addonIdsList []int64
+	if len(one.BindingAddonIds) > 0 {
+		//初始化
+		strList := strings.Split(one.BindingAddonIds, ",")
+
+		for _, s := range strList {
+			num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+			if err != nil {
+				fmt.Println("Internal Error converting string to int:", err)
+				return nil, err
+			}
+			addonIdsList = append(addonIdsList, num) // 添加到整数列表中
+		}
+	}
+	if req.Action == 0 {
+		//覆盖
+		addonIdsList = req.AddonIds
+	} else if req.Action == 1 {
+		//添加
+		addonIdsList = mergeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
+	} else if req.Action == 2 {
+		//删除
+		addonIdsList = removeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
+	}
+	newIds := intListToString(addonIdsList)
+	one.BindingAddonIds = newIds
+	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().BindingAddonIds: one.BindingAddonIds,
+	}).Where(dao.SubscriptionPlan.Columns().Id, one.Id).Update()
+	if err != nil {
+		return nil, err
+	}
+	affected, err := update.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if affected != 1 {
+		return nil, gerror.New("internal err, publish count != 1")
+	}
+	return one, nil
+}
+
+func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
+	//发布 Plan
+	utility.Assert(planId > 0, "invalid planId")
+	one := query.GetSubscriptionPlanById(ctx, planId)
+	utility.Assert(one != nil, "plan not found, invalid planId")
+	if one.Status == 2 {
+		//已成功
+		return nil
+	}
+	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().Status: 2,
+	}).Where(dao.SubscriptionPlan.Columns().Id, planId).WhereNot(dao.SubscriptionPlan.Columns().Status, 2).OmitEmpty().Update()
+	if err != nil {
+		return err
+	}
+	affected, err := update.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected != 1 {
+		return gerror.New("internal err, publish count != 1")
+	}
+	return nil
 }
 
 func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, channelId int64) error {
@@ -192,4 +304,55 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	}
 
 	return nil
+}
+
+func mergeArrays(arr1, arr2 []int64) []int64 {
+	// 使用 map 跟踪已存在的元素
+	seen := make(map[int64]bool)
+	var result []int64
+
+	// 将 arr1 中的元素添加到结果中
+	for _, num := range arr1 {
+		if !seen[num] {
+			seen[num] = true
+			result = append(result, num)
+		}
+	}
+
+	// 将 arr2 中不重复的元素添加到结果中
+	for _, num := range arr2 {
+		if !seen[num] {
+			seen[num] = true
+			result = append(result, num)
+		}
+	}
+
+	return result
+}
+
+func removeArrays(arr, toRemove []int64) []int64 {
+	// 创建一个 map 来存储要删除的元素
+	removeMap := make(map[int64]bool)
+	for _, num := range toRemove {
+		removeMap[num] = true
+	}
+
+	// 遍历数组并删除要删除的元素
+	var result []int64
+	for _, num := range arr {
+		if !removeMap[num] {
+			result = append(result, num)
+		}
+	}
+
+	return result
+}
+
+// 将整数数组转换为逗号分隔的字符串
+func intListToString(arr []int64) string {
+	strArr := make([]string, len(arr))
+	for i, num := range arr {
+		strArr[i] = strconv.FormatInt(num, 10)
+	}
+	return strings.Join(strArr, ",")
 }
