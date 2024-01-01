@@ -192,6 +192,7 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	one.BindingAddonIds = newIds
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlan.Columns().BindingAddonIds: one.BindingAddonIds,
+		dao.SubscriptionPlan.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.SubscriptionPlan.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err
@@ -216,8 +217,9 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 		return nil
 	}
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().Status: 2,
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).WhereNot(dao.SubscriptionPlan.Columns().Status, 2).OmitEmpty().Update()
+		dao.SubscriptionPlan.Columns().Status:    2,
+		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitEmpty().Update()
 	if err != nil {
 		return err
 	}
