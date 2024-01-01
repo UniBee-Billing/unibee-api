@@ -17,7 +17,7 @@ gfcli:
       - registry.cn-shenzhen.aliyuncs.com/heiku
   gen:
     dao:
-      - link:     "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/xin"
+      - link:     "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/test?loc=Local&parseTime=true"
         tables:   "test"
         group: "xin"
         daoPath:  "dao/xin"
@@ -25,7 +25,7 @@ gfcli:
         entityPath:  "model/entity/xin"
 #        jsonCase: "CamelLower"
 
-      - link:   "mysql:root:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(frps.hknet-inc.com:7111)/gooversea_pay"
+      - link:   "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/unib?loc=Local&parseTime=true"
 #        path:   "oversea_pay"
 #        prefix: "primary_"
         group: "oversea_pay"

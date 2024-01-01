@@ -38,6 +38,8 @@ type SubscriptionPlanColumns struct {
 	ChannelProductDescription string // 支付渠道product_description
 	TaxPercentage             string // 税费比例： 1 =1%
 	TaxInclusive              string // 税费是否包含，1-包含，0-不包含
+	Type                      string // 类型，0-main plan，1-addon plan
+	Status                    string // 状态，0-编辑中，2-已发布，4-过期
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
@@ -60,6 +62,8 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	ChannelProductDescription: "channel_product_description",
 	TaxPercentage:             "tax_percentage",
 	TaxInclusive:              "tax_inclusive",
+	Type:                      "type",
+	Status:                    "status",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.

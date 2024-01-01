@@ -47,4 +47,4 @@ deploy:
   script:
     - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
 #    - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout status deployment/yd-unib-server-daily
-    - kubectl --kubeconfig /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily
+#    - kubectl --kubeconfig /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily

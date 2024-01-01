@@ -30,4 +30,6 @@ type SubscriptionPlan struct {
 	ChannelProductDescription interface{} // 支付渠道product_description
 	TaxPercentage             interface{} // 税费比例： 1 =1%
 	TaxInclusive              interface{} // 税费是否包含，1-包含，0-不包含
+	Type                      interface{} // 类型，0-main plan，1-addon plan
+	Status                    interface{} // 状态，0-编辑中，2-已发布，4-过期
 }
