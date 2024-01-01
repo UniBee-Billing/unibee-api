@@ -33,4 +33,8 @@ type UserAccount struct {
 	IsRisk     interface{} // 风控：0.低风险，1.中风险，2.高风险
 	Channel    interface{} // 渠道
 	Version    interface{} // 版本
+	Phone      interface{} //
+	Address    interface{} //
+	FirstName  interface{} //
+	LastName   interface{} //
 }

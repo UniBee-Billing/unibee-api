@@ -418,7 +418,8 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		Currency:   stripe.String(strings.ToLower(targetPlan.Currency)),
 		UnitAmount: stripe.Int64(targetPlan.Amount), //todo mark 小数点可能不用处理
 		Recurring: &stripe.PriceRecurringParams{
-			Interval: stripe.String(targetPlan.IntervalUnit),
+			Interval:      stripe.String(targetPlan.IntervalUnit),
+			IntervalCount: stripe.Int64(int64(targetPlan.IntervalCount)),
 		},
 		Product: stripe.String(planChannel.ChannelProductId),
 

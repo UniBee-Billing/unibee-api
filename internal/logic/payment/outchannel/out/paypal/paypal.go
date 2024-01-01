@@ -461,8 +461,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 					UpdateTime: time.Now(),
 				},
 				Frequency: paypal.Frequency{
-					IntervalUnit:  paypal.IntervalUnitMonth,
-					IntervalCount: 1,
+					IntervalUnit:  paypal.IntervalUnit(strings.ToUpper(plan.IntervalUnit)),
+					IntervalCount: plan.IntervalCount,
 				},
 				TenureType:  paypal.TenureTypeRegular,
 				Sequence:    1,

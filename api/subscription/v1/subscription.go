@@ -15,15 +15,16 @@ type SubscriptionChannelsRes struct {
 type SubscriptionPlanCreateReq struct {
 	g.Meta             `path:"/subscription_plan_create_and_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"1.2订阅计划创建"`
 	MerchantId         int64  `p:"merchantAccount" d:"15621" dc:"商户号" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
-	PlanName           string `p:"planName"    v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" ` // 计划名称
-	Amount             int64  `p:"amount"      v:"required#请输入订阅计划金额" `                              // 金额,单位：分
-	Currency           string `p:"currency"    v:"required#请输入订阅计划货币" `                              // 货币
-	IntervalUnit       string `p:"intervalUnit" v:"required#请输入订阅计划周期，小写: day|month|year|week" `     // 周期,day|month|year|week
-	Description        string `p:"description"  `                                                    //
-	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                 //
-	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                        //
-	ImageUrl           string `p:"imageUrl"     v:"required#请输入ImageUrl,需 http 开头" `                 // image_url
-	HomeUrl            string `p:"homeUrl"      `                                                    // home_url
+	PlanName           string `p:"planName"    v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                                  // 计划名称
+	Amount             int64  `p:"amount"      v:"required#请输入订阅计划金额" `                                                                                               // 金额,单位：分
+	Currency           string `p:"currency"    v:"required#请输入订阅计划货币" `                                                                                               // 货币
+	IntervalUnit       string `p:"intervalUnit" v:"required#请输入订阅计划周期，小写: day|month|year|week" `                                                                      // 周期,day|month|year|week
+	IntervalCount      int    `p:"intervalCount"  d:"1"  v:"不输入或者输入值小于 1，强制设置 1，订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）" ` // 金额,单位：分
+	Description        string `p:"description"  `                                                                                                                     //
+	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
+	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
+	ImageUrl           string `p:"imageUrl"     v:"required#请输入ImageUrl,需 http 开头" `                                                                                  // image_url
+	HomeUrl            string `p:"homeUrl"      `                                                                                                                     // home_url
 }
 type SubscriptionPlanCreateRes struct {
 	Plan *entity.SubscriptionPlan `json:"plan" dc:"订阅计划"`

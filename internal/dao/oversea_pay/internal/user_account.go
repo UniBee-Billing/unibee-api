@@ -41,6 +41,10 @@ type UserAccountColumns struct {
 	IsRisk     string // 风控：0.低风险，1.中风险，2.高风险
 	Channel    string // 渠道
 	Version    string // 版本
+	Phone      string //
+	Address    string //
+	FirstName  string //
+	LastName   string //
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -66,6 +70,10 @@ var userAccountColumns = UserAccountColumns{
 	IsRisk:     "is_risk",
 	Channel:    "channel",
 	Version:    "version",
+	Phone:      "phone",
+	Address:    "address",
+	FirstName:  "first_name",
+	LastName:   "last_name",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

@@ -29,6 +29,7 @@ type SubscriptionPlanColumns struct {
 	Amount                    string // 金额,单位：分
 	Currency                  string // 货币
 	IntervalUnit              string // 周期-全小写存放,day|month|year|week
+	IntervalCount             string // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               string //
 	IsDeleted                 string //
 	ImageUrl                  string // image_url
@@ -50,6 +51,7 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	Amount:                    "amount",
 	Currency:                  "currency",
 	IntervalUnit:              "interval_unit",
+	IntervalCount:             "interval_count",
 	Description:               "description",
 	IsDeleted:                 "is_deleted",
 	ImageUrl:                  "image_url",

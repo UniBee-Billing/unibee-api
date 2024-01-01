@@ -19,6 +19,7 @@ type SubscriptionPlan struct {
 	Amount                    int64       `json:"amount"                    ` // 金额,单位：分
 	Currency                  string      `json:"currency"                  ` // 货币
 	IntervalUnit              string      `json:"intervalUnit"              ` // 周期-全小写存放,day|month|year|week
+	IntervalCount             int         `json:"intervalCount"             ` // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               string      `json:"description"               ` //
 	IsDeleted                 int         `json:"isDeleted"                 ` //
 	ImageUrl                  string      `json:"imageUrl"                  ` // image_url

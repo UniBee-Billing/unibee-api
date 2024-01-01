@@ -84,6 +84,10 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
+	if req.IntervalCount < 1 {
+		req.IntervalCount = 1
+	}
+
 	if len(req.ProductName) == 0 {
 		req.ProductName = req.PlanName
 	}
@@ -97,6 +101,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		Amount:                    req.Amount,
 		Currency:                  strings.ToUpper(req.Currency),
 		IntervalUnit:              strings.ToLower(req.IntervalUnit),
+		IntervalCount:             req.IntervalCount,
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
