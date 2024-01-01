@@ -10,6 +10,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -156,6 +157,83 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	}
 
 	return one, nil
+}
+
+func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (list []*ro.SubscriptionPlanRo) {
+	var mainList []*entity.SubscriptionPlan
+	err := dao.SubscriptionPlan.Ctx(ctx).
+		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
+		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
+		OmitEmpty().Scan(&mainList)
+	if err != nil {
+		return nil
+	}
+	var totalAddonIds []int64
+	var totalPlanIds []uint64
+	for _, plan := range mainList {
+		totalPlanIds = append(totalPlanIds, plan.Id)
+		if plan.Type != 0 {
+			//非主 Plan 不查询 addons
+			continue
+		}
+		var addonIds []int64
+		if len(plan.BindingAddonIds) > 0 {
+			//初始化
+			strList := strings.Split(plan.BindingAddonIds, ",")
+
+			for _, s := range strList {
+				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+				if err != nil {
+					fmt.Println("Internal Error converting string to int:", err)
+				} else {
+					totalAddonIds = append(totalAddonIds, num) // 添加到整数列表中
+					addonIds = append(addonIds, num)           // 添加到整数列表中
+				}
+			}
+		}
+		list = append(list, &ro.SubscriptionPlanRo{
+			Plan:     plan,
+			Channels: []*entity.SubscriptionPlanChannel{},
+			Addons:   nil,
+			AddonIds: addonIds,
+		})
+	}
+	if len(totalAddonIds) > 0 {
+		//主 Plan 查询 addons
+		var allAddonList []*entity.SubscriptionPlan
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).Scan(&allAddonList)
+		if err == nil {
+			//整合进列表
+			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			for _, pair := range allAddonList {
+				key := int64(pair.Id)
+				value := pair
+				mapPlans[key] = value
+			}
+			for _, planRo := range list {
+				if len(planRo.AddonIds) > 0 {
+					for _, id := range planRo.AddonIds {
+						if mapPlans[id] != nil {
+							planRo.Addons = append(planRo.Addons, mapPlans[id])
+						}
+					}
+				}
+			}
+		}
+	}
+	//添加 Channel 信息
+	var allChannelList []*entity.SubscriptionPlanChannel
+	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalPlanIds).Scan(&allChannelList)
+	if err == nil {
+		for _, channel := range allChannelList {
+			for _, planRo := range list {
+				if int64(planRo.Plan.Id) == channel.PlanId {
+					planRo.Channels = append(planRo.Channels, channel)
+				}
+			}
+		}
+	}
+	return list
 }
 
 func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {

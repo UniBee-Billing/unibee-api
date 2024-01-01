@@ -2,6 +2,7 @@ package v1
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -61,10 +62,12 @@ type SubscriptionPlanAddonsBindingRes struct {
 
 type SubscriptionPlanListReq struct {
 	g.Meta     `path:"/subscription_plan_list" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划修改"`
-	MerchantId int64 `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	Type       int    `p:"type"  d:"0"  dc:"不填查询所有，,0-main plan，1-addon plan" ` // 金额,单位：分
+	Currency   string `p:"currency"   dc:"订阅计划货币" dc:"订阅计划货币" `
 }
 type SubscriptionPlanListRes struct {
-	Plans []*entity.SubscriptionPlan `json:"plans" dc:"订阅计划"`
+	Plans []*ro.SubscriptionPlanRo `p:"plans" dc:"订阅计划明细"`
 }
 
 type SubscriptionPlanChannelTransferAndActivateReq struct {
@@ -96,8 +99,7 @@ type SubscriptionPlanDetailReq struct {
 	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 }
 type SubscriptionPlanDetailRes struct {
-	Plan     *entity.SubscriptionPlan          `json:"plan" dc:"订阅计划"`
-	Channels *[]entity.SubscriptionPlanChannel `json:"channels" dc:"订阅计划 Channel 开通明细"`
+	Plan *ro.SubscriptionPlanRo `p:"plan" dc:"订阅计划明细"`
 }
 
 type SubscriptionCreateReq struct {

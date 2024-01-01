@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"go-oversea-pay/internal/logic/subscription/ro"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 
@@ -12,7 +13,10 @@ func (c *ControllerV1) SubscriptionPlanDetail(ctx context.Context, req *v1.Subsc
 	one := query.GetSubscriptionPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, "plan not found")
 	return &v1.SubscriptionPlanDetailRes{
-		Plan:     one,
-		Channels: query.GetListActiveSubscriptionPlanChannels(ctx, req.PlanId),
+		Plan: &ro.SubscriptionPlanRo{
+			Plan:     one,
+			Channels: query.GetListActiveSubscriptionPlanChannels(ctx, req.PlanId),
+			Addons:   query.GetSubscriptionPlanAddonsByPlanId(ctx, req.PlanId),
+		},
 	}, nil
 }
