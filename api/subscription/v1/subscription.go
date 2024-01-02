@@ -64,7 +64,7 @@ type SubscriptionPlanListReq struct {
 	g.Meta     `path:"/subscription_plan_list" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划列表"`
 	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,1-edit，2-published,2-expired" `
+	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
 	Currency   string `p:"currency"   dc:"订阅计划货币" dc:"订阅计划货币" `
 }
 type SubscriptionPlanListRes struct {
@@ -72,7 +72,7 @@ type SubscriptionPlanListRes struct {
 }
 
 type SubscriptionPlanChannelTransferAndActivateReq struct {
-	g.Meta `path:"/subscription_plan_channel_transfer_and_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付通道开通并发布"`
+	g.Meta `path:"/subscription_plan_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付通道激活并发布"`
 	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	//ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -80,7 +80,7 @@ type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
 type SubscriptionPlanChannelActivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付通道激活"`
+	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道激活"`
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -88,7 +88,7 @@ type SubscriptionPlanChannelActivateRes struct {
 }
 
 type SubscriptionPlanChannelDeactivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付通道取消激活"`
+	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道取消激活"`
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
