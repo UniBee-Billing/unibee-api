@@ -103,6 +103,14 @@ type SubscriptionPlanDetailRes struct {
 	Plan *ro.SubscriptionPlanRo `p:"plan" dc:"订阅计划明细"`
 }
 
+type SubscriptionPlanExpireReq struct {
+	g.Meta    `path:"/subscription_plan_expire" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划过期"`
+	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	EmailCode int64 `p:"emailCode" dc:"邮箱中获取的验证码" v:"required#请输入验证码"`
+}
+type SubscriptionPlanExpireRes struct {
+}
+
 type SubscriptionCreateReq struct {
 	g.Meta        `path:"/subscription_create" tags:"Subscription-Controller" method:"post" summary:"用户订阅创建"`
 	PlanId        int64  `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
