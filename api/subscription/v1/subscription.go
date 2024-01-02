@@ -34,7 +34,7 @@ type SubscriptionPlanCreateRes struct {
 
 type SubscriptionPlanEditReq struct {
 	g.Meta             `path:"/subscription_plan_edit" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划修改(覆盖模式）"`
-	PlanId             int64  `p:"planId" dc:"PlanId" v:"required|length:4,30#请输入PlanId"`
+	PlanId             int64  `p:"planId" dc:"PlanId" v:"required#请输入订阅计划 ID"`
 	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
 	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
 	Currency           string `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币

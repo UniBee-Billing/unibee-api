@@ -142,6 +142,13 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 
+	if len(req.ProductName) == 0 {
+		req.ProductName = req.PlanName
+	}
+	if len(req.ProductDescription) == 0 {
+		req.ProductDescription = req.Description
+	}
+
 	one.PlanName = req.PlanName
 	one.Amount = req.Amount
 	one.Currency = strings.ToUpper(req.Currency)
@@ -152,7 +159,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.HomeUrl = req.HomeUrl
 	one.ChannelProductName = req.ProductName
 	one.ChannelProductDescription = req.ProductDescription
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Update(one)
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).Update(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
 		one = nil
@@ -270,7 +277,7 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-		utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		//utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 	}
 
 	if req.Action == 0 {
@@ -358,6 +365,12 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	}
 	if len(planChannel.ChannelProductId) == 0 {
 		//产品尚未创建
+		if len(plan.ChannelProductName) == 0 {
+			plan.ChannelProductName = plan.PlanName
+		}
+		if len(plan.ChannelProductDescription) == 0 {
+			plan.ChannelProductDescription = plan.Description
+		}
 		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
 		if err != nil {
 			return err
