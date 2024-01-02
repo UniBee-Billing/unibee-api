@@ -122,6 +122,8 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
+
+	//todo mark 是否直接发布
 	return one, nil
 }
 
@@ -156,6 +158,8 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		one = nil
 		return
 	}
+
+	//todo mark 是否直接发布
 
 	return one, nil
 }
