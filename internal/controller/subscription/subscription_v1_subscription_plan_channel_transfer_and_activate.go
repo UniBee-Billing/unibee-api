@@ -28,7 +28,7 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 		err = service.SubscriptionPlanChannelTransferAndActivate(ctx, req.PlanId, int64(channel.Id))
 		if err != nil {
 			utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
-			return
+			return nil, err
 		}
 	}
 
@@ -36,7 +36,7 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 	err = service.SubscriptionPlanActivate(ctx, req.PlanId)
 	if err != nil {
 		utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
-		return
+		return nil, err
 	}
 
 	if len(plan.BindingAddonIds) > 0 {
@@ -50,7 +50,7 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
 				if err != nil {
 					utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("Internal Error converting string to int: %s", err))
-					return
+					return nil, err
 				}
 				addonIdsList = append(addonIdsList, num) // 添加到整数列表中
 				addonIds = append(addonIds, num)         // 添加到整数列表中
@@ -66,7 +66,7 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(channel.Id))
 					if err != nil {
 						utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
-						return
+						return nil, err
 					}
 				}
 
@@ -74,12 +74,12 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 				err = service.SubscriptionPlanActivate(ctx, int64(addonPlan.Id))
 				if err != nil {
 					utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
-					return
+					return nil, err
 				}
 			}
 		}
 	}
 
 	utility.SuccessJsonExit(g.RequestFromCtx(ctx), nil)
-	return
+	return &v1.SubscriptionPlanChannelTransferAndActivateRes{}, nil
 }
