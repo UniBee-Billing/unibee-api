@@ -49,8 +49,8 @@ func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Co
 			for _, s := range strList {
 				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
 				if err != nil {
-					fmt.Println("Internal Error converting string to int:", err)
-					return nil, err
+					utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("Internal Error converting string to int: %s", err))
+					return
 				}
 				addonIdsList = append(addonIdsList, num) // 添加到整数列表中
 				addonIds = append(addonIds, num)         // 添加到整数列表中
