@@ -82,7 +82,7 @@ type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
 type SubscriptionPlanChannelActivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道激活"`
+	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道激活"  deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -90,7 +90,7 @@ type SubscriptionPlanChannelActivateRes struct {
 }
 
 type SubscriptionPlanChannelDeactivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道取消激活"`
+	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道取消激活" deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
