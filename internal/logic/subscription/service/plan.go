@@ -86,7 +86,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(req.Type == 0 || req.Type == 1, "type should be 0 or 1")
+	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
@@ -164,6 +164,7 @@ func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) 
 	err := dao.SubscriptionPlan.Ctx(ctx).
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
+		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
@@ -173,7 +174,7 @@ func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) 
 	var totalPlanIds []uint64
 	for _, plan := range mainList {
 		totalPlanIds = append(totalPlanIds, plan.Id)
-		if plan.Type != 0 {
+		if plan.Type != 1 {
 			//非主 Plan 不查询 addons
 			continue
 		}
