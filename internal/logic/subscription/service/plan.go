@@ -284,7 +284,7 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-		//utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 	}
 
 	if req.Action == 0 {
