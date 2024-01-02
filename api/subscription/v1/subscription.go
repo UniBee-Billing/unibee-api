@@ -25,7 +25,7 @@ type SubscriptionPlanCreateReq struct {
 	Description        string `p:"description"  dc:"描述"`                                                                                                              //
 	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
 	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
-	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头"  v:"required#请输入ImageUrl,需 http 开头" `                                                          // image_url
+	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头" `                                                                                              // image_url
 	HomeUrl            string `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `                                                                                               // home_url
 }
 type SubscriptionPlanCreateRes struct {

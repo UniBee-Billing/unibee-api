@@ -35,6 +35,7 @@ type MerchantInfoColumns struct {
 	GmtModify   string // 修改时间
 	IsDeleted   string // 是否删除，0-未删除，1-删除
 	CompanyLogo string // 账号头像
+	HomeUrl     string //
 }
 
 // merchantInfoColumns holds the columns for table merchant_info.
@@ -54,6 +55,7 @@ var merchantInfoColumns = MerchantInfoColumns{
 	GmtModify:   "gmt_modify",
 	IsDeleted:   "is_deleted",
 	CompanyLogo: "company_logo",
+	HomeUrl:     "home_url",
 }
 
 // NewMerchantInfoDao creates and returns a new DAO object for table data access.

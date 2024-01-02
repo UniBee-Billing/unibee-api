@@ -27,4 +27,5 @@ type MerchantInfo struct {
 	GmtModify   *gtime.Time // 修改时间
 	IsDeleted   interface{} // 是否删除，0-未删除，1-删除
 	CompanyLogo interface{} // 账号头像
+	HomeUrl     interface{} //
 }

@@ -82,9 +82,16 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
-	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
+
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
+	if len(req.ImageUrl) == 0 {
+		req.ImageUrl = merchantInfo.CompanyLogo
+	}
+	if len(req.HomeUrl) == 0 {
+		req.HomeUrl = merchantInfo.HomeUrl
+	}
+	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")

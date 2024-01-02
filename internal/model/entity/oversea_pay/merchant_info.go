@@ -25,4 +25,5 @@ type MerchantInfo struct {
 	GmtModify   *gtime.Time `json:"gmtModify"   ` // 修改时间
 	IsDeleted   int         `json:"isDeleted"   ` // 是否删除，0-未删除，1-删除
 	CompanyLogo string      `json:"companyLogo" ` // 账号头像
+	HomeUrl     string      `json:"homeUrl"     ` //
 }
