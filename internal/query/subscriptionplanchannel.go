@@ -16,7 +16,7 @@ func GetSubscriptionPlanChannel(ctx context.Context, planId int64, channelId int
 }
 
 func GetActiveSubscriptionPlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.SubscriptionPlanChannel) {
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, ChannelId: channelId, Status: consts.PlanStatusActive}).OmitEmpty().Scan(&one)
+	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, ChannelId: channelId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -24,7 +24,7 @@ func GetActiveSubscriptionPlanChannel(ctx context.Context, planId int64, channel
 }
 
 func GetListActiveSubscriptionPlanChannels(ctx context.Context, planId int64) (list []*entity.SubscriptionPlanChannel) {
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, Status: consts.PlanStatusActive}).OmitEmpty().Scan(&list)
+	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		list = nil
 	}

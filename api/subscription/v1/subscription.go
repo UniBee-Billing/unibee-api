@@ -51,7 +51,7 @@ type SubscriptionPlanEditRes struct {
 }
 
 type SubscriptionPlanAddonsBindingReq struct {
-	g.Meta   `path:"/subscription_plan_addons_binding" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划Addons 配置"`
+	g.Meta   `path:"/subscription_plan_addons_binding" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划 Addons 绑定"`
 	PlanId   int64   `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Action   int64   `p:"action" d:"0" dc:"操作类型，0-覆盖,1-添加，2-删除" v:"required#请输入操作类型"`
 	AddonIds []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `

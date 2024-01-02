@@ -80,7 +80,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 		return nil, gerror.Newf("SubscriptionCreate update err:%s", update)
 	}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
-	one.Status = consts.PlanStatusCreate
+	one.Status = consts.PlanChannelStatusCreate
 	one.Link = createRes.Link
 	one.ChannelUserId = createRes.ChannelUserId
 
@@ -139,7 +139,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 		return nil, gerror.Newf("SubscriptionUpdate update err:%s", update)
 	}
 	subscription.ChannelSubscriptionId = updateRes.ChannelSubscriptionId
-	subscription.Status = consts.PlanStatusCreate
+	subscription.Status = consts.PlanChannelStatusCreate
 	subscription.Link = updateRes.Link
 
 	return subscription, nil

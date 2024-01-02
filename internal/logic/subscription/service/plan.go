@@ -33,8 +33,8 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 		return
 	}
 	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusActive,
-		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusActive,// todo mark
+		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanChannelStatusActive,
+		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusActive,// todo mark
 		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
 	if err != nil {
@@ -63,8 +63,8 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 		return
 	}
 	update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanStatusInActive,
-		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanStatusInActive,// todo mark
+		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanChannelStatusInActive,
+		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusInActive,// todo mark
 		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
 	if err != nil {
@@ -112,6 +112,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		HomeUrl:                   req.HomeUrl,
 		ChannelProductName:        req.ProductName,
 		ChannelProductDescription: req.ProductDescription,
+		Status:                    consts.PlanStatusEditable,
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
@@ -137,7 +138,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
 	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
-	utility.Assert(one.Status == 0, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
+	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 
 	one.PlanName = req.PlanName
 	one.Amount = req.Amount
@@ -244,6 +245,8 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
 	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+	utility.Assert(one.Type == consts.PlanTypeMain, fmt.Sprintf("plan not type main, id:%d", req.PlanId))
+
 	var addonIdsList []int64
 	if len(one.BindingAddonIds) > 0 {
 		//初始化
@@ -258,14 +261,24 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 			addonIdsList = append(addonIdsList, num) // 添加到整数列表中
 		}
 	}
+	//检查 addonIds 类型
+	var allAddonList []*entity.SubscriptionPlan
+	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
+	for _, addonPlan := range allAddonList {
+		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
+		utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+	}
+
 	if req.Action == 0 {
 		//覆盖
 		addonIdsList = req.AddonIds
 	} else if req.Action == 1 {
 		//添加
+		utility.Assert(len(req.AddonIds) > 0, "action add, addonids is empty")
 		addonIdsList = mergeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	} else if req.Action == 2 {
 		//删除
+		utility.Assert(len(req.AddonIds) > 0, "action delete, addonids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	}
 	newIds := intListToString(addonIdsList)
@@ -292,12 +305,12 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 	utility.Assert(planId > 0, "invalid planId")
 	one := query.GetSubscriptionPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found, invalid planId")
-	if one.Status == 2 {
+	if one.Status == consts.PlanStatusPublished {
 		//已成功
 		return nil
 	}
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().Status:    2,
+		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusPublished,
 		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitEmpty().Update()
 	if err != nil {
@@ -323,7 +336,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		planChannel = &entity.SubscriptionPlanChannel{
 			PlanId:    planId,
 			ChannelId: channelId,
-			Status:    consts.PlanStatusInit,
+			Status:    consts.PlanChannelStatusInit,
 		}
 		//保存planChannel
 		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitEmpty().Insert(planChannel)

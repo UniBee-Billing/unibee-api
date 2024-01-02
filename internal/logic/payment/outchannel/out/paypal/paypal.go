@@ -491,7 +491,7 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 		ChannelPlanId:     subscriptionPlan.ID,
 		ChannelPlanStatus: string(subscriptionPlan.Status),
 		Data:              string(jsonData),
-		Status:            consts.PlanStatusActive,
+		Status:            consts.PlanChannelStatusActive,
 	}, nil
 }
 

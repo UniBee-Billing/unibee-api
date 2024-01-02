@@ -438,7 +438,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		ChannelPlanId:     result.ID,
 		ChannelPlanStatus: fmt.Sprintf("%v", result.Active),
 		Data:              string(jsonData),
-		Status:            consts.PlanStatusActive,
+		Status:            consts.PlanChannelStatusActive,
 	}, nil
 }
 

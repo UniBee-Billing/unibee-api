@@ -97,19 +97,19 @@ type CreateProductInternalResp struct {
 }
 
 type CreatePlanInternalResp struct {
-	ChannelPlanId     string                            `json:"channelPlanId"`
-	ChannelPlanStatus string                            `json:"channelPlanStatus"`
-	Data              string                            `json:"data"`
-	Status            consts.SubscriptionPlanStatusEnum `json:"status"`
+	ChannelPlanId     string                                   `json:"channelPlanId"`
+	ChannelPlanStatus string                                   `json:"channelPlanStatus"`
+	Data              string                                   `json:"data"`
+	Status            consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
 type CreateSubscriptionInternalResp struct {
-	ChannelUserId             string                            `json:"channelUserId"`
-	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
-	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
-	Data                      string                            `json:"data"`
-	Link                      string                            `json:"link"`
-	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
+	ChannelUserId             string                                   `json:"channelUserId"`
+	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
+	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
+	Data                      string                                   `json:"data"`
+	Link                      string                                   `json:"link"`
+	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
 type CreateSubscriptionRo struct {
@@ -132,12 +132,12 @@ type CancelSubscriptionInternalResp struct {
 }
 
 type UpdateSubscriptionInternalResp struct {
-	ChannelUserId             string                            `json:"channelUserId"`
-	ChannelSubscriptionId     string                            `json:"channelSubscriptionId"`
-	ChannelSubscriptionStatus string                            `json:"channelSubscriptionStatus"`
-	Data                      string                            `json:"data"`
-	Link                      string                            `json:"link"`
-	Status                    consts.SubscriptionPlanStatusEnum `json:"status"`
+	ChannelUserId             string                                   `json:"channelUserId"`
+	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
+	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
+	Data                      string                                   `json:"data"`
+	Link                      string                                   `json:"link"`
+	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
 type ListSubscriptionInternalResp struct {
