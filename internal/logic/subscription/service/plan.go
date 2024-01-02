@@ -173,6 +173,12 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 
 func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (list []*ro.SubscriptionPlanRo) {
 	var mainList []*entity.SubscriptionPlan
+	if req.Count <= 0 {
+		req.Count = 10 //每页数量默认 10
+	}
+	if req.Page < 0 {
+		req.Page = 0
+	}
 	err := dao.SubscriptionPlan.Ctx(ctx).
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
@@ -293,6 +299,9 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 		utility.Assert(len(req.AddonIds) > 0, "action delete, addonids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	}
+
+	utility.Assert(len(addonIdsList) <= 10, "addon too much, should <= 10")
+
 	newIds := intListToString(addonIdsList)
 	one.BindingAddonIds = newIds
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
