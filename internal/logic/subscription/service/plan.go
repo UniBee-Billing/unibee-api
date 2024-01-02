@@ -178,6 +178,7 @@ func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) 
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
 		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
+		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
 		return nil
