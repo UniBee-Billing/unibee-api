@@ -162,6 +162,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (list []*ro.SubscriptionPlanRo) {
 	var mainList []*entity.SubscriptionPlan
 	err := dao.SubscriptionPlan.Ctx(ctx).
+		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
 		OmitEmpty().Scan(&mainList)
@@ -223,7 +224,7 @@ func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) 
 	}
 	//添加 Channel 信息
 	var allChannelList []*entity.SubscriptionPlanChannel
-	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalPlanIds).Scan(&allChannelList)
+	err = dao.SubscriptionPlanChannel.Ctx(ctx).WhereIn(dao.SubscriptionPlanChannel.Columns().PlanId, totalPlanIds).Scan(&allChannelList)
 	if err == nil {
 		for _, channel := range allChannelList {
 			for _, planRo := range list {

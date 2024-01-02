@@ -61,7 +61,7 @@ type SubscriptionPlanAddonsBindingRes struct {
 }
 
 type SubscriptionPlanListReq struct {
-	g.Meta     `path:"/subscription_plan_list" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划修改"`
+	g.Meta     `path:"/subscription_plan_list" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划列表"`
 	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	Type       int    `p:"type"  d:"0"  dc:"不填查询所有，,0-main plan，1-addon plan" ` // 金额,单位：分
 	Currency   string `p:"currency"   dc:"订阅计划货币" dc:"订阅计划货币" `

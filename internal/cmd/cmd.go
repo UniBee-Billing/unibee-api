@@ -43,13 +43,13 @@ var (
 			//	router.Tools(ctx, group) //工具接口
 			//})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/out", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
-				)
-				router.Outs(ctx, group) //开放平台接口
-			})
+			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/out", func(group *ghttp.RouterGroup) {
+			//	group.Middleware(
+			//		_interface.Middleware().ResponseHandler,
+			//		_interface.Middleware().PreOpenApiAuth,
+			//	)
+			//	router.Outs(ctx, group) //开放平台接口
+			//})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
 				group.Middleware(
@@ -59,13 +59,13 @@ var (
 				router.Subscription(ctx, group) //订阅接口
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/mock", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreAuth,
-				)
-				router.Mocks(ctx, group) //Out本地测试用Mock接口
-			})
+			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/mock", func(group *ghttp.RouterGroup) {
+			//	group.Middleware(
+			//		_interface.Middleware().ResponseHandler,
+			//		_interface.Middleware().PreAuth,
+			//	)
+			//	router.Mocks(ctx, group) //Out本地测试用Mock接口
+			//})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
