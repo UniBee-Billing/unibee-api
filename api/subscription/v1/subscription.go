@@ -65,7 +65,7 @@ type SubscriptionPlanListReq struct {
 	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
 	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency"   dc:"订阅计划货币" dc:"订阅计划货币" `
+	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币" dc:"订阅计划货币" `
 }
 type SubscriptionPlanListRes struct {
 	Plans []*ro.SubscriptionPlanRo `p:"plans" dc:"订阅计划明细"`
