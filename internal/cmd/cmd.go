@@ -54,9 +54,8 @@ var (
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/plan", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
-					_interface.Middleware().TokenAuth,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.SubscriptionPlanAdmin(ctx, group) //订阅Plan接口-Merchant Portal 使用
 			})
