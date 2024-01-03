@@ -62,8 +62,15 @@ var (
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
-				router.UserAuth(ctx, group)
 				router.UserProfile(ctx, group)
+			})
+
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				router.UserAuth(ctx, group)
 			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)

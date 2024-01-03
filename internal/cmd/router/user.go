@@ -9,7 +9,7 @@ import (
 // UserAuth 工具类
 func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
-	group.Group("/auth", func(group *ghttp.RouterGroup) {
+	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewAuth(),
 		)
