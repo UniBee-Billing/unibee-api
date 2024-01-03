@@ -159,18 +159,18 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 // later define a merchantClaim
 type UserClaims struct {
 	// UserId
-	Email	string	`json:"email"`
+	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
 // Token Auth, 和上面的 Auth() 重复了, 但上面的Auth并非用在unibee项目中
-var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")	// pass this as ENV, auth_v1_login.go also uses this
+var secretKey = []byte("3^&secret-key-for-UniBee*1!8*") // pass this as ENV, user_auth_login.go also uses this
 func parseAccessToken(accessToken string) *UserClaims {
 	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-	 return secretKey, nil
+		return secretKey, nil
 	})
 	return parsedAccessToken.Claims.(*UserClaims)
-}   
+}
 
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	tokenString := r.Header.Get("Authorization")
@@ -182,8 +182,8 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	// fmt.Println("token str: ", tokenString)
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
-	 })
-	
+	})
+
 	if err != nil {
 		fmt.Println("parse error")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
@@ -205,28 +205,26 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	}
 	_interface.BizCtx().Init(r, customCtx)
 	// if := _interface.Session().GetUser(r.Context()); userEntity != nil {
-		customCtx.User = &model.ContextUser{
-			/*
+	customCtx.User = &model.ContextUser{
+		/*
 			Id:          userEntity.Id,
 			MobilePhone: userEntity.Mobile,
 			UserName:    userEntity.UserName,
 			AvatarUrl:   userEntity.AvatarUrl,
 			IsAdmin:     false,
-			*/
-			Email: 		u.Email,
-		}
+		*/
+		Email: u.Email,
+	}
 	// }
 	// if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
-		//openapikey 转化为api 用户
-		// customCtx.Data[consts.ApiKey] = key
-		// customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
+	//openapikey 转化为api 用户
+	// customCtx.Data[consts.ApiKey] = key
+	// customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
 	// }
 	// 将自定义的上下文对象传递到模板变量中使用
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})
-
-
 
 	r.Middleware.Next()
 }

@@ -1,12 +1,12 @@
 #deploy
-apiVersion: v1
+apiVersion: auth
 kind: Namespace
 metadata:
   name: default
   labels:
     name: default
 ---
-apiVersion: apps/v1
+apiVersion: apps/auth
 kind: Deployment
 metadata:
   name: yd-gooverseapay-daily
@@ -80,7 +80,7 @@ spec:
 
 ---
 #service
-apiVersion: v1
+apiVersion: auth
 kind: Service
 metadata:
   name: yd-gooverseapay-daily-service

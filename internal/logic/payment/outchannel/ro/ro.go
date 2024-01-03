@@ -3,8 +3,7 @@ package ro
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/out/v1"
-	"go-oversea-pay/api/out/vo"
+	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
@@ -56,7 +55,7 @@ type OutPayCaptureRo struct {
 	MerchantId   string          `json:"merchantId"         `      // 商户ID
 	PspReference string          `json:"pspReference"            ` // 业务类型。1-订单
 	Reference    string          `json:"reference"              `  // 业务id-即商户订单号
-	Amount       *vo.PayAmountVo `json:"amount"`
+	Amount       *v1.PayAmountVo `json:"amount"`
 	Status       string          `json:"status"`
 }
 

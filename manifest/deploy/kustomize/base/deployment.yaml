@@ -1,4 +1,4 @@
-apiVersion: apps/v1
+apiVersion: apps/auth
 kind: Deployment
 metadata:
   name: template-single

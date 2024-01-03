@@ -5,7 +5,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/subscription/v1"
+	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel"
@@ -15,7 +15,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*entity.Subscription, error) {
+func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*entity.Subscription, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
@@ -90,7 +90,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	return one, nil
 }
 
-func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "NewPlanId invalid")
 	utility.Assert(req.ConfirmChannelId > 0, "ConfirmChannelId invalid")

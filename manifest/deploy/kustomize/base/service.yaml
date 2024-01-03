@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: auth
 kind: Service
 metadata:
   name: template-single

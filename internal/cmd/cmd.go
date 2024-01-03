@@ -35,63 +35,43 @@ var (
 				//	hello.NewV1(), //测试接口
 				//)
 			})
-			//s.Group("/gooverseapay/xin", func(group *ghttp.RouterGroup) {
+
+			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
 			//	group.Middleware(
 			//		_interface.Middleware().ResponseHandler,
 			//		// _interface.Middleware().PreOpenApiAuth,
 			//	)
-			//	router.Tools(ctx, group) //工具接口
+			//	router.OpenPayment(ctx, group) //开放平台接口
+			// router.OpenMocks(ctx, group) //Out本地测试用Mock接口
 			//})
 
-			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/out", func(group *ghttp.RouterGroup) {
-			//	group.Middleware(
-			//		_interface.Middleware().ResponseHandler,
-			//		// _interface.Middleware().PreOpenApiAuth,
-			//	)
-			//	router.Outs(ctx, group) //开放平台接口
-			//})
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				router.MerchantPlan(ctx, group)
+				router.MerchantWebhook(ctx, group)
+			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/plan", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
-				router.SubscriptionPlanAdmin(ctx, group) //订阅Plan接口-Merchant Portal 使用
-			})
-
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/subscription", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-				)
-				router.Subscription(ctx, group) //订阅Plan接口-Merchant Portal 使用
-			})
-
-			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/mock", func(group *ghttp.RouterGroup) {
-			//	group.Middleware(
-			//		_interface.Middleware().ResponseHandler,
-			//		_interface.Middleware().PreAuth,
-			//	)
-			//	router.Mocks(ctx, group) //Out本地测试用Mock接口
-			//})
-
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/auth", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreAuth,
-				)
-				router.Auth(ctx, group) //Out本地测试用Mock接口
+				router.UserSubscription(ctx, group)
+				router.UserAuth(ctx, group)
+				router.UserProfile(ctx, group)
 			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// 通道支付 Redirect 回调
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", channel_webhook_entry.ChannelPaymentRedirectEntrance)
-			// 通道支付 Webhook 回调
+			// 通道支付 MerchantWebhook 回调
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{channelId}/notifications", channel_webhook_entry.ChannelPaymentWebhookEntrance)
-			//// 初始化通道 Webhook 配置
+			//// 初始化通道 MerchantWebhook 配置
 			//outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{

@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// Subscription is the golang structure for table subscription_plan_merchant.
+// Subscription is the golang structure for table subscription.
 type Subscription struct {
 	Id                    uint64      `json:"id"                    ` //
 	SubscriptionId        string      `json:"subscriptionId"        ` // 订阅id（内部编号）
