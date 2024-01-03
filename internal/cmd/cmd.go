@@ -53,6 +53,8 @@ var (
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
 				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().TokenAuth,
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
 				)

@@ -7,9 +7,11 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"log"
+	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -23,6 +25,22 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
         return false
     }
     return true
+}
+
+var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
+func createToken(email string) (string, error) {
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
+        jwt.MapClaims{ 
+        "email": email, 
+        "exp": time.Now().Add(time.Hour * 1).Unix(), 
+        })
+
+    tokenString, err := token.SignedString(secretKey)
+    if err != nil {
+    return "", err
+    }
+
+ return tokenString, nil
 }
 
 func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRes, err error) {
@@ -45,5 +63,10 @@ func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.Log
 		return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
 	}
 
-	return &v1.LoginRes{User: newOne}, nil
+	token, err := createToken(req.Email)
+	if err != nil {
+		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+	}
+
+	return &v1.LoginRes{User: newOne, Token: token}, nil
 }

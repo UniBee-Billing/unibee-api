@@ -14,6 +14,7 @@ type LoginReq struct {
 // with token to be implemented in the future
 type LoginRes struct {
 	User *entity.UserAccount `p:"user" dc:"user"`
+	Token string `p:"token" dc:"token string"`
 }
 
 type LoginOtpReq struct {
@@ -22,6 +23,7 @@ type LoginOtpReq struct {
 }
 
 type LoginOtpRes struct {
+	
 }
 
 type LoginOtpVerifyReq struct {
@@ -31,6 +33,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
+	User *entity.UserAccount `p:"user" dc:"user"`
+	Token string `p:"token" dc:"token string"`
 }
 
 type RegisterReq struct {

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"go-oversea-pay/internal/consts"
 	_ "go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
@@ -12,6 +13,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	_ "github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type SMiddleware struct {
@@ -152,6 +154,37 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 		}
 	}
 	r.Middleware.Next()
+}
+
+// Token Auth, 和上面的 Auth() 重复了, 但上面的Auth并非用在unibee项目中
+var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")	// pass this as ENV, auth_v1_login.go also uses this
+func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		fmt.Println("empty token string of auth header")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+	// fmt.Println("token str: ", tokenString)
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	 })
+	
+	if err != nil {
+		fmt.Println("parse error")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+
+	if !token.Valid {
+		fmt.Println("token invalid")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+	
+	
+
+	 r.Middleware.Next()
 }
 
 func (s *SMiddleware) ApiAuth(r *ghttp.Request) {

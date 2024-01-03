@@ -21,47 +21,55 @@ type SubscriptionDao struct {
 // SubscriptionColumns defines and stores column names for table subscription.
 type SubscriptionColumns struct {
 	Id                    string //
+	SubscriptionId        string // 内部订阅id
 	GmtCreate             string // 创建时间
-	GmtModify             string // 修改时间
+	Type                  string // 类型，1-普通单，2-升级单
+	UpdateFromId          string // 升级来源 ID
+	UpdateToId            string // 升级去向 ID
 	CompanyId             string // 公司ID
 	MerchantId            string // 商户Id
 	PlanId                string // 计划ID
 	ChannelId             string // 支付渠道Id
 	UserId                string // userId
 	Quantity              string // quantity
-	SubscriptionId        string // 内部订阅id
 	ChannelSubscriptionId string // 支付渠道订阅id
 	Data                  string // 渠道额外参数，JSON格式
 	ResponseData          string // 渠道返回参数，JSON格式
-	IsDeleted             string //
 	Status                string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelUserId         string // 渠道用户 Id
 	CustomerName          string // customer_name
 	CustomerEmail         string // customer_email
+	GmtModify             string // 修改时间
+	IsDeleted             string //
 	Link                  string //
+	ChannelStatus         string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 }
 
 // subscriptionColumns holds the columns for table subscription.
 var subscriptionColumns = SubscriptionColumns{
 	Id:                    "id",
+	SubscriptionId:        "subscription_id",
 	GmtCreate:             "gmt_create",
-	GmtModify:             "gmt_modify",
+	Type:                  "type",
+	UpdateFromId:          "update_from_id",
+	UpdateToId:            "update_to_id",
 	CompanyId:             "company_id",
 	MerchantId:            "merchant_id",
 	PlanId:                "plan_id",
 	ChannelId:             "channel_id",
 	UserId:                "user_id",
 	Quantity:              "quantity",
-	SubscriptionId:        "subscription_id",
 	ChannelSubscriptionId: "channel_subscription_id",
 	Data:                  "data",
 	ResponseData:          "response_data",
-	IsDeleted:             "is_deleted",
 	Status:                "status",
 	ChannelUserId:         "channel_user_id",
 	CustomerName:          "customer_name",
 	CustomerEmail:         "customer_email",
+	GmtModify:             "gmt_modify",
+	IsDeleted:             "is_deleted",
 	Link:                  "link",
+	ChannelStatus:         "channel_status",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.
