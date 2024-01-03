@@ -29,7 +29,7 @@ var (
 				})
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
+					// _interface.Middleware().PreOpenApiAuth,
 				)
 				//group.Bind(
 				//	hello.NewV1(), //测试接口
@@ -38,7 +38,7 @@ var (
 			//s.Group("/gooverseapay/xin", func(group *ghttp.RouterGroup) {
 			//	group.Middleware(
 			//		_interface.Middleware().ResponseHandler,
-			//		_interface.Middleware().PreOpenApiAuth,
+			//		// _interface.Middleware().PreOpenApiAuth,
 			//	)
 			//	router.Tools(ctx, group) //工具接口
 			//})
@@ -46,7 +46,7 @@ var (
 			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/out", func(group *ghttp.RouterGroup) {
 			//	group.Middleware(
 			//		_interface.Middleware().ResponseHandler,
-			//		_interface.Middleware().PreOpenApiAuth,
+			//		// _interface.Middleware().PreOpenApiAuth,
 			//	)
 			//	router.Outs(ctx, group) //开放平台接口
 			//})

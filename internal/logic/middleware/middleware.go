@@ -194,9 +194,13 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 
-	//  u := parseAccessToken(tokenString)
+	u := parseAccessToken(tokenString)
 	// u.Email
-
+	
+	r.Assigns(g.Map{
+		consts.ContextKey: u,
+	})
+	
 	 r.Middleware.Next()
 }
 
