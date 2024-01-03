@@ -115,10 +115,11 @@ type SubscriptionPlanExpireRes struct {
 
 type SubscriptionCreateReq struct {
 	g.Meta        `path:"/subscription_create" tags:"Subscription-Controller" method:"post" summary:"用户订阅创建"`
-	PlanId        int64  `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ChannelId     int64  `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
-	UserId        int64  `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	ChannelUserId string `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
+	PlanId        int64                         `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ChannelId     int64                         `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
+	UserId        int64                         `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
+	ChannelUserId string                        `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
+	Addons        []*SubscriptionPlanAddonParam `p:"addons" dc:"addons" `
 }
 type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
@@ -140,9 +141,10 @@ type SubscriptionDetailRes struct {
 
 type SubscriptionUpdateReq struct {
 	g.Meta           `path:"/subscription_update" tags:"Subscription-Controller" method:"post" summary:"用户订阅更新"`
-	SubscriptionId   int64 `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId        int64 `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ConfirmChannelId int64 `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
+	SubscriptionId   int64                         `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId        int64                         `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	ConfirmChannelId int64                         `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
+	Addons           []*SubscriptionPlanAddonParam `p:"addons" dc:"addons" `
 }
 type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
@@ -152,4 +154,9 @@ type SubscriptionWebhookCheckAndSetupReq struct {
 	g.Meta `path:"/subscription_webhook_check_and_setup" tags:"Subscription-Controller" method:"post" summary:"Webhook 初始化"`
 }
 type SubscriptionWebhookCheckAndSetupRes struct {
+}
+
+type SubscriptionPlanAddonParam struct {
+	AddonPlanId int64 `p:"addonPlanId" dc:"订阅计划Addon ID" v:"required#请输入订阅计划Addon ID"`
+	Quantity    int   `p:"quantity" dc:"数量，默认 1" `
 }

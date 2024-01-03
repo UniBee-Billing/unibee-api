@@ -13,3 +13,11 @@ func GetSubscriptionById(ctx context.Context, id int64) (one *entity.Subscriptio
 	}
 	return
 }
+
+func GetSubscriptionByChannelSubscriptionId(ctx context.Context, channelSubscriptionId string) (one *entity.Subscription) {
+	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{ChannelSubscriptionId: channelSubscriptionId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
