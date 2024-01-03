@@ -82,9 +82,16 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
-	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
+
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
+	if len(req.ImageUrl) == 0 {
+		req.ImageUrl = merchantInfo.CompanyLogo
+	}
+	if len(req.HomeUrl) == 0 {
+		req.HomeUrl = merchantInfo.HomeUrl
+	}
+	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
@@ -142,6 +149,13 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 
+	if len(req.ProductName) == 0 {
+		req.ProductName = req.PlanName
+	}
+	if len(req.ProductDescription) == 0 {
+		req.ProductDescription = req.Description
+	}
+
 	one.PlanName = req.PlanName
 	one.Amount = req.Amount
 	one.Currency = strings.ToUpper(req.Currency)
@@ -152,7 +166,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.HomeUrl = req.HomeUrl
 	one.ChannelProductName = req.ProductName
 	one.ChannelProductDescription = req.ProductDescription
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Update(one)
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).Update(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
 		one = nil
@@ -166,11 +180,18 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 
 func SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (list []*ro.SubscriptionPlanRo) {
 	var mainList []*entity.SubscriptionPlan
+	if req.Count <= 0 {
+		req.Count = 10 //每页数量默认 10
+	}
+	if req.Page < 0 {
+		req.Page = 0
+	}
 	err := dao.SubscriptionPlan.Ctx(ctx).
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
 		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
+		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
 		return nil
@@ -285,6 +306,9 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 		utility.Assert(len(req.AddonIds) > 0, "action delete, addonids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	}
+
+	utility.Assert(len(addonIdsList) <= 10, "addon too much, should <= 10")
+
 	newIds := intListToString(addonIdsList)
 	one.BindingAddonIds = newIds
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
@@ -358,6 +382,12 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	}
 	if len(planChannel.ChannelProductId) == 0 {
 		//产品尚未创建
+		if len(plan.ChannelProductName) == 0 {
+			plan.ChannelProductName = plan.PlanName
+		}
+		if len(plan.ChannelProductDescription) == 0 {
+			plan.ChannelProductDescription = plan.Description
+		}
 		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
 		if err != nil {
 			return err

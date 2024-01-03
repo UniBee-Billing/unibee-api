@@ -26,9 +26,9 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 		}()
 		httpLog := &entity.ChannelHttpLog{
 			Url:       url,
-			Request:   utility.FormatToJson(request),
-			Response:  utility.FormatToJson(utility.CheckReturn(err != nil, err, response)),
-			RequestId: utility.FormatToJson(requestId),
+			Request:   utility.FormatToJsonString(request),
+			Response:  utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
+			RequestId: utility.FormatToJsonString(requestId),
 			Mamo:      memo,
 			ChannelId: strconv.FormatUint(channel.Id, 10),
 		}

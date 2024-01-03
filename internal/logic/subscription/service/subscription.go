@@ -32,14 +32,16 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	//todo mark plan 是否活跃检查
 
 	one := &entity.Subscription{
-		CompanyId:  merchantInfo.CompanyId,
 		MerchantId: merchantInfo.Id,
 		PlanId:     req.PlanId,
 		ChannelId:  req.ChannelId,
 		UserId:     req.UserId,
-		Quantity:   12, // todo mark 按照逻辑计算数量
+		Quantity:   1,           //todo mark 主 plan 暂时不支持数量调整
+		Amount:     plan.Amount, //总金额 todo mark 需要添加 Addon，并用计算函数重新计算
+		Currency:   plan.Currency,
 		//CustomerName:          "jack3",             // todo mark
 		//CustomerEmail:         "jack3.fu@wowow.io", // todo mark
+		AddonData:             "", // todo mark
 		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
 		ChannelSubscriptionId: "",
 		Status:                consts.SubStatusInit,
@@ -55,7 +57,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.CreateSubscriptionRo{
+	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
 		Plan:         plan,
 		SubPlans:     nil,
 		PlanChannel:  planChannel,
@@ -87,7 +89,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	return one, nil
 }
 
-func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*entity.Subscription, error) {
+func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "NewPlanId invalid")
 	utility.Assert(req.ConfirmChannelId > 0, "ConfirmChannelId invalid")
@@ -111,8 +113,36 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 
 	//todo mark subscription 检查
 
+	one := &entity.SubscriptionPendingUpdate{
+		MerchantId:           merchantInfo.Id,
+		ChannelId:            subscription.ChannelId,
+		UserId:               subscription.UserId,
+		SubscriptionId:       subscription.SubscriptionId,
+		UpdateSubscriptionId: utility.CreateSubscriptionOrderNo(),
+		Amount:               subscription.Amount,
+		Currency:             subscription.Currency,
+		PlanId:               subscription.PlanId,
+		Quantity:             subscription.Quantity,
+		AddonData:            subscription.AddonData,
+		UpdateAmount:         subscription.Amount, //总金额 todo mark 需要添加 Addon，并用计算函数重新计算
+		UpdateCurrency:       plan.Currency,
+		UpdatePlanId:         req.NewPlanId,
+		UpdateQuantity:       1,                      //todo mark 主 plan 暂时不支持数量调整
+		UpdatedAddonData:     subscription.AddonData, // addon 带上之前订阅
+		Status:               consts.SubStatusInit,
+		Data:                 "", //额外参数配置
+	}
+
+	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	if err != nil {
+		err = gerror.Newf(`SubscriptionPendingUpdate record insert failure %s`, err)
+		return nil, err
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+
 	//todo mark plan 是否活跃检查
-	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.UpdateSubscriptionRo{
+	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 		Plan:           plan,
 		OldPlan:        oldPlan,
 		SubPlans:       nil,
@@ -125,12 +155,11 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	}
 
 	//更新 Subscription
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().PlanId:       plan.Id,
-		dao.Subscription.Columns().ResponseData: updateRes.Data,
-		dao.Subscription.Columns().GmtModify:    gtime.Now(),
-		dao.Subscription.Columns().Link:         updateRes.Link,
-	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
+	update, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().ResponseData: updateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:    gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Link:         updateRes.Link,
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -138,9 +167,9 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	if rowAffected != 1 {
 		return nil, gerror.Newf("SubscriptionUpdate update err:%s", update)
 	}
-	subscription.ChannelSubscriptionId = updateRes.ChannelSubscriptionId
-	subscription.Status = consts.PlanChannelStatusCreate
-	subscription.Link = updateRes.Link
+	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
+	one.Status = consts.PlanChannelStatusCreate
+	one.Link = updateRes.Link
 
-	return subscription, nil
+	return one, nil
 }

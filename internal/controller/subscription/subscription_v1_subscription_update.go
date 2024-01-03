@@ -12,5 +12,5 @@ func (c *ControllerV1) SubscriptionUpdate(ctx context.Context, req *v1.Subscript
 	if err != nil {
 		return nil, err
 	}
-	return &v1.SubscriptionUpdateRes{Subscription: one}, nil
+	return &v1.SubscriptionUpdateRes{SubscriptionPendingUpdate: one}, nil
 }

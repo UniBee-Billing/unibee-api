@@ -21,21 +21,21 @@ type SubscriptionDao struct {
 // SubscriptionColumns defines and stores column names for table subscription.
 type SubscriptionColumns struct {
 	Id                    string //
-	SubscriptionId        string // 内部订阅id
+	SubscriptionId        string // 订阅id（内部编号）
+	UpdateSubscriptionId  string // 升级来源订阅 ID（内部编号）
 	GmtCreate             string // 创建时间
-	Type                  string // 类型，1-普通单，2-升级单
-	UpdateFromId          string // 升级来源 ID
-	UpdateToId            string // 升级去向 ID
-	CompanyId             string // 公司ID
+	Amount                string // 金额,单位：分
+	Currency              string // 货币
 	MerchantId            string // 商户Id
 	PlanId                string // 计划ID
-	ChannelId             string // 支付渠道Id
-	UserId                string // userId
 	Quantity              string // quantity
+	AddonData             string // plan addon json data
+	ChannelId             string // 支付渠道Id
+	Status                string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire
+	UserId                string // userId
 	ChannelSubscriptionId string // 支付渠道订阅id
 	Data                  string // 渠道额外参数，JSON格式
 	ResponseData          string // 渠道返回参数，JSON格式
-	Status                string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelUserId         string // 渠道用户 Id
 	CustomerName          string // customer_name
 	CustomerEmail         string // customer_email
@@ -49,20 +49,20 @@ type SubscriptionColumns struct {
 var subscriptionColumns = SubscriptionColumns{
 	Id:                    "id",
 	SubscriptionId:        "subscription_id",
+	UpdateSubscriptionId:  "update_subscription_id",
 	GmtCreate:             "gmt_create",
-	Type:                  "type",
-	UpdateFromId:          "update_from_id",
-	UpdateToId:            "update_to_id",
-	CompanyId:             "company_id",
+	Amount:                "amount",
+	Currency:              "currency",
 	MerchantId:            "merchant_id",
 	PlanId:                "plan_id",
-	ChannelId:             "channel_id",
-	UserId:                "user_id",
 	Quantity:              "quantity",
+	AddonData:             "addon_data",
+	ChannelId:             "channel_id",
+	Status:                "status",
+	UserId:                "user_id",
 	ChannelSubscriptionId: "channel_subscription_id",
 	Data:                  "data",
 	ResponseData:          "response_data",
-	Status:                "status",
 	ChannelUserId:         "channel_user_id",
 	CustomerName:          "customer_name",
 	CustomerEmail:         "customer_email",

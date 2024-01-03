@@ -54,6 +54,10 @@ func CreateSubscriptionOrderNo() string {
 	return fmt.Sprintf("sub%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
+func CreateSubscriptionUpdateOrderNo() string {
+	return fmt.Sprintf("subup%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+}
+
 func CreateMerchantOrderNo() string {
 	return fmt.Sprintf("mon%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }

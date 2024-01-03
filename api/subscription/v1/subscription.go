@@ -25,7 +25,7 @@ type SubscriptionPlanCreateReq struct {
 	Description        string `p:"description"  dc:"描述"`                                                                                                              //
 	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
 	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
-	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头"  v:"required#请输入ImageUrl,需 http 开头" `                                                          // image_url
+	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头" `                                                                                              // image_url
 	HomeUrl            string `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `                                                                                               // home_url
 }
 type SubscriptionPlanCreateRes struct {
@@ -34,7 +34,7 @@ type SubscriptionPlanCreateRes struct {
 
 type SubscriptionPlanEditReq struct {
 	g.Meta             `path:"/subscription_plan_edit" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划修改(覆盖模式）"`
-	PlanId             int64  `p:"planId" dc:"PlanId" v:"required|length:4,30#请输入PlanId"`
+	PlanId             int64  `p:"planId" dc:"PlanId" v:"required#请输入订阅计划 ID"`
 	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
 	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
 	Currency           string `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
@@ -65,7 +65,9 @@ type SubscriptionPlanListReq struct {
 	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
 	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币" dc:"订阅计划货币" `
+	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
+	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
+	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionPlanListRes struct {
 	Plans []*ro.SubscriptionPlanRo `p:"plans" dc:"订阅计划明细"`
@@ -80,7 +82,7 @@ type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
 type SubscriptionPlanChannelActivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道激活"`
+	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道激活"  deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -88,7 +90,7 @@ type SubscriptionPlanChannelActivateRes struct {
 }
 
 type SubscriptionPlanChannelDeactivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道取消激活"`
+	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Subscription-Plan-Controller" method:"post" summary:"订阅计划支付单通道取消激活" deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -143,7 +145,7 @@ type SubscriptionUpdateReq struct {
 	ConfirmChannelId int64 `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionUpdateRes struct {
-	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
+	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
 }
 
 type SubscriptionWebhookCheckAndSetupReq struct {
