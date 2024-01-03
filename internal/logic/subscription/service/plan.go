@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/subscription/v1"
+	v1 "go-oversea-pay/api/subscription_plan_merchant/v1"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel"

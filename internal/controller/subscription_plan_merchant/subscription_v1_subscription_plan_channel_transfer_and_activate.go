@@ -1,4 +1,4 @@
-package subscription
+package subscription_plan_merchant
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"go-oversea-pay/api/subscription/v1"
+	"go-oversea-pay/api/subscription_plan_merchant/v1"
 )
 
 func (c *ControllerV1) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *v1.SubscriptionPlanChannelTransferAndActivateReq) (res *v1.SubscriptionPlanChannelTransferAndActivateRes, err error) {

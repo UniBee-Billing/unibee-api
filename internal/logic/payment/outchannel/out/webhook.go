@@ -7,11 +7,11 @@ import (
 )
 
 func GetPaymentWebhookEntranceUrl(channelId int64) string {
-	return fmt.Sprintf("%s/payment/webhooks/%d/notifications", consts.GetConfigInstance().Server.DomainPath, channelId)
+	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().Server.DomainPath, channelId)
 }
 
 //func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
-//	return fmt.Sprintf("%s/payment/webhooks/%d/notifications", consts.GetConfigInstance().HostPath, pay.ChannelId)
+//	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.ChannelId)
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.OverseaPay) string {

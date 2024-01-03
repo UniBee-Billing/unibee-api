@@ -116,7 +116,7 @@ type ChannelCreateSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan        `json:"plan"`
 	SubPlans     *[]entity.SubscriptionPlan      `json:"subPlans"`
 	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription *entity.Subscription            `json:"subscription"`
+	Subscription *entity.Subscription            `json:"subscription_plan_merchant"`
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
@@ -125,7 +125,7 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	SubPlans       *[]entity.SubscriptionPlan      `json:"subPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
 	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
-	Subscription   *entity.Subscription            `json:"subscription"`
+	Subscription   *entity.Subscription            `json:"subscription_plan_merchant"`
 }
 
 type ChannelCancelSubscriptionInternalResp struct {

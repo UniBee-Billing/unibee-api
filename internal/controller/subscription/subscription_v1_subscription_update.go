@@ -2,9 +2,8 @@ package subscription
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/subscription/service"
-
 	"go-oversea-pay/api/subscription/v1"
+	"go-oversea-pay/internal/logic/subscription/service"
 )
 
 func (c *ControllerV1) SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (res *v1.SubscriptionUpdateRes, err error) {

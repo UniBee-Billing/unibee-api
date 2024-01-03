@@ -11,14 +11,14 @@ import (
 // internalSubscriptionDao is internal type for wrapping internal DAO implements.
 type internalSubscriptionDao = *internal.SubscriptionDao
 
-// subscriptionDao is the data access object for table subscription.
+// subscriptionDao is the data access object for table subscription_plan_merchant.
 // You can define custom methods on it to extend its functionality as you wish.
 type subscriptionDao struct {
 	internalSubscriptionDao
 }
 
 var (
-	// Subscription is globally public accessible object for table subscription operations.
+	// Subscription is globally public accessible object for table subscription_plan_merchant operations.
 	Subscription = subscriptionDao{
 		internal.NewSubscriptionDao(),
 	}

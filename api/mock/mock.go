@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
 package mock
 
 import (
 	"context"
-
+	
 	"go-oversea-pay/api/mock/v1"
 )
 
@@ -17,3 +17,5 @@ type IMockV1 interface {
 	DetailPay(ctx context.Context, req *v1.DetailPayReq) (res *v1.DetailPayRes, err error)
 	Refund(ctx context.Context, req *v1.RefundReq) (res *v1.RefundRes, err error)
 }
+
+

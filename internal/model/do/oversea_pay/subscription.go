@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// Subscription is the golang structure of table subscription for DAO operations like Where/Data.
+// Subscription is the golang structure of table subscription_plan_merchant for DAO operations like Where/Data.
 type Subscription struct {
-	g.Meta                `orm:"table:subscription, do:true"`
+	g.Meta                `orm:"table:subscription_plan_merchant, do:true"`
 	Id                    interface{} //
 	SubscriptionId        interface{} // 订阅id（内部编号）
 	UpdateSubscriptionId  interface{} // 升级来源订阅 ID（内部编号）
