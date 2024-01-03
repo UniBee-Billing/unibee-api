@@ -3,10 +3,12 @@ package consts
 type SubscriptionStatusEnum int
 
 const (
-	SubStatusInit     = 0 //初始化
-	SubStatusCreate   = 1 //创建-渠道状态
-	SubStatusActive   = 2 //有效-渠道状态
-	SubStatusInActive = 3 //无效-渠道状态
+	SubStatusInit      = 0 //初始化
+	SubStatusCreate    = 1 //创建-渠道状态
+	SubStatusActive    = 2 //有效-渠道状态
+	SubStatusSuspended = 3 //暂停-渠道状态
+	SubStatusCancelled = 4 //取消-渠道状态
+	SubStatusExpired   = 5 //过期-渠道状态
 )
 
 func (status SubscriptionStatusEnum) Description() string {
@@ -17,8 +19,8 @@ func (status SubscriptionStatusEnum) Description() string {
 		return "SubStatusCreate"
 	case SubStatusActive:
 		return "SubStatusActive"
-	case SubStatusInActive:
-		return "SubStatusInActive"
+	case SubStatusSuspended:
+		return "SubStatusSuspended"
 	default:
 		return "SubStatusInit"
 	}

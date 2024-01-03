@@ -32,7 +32,6 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	//todo mark plan 是否活跃检查
 
 	one := &entity.Subscription{
-		CompanyId:  merchantInfo.CompanyId,
 		MerchantId: merchantInfo.Id,
 		PlanId:     req.PlanId,
 		ChannelId:  req.ChannelId,
@@ -55,7 +54,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.CreateSubscriptionRo{
+	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
 		Plan:         plan,
 		SubPlans:     nil,
 		PlanChannel:  planChannel,
@@ -112,7 +111,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	//todo mark subscription 检查
 
 	//todo mark plan 是否活跃检查
-	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.UpdateSubscriptionRo{
+	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 		Plan:           plan,
 		OldPlan:        oldPlan,
 		SubPlans:       nil,

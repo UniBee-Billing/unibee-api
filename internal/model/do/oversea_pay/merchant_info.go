@@ -28,4 +28,7 @@ type MerchantInfo struct {
 	IsDeleted   interface{} // 是否删除，0-未删除，1-删除
 	CompanyLogo interface{} // 账号头像
 	HomeUrl     interface{} //
+	FirstName   interface{} //
+	LastName    interface{} //
+	Phone       interface{} //
 }

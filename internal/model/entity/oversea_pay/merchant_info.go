@@ -26,4 +26,7 @@ type MerchantInfo struct {
 	IsDeleted   int         `json:"isDeleted"   ` // 是否删除，0-未删除，1-删除
 	CompanyLogo string      `json:"companyLogo" ` // 账号头像
 	HomeUrl     string      `json:"homeUrl"     ` //
+	FirstName   string      `json:"firstName"   ` //
+	LastName    string      `json:"lastName"    ` //
+	Phone       string      `json:"phone"       ` //
 }

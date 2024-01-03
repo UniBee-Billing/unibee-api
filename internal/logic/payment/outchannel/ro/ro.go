@@ -91,19 +91,19 @@ type OutPayRo struct {
 	PayTime         *gtime.Time `json:"PayTime" `             // 创建时间
 }
 
-type CreateProductInternalResp struct {
+type ChannelCreateProductInternalResp struct {
 	ChannelProductId     string `json:"channelProductId"`
 	ChannelProductStatus string `json:"channelProductStatus"`
 }
 
-type CreatePlanInternalResp struct {
+type ChannelCreatePlanInternalResp struct {
 	ChannelPlanId     string                                   `json:"channelPlanId"`
 	ChannelPlanStatus string                                   `json:"channelPlanStatus"`
 	Data              string                                   `json:"data"`
 	Status            consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
-type CreateSubscriptionInternalResp struct {
+type ChannelCreateSubscriptionInternalResp struct {
 	ChannelUserId             string                                   `json:"channelUserId"`
 	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
@@ -112,14 +112,14 @@ type CreateSubscriptionInternalResp struct {
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
-type CreateSubscriptionRo struct {
+type ChannelCreateSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan        `json:"plan"`
 	SubPlans     *[]entity.SubscriptionPlan      `json:"subPlans"`
 	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
 	Subscription *entity.Subscription            `json:"subscription"`
 }
 
-type UpdateSubscriptionRo struct {
+type ChannelUpdateSubscriptionInternalReq struct {
 	Plan           *entity.SubscriptionPlan        `json:"plan"`
 	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
 	SubPlans       *[]entity.SubscriptionPlan      `json:"subPlans"`
@@ -128,10 +128,10 @@ type UpdateSubscriptionRo struct {
 	Subscription   *entity.Subscription            `json:"subscription"`
 }
 
-type CancelSubscriptionInternalResp struct {
+type ChannelCancelSubscriptionInternalResp struct {
 }
 
-type UpdateSubscriptionInternalResp struct {
+type ChannelUpdateSubscriptionInternalResp struct {
 	ChannelUserId             string                                   `json:"channelUserId"`
 	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
@@ -140,8 +140,11 @@ type UpdateSubscriptionInternalResp struct {
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 }
 
-type ListSubscriptionInternalResp struct {
+type ChannelDetailSubscriptionInternalResp struct {
+	Status        consts.SubscriptionStatusEnum `json:"status"`
+	ChannelStatus string                        `json:"channelStatus"                  ` // 货币
+	Data          string                        `json:"data"`
 }
 
-type WebhookSubscriptionInternalResp struct {
+type ChannelWebhookSubscriptionInternalResp struct {
 }
