@@ -51,7 +51,7 @@ var (
 			//	router.Outs(ctx, group) //开放平台接口
 			//})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/plan/merchant", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/plan", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().TokenAuth,
@@ -61,7 +61,7 @@ var (
 				router.SubscriptionPlanAdmin(ctx, group) //订阅Plan接口-Merchant Portal 使用
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/subscription", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
