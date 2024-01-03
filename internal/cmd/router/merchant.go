@@ -18,7 +18,7 @@ func MerchantPlan(ctx context.Context, group *ghttp.RouterGroup) {
 
 func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
-	group.Group("/auth", func(group *ghttp.RouterGroup) {
+	group.Group("/webhook", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewWebhook(), //Webhook接口-Go Server使用
 		)
