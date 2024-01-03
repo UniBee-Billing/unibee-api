@@ -73,6 +73,7 @@ func SubscriptionCreate(ctx context.Context, req *v1.SubscriptionCreateReq) (*en
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
 		dao.Subscription.Columns().Link:                  createRes.Link,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
+		dao.Subscription.Columns().GmtModify:             gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
