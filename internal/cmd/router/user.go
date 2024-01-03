@@ -39,7 +39,7 @@ func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 // UserProfile 工具类
 func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 	// profile 库相关接口
-	group.Group("/profile", func(group *ghttp.RouterGroup) {
+	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewProfile(),
 		)
