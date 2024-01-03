@@ -1,15 +1,17 @@
 package model
 
 import (
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
 // Context 请求上下文结构
 type Context struct {
 	Session       *ghttp.Session // 当前Session管理对象
 	User          *ContextUser   // 上下文用户信息
+	// Merchant
 	Data          g.Map          // 自定KV变量，业务模块根据需要设置，不固定
 	OpenApiConfig *entity.OpenApiConfig
 }
@@ -21,4 +23,16 @@ type ContextUser struct {
 	UserName    string // 用户名称
 	AvatarUrl   string // 用户头像
 	IsAdmin     bool   // 是否是管理员
+	Email		string
 }
+
+/*
+type ContextMerchant struct {
+	Id          uint64 // 用户ID
+	MobilePhone string // 用户手机号
+	UserName    string // 用户名称
+	AvatarUrl   string // 用户头像
+	IsAdmin     bool   // 是否是管理员
+	Email		string
+}
+*/

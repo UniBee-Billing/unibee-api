@@ -156,9 +156,11 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
+// later define a merchantClaim
 type UserClaims struct {
+	// UserId
 	Email	string	`json:"email"`
-	jwt.Claims
+	jwt.RegisteredClaims
 }
 
 // Token Auth, 和上面的 Auth() 重复了, 但上面的Auth并非用在unibee项目中
@@ -195,13 +197,38 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
-	// u.Email
-	
+	fmt.Println("parsed token: ", u.Email)
+
+	customCtx := &model.Context{
+		Session: r.Session,
+		Data:    make(g.Map),
+	}
+	_interface.BizCtx().Init(r, customCtx)
+	// if := _interface.Session().GetUser(r.Context()); userEntity != nil {
+		customCtx.User = &model.ContextUser{
+			/*
+			Id:          userEntity.Id,
+			MobilePhone: userEntity.Mobile,
+			UserName:    userEntity.UserName,
+			AvatarUrl:   userEntity.AvatarUrl,
+			IsAdmin:     false,
+			*/
+			Email: 		u.Email,
+		}
+	// }
+	// if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
+		//openapikey 转化为api 用户
+		// customCtx.Data[consts.ApiKey] = key
+		// customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
+	// }
+	// 将自定义的上下文对象传递到模板变量中使用
 	r.Assigns(g.Map{
-		consts.ContextKey: u,
+		consts.ContextKey: customCtx,
 	})
-	
-	 r.Middleware.Next()
+
+
+
+	r.Middleware.Next()
 }
 
 func (s *SMiddleware) ApiAuth(r *ghttp.Request) {

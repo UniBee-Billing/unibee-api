@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 
 	v1 "go-oversea-pay/api/auth/v1"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -43,6 +44,22 @@ func createToken(email string) (string, error) {
 
  return tokenString, nil
 }
+
+func verifyToken(tokenString string) error {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	   return secretKey, nil
+	})
+   
+	if err != nil {
+	   return err
+	}
+   
+	if !token.Valid {
+	   return fmt.Errorf("invalid token")
+	}
+   
+	return nil
+ }
 
 func (c *ControllerV1) Login(ctx context.Context, req *v1.LoginReq) (res *v1.LoginRes, err error) {
 	if (req.Email == "") {
