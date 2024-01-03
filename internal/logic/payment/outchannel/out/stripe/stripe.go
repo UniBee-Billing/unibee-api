@@ -311,8 +311,12 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 		//创建
 		params := &stripe.WebhookEndpointParams{
 			EnabledEvents: []*string{
-				stripe.String("charge.succeeded"),
-				stripe.String("charge.failed"),
+				stripe.String("customer.subscription.deleted"),
+				stripe.String("customer.subscription.updated"),
+				stripe.String("customer.subscription.created"),
+				stripe.String("customer.subscription.trial_will_end"),
+				stripe.String("customer.subscription.paused"),
+				stripe.String("customer.subscription.resumed"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -335,12 +339,12 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 		params := &stripe.WebhookEndpointParams{
 			EnabledEvents: []*string{
 				//订阅相关 webhook
-				stripe.String("customer.subscription_plan_merchant.deleted"),
-				stripe.String("customer.subscription_plan_merchant.updated"),
-				stripe.String("customer.subscription_plan_merchant.created"),
-				stripe.String("customer.subscription_plan_merchant.trial_will_end"),
-				stripe.String("customer.subscription_plan_merchant.paused"),
-				stripe.String("customer.subscription_plan_merchant.resumed"),
+				stripe.String("customer.subscription.deleted"),
+				stripe.String("customer.subscription.updated"),
+				stripe.String("customer.subscription.created"),
+				stripe.String("customer.subscription.trial_will_end"),
+				stripe.String("customer.subscription.paused"),
+				stripe.String("customer.subscription.resumed"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
