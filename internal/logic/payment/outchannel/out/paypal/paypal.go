@@ -356,7 +356,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			{
 				Operation: "replace",
 				Path:      "/url",
-				Value:     out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+				Value:     strings.Replace(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
