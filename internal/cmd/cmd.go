@@ -6,7 +6,7 @@ import (
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller"
-	"go-oversea-pay/internal/controller/webhooks"
+	"go-oversea-pay/internal/controller/channel_webhook_entry"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/utility/liberr"
 
@@ -51,14 +51,22 @@ var (
 			//	router.Outs(ctx, group) //开放平台接口
 			//})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/plan/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().TokenAuth,
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreAuth,
 				)
-				router.Subscription(ctx, group) //订阅接口
+				router.SubscriptionPlanAdmin(ctx, group) //订阅Plan接口-Merchant Portal 使用
+			})
+
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/subscription", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				router.Subscription(ctx, group) //订阅Plan接口-Merchant Portal 使用
 			})
 
 			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/mock", func(group *ghttp.RouterGroup) {
@@ -81,9 +89,9 @@ var (
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// 通道支付 Redirect 回调
-			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", webhooks.ChannelPaymentRedirectEntrance)
+			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", channel_webhook_entry.ChannelPaymentRedirectEntrance)
 			// 通道支付 Webhook 回调
-			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/webhooks/{channelId}/notifications", webhooks.ChannelPaymentWebhookEntrance)
+			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{channelId}/notifications", channel_webhook_entry.ChannelPaymentWebhookEntrance)
 			//// 初始化通道 Webhook 配置
 			//outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 

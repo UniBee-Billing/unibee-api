@@ -2,16 +2,16 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
-package userProfile
+package webhook
 
 import (
 	"context"
 	
-	"go-oversea-pay/api/userProfile/v1"
+	"go-oversea-pay/api/webhook/v1"
 )
 
-type IUserProfileV1 interface {
-	Profile(ctx context.Context, req *v1.ProfileReq) (res *v1.ProfileRes, err error)
+type IWebhookV1 interface {
+	SubscriptionWebhookCheckAndSetup(ctx context.Context, req *v1.SubscriptionWebhookCheckAndSetupReq) (res *v1.SubscriptionWebhookCheckAndSetupRes, err error)
 }
 
 

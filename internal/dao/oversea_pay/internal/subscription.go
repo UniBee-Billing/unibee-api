@@ -11,14 +11,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// SubscriptionDao is the data access object for table subscription.
+// SubscriptionDao is the data access object for table subscription_plan_merchant.
 type SubscriptionDao struct {
 	table   string              // table is the underlying table name of the DAO.
 	group   string              // group is the database configuration group name of current DAO.
 	columns SubscriptionColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// SubscriptionColumns defines and stores column names for table subscription.
+// SubscriptionColumns defines and stores column names for table subscription_plan_merchant.
 type SubscriptionColumns struct {
 	Id                    string //
 	SubscriptionId        string // 订阅id（内部编号）
@@ -45,7 +45,7 @@ type SubscriptionColumns struct {
 	ChannelStatus         string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 }
 
-// subscriptionColumns holds the columns for table subscription.
+// subscriptionColumns holds the columns for table subscription_plan_merchant.
 var subscriptionColumns = SubscriptionColumns{
 	Id:                    "id",
 	SubscriptionId:        "subscription_id",
@@ -76,7 +76,7 @@ var subscriptionColumns = SubscriptionColumns{
 func NewSubscriptionDao() *SubscriptionDao {
 	return &SubscriptionDao{
 		group:   "oversea_pay",
-		table:   "subscription",
+		table:   "subscription_plan_merchant",
 		columns: subscriptionColumns,
 	}
 }

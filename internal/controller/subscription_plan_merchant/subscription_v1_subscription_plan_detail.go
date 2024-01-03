@@ -1,4 +1,4 @@
-package subscription
+package subscription_plan_merchant
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 
-	"go-oversea-pay/api/subscription/v1"
+	"go-oversea-pay/api/subscription_plan_merchant/v1"
 )
 
 func (c *ControllerV1) SubscriptionPlanDetail(ctx context.Context, req *v1.SubscriptionPlanDetailReq) (res *v1.SubscriptionPlanDetailRes, err error) {

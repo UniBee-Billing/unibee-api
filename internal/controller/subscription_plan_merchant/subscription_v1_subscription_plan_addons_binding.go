@@ -1,10 +1,10 @@
-package subscription
+package subscription_plan_merchant
 
 import (
 	"context"
 	"go-oversea-pay/internal/logic/subscription/service"
 
-	"go-oversea-pay/api/subscription/v1"
+	"go-oversea-pay/api/subscription_plan_merchant/v1"
 )
 
 func (c *ControllerV1) SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (res *v1.SubscriptionPlanAddonsBindingRes, err error) {

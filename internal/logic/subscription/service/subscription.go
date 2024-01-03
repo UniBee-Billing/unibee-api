@@ -104,7 +104,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	subscription := query.GetSubscriptionById(ctx, req.SubscriptionId)
-	utility.Assert(subscription != nil, "subscription not found")
+	utility.Assert(subscription != nil, "subscription_plan_merchant not found")
 	utility.Assert(subscription.ChannelId == req.ConfirmChannelId, "channel not match")
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlan := query.GetSubscriptionPlanById(ctx, subscription.PlanId)
@@ -112,7 +112,7 @@ func SubscriptionUpdate(ctx context.Context, req *v1.SubscriptionUpdateReq) (*en
 	oldPlanChannel := query.GetSubscriptionPlanChannel(ctx, int64(oldPlan.Id), req.ConfirmChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
-	//todo mark subscription 检查
+	//todo mark subscription_plan_merchant 检查
 
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:           merchantInfo.Id,

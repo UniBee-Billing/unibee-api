@@ -2,16 +2,15 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
-package userProfile
+package webhook
 
 import (
-	"context"
-	
-	"go-oversea-pay/api/userProfile/v1"
+	"go-oversea-pay/api/webhook"
 )
 
-type IUserProfileV1 interface {
-	Profile(ctx context.Context, req *v1.ProfileReq) (res *v1.ProfileRes, err error)
-}
+type ControllerV1 struct{}
 
+func NewV1() webhook.IWebhookV1 {
+	return &ControllerV1{}
+}
 

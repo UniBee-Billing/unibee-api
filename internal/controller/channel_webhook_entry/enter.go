@@ -1,4 +1,4 @@
-package webhooks
+package channel_webhook_entry
 
 import (
 	"github.com/gogf/gf/v2/frame/g"

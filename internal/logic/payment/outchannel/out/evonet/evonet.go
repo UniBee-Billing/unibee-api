@@ -81,12 +81,12 @@ func (e Evonet) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 }
 
 func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 webhooks 结果通知:%s", r.GetBody())
+	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 channel_webhook_entry 结果通知:%s", r.GetBody())
 	notificationJson, err := r.GetJson()
 	if err != nil {
 		r.Response.Writeln(err)
 	}
-	g.Log().Infof(r.Context(), "EvonetNotifyController webhooks notifications:%s", notificationJson)
+	g.Log().Infof(r.Context(), "EvonetNotifyController channel_webhook_entry notifications:%s", notificationJson)
 	if notificationJson == nil {
 		r.Response.Writeln("invalid body")
 	}
@@ -122,7 +122,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			one.ChannelTradeNo = channelTradeNo
 			err := handler.HandlePayAuthorized(r.Context(), one)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "webhooks action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -132,7 +132,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "webhooks action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if (strings.Compare(eventCode, "Cancel") == 0 && cancel != nil &&
 		cancel.Contains("status") &&
@@ -181,7 +181,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			}
 			err := handler.HandlePayFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -192,7 +192,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "webhooks action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 
 	} else if (strings.Compare(eventCode, "Capture") == 0 && capture != nil &&
@@ -246,7 +246,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			}
 			err := handler.HandlePaySuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -256,7 +256,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "webhooks action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if strings.Compare(eventCode, "Refund") == 0 &&
 		refund != nil &&
@@ -287,7 +287,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			}
 			err := handler.HandleRefundSuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -297,7 +297,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "webhooks action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if strings.Compare(eventCode, "Refund") == 0 &&
 		refund != nil &&
@@ -329,7 +329,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			}
 			err := handler.HandleRefundFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "webhooks action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -339,7 +339,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "webhooks action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else {
 		requestId := strconv.FormatInt(utility.CurrentTimeMillis(), 10)
@@ -372,7 +372,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		//Message message = new Message(MqTopicEnum.ChannelPayV2WebHookReceive,new PaymentNotificationMqItem(notifyIsSuccess,notifyEventDate,notifyEventCode,notifyMerchantReference,notifyReason));
 		//boolean sendResult = producerWrapper.send(message);
 	}
-	g.Log().Infof(r.Context(), "webhooks execute result:%s %s %s %s %s ", notifyIsSuccess, notifyEventDate, notifyEventCode, notifyMerchantReference, notifyReason)
+	g.Log().Infof(r.Context(), "channel_webhook_entry execute result:%s %s %s %s %s ", notifyIsSuccess, notifyEventDate, notifyEventCode, notifyMerchantReference, notifyReason)
 
 	r.Response.Writeln("success")
 }
