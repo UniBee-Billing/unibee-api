@@ -31,8 +31,9 @@ var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
 func createToken(email string) (string, error) {
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
         jwt.MapClaims{ 
-        "email": email, 
-        "exp": time.Now().Add(time.Hour * 1).Unix(), 
+			"email": email,
+			// "userId": userId,
+			"exp": time.Now().Add(time.Hour * 1).Unix(), 
         })
 
     tokenString, err := token.SignedString(secretKey)

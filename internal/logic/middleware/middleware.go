@@ -156,8 +156,20 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
+type UserClaims struct {
+	Email	string	`json:"email"`
+	jwt.Claims
+}
+
 // Token Auth, 和上面的 Auth() 重复了, 但上面的Auth并非用在unibee项目中
 var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")	// pass this as ENV, auth_v1_login.go also uses this
+func parseAccessToken(accessToken string) *UserClaims {
+	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
+	 return secretKey, nil
+	})
+	return parsedAccessToken.Claims.(*UserClaims)
+}   
+
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
@@ -181,8 +193,9 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
-	
-	
+
+	//  u := parseAccessToken(tokenString)
+	// u.Email
 
 	 r.Middleware.Next()
 }
