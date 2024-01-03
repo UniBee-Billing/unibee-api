@@ -21,15 +21,20 @@ type SubscriptionPendingUpdateDao struct {
 // SubscriptionPendingUpdateColumns defines and stores column names for table subscription_pending_update.
 type SubscriptionPendingUpdateColumns struct {
 	Id                   string //
+	MerchantId           string // 商户Id
 	SubscriptionId       string // 订阅id（内部编号）
 	UpdateSubscriptionId string // 升级单ID（内部编号）
 	GmtCreate            string // 创建时间
 	Amount               string // 金额,单位：分
+	UpdateAmount         string // 升级到金额,单位：分
 	Currency             string // 货币
-	MerchantId           string // 商户Id
+	UpdateCurrency       string // 升级到货币
 	PlanId               string // 计划ID
+	UpdatePlanId         string // 升级到计划ID
 	Quantity             string // quantity
+	UpdateQuantity       string // 升级到quantity
 	AddonData            string // plan addon json data
+	UpdatedAddonData     string // 升级到plan addon json data
 	ChannelId            string // 支付渠道Id
 	Status               string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UserId               string // userId
@@ -45,15 +50,20 @@ type SubscriptionPendingUpdateColumns struct {
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
 var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	Id:                   "id",
+	MerchantId:           "merchant_id",
 	SubscriptionId:       "subscription_id",
 	UpdateSubscriptionId: "update_subscription_id",
 	GmtCreate:            "gmt_create",
 	Amount:               "amount",
+	UpdateAmount:         "update_amount",
 	Currency:             "currency",
-	MerchantId:           "merchant_id",
+	UpdateCurrency:       "update_currency",
 	PlanId:               "plan_id",
+	UpdatePlanId:         "update_plan_id",
 	Quantity:             "quantity",
+	UpdateQuantity:       "update_quantity",
 	AddonData:            "addon_data",
+	UpdatedAddonData:     "updated_addon_data",
 	ChannelId:            "channel_id",
 	Status:               "status",
 	UserId:               "user_id",

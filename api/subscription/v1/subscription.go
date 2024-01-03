@@ -145,7 +145,7 @@ type SubscriptionUpdateReq struct {
 	ConfirmChannelId int64 `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionUpdateRes struct {
-	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
+	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
 }
 
 type SubscriptionWebhookCheckAndSetupReq struct {
