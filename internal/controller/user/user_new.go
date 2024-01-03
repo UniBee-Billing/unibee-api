@@ -26,3 +26,9 @@ func NewSubscription() user.IUserSubscription {
 	return &ControllerSubscription{}
 }
 
+type ControllerPlan struct{}
+
+func NewPlan() user.IUserPlan {
+	return &ControllerPlan{}
+}
+

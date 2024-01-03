@@ -11,7 +11,17 @@ func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
 	group.Group("/auth", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			user.NewAuth(), //开放平台接口
+			user.NewAuth(),
+		)
+	})
+}
+
+// UserPlan 工具类
+func UserPlan(ctx context.Context, group *ghttp.RouterGroup) {
+	// subscription 库相关接口
+	group.Group("/plan", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewPlan(),
 		)
 	})
 }
@@ -21,7 +31,7 @@ func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 	// subscription 库相关接口
 	group.Group("/subscription", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			user.NewSubscription(), //开放平台接口
+			user.NewSubscription(),
 		)
 	})
 }
@@ -31,7 +41,7 @@ func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 	// profile 库相关接口
 	group.Group("/profile", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			user.NewProfile(), //开放平台接口
+			user.NewProfile(),
 		)
 	})
 }

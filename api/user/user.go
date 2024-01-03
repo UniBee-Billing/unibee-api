@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"go-oversea-pay/api/user/auth"
+	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
 )
@@ -18,6 +19,10 @@ type IUserAuth interface {
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
+
+type IUserPlan interface {
+	SubscriptionPlanList(ctx context.Context, req *plan.SubscriptionPlanListReq) (res *plan.SubscriptionPlanListRes, err error)
 }
 
 type IUserProfile interface {

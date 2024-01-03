@@ -60,6 +60,7 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
+				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
 				router.UserAuth(ctx, group)
 				router.UserProfile(ctx, group)
