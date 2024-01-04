@@ -29,11 +29,11 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 
 var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
 
-func createToken(email string) (string, error) {
+func createToken(email string, userId uint64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"email": email,
-			// "userId": userId,
+			"id": userId,
 			"exp": time.Now().Add(time.Hour * 1).Unix(),
 		})
 
@@ -81,7 +81,8 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 		return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
 	}
 
-	token, err := createToken(req.Email)
+	token, err := createToken(req.Email, newOne.Id)
+	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

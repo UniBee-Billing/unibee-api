@@ -2,23 +2,24 @@ package user
 
 import (
 	"context"
+	v1 "go-oversea-pay/api/user/profile"
+
+	_interface "go-oversea-pay/internal/interface"
+
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	v1 "go-oversea-pay/api/user/profile"
 
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 )
 
 func (c *ControllerProfile) Profile(ctx context.Context, req *v1.ProfileReq) (res *v1.ProfileRes, err error) {
-
-	var newOne *entity.UserAccount
-	newOne = query.GetUserAccountById(ctx, 100)
-
+	var newOne *entity.UserAccount = query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
 	if newOne == nil {
 		// return nil, gerror.New("internal err: user not found")
 		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
 	}
-
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	
+	return &v1.ProfileRes{User: newOne}, nil
 }
+ 

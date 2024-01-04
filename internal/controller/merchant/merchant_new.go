@@ -20,3 +20,15 @@ func NewWebhook() merchant.IMerchantWebhook {
 	return &ControllerWebhook{}
 }
 
+
+type ControllerAuth struct{}
+
+func NewAuth() merchant.IMerchantAuth {
+	return &ControllerAuth{}
+}
+
+type ControllerProfile struct{}
+
+func NewProfile() merchant.IMerchantProfile {
+	return &ControllerProfile{}
+}

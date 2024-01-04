@@ -11,7 +11,7 @@ import (
 type Context struct {
 	Session       *ghttp.Session // 当前Session管理对象
 	User          *ContextUser   // 上下文用户信息
-	// Merchant
+	Merchant	  *ContextMerchant
 	Data          g.Map          // 自定KV变量，业务模块根据需要设置，不固定
 	OpenApiConfig *entity.OpenApiConfig
 }
@@ -19,20 +19,19 @@ type Context struct {
 // ContextUser 请求上下文中的用户信息
 type ContextUser struct {
 	Id          uint64 // 用户ID
-	MobilePhone string // 用户手机号
-	UserName    string // 用户名称
-	AvatarUrl   string // 用户头像
-	IsAdmin     bool   // 是否是管理员
+	// MobilePhone string // 用户手机号
+	// UserName    string // 用户名称
+	// AvatarUrl   string // 用户头像
+	// IsAdmin     bool   // 是否是管理员
 	Email		string
 }
 
-/*
 type ContextMerchant struct {
 	Id          uint64 // 用户ID
-	MobilePhone string // 用户手机号
-	UserName    string // 用户名称
-	AvatarUrl   string // 用户头像
-	IsAdmin     bool   // 是否是管理员
+	// MobilePhone string // 用户手机号
+	// UserName    string // 用户名称
+	// AvatarUrl   string // 用户头像
+	// IsAdmin     bool   // 是否是管理员
 	Email		string
 }
-*/
+
