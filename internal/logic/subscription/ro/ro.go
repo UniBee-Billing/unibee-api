@@ -10,13 +10,14 @@ type PlanDetailRo struct {
 }
 
 type SubscriptionPlanAddonParamRo struct {
-	Quantity    int   `p:"quantity" dc:"数量，默认 1" `
+	Quantity    int64 `p:"quantity" dc:"数量，默认 1" `
 	AddonPlanId int64 `p:"addonPlanId" dc:"订阅计划Addon ID"`
 }
 
 type SubscriptionPlanAddonRo struct {
-	Quantity  int                      `p:"quantity" dc:"数量" `
-	AddonPlan *entity.SubscriptionPlan `p:"addonPlan" dc:"addonPlan" `
+	Quantity         int64                           `p:"quantity" dc:"数量" `
+	AddonPlan        *entity.SubscriptionPlan        `p:"addonPlan" dc:"addonPlan" `
+	AddonPlanChannel *entity.SubscriptionPlanChannel `p:"addonPlanChannel" dc:"addonPlanChannel" `
 }
 
 type SubscriptionDetailRo struct {

@@ -25,15 +25,23 @@ type SubscriptionChannelsRes struct {
 }
 
 type SubscriptionCreatePrepareReq struct {
-	g.Meta        `path:"/subscription_create_prepare" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建计算（仅计算）"`
-	PlanId        int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity      int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
-	ChannelId     int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
-	UserId        int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	ChannelUserId string                             `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
-	AddonParams   []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	g.Meta      `path:"/subscription_create_prepare" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建计算（仅计算）"`
+	PlanId      int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity    int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
+	ChannelId   int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
+	UserId      int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
+	AddonParams []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionCreatePrepareRes struct {
+	Plan        *entity.SubscriptionPlan           `json:"planId"`
+	Quantity    int64                              `json:"quantity"`
+	PayChannel  *entity.OverseaPayChannel          `json:"payChannel"`
+	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency    string                             `json:"currency"              `      // 货币
+	UserId      int64                              `json:"userId" `
+	Email       string                             `json:"email" `
 }
 
 type SubscriptionCreateReq struct {
@@ -42,8 +50,7 @@ type SubscriptionCreateReq struct {
 	Quantity           int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
 	ChannelId          int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
 	UserId             int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	ChannelUserId      string                             `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
-	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addons" `
+	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 接口输出的总金额"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
 	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 接口输出的货币" v:"required#请输入 confirmCurrency"  `
 }
@@ -58,12 +65,25 @@ type SubscriptionCancelReq struct {
 type SubscriptionCancelRes struct {
 }
 
+type SubscriptionUpdatePrepareReq struct {
+	g.Meta         `path:"/subscription_update_prepare" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新计算（仅计算）"`
+	SubscriptionId string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId      int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity       int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
+	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+}
+type SubscriptionUpdatePrepareRes struct {
+}
+
 type SubscriptionUpdateReq struct {
-	g.Meta           `path:"/subscription_update" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新"`
-	SubscriptionId   string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId        int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
-	Addons           []*ro.SubscriptionPlanAddonParamRo `p:"addons" dc:"addons" `
+	g.Meta             `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新提交"`
+	SubscriptionId     string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId          int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity           int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
+	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 接口输出的总金额"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
+	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 接口输出的货币" v:"required#请输入 confirmCurrency"  `
+	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`

@@ -1,6 +1,9 @@
 package consts
 
-import "sync"
+import (
+	"strings"
+	"sync"
+)
 
 type Config struct {
 	Env         string      `yaml:"env"`
@@ -29,4 +32,16 @@ func GetConfigInstance() *Config {
 		instance = &Config{}
 	})
 	return instance
+}
+
+func (config Config) IsLocal() bool {
+	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "local") == 0
+}
+
+func (config Config) IsStage() bool {
+	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "daily") == 0
+}
+
+func (config Config) IsProd() bool {
+	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "prod") == 0
 }

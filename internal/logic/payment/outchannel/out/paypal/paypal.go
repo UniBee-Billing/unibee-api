@@ -85,26 +85,14 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 					PricingScheme: paypal.PricingScheme{
 						Version: 1,
 						FixedPrice: paypal.Money{
-							Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount), //paypal 需要元为单位，小数点处理
+							Currency: strings.ToUpper(subscriptionRo.Subscription.Currency),
+							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Subscription.Amount), //paypal 需要元为单位，小数点处理
 						},
 						CreateTime: time.Now(),
 						UpdateTime: time.Now(),
 					},
 					Sequence: Int(1),
 				},
-				//{
-				//	PricingScheme: paypal.PricingScheme{
-				//		Version: 1,
-				//		FixedPrice: paypal.Money{
-				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-				//			Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
-				//		},
-				//		CreateTime: time.Now(),
-				//		UpdateTime: time.Now(),
-				//	},
-				//	Sequence: Int(1),
-				//},
 			},
 			PaymentPreferences: &paypal.PaymentPreferencesOverride{
 				AutoBillOutstanding: false,
