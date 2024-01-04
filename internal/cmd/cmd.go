@@ -60,7 +60,6 @@ var (
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 				)
-				router.MerchantWebhook(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user", func(group *ghttp.RouterGroup) {
