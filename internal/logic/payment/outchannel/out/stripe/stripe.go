@@ -278,7 +278,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 	var invoiceItems []*ro2.SubscriptionInvoiceItemRo
 	for _, line := range result.Lines.Data {
 		invoiceItems = append(invoiceItems, &ro2.SubscriptionInvoiceItemRo{
-			Currency:    strings.ToLower(string(line.Currency)),
+			Currency:    strings.ToUpper(string(line.Currency)),
 			Amount:      line.Amount,
 			Description: line.Description,
 		})
@@ -287,11 +287,11 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
 		Data:          utility.FormatToJsonString(result),
 		TotalAmount:   result.Total,
-		Currency:      strings.ToLower(string(result.Currency)),
+		Currency:      strings.ToUpper(string(result.Currency)),
 		ProrationDate: prorationDate,
 		Invoice: &ro2.SubscriptionInvoiceRo{
 			TotalAmount:        result.Total,
-			Currency:           strings.ToLower(string(result.Currency)),
+			Currency:           strings.ToUpper(string(result.Currency)),
 			TaxAmount:          result.Tax,
 			SubscriptionAmount: result.Subtotal,
 			Lines:              invoiceItems,

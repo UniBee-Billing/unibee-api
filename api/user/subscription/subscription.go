@@ -8,7 +8,7 @@ import (
 
 type SubscriptionDetailReq struct {
 	g.Meta         `path:"/subscription_detail" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅详情"`
-	SubscriptionId string `p:"ubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
 	Subscription              *entity.Subscription                `p:"subscription" dc:"订阅"`
