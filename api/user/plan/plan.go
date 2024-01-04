@@ -14,5 +14,5 @@ type SubscriptionPlanListReq struct {
 	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionPlanListRes struct {
-	Plans []*ro.SubscriptionPlanRo `p:"plans" dc:"订阅计划明细"`
+	Plans []*ro.PlanDetailRo `p:"plans" dc:"订阅计划明细"`
 }

@@ -10,7 +10,6 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel"
-	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -21,9 +20,9 @@ import (
 func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelId int64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	utility.Assert(channelId > 0, "invalid channelId")
-	plan := query.GetSubscriptionPlanById(ctx, planId)
+	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetSubscriptionPlanChannel(ctx, planId, channelId)
+	planChannel := query.GetPlanChannel(ctx, planId, channelId)
 	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
@@ -51,9 +50,9 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channelId int64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	utility.Assert(channelId > 0, "invalid channelId")
-	plan := query.GetSubscriptionPlanById(ctx, planId)
+	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetSubscriptionPlanChannel(ctx, planId, channelId)
+	planChannel := query.GetPlanChannel(ctx, planId, channelId)
 	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
@@ -145,7 +144,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		req.IntervalCount = 1
 	}
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
-	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
+	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 
@@ -178,106 +177,11 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	return one, nil
 }
 
-type SubscriptionPlanListInternalReq struct {
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
-	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
-	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
-}
-
-func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro.SubscriptionPlanRo) {
-	var mainList []*entity.SubscriptionPlan
-	if req.Count <= 0 {
-		req.Count = 10 //每页数量默认 10
-	}
-	if req.Page < 0 {
-		req.Page = 0
-	}
-	err := dao.SubscriptionPlan.Ctx(ctx).
-		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
-		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
-		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
-		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
-		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
-	if err != nil {
-		return nil
-	}
-	var totalAddonIds []int64
-	var totalPlanIds []uint64
-	for _, plan := range mainList {
-		totalPlanIds = append(totalPlanIds, plan.Id)
-		if plan.Type != 1 {
-			//非主 Plan 不查询 addons
-			continue
-		}
-		var addonIds []int64
-		if len(plan.BindingAddonIds) > 0 {
-			//初始化
-			strList := strings.Split(plan.BindingAddonIds, ",")
-
-			for _, s := range strList {
-				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
-				if err != nil {
-					fmt.Println("Internal Error converting string to int:", err)
-				} else {
-					totalAddonIds = append(totalAddonIds, num) // 添加到整数列表中
-					addonIds = append(addonIds, num)           // 添加到整数列表中
-				}
-			}
-		}
-		list = append(list, &ro.SubscriptionPlanRo{
-			Plan:     plan,
-			Channels: []*entity.SubscriptionPlanChannel{},
-			Addons:   nil,
-			AddonIds: addonIds,
-		})
-	}
-	if len(totalAddonIds) > 0 {
-		//主 Plan 查询 addons
-		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).Scan(&allAddonList)
-		if err == nil {
-			//整合进列表
-			mapPlans := make(map[int64]*entity.SubscriptionPlan)
-			for _, pair := range allAddonList {
-				key := int64(pair.Id)
-				value := pair
-				mapPlans[key] = value
-			}
-			for _, planRo := range list {
-				if len(planRo.AddonIds) > 0 {
-					for _, id := range planRo.AddonIds {
-						if mapPlans[id] != nil {
-							planRo.Addons = append(planRo.Addons, mapPlans[id])
-						}
-					}
-				}
-			}
-		}
-	}
-	//添加 Channel 信息
-	var allChannelList []*entity.SubscriptionPlanChannel
-	err = dao.SubscriptionPlanChannel.Ctx(ctx).WhereIn(dao.SubscriptionPlanChannel.Columns().PlanId, totalPlanIds).Scan(&allChannelList)
-	if err == nil {
-		for _, channel := range allChannelList {
-			for _, planRo := range list {
-				if int64(planRo.Plan.Id) == channel.PlanId {
-					planRo.Channels = append(planRo.Channels, channel)
-				}
-			}
-		}
-	}
-	return list
-}
-
 func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
-	one = query.GetSubscriptionPlanById(ctx, req.PlanId)
+	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.Type == consts.PlanTypeMain, fmt.Sprintf("plan not type main, id:%d", req.PlanId))
 
@@ -335,113 +239,6 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 		return nil, gerror.New("internal err, publish count != 1")
 	}
 	return one, nil
-}
-
-func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
-	//发布 Plan
-	utility.Assert(planId > 0, "invalid planId")
-	one := query.GetSubscriptionPlanById(ctx, planId)
-	utility.Assert(one != nil, "plan not found, invalid planId")
-	if one.Status == consts.PlanStatusPublished {
-		//已成功
-		return nil
-	}
-	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusPublished,
-		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitEmpty().Update()
-	if err != nil {
-		return err
-	}
-	affected, err := update.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if affected != 1 {
-		return gerror.New("internal err, publish count != 1")
-	}
-	return nil
-}
-
-func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, channelId int64) error {
-	plan := query.GetSubscriptionPlanById(ctx, planId)
-	utility.Assert(plan != nil, "plan not found")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
-	planChannel := query.GetSubscriptionPlanChannel(ctx, planId, channelId)
-	if planChannel == nil {
-		planChannel = &entity.SubscriptionPlanChannel{
-			PlanId:    planId,
-			ChannelId: channelId,
-			Status:    consts.PlanChannelStatusInit,
-		}
-		//保存planChannel
-		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitEmpty().Insert(planChannel)
-		if err != nil {
-			err = gerror.Newf(`SubscriptionPlanChannelTransferAndActivate record insert failure %s`, err)
-			planChannel = nil
-			return err
-		}
-		id, err := result.LastInsertId()
-		if err != nil {
-			planChannel = nil
-			return err
-		}
-		planChannel.Id = uint64(uint(id))
-	}
-	if len(planChannel.ChannelProductId) == 0 {
-		//产品尚未创建
-		if len(plan.ChannelProductName) == 0 {
-			plan.ChannelProductName = plan.PlanName
-		}
-		if len(plan.ChannelProductDescription) == 0 {
-			plan.ChannelProductDescription = plan.Description
-		}
-		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
-		if err != nil {
-			return err
-		}
-		//更新 planChannel
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
-			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
-		if err != nil {
-			return err
-		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
-		}
-		planChannel.ChannelProductId = res.ChannelProductId
-		planChannel.ChannelProductStatus = res.ChannelProductStatus
-	}
-	if len(planChannel.ChannelPlanId) == 0 {
-		//创建 并激活 Plan
-		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
-		if err != nil {
-			return err
-		}
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPlanChannel.Columns().ChannelPlanId:     res.ChannelPlanId,
-			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
-			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
-			dao.SubscriptionPlanChannel.Columns().Status:            int(res.Status),
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
-		if err != nil {
-			return err
-		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
-		}
-		planChannel.ChannelPlanId = res.ChannelPlanId
-		planChannel.ChannelPlanStatus = res.ChannelPlanStatus
-		planChannel.Data = res.Data
-		planChannel.Status = int(res.Status)
-	}
-
-	return nil
 }
 
 func mergeArrays(arr1, arr2 []int64) []int64 {

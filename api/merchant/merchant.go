@@ -10,6 +10,7 @@ import (
 	"go-oversea-pay/api/merchant/auth"
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
+	"go-oversea-pay/api/merchant/subscription"
 	"go-oversea-pay/api/merchant/webhook"
 )
 
@@ -36,6 +37,10 @@ type IMerchantPlan interface {
 
 type IMerchantProfile interface {
 	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+}
+
+type IMerchantSubscription interface {
+	SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error)
 }
 
 type IMerchantWebhook interface {

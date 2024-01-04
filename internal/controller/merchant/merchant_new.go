@@ -32,3 +32,9 @@ type ControllerProfile struct{}
 func NewProfile() merchant.IMerchantProfile {
 	return &ControllerProfile{}
 }
+type ControllerSubscription struct{}
+
+func NewSubscription() merchant.IMerchantSubscription {
+	return &ControllerSubscription{}
+}
+

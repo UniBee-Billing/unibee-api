@@ -356,7 +356,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			{
 				Operation: "replace",
 				Path:      "/url",
-				Value:     out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+				Value:     strings.Replace(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
@@ -516,8 +516,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 func (p Paypal) processWebhook(ctx context.Context, eventType string, resource *gjson.Json) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, resource.Get("id").String())
 	if unibSub != nil {
-		plan := query.GetSubscriptionPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetSubscriptionPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
+		plan := query.GetPlanById(ctx, unibSub.PlanId)
+		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
 		details, err := p.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
 		if err != nil {
 			return err
@@ -529,7 +529,7 @@ func (p Paypal) processWebhook(ctx context.Context, eventType string, resource *
 		}
 		return nil
 	} else {
-		return gerror.New("subscription_plan_merchant not found on channelSubId:" + resource.Get("id").String())
+		return gerror.New("subscription not found on channelSubId:" + resource.Get("id").String())
 	}
 }
 
@@ -565,8 +565,8 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				responseBack = http.StatusBadRequest
 			} else {
 				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, resource.Get("id").String())
-				// Then define and call a func to handle the deleted subscription_plan_merchant.
-				// handleSubscriptionCanceled(subscription_plan_merchant)
+				// Then define and call a func to handle the deleted subscription.
+				// handleSubscriptionCanceled(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
 					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
@@ -583,7 +583,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			} else {
 				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a PaymentMethod.
-				// handleSubscriptionUpdated(subscription_plan_merchant)
+				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
 					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
@@ -600,7 +600,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			} else {
 				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a PaymentMethod.
-				// handleSubscriptionCreated(subscription_plan_merchant)
+				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
 					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)

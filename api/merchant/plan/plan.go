@@ -63,7 +63,7 @@ type SubscriptionPlanListReq struct {
 	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionPlanListRes struct {
-	Plans []*ro.SubscriptionPlanRo `p:"plans" dc:"订阅计划明细"`
+	Plans []*ro.PlanDetailRo `p:"plans" dc:"订阅计划明细"`
 }
 
 type SubscriptionPlanChannelTransferAndActivateReq struct {
@@ -95,7 +95,7 @@ type SubscriptionPlanDetailReq struct {
 	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 }
 type SubscriptionPlanDetailRes struct {
-	Plan *ro.SubscriptionPlanRo `p:"plan" dc:"订阅计划明细"`
+	Plan *ro.PlanDetailRo `p:"plan" dc:"订阅计划明细"`
 }
 
 type SubscriptionPlanExpireReq struct {
