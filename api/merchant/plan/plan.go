@@ -7,7 +7,7 @@ import (
 )
 
 type SubscriptionPlanCreateReq struct {
-	g.Meta             `path:"/subscription_plan_create_and_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划创建"`
+	g.Meta             `path:"/subscription_plan_create" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划创建"`
 	MerchantId         int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
 	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
