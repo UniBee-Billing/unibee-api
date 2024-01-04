@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
 // =================================================================================
 
 package user
 
 import (
 	"context"
-
+	
 	"go-oversea-pay/api/user/auth"
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
@@ -36,6 +36,9 @@ type IUserSubscription interface {
 	SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (res *subscription.SubscriptionCreatePrepareRes, err error)
 	SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (res *subscription.SubscriptionCreateRes, err error)
 	SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error)
+	SubscriptionUpdatePrepare(ctx context.Context, req *subscription.SubscriptionUpdatePrepareReq) (res *subscription.SubscriptionUpdatePrepareRes, err error)
 	SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error)
 	SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error)
 }
+
+

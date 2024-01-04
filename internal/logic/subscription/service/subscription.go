@@ -29,59 +29,11 @@ type SubscriptionCreatePrepareInternalRes struct {
 	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount  int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency     string                             `json:"currency"              `      // 货币
-	UserId       int64                              `json:"UserId" `
+	UserId       int64                              `json:"userId" `
+	Email        string                             `json:"email" `
 }
 
-func SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (*SubscriptionCreatePrepareInternalRes, error) {
-	utility.Assert(req != nil, "req not found")
-	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
-	utility.Assert(req.UserId > 0, "UserId invalid")
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
-	}
-	plan := query.GetPlanById(ctx, req.PlanId)
-	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetPlanChannel(ctx, req.PlanId, req.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
-	utility.Assert(merchantInfo != nil, "merchant not found")
-
-	//设置默认值
-	if req.Quantity <= 0 {
-		req.Quantity = 1
-	}
-
-	var totalAmount = plan.Amount * int64(req.Quantity)
-	var currency = plan.Currency
-
-	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
-
-	for _, addon := range addons {
-		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
-		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
-		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
-		totalAmount = totalAmount + addon.AddonPlan.Amount*int64(addon.Quantity)
-	}
-
-	return &SubscriptionCreatePrepareInternalRes{
-		Plan:         plan,
-		PlanChannel:  planChannel,
-		PayChannel:   payChannel,
-		MerchantInfo: merchantInfo,
-		AddonParams:  req.AddonParams,
-		Addons:       addons,
-		TotalAmount:  totalAmount,
-		Currency:     currency,
-		UserId:       req.UserId,
-	}, nil
-}
-
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo) []*ro.SubscriptionPlanAddonRo {
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
 	var addons []*ro.SubscriptionPlanAddonRo
 	var totalAddonIds []int64
 	if len(addonParams) > 0 {
@@ -110,14 +62,72 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
+				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 channelId 合并查询
+				utility.Assert(len(planChannel.ChannelPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanId invalid", param.AddonPlanId, channelId))
+				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
-					Quantity:  param.Quantity,
-					AddonPlan: mapPlans[param.AddonPlanId],
+					Quantity:         param.Quantity,
+					AddonPlan:        mapPlans[param.AddonPlanId],
+					AddonPlanChannel: planChannel,
 				})
 			}
 		}
 	}
 	return addons
+}
+
+func SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (*SubscriptionCreatePrepareInternalRes, error) {
+	utility.Assert(req != nil, "req not found")
+	utility.Assert(req.PlanId > 0, "PlanId invalid")
+	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
+	utility.Assert(req.UserId > 0, "UserId invalid")
+	email := ""
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
+		email = _interface.BizCtx().Get(ctx).User.Email
+	}
+	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan != nil, "invalid planId")
+	utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+	planChannel := query.GetPlanChannel(ctx, req.PlanId, req.ChannelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
+	utility.Assert(payChannel != nil, "payChannel not found")
+	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	utility.Assert(merchantInfo != nil, "merchant not found")
+
+	//设置默认值
+	if req.Quantity <= 0 {
+		req.Quantity = 1
+	}
+
+	var totalAmount = plan.Amount * int64(req.Quantity)
+	var currency = plan.Currency
+
+	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
+
+	for _, addon := range addons {
+		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
+		totalAmount = totalAmount + addon.AddonPlan.Amount*addon.Quantity
+	}
+
+	return &SubscriptionCreatePrepareInternalRes{
+		Plan:         plan,
+		Quantity:     int64(req.Quantity),
+		PlanChannel:  planChannel,
+		PayChannel:   payChannel,
+		MerchantInfo: merchantInfo,
+		AddonParams:  req.AddonParams,
+		Addons:       addons,
+		TotalAmount:  totalAmount,
+		Currency:     currency,
+		UserId:       req.UserId,
+		Email:        email,
+	}, nil
 }
 
 func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*entity.Subscription, error) {
@@ -143,19 +153,19 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	}
 
 	one := &entity.Subscription{
-		MerchantId:            prepare.MerchantInfo.Id,
-		PlanId:                int64(prepare.Plan.Id),
-		ChannelId:             prepare.PlanChannel.ChannelId,
-		UserId:                prepare.UserId,
-		Quantity:              prepare.Quantity,
-		Amount:                prepare.TotalAmount,
-		Currency:              prepare.Currency,
-		AddonData:             utility.MarshalToJsonString(prepare.Addons),
-		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
-		ChannelSubscriptionId: "",
-		Status:                consts.SubStatusInit,
-		ChannelUserId:         channelUserId,
-		Data:                  "", //额外参数配置
+		MerchantId:     prepare.MerchantInfo.Id,
+		PlanId:         int64(prepare.Plan.Id),
+		ChannelId:      prepare.PlanChannel.ChannelId,
+		UserId:         prepare.UserId,
+		Quantity:       prepare.Quantity,
+		Amount:         prepare.TotalAmount,
+		Currency:       prepare.Currency,
+		AddonData:      utility.MarshalToJsonString(prepare.Addons),
+		SubscriptionId: utility.CreateSubscriptionOrderNo(),
+		Status:         consts.SubStatusInit,
+		CustomerEmail:  prepare.Email,
+		ChannelUserId:  channelUserId,
+		Data:           "", //额外参数配置
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
@@ -208,46 +218,118 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	return one, nil
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
+type SubscriptionUpdatePrepareInternalRes struct {
+	Subscription *entity.Subscription               `json:"subscription"`
+	Plan         *entity.SubscriptionPlan           `json:"planId"`
+	Quantity     int64                              `json:"quantity"`
+	PlanChannel  *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel   *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount  int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency     string                             `json:"currency"              `      // 货币
+	UserId       int64                              `json:"userId" `
+	Email        string                             `json:"email" `
+}
+
+func SubscriptionUpdatePrepare(ctx context.Context, req *subscription.SubscriptionUpdatePrepareReq) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
-	utility.Assert(req.NewPlanId > 0, "NewPlanId invalid")
-	utility.Assert(req.ConfirmChannelId > 0, "ConfirmChannelId invalid")
+	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
+
+	email := ""
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")
+		email = _interface.BizCtx().Get(ctx).User.Email
+	}
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetPlanChannel(ctx, req.NewPlanId, req.ConfirmChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ConfirmChannelId)
+	utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+	planChannel := query.GetPlanChannel(ctx, req.NewPlanId, sub.ChannelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	subscription := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
-	utility.Assert(subscription != nil, "subscription not found")
-	utility.Assert(subscription.ChannelId == req.ConfirmChannelId, "channel not match")
-	//暂时不开放不同通道升级功能 todo mark
-	oldPlan := query.GetPlanById(ctx, subscription.PlanId)
+
+	//设置默认值
+	if req.Quantity <= 0 {
+		req.Quantity = 1
+	}
+
+	var currency = sub.Currency
+	var totalAmount int64 = sub.Amount
+
+	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
+
+	for _, addon := range addons {
+		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
+	}
+
+	//todo mark doChannelPrepare 走渠道计算
+
+	return &SubscriptionUpdatePrepareInternalRes{
+		Subscription: sub,
+		Plan:         plan,
+		Quantity:     int64(req.Quantity),
+		PlanChannel:  planChannel,
+		PayChannel:   payChannel,
+		MerchantInfo: merchantInfo,
+		AddonParams:  req.AddonParams,
+		Addons:       addons,
+		TotalAmount:  totalAmount,
+		Currency:     currency,
+		UserId:       sub.UserId,
+		Email:        email,
+	}, nil
+
+}
+
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
+	prepare, err := SubscriptionUpdatePrepare(ctx, &subscription.SubscriptionUpdatePrepareReq{
+		SubscriptionId: req.SubscriptionId,
+		NewPlanId:      req.NewPlanId,
+		Quantity:       req.Quantity,
+		AddonParams:    req.AddonParams,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	oldPlan := query.GetPlanById(ctx, prepare.Subscription.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
-	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), req.ConfirmChannelId)
+	//暂时不开放不同通道升级功能 todo mark
+	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), prepare.Subscription.ChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
-	//todo mark subscription 检查
+	//subscription prepare 检查
+	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
+	utility.Assert(strings.Compare(req.ConfirmCurrency, prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
 	one := &entity.SubscriptionPendingUpdate{
-		MerchantId:           merchantInfo.Id,
-		ChannelId:            subscription.ChannelId,
-		UserId:               subscription.UserId,
-		SubscriptionId:       subscription.SubscriptionId,
+		MerchantId:           prepare.MerchantInfo.Id,
+		ChannelId:            prepare.Subscription.ChannelId,
+		UserId:               prepare.Subscription.UserId,
+		SubscriptionId:       prepare.Subscription.SubscriptionId,
 		UpdateSubscriptionId: utility.CreateSubscriptionOrderNo(),
-		Amount:               subscription.Amount,
-		Currency:             subscription.Currency,
-		PlanId:               subscription.PlanId,
-		Quantity:             subscription.Quantity,
-		AddonData:            subscription.AddonData,
-		UpdateAmount:         subscription.Amount, //总金额 todo mark 需要添加 Addon，并用计算函数重新计算
-		UpdateCurrency:       plan.Currency,
-		UpdatePlanId:         req.NewPlanId,
-		UpdateQuantity:       1,                      //todo mark 主 plan 暂时不支持数量调整
-		UpdatedAddonData:     subscription.AddonData, // addon 带上之前订阅
+		Amount:               prepare.Subscription.Amount,
+		Currency:             prepare.Subscription.Currency,
+		PlanId:               prepare.Subscription.PlanId,
+		Quantity:             prepare.Subscription.Quantity,
+		AddonData:            prepare.Subscription.AddonData,
+		UpdateAmount:         prepare.TotalAmount,
+		UpdateCurrency:       prepare.Currency,
+		UpdatePlanId:         int64(prepare.Plan.Id),
+		UpdateQuantity:       prepare.Quantity,
+		UpdatedAddonData:     utility.MarshalToJsonString(prepare.Addons), // addon 暂定不带上之前订阅
 		Status:               consts.SubStatusInit,
 		Data:                 "", //额外参数配置
 	}
@@ -260,14 +342,13 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	//todo mark plan 是否活跃检查
-	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &outchannelro.ChannelUpdateSubscriptionInternalReq{
-		Plan:           plan,
+	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &outchannelro.ChannelUpdateSubscriptionInternalReq{
+		Plan:           prepare.Plan,
 		OldPlan:        oldPlan,
-		SubPlans:       nil,
-		PlanChannel:    planChannel,
+		AddonPlans:     prepare.Addons,
+		PlanChannel:    prepare.PlanChannel,
 		OldPlanChannel: oldPlanChannel,
-		Subscription:   subscription,
+		Subscription:   prepare.Subscription,
 	})
 	if err != nil {
 		return nil, err
@@ -284,7 +365,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return nil, gerror.Newf("SubscriptionUpdate update err:%s", update)
+		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
 	one.Status = consts.PlanChannelStatusCreate

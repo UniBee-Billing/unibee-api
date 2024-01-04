@@ -56,9 +56,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	{
 		if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
 			params := &stripe.CustomerParams{
-				// todo mark 创建 customer 需要这两个字段 https://stripe.com/docs/api/customers/create
 				//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
-				//Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
+				Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
 			}
 
 			createCustomResult, err := customer.New(params)
@@ -73,14 +72,23 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			//税费不包含
 			taxInclusive = false
 		}
+		items := []*stripe.SubscriptionItemsParams{
+			{
+				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+				Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+			},
+		}
+		for _, addon := range subscriptionRo.AddonPlans {
+			items = append(items, &stripe.SubscriptionItemsParams{
+				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+				Quantity: stripe.Int64(addon.Quantity),
+			})
+		}
+
 		subscriptionParams := &stripe.SubscriptionParams{
 			Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
 			Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
-			Items: []*stripe.SubscriptionItemsParams{
-				{
-					Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-				},
-			},
+			Items:    items,
 			AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
 				Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
 			},
