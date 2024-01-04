@@ -9,6 +9,7 @@ import (
 	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	outchannelro "go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/ro"
@@ -19,17 +20,16 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan          *entity.SubscriptionPlan           `json:"planId"`
-	Quantity      int64                              `json:"quantity"`
-	PlanChannel   *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel    *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo  *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams   []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons        []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount   int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                             `json:"currency"              `      // 货币
-	UserId        int64                              `json:"UserId" `
-	ChannelUserId string                             `json:"channelUserId" `
+	Plan         *entity.SubscriptionPlan           `json:"planId"`
+	Quantity     int64                              `json:"quantity"`
+	PlanChannel  *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel   *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount  int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency     string                             `json:"currency"              `      // 货币
+	UserId       int64                              `json:"UserId" `
 }
 
 func SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (*SubscriptionCreatePrepareInternalRes, error) {
@@ -37,6 +37,11 @@ func SubscriptionCreatePrepare(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
+	}
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	planChannel := query.GetPlanChannel(ctx, req.PlanId, req.ChannelId)
@@ -45,6 +50,7 @@ func SubscriptionCreatePrepare(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+
 	//设置默认值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
@@ -63,16 +69,15 @@ func SubscriptionCreatePrepare(ctx context.Context, req *subscription.Subscripti
 	}
 
 	return &SubscriptionCreatePrepareInternalRes{
-		Plan:          plan,
-		PlanChannel:   planChannel,
-		PayChannel:    payChannel,
-		MerchantInfo:  merchantInfo,
-		AddonParams:   req.AddonParams,
-		Addons:        addons,
-		TotalAmount:   totalAmount,
-		Currency:      currency,
-		UserId:        req.UserId,
-		ChannelUserId: req.ChannelUserId, // todo mark 于用户系统对接，并于 Channel CustomerId 进行匹配
+		Plan:         plan,
+		PlanChannel:  planChannel,
+		PayChannel:   payChannel,
+		MerchantInfo: merchantInfo,
+		AddonParams:  req.AddonParams,
+		Addons:       addons,
+		TotalAmount:  totalAmount,
+		Currency:     currency,
+		UserId:       req.UserId,
 	}, nil
 }
 
@@ -117,12 +122,11 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 
 func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*entity.Subscription, error) {
 	prepare, err := SubscriptionCreatePrepare(ctx, &subscription.SubscriptionCreatePrepareReq{
-		PlanId:        req.PlanId,
-		Quantity:      req.Quantity,
-		ChannelId:     req.ChannelId,
-		UserId:        req.UserId,
-		ChannelUserId: req.ChannelUserId,
-		AddonParams:   req.AddonParams,
+		PlanId:      req.PlanId,
+		Quantity:    req.Quantity,
+		ChannelId:   req.ChannelId,
+		UserId:      req.UserId,
+		AddonParams: req.AddonParams,
 	})
 	if err != nil {
 		return nil, err
@@ -131,6 +135,12 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	//校验
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(req.ConfirmCurrency, prepare.Currency) == 0, "currency not match , data may expired, fetch again")
+	//channelUserId 处理
+	var channelUserId string
+	channelUser := query.GetUserChannel(ctx, prepare.UserId, prepare.PlanChannel.ChannelId)
+	if channelUser != nil {
+		channelUserId = channelUser.ChannelUserId
+	}
 
 	one := &entity.Subscription{
 		MerchantId:            prepare.MerchantInfo.Id,
@@ -144,7 +154,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
 		ChannelSubscriptionId: "",
 		Status:                consts.SubStatusInit,
-		ChannelUserId:         prepare.ChannelUserId,
+		ChannelUserId:         channelUserId,
 		Data:                  "", //额外参数配置
 	}
 
@@ -165,6 +175,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
+
 	//更新 Subscription
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId, // todo mark 进行 UserId 匹配更新
@@ -185,6 +196,14 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one.Status = consts.PlanChannelStatusCreate
 	one.Link = createRes.Link
 	one.ChannelUserId = createRes.ChannelUserId
+
+	if channelUser == nil && len(createRes.ChannelUserId) > 0 {
+		_, err := query.SaveUserChannel(ctx, prepare.UserId, prepare.PlanChannel.ChannelId, channelUserId)
+		if err != nil {
+			// todo mark
+			return nil, gerror.Newf("SubscriptionCreate ChannelUser save err:%s", err)
+		}
+	}
 
 	return one, nil
 }

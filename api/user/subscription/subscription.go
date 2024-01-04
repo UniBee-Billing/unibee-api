@@ -25,13 +25,12 @@ type SubscriptionChannelsRes struct {
 }
 
 type SubscriptionCreatePrepareReq struct {
-	g.Meta        `path:"/subscription_create_prepare" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建计算（仅计算）"`
-	PlanId        int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity      int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
-	ChannelId     int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
-	UserId        int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	ChannelUserId string                             `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
-	AddonParams   []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	g.Meta      `path:"/subscription_create_prepare" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建计算（仅计算）"`
+	PlanId      int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity    int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
+	ChannelId   int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
+	UserId      int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
+	AddonParams []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionCreatePrepareRes struct {
 }
@@ -42,7 +41,6 @@ type SubscriptionCreateReq struct {
 	Quantity           int                                `p:"quantity" dc:"订阅计划数量，默认 1" `
 	ChannelId          int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
 	UserId             int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	ChannelUserId      string                             `p:"channelUserId" dc:"渠道用户 Id，stripe 代表 customerId" `
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addons" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 接口输出的总金额"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
 	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 接口输出的货币" v:"required#请输入 confirmCurrency"  `
