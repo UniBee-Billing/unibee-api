@@ -25,7 +25,7 @@ type SubscriptionChannelsRes struct {
 }
 
 type SubscriptionCreatePreviewReq struct {
-	g.Meta      `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建计算（仅计算）"`
+	g.Meta      `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建预览（仅计算）"`
 	PlanId      int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Quantity    int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
 	ChannelId   int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
@@ -52,8 +52,8 @@ type SubscriptionCreateReq struct {
 	ChannelId          int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
 	UserId             int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 接口输出的总金额"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 接口输出的货币" v:"required#请输入 confirmCurrency"  `
+	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
+	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 }
 type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription      `json:"subscription" dc:"订阅"`
@@ -68,7 +68,7 @@ type SubscriptionCancelRes struct {
 }
 
 type SubscriptionUpdatePreviewReq struct {
-	g.Meta         `path:"/subscription_update_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新计算（仅计算）"`
+	g.Meta         `path:"/subscription_update_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新预览（仅计算）"`
 	SubscriptionId string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 	NewPlanId      int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Quantity       int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
@@ -87,8 +87,8 @@ type SubscriptionUpdateReq struct {
 	NewPlanId          int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 接口输出的总金额"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 接口输出的货币" v:"required#请输入 confirmCurrency"  `
+	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
+	ConfirmCurrency    string                             `p:"confirmCurrency" d:"usd"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 	ProrationDate      int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
 	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
