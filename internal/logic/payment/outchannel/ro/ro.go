@@ -114,7 +114,7 @@ type ChannelCreateSubscriptionInternalResp struct {
 
 type ChannelCreateSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan        `json:"plan"`
-	AddonPlans   *[]ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
+	AddonPlans   []*ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
 	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
 	Subscription *entity.Subscription            `json:"subscription"`
 }
