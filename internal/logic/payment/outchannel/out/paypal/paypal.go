@@ -516,8 +516,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 func (p Paypal) processWebhook(ctx context.Context, eventType string, resource *gjson.Json) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, resource.Get("id").String())
 	if unibSub != nil {
-		plan := query.GetSubscriptionPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetSubscriptionPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
+		plan := query.GetPlanById(ctx, unibSub.PlanId)
+		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
 		details, err := p.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
 		if err != nil {
 			return err

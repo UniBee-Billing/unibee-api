@@ -467,8 +467,8 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 func (s Stripe) processWebhook(ctx context.Context, eventType string, subscription stripe.Subscription) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
 	if unibSub != nil {
-		plan := query.GetSubscriptionPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetSubscriptionPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
+		plan := query.GetPlanById(ctx, unibSub.PlanId)
+		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
 		details, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
 		if err != nil {
 			return err

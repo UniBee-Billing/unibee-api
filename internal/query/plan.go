@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func GetSubscriptionPlanById(ctx context.Context, id int64) (one *entity.SubscriptionPlan) {
+func GetPlanById(ctx context.Context, id int64) (one *entity.SubscriptionPlan) {
 	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -17,7 +17,7 @@ func GetSubscriptionPlanById(ctx context.Context, id int64) (one *entity.Subscri
 	return
 }
 
-func GetSubscriptionPlanAddonsByPlanId(ctx context.Context, id int64) (list []*entity.SubscriptionPlan) {
+func GetPlanBindingAddonsByPlanId(ctx context.Context, id int64) (list []*entity.SubscriptionPlan) {
 	var one *entity.SubscriptionPlan
 	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil && one == nil {

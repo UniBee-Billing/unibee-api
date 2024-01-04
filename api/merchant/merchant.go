@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"go-oversea-pay/api/merchant/plan"
+	"go-oversea-pay/api/merchant/subscription"
 	"go-oversea-pay/api/merchant/webhook"
 )
 
@@ -21,6 +22,10 @@ type IMerchantPlan interface {
 	SubscriptionPlanChannelDeactivate(ctx context.Context, req *plan.SubscriptionPlanChannelDeactivateReq) (res *plan.SubscriptionPlanChannelDeactivateRes, err error)
 	SubscriptionPlanDetail(ctx context.Context, req *plan.SubscriptionPlanDetailReq) (res *plan.SubscriptionPlanDetailRes, err error)
 	SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error)
+}
+
+type IMerchantSubscription interface {
+	SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error)
 }
 
 type IMerchantWebhook interface {

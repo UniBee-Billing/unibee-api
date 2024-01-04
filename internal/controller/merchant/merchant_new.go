@@ -20,3 +20,9 @@ func NewWebhook() merchant.IMerchantWebhook {
 	return &ControllerWebhook{}
 }
 
+type ControllerSubscription struct{}
+
+func NewSubscription() merchant.IMerchantSubscription {
+	return &ControllerSubscription{}
+}
+

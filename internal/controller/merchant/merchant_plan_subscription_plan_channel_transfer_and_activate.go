@@ -18,7 +18,7 @@ import (
 func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *_plan.SubscriptionPlanChannelTransferAndActivateReq) (res *_plan.SubscriptionPlanChannelTransferAndActivateRes, err error) {
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	//utility.Assert(req.ChannelId > 0, "ConfirmChannelId should > 0")
-	plan := query.GetSubscriptionPlanById(ctx, req.PlanId)
+	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
 	//多个渠道Plan 创建并激活
 	list := query.GetListSubscriptionTypePayChannels(ctx) // todo mark 需改造成获取 merchantId 相关的 Channel
