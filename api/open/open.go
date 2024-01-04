@@ -1,12 +1,12 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package open
 
 import (
 	"context"
-	
+
 	"go-oversea-pay/api/open/mock"
 	"go-oversea-pay/api/open/payment"
 )
@@ -29,5 +29,3 @@ type IOpenPayment interface {
 	ListRecurringDetails(ctx context.Context, req *payment.ListRecurringDetailsReq) (res *payment.ListRecurringDetailsRes, err error)
 	Refunds(ctx context.Context, req *payment.RefundsReq) (res *payment.RefundsRes, err error)
 }
-
-

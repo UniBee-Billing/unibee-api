@@ -90,10 +90,10 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id:          userEntity.Id,
-			MobilePhone: userEntity.Mobile,
-			UserName:    userEntity.UserName,
-			AvatarUrl:   userEntity.AvatarUrl,
-			IsAdmin:     false,
+			// MobilePhone: userEntity.Mobile,
+			// UserName:    userEntity.UserName,
+			// AvatarUrl:   userEntity.AvatarUrl,
+			// IsAdmin:     false,
 		}
 	}
 	// 将自定义的上下文对象传递到模板变量中使用
@@ -104,7 +104,7 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	r.Middleware.Next()
 }
 
-// PreOpenApiAuth 从 Session 中获取用户
+// PreOpenApiAuth 从 Session 中获取用户 (obsolete)
 func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 	// 初始化，务必最开始执行
 	customCtx := &model.Context{
@@ -115,14 +115,14 @@ func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id:          userEntity.Id,
-			MobilePhone: userEntity.Mobile,
-			UserName:    userEntity.UserName,
-			AvatarUrl:   userEntity.AvatarUrl,
-			IsAdmin:     false,
+			// MobilePhone: userEntity.Mobile,
+			// UserName:    userEntity.UserName,
+			// AvatarUrl:   userEntity.AvatarUrl,
+			// IsAdmin:     false,
 		}
 	}
 	if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
-		//openapikey 转化未api 用户
+		//openapikey 转化为 api 用户
 		customCtx.Data[consts.ApiKey] = key
 		customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
 	}
@@ -158,7 +158,7 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 
 // later define a merchantClaim
 type UserClaims struct {
-	// UserId
+	Id uint64 `json:"id"`
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
@@ -172,7 +172,7 @@ func parseAccessToken(accessToken string) *UserClaims {
 	return parsedAccessToken.Claims.(*UserClaims)
 }
 
-func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
+func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		fmt.Println("empty token string of auth header")
@@ -197,31 +197,58 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
-	fmt.Println("parsed token: ", u.Email)
-
+	fmt.Println("parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
 	customCtx := &model.Context{
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
 	_interface.BizCtx().Init(r, customCtx)
-	// if := _interface.Session().GetUser(r.Context()); userEntity != nil {
 	customCtx.User = &model.ContextUser{
-		/*
-			Id:          userEntity.Id,
-			MobilePhone: userEntity.Mobile,
-			UserName:    userEntity.UserName,
-			AvatarUrl:   userEntity.AvatarUrl,
-			IsAdmin:     false,
-		*/
+		Id: u.Id,
 		Email: u.Email,
 	}
-	// }
-	// if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
-	//openapikey 转化为api 用户
-	// customCtx.Data[consts.ApiKey] = key
-	// customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
-	// }
-	// 将自定义的上下文对象传递到模板变量中使用
+
+	r.Assigns(g.Map{
+		consts.ContextKey: customCtx,
+	})
+
+	r.Middleware.Next()
+}
+
+func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		fmt.Println("empty token string of auth header")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		fmt.Println("parse error")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+
+	if !token.Valid {
+		fmt.Println("token invalid")
+		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		r.Exit()
+	}
+
+	u := parseAccessToken(tokenString)
+	customCtx := &model.Context{
+		Session: r.Session,
+		Data:    make(g.Map),
+	}
+	_interface.BizCtx().Init(r, customCtx)
+	customCtx.Merchant = &model.ContextMerchant{
+		Id: u.Id,
+		Email: u.Email,
+	}
+
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})

@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"go-oversea-pay/api/user/auth"
+
 	// "github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -28,11 +29,10 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	var newOne *entity.UserAccount
 	newOne = query.GetUserAccountByEmail(ctx, req.Email)
 	if newOne == nil {
-		// return nil, gerror.New("internal err: user not found")
 		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
 	}
 
-	token, err := createToken(req.Email)
+	token, err := createToken(req.Email, newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

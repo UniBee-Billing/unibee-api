@@ -1,16 +1,27 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package merchant
 
 import (
 	"context"
-	
+
+	"go-oversea-pay/api/merchant/auth"
 	"go-oversea-pay/api/merchant/plan"
+	"go-oversea-pay/api/merchant/profile"
 	"go-oversea-pay/api/merchant/subscription"
 	"go-oversea-pay/api/merchant/webhook"
 )
+
+type IMerchantAuth interface {
+	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
+	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
+	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
+	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
+	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
+	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
 
 type IMerchantPlan interface {
 	SubscriptionPlanCreate(ctx context.Context, req *plan.SubscriptionPlanCreateReq) (res *plan.SubscriptionPlanCreateRes, err error)
@@ -24,6 +35,10 @@ type IMerchantPlan interface {
 	SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error)
 }
 
+type IMerchantProfile interface {
+	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+}
+
 type IMerchantSubscription interface {
 	SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error)
 }
@@ -31,5 +46,3 @@ type IMerchantSubscription interface {
 type IMerchantWebhook interface {
 	SubscriptionWebhookCheckAndSetup(ctx context.Context, req *webhook.SubscriptionWebhookCheckAndSetupReq) (res *webhook.SubscriptionWebhookCheckAndSetupRes, err error)
 }
-
-

@@ -13,3 +13,19 @@ func GetMerchantInfoById(ctx context.Context, id int64) (one *entity.MerchantInf
 	}
 	return one
 }
+
+func GetMerchantAccountById(ctx context.Context, id uint64) (one *entity.MerchantUserAccount) {
+	err := dao.MerchantUserAccount.Ctx(ctx).Where(entity.MerchantUserAccount{Id: id}).OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetMerchantAccountByEmail(ctx context.Context, email string) (one *entity.MerchantUserAccount) {
+	err := dao.MerchantUserAccount.Ctx(ctx).Where(entity.MerchantUserAccount{Email: email}).OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
