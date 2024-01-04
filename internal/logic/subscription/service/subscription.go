@@ -178,7 +178,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 	//更新 Subscription
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId, // todo mark 进行 UserId 匹配更新
+		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId,
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
 		dao.Subscription.Columns().Link:                  createRes.Link,
