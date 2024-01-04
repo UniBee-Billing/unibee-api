@@ -20,8 +20,8 @@ type SubscriptionPlanAddonRo struct {
 }
 
 type SubscriptionDetailRo struct {
-	Subscription *entity.Subscription
-	Plan         *entity.SubscriptionPlan
-	AddonParams  []*SubscriptionPlanAddonParamRo
-	Addons       []*SubscriptionPlanAddonRo
+	Subscription *entity.Subscription            `p:"subscription" dc:"订阅"`
+	Plan         *entity.SubscriptionPlan        `p:"planId" dc:"订阅计划"`
+	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" dc:"订阅Addon参数"`
+	Addons       []*SubscriptionPlanAddonRo      `p:"addons" dc:"订阅Addon"`
 }

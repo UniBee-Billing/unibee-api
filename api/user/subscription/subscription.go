@@ -8,12 +8,13 @@ import (
 
 type SubscriptionDetailReq struct {
 	g.Meta         `path:"/subscription_detail" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅详情"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"ubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
-	Subscription *entity.Subscription
-	Plan         *entity.SubscriptionPlan
-	Addons       []*ro.SubscriptionPlanAddonRo
+	Subscription              *entity.Subscription                `p:"subscription" dc:"订阅"`
+	Plan                      *entity.SubscriptionPlan            `p:"planId" dc:"订阅计划"`
+	Addons                    []*ro.SubscriptionPlanAddonRo       `p:"addons" dc:"订阅Addon"`
+	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `p:"subscriptionPendingUpdate" dc:"订阅更新明细"`
 }
 
 type SubscriptionChannelsReq struct {
