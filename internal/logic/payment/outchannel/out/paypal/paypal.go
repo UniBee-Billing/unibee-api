@@ -40,6 +40,11 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func init() {
 	//注册 channel_webhook_entry
 }

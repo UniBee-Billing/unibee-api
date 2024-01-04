@@ -126,9 +126,18 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
 	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
 	Subscription   *entity.Subscription            `json:"subscription"`
+	ProrationDate  int64                           `json:"prorationDate"`
 }
 
 type ChannelCancelSubscriptionInternalResp struct {
+}
+
+type ChannelUpdateSubscriptionPreviewInternalResp struct {
+	Data          string                    `json:"data"`
+	TotalAmount   int64                     `json:"totalAmount"`
+	Currency      string                    `json:"currency"`
+	Invoice       *ro.SubscriptionInvoiceRo `json:"invoice"`
+	ProrationDate int64                     `json:"prorationDate"`
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {

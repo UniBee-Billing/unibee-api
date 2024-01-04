@@ -26,3 +26,17 @@ type SubscriptionDetailRo struct {
 	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" dc:"订阅Addon参数"`
 	Addons       []*SubscriptionPlanAddonRo      `p:"addons" dc:"订阅Addon"`
 }
+
+type SubscriptionInvoiceRo struct {
+	TotalAmount        int64                        `json:"totalAmount"`
+	Currency           string                       `json:"currency"`
+	TaxAmount          int64                        `json:"taxAmount"`
+	SubscriptionAmount int64                        `json:"subscriptionAmount"`
+	Lines              []*SubscriptionInvoiceItemRo `json:"lines"`
+}
+
+type SubscriptionInvoiceItemRo struct {
+	Currency    string `json:"currency"`
+	Amount      int64  `json:"amount"`
+	Description string `json:"description"`
+}

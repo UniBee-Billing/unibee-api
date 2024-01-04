@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerSubscription) SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (res *subscription.SubscriptionCreatePrepareRes, err error) {
-	prepare, err := service.SubscriptionCreatePrepare(ctx, req)
+	prepare, err := service.SubscriptionCreatePreview(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -20,6 +20,7 @@ func (c *ControllerSubscription) SubscriptionCreatePrepare(ctx context.Context, 
 		Addons:      prepare.Addons,
 		TotalAmount: prepare.TotalAmount,
 		Currency:    prepare.Currency,
+		Invoice:     prepare.Invoice,
 		UserId:      prepare.UserId,
 		Email:       prepare.Email,
 	}, nil

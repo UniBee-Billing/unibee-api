@@ -22,11 +22,14 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	"go-oversea-pay/internal/logic/subscription/handler"
+	ro2 "go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Stripe struct {
@@ -76,12 +79,20 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			{
 				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
 				Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+				Metadata: map[string]string{
+					"BillingPlanType": "Main",
+					"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
+				},
 			},
 		}
 		for _, addon := range subscriptionRo.AddonPlans {
 			items = append(items, &stripe.SubscriptionItemsParams{
 				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
 				Quantity: stripe.Int64(addon.Quantity),
+				Metadata: map[string]string{
+					"BillingPlanType": "Addon",
+					"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
+				},
 			})
 		}
 
@@ -207,6 +218,87 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.ChannelCancelSubscriptionInternalResp{}, nil //todo mark
 }
 
+func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	// Set the proration date to this moment:
+	prorationDate := time.Now().Unix()
+	detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
+	if err != nil {
+		return nil, err
+	}
+	//遍历并删除
+	var items []*stripe.SubscriptionItemsParams
+	for _, item := range detail.Items.Data {
+		//if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
+		//	targetItems = append(targetItems, &stripe.SubscriptionItemsParams{
+		//		ID:    stripe.String(item.ID),
+		//		Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+		//	})
+		//}
+		//删除之前全部，新增 Plan 和 Addons 方式
+		items = append(items, &stripe.SubscriptionItemsParams{
+			ID:      stripe.String(item.ID),
+			Deleted: stripe.Bool(true),
+		})
+	}
+	//新增新的项目
+	items = append(items, &stripe.SubscriptionItemsParams{
+		Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+		Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+		Metadata: map[string]string{
+			"BillingPlanType": "Main",
+			"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
+		},
+	})
+	for _, addon := range subscriptionRo.AddonPlans {
+		items = append(items, &stripe.SubscriptionItemsParams{
+			Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+			Quantity: stripe.Int64(addon.Quantity),
+			Metadata: map[string]string{
+				"BillingPlanType": "Addon",
+				"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
+			},
+		})
+	}
+	params := &stripe.InvoiceUpcomingParams{
+		Customer:                  stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Subscription:              stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
+		SubscriptionItems:         items,
+		SubscriptionProrationDate: stripe.Int64(prorationDate),
+	}
+	result, err := invoice.Upcoming(params)
+	if err != nil {
+		return nil, err
+	}
+
+	var invoiceItems []*ro2.SubscriptionInvoiceItemRo
+	for _, line := range result.Lines.Data {
+		invoiceItems = append(invoiceItems, &ro2.SubscriptionInvoiceItemRo{
+			Currency:    strings.ToLower(string(line.Currency)),
+			Amount:      line.Amount,
+			Description: line.Description,
+		})
+	}
+
+	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
+		Data:          utility.FormatToJsonString(result),
+		TotalAmount:   result.Total,
+		Currency:      strings.ToLower(string(result.Currency)),
+		ProrationDate: prorationDate,
+		Invoice: &ro2.SubscriptionInvoiceRo{
+			TotalAmount:        result.Total,
+			Currency:           strings.ToLower(string(result.Currency)),
+			TaxAmount:          result.Tax,
+			SubscriptionAmount: result.Subtotal,
+			Lines:              invoiceItems,
+		},
+	}, nil
+}
+
 // DoRemoteChannelSubscriptionUpdate 需保证同一个 Price 在 Items 中不能出现两份
 func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
@@ -219,22 +311,46 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
-	//遍历
-	var targetItems []*stripe.SubscriptionItemsParams
+	//遍历并删除
+	var items []*stripe.SubscriptionItemsParams
 	for _, item := range detail.Items.Data {
-		if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
-			targetItems = append(targetItems, &stripe.SubscriptionItemsParams{
-				ID:    stripe.String(item.ID),
-				Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-			})
-		}
+		//if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
+		//	targetItems = append(targetItems, &stripe.SubscriptionItemsParams{
+		//		ID:    stripe.String(item.ID),
+		//		Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+		//	})
+		//}
+		//删除之前全部，新增 Plan 和 Addons 方式
+		items = append(items, &stripe.SubscriptionItemsParams{
+			ID:      stripe.String(item.ID),
+			Deleted: stripe.Bool(true),
+		})
 	}
-	if len(targetItems) == 0 {
-		return nil, gerror.New("items not match")
+	//新增新的项目
+	items = append(items, &stripe.SubscriptionItemsParams{
+		Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+		Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+		Metadata: map[string]string{
+			"BillingPlanType": "Main",
+			"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
+		},
+	})
+	for _, addon := range subscriptionRo.AddonPlans {
+		items = append(items, &stripe.SubscriptionItemsParams{
+			Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+			Quantity: stripe.Int64(addon.Quantity),
+			Metadata: map[string]string{
+				"BillingPlanType": "Addon",
+				"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
+			},
+		})
 	}
+	//if len(targetItems) == 0 {
+	//	return nil, gerror.New("items not match")
+	//}
 
 	params := &stripe.SubscriptionParams{
-		Items:             targetItems,
+		Items:             items,
 		PaymentBehavior:   stripe.String("pending_if_incomplete"),
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
 	}
