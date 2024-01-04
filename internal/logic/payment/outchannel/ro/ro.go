@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -113,9 +114,9 @@ type ChannelCreateSubscriptionInternalResp struct {
 
 type ChannelCreateSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan        `json:"plan"`
-	SubPlans     *[]entity.SubscriptionPlan      `json:"subPlans"`
+	AddonPlans   *[]ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
 	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription *entity.Subscription            `json:"subscription_plan_merchant"`
+	Subscription *entity.Subscription            `json:"subscription"`
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
@@ -124,7 +125,7 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	SubPlans       *[]entity.SubscriptionPlan      `json:"subPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
 	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
-	Subscription   *entity.Subscription            `json:"subscription_plan_merchant"`
+	Subscription   *entity.Subscription            `json:"subscription"`
 }
 
 type ChannelCancelSubscriptionInternalResp struct {

@@ -29,7 +29,7 @@ func FormatToGJson(target interface{}) *gjson.Json {
 
 func MarshalToJsonString(target interface{}) string {
 	if target == nil {
-		return "nil"
+		return ""
 	}
 	marshal, err := gjson.Marshal(target)
 	if err != nil {

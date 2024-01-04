@@ -41,13 +41,14 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		Currency:   plan.Currency,
 		//CustomerName:          "jack3",             // todo mark
 		//CustomerEmail:         "jack3.fu@wowow.io", // todo mark
-		AddonData:             "", // todo mark
+		AddonData:             utility.MarshalToJsonString(req.Addons),
 		SubscriptionId:        utility.CreateSubscriptionOrderNo(),
 		ChannelSubscriptionId: "",
 		Status:                consts.SubStatusInit,
 		ChannelUserId:         req.ChannelUserId,
 		Data:                  "", //额外参数配置
 	}
+	// todo mark addonPlan检查
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
@@ -59,7 +60,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 	createRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
 		Plan:         plan,
-		SubPlans:     nil,
+		AddonPlans:   nil,
 		PlanChannel:  planChannel,
 		Subscription: one,
 	})
@@ -104,7 +105,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	subscription := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
-	utility.Assert(subscription != nil, "subscription_plan_merchant not found")
+	utility.Assert(subscription != nil, "subscription not found")
 	utility.Assert(subscription.ChannelId == req.ConfirmChannelId, "channel not match")
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlan := query.GetPlanById(ctx, subscription.PlanId)
@@ -112,7 +113,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), req.ConfirmChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
-	//todo mark subscription_plan_merchant 检查
+	//todo mark subscription 检查
 
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:           merchantInfo.Id,

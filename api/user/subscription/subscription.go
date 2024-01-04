@@ -33,7 +33,7 @@ type SubscriptionCreateReq struct {
 	Addons        []*ro.SubscriptionPlanAddonParamRo `p:"addons" dc:"addons" `
 }
 type SubscriptionCreateRes struct {
-	Subscription *entity.Subscription `json:"subscription_plan_merchant" dc:"订阅"`
+	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
 }
 
 type SubscriptionCancelReq struct {
