@@ -200,7 +200,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if channelUser == nil && len(createRes.ChannelUserId) > 0 {
 		_, err := query.SaveUserChannel(ctx, prepare.UserId, prepare.PlanChannel.ChannelId, channelUserId)
 		if err != nil {
-			// todo mark
+			// ChannelUser 创建错误
 			return nil, gerror.Newf("SubscriptionCreate ChannelUser save err:%s", err)
 		}
 	}
