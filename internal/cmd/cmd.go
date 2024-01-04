@@ -60,6 +60,7 @@ var (
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 				)
+				router.MerchantUserAuth(ctx, group)
 				router.MerchantPlan(ctx, group)
 				router.MerchantWebhook(ctx, group)
 			})

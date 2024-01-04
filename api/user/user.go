@@ -28,6 +28,7 @@ type IUserPlan interface {
 
 type IUserProfile interface {
 	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+	ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error)
 }
 
 type IUserSubscription interface {

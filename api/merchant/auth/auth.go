@@ -49,9 +49,10 @@ type RegisterReq struct {
 	LastName  string `p:"lastName" dc:"last name" v:"required"`
 	Email     string `p:"email" dc:"email" v:"required"`
 	Password  string `p:"password" dc:"password" v:"required"`
-	// Phone     string `p:"phone" dc:"phone" `
-	Address   string `p:"address" dc:"adderss"`
-	// UserName  string `p:"userName" dc:"userName" v:"required"`
+	Phone     string `p:"phone" dc:"phone"`
+	MerchantId	uint64 	`p:"merchantId" dc:"merchant id" v:"required"`
+	UserName	string `p:"userName" dc:"user name"`
+	// Address   string `p:"address" dc:"adderss"`
 }
 type RegisterRes struct {
 	// User *entity.MerchantUserAccount `p:"user" dc:"user"`

@@ -40,10 +40,9 @@ func hashAndSalt(pwd []byte) string {
 	return string(hash)
 }
 
-// ???????????????????? 8entitty.MerchantAccount
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
-	var newOne *entity.MerchantUserAccount //  .UserAccount
-	newOne = query.GetMerchantAccountByEmail(ctx, req.Email) //Id(ctx, user.Id)
+	var newOne *entity.MerchantUserAccount
+	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
 	if newOne != nil {
 		return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
 	}
@@ -51,14 +50,16 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	userStr, err := json.Marshal(
 		struct {
 			FirstName, LastName, Email, Password, Phone, Address, UserName string
+			MerchantId uint64
 		}{
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			Email:     req.Email,
 			Password:  hashAndSalt([]byte(req.Password)),
-			// Phone:     req.Phone,
-			Address:   req.Address,
-			// UserName:  req.UserName,
+			Phone:     req.Phone,
+			MerchantId: req.MerchantId,
+			// Address:   req.Address,
+			UserName:  req.UserName,
 		},
 	)
 	if err != nil {
@@ -76,7 +77,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	verificationCode := generateRandomString(6)
-	fmt.Printf("verification ", verificationCode)
+	fmt.Println("verification ", verificationCode)
 	// add merchant-verify, user-verify
 	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)
 	if err != nil {
