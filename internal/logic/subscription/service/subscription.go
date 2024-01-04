@@ -77,7 +77,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 	return addons
 }
 
-func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (*SubscriptionCreatePrepareInternalRes, error) {
+func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
@@ -154,7 +154,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 }
 
 func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*entity.Subscription, error) {
-	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePrepareReq{
+	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
 		PlanId:      req.PlanId,
 		Quantity:    req.Quantity,
 		ChannelId:   req.ChannelId,
@@ -260,7 +260,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	ProrationDate  int64                              `json:"prorationDate"`
 }
 
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePrepareReq) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -341,7 +341,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 }
 
 func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
-	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePrepareReq{
+	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId: req.SubscriptionId,
 		NewPlanId:      req.NewPlanId,
 		Quantity:       req.Quantity,
