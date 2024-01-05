@@ -7,12 +7,12 @@ import (
 	"go-oversea-pay/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionCreatePrepare(ctx context.Context, req *subscription.SubscriptionCreatePrepareReq) (res *subscription.SubscriptionCreatePrepareRes, err error) {
-	prepare, err := service.SubscriptionCreatePrepare(ctx, req)
+func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (res *subscription.SubscriptionCreatePreviewRes, err error) {
+	prepare, err := service.SubscriptionCreatePreview(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionCreatePrepareRes{
+	return &subscription.SubscriptionCreatePreviewRes{
 		Plan:        prepare.Plan,
 		Quantity:    prepare.Quantity,
 		PayChannel:  prepare.PayChannel,
@@ -20,6 +20,7 @@ func (c *ControllerSubscription) SubscriptionCreatePrepare(ctx context.Context, 
 		Addons:      prepare.Addons,
 		TotalAmount: prepare.TotalAmount,
 		Currency:    prepare.Currency,
+		Invoice:     prepare.Invoice,
 		UserId:      prepare.UserId,
 		Email:       prepare.Email,
 	}, nil

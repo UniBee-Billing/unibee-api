@@ -8,7 +8,7 @@ import (
 
 type SubscriptionPlanCreateReq struct {
 	g.Meta             `path:"/subscription_plan_create" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划创建"`
-	MerchantId         int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	MerchantId         int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
 	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
 	Currency           string `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
@@ -46,7 +46,7 @@ type SubscriptionPlanEditRes struct {
 type SubscriptionPlanAddonsBindingReq struct {
 	g.Meta   `path:"/subscription_plan_addons_binding" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划 Addons 绑定"`
 	PlanId   int64   `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Action   int64   `p:"action" d:"0" dc:"操作类型，0-覆盖,1-添加，2-删除" v:"required#请输入操作类型"`
+	Action   int64   `p:"action" dc:"操作类型，0-覆盖,1-添加，2-删除" v:"required#请输入操作类型"`
 	AddonIds []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `
 }
 type SubscriptionPlanAddonsBindingRes struct {
@@ -55,12 +55,12 @@ type SubscriptionPlanAddonsBindingRes struct {
 
 type SubscriptionPlanListReq struct {
 	g.Meta     `path:"/subscription_plan_list" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划列表"`
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	Type       int    `p:"type"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
 	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
-	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
-	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	Currency   string `p:"currency" dc:"订阅计划货币"  `
+	Page       int    `p:"page"  dc:"分页页码,0开始" `
+	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionPlanListRes struct {
 	Plans []*ro.PlanDetailRo `p:"plans" dc:"订阅计划明细"`

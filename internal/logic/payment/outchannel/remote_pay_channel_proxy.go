@@ -35,6 +35,21 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
+func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdatePreview(ctx, subscriptionRo)
+}
+
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
 	utility.Assert(p.channel != nil, "channel is not set")
 	if p.channel.EnumKey == Evonet.Code {

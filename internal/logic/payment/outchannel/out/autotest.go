@@ -10,6 +10,11 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

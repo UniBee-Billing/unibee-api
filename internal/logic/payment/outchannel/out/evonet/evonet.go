@@ -34,6 +34,11 @@ import (
 
 type Evonet struct{}
 
+func (e Evonet) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e Evonet) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
