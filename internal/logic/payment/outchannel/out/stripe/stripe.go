@@ -357,7 +357,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     updateSubscription.ID,
+		ChannelSubscriptionId:     queryParamsResult.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
 		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),

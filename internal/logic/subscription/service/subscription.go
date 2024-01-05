@@ -359,7 +359,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	//subscription prepare 检查
-	//utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
+	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
 	one := &entity.SubscriptionPendingUpdate{
@@ -431,6 +431,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
 	one.Link = updateRes.Link
+	one.Status = pendingUpdateStatus
+	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
@@ -447,7 +449,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 		dao.Subscription.Columns().Amount:    one.UpdateAmount,
 		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.UpdateSubscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitEmpty().Update()
 	if err != nil {
 		return false, err
 	}
