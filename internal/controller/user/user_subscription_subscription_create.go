@@ -7,9 +7,5 @@ import (
 )
 
 func (c *ControllerSubscription) SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (res *subscription.SubscriptionCreateRes, err error) {
-	one, err := service.SubscriptionCreate(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &subscription.SubscriptionCreateRes{Subscription: one}, nil
+	return service.SubscriptionCreate(ctx, req)
 }

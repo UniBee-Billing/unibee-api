@@ -153,7 +153,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}, nil
 }
 
-func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*entity.Subscription, error) {
+func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*subscription.SubscriptionCreateRes, error) {
 	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
 		PlanId:      req.PlanId,
 		Quantity:    req.Quantity,
@@ -183,7 +183,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		Quantity:       prepare.Quantity,
 		Amount:         prepare.TotalAmount,
 		Currency:       prepare.Currency,
-		AddonData:      utility.MarshalToJsonString(prepare.Addons),
+		AddonData:      utility.MarshalToJsonString(prepare.AddonParams),
 		SubscriptionId: utility.CreateSubscriptionOrderNo(),
 		Status:         consts.SubStatusInit,
 		CustomerEmail:  prepare.Email,
@@ -238,7 +238,11 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		}
 	}
 
-	return one, nil
+	return &subscription.SubscriptionCreateRes{
+		Subscription: one,
+		Paid:         createRes.Paid,
+		Link:         one.Link,
+	}, nil
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
@@ -260,7 +264,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	ProrationDate  int64                              `json:"prorationDate"`
 }
 
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -307,11 +311,13 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 	updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdatePreview(ctx, &outchannelro.ChannelUpdateSubscriptionInternalReq{
 		Plan:           plan,
+		Quantity:       req.Quantity,
 		OldPlan:        oldPlan,
 		AddonPlans:     addons, //todo mark oldAddonPlans 是否需要传
 		PlanChannel:    planChannel,
 		OldPlanChannel: oldPlanChannel,
 		Subscription:   sub,
+		ProrationDate:  prorationDate,
 	})
 	if err != nil {
 		return nil, err
@@ -341,13 +347,13 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*entity.SubscriptionPendingUpdate, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId: req.SubscriptionId,
 		NewPlanId:      req.NewPlanId,
 		Quantity:       req.Quantity,
 		AddonParams:    req.AddonParams,
-	})
+	}, req.ProrationDate)
 	if err != nil {
 		return nil, err
 	}
@@ -382,10 +388,11 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
-	one.Id = uint64(uint(id))
+	one.Id = uint64(id)
 
 	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &outchannelro.ChannelUpdateSubscriptionInternalReq{
 		Plan:           prepare.Plan,
+		Quantity:       prepare.Quantity,
 		OldPlan:        prepare.OldPlan,
 		AddonPlans:     prepare.Addons, //todo mark oldAddonPlans 是否需要传
 		PlanChannel:    prepare.PlanChannel,
@@ -414,5 +421,14 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Status = consts.PlanChannelStatusCreate
 	one.Link = updateRes.Link
 
-	return one, nil
+	//处理支付完成事件
+	if updateRes.Paid {
+
+	}
+
+	return &subscription.SubscriptionUpdateRes{
+		SubscriptionPendingUpdate: one,
+		Paid:                      updateRes.Paid,
+		Link:                      one.Link,
+	}, nil
 }

@@ -49,7 +49,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					//_interface.Middleware().TokenMerchantAuth,
+					_interface.Middleware().TokenMerchantAuth,
 				)
 				router.MerchantPlan(ctx, group)
 				router.MerchantWebhook(ctx, group)
@@ -67,7 +67,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenUserAuth,
+					//_interface.Middleware().TokenUserAuth,
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)

@@ -110,6 +110,7 @@ type ChannelCreateSubscriptionInternalResp struct {
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Paid                      bool                                     `json:"paid"`
 }
 
 type ChannelCreateSubscriptionInternalReq struct {
@@ -121,6 +122,7 @@ type ChannelCreateSubscriptionInternalReq struct {
 
 type ChannelUpdateSubscriptionInternalReq struct {
 	Plan           *entity.SubscriptionPlan        `json:"plan"`
+	Quantity       int64                           `p:"quantity" dc:"数量" `
 	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
 	AddonPlans     []*ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
@@ -147,6 +149,7 @@ type ChannelUpdateSubscriptionInternalResp struct {
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Paid                      bool                                     `json:"paid"`
 }
 
 type ChannelDetailSubscriptionInternalResp struct {

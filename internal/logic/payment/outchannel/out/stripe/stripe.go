@@ -135,6 +135,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			ChannelSubscriptionStatus: string(createSubscription.Status),
 			Data:                      utility.FormatToJsonString(createSubscription),
 			Status:                    0, //todo mark
+			Paid:                      createSubscription.LatestInvoice.Paid,
 		}, nil
 	}
 	//{
@@ -226,15 +227,17 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 	s.setUnibeeAppInfo()
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
+	if subscriptionRo.ProrationDate > 0 {
+		updateUnixTime = subscriptionRo.ProrationDate
+	}
 	items, err := s.makeSubscriptionUpdateItems(subscriptionRo)
 	if err != nil {
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:                  stripe.String(subscriptionRo.Subscription.ChannelUserId),
-		Subscription:              stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
-		SubscriptionItems:         items,
-		SubscriptionProrationDate: stripe.Int64(updateUnixTime),
+		Customer:          stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
+		SubscriptionItems: items,
 	}
 	result, err := invoice.Upcoming(params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdatePreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
@@ -248,6 +251,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 			Currency:    strings.ToUpper(string(line.Currency)),
 			Amount:      line.Amount,
 			Description: line.Description,
+			Proration:   line.Proration,
 		})
 	}
 
@@ -289,7 +293,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	//新增新的项目
 	items = append(items, &stripe.SubscriptionItemsParams{
 		Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-		Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+		Quantity: stripe.Int64(subscriptionRo.Quantity),
 		//Metadata: map[string]string{
 		//	"BillingPlanType": "Main",
 		//	"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
@@ -328,6 +332,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Items: items,
 		//PaymentBehavior:   stripe.String("pending_if_incomplete"),//pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
+		ProrationDate:     stripe.Int64(subscriptionRo.ProrationDate),
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
@@ -357,6 +362,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Data:                      utility.FormatToJsonString(updateSubscription),
 		Link:                      queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
+		Paid:                      queryParamsResult.Paid,
 	}, nil //todo mark
 }
 
@@ -573,7 +579,7 @@ func (s Stripe) processWebhook(ctx context.Context, eventType string, subscripti
 			return err
 		}
 
-		err = handler.HandleSubscriptionEvent(ctx, unibSub, eventType, details)
+		err = handler.HandleSubscriptionWebhookEvent(ctx, unibSub, eventType, details)
 		if err != nil {
 			return err
 		}
@@ -610,7 +616,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionCanceled(subscription)
 			err := s.processWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -628,7 +634,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionUpdated(subscription)
 			err := s.processWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -646,7 +652,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionCreated(subscription)
 			err := s.processWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -664,7 +670,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}

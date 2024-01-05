@@ -56,8 +56,9 @@ type SubscriptionCreateReq struct {
 	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 }
 type SubscriptionCreateRes struct {
-	Subscription *entity.Subscription      `json:"subscription" dc:"订阅"`
-	Invoice      *ro.SubscriptionInvoiceRo `json:"invoice"`
+	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
+	Paid         bool                 `json:"paid"`
+	Link         string               `json:"link"`
 }
 
 type SubscriptionCancelReq struct {
@@ -94,9 +95,8 @@ type SubscriptionUpdateReq struct {
 }
 type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
-	TotalAmount               int64                             `json:"totalAmount"                ` // 金额,单位：分
-	Currency                  string                            `json:"currency"              `      // 货币
-	Invoice                   *ro.SubscriptionInvoiceRo         `json:"invoice"`
+	Paid                      bool                              `json:"paid"`
+	Link                      string                            `json:"link"`
 }
 
 type SubscriptionListReq struct {

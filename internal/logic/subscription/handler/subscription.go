@@ -10,7 +10,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func HandleSubscriptionEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
+func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	//更新 Subscription
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:        details.Status,
@@ -22,7 +22,7 @@ func HandleSubscriptionEvent(ctx context.Context, subscription *entity.Subscript
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return gerror.Newf("SubscriptionCreate update err:%s", update)
+		return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
 	}
 	//处理更新事件 todo mark
 
