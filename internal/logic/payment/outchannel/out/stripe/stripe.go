@@ -271,6 +271,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 		SubscriptionProrationDate: stripe.Int64(prorationDate),
 	}
 	result, err := invoice.Upcoming(params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdatePreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}

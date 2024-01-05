@@ -231,7 +231,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one.ChannelUserId = createRes.ChannelUserId
 
 	if channelUser == nil && len(createRes.ChannelUserId) > 0 {
-		_, err := query.SaveUserChannel(ctx, prepare.UserId, prepare.PlanChannel.ChannelId, channelUserId)
+		_, err := query.SaveUserChannel(ctx, prepare.UserId, prepare.PlanChannel.ChannelId, createRes.ChannelUserId)
 		if err != nil {
 			// ChannelUser 创建错误
 			return nil, gerror.Newf("SubscriptionCreate ChannelUser save err:%s", err)
@@ -266,6 +266,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
 
 	email := ""
