@@ -79,6 +79,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		}
 	}
 
-	utility.SuccessJsonExit(g.RequestFromCtx(ctx), nil)
+	//utility.SuccessJsonExit(g.RequestFromCtx(ctx), nil)
 	return &_plan.SubscriptionPlanChannelTransferAndActivateRes{}, nil
 }
