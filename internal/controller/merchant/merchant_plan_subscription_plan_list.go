@@ -9,13 +9,13 @@ import (
 
 func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (res *v1.SubscriptionPlanListRes, err error) {
 	fmt.Println("context: ", ctx)
-
-	return &v1.SubscriptionPlanListRes{Plans: service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
+	plans := service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
 		MerchantId: req.MerchantId,
 		Type:       req.Type,
 		Status:     req.Status,
 		Currency:   req.Currency,
 		Page:       req.Page,
 		Count:      req.Count,
-	})}, nil
+	})
+	return &v1.SubscriptionPlanListRes{Plans: plans}, nil
 }

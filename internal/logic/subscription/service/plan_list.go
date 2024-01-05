@@ -58,6 +58,12 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		totalPlanIds = append(totalPlanIds, p.Id)
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
+			list = append(list, &ro.PlanDetailRo{
+				Plan:     p,
+				Channels: []*entity.SubscriptionPlanChannel{},
+				Addons:   nil,
+				AddonIds: nil,
+			})
 			continue
 		}
 		var addonIds []int64
