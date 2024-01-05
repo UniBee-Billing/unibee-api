@@ -39,4 +39,5 @@ type SubscriptionInvoiceItemRo struct {
 	Currency    string `json:"currency"`
 	Amount      int64  `json:"amount"`
 	Description string `json:"description"`
+	Proration   bool   `json:"proration"`
 }

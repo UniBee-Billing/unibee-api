@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error) {
-	prepare, err := service.SubscriptionUpdatePreview(ctx, req)
+	prepare, err := service.SubscriptionUpdatePreview(ctx, req, 0)
 	if err != nil {
 		return nil, err
 	}

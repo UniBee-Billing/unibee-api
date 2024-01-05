@@ -15,11 +15,11 @@ type SubscriptionPlanChannel struct {
 	GmtModify            *gtime.Time `json:"gmtModify"            ` // 修改时间
 	PlanId               int64       `json:"planId"               ` // 计划ID
 	ChannelId            int64       `json:"channelId"            ` // 支付渠道Id
+	Status               int         `json:"status"               ` // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelPlanId        string      `json:"channelPlanId"        ` // 支付渠道plan_Id
 	ChannelProductId     string      `json:"channelProductId"     ` // 支付渠道product_Id
 	ChannelPlanStatus    string      `json:"channelPlanStatus"    ` // channel_plan_status
 	ChannelProductStatus string      `json:"channelProductStatus" ` // channel_product_status
 	Data                 string      `json:"data"                 ` // 渠道额外参数，JSON格式
 	IsDeleted            int         `json:"isDeleted"            ` //
-	Status               int         `json:"status"               ` // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 }

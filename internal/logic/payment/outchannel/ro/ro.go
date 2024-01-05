@@ -110,6 +110,7 @@ type ChannelCreateSubscriptionInternalResp struct {
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Paid                      bool                                     `json:"paid"`
 }
 
 type ChannelCreateSubscriptionInternalReq struct {
@@ -121,6 +122,7 @@ type ChannelCreateSubscriptionInternalReq struct {
 
 type ChannelUpdateSubscriptionInternalReq struct {
 	Plan           *entity.SubscriptionPlan        `json:"plan"`
+	Quantity       int64                           `p:"quantity" dc:"数量" `
 	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
 	AddonPlans     []*ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
@@ -141,18 +143,20 @@ type ChannelUpdateSubscriptionPreviewInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {
-	ChannelUserId             string                                   `json:"channelUserId"`
 	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
+	ChannelInvoiceId          string                                   `json:"channelInvoiceId"`
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Paid                      bool                                     `json:"paid"`
 }
 
 type ChannelDetailSubscriptionInternalResp struct {
-	Status        consts.SubscriptionStatusEnum `json:"status"`
-	ChannelStatus string                        `json:"channelStatus"                  ` // 货币
-	Data          string                        `json:"data"`
+	Status                 consts.SubscriptionStatusEnum `json:"status"`
+	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
+	Data                   string                        `json:"data"`
+	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
 }
 
 type ChannelWebhookSubscriptionInternalResp struct {

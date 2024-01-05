@@ -25,13 +25,13 @@ type SubscriptionPlanChannelColumns struct {
 	GmtModify            string // 修改时间
 	PlanId               string // 计划ID
 	ChannelId            string // 支付渠道Id
+	Status               string // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelPlanId        string // 支付渠道plan_Id
 	ChannelProductId     string // 支付渠道product_Id
 	ChannelPlanStatus    string // channel_plan_status
 	ChannelProductStatus string // channel_product_status
 	Data                 string // 渠道额外参数，JSON格式
 	IsDeleted            string //
-	Status               string // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
 }
 
 // subscriptionPlanChannelColumns holds the columns for table subscription_plan_channel.
@@ -41,13 +41,13 @@ var subscriptionPlanChannelColumns = SubscriptionPlanChannelColumns{
 	GmtModify:            "gmt_modify",
 	PlanId:               "plan_id",
 	ChannelId:            "channel_id",
+	Status:               "status",
 	ChannelPlanId:        "channel_plan_id",
 	ChannelProductId:     "channel_product_id",
 	ChannelPlanStatus:    "channel_plan_status",
 	ChannelProductStatus: "channel_product_status",
 	Data:                 "data",
 	IsDeleted:            "is_deleted",
-	Status:               "status",
 }
 
 // NewSubscriptionPlanChannelDao creates and returns a new DAO object for table data access.

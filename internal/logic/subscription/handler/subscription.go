@@ -10,19 +10,24 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func HandleSubscriptionEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
+func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	//更新 Subscription
+	return UpdateSubWithChannelDetailBack(ctx, subscription, details)
+}
+
+func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:        details.Status,
-		dao.Subscription.Columns().ChannelStatus: details.ChannelStatus,
-		dao.Subscription.Columns().GmtModify:     gtime.Now(),
+		dao.Subscription.Columns().Status:                 details.Status,
+		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
+		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
 	if err != nil {
 		return err
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return gerror.Newf("SubscriptionCreate update err:%s", update)
+		return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
 	}
 	//处理更新事件 todo mark
 

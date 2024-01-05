@@ -2,8 +2,12 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"go-oversea-pay/api/user/subscription"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -21,6 +25,28 @@ type SubscriptionListInternalReq struct {
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscription.SubscriptionDetailRes, error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
+
+	go func() {
+		defer func() {
+			if exception := recover(); exception != nil {
+				fmt.Printf("SubscriptionDetail Background panic error:%s\n", exception)
+				return
+			}
+		}()
+		backgroundCtx := context.Background()
+		plan := query.GetPlanById(backgroundCtx, one.PlanId)
+		utility.Assert(plan != nil, "invalid planId")
+		utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+		planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
+		details, err := outchannel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, one)
+		if err == nil {
+			err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
+			if err != nil {
+				fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
+				return
+			}
+		}
+	}()
 
 	return &subscription.SubscriptionDetailRes{
 		Subscription: one,

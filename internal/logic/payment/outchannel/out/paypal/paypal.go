@@ -516,7 +516,7 @@ func (p Paypal) processWebhook(ctx context.Context, eventType string, resource *
 			return err
 		}
 
-		err = handler.HandleSubscriptionEvent(ctx, unibSub, eventType, details)
+		err = handler.HandleSubscriptionWebhookEvent(ctx, unibSub, eventType, details)
 		if err != nil {
 			return err
 		}
@@ -562,7 +562,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionCanceled(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -579,7 +579,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -596,7 +596,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}

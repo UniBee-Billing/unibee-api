@@ -45,6 +45,7 @@ type SubscriptionPendingUpdateColumns struct {
 	IsDeleted            string //
 	Link                 string //
 	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelInvoiceId     string // 关联渠道发票 Id
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -74,6 +75,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	IsDeleted:            "is_deleted",
 	Link:                 "link",
 	ChannelStatus:        "channel_status",
+	ChannelInvoiceId:     "channel_invoice_id",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.
