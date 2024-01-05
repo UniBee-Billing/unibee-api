@@ -404,11 +404,23 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 
+	pendingUpdateStatus := consts.SubStatusCreate
+
+	if updateRes.Paid {
+		pendingUpdateStatus = consts.SubStatusActive
+		_, err := FinishPendingUpdateForSubscription(ctx, one)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	//更新 Subscription
 	update, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().ResponseData: updateRes.Data,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify:    gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Link:         updateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().Status:           pendingUpdateStatus,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData:     updateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
@@ -418,17 +430,30 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
-	one.Status = consts.PlanChannelStatusCreate
 	one.Link = updateRes.Link
-
-	//处理支付完成事件
-	if updateRes.Paid {
-
-	}
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
 		Paid:                      updateRes.Paid,
 		Link:                      one.Link,
 	}, nil
+}
+
+func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
+		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
+		dao.Subscription.Columns().AddonData: one.UpdatedAddonData,
+		dao.Subscription.Columns().Amount:    one.UpdateAmount,
+		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, one.UpdateSubscriptionId).OmitEmpty().Update()
+	if err != nil {
+		return false, err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
+	}
+	return true, nil
 }

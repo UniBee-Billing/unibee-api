@@ -35,4 +35,5 @@ type SubscriptionPendingUpdate struct {
 	IsDeleted            int         `json:"isDeleted"            ` //
 	Link                 string      `json:"link"                 ` //
 	ChannelStatus        string      `json:"channelStatus"        ` // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelInvoiceId     string      `json:"channelInvoiceId"     ` // 关联渠道发票 Id
 }

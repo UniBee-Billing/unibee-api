@@ -12,10 +12,15 @@ import (
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	//更新 Subscription
+	return UpdateSubWithChannelDetailBack(ctx, subscription, details)
+}
+
+func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:        details.Status,
-		dao.Subscription.Columns().ChannelStatus: details.ChannelStatus,
-		dao.Subscription.Columns().GmtModify:     gtime.Now(),
+		dao.Subscription.Columns().Status:                 details.Status,
+		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
+		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
 	if err != nil {
 		return err

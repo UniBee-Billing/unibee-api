@@ -359,6 +359,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	return &ro.ChannelUpdateSubscriptionInternalResp{
 		ChannelSubscriptionId:     updateSubscription.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
+		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
 		Link:                      queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
@@ -395,9 +396,10 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	}
 
 	return &ro.ChannelDetailSubscriptionInternalResp{
-		Status:        status,
-		ChannelStatus: string(response.Status),
-		Data:          utility.FormatToJsonString(response),
+		Status:                 status,
+		ChannelStatus:          string(response.Status),
+		Data:                   utility.FormatToJsonString(response),
+		ChannelLatestInvoiceId: response.LatestInvoice.ID,
 	}, nil
 }
 
@@ -422,6 +424,9 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
 				stripe.String("customer.subscription.resumed"),
+				stripe.String("invoice.paid"),
+				stripe.String("invoice.payment_failed"),
+				stripe.String("invoice.payment_succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -450,6 +455,9 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
 				stripe.String("customer.subscription.resumed"),
+				stripe.String("invoice.paid"),
+				stripe.String("invoice.payment_failed"),
+				stripe.String("invoice.payment_succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -678,7 +686,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
 	}
-	log.SaveChannelHttpLog("DoRemoteChannelWebhook", event, responseBack, err, "", nil, payChannel)
+	log.SaveChannelHttpLog("DoRemoteChannelWebhook", event, responseBack, err, string(event.Type), nil, payChannel)
 	r.Response.WriteHeader(http.StatusOK)
 }
 

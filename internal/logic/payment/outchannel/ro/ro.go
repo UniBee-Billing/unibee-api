@@ -143,9 +143,9 @@ type ChannelUpdateSubscriptionPreviewInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {
-	ChannelUserId             string                                   `json:"channelUserId"`
 	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
+	ChannelInvoiceId          string                                   `json:"channelInvoiceId"`
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
@@ -153,9 +153,10 @@ type ChannelUpdateSubscriptionInternalResp struct {
 }
 
 type ChannelDetailSubscriptionInternalResp struct {
-	Status        consts.SubscriptionStatusEnum `json:"status"`
-	ChannelStatus string                        `json:"channelStatus"                  ` // 货币
-	Data          string                        `json:"data"`
+	Status                 consts.SubscriptionStatusEnum `json:"status"`
+	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
+	Data                   string                        `json:"data"`
+	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
 }
 
 type ChannelWebhookSubscriptionInternalResp struct {
