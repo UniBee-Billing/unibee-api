@@ -19,7 +19,7 @@ type SubscriptionDetailRes struct {
 
 type SubscriptionChannelsReq struct {
 	g.Meta     `path:"/subscription_pay_channels" tags:"User-Subscription-Controller" method:"post" summary:"订阅支持的支付渠道"`
-	MerchantId int64 `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type SubscriptionChannelsRes struct {
 }
@@ -53,7 +53,7 @@ type SubscriptionCreateReq struct {
 	UserId             int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency" d:"USD"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
+	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 }
 type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription      `json:"subscription" dc:"订阅"`
@@ -88,7 +88,7 @@ type SubscriptionUpdateReq struct {
 	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency" d:"USD"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
+	ConfirmCurrency    string                             `p:"confirmCurrency" dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 	ProrationDate      int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
 	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
@@ -101,11 +101,11 @@ type SubscriptionUpdateRes struct {
 
 type SubscriptionListReq struct {
 	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"订阅列表"`
-	MerchantId int64 `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	UserId     int64 `p:"userId"  d:"1" dc:"UserId" v:"required|length:4,30#请输入UserId" `
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	UserId     int64 `p:"userId" dc:"UserId" v:"required|length:4,30#请输入UserId" `
 	Status     int   `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	Page       int   `p:"page" d:"0"  dc:"分页页码,0开始" `
-	Count      int   `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	Page       int   `p:"page"  dc:"分页页码,0开始" `
+	Count      int   `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
