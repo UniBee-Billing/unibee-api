@@ -104,6 +104,17 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	if len(req.ProductDescription) == 0 {
 		req.ProductDescription = req.Description
 	}
+
+	if len(req.AddonIds) > 0 {
+		//检查 addonIds 类型
+		var allAddonList []*entity.SubscriptionPlan
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		}
+	}
+
 	one = &entity.SubscriptionPlan{
 		CompanyId:                 merchantInfo.CompanyId,
 		MerchantId:                req.MerchantId,
@@ -116,6 +127,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
+		BindingAddonIds:           intListToString(req.AddonIds),
 		ChannelProductName:        req.ProductName,
 		ChannelProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
@@ -155,6 +167,16 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		req.ProductDescription = req.Description
 	}
 
+	if len(req.AddonIds) > 0 {
+		//检查 addonIds 类型
+		var allAddonList []*entity.SubscriptionPlan
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		}
+	}
+
 	one.PlanName = req.PlanName
 	one.Amount = req.Amount
 	one.Currency = strings.ToUpper(req.Currency)
@@ -163,6 +185,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.Description = req.Description
 	one.ImageUrl = req.ImageUrl
 	one.HomeUrl = req.HomeUrl
+	one.BindingAddonIds = intListToString(req.AddonIds)
 	one.ChannelProductName = req.ProductName
 	one.ChannelProductDescription = req.ProductDescription
 	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).Update(one)
