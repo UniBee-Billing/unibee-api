@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
@@ -22,6 +23,7 @@ type SubscriptionChannelsReq struct {
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type SubscriptionChannelsRes struct {
+	Channels []*ro2.OutChannelRo `json:"channels"`
 }
 
 type SubscriptionCreatePreviewReq struct {
@@ -35,7 +37,7 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan        *entity.SubscriptionPlan           `json:"planId"`
 	Quantity    int64                              `json:"quantity"`
-	PayChannel  *entity.OverseaPayChannel          `json:"payChannel"`
+	PayChannel  *ro2.OutChannelRo                  `json:"payChannel"`
 	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分

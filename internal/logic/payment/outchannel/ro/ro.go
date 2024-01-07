@@ -91,6 +91,11 @@ type OutPayRo struct {
 	PayTime         *gtime.Time `json:"PayTime" `             // 创建时间
 }
 
+type OutChannelRo struct {
+	ChannelId   uint64 `json:"channelId"`
+	ChannelName string `json:"channelName"`
+}
+
 type ChannelCreateProductInternalResp struct {
 	ChannelProductId     string `json:"channelProductId"`
 	ChannelProductStatus string `json:"channelProductStatus"`
