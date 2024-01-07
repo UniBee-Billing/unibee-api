@@ -16,10 +16,15 @@ func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Su
 }
 
 func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
+	var cancelAtPeriodEnd = 0
+	if details.CancelAtPeriodEnd {
+		cancelAtPeriodEnd = 1
+	}
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 details.Status,
 		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
 		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
 	if err != nil {

@@ -210,13 +210,15 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.SubscriptionCancelParams{}
-	response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", params, response, err, "", nil, channelEntity)
+	//params := &stripe.SubscriptionCancelParams{}
+	//response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
+	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(true)} //使用更新方式取代取消接口
+	response, err := sub.Update(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", params, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCancelSubscriptionInternalResp{}, nil //todo mark
+	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
@@ -400,6 +402,7 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 		ChannelStatus:          string(response.Status),
 		Data:                   utility.FormatToJsonString(response),
 		ChannelLatestInvoiceId: response.LatestInvoice.ID,
+		CancelAtPeriodEnd:      response.CancelAtPeriodEnd,
 	}, nil
 }
 
