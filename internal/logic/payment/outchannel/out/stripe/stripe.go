@@ -265,6 +265,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 }
 
+// DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
 func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
