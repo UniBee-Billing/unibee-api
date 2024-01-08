@@ -173,8 +173,10 @@ type ChannelWebhookSubscriptionInternalResp struct {
 }
 
 type ChannelRedirectInternalResp struct {
-	Status  bool   `json:"status"`
-	Message string `json:"message"`
+	Status    bool   `json:"status"`
+	Message   string `json:"message"`
+	ReturnUrl string `json:"returnUrl"`
+	QueryPath string `json:"queryPath"`
 }
 
 type ChannelDetailInvoiceInternalResp struct {

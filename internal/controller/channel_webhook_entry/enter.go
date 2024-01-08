@@ -8,6 +8,7 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	"go-oversea-pay/utility"
 	"strconv"
+	"strings"
 )
 
 func ChannelPaymentWebhookEntrance(r *ghttp.Request) {
@@ -34,5 +35,13 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		r.Response.Writeln(fmt.Sprintf("%v", err))
 		return
 	}
-	r.Response.Writeln(utility.FormatToJsonString(redirect))
+	if len(redirect.ReturnUrl) > 0 {
+		if !strings.Contains(redirect.ReturnUrl, "?") {
+			r.Response.RedirectTo(fmt.Sprintf("%s?%s", redirect.ReturnUrl, redirect.QueryPath))
+		} else {
+			r.Response.RedirectTo(fmt.Sprintf("%s&%s", redirect.ReturnUrl, redirect.QueryPath))
+		}
+	} else {
+		r.Response.Writeln(utility.FormatToJsonString(redirect))
+	}
 }

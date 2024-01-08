@@ -877,6 +877,7 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 	SubIdStr := r.Get("subId").String()
 	var response string
 	var status bool = false
+	var returnUrl string = ""
 	if len(payIdStr) > 0 {
 		response = "not implement"
 	} else if len(SubIdStr) > 0 {
@@ -888,10 +889,12 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 			if unibSub == nil || len(unibSub.ChannelUserId) == 0 {
 				response = "subId invalid or customId empty"
 			} else if len(unibSub.ChannelSubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
+				returnUrl = unibSub.ReturnUrl
 				response = "active"
 				status = true
 			} else {
 				//需要去检索
+				returnUrl = unibSub.ReturnUrl
 				params := &stripe.SubscriptionSearchParams{
 					SearchParams: stripe.SearchParams{
 						Query: "metadata['SubId']:'" + SubIdStr + "'",
@@ -923,8 +926,10 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 	}
 	log.SaveChannelHttpLog("DoRemoteChannelRedirect", params, response, err, "", nil, payChannel)
 	return &ro.ChannelRedirectInternalResp{
-		Status:  status,
-		Message: response,
+		Status:    status,
+		Message:   response,
+		ReturnUrl: returnUrl,
+		QueryPath: r.URL.RawQuery,
 	}, nil
 }
 
