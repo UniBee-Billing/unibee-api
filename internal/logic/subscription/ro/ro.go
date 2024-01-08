@@ -1,6 +1,8 @@
 package ro
 
-import entity "go-oversea-pay/internal/model/entity/oversea_pay"
+import (
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+)
 
 type PlanDetailRo struct {
 	Plan     *entity.SubscriptionPlan          `json:"plan" dc:"订阅计划"`
@@ -27,17 +29,18 @@ type SubscriptionDetailRo struct {
 	Addons       []*SubscriptionPlanAddonRo      `p:"addons" dc:"订阅Addon"`
 }
 
-type SubscriptionInvoiceRo struct {
-	TotalAmount        int64                        `json:"totalAmount"`
-	Currency           string                       `json:"currency"`
-	TaxAmount          int64                        `json:"taxAmount"`
-	SubscriptionAmount int64                        `json:"subscriptionAmount"`
-	Lines              []*SubscriptionInvoiceItemRo `json:"lines"`
-}
+//type SubscriptionInvoiceRo struct {
+//	TotalAmount        int64                          `json:"totalAmount"`
+//	Currency           string                         `json:"currency"`
+//	TaxAmount          int64                          `json:"taxAmount"`
+//	SubscriptionAmount int64                          `json:"subscriptionAmount"`
+//	Lines              []*ro.ChannelDetailInvoiceItem `json:"lines"`
+//}
 
-type SubscriptionInvoiceItemRo struct {
-	Currency    string `json:"currency"`
-	Amount      int64  `json:"amount"`
-	Description string `json:"description"`
-	Proration   bool   `json:"proration"`
-}
+//
+//type SubscriptionInvoiceItemRo struct {
+//	Currency    string `json:"currency"`
+//	Amount      int64  `json:"amount"`
+//	Description string `json:"description"`
+//	Proration   bool   `json:"proration"`
+//}

@@ -1,0 +1,115 @@
+// ==========================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// ==========================================================================
+
+package internal
+
+import (
+	"context"
+
+	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/frame/g"
+)
+
+// InvoiceDao is the data access object for table invoice.
+type InvoiceDao struct {
+	table   string         // table is the underlying table name of the DAO.
+	group   string         // group is the database configuration group name of current DAO.
+	columns InvoiceColumns // columns contains all the column names of Table for convenient usage.
+}
+
+// InvoiceColumns defines and stores column names for table invoice.
+type InvoiceColumns struct {
+	Id                 string //
+	MerchantId         string // 商户Id
+	SubscriptionId     string // 订阅id（内部编号）
+	InvoiceId          string // 发票ID（内部编号）
+	GmtCreate          string // 创建时间
+	TotalAmount        string // 金额,单位：分
+	TaxAmount          string // Tax金额,单位：分
+	SubscriptionAmount string // Sub金额,单位：分
+	Currency           string // 货币
+	Lines              string // lines json data
+	ChannelId          string // 支付渠道Id
+	Status             string // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	SendStatus         string // 订阅单发送状态，0-No | 1- YES
+	SendEmail          string // send_email
+	SendPdf            string // send_pdf
+	UserId             string // userId
+	Data               string // 渠道额外参数，JSON格式
+	GmtModify          string // 修改时间
+	IsDeleted          string //
+	Link               string //
+	ChannelStatus      string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelInvoiceId   string // 关联渠道发票 Id
+}
+
+// invoiceColumns holds the columns for table invoice.
+var invoiceColumns = InvoiceColumns{
+	Id:                 "id",
+	MerchantId:         "merchant_id",
+	SubscriptionId:     "subscription_id",
+	InvoiceId:          "invoice_id",
+	GmtCreate:          "gmt_create",
+	TotalAmount:        "total_amount",
+	TaxAmount:          "tax_amount",
+	SubscriptionAmount: "subscription_amount",
+	Currency:           "currency",
+	Lines:              "lines",
+	ChannelId:          "channel_id",
+	Status:             "status",
+	SendStatus:         "send_status",
+	SendEmail:          "send_email",
+	SendPdf:            "send_pdf",
+	UserId:             "user_id",
+	Data:               "data",
+	GmtModify:          "gmt_modify",
+	IsDeleted:          "is_deleted",
+	Link:               "link",
+	ChannelStatus:      "channel_status",
+	ChannelInvoiceId:   "channel_invoice_id",
+}
+
+// NewInvoiceDao creates and returns a new DAO object for table data access.
+func NewInvoiceDao() *InvoiceDao {
+	return &InvoiceDao{
+		group:   "oversea_pay",
+		table:   "invoice",
+		columns: invoiceColumns,
+	}
+}
+
+// DB retrieves and returns the underlying raw database management object of current DAO.
+func (dao *InvoiceDao) DB() gdb.DB {
+	return g.DB(dao.group)
+}
+
+// Table returns the table name of current dao.
+func (dao *InvoiceDao) Table() string {
+	return dao.table
+}
+
+// Columns returns all column names of current dao.
+func (dao *InvoiceDao) Columns() InvoiceColumns {
+	return dao.columns
+}
+
+// Group returns the configuration group name of database of current dao.
+func (dao *InvoiceDao) Group() string {
+	return dao.group
+}
+
+// Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
+func (dao *InvoiceDao) Ctx(ctx context.Context) *gdb.Model {
+	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+}
+
+// Transaction wraps the transaction logic using function f.
+// It rollbacks the transaction and returns the error from function f if it returns non-nil error.
+// It commits the transaction and returns nil if function f returns nil.
+//
+// Note that, you should not Commit or Rollback the transaction in function f
+// as it is automatically handled by this function.
+func (dao *InvoiceDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+	return dao.Ctx(ctx).Transaction(ctx, f)
+}

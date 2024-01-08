@@ -42,13 +42,13 @@ type SubscriptionCreatePreviewRes struct {
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency    string                             `json:"currency"              `      // 货币
-	Invoice     *ro.SubscriptionInvoiceRo          `json:"invoice"`
+	Invoice     *ro2.ChannelDetailInvoiceRo        `json:"invoice"`
 	UserId      int64                              `json:"userId" `
 	Email       string                             `json:"email" `
 }
 
 type SubscriptionCreateReq struct {
-	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建提交"`
+	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建提交（需先调用预览接口）"`
 	PlanId             int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
 	ChannelId          int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
@@ -71,14 +71,14 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount   int64                     `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                    `json:"currency"              `      // 货币
-	Invoice       *ro.SubscriptionInvoiceRo `json:"invoice"`
-	ProrationDate int64                     `json:"prorationDate"`
+	TotalAmount   int64                       `json:"totalAmount"                ` // 金额,单位：分
+	Currency      string                      `json:"currency"              `      // 货币
+	Invoice       *ro2.ChannelDetailInvoiceRo `json:"invoice"`
+	ProrationDate int64                       `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {
-	g.Meta             `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新提交"`
+	g.Meta             `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新提交（需先调用预览接口）"`
 	SubscriptionId     string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 	NewPlanId          int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
@@ -107,21 +107,21 @@ type SubscriptionListRes struct {
 }
 
 type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消(在周期结束时取消）"`
+	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅设置周期结束时取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionCancelRes struct {
 }
 
 type SubscriptionSuspendReq struct {
-	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅暂停"`
+	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅暂停"  deprecated:"true"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionSuspendRes struct {
 }
 
 type SubscriptionResumeReq struct {
-	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅恢复"`
+	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅恢复"  deprecated:"true"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionResumeRes struct {

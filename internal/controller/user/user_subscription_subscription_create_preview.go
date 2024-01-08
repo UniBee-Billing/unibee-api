@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/service"
 
 	"go-oversea-pay/api/user/subscription"
@@ -20,8 +21,14 @@ func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, 
 		Addons:      prepare.Addons,
 		TotalAmount: prepare.TotalAmount,
 		Currency:    prepare.Currency,
-		Invoice:     prepare.Invoice,
-		UserId:      prepare.UserId,
-		Email:       prepare.Email,
+		Invoice: &ro.ChannelDetailInvoiceRo{
+			TotalAmount:        prepare.Invoice.TotalAmount,
+			Currency:           prepare.Invoice.Currency,
+			TaxAmount:          prepare.Invoice.TaxAmount,
+			SubscriptionAmount: prepare.Invoice.SubscriptionAmount,
+			Lines:              prepare.Invoice.Lines,
+		},
+		UserId: prepare.UserId,
+		Email:  prepare.Email,
 	}, nil
 }
