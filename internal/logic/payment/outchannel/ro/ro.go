@@ -159,6 +159,7 @@ type ChannelUpdateSubscriptionInternalResp struct {
 
 type ChannelDetailSubscriptionInternalResp struct {
 	Status                 consts.SubscriptionStatusEnum `json:"status"`
+	ChannelSubscriptionId  string                        `json:"channelSubscriptionId"`
 	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
 	Data                   string                        `json:"data"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`

@@ -22,6 +22,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	}
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 details.Status,
+		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
 		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
 		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
 		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
