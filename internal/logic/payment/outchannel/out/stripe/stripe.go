@@ -753,7 +753,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	r.Response.WriteHeader(http.StatusOK)
 }
 
-func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	params, err := r.GetJson()
 	g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err)
 	if err != nil {
@@ -763,6 +763,7 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 	payIdStr := r.Get("payId").String()
 	SubIdStr := r.Get("subId").String()
 	var response string
+	var status bool = false
 	if len(payIdStr) > 0 {
 		response = "not implement"
 	} else if len(SubIdStr) > 0 {
@@ -775,6 +776,7 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 				response = "subId invalid or customId empty"
 			} else if len(unibSub.ChannelSubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
 				response = "active"
+				status = true
 			} else {
 				//需要去检索
 				params := &stripe.SubscriptionSearchParams{
@@ -794,6 +796,7 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 							response = fmt.Sprintf("%v", err)
 						} else {
 							response = "active"
+							status = true
 						}
 					}
 				} else {
@@ -805,8 +808,11 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 			response = "user cancelled"
 		}
 	}
-	r.Response.Writeln(response)
 	log.SaveChannelHttpLog("DoRemoteChannelRedirect", params, response, err, "", nil, payChannel)
+	return &ro.ChannelRedirectInternalResp{
+		Status:  status,
+		Message: response,
+	}, nil
 }
 
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {

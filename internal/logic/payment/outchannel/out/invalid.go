@@ -63,7 +63,7 @@ func (i Invalid) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Ove
 	panic("invalid pay channel")
 }
 
-func (i Invalid) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (i Invalid) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	panic("invalid pay channel")
 }
 

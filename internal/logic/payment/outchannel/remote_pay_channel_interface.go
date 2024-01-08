@@ -21,7 +21,7 @@ type RemotePayChannelInterface interface {
 	//Payment 是支付接口
 	DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error)
 	DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel)
-	DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel)
+	DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error)
 	DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error)
 	DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error)
 	DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error)

@@ -382,7 +382,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	r.Response.Writeln("success")
 }
 
-func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	payIdStr := r.Get("payId").String()
 	redirectResult := r.Get("redirectResult").String()
 	g.Log().Printf(r.Context(), "EvonetNotifyController evonet_redirect payId:%s redirectResult:%s", payIdStr, redirectResult)
@@ -401,6 +401,10 @@ func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 		//r.Response.Writeln(r.Get("channelId"))
 		r.Response.Writeln(overseaPay)
 	}
+	return &ro.ChannelRedirectInternalResp{
+		Status:  true,
+		Message: "",
+	}, nil
 }
 
 func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
