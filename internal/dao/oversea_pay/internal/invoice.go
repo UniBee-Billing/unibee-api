@@ -40,8 +40,9 @@ type InvoiceColumns struct {
 	GmtModify          string // 修改时间
 	IsDeleted          string //
 	Link               string //
-	ChannelStatus      string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelStatus      string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId   string // 关联渠道发票 Id
+	ChannelInvoicePdf  string // 关联渠道发票 pdf
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -68,6 +69,7 @@ var invoiceColumns = InvoiceColumns{
 	Link:               "link",
 	ChannelStatus:      "channel_status",
 	ChannelInvoiceId:   "channel_invoice_id",
+	ChannelInvoicePdf:  "channel_invoice_pdf",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.
