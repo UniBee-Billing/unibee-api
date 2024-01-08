@@ -35,6 +35,16 @@ func MerchantPlan(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
+// MerchantSubscrption 订阅类
+func MerchantSubscrption(ctx context.Context, group *ghttp.RouterGroup) {
+	// plan 库相关接口
+	group.Group("/subscription", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewSubscription(), //MerchantSubscription Admin接口-Merchant Portal使用
+		)
+	})
+}
+
 func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
 	group.Group("/webhook", func(group *ghttp.RouterGroup) {
