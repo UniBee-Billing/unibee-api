@@ -83,7 +83,7 @@ func pollingCore(key string) {
 		var message *Message
 
 		// 使用 gjson.Unmarshal 将 JSON 字符串解析成结构体
-		err := gjson.Unmarshal([]byte(messageJson), message)
+		err := gjson.Unmarshal([]byte(messageJson), &message) // Unmarshal todo mark 加上 &
 		if err != nil {
 			fmt.Printf("Error:%v\n", err)
 			return
