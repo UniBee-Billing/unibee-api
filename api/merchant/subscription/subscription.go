@@ -16,3 +16,32 @@ type SubscriptionListReq struct {
 type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
 }
+
+type SubscriptionCancelReq struct {
+	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消(在周期结束时取消）"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionCancelRes struct {
+}
+
+type SubscriptionSuspendReq struct {
+	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅暂停"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionSuspendRes struct {
+}
+
+type SubscriptionResumeReq struct {
+	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅恢复"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionResumeRes struct {
+}
+
+type SubscriptionAddNewTrialStartReq struct {
+	g.Meta         `path:"/subscription_add_new_trial_start" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅添加试用以更改计费周期, 免费期为 current_period_end到 trailEnd 时间段"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	TrailEnd       int64  `p:"trailEnd" dc:"新计费周期开始时间（ Unix 时间戳）-上一计费点到新周期之间为试用期，不收费" v:"required#请输入trailEnd"`
+}
+type SubscriptionAddNewTrialStartRes struct {
+}
