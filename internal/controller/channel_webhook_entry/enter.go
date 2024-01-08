@@ -35,5 +35,4 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	r.Response.Writeln(utility.FormatToJsonString(redirect))
-
 }

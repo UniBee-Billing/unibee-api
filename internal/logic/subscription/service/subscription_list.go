@@ -47,7 +47,11 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 			}
 		}
 	}()
-
+	//删减返回值
+	{
+		one.Data = ""
+		one.ResponseData = ""
+	}
 	return &subscription.SubscriptionDetailRes{
 		Subscription: one,
 		Plan:         query.GetPlanById(ctx, one.PlanId),
@@ -83,6 +87,10 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 					totalPlanIds = append(totalPlanIds, s.AddonPlanId) // 添加到整数列表中
 				}
 			}
+		}
+		{
+			sub.Data = ""
+			sub.ResponseData = ""
 		}
 		list = append(list, &ro.SubscriptionDetailRo{
 			Subscription: sub,
