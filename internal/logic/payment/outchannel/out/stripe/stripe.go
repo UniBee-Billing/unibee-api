@@ -36,6 +36,32 @@ import (
 type Stripe struct {
 }
 
+// DoRemoteChannelSubscriptionNewTrailEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
+func (s Stripe) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.SubscriptionParams{
+		TrialEnd:          stripe.Int64(newTrailEnd),
+		ProrationBehavior: stripe.String("none"),
+	}
+	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
+	if err != nil {
+		return nil, err
+	}
+
+	details, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
+	if err != nil {
+		return nil, err
+	}
+	if details.TrailEnd != newTrailEnd {
+		return nil, gerror.New("update new trail end error")
+	}
+	return details, nil
+}
+
 // 测试数据
 // 付款成功
 // 4242 4242 4242 4242
@@ -458,6 +484,9 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		Data:                   utility.FormatToJsonString(subscription),
 		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
 		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
+		CurrentPeriodStart:     subscription.CurrentPeriodStart,
+		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
+		TrailEnd:               subscription.TrialEnd,
 	}
 }
 

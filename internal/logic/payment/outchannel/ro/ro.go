@@ -164,6 +164,9 @@ type ChannelDetailSubscriptionInternalResp struct {
 	Data                   string                        `json:"data"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
 	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
+	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`
+	CurrentPeriodStart     int64                         `json:"currentPeriodStart"`
+	TrailEnd               int64                         `json:"trailEnd"`
 }
 
 type ChannelWebhookSubscriptionInternalResp struct {

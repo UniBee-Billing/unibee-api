@@ -12,6 +12,7 @@ import (
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	outchannelro "go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -496,6 +497,41 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string) error {
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
 		return gerror.Newf("SubscriptionCancel subscription err:%s", update)
+	}
+	return nil
+}
+
+func SubscriptionAddNewTrailEnd(ctx context.Context, subscriptionId string, newTrailEnd int64) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	utility.Assert(plan != nil, "invalid planId")
+	utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
+	utility.Assert(payChannel != nil, "payChannel not found")
+
+	details, err := outchannel.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+	utility.Assert(err != nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
+	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
+	utility.Assert(err != nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
+	utility.Assert(newTrailEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
+	_, err = outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, sub, newTrailEnd)
+	if err != nil {
+		return err
+	}
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().TrailEnd:  newTrailEnd,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("SubscriptionAddNewTrailEnd subscription err:%s", update)
 	}
 	return nil
 }

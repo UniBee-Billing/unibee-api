@@ -39,7 +39,7 @@ type SubscriptionResumeRes struct {
 }
 
 type SubscriptionAddNewTrialStartReq struct {
-	g.Meta         `path:"/subscription_add_new_trial_start" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅添加试用以更改计费周期"`
+	g.Meta         `path:"/subscription_add_new_trial_start" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅添加试用以更改计费周期, 免费期为 current_period_end到 trailEnd 时间段"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 	TrailEnd       int64  `p:"trailEnd" dc:"新计费周期开始时间（ Unix 时间戳）-上一计费点到新周期之间为试用期，不收费" v:"required#请输入trailEnd"`
 }
