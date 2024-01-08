@@ -2,13 +2,16 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"go-oversea-pay/internal/logic/subscription/service"
 
 	"go-oversea-pay/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	// todo mark 权限控制
+	err = service.SubscriptionCancel(ctx, req.SubscriptionId)
+	if err != nil {
+		return nil, err
+	}
+	return &subscription.SubscriptionCancelRes{}, nil
 }
