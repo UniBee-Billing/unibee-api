@@ -15,7 +15,7 @@ func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, 
 	return &subscription.SubscriptionCreatePreviewRes{
 		Plan:        prepare.Plan,
 		Quantity:    prepare.Quantity,
-		PayChannel:  prepare.PayChannel,
+		PayChannel:  service.ConvertChannelToRo(prepare.PayChannel),
 		AddonParams: prepare.AddonParams,
 		Addons:      prepare.Addons,
 		TotalAmount: prepare.TotalAmount,

@@ -8,18 +8,19 @@ import (
 
 type SubscriptionPlanCreateReq struct {
 	g.Meta             `path:"/subscription_plan_create" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划创建"`
-	MerchantId         int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
-	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
-	Currency           string `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
-	IntervalUnit       string `p:"intervalUnit" dc:"订阅计划周期，小写: day|month|year|week" v:"required#请输入订阅计划周期，小写: day|month|year|week" `                                  // 周期,day|month|year|week
-	IntervalCount      int    `p:"intervalCount"  d:"1" dc:"不输入或者输入值小于 1，强制设置 1，订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）" ` // 金额,单位：分
-	Type               int    `p:"type"  d:"1"  dc:"默认值 1，,1-main plan，2-addon plan" `                                                                                // 金额,单位：分
-	Description        string `p:"description"  dc:"描述"`                                                                                                              //
-	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
-	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
-	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头" `                                                                                              // image_url
-	HomeUrl            string `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `                                                                                               // home_url
+	MerchantId         int64   `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	PlanName           string  `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
+	Amount             int64   `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
+	Currency           string  `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
+	IntervalUnit       string  `p:"intervalUnit" dc:"订阅计划周期，小写: day|month|year|week" v:"required#请输入订阅计划周期，小写: day|month|year|week" `                                  // 周期,day|month|year|week
+	IntervalCount      int     `p:"intervalCount"  d:"1" dc:"不输入或者输入值小于 1，强制设置 1，订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）" ` // 金额,单位：分
+	Type               int     `p:"type"  d:"1"  dc:"默认值 1，,1-main plan，2-addon plan" `                                                                                // 金额,单位：分
+	Description        string  `p:"description"  dc:"描述"`                                                                                                              //
+	ProductName        string  `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
+	ProductDescription string  `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
+	ImageUrl           string  `p:"imageUrl"    dc:"ImageUrl,需 http 开头" `                                                                                              // image_url
+	HomeUrl            string  `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `
+	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `
 }
 type SubscriptionPlanCreateRes struct {
 	Plan *entity.SubscriptionPlan `json:"plan" dc:"订阅计划"`
@@ -27,17 +28,18 @@ type SubscriptionPlanCreateRes struct {
 
 type SubscriptionPlanEditReq struct {
 	g.Meta             `path:"/subscription_plan_edit" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划修改(覆盖模式）"`
-	PlanId             int64  `p:"planId" dc:"PlanId" v:"required#请输入订阅计划 ID"`
-	PlanName           string `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
-	Amount             int64  `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
-	Currency           string `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
-	IntervalUnit       string `p:"intervalUnit" dc:"订阅计划周期，小写: day|month|year|week" v:"required#请输入订阅计划周期，小写: day|month|year|week" `                                  // 周期,day|month|year|week
-	IntervalCount      int    `p:"intervalCount"  d:"1" dc:"不输入或者输入值小于 1，强制设置 1，订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）" ` // 金额,单位：分
-	Description        string `p:"description"  dc:"描述"`                                                                                                              //
-	ProductName        string `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
-	ProductDescription string `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
-	ImageUrl           string `p:"imageUrl"    dc:"ImageUrl,需 http 开头"  v:"required#请输入ImageUrl,需 http 开头" `                                                          // image_url
-	HomeUrl            string `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `                                                                                               // home_url
+	PlanId             int64   `p:"planId" dc:"PlanId" v:"required#请输入订阅计划 ID"`
+	PlanName           string  `p:"planName" dc:"订阅计划名称"   v:"required|length:4,30#请输入订阅计划名称长度为:{min}到:{max}位" `                                                       // 计划名称
+	Amount             int64   `p:"amount"   dc:"订阅计划金额"   v:"required#请输入订阅计划金额" `                                                                                    // 金额,单位：分
+	Currency           string  `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" `                                                                                    // 货币
+	IntervalUnit       string  `p:"intervalUnit" dc:"订阅计划周期，小写: day|month|year|week" v:"required#请输入订阅计划周期，小写: day|month|year|week" `                                  // 周期,day|month|year|week
+	IntervalCount      int     `p:"intervalCount"  d:"1" dc:"不输入或者输入值小于 1，强制设置 1，订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）" ` // 金额,单位：分
+	Description        string  `p:"description"  dc:"描述"`                                                                                                              //
+	ProductName        string  `p:"productName" dc:"不填默认 PlanName"  `                                                                                                  //
+	ProductDescription string  `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
+	ImageUrl           string  `p:"imageUrl"    dc:"ImageUrl,需 http 开头"  v:"required#请输入ImageUrl,需 http 开头" `                                                          // image_url
+	HomeUrl            string  `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `
+	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `
 }
 type SubscriptionPlanEditRes struct {
 	Plan *entity.SubscriptionPlan `json:"plan" dc:"订阅计划"`

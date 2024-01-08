@@ -1,10 +1,12 @@
 package channel_webhook_entry
 
 import (
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
+	"go-oversea-pay/utility"
 	"strconv"
 )
 
@@ -27,5 +29,11 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	payChannel := util.GetOverseaPayChannel(r.Context(), int64(channelIdInt))
-	outchannel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
+	redirect, err := outchannel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
+	if err != nil {
+		r.Response.Writeln(fmt.Sprintf("%v", err))
+		return
+	}
+	r.Response.Writeln(utility.FormatToJsonString(redirect))
+
 }

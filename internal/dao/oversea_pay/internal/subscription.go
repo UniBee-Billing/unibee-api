@@ -44,6 +44,7 @@ type SubscriptionColumns struct {
 	Link                   string //
 	ChannelStatus          string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelLatestInvoiceId string // 渠道最新发票 id
+	CancelAtPeriodEnd      string // 是否在周期结束时取消，0-false | 1-true
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -72,6 +73,7 @@ var subscriptionColumns = SubscriptionColumns{
 	Link:                   "link",
 	ChannelStatus:          "channel_status",
 	ChannelLatestInvoiceId: "channel_latest_invoice_id",
+	CancelAtPeriodEnd:      "cancel_at_period_end",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

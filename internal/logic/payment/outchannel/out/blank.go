@@ -65,7 +65,7 @@ func (b Blank) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Overs
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (b Blank) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

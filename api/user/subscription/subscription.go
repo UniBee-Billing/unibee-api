@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
@@ -22,6 +23,7 @@ type SubscriptionChannelsReq struct {
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type SubscriptionChannelsRes struct {
+	Channels []*ro2.OutChannelRo `json:"channels"`
 }
 
 type SubscriptionCreatePreviewReq struct {
@@ -35,7 +37,7 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan        *entity.SubscriptionPlan           `json:"planId"`
 	Quantity    int64                              `json:"quantity"`
-	PayChannel  *entity.OverseaPayChannel          `json:"payChannel"`
+	PayChannel  *ro2.OutChannelRo                  `json:"payChannel"`
 	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
@@ -59,13 +61,6 @@ type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
 	Paid         bool                 `json:"paid"`
 	Link         string               `json:"link"`
-}
-
-type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-}
-type SubscriptionCancelRes struct {
 }
 
 type SubscriptionUpdatePreviewReq struct {
@@ -109,4 +104,25 @@ type SubscriptionListReq struct {
 }
 type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
+}
+
+type SubscriptionCancelReq struct {
+	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消(在周期结束时取消）"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionCancelRes struct {
+}
+
+type SubscriptionSuspendReq struct {
+	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅暂停"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionSuspendRes struct {
+}
+
+type SubscriptionResumeReq struct {
+	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅恢复"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionResumeRes struct {
 }

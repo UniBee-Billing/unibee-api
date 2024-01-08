@@ -19,5 +19,5 @@ func GetPaymentRedirectEntranceUrl(pay *entity.OverseaPay) string {
 }
 
 func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%d&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, subscription.ChannelId, subscription.Id, success)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%v&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, subscription.ChannelId, subscription.SubscriptionId, success)
 }

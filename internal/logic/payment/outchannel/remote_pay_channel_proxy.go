@@ -206,8 +206,8 @@ func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *en
 	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
 }
 
-func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
+func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
+	return p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
 }
 
 func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
