@@ -42,7 +42,7 @@ type SubscriptionCreatePreviewRes struct {
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency    string                             `json:"currency"              `      // 货币
-	Invoice     *ro.SubscriptionInvoiceRo          `json:"invoice"`
+	Invoice     *ro2.ChannelDetailInvoiceRo        `json:"invoice"`
 	UserId      int64                              `json:"userId" `
 	Email       string                             `json:"email" `
 }
@@ -71,10 +71,10 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount   int64                     `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                    `json:"currency"              `      // 货币
-	Invoice       *ro.SubscriptionInvoiceRo `json:"invoice"`
-	ProrationDate int64                     `json:"prorationDate"`
+	TotalAmount   int64                       `json:"totalAmount"                ` // 金额,单位：分
+	Currency      string                      `json:"currency"              `      // 货币
+	Invoice       *ro2.ChannelDetailInvoiceRo `json:"invoice"`
+	ProrationDate int64                       `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {

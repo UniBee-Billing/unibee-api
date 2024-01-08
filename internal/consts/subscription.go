@@ -1,5 +1,16 @@
 package consts
 
+type InvoiceStatusEnum int
+
+const (
+	InvoiceStatusInit        = 0 //初始化
+	InvoiceStatusDraft       = 1 // 草稿-渠道状态
+	InvoiceStatusOpen        = 2 //打开-渠道状态
+	InvoiceStatusPaid        = 3 //已支付-渠道状态
+	InvoiceStatusUnCollected = 4 //未收集-渠道状态
+	InvoiceStatusVoid        = 5 // Void-渠道状态
+)
+
 type SubscriptionStatusEnum int
 
 const (

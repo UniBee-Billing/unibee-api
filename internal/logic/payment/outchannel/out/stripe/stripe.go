@@ -23,7 +23,6 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/payment/outchannel/util"
 	"go-oversea-pay/internal/logic/subscription/handler"
-	ro2 "go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -34,6 +33,59 @@ import (
 )
 
 type Stripe struct {
+}
+
+func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
+	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	if strings.Compare(string(detail.Status), "draft") == 0 {
+		status = consts.InvoiceStatusDraft
+	} else if strings.Compare(string(detail.Status), "open") == 0 {
+		status = consts.InvoiceStatusOpen
+	} else if strings.Compare(string(detail.Status), "paid") == 0 {
+		status = consts.InvoiceStatusPaid
+	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
+		status = consts.InvoiceStatusUnCollected
+	} else if strings.Compare(string(detail.Status), "void") == 0 {
+		status = consts.InvoiceStatusVoid
+	}
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	for _, line := range detail.Lines.Data {
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:    strings.ToUpper(string(line.Currency)),
+			Amount:      line.Amount,
+			Description: line.Description,
+			Proration:   line.Proration,
+		})
+	}
+
+	return &ro.ChannelDetailInvoiceInternalResp{
+		ChannelSubscriptionId: detail.Subscription.ID,
+		TotalAmount:           detail.Total,
+		TaxAmount:             detail.Tax,
+		SubscriptionAmount:    detail.Subtotal,
+		Currency:              strings.ToUpper(string(detail.Currency)),
+		Lines:                 invoiceItems,
+		ChannelId:             channelId,
+		Status:                status,
+		ChannelUserId:         detail.Customer.ID,
+		Link:                  detail.HostedInvoiceURL,
+		ChannelStatus:         string(detail.Status),
+		ChannelInvoiceId:      detail.InvoicePDF,
+	}
+}
+
+func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 outchannel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.InvoiceParams{}
+	detail, err := invoice.Get(channelInvoiceId, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
 }
 
 // DoRemoteChannelSubscriptionNewTrailEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
@@ -309,28 +361,22 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 		return nil, err
 	}
 
-	var invoiceItems []*ro2.SubscriptionInvoiceItemRo
-	for _, line := range result.Lines.Data {
-		invoiceItems = append(invoiceItems, &ro2.SubscriptionInvoiceItemRo{
-			Currency:    strings.ToUpper(string(line.Currency)),
-			Amount:      line.Amount,
-			Description: line.Description,
-			Proration:   line.Proration,
-		})
-	}
+	//var invoiceItems []*ro2.SubscriptionInvoiceItemRo
+	//for _, line := range result.Lines.Data {
+	//	invoiceItems = append(invoiceItems, &ro2.SubscriptionInvoiceItemRo{
+	//		Currency:    strings.ToUpper(string(line.Currency)),
+	//		Amount:      line.Amount,
+	//		Description: line.Description,
+	//		Proration:   line.Proration,
+	//	})
+	//}
 
 	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
 		Data:          utility.FormatToJsonString(result),
 		TotalAmount:   result.Total,
 		Currency:      strings.ToUpper(string(result.Currency)),
 		ProrationDate: updateUnixTime,
-		Invoice: &ro2.SubscriptionInvoiceRo{
-			TotalAmount:        result.Total,
-			Currency:           strings.ToUpper(string(result.Currency)),
-			TaxAmount:          result.Tax,
-			SubscriptionAmount: result.Subtotal,
-			Lines:              invoiceItems,
-		},
+		Invoice:       parseStripeInvoice(result, int64(channelEntity.Id)),
 	}, nil
 }
 
@@ -512,9 +558,12 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
 				stripe.String("customer.subscription.resumed"),
+				stripe.String("invoice.upcoming"),
+				stripe.String("invoice.created"),
+				stripe.String("invoice.updated"),
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
-				stripe.String("invoice.payment_succeeded"),
+				stripe.String("invoice.payment_action_required"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -543,9 +592,12 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
 				stripe.String("customer.subscription.resumed"),
+				stripe.String("invoice.upcoming"),
+				stripe.String("invoice.created"),
+				stripe.String("invoice.updated"),
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
-				stripe.String("invoice.payment_succeeded"),
+				stripe.String("invoice.payment_action_required"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -665,7 +717,19 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	}, nil
 }
 
-func (s Stripe) processWebhook(ctx context.Context, eventType string, subscription stripe.Subscription) error {
+func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.OverseaPayChannel) error {
+	details, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
+	if err != nil {
+		return err
+	}
+	err = handler.HandleInvoiceWebhookEvent(ctx, eventType, details)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
 	if unibSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
@@ -715,7 +779,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
 			// Then define and call a func to handle the deleted subscription.
 			// handleSubscriptionCanceled(subscription)
-			err := s.processWebhook(r.Context(), string(event.Type), subscription)
+			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -733,7 +797,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionUpdated(subscription)
-			err := s.processWebhook(r.Context(), string(event.Type), subscription)
+			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -751,7 +815,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionCreated(subscription)
-			err := s.processWebhook(r.Context(), string(event.Type), subscription)
+			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -769,7 +833,25 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription trial will end for %d.", payChannel.Channel, subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			err := s.processWebhook(r.Context(), string(event.Type), subscription)
+			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			}
+		}
+	case "invoice.upcoming", "invoice.created", "invoice.updated", "invoice.paid", "invoice.payment_failed", "invoice.payment_action_required":
+		var stripeInvoice stripe.Invoice
+		err := json.Unmarshal(event.Data.Raw, &stripeInvoice)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Invoice %s for %d.", payChannel.Channel, string(event.Type), stripeInvoice.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionTrialWillEnd(subscription)
+			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)

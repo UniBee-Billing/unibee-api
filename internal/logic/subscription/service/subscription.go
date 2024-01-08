@@ -21,18 +21,18 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan         *entity.SubscriptionPlan           `json:"planId"`
-	Quantity     int64                              `json:"quantity"`
-	PlanChannel  *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel   *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount  int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency     string                             `json:"currency"              `      // 货币
-	Invoice      *ro.SubscriptionInvoiceRo          `json:"invoice"`
-	UserId       int64                              `json:"userId" `
-	Email        string                             `json:"email" `
+	Plan         *entity.SubscriptionPlan             `json:"planId"`
+	Quantity     int64                                `json:"quantity"`
+	PlanChannel  *entity.SubscriptionPlanChannel      `json:"planChannel"`
+	PayChannel   *entity.OverseaPayChannel            `json:"payChannel"`
+	MerchantInfo *entity.MerchantInfo                 `json:"merchantInfo"`
+	AddonParams  []*ro.SubscriptionPlanAddonParamRo   `json:"addonParams"`
+	Addons       []*ro.SubscriptionPlanAddonRo        `json:"addons"`
+	TotalAmount  int64                                `json:"totalAmount"                ` // 金额,单位：分
+	Currency     string                               `json:"currency"              `      // 货币
+	Invoice      *outchannelro.ChannelDetailInvoiceRo `json:"invoice"`
+	UserId       int64                                `json:"userId" `
+	Email        string                               `json:"email" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -118,14 +118,14 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	//生成临时账单
-	var invoiceItems []*ro.SubscriptionInvoiceItemRo
-	invoiceItems = append(invoiceItems, &ro.SubscriptionInvoiceItemRo{
+	var invoiceItems []*outchannelro.ChannelDetailInvoiceItem
+	invoiceItems = append(invoiceItems, &outchannelro.ChannelDetailInvoiceItem{
 		Currency:    currency,
 		Amount:      req.Quantity * plan.Amount,
 		Description: plan.PlanName,
 	})
 	for _, addon := range addons {
-		invoiceItems = append(invoiceItems, &ro.SubscriptionInvoiceItemRo{
+		invoiceItems = append(invoiceItems, &outchannelro.ChannelDetailInvoiceItem{
 			Currency:    currency,
 			Amount:      addon.Quantity * addon.AddonPlan.Amount,
 			Description: addon.AddonPlan.PlanName,
@@ -144,7 +144,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		Currency:     currency,
 		UserId:       req.UserId,
 		Email:        email,
-		Invoice: &ro.SubscriptionInvoiceRo{
+		Invoice: &outchannelro.ChannelDetailInvoiceRo{
 			TotalAmount:        totalAmount,
 			Currency:           currency,
 			TaxAmount:          0, // todo mark 暂时不处理 TaxAmount
@@ -247,22 +247,22 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription   *entity.Subscription               `json:"subscription"`
-	Plan           *entity.SubscriptionPlan           `json:"planId"`
-	Quantity       int64                              `json:"quantity"`
-	PlanChannel    *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel     *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo   *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons         []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount    int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency       string                             `json:"currency"              `      // 货币
-	UserId         int64                              `json:"userId" `
-	Email          string                             `json:"email" `
-	OldPlan        *entity.SubscriptionPlan           `json:"oldPlan"`
-	OldPlanChannel *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
-	Invoice        *ro.SubscriptionInvoiceRo          `json:"invoice"`
-	ProrationDate  int64                              `json:"prorationDate"`
+	Subscription   *entity.Subscription                           `json:"subscription"`
+	Plan           *entity.SubscriptionPlan                       `json:"planId"`
+	Quantity       int64                                          `json:"quantity"`
+	PlanChannel    *entity.SubscriptionPlanChannel                `json:"planChannel"`
+	PayChannel     *entity.OverseaPayChannel                      `json:"payChannel"`
+	MerchantInfo   *entity.MerchantInfo                           `json:"merchantInfo"`
+	AddonParams    []*ro.SubscriptionPlanAddonParamRo             `json:"addonParams"`
+	Addons         []*ro.SubscriptionPlanAddonRo                  `json:"addons"`
+	TotalAmount    int64                                          `json:"totalAmount"                ` // 金额,单位：分
+	Currency       string                                         `json:"currency"              `      // 货币
+	UserId         int64                                          `json:"userId" `
+	Email          string                                         `json:"email" `
+	OldPlan        *entity.SubscriptionPlan                       `json:"oldPlan"`
+	OldPlanChannel *entity.SubscriptionPlanChannel                `json:"oldPlanChannel"`
+	Invoice        *outchannelro.ChannelDetailInvoiceInternalResp `json:"invoice"`
+	ProrationDate  int64                                          `json:"prorationDate"`
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
@@ -368,7 +368,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		ChannelId:            prepare.Subscription.ChannelId,
 		UserId:               prepare.Subscription.UserId,
 		SubscriptionId:       prepare.Subscription.SubscriptionId,
-		UpdateSubscriptionId: utility.CreateSubscriptionOrderNo(),
+		UpdateSubscriptionId: utility.CreateSubscriptionUpdateOrderNo(),
 		Amount:               prepare.Subscription.Amount,
 		Currency:             prepare.Subscription.Currency,
 		PlanId:               prepare.Subscription.PlanId,

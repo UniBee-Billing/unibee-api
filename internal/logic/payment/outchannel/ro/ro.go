@@ -140,11 +140,11 @@ type ChannelCancelSubscriptionInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionPreviewInternalResp struct {
-	Data          string                    `json:"data"`
-	TotalAmount   int64                     `json:"totalAmount"`
-	Currency      string                    `json:"currency"`
-	Invoice       *ro.SubscriptionInvoiceRo `json:"invoice"`
-	ProrationDate int64                     `json:"prorationDate"`
+	Data          string                            `json:"data"`
+	TotalAmount   int64                             `json:"totalAmount"`
+	Currency      string                            `json:"currency"`
+	Invoice       *ChannelDetailInvoiceInternalResp `json:"invoice"`
+	ProrationDate int64                             `json:"prorationDate"`
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {
@@ -175,4 +175,34 @@ type ChannelWebhookSubscriptionInternalResp struct {
 type ChannelRedirectInternalResp struct {
 	Status  bool   `json:"status"`
 	Message string `json:"message"`
+}
+
+type ChannelDetailInvoiceInternalResp struct {
+	ChannelSubscriptionId string                      `json:"channelSubscriptionId"           ` // 货币
+	TotalAmount           int64                       `json:"totalAmount"        `              // 金额,单位：分
+	TaxAmount             int64                       `json:"taxAmount"          `              // Tax金额,单位：分
+	SubscriptionAmount    int64                       `json:"subscriptionAmount" `              // Sub金额,单位：分
+	Currency              string                      `json:"currency"           `              // 货币
+	Lines                 []*ChannelDetailInvoiceItem `json:"lines"              `              // lines json data
+	ChannelId             int64                       `json:"channelId"          `              // 支付渠道Id
+	Status                consts.InvoiceStatusEnum    `json:"status"             `              // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	ChannelUserId         string                      `json:"channelUserId"             `       // channelUserId
+	Link                  string                      `json:"link"               `              //
+	ChannelStatus         string                      `json:"channelStatus"      `              // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelInvoiceId      string                      `json:"channelInvoiceId"   `              // 关联渠道发票 Id
+}
+
+type ChannelDetailInvoiceRo struct {
+	TotalAmount        int64                       `json:"totalAmount"`
+	Currency           string                      `json:"currency"`
+	TaxAmount          int64                       `json:"taxAmount"`
+	SubscriptionAmount int64                       `json:"subscriptionAmount"`
+	Lines              []*ChannelDetailInvoiceItem `json:"lines"`
+}
+
+type ChannelDetailInvoiceItem struct {
+	Currency    string `json:"currency"`
+	Amount      int64  `json:"amount"`
+	Description string `json:"description"`
+	Proration   bool   `json:"proration"`
 }
