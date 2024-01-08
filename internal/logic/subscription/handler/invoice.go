@@ -24,10 +24,12 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	var userId int64
 	if len(details.ChannelSubscriptionId) > 0 {
 		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionId)
-		subscriptionId = sub.SubscriptionId
-		merchantId = sub.MerchantId
-		channelId = sub.ChannelId
-		userId = sub.UserId
+		if sub != nil {
+			subscriptionId = sub.SubscriptionId
+			merchantId = sub.MerchantId
+			channelId = sub.ChannelId
+			userId = sub.UserId
+		}
 	}
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
@@ -41,7 +43,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			TaxAmount:          details.TaxAmount,
 			SubscriptionAmount: details.SubscriptionAmount,
 			Currency:           details.Currency,
-			Lines:              "",
+			Lines:              utility.FormatToJsonString(details.Lines),
 			ChannelId:          channelId,
 			Status:             int(details.Status),
 			SendStatus:         0,
@@ -50,6 +52,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			Link:               details.Link,
 			ChannelStatus:      details.ChannelStatus,
 			ChannelInvoiceId:   details.ChannelInvoiceId,
+			ChannelInvoicePdf:  details.ChannelInvoicePdf,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
@@ -71,7 +74,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().SubscriptionAmount: details.SubscriptionAmount,
 			dao.Invoice.Columns().Currency:           details.Currency,
 			dao.Invoice.Columns().Status:             details.Status,
-			dao.Invoice.Columns().Lines:              "",
+			dao.Invoice.Columns().Lines:              utility.FormatToJsonString(details.Lines),
 			dao.Invoice.Columns().ChannelStatus:      details.ChannelStatus,
 			dao.Invoice.Columns().ChannelInvoiceId:   details.ChannelInvoiceId,
 			dao.Invoice.Columns().SubscriptionId:     subscriptionId,

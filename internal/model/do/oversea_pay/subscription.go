@@ -40,4 +40,5 @@ type Subscription struct {
 	CurrentPeriodStart     interface{} // current_period_start
 	CurrentPeriodEnd       interface{} // current_period_end
 	TrailEnd               interface{} // trail_end
+	ReturnUrl              interface{} //
 }
