@@ -168,3 +168,8 @@ type ChannelDetailSubscriptionInternalResp struct {
 
 type ChannelWebhookSubscriptionInternalResp struct {
 }
+
+type ChannelRedirectInternalResp struct {
+	Status  bool   `json:"status"`
+	Message string `json:"message"`
+}
