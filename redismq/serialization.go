@@ -17,7 +17,7 @@ func Deserialize(body []byte, v interface{}) (err error) {
 		err = gerror.New("v should be pointer type")
 		return
 	}
-	err = gjson.Unmarshal(body, v)
+	err = gjson.Unmarshal(body, &v) // Unmarshal todo mark 加上 &
 	return
 }
 
