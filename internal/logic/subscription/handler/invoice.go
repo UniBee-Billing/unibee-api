@@ -24,10 +24,12 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	var userId int64
 	if len(details.ChannelSubscriptionId) > 0 {
 		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionId)
-		subscriptionId = sub.SubscriptionId
-		merchantId = sub.MerchantId
-		channelId = sub.ChannelId
-		userId = sub.UserId
+		if sub != nil {
+			subscriptionId = sub.SubscriptionId
+			merchantId = sub.MerchantId
+			channelId = sub.ChannelId
+			userId = sub.UserId
+		}
 	}
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
