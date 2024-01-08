@@ -91,6 +91,11 @@ type OutPayRo struct {
 	PayTime         *gtime.Time `json:"PayTime" `             // 创建时间
 }
 
+type OutChannelRo struct {
+	ChannelId   uint64 `json:"channelId"`
+	ChannelName string `json:"channelName"`
+}
+
 type ChannelCreateProductInternalResp struct {
 	ChannelProductId     string `json:"channelProductId"`
 	ChannelProductStatus string `json:"channelProductStatus"`
@@ -154,9 +159,11 @@ type ChannelUpdateSubscriptionInternalResp struct {
 
 type ChannelDetailSubscriptionInternalResp struct {
 	Status                 consts.SubscriptionStatusEnum `json:"status"`
+	ChannelSubscriptionId  string                        `json:"channelSubscriptionId"`
 	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
 	Data                   string                        `json:"data"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
+	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
 }
 
 type ChannelWebhookSubscriptionInternalResp struct {

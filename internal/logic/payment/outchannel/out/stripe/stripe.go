@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/invoice"
 	"github.com/stripe/stripe-go/v76/price"
@@ -75,68 +76,102 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			//税费不包含
 			taxInclusive = false
 		}
-		items := []*stripe.SubscriptionItemsParams{
-			{
-				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-				Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
-				Metadata: map[string]string{
-					"BillingPlanType": "Main",
-					"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
-				},
-			},
-		}
-		for _, addon := range subscriptionRo.AddonPlans {
-			items = append(items, &stripe.SubscriptionItemsParams{
-				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
-				Quantity: stripe.Int64(addon.Quantity),
-				Metadata: map[string]string{
-					"BillingPlanType": "Addon",
-					"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
-				},
-			})
-		}
 
-		subscriptionParams := &stripe.SubscriptionParams{
-			Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
-			Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
-			Items:    items,
-			AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
-				Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
-			},
-			PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
-			CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
-		}
-		subscriptionParams.AddExpand("latest_invoice.payment_intent")
-		createSubscription, err := sub.New(subscriptionParams)
-		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
-		if err != nil {
-			return nil, err
-		}
-		////尝试创建发票
-		//params := &stripe.InvoiceParams{
-		//	Customer:     stripe.String(subscriptionRo.Subscription.ChannelUserId),
-		//	Subscription: stripe.String(createSubscription.ID),
-		//}
-		//createInvoice, err := invoice.New(params)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//createPayInvoice, err := invoice.Pay(createSubscription.LatestInvoice.ID, &stripe.InvoicePayParams{})
-		//if err != nil {
-		//	return nil, err
-		//}
-		//createPayInvoiceJson, _ := gjson.Marshal(createPayInvoice)
-		//g.Log().Infof(ctx, "pay invoice:%s", string(createPayInvoiceJson))
+		var checkoutMode = true
+		if checkoutMode {
+			items := []*stripe.CheckoutSessionLineItemParams{
+				{
+					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+				},
+			}
+			for _, addon := range subscriptionRo.AddonPlans {
+				items = append(items, &stripe.CheckoutSessionLineItemParams{
+					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(addon.Quantity),
+				})
+			}
+			subscriptionParams := &stripe.CheckoutSessionParams{
+				Customer:  stripe.String(subscriptionRo.Subscription.ChannelUserId),
+				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
+				LineItems: items,
+				AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
+					Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+				},
+				Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+				SuccessURL: stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
+				CancelURL:  stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, false)),
+				SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
+					Metadata: map[string]string{
+						"SubId": subscriptionRo.Subscription.SubscriptionId,
+					},
+				},
+			}
+			createSubscription, err := session.New(subscriptionParams)
+			log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreateSession", subscriptionParams, createSubscription, err, "", nil, channelEntity)
+			if err != nil {
+				return nil, err
+			}
+			return &ro.ChannelCreateSubscriptionInternalResp{
+				ChannelUserId: subscriptionRo.Subscription.ChannelUserId,
+				Link:          createSubscription.URL,
+				//ChannelSubscriptionId:     createSubscription.Subscription.ID,
+				//ChannelSubscriptionStatus: string(createSubscription.Subscription.Status),
+				Data:   utility.FormatToJsonString(createSubscription),
+				Status: 0, //todo mark
+				//Paid:                      createSubscription.Subscription.LatestInvoice.Paid,
+			}, nil
+		} else {
+			items := []*stripe.SubscriptionItemsParams{
+				{
+					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
+					Metadata: map[string]string{
+						"BillingPlanType": "Main",
+						"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
+					},
+				},
+			}
+			for _, addon := range subscriptionRo.AddonPlans {
+				items = append(items, &stripe.SubscriptionItemsParams{
+					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(addon.Quantity),
+					Metadata: map[string]string{
+						"BillingPlanType": "Addon",
+						"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
+					},
+				})
+			}
+			subscriptionParams := &stripe.SubscriptionParams{
+				Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
+				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
+				Items:    items,
+				AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
+					Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+				},
+				PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
+				CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
+				Metadata: map[string]string{
+					"SubId": subscriptionRo.Subscription.SubscriptionId,
+				},
+			}
+			subscriptionParams.AddExpand("latest_invoice.payment_intent")
+			createSubscription, err := sub.New(subscriptionParams)
+			log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
+			if err != nil {
+				return nil, err
+			}
 
-		return &ro.ChannelCreateSubscriptionInternalResp{
-			ChannelUserId:             subscriptionRo.Subscription.ChannelUserId,
-			Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
-			ChannelSubscriptionId:     createSubscription.ID,
-			ChannelSubscriptionStatus: string(createSubscription.Status),
-			Data:                      utility.FormatToJsonString(createSubscription),
-			Status:                    0, //todo mark
-			Paid:                      createSubscription.LatestInvoice.Paid,
-		}, nil
+			return &ro.ChannelCreateSubscriptionInternalResp{
+				ChannelUserId:             subscriptionRo.Subscription.ChannelUserId,
+				Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
+				ChannelSubscriptionId:     createSubscription.ID,
+				ChannelSubscriptionStatus: string(createSubscription.Status),
+				Data:                      utility.FormatToJsonString(createSubscription),
+				Status:                    0, //todo mark
+				Paid:                      createSubscription.LatestInvoice.Paid,
+			}, nil
+		}
 	}
 	//{
 	//	//付款链接方式可能存在多次重复付款问题
@@ -210,13 +245,15 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
-	params := &stripe.SubscriptionCancelParams{}
-	response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreate", params, response, err, "", nil, channelEntity)
+	//params := &stripe.SubscriptionCancelParams{}
+	//response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
+	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(true)} //使用更新方式取代取消接口
+	response, err := sub.Update(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", params, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCancelSubscriptionInternalResp{}, nil //todo mark
+	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
@@ -357,7 +394,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     updateSubscription.ID,
+		ChannelSubscriptionId:     queryParamsResult.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
 		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
@@ -380,27 +417,48 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	if err != nil {
 		return nil, err
 	}
+	//var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
+	//if strings.Compare(string(response.Status), "trialing") == 0 ||
+	//	strings.Compare(string(response.Status), "active") == 0 {
+	//	status = consts.SubStatusActive
+	//} else if strings.Compare(string(response.Status), "incomplete") == 0 ||
+	//	strings.Compare(string(response.Status), "incomplete_expired") == 0 {
+	//	status = consts.SubStatusCreate
+	//} else if strings.Compare(string(response.Status), "past_due") == 0 ||
+	//	strings.Compare(string(response.Status), "unpaid") == 0 ||
+	//	strings.Compare(string(response.Status), "paused") == 0 {
+	//	status = consts.SubStatusSuspended
+	//} else if strings.Compare(string(response.Status), "canceled") == 0 {
+	//	status = consts.SubStatusCancelled
+	//}
+
+	return parseStripeSubscriptionDetail(response), nil
+}
+
+func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
 	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
-	if strings.Compare(string(response.Status), "trialing") == 0 ||
-		strings.Compare(string(response.Status), "active") == 0 {
+	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
+		strings.Compare(string(subscription.Status), "active") == 0 {
 		status = consts.SubStatusActive
-	} else if strings.Compare(string(response.Status), "incomplete") == 0 ||
-		strings.Compare(string(response.Status), "incomplete_expired") == 0 {
+	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
+		strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
 		status = consts.SubStatusCreate
-	} else if strings.Compare(string(response.Status), "past_due") == 0 ||
-		strings.Compare(string(response.Status), "unpaid") == 0 ||
-		strings.Compare(string(response.Status), "paused") == 0 {
+	} else if strings.Compare(string(subscription.Status), "past_due") == 0 ||
+		strings.Compare(string(subscription.Status), "unpaid") == 0 ||
+		strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended
-	} else if strings.Compare(string(response.Status), "canceled") == 0 {
+	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
 		status = consts.SubStatusCancelled
 	}
 
 	return &ro.ChannelDetailSubscriptionInternalResp{
 		Status:                 status,
-		ChannelStatus:          string(response.Status),
-		Data:                   utility.FormatToJsonString(response),
-		ChannelLatestInvoiceId: response.LatestInvoice.ID,
-	}, nil
+		ChannelSubscriptionId:  subscription.ID,
+		ChannelStatus:          string(subscription.Status),
+		Data:                   utility.FormatToJsonString(subscription),
+		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
+		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
+	}
 }
 
 // DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks
@@ -579,6 +637,11 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 
 func (s Stripe) processWebhook(ctx context.Context, eventType string, subscription stripe.Subscription) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
+	if unibSub == nil {
+		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
+			unibSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
+		}
+	}
 	if unibSub != nil {
 		plan := query.GetPlanById(ctx, unibSub.PlanId)
 		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
@@ -691,8 +754,59 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 }
 
 func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	//TODO implement me
-	panic("implement me")
+	params, err := r.GetJson()
+	g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err)
+	if err != nil {
+		r.Response.Writeln(err)
+		return
+	}
+	payIdStr := r.Get("payId").String()
+	SubIdStr := r.Get("subId").String()
+	var response string
+	if len(payIdStr) > 0 {
+		response = "not implement"
+	} else if len(SubIdStr) > 0 {
+		//订阅回跳
+		if r.Get("success").Bool() {
+			stripe.Key = payChannel.ChannelSecret
+			s.setUnibeeAppInfo()
+			unibSub := query.GetSubscriptionBySubscriptionId(r.Context(), SubIdStr)
+			if unibSub == nil || len(unibSub.ChannelUserId) == 0 {
+				response = "subId invalid or customId empty"
+			} else if len(unibSub.ChannelSubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
+				response = "active"
+			} else {
+				//需要去检索
+				params := &stripe.SubscriptionSearchParams{
+					SearchParams: stripe.SearchParams{
+						Query: "metadata['SubId']:'" + SubIdStr + "'",
+					},
+				}
+				result := sub.Search(params)
+				if result.SubscriptionSearchResult().Data != nil && len(result.SubscriptionSearchResult().Data) == 1 {
+					//找到
+					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, unibSub.ChannelUserId) != 0 {
+						response = "customId not match"
+					} else {
+						detail := parseStripeSubscriptionDetail(result.SubscriptionSearchResult().Data[0])
+						err := handler.UpdateSubWithChannelDetailBack(r.Context(), unibSub, detail)
+						if err != nil {
+							response = fmt.Sprintf("%v", err)
+						} else {
+							response = "active"
+						}
+					}
+				} else {
+					//找不到
+					response = "subscription not found"
+				}
+			}
+		} else {
+			response = "user cancelled"
+		}
+	}
+	r.Response.Writeln(response)
+	log.SaveChannelHttpLog("DoRemoteChannelRedirect", params, response, err, "", nil, payChannel)
 }
 
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {

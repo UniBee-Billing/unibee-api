@@ -359,7 +359,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	//subscription prepare 检查
-	//utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
+	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
 	one := &entity.SubscriptionPendingUpdate{
@@ -431,6 +431,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
 	one.Link = updateRes.Link
+	one.Status = pendingUpdateStatus
+	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
@@ -447,7 +449,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 		dao.Subscription.Columns().Amount:    one.UpdateAmount,
 		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.UpdateSubscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitEmpty().Update()
 	if err != nil {
 		return false, err
 	}
@@ -456,4 +458,44 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
 	}
 	return true, nil
+}
+
+func SubscriptionCancel(ctx context.Context, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
+	if sub.CancelAtPeriodEnd == 1 {
+		//已经设置未周期结束取消
+		return nil
+	}
+
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")
+	}
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
+	utility.Assert(payChannel != nil, "payChannel not found")
+	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	utility.Assert(merchantInfo != nil, "merchant not found")
+	_, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, plan, planChannel, sub)
+	if err != nil {
+		return err
+	}
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().CancelAtPeriodEnd: 1,
+		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("SubscriptionCancel subscription err:%s", update)
+	}
+	return nil
 }

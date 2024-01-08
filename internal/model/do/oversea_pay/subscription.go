@@ -36,4 +36,5 @@ type Subscription struct {
 	Link                   interface{} //
 	ChannelStatus          interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelLatestInvoiceId interface{} // 渠道最新发票 id
+	CancelAtPeriodEnd      interface{} // 是否在周期结束时取消，0-false | 1-true
 }
