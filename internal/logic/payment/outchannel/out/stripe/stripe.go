@@ -907,13 +907,13 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 						if err != nil {
 							response = fmt.Sprintf("%v", err)
 						} else {
-							response = "active"
+							response = "subscription active"
 							status = true
 						}
 					}
 				} else {
 					//找不到
-					response = "subscription not found"
+					response = "subscription not paid"
 				}
 			}
 		} else {
