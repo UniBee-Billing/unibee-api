@@ -52,6 +52,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			Link:               details.Link,
 			ChannelStatus:      details.ChannelStatus,
 			ChannelInvoiceId:   details.ChannelInvoiceId,
+			ChannelInvoicePdf:  details.ChannelInvoicePdf,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)

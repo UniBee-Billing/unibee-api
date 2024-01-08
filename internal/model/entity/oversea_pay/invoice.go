@@ -30,6 +30,7 @@ type Invoice struct {
 	GmtModify          *gtime.Time `json:"gmtModify"          ` // 修改时间
 	IsDeleted          int         `json:"isDeleted"          ` //
 	Link               string      `json:"link"               ` //
-	ChannelStatus      string      `json:"channelStatus"      ` // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelStatus      string      `json:"channelStatus"      ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId   string      `json:"channelInvoiceId"   ` // 关联渠道发票 Id
+	ChannelInvoicePdf  string      `json:"channelInvoicePdf"  ` // 关联渠道发票 pdf
 }

@@ -70,7 +70,8 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		ChannelUserId:         detail.Customer.ID,
 		Link:                  detail.HostedInvoiceURL,
 		ChannelStatus:         string(detail.Status),
-		ChannelInvoiceId:      detail.InvoicePDF,
+		ChannelInvoiceId:      detail.ID,
+		ChannelInvoicePdf:     detail.InvoicePDF,
 	}
 }
 

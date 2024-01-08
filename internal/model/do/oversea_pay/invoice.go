@@ -32,6 +32,7 @@ type Invoice struct {
 	GmtModify          *gtime.Time // 修改时间
 	IsDeleted          interface{} //
 	Link               interface{} //
-	ChannelStatus      interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelStatus      interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId   interface{} // 关联渠道发票 Id
+	ChannelInvoicePdf  interface{} // 关联渠道发票 pdf
 }
