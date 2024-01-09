@@ -274,6 +274,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
+	// todo mark addon binding check
 
 	email := ""
 	if !consts.GetConfigInstance().IsLocal() {
