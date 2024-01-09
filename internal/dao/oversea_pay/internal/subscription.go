@@ -22,7 +22,6 @@ type SubscriptionDao struct {
 type SubscriptionColumns struct {
 	Id                     string //
 	SubscriptionId         string // 订阅id（内部编号）
-	UpdateSubscriptionId   string // 升级来源订阅 ID（内部编号）
 	GmtCreate              string // 创建时间
 	Amount                 string // 金额,单位：分
 	Currency               string // 货币
@@ -55,7 +54,6 @@ type SubscriptionColumns struct {
 var subscriptionColumns = SubscriptionColumns{
 	Id:                     "id",
 	SubscriptionId:         "subscription_id",
-	UpdateSubscriptionId:   "update_subscription_id",
 	GmtCreate:              "gmt_create",
 	Amount:                 "amount",
 	Currency:               "currency",

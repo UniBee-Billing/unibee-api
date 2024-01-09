@@ -12,7 +12,6 @@ import (
 type Subscription struct {
 	Id                     uint64      `json:"id"                     ` //
 	SubscriptionId         string      `json:"subscriptionId"         ` // 订阅id（内部编号）
-	UpdateSubscriptionId   int64       `json:"updateSubscriptionId"   ` // 升级来源订阅 ID（内部编号）
 	GmtCreate              *gtime.Time `json:"gmtCreate"              ` // 创建时间
 	Amount                 int64       `json:"amount"                 ` // 金额,单位：分
 	Currency               string      `json:"currency"               ` // 货币

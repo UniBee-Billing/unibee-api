@@ -14,7 +14,6 @@ type Subscription struct {
 	g.Meta                 `orm:"table:subscription, do:true"`
 	Id                     interface{} //
 	SubscriptionId         interface{} // 订阅id（内部编号）
-	UpdateSubscriptionId   interface{} // 升级来源订阅 ID（内部编号）
 	GmtCreate              *gtime.Time // 创建时间
 	Amount                 interface{} // 金额,单位：分
 	Currency               interface{} // 货币
