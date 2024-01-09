@@ -6,9 +6,10 @@ import (
 )
 
 type Config struct {
-	Env         string      `yaml:"env"`
-	RedisConfig RedisConfig `yaml:"redismq"`
-	Server      Server      `yaml:"server"`
+	Env           string        `yaml:"env"`
+	RedisMqConfig RedisMqConfig `yaml:"redismq"`
+	MinioConfig   MinioConfig   `yaml:"minio"`
+	Server        Server        `yaml:"server"`
 }
 
 type Server struct {
@@ -17,10 +18,18 @@ type Server struct {
 	DomainPath string `yaml:"domainPath"`
 }
 
-type RedisConfig struct {
+type RedisMqConfig struct {
 	Address string `yaml:"address"`
 	DB      int    `yaml:"db"`
 	Pass    string `yaml:"pass"`
+}
+
+type MinioConfig struct {
+	Endpoint   string `yaml:"endpoint"`
+	AccessKey  string `yaml:"accessKey"`
+	SecretKey  string `yaml:"secretKey"`
+	BucketName string `yaml:"bucketName"`
+	Domain     string `yaml:"domain"`
 }
 
 var instance *Config

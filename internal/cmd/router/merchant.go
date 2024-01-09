@@ -53,3 +53,12 @@ func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantOss(ctx context.Context, group *ghttp.RouterGroup) {
+	// auth 库相关接口
+	group.Group("/oss", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewOss(), //Oss 文件接口-Go Server使用
+		)
+	})
+}

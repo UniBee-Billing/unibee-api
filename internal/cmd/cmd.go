@@ -55,6 +55,7 @@ var (
 				router.MerchantWebhook(ctx, group)
 				router.MerchantProfile(ctx, group)
 				router.MerchantSubscrption(ctx, group)
+				router.MerchantOss(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
