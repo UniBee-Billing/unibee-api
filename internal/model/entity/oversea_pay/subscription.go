@@ -38,4 +38,5 @@ type Subscription struct {
 	CurrentPeriodStart     int64       `json:"currentPeriodStart"     ` // current_period_start
 	CurrentPeriodEnd       int64       `json:"currentPeriodEnd"       ` // current_period_end
 	TrailEnd               int64       `json:"trailEnd"               ` // trail_end
+	ReturnUrl              string      `json:"returnUrl"              ` //
 }

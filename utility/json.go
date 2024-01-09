@@ -40,7 +40,7 @@ func MarshalToJsonString(target interface{}) string {
 
 func UnmarshalFromJsonString(target string, one interface{}) error {
 	if len(target) > 0 {
-		return gjson.Unmarshal([]byte(target), one)
+		return gjson.Unmarshal([]byte(target), &one)
 	} else {
 		return gerror.New("target is nil")
 	}

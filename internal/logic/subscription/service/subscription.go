@@ -189,6 +189,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		Status:         consts.SubStatusInit,
 		CustomerEmail:  prepare.Email,
 		ChannelUserId:  channelUserId,
+		ReturnUrl:      req.ReturnUrl,
 		Data:           "", //额外参数配置
 	}
 

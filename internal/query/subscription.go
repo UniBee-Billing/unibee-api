@@ -38,7 +38,7 @@ func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId s
 		return nil
 	}
 	var addonParams []*ro.SubscriptionPlanAddonParamRo
-	err := utility.UnmarshalFromJsonString(one.AddonData, addonParams)
+	err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
 	if err != nil {
 		return nil
 	}

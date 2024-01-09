@@ -38,7 +38,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		utility.Assert(plan != nil, "invalid planId")
 		utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 		planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
-		details, err := outchannel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, one)
+		details, err := outchannel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 		if err == nil {
 			err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
 			if err != nil {
@@ -47,7 +47,11 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 			}
 		}
 	}()
-
+	//删减返回值
+	{
+		one.Data = ""
+		one.ResponseData = ""
+	}
 	return &subscription.SubscriptionDetailRes{
 		Subscription: one,
 		Plan:         query.GetPlanById(ctx, one.PlanId),
@@ -77,12 +81,16 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		totalPlanIds = append(totalPlanIds, sub.PlanId)
 		var addonParams []*ro.SubscriptionPlanAddonParamRo
 		if len(sub.AddonData) > 0 {
-			err := utility.UnmarshalFromJsonString(sub.AddonData, addonParams)
+			err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 			if err == nil {
 				for _, s := range addonParams {
 					totalPlanIds = append(totalPlanIds, s.AddonPlanId) // 添加到整数列表中
 				}
 			}
+		}
+		{
+			sub.Data = ""
+			sub.ResponseData = ""
 		}
 		list = append(list, &ro.SubscriptionDetailRo{
 			Subscription: sub,

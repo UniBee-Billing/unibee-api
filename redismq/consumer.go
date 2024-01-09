@@ -421,7 +421,7 @@ func fetchTransactionPrepareMessagesForChecker(topic string) []*Message {
 			value, _ := client.Get(context.Background(), messageId).Result()
 			if len(value) > 0 {
 				var message *Message
-				err = gjson.Unmarshal([]byte(value), message)
+				err = gjson.Unmarshal([]byte(value), &message) // Unmarshal todo mark 加上 &
 				if err == nil {
 					messages = append(messages, message)
 				}

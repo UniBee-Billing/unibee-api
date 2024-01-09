@@ -56,6 +56,7 @@ type SubscriptionCreateReq struct {
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
 	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
+	ReturnUrl          string                             `p:"returnUrl"  dc:"回调地址"  `
 }
 type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
