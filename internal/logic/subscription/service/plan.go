@@ -228,6 +228,8 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
 		utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		//addon 周期校验
+		utility.Assert(addonPlan.IntervalUnit == one.IntervalUnit && addonPlan.IntervalCount == one.IntervalCount, fmt.Sprintf("addon not match plan's recycle interval, id:%d", addonPlan.Id))
 	}
 
 	if req.Action == 0 {
