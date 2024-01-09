@@ -186,7 +186,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		Currency:       prepare.Currency,
 		AddonData:      utility.MarshalToJsonString(prepare.AddonParams),
 		SubscriptionId: utility.CreateSubscriptionOrderNo(),
-		Status:         consts.SubStatusInit,
+		Status:         consts.SubStatusCreate,
 		CustomerEmail:  prepare.Email,
 		ChannelUserId:  channelUserId,
 		ReturnUrl:      req.ReturnUrl,
