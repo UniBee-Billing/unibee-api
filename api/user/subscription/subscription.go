@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"go-oversea-pay/internal/consts"
 	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -12,10 +13,19 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
-	Subscription              *entity.Subscription                `p:"subscription" dc:"订阅"`
-	Plan                      *entity.SubscriptionPlan            `p:"planId" dc:"订阅计划"`
-	Addons                    []*ro.SubscriptionPlanAddonRo       `p:"addons" dc:"订阅Addon"`
-	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `p:"subscriptionPendingUpdate" dc:"订阅更新明细"`
+	Subscription              *entity.Subscription                `json:"subscription" dc:"订阅"`
+	Plan                      *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
+	Addons                    []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
+	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅更新明细"`
+}
+
+type SubscriptionPayCheckReq struct {
+	g.Meta         `path:"/subscription_pay_check" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅支付状态检查"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionPayCheckRes struct {
+	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"支付状态，1-支付中，2-支付完成，3-暂停，4-取消, 5-过期"`
+	Subscription *entity.Subscription          `json:"subscription" dc:"订阅"`
 }
 
 type SubscriptionChannelsReq struct {

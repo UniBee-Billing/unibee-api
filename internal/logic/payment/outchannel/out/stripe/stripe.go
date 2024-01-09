@@ -515,10 +515,11 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		strings.Compare(string(subscription.Status), "active") == 0 {
 		status = consts.SubStatusActive
 	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
-		strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		strings.Compare(string(subscription.Status), "unpaid") == 0 {
 		status = consts.SubStatusCreate
+	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		status = consts.SubStatusExpired
 	} else if strings.Compare(string(subscription.Status), "past_due") == 0 ||
-		strings.Compare(string(subscription.Status), "unpaid") == 0 ||
 		strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended
 	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
