@@ -40,4 +40,5 @@ type Subscription struct {
 	CurrentPeriodEnd       interface{} // current_period_end
 	TrailEnd               interface{} // trail_end
 	ReturnUrl              interface{} //
+	FirstPayTime           *gtime.Time // 首次支付时间
 }

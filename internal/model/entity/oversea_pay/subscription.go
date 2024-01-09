@@ -38,4 +38,5 @@ type Subscription struct {
 	CurrentPeriodEnd       int64       `json:"currentPeriodEnd"       ` // current_period_end
 	TrailEnd               int64       `json:"trailEnd"               ` // trail_end
 	ReturnUrl              string      `json:"returnUrl"              ` //
+	FirstPayTime           *gtime.Time `json:"firstPayTime"           ` // 首次支付时间
 }
