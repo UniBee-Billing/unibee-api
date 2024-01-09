@@ -38,3 +38,9 @@ func NewSubscription() merchant.IMerchantSubscription {
 	return &ControllerSubscription{}
 }
 
+type ControllerOss struct{}
+
+func NewOss() merchant.IMerchantOss {
+	return &ControllerOss{}
+}
+

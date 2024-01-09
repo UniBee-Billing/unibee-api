@@ -23,9 +23,9 @@ type SRedisMqConfig struct{}
 
 func (s SRedisMqConfig) GetRedisStreamConfig() (res *redis.Options) {
 	return &redis.Options{
-		Addr:     consts.GetConfigInstance().RedisConfig.Address,
-		Password: consts.GetConfigInstance().RedisConfig.Pass,
-		DB:       consts.GetConfigInstance().RedisConfig.DB,
+		Addr:     consts.GetConfigInstance().RedisMqConfig.Address,
+		Password: consts.GetConfigInstance().RedisMqConfig.Pass,
+		DB:       consts.GetConfigInstance().RedisMqConfig.DB,
 	}
 }
 
