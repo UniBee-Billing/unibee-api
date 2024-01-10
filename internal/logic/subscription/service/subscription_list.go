@@ -54,6 +54,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 	}
 	return &subscription.SubscriptionDetailRes{
 		Subscription: one,
+		Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
 		Plan:         query.GetPlanById(ctx, one.PlanId),
 		Addons:       query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
 	}, nil
@@ -94,6 +95,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		}
 		list = append(list, &ro.SubscriptionDetailRo{
 			Subscription: sub,
+			Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, sub.ChannelId)),
 			Plan:         nil,
 			Addons:       nil,
 			AddonParams:  addonParams,
