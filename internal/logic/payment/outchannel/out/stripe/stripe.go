@@ -775,6 +775,7 @@ func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string
 	if unibSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
 			unibSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
+			unibSub.ChannelSubscriptionId = subscription.ID
 		}
 	}
 	if unibSub != nil {
