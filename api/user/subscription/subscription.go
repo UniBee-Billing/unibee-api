@@ -3,8 +3,7 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
-	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
-	"go-oversea-pay/internal/logic/subscription/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -33,7 +32,7 @@ type SubscriptionChannelsReq struct {
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type SubscriptionChannelsRes struct {
-	Channels []*ro2.OutChannelRo `json:"channels"`
+	Channels []*ro.OutChannelRo `json:"channels"`
 }
 
 type SubscriptionCreatePreviewReq struct {
@@ -47,12 +46,12 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan        *entity.SubscriptionPlan           `json:"planId"`
 	Quantity    int64                              `json:"quantity"`
-	PayChannel  *ro2.OutChannelRo                  `json:"payChannel"`
+	PayChannel  *ro.OutChannelRo                   `json:"payChannel"`
 	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency    string                             `json:"currency"              `      // 货币
-	Invoice     *ro2.ChannelDetailInvoiceRo        `json:"invoice"`
+	Invoice     *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId      int64                              `json:"userId" `
 	Email       string                             `json:"email" `
 }
@@ -82,10 +81,10 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount   int64                       `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                      `json:"currency"              `      // 货币
-	Invoice       *ro2.ChannelDetailInvoiceRo `json:"invoice"`
-	ProrationDate int64                       `json:"prorationDate"`
+	TotalAmount   int64                      `json:"totalAmount"                ` // 金额,单位：分
+	Currency      string                     `json:"currency"              `      // 货币
+	Invoice       *ro.ChannelDetailInvoiceRo `json:"invoice"`
+	ProrationDate int64                      `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {

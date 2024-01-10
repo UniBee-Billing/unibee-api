@@ -48,6 +48,7 @@ type SubscriptionColumns struct {
 	CurrentPeriodEnd       string // current_period_end
 	TrailEnd               string // trail_end
 	ReturnUrl              string //
+	FirstPayTime           string // 首次支付时间
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -80,6 +81,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CurrentPeriodEnd:       "current_period_end",
 	TrailEnd:               "trail_end",
 	ReturnUrl:              "return_url",
+	FirstPayTime:           "first_pay_time",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"go-oversea-pay/api/merchant/plan"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/subscription/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -28,7 +30,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro.PlanDetailRo{
 			Plan:     one,
-			Channels: query.GetListActivePlanChannels(ctx, planId),
+			Channels: query.GetListActiveOutChannelRos(ctx, planId),
 			Addons:   query.GetPlanBindingAddonsByPlanId(ctx, planId),
 		},
 	}, nil
@@ -60,7 +62,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			//非主 Plan 不查询 addons
 			list = append(list, &ro.PlanDetailRo{
 				Plan:     p,
-				Channels: []*entity.SubscriptionPlanChannel{},
+				Channels: []*ro2.OutChannelRo{},
 				Addons:   nil,
 				AddonIds: nil,
 			})
@@ -83,7 +85,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 		list = append(list, &ro.PlanDetailRo{
 			Plan:     p,
-			Channels: []*entity.SubscriptionPlanChannel{},
+			Channels: []*ro2.OutChannelRo{},
 			Addons:   nil,
 			AddonIds: addonIds,
 		})
@@ -112,13 +114,17 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 	}
 	//添加 Channel 信息
-	var allChannelList []*entity.SubscriptionPlanChannel
-	err = dao.SubscriptionPlanChannel.Ctx(ctx).WhereIn(dao.SubscriptionPlanChannel.Columns().PlanId, totalPlanIds).Scan(&allChannelList)
+	var allPlanChannelList []*entity.SubscriptionPlanChannel
+	err = dao.SubscriptionPlanChannel.Ctx(ctx).WhereIn(dao.SubscriptionPlanChannel.Columns().PlanId, totalPlanIds).Scan(&allPlanChannelList)
 	if err == nil {
-		for _, channel := range allChannelList {
+		for _, planChannel := range allPlanChannelList {
 			for _, planRo := range list {
-				if int64(planRo.Plan.Id) == channel.PlanId {
-					planRo.Channels = append(planRo.Channels, channel)
+				if int64(planRo.Plan.Id) == planChannel.PlanId && planChannel.Status == consts.PlanChannelStatusActive {
+					outChannel := query.GetPayChannelById(ctx, planChannel.ChannelId)
+					planRo.Channels = append(planRo.Channels, &ro2.OutChannelRo{
+						ChannelId:   outChannel.Id,
+						ChannelName: outChannel.Name,
+					})
 				}
 			}
 		}

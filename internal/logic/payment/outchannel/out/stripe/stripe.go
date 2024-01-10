@@ -38,15 +38,15 @@ type Stripe struct {
 func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
-		status = consts.InvoiceStatusDraft
+		status = consts.InvoiceStatusPending
 	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		status = consts.InvoiceStatusOpen
+		status = consts.InvoiceStatusProcessing
 	} else if strings.Compare(string(detail.Status), "paid") == 0 {
 		status = consts.InvoiceStatusPaid
 	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		status = consts.InvoiceStatusUnCollected
+		status = consts.InvoiceStatusFailed
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		status = consts.InvoiceStatusVoid
+		status = consts.InvoiceStatusCancelled
 	}
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	for _, line := range detail.Lines.Data {

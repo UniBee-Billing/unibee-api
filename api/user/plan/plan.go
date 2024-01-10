@@ -2,7 +2,7 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/subscription/ro"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 )
 
 type SubscriptionPlanListReq struct {
