@@ -22,7 +22,6 @@ type SubscriptionDao struct {
 type SubscriptionColumns struct {
 	Id                     string //
 	SubscriptionId         string // 订阅id（内部编号）
-	UpdateSubscriptionId   string // 升级来源订阅 ID（内部编号）
 	GmtCreate              string // 创建时间
 	Amount                 string // 金额,单位：分
 	Currency               string // 货币
@@ -49,13 +48,13 @@ type SubscriptionColumns struct {
 	CurrentPeriodEnd       string // current_period_end
 	TrailEnd               string // trail_end
 	ReturnUrl              string //
+	FirstPayTime           string // 首次支付时间
 }
 
 // subscriptionColumns holds the columns for table subscription.
 var subscriptionColumns = SubscriptionColumns{
 	Id:                     "id",
 	SubscriptionId:         "subscription_id",
-	UpdateSubscriptionId:   "update_subscription_id",
 	GmtCreate:              "gmt_create",
 	Amount:                 "amount",
 	Currency:               "currency",
@@ -82,6 +81,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CurrentPeriodEnd:       "current_period_end",
 	TrailEnd:               "trail_end",
 	ReturnUrl:              "return_url",
+	FirstPayTime:           "first_pay_time",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

@@ -38,15 +38,15 @@ type Stripe struct {
 func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
-		status = consts.InvoiceStatusDraft
+		status = consts.InvoiceStatusPending
 	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		status = consts.InvoiceStatusOpen
+		status = consts.InvoiceStatusProcessing
 	} else if strings.Compare(string(detail.Status), "paid") == 0 {
 		status = consts.InvoiceStatusPaid
 	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		status = consts.InvoiceStatusUnCollected
+		status = consts.InvoiceStatusFailed
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		status = consts.InvoiceStatusVoid
+		status = consts.InvoiceStatusCancelled
 	}
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	for _, line := range detail.Lines.Data {
@@ -336,6 +336,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
 }
 
+var usePendingUpdate = false
+
 func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
@@ -382,47 +384,65 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 }
 
 func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) ([]*stripe.SubscriptionItemsParams, error) {
-	var items []*stripe.SubscriptionItemsParams
 	detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
 	if err != nil {
 		return nil, err
 	}
-	//遍历并删除
-	for _, item := range detail.Items.Data {
-		//if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
-		//	targetItems = append(targetItems, &stripe.SubscriptionItemsParams{
-		//		ID:    stripe.String(item.ID),
-		//		Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-		//	})
-		//}
-		//删除之前全部，新增 Plan 和 Addons 方式
+	var items []*stripe.SubscriptionItemsParams
+
+	if !usePendingUpdate {
+		//方案 1 遍历并删除，马上生效，不支持 PendingUpdate
+		for _, item := range detail.Items.Data {
+			//删除之前全部，新增 Plan 和 Addons 方式
+			items = append(items, &stripe.SubscriptionItemsParams{
+				ID:      stripe.String(item.ID),
+				Deleted: stripe.Bool(true),
+			})
+		}
+		//新增新的项目
 		items = append(items, &stripe.SubscriptionItemsParams{
-			ID:      stripe.String(item.ID),
-			Deleted: stripe.Bool(true),
+			Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+			Quantity: stripe.Int64(subscriptionRo.Quantity),
+			Metadata: map[string]string{
+				"BillingPlanType": "Main",
+				"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
+			},
 		})
+		for _, addon := range subscriptionRo.AddonPlans {
+			items = append(items, &stripe.SubscriptionItemsParams{
+				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+				Quantity: stripe.Int64(addon.Quantity),
+				Metadata: map[string]string{
+					"BillingPlanType": "Addon",
+					"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
+				},
+			})
+		}
+	} else {
+		//方案 2 PendingUpdate，只修改 Quantity
+		for _, item := range detail.Items.Data {
+			if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
+				items = append(items, &stripe.SubscriptionItemsParams{
+					ID:    stripe.String(item.ID),
+					Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+				})
+			} else {
+				//删除之前全部，新增 Plan 和 Addons 方式
+				items = append(items, &stripe.SubscriptionItemsParams{
+					ID:       stripe.String(item.ID),
+					Quantity: stripe.Int64(0),
+				})
+			}
+		}
+		//新增Addon
+		for _, addon := range subscriptionRo.AddonPlans {
+			items = append(items, &stripe.SubscriptionItemsParams{
+				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+				Quantity: stripe.Int64(addon.Quantity),
+			})
+		}
 	}
-	//新增新的项目
-	items = append(items, &stripe.SubscriptionItemsParams{
-		Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-		Quantity: stripe.Int64(subscriptionRo.Quantity),
-		//Metadata: map[string]string{
-		//	"BillingPlanType": "Main",
-		//	"BillingPlanId":   strconv.FormatInt(subscriptionRo.PlanChannel.PlanId, 10),
-		//},
-	})
-	for _, addon := range subscriptionRo.AddonPlans {
-		items = append(items, &stripe.SubscriptionItemsParams{
-			Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
-			Quantity: stripe.Int64(addon.Quantity),
-			//Metadata: map[string]string{
-			//	"BillingPlanType": "Addon",
-			//	"BillingPlanId":   strconv.FormatInt(addon.AddonPlanChannel.PlanId, 10),
-			//},
-		})
-	}
-	//if len(targetItems) == 0 {
-	//	return nil, gerror.New("items not match")
-	//}
+
 	return items, nil
 }
 
@@ -440,10 +460,12 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	params := &stripe.SubscriptionParams{
-		Items: items,
-		//PaymentBehavior:   stripe.String("pending_if_incomplete"),//pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+		Items:             items,
 		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
 		ProrationDate:     stripe.Int64(subscriptionRo.ProrationDate),
+	}
+	if usePendingUpdate {
+		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
@@ -515,10 +537,11 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		strings.Compare(string(subscription.Status), "active") == 0 {
 		status = consts.SubStatusActive
 	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
-		strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		strings.Compare(string(subscription.Status), "unpaid") == 0 {
 		status = consts.SubStatusCreate
+	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		status = consts.SubStatusExpired
 	} else if strings.Compare(string(subscription.Status), "past_due") == 0 ||
-		strings.Compare(string(subscription.Status), "unpaid") == 0 ||
 		strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended
 	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {

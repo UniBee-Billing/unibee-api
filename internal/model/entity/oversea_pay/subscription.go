@@ -12,7 +12,6 @@ import (
 type Subscription struct {
 	Id                     uint64      `json:"id"                     ` //
 	SubscriptionId         string      `json:"subscriptionId"         ` // 订阅id（内部编号）
-	UpdateSubscriptionId   int64       `json:"updateSubscriptionId"   ` // 升级来源订阅 ID（内部编号）
 	GmtCreate              *gtime.Time `json:"gmtCreate"              ` // 创建时间
 	Amount                 int64       `json:"amount"                 ` // 金额,单位：分
 	Currency               string      `json:"currency"               ` // 货币
@@ -39,4 +38,5 @@ type Subscription struct {
 	CurrentPeriodEnd       int64       `json:"currentPeriodEnd"       ` // current_period_end
 	TrailEnd               int64       `json:"trailEnd"               ` // trail_end
 	ReturnUrl              string      `json:"returnUrl"              ` //
+	FirstPayTime           *gtime.Time `json:"firstPayTime"           ` // 首次支付时间
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -20,6 +21,10 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	if details.CancelAtPeriodEnd {
 		cancelAtPeriodEnd = 1
 	}
+	var firstPayTime *gtime.Time
+	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
+		firstPayTime = gtime.Now()
+	}
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 details.Status,
 		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
@@ -30,6 +35,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
 		dao.Subscription.Columns().TrailEnd:               details.TrailEnd,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+		dao.Subscription.Columns().FirstPayTime:           firstPayTime,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
 	if err != nil {
 		return err

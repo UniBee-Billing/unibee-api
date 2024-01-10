@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/subscription/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -120,7 +119,7 @@ type ChannelCreateSubscriptionInternalResp struct {
 
 type ChannelCreateSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan        `json:"plan"`
-	AddonPlans   []*ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
+	AddonPlans   []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
 	Subscription *entity.Subscription            `json:"subscription"`
 }
@@ -129,7 +128,7 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	Plan           *entity.SubscriptionPlan        `json:"plan"`
 	Quantity       int64                           `p:"quantity" dc:"数量" `
 	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
-	AddonPlans     []*ro.SubscriptionPlanAddonRo   `json:"addonPlans"`
+	AddonPlans     []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
 	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
 	Subscription   *entity.Subscription            `json:"subscription"`
@@ -208,4 +207,29 @@ type ChannelDetailInvoiceItem struct {
 	Amount      int64  `json:"amount"`
 	Description string `json:"description"`
 	Proration   bool   `json:"proration"`
+}
+
+type PlanDetailRo struct {
+	Plan     *entity.SubscriptionPlan   `json:"plan" dc:"订阅计划"`
+	Channels []*OutChannelRo            `json:"channels" dc:"订阅计划 Channel 开通明细"`
+	Addons   []*entity.SubscriptionPlan `json:"addons" dc:"订阅计划 Addons 明细"`
+	AddonIds []int64                    `json:"addonIds" dc:"订阅计划 Addon Ids"`
+}
+
+type SubscriptionPlanAddonParamRo struct {
+	Quantity    int64 `p:"quantity" dc:"数量，默认 1" `
+	AddonPlanId int64 `p:"addonPlanId" dc:"订阅计划Addon ID"`
+}
+
+type SubscriptionPlanAddonRo struct {
+	Quantity         int64                           `p:"quantity" dc:"数量" `
+	AddonPlan        *entity.SubscriptionPlan        `p:"addonPlan" dc:"addonPlan" `
+	AddonPlanChannel *entity.SubscriptionPlanChannel `p:"addonPlanChannel" dc:"addonPlanChannel" `
+}
+
+type SubscriptionDetailRo struct {
+	Subscription *entity.Subscription            `p:"subscription" dc:"订阅"`
+	Plan         *entity.SubscriptionPlan        `p:"planId" dc:"订阅计划"`
+	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" dc:"订阅Addon参数"`
+	Addons       []*SubscriptionPlanAddonRo      `p:"addons" dc:"订阅Addon"`
 }

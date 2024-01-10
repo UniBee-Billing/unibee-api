@@ -2,8 +2,8 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	ro2 "go-oversea-pay/internal/logic/payment/outchannel/ro"
-	"go-oversea-pay/internal/logic/subscription/ro"
+	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -12,10 +12,19 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
-	Subscription              *entity.Subscription                `p:"subscription" dc:"订阅"`
-	Plan                      *entity.SubscriptionPlan            `p:"planId" dc:"订阅计划"`
-	Addons                    []*ro.SubscriptionPlanAddonRo       `p:"addons" dc:"订阅Addon"`
-	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `p:"subscriptionPendingUpdate" dc:"订阅更新明细"`
+	Subscription              *entity.Subscription                `json:"subscription" dc:"订阅"`
+	Plan                      *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
+	Addons                    []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
+	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅更新明细"`
+}
+
+type SubscriptionPayCheckReq struct {
+	g.Meta         `path:"/subscription_pay_check" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅支付状态检查"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionPayCheckRes struct {
+	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"支付状态，1-支付中，2-支付完成，3-暂停，4-取消, 5-过期"`
+	Subscription *entity.Subscription          `json:"subscription" dc:"订阅"`
 }
 
 type SubscriptionChannelsReq struct {
@@ -23,7 +32,7 @@ type SubscriptionChannelsReq struct {
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type SubscriptionChannelsRes struct {
-	Channels []*ro2.OutChannelRo `json:"channels"`
+	Channels []*ro.OutChannelRo `json:"channels"`
 }
 
 type SubscriptionCreatePreviewReq struct {
@@ -37,12 +46,12 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan        *entity.SubscriptionPlan           `json:"planId"`
 	Quantity    int64                              `json:"quantity"`
-	PayChannel  *ro2.OutChannelRo                  `json:"payChannel"`
+	PayChannel  *ro.OutChannelRo                   `json:"payChannel"`
 	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency    string                             `json:"currency"              `      // 货币
-	Invoice     *ro2.ChannelDetailInvoiceRo        `json:"invoice"`
+	Invoice     *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId      int64                              `json:"userId" `
 	Email       string                             `json:"email" `
 }
@@ -72,10 +81,10 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount   int64                       `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                      `json:"currency"              `      // 货币
-	Invoice       *ro2.ChannelDetailInvoiceRo `json:"invoice"`
-	ProrationDate int64                       `json:"prorationDate"`
+	TotalAmount   int64                      `json:"totalAmount"                ` // 金额,单位：分
+	Currency      string                     `json:"currency"              `      // 货币
+	Invoice       *ro.ChannelDetailInvoiceRo `json:"invoice"`
+	ProrationDate int64                      `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {
