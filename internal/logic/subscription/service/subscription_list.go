@@ -53,10 +53,11 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		one.ResponseData = ""
 	}
 	return &subscription.SubscriptionDetailRes{
-		Subscription: one,
-		Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
-		Plan:         query.GetPlanById(ctx, one.PlanId),
-		Addons:       query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
+		Subscription:               one,
+		Channel:                    ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
+		Plan:                       query.GetPlanById(ctx, one.PlanId),
+		Addons:                     query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
+		SubscriptionPendingUpdates: query.GetSubscriptionPendingUpdatesBySubscriptionId(ctx, one.SubscriptionId),
 	}, nil
 }
 

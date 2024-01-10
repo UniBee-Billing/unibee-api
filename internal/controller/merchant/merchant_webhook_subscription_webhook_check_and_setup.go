@@ -3,10 +3,18 @@ package merchant
 import (
 	"context"
 	"go-oversea-pay/api/merchant/webhook"
+	"go-oversea-pay/internal/consts"
+	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/utility"
 )
 
 func (c *ControllerWebhook) SubscriptionWebhookCheckAndSetup(ctx context.Context, req *webhook.SubscriptionWebhookCheckAndSetupReq) (res *webhook.SubscriptionWebhookCheckAndSetupRes, err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	outchannel.CheckAndSetupPayChannelWebhooks(ctx)
 	return &webhook.SubscriptionWebhookCheckAndSetupRes{}, nil
 }

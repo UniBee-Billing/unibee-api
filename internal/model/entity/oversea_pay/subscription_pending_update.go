@@ -16,6 +16,7 @@ type SubscriptionPendingUpdate struct {
 	UpdateSubscriptionId string      `json:"updateSubscriptionId" ` // 升级单ID（内部编号）
 	GmtCreate            *gtime.Time `json:"gmtCreate"            ` // 创建时间
 	Amount               int64       `json:"amount"               ` // 金额,单位：分
+	Status               int         `json:"status"               ` // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UpdateAmount         int64       `json:"updateAmount"         ` // 升级到金额,单位：分
 	Currency             string      `json:"currency"             ` // 货币
 	UpdateCurrency       string      `json:"updateCurrency"       ` // 升级到货币
@@ -26,7 +27,6 @@ type SubscriptionPendingUpdate struct {
 	AddonData            string      `json:"addonData"            ` // plan addon json data
 	UpdatedAddonData     string      `json:"updatedAddonData"     ` // 升级到plan addon json data
 	ChannelId            int64       `json:"channelId"            ` // 支付渠道Id
-	Status               int         `json:"status"               ` // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UserId               int64       `json:"userId"               ` // userId
 	ChannelUpdateId      string      `json:"channelUpdateId"      ` // 支付渠道订阅更新单id
 	Data                 string      `json:"data"                 ` // 渠道额外参数，JSON格式
@@ -36,4 +36,5 @@ type SubscriptionPendingUpdate struct {
 	Link                 string      `json:"link"                 ` //
 	ChannelStatus        string      `json:"channelStatus"        ` // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelInvoiceId     string      `json:"channelInvoiceId"     ` // 关联渠道发票 Id
+	MerchantUserId       int64       `json:"merchantUserId"       ` // merchant_user_id
 }
