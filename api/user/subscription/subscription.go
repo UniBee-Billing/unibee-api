@@ -14,6 +14,7 @@ type SubscriptionDetailReq struct {
 type SubscriptionDetailRes struct {
 	Subscription              *entity.Subscription                `json:"subscription" dc:"订阅"`
 	Plan                      *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
+	Channel                   *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`
 	Addons                    []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
 	SubscriptionPendingUpdate []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅更新明细"`
 }

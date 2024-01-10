@@ -336,7 +336,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
 }
 
-var usePendingUpdate = false
+var usePendingUpdate = true
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
@@ -358,6 +358,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
 		SubscriptionItems: items,
 	}
+	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	result, err := invoice.Upcoming(params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdatePreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
@@ -420,12 +421,26 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 		}
 	} else {
 		//方案 2 PendingUpdate，只修改 Quantity
+		newAddonMap := make(map[string]*ro.SubscriptionPlanAddonRo)
+		for _, addon := range subscriptionRo.AddonPlans {
+			newAddonMap[addon.AddonPlanChannel.ChannelPlanId] = addon
+		}
+		//匹配
 		for _, item := range detail.Items.Data {
 			if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
 				items = append(items, &stripe.SubscriptionItemsParams{
-					ID:    stripe.String(item.ID),
-					Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					ID:       stripe.String(item.ID),
+					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(subscriptionRo.Quantity),
 				})
+			} else if addon, ok := newAddonMap[item.Price.ID]; ok {
+				//替换
+				items = append(items, &stripe.SubscriptionItemsParams{
+					ID:       stripe.String(item.ID),
+					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(addon.Quantity),
+				})
+				delete(newAddonMap, item.Price.ID)
 			} else {
 				//删除之前全部，新增 Plan 和 Addons 方式
 				items = append(items, &stripe.SubscriptionItemsParams{
@@ -434,10 +449,10 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 				})
 			}
 		}
-		//新增Addon
-		for _, addon := range subscriptionRo.AddonPlans {
+		//新增剩余的Addons
+		for channelPlanId, addon := range newAddonMap {
 			items = append(items, &stripe.SubscriptionItemsParams{
-				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+				Price:    stripe.String(channelPlanId),
 				Quantity: stripe.Int64(addon.Quantity),
 			})
 		}
@@ -460,13 +475,15 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	params := &stripe.SubscriptionParams{
-		Items:             items,
-		ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
-		ProrationDate:     stripe.Int64(subscriptionRo.ProrationDate),
+		Items: items,
+		//ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
+		ProrationDate: stripe.Int64(subscriptionRo.ProrationDate),
 	}
 	if usePendingUpdate {
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 	}
+	// todo mark 降级不立即收取费用
+	params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
@@ -758,6 +775,7 @@ func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string
 	if unibSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
 			unibSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
+			unibSub.ChannelSubscriptionId = subscription.ID
 		}
 	}
 	if unibSub != nil {
