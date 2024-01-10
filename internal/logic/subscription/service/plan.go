@@ -9,6 +9,7 @@ import (
 	v1 "go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -18,6 +19,11 @@ import (
 )
 
 func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelId int64) (err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	utility.Assert(planId > 0, "invalid planId")
 	utility.Assert(channelId > 0, "invalid channelId")
 	plan := query.GetPlanById(ctx, planId)
@@ -48,6 +54,11 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 }
 
 func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channelId int64) (err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	utility.Assert(planId > 0, "invalid planId")
 	utility.Assert(channelId > 0, "invalid channelId")
 	plan := query.GetPlanById(ctx, planId)
@@ -78,6 +89,11 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 }
 
 func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateReq) (one *entity.SubscriptionPlan, err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -146,6 +162,11 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 }
 
 func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) (one *entity.SubscriptionPlan, err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -201,6 +222,11 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 }
 
 func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")

@@ -18,6 +18,7 @@ type SubscriptionPendingUpdate struct {
 	UpdateSubscriptionId interface{} // 升级单ID（内部编号）
 	GmtCreate            *gtime.Time // 创建时间
 	Amount               interface{} // 金额,单位：分
+	Status               interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UpdateAmount         interface{} // 升级到金额,单位：分
 	Currency             interface{} // 货币
 	UpdateCurrency       interface{} // 升级到货币
@@ -28,7 +29,6 @@ type SubscriptionPendingUpdate struct {
 	AddonData            interface{} // plan addon json data
 	UpdatedAddonData     interface{} // 升级到plan addon json data
 	ChannelId            interface{} // 支付渠道Id
-	Status               interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UserId               interface{} // userId
 	ChannelUpdateId      interface{} // 支付渠道订阅更新单id
 	Data                 interface{} // 渠道额外参数，JSON格式
@@ -38,4 +38,5 @@ type SubscriptionPendingUpdate struct {
 	Link                 interface{} //
 	ChannelStatus        interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelInvoiceId     interface{} // 关联渠道发票 Id
+	MerchantUserId       interface{} // merchant_user_id
 }
