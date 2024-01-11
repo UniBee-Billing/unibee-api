@@ -54,7 +54,7 @@ func (e Evonet) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (e Evonet) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

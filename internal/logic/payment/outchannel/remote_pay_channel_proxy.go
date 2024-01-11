@@ -112,7 +112,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -124,7 +124,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, plan, planChannel, subscription)
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {

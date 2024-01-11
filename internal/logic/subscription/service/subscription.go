@@ -454,7 +454,8 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	return true, nil
 }
 
-func SubscriptionCancel(ctx context.Context, subscriptionId string) error {
+func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool) error {
+	// todo mark proration 实现
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -476,7 +477,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string) error {
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, plan, planChannel, sub)
+	_, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 	if err != nil {
 		return err
 	}

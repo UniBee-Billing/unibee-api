@@ -334,7 +334,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 }
 
 // DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
-func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
@@ -344,7 +344,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 	//response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
 	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(true)} //使用更新方式取代取消接口
 	response, err := sub.Update(subscription.ChannelSubscriptionId, params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", params, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancelAtPeriodEnd", params, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
