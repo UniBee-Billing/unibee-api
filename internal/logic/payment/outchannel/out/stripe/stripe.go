@@ -50,28 +50,43 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	}
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	for _, line := range detail.Lines.Data {
+		var start int64 = 0
+		var end int64 = 0
+		if line.Period != nil {
+			start = line.Period.Start
+			end = line.Period.End
+		}
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-			Currency:    strings.ToUpper(string(line.Currency)),
-			Amount:      line.Amount,
-			Description: line.Description,
-			Proration:   line.Proration,
+			Currency:               strings.ToUpper(string(line.Currency)),
+			Amount:                 line.Amount,
+			AmountExcludingTax:     line.AmountExcludingTax,
+			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+			Description:            line.Description,
+			Proration:              line.Proration,
+			Quantity:               line.Quantity,
+			PeriodStart:            start,
+			PeriodEnd:              end,
 		})
 	}
 
 	return &ro.ChannelDetailInvoiceInternalResp{
-		ChannelSubscriptionId: detail.Subscription.ID,
-		TotalAmount:           detail.Total,
-		TaxAmount:             detail.Tax,
-		SubscriptionAmount:    detail.Subtotal,
-		Currency:              strings.ToUpper(string(detail.Currency)),
-		Lines:                 invoiceItems,
-		ChannelId:             channelId,
-		Status:                status,
-		ChannelUserId:         detail.Customer.ID,
-		Link:                  detail.HostedInvoiceURL,
-		ChannelStatus:         string(detail.Status),
-		ChannelInvoiceId:      detail.ID,
-		ChannelInvoicePdf:     detail.InvoicePDF,
+		ChannelSubscriptionId:          detail.Subscription.ID,
+		TotalAmount:                    detail.Total,
+		TotalAmountExcludingTax:        detail.TotalExcludingTax,
+		TaxAmount:                      detail.Tax,
+		SubscriptionAmount:             detail.Subtotal,
+		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		Lines:                          invoiceItems,
+		ChannelId:                      channelId,
+		Status:                         status,
+		ChannelUserId:                  detail.Customer.ID,
+		Link:                           detail.HostedInvoiceURL,
+		ChannelStatus:                  string(detail.Status),
+		ChannelInvoiceId:               detail.ID,
+		ChannelInvoicePdf:              detail.InvoicePDF,
+		PeriodStart:                    detail.PeriodStart,
+		PeriodEnd:                      detail.PeriodEnd,
 	}
 }
 

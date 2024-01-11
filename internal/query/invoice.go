@@ -6,7 +6,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.Subscription) {
+func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.Invoice) {
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{InvoiceId: invoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -14,7 +14,7 @@ func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.S
 	return
 }
 
-func GetInvoiceByChannelInvoiceId(ctx context.Context, channelInvoiceId string) (one *entity.Subscription) {
+func GetInvoiceByChannelInvoiceId(ctx context.Context, channelInvoiceId string) (one *entity.Invoice) {
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{ChannelInvoiceId: channelInvoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

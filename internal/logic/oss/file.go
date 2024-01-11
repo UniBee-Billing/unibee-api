@@ -12,7 +12,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -35,29 +35,19 @@ type FileUploadOutput struct {
 }
 
 func Upload(ctx context.Context, in FileUploadInput) (*FileUploadOutput, error) {
-	minioClient, err := minio.New(consts.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(consts.GetConfigInstance().MinioConfig.AccessKey, consts.GetConfigInstance().MinioConfig.SecretKey, ""),
-		Secure: false, // 如果是 HTTPS 连接，请将其设置为 true
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	tempFileName, err := in.File.Save(".", true)
-
-	// 读取本地文件
-	data, err := ioutil.ReadFile(tempFileName)
-	if err != nil {
-		return nil, err
-	}
-
 	var path string
-
 	if len(in.Path) > 0 {
 		path = in.Path
 	} else {
 		path = "cm"
 	}
+
+	tempFileName, err := in.File.Save(".", true)
+	if err != nil {
+		return nil, err
+	}
+
+	userId := in.UserId
 
 	var fileName string
 	if in.RandomName || len(in.Name) == 0 {
@@ -67,17 +57,35 @@ func Upload(ctx context.Context, in FileUploadInput) (*FileUploadOutput, error) 
 		fileName = in.Name
 	}
 
-	_, err = minioClient.PutObject(ctx, consts.GetConfigInstance().MinioConfig.BucketName, gfile.Join(path, fileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{})
+	return UploadLocalFile(ctx, tempFileName, path, fileName, userId)
+}
+
+func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath string, uploadFileName string, uploadUserId string) (*FileUploadOutput, error) {
+	// 读取本地文件
+	data, err := os.ReadFile(localFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	minioClient, err := minio.New(consts.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(consts.GetConfigInstance().MinioConfig.AccessKey, consts.GetConfigInstance().MinioConfig.SecretKey, ""),
+		Secure: false, // 如果是 HTTPS 连接，请将其设置为 true
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = minioClient.PutObject(ctx, consts.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	// 记录到数据表
 	toSave := entity.FileUpload{
-		UserId:   in.UserId,
-		Url:      consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(path, fileName),
-		FileName: fileName,
-		Tag:      path,
+		UserId:   uploadUserId,
+		Url:      consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		FileName: uploadFileName,
+		Tag:      uploadPath,
 	}
 	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitEmpty().Insert()
 	if err != nil {
