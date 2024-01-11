@@ -454,7 +454,8 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	return true, nil
 }
 
-func SubscriptionCancel(ctx context.Context, subscriptionId string) error {
+func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool) error {
+	// todo mark proration 实现
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
