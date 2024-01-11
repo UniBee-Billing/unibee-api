@@ -519,7 +519,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Link:                      queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
 		Paid:                      queryParamsResult.Paid,
-	}, nil //todo mark
+	}, nil
 }
 
 // DoRemoteChannelSubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
