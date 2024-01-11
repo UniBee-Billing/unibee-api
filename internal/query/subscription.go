@@ -51,3 +51,13 @@ func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId s
 	}
 	return addons
 }
+
+func GetSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) []*entity.SubscriptionPendingUpdate {
+	var list []*entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).OmitEmpty().Scan(&list)
+	if err != nil {
+		return nil
+	}
+	return list
+
+}

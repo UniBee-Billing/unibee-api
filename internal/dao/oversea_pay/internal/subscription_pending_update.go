@@ -26,6 +26,7 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdateSubscriptionId string // 升级单ID（内部编号）
 	GmtCreate            string // 创建时间
 	Amount               string // 金额,单位：分
+	Status               string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UpdateAmount         string // 升级到金额,单位：分
 	Currency             string // 货币
 	UpdateCurrency       string // 升级到货币
@@ -36,7 +37,6 @@ type SubscriptionPendingUpdateColumns struct {
 	AddonData            string // plan addon json data
 	UpdatedAddonData     string // 升级到plan addon json data
 	ChannelId            string // 支付渠道Id
-	Status               string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
 	UserId               string // userId
 	ChannelUpdateId      string // 支付渠道订阅更新单id
 	Data                 string // 渠道额外参数，JSON格式
@@ -46,6 +46,7 @@ type SubscriptionPendingUpdateColumns struct {
 	Link                 string //
 	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelInvoiceId     string // 关联渠道发票 Id
+	MerchantUserId       string // merchant_user_id
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -56,6 +57,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UpdateSubscriptionId: "update_subscription_id",
 	GmtCreate:            "gmt_create",
 	Amount:               "amount",
+	Status:               "status",
 	UpdateAmount:         "update_amount",
 	Currency:             "currency",
 	UpdateCurrency:       "update_currency",
@@ -66,7 +68,6 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	AddonData:            "addon_data",
 	UpdatedAddonData:     "updated_addon_data",
 	ChannelId:            "channel_id",
-	Status:               "status",
 	UserId:               "user_id",
 	ChannelUpdateId:      "channel_update_id",
 	Data:                 "data",
@@ -76,6 +77,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	Link:                 "link",
 	ChannelStatus:        "channel_status",
 	ChannelInvoiceId:     "channel_invoice_id",
+	MerchantUserId:       "merchant_user_id",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.

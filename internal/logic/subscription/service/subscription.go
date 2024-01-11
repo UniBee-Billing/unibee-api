@@ -258,14 +258,13 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	TotalAmount    int64                                `json:"totalAmount"                ` // 金额,单位：分
 	Currency       string                               `json:"currency"              `      // 货币
 	UserId         int64                                `json:"userId" `
-	Email          string                               `json:"email" `
 	OldPlan        *entity.SubscriptionPlan             `json:"oldPlan"`
 	OldPlanChannel *entity.SubscriptionPlanChannel      `json:"oldPlanChannel"`
 	Invoice        *ro.ChannelDetailInvoiceInternalResp `json:"invoice"`
 	ProrationDate  int64                                `json:"prorationDate"`
 }
 
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantUserId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -275,13 +274,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
 	// todo mark addon binding check
 
-	email := ""
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")
-		email = _interface.BizCtx().Get(ctx).User.Email
-	}
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -340,7 +332,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		TotalAmount:    totalAmount,
 		Currency:       currency,
 		UserId:         sub.UserId,
-		Email:          email,
 		OldPlan:        oldPlan,
 		OldPlanChannel: oldPlanChannel,
 		Invoice:        updatePreviewRes.Invoice,
@@ -349,13 +340,13 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (*subscription.SubscriptionUpdateRes, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId: req.SubscriptionId,
 		NewPlanId:      req.NewPlanId,
 		Quantity:       req.Quantity,
 		AddonParams:    req.AddonParams,
-	}, req.ProrationDate)
+	}, req.ProrationDate, merchantUserId)
 	if err != nil {
 		return nil, err
 	}
@@ -382,6 +373,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UpdatedAddonData:     utility.MarshalToJsonString(prepare.AddonParams), // addon 暂定不带上之前订阅
 		Status:               consts.SubStatusInit,
 		Data:                 "", //额外参数配置
+		MerchantUserId:       merchantUserId,
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitEmpty().Insert(one)

@@ -20,56 +20,70 @@ type InvoiceDao struct {
 
 // InvoiceColumns defines and stores column names for table invoice.
 type InvoiceColumns struct {
-	Id                 string //
-	MerchantId         string // 商户Id
-	SubscriptionId     string // 订阅id（内部编号）
-	InvoiceId          string // 发票ID（内部编号）
-	GmtCreate          string // 创建时间
-	TotalAmount        string // 金额,单位：分
-	TaxAmount          string // Tax金额,单位：分
-	SubscriptionAmount string // Sub金额,单位：分
-	Currency           string // 货币
-	Lines              string // lines json data
-	ChannelId          string // 支付渠道Id
-	Status             string // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
-	SendStatus         string // 订阅单发送状态，0-No | 1- YES
-	SendEmail          string // send_email
-	SendPdf            string // send_pdf
-	UserId             string // userId
-	Data               string // 渠道额外参数，JSON格式
-	GmtModify          string // 修改时间
-	IsDeleted          string //
-	Link               string //
-	ChannelStatus      string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
-	ChannelInvoiceId   string // 关联渠道发票 Id
-	ChannelInvoicePdf  string // 关联渠道发票 pdf
+	Id                             string //
+	MerchantId                     string // 商户Id
+	SubscriptionId                 string // 订阅id（内部编号）
+	InvoiceId                      string // 发票ID（内部编号）
+	GmtCreate                      string // 创建时间
+	TotalAmount                    string // 金额,单位：分
+	TaxAmount                      string // Tax金额,单位：分
+	SubscriptionAmount             string // Sub金额,单位：分
+	Currency                       string // 货币
+	Lines                          string // lines json data
+	ChannelId                      string // 支付渠道Id
+	Status                         string // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	SendStatus                     string // 订阅单发送状态，0-No | 1- YES
+	SendEmail                      string // send_email
+	SendPdf                        string // send_pdf
+	UserId                         string // userId
+	Data                           string // 渠道额外参数，JSON格式
+	GmtModify                      string // 修改时间
+	IsDeleted                      string //
+	Link                           string //
+	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelInvoiceId               string // 关联渠道发票 Id
+	ChannelInvoicePdf              string // 关联渠道发票 pdf
+	TaxPencentage                  string // Tax百分比，10 表示 10%
+	SendNote                       string // send_note
+	SendTerms                      string // send_terms
+	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
+	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
+	PeriodStart                    string // period_start
+	PeriodEnd                      string // period_end
 }
 
 // invoiceColumns holds the columns for table invoice.
 var invoiceColumns = InvoiceColumns{
-	Id:                 "id",
-	MerchantId:         "merchant_id",
-	SubscriptionId:     "subscription_id",
-	InvoiceId:          "invoice_id",
-	GmtCreate:          "gmt_create",
-	TotalAmount:        "total_amount",
-	TaxAmount:          "tax_amount",
-	SubscriptionAmount: "subscription_amount",
-	Currency:           "currency",
-	Lines:              "lines",
-	ChannelId:          "channel_id",
-	Status:             "status",
-	SendStatus:         "send_status",
-	SendEmail:          "send_email",
-	SendPdf:            "send_pdf",
-	UserId:             "user_id",
-	Data:               "data",
-	GmtModify:          "gmt_modify",
-	IsDeleted:          "is_deleted",
-	Link:               "link",
-	ChannelStatus:      "channel_status",
-	ChannelInvoiceId:   "channel_invoice_id",
-	ChannelInvoicePdf:  "channel_invoice_pdf",
+	Id:                             "id",
+	MerchantId:                     "merchant_id",
+	SubscriptionId:                 "subscription_id",
+	InvoiceId:                      "invoice_id",
+	GmtCreate:                      "gmt_create",
+	TotalAmount:                    "total_amount",
+	TaxAmount:                      "tax_amount",
+	SubscriptionAmount:             "subscription_amount",
+	Currency:                       "currency",
+	Lines:                          "lines",
+	ChannelId:                      "channel_id",
+	Status:                         "status",
+	SendStatus:                     "send_status",
+	SendEmail:                      "send_email",
+	SendPdf:                        "send_pdf",
+	UserId:                         "user_id",
+	Data:                           "data",
+	GmtModify:                      "gmt_modify",
+	IsDeleted:                      "is_deleted",
+	Link:                           "link",
+	ChannelStatus:                  "channel_status",
+	ChannelInvoiceId:               "channel_invoice_id",
+	ChannelInvoicePdf:              "channel_invoice_pdf",
+	TaxPencentage:                  "tax_pencentage",
+	SendNote:                       "send_note",
+	SendTerms:                      "send_terms",
+	TotalAmountExcludingTax:        "total_amount_excluding_tax",
+	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
+	PeriodStart:                    "period_start",
+	PeriodEnd:                      "period_end",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

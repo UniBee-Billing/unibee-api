@@ -11,28 +11,35 @@ import (
 
 // Invoice is the golang structure of table invoice for DAO operations like Where/Data.
 type Invoice struct {
-	g.Meta             `orm:"table:invoice, do:true"`
-	Id                 interface{} //
-	MerchantId         interface{} // 商户Id
-	SubscriptionId     interface{} // 订阅id（内部编号）
-	InvoiceId          interface{} // 发票ID（内部编号）
-	GmtCreate          *gtime.Time // 创建时间
-	TotalAmount        interface{} // 金额,单位：分
-	TaxAmount          interface{} // Tax金额,单位：分
-	SubscriptionAmount interface{} // Sub金额,单位：分
-	Currency           interface{} // 货币
-	Lines              interface{} // lines json data
-	ChannelId          interface{} // 支付渠道Id
-	Status             interface{} // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
-	SendStatus         interface{} // 订阅单发送状态，0-No | 1- YES
-	SendEmail          interface{} // send_email
-	SendPdf            interface{} // send_pdf
-	UserId             interface{} // userId
-	Data               interface{} // 渠道额外参数，JSON格式
-	GmtModify          *gtime.Time // 修改时间
-	IsDeleted          interface{} //
-	Link               interface{} //
-	ChannelStatus      interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
-	ChannelInvoiceId   interface{} // 关联渠道发票 Id
-	ChannelInvoicePdf  interface{} // 关联渠道发票 pdf
+	g.Meta                         `orm:"table:invoice, do:true"`
+	Id                             interface{} //
+	MerchantId                     interface{} // 商户Id
+	SubscriptionId                 interface{} // 订阅id（内部编号）
+	InvoiceId                      interface{} // 发票ID（内部编号）
+	GmtCreate                      *gtime.Time // 创建时间
+	TotalAmount                    interface{} // 金额,单位：分
+	TaxAmount                      interface{} // Tax金额,单位：分
+	SubscriptionAmount             interface{} // Sub金额,单位：分
+	Currency                       interface{} // 货币
+	Lines                          interface{} // lines json data
+	ChannelId                      interface{} // 支付渠道Id
+	Status                         interface{} // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	SendStatus                     interface{} // 订阅单发送状态，0-No | 1- YES
+	SendEmail                      interface{} // send_email
+	SendPdf                        interface{} // send_pdf
+	UserId                         interface{} // userId
+	Data                           interface{} // 渠道额外参数，JSON格式
+	GmtModify                      *gtime.Time // 修改时间
+	IsDeleted                      interface{} //
+	Link                           interface{} //
+	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelInvoiceId               interface{} // 关联渠道发票 Id
+	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
+	TaxPencentage                  interface{} // Tax百分比，10 表示 10%
+	SendNote                       interface{} // send_note
+	SendTerms                      interface{} // send_terms
+	TotalAmountExcludingTax        interface{} // 金额(不含税）,单位：分
+	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
+	PeriodStart                    interface{} // period_start
+	PeriodEnd                      interface{} // period_end
 }
