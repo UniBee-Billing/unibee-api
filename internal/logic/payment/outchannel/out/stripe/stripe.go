@@ -491,10 +491,9 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 
 	params := &stripe.SubscriptionParams{
 		Items: items,
-		//ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
-		ProrationDate: stripe.Int64(subscriptionRo.ProrationDate),
 	}
 	if usePendingUpdate {
+		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	} else {
