@@ -169,8 +169,20 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		if err != nil {
 			return err
 		}
+		//修改发送状态
+		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().SendStatus: 1,
+			dao.Invoice.Columns().GmtModify:  gtime.Now(),
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
+		if err != nil {
+			fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
+		}
 	} else {
-		fmt.Printf("SendInvoiceEmail invoice status is pending or init, email not send")
+		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
 	}
 	return nil
 
