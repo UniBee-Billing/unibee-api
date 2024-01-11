@@ -8,6 +8,6 @@ import (
 )
 
 func (c *ControllerInvoice) SubscriptionInvoicePdfGenerate(ctx context.Context, req *invoice.SubscriptionInvoicePdfGenerateReq) (res *invoice.SubscriptionInvoicePdfGenerateRes, err error) {
-	_ = handler.SubscriptionInvoicePdfGenerateBackground(req.InvoiceId)
+	_ = handler.SubscriptionInvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail)
 	return &invoice.SubscriptionInvoicePdfGenerateRes{}, nil
 }

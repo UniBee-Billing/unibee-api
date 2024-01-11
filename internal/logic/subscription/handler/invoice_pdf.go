@@ -12,13 +12,9 @@ import (
 	"go-oversea-pay/utility"
 	"golang.org/x/text/currency"
 	"golang.org/x/text/number"
-	"io"
-	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
@@ -66,10 +62,10 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Link</a>")
 	}
 
-	doc.SetDate(FormatUnixTime(unibInvoice.PeriodStart))
-	doc.SetPaymentTerm(FormatUnixTime(unibInvoice.PeriodEnd))
+	doc.SetDate(utility.FormatUnixTime(unibInvoice.PeriodStart))
+	doc.SetPaymentTerm(utility.FormatUnixTime(unibInvoice.PeriodEnd))
 
-	tempLogoPath := downloadImage(merchantInfo.CompanyLogo)
+	tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
 	utility.Assert(len(tempLogoPath) > 0, "download Logo error")
 	logoBytes, err := os.ReadFile(tempLogoPath)
 	if err != nil {
@@ -110,7 +106,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		//dec := fmt.Sprintf("%v", number.Decimal(float64(line.UnitAmountExcludingTax)/100.0, number.Scale(scale)))
 		doc.AppendItem(&generator.Item{
 			Name:        fmt.Sprintf("%s #%d", line.Description, i),
-			Description: fmt.Sprintf("%s-%s", FormatUnixTime(unibInvoice.PeriodStart), FormatUnixTime(unibInvoice.PeriodEnd)),
+			Description: fmt.Sprintf("%s-%s", utility.FormatUnixTime(unibInvoice.PeriodStart), utility.FormatUnixTime(unibInvoice.PeriodEnd)),
 			UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 			Quantity:    strconv.FormatInt(line.Quantity, 10),
 			Tax: &generator.Tax{
@@ -229,55 +225,6 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 //	return invoice
 //}
 
-func downloadImage(url string) string {
-	// 获取图片文件名
-	fileName := filepath.Base(url)
-
-	currentDir, err := os.Getwd()
-	// 构建本地文件路径
-	localFilePath := filepath.Join(currentDir, fileName)
-	// 创建文件
-	file, err := os.Create(fileName)
-	if err != nil {
-		fmt.Println("Error creating file:", err)
-		return ""
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	// 发起 HTTP 请求获取图片
-	response, err := http.Get(url)
-	if err != nil {
-		fmt.Println("Error downloading image:", err)
-		return ""
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(response.Body)
-
-	// 检查 HTTP 状态码
-	if response.StatusCode != http.StatusOK {
-		fmt.Println("Error:", response.Status)
-		return ""
-	}
-
-	// 将图片内容写入文件
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		fmt.Println("Error writing to file:", err)
-		return ""
-	}
-	fmt.Println("Image downloaded successfully:", localFilePath)
-	return localFilePath
-}
-
 func MustParseCurrencySymbolValue(currencyCode string, centAmount int64) string {
 	// 将货币代码转换为 currency.Unit 类型的值
 	cur := currency.MustParseISO(strings.ToUpper(currencyCode))
@@ -292,12 +239,4 @@ func MustParseCurrencySymbolValue(currencyCode string, centAmount int64) string 
 
 	// 将货币符号和数字格式化为字符串，并输出到标准输出
 	return fmt.Sprintf("%v%v", currency.Symbol(cur), dec)
-}
-
-func FormatUnixTime(unixTime int64) string {
-	// Convert Unix time to time.Time
-	timeValue := time.Unix(unixTime, 0)
-
-	// Format time using a layout
-	return timeValue.Format("2006-01-02 15:04:05 MST")
 }
