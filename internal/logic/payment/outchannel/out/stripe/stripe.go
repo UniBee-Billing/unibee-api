@@ -504,6 +504,8 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
+
+	////todo mark usePendingUpdate=false 获取的发票可能不是当前更新产生的发票，需要确认
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
