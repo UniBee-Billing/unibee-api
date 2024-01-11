@@ -149,7 +149,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 }
 
 // todo mark paypal 的 cancel 似乎是无法恢复的，和 stripe 不一样，需要确认是否有真实 cancel 的需求
-func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (p Paypal) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
@@ -160,7 +160,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *ent
 		return nil, err
 	}
 	err = client.CancelSubscription(ctx, subscription.ChannelSubscriptionId, "")
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", nil, nil, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancelAtPeriodEnd", nil, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	} // cancelReason

@@ -30,7 +30,7 @@ func (a AutoTest) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscri
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelSubscriptionCancel(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (a AutoTest) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
