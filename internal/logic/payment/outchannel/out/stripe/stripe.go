@@ -504,18 +504,6 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	if err != nil {
 		return nil, err
 	}
-	////尝试创建发票
-	//invoiceParams := &stripe.InvoiceParams{
-	//	Customer:     stripe.String(subscriptionRo.Subscription.ChannelUserId),
-	//	Subscription: stripe.String(updateSubscription.ID),
-	//}
-	//createInvoice, err := invoice.New(invoiceParams)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//createInvoiceJsonData, _ := gjson.Marshal(createInvoice)
-	//g.Log().Infof(ctx, "create invoice:", createInvoiceJsonData)
-	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
