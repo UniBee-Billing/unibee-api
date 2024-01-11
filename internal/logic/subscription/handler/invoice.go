@@ -6,7 +6,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -23,6 +25,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	var merchantId int64
 	var channelId int64
 	var userId int64
+	var sendEmail string
 	if len(details.ChannelSubscriptionId) > 0 {
 		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionId)
 		if sub != nil {
@@ -30,10 +33,16 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			merchantId = sub.MerchantId
 			channelId = sub.ChannelId
 			userId = sub.UserId
+			merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
+			if merchantInfo != nil {
+				sendEmail = merchantInfo.Email
+			}
 		}
 	}
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
+	var invoiceId string
+	var change bool = false
 	if one == nil {
 		//创建
 		one := &entity.Invoice{
@@ -52,6 +61,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			ChannelId:                      channelId,
 			Status:                         int(details.Status),
 			SendStatus:                     0,
+			SendEmail:                      sendEmail,
 			UserId:                         userId,
 			Data:                           utility.MarshalToJsonString(details),
 			Link:                           details.Link,
@@ -67,9 +77,13 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
-
+		invoiceId = one.InvoiceId
+		change = true
 	} else {
 		//更新
+		if one.Status != int(details.Status) {
+			change = true
+		}
 		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().MerchantId:                     merchantId,
 			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
@@ -88,6 +102,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().ChannelInvoiceId:               details.ChannelInvoiceId,
 			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
 			dao.Invoice.Columns().Link:                           details.Link,
+			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
@@ -98,8 +113,18 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		if rowAffected != 1 {
 			return gerror.Newf("CreateOrUpdateInvoiceByDetail err:%s", update)
 		}
+		invoiceId = one.InvoiceId
 	}
 
+	if change {
+		//脱离草稿状态每次变化都生成并发送邮件
+		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId, true)
+	}
+
+	return nil
+}
+
+func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -108,10 +133,11 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			}
 		}()
 		backgroundCtx := context.Background()
-		one := query.GetInvoiceByChannelInvoiceId(backgroundCtx, details.ChannelInvoiceId)
+		one := query.GetInvoiceByInvoiceId(backgroundCtx, invoiceId)
+		utility.Assert(one != nil, "invoice not found")
 		url := GenerateAndUploadInvoicePdf(backgroundCtx, one)
 		if len(url) > 0 {
-			update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			update, err := dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
 				dao.Invoice.Columns().SendPdf:   url,
 				dao.Invoice.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
@@ -123,8 +149,29 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", update)
 			}
 		}
-		// 异步处理发送邮件事件 todo mark
+		if sendUserEmail {
+			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
+			utility.Assert(err == nil, "SendInvoiceEmail error")
+		}
 	}()
-
 	return nil
+}
+
+func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(len(one.SendEmail) > 0, "SendEmail is nil")
+	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
+	if one.Status > consts.InvoiceStatusPending {
+		pdfFileName := utility.DownloadFile(one.SendPdf)
+		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
+		err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName)
+		if err != nil {
+			return err
+		}
+	} else {
+		fmt.Printf("SendInvoiceEmail invoice status is pending or init, email not send")
+	}
+	return nil
+
 }

@@ -45,6 +45,16 @@ func MerchantSubscrption(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
+// MerchantInvoice 发票类
+func MerchantInvoice(ctx context.Context, group *ghttp.RouterGroup) {
+	// plan 库相关接口
+	group.Group("/invoice", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewInvoice(), //MerchantSubscription Admin接口-Merchant Portal使用
+		)
+	})
+}
+
 func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
 	group.Group("/webhook", func(group *ghttp.RouterGroup) {

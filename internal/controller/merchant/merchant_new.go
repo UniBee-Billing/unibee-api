@@ -44,3 +44,9 @@ func NewOss() merchant.IMerchantOss {
 	return &ControllerOss{}
 }
 
+type ControllerInvoice struct{}
+
+func NewInvoice() merchant.IMerchantInvoice {
+	return &ControllerInvoice{}
+}
+
