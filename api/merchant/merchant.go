@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"go-oversea-pay/api/merchant/auth"
+	"go-oversea-pay/api/merchant/invoice"
 	"go-oversea-pay/api/merchant/oss"
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
@@ -22,6 +23,10 @@ type IMerchantAuth interface {
 	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
+
+type IMerchantInvoice interface {
+	SubscriptionInvoicePdfGenerate(ctx context.Context, req *invoice.SubscriptionInvoicePdfGenerateReq) (res *invoice.SubscriptionInvoicePdfGenerateRes, err error)
 }
 
 type IMerchantOss interface {
