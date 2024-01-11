@@ -218,6 +218,39 @@ type ChannelDetailInvoiceItem struct {
 	PeriodStart            int64  `json:"periodStart"`
 }
 
+type InvoiceDetailRo struct {
+	Id                             uint64                      `json:"id"                             ` //
+	MerchantId                     int64                       `json:"merchantId"                     ` // 商户Id
+	SubscriptionId                 string                      `json:"subscriptionId"                 ` // 订阅id（内部编号）
+	InvoiceId                      string                      `json:"invoiceId"                      ` // 发票ID（内部编号）
+	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      ` // 创建时间
+	TotalAmount                    int64                       `json:"totalAmount"                    ` // 金额,单位：分
+	TaxAmount                      int64                       `json:"taxAmount"                      ` // Tax金额,单位：分
+	SubscriptionAmount             int64                       `json:"subscriptionAmount"             ` // Sub金额,单位：分
+	Currency                       string                      `json:"currency"                       ` // 货币
+	Lines                          []*ChannelDetailInvoiceItem `json:"lines"                          ` // lines json data
+	ChannelId                      int64                       `json:"channelId"                      ` // 支付渠道Id
+	Status                         int                         `json:"status"                         ` // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	SendStatus                     int                         `json:"sendStatus"                     ` // 订阅单发送状态，0-No | 1- YES
+	SendEmail                      string                      `json:"sendEmail"                      ` // send_email
+	SendPdf                        string                      `json:"sendPdf"                        ` // send_pdf
+	UserId                         int64                       `json:"userId"                         ` // userId
+	Data                           string                      `json:"data"                           ` // 渠道额外参数，JSON格式
+	GmtModify                      *gtime.Time                 `json:"gmtModify"                      ` // 修改时间
+	IsDeleted                      int                         `json:"isDeleted"                      ` //
+	Link                           string                      `json:"link"                           ` //
+	ChannelStatus                  string                      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelInvoiceId               string                      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
+	ChannelInvoicePdf              string                      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
+	TaxPencentage                  int64                       `json:"taxPencentage"                  ` // Tax百分比，10 表示 10%
+	SendNote                       string                      `json:"sendNote"                       ` // send_note
+	SendTerms                      string                      `json:"sendTerms"                      ` // send_terms
+	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分
+	SubscriptionAmountExcludingTax int64                       `json:"subscriptionAmountExcludingTax" ` // Sub金额(不含税）,单位：分
+	PeriodStart                    int64                       `json:"periodStart"                    ` // period_start
+	PeriodEnd                      int64                       `json:"periodEnd"                      ` // period_end
+}
+
 type PlanDetailRo struct {
 	Plan     *entity.SubscriptionPlan   `json:"plan" dc:"订阅计划"`
 	Channels []*OutChannelRo            `json:"channels" dc:"订阅计划 Channel 开通明细"`
