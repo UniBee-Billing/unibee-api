@@ -353,7 +353,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 
 var usePendingUpdate = true
 
-func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
@@ -375,7 +375,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	result, err := invoice.Upcoming(params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdatePreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdateProrationPreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -496,9 +496,10 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 	if usePendingUpdate {
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
+	} else {
+		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
 	}
-	// todo mark 降级不立即收取费用
-	params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {

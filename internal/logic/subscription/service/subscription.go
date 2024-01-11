@@ -303,7 +303,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), sub.ChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
-	updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdatePreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+	updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 		Plan:           plan,
 		Quantity:       req.Quantity,
 		OldPlan:        oldPlan,
