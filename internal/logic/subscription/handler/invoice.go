@@ -34,6 +34,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	}
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
+	var invoiceId string
 	if one == nil {
 		//创建
 		one := &entity.Invoice{
@@ -67,6 +68,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
+		invoiceId = one.InvoiceId
 
 	} else {
 		//更新
@@ -98,8 +100,15 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		if rowAffected != 1 {
 			return gerror.Newf("CreateOrUpdateInvoiceByDetail err:%s", update)
 		}
+		invoiceId = one.InvoiceId
 	}
 
+	_ = SubscriptionInvoicePdfGenerateBackground(invoiceId)
+
+	return nil
+}
+
+func SubscriptionInvoicePdfGenerateBackground(invoiceId string) (err error) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -108,10 +117,10 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			}
 		}()
 		backgroundCtx := context.Background()
-		one := query.GetInvoiceByChannelInvoiceId(backgroundCtx, details.ChannelInvoiceId)
+		one := query.GetInvoiceByInvoiceId(backgroundCtx, invoiceId)
 		url := GenerateAndUploadInvoicePdf(backgroundCtx, one)
 		if len(url) > 0 {
-			update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			update, err := dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
 				dao.Invoice.Columns().SendPdf:   url,
 				dao.Invoice.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
@@ -125,6 +134,5 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		}
 		// 异步处理发送邮件事件 todo mark
 	}()
-
 	return nil
 }

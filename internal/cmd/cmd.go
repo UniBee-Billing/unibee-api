@@ -54,6 +54,7 @@ var (
 				router.MerchantPlan(ctx, group)
 				router.MerchantWebhook(ctx, group)
 				router.MerchantSubscrption(ctx, group)
+				router.MerchantInvoice(ctx, group)
 				router.MerchantOss(ctx, group)
 			})
 
