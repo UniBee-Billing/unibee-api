@@ -72,7 +72,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 
 func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
 	var lines []*ro.ChannelDetailInvoiceItem
-	err := utility.UnmarshalFromJsonString(invoice.Lines, lines)
+	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
 	if err != nil {
 		fmt.Printf("ConvertInvoiceLines err:%s", err)
 	}
