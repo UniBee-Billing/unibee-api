@@ -7,6 +7,7 @@ import (
 	_plan "go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/subscription/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -16,6 +17,13 @@ import (
 )
 
 func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *_plan.SubscriptionPlanChannelTransferAndActivateReq) (res *_plan.SubscriptionPlanChannelTransferAndActivateRes, err error) {
+
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+	}
+
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	//utility.Assert(req.ChannelId > 0, "ConfirmChannelId should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
