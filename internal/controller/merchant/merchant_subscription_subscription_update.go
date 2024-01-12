@@ -19,13 +19,14 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
 	}
 	update, err := service.SubscriptionUpdate(ctx, &subscription2.SubscriptionUpdateReq{
-		SubscriptionId:     req.SubscriptionId,
-		NewPlanId:          req.NewPlanId,
-		Quantity:           req.Quantity,
-		AddonParams:        req.AddonParams,
-		ConfirmTotalAmount: req.ConfirmTotalAmount,
-		ConfirmCurrency:    req.ConfirmCurrency,
-		ProrationDate:      req.ProrationDate,
+		SubscriptionId:      req.SubscriptionId,
+		NewPlanId:           req.NewPlanId,
+		Quantity:            req.Quantity,
+		AddonParams:         req.AddonParams,
+		WithImmediateEffect: req.WithImmediateEffect,
+		ConfirmTotalAmount:  req.ConfirmTotalAmount,
+		ConfirmCurrency:     req.ConfirmCurrency,
+		ProrationDate:       req.ProrationDate,
 	}, int64(_interface.BizCtx().Get(ctx).Merchant.Id))
 	if err != nil {
 		return nil, err
