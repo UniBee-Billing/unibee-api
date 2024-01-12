@@ -526,11 +526,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Link = updateRes.Link
 	one.Status = pendingUpdateStatus
 	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
+	var PayLink = ""
+	if !updateRes.Paid {
+		PayLink = one.Link
+	}
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
 		Paid:                      updateRes.Paid,
-		Link:                      one.Link,
+		Link:                      PayLink,
 	}, nil
 }
 
