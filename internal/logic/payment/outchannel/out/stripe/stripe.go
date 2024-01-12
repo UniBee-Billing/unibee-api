@@ -406,7 +406,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	}
 	var items []*stripe.SubscriptionItemsParams
 
-	if !subscriptionRo.PayImmediate {
+	if !subscriptionRo.EffectImmediate {
 		//方案 1 遍历并删除，下周期生效，不支持 PendingUpdate
 		for _, item := range detail.Items.Data {
 			//删除之前全部，新增 Plan 和 Addons 方式
@@ -435,7 +435,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			})
 		}
 	} else {
-		//方案 2 PayImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
+		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
 		newAddonMap := make(map[string]*ro.SubscriptionPlanAddonRo)
 		for _, addon := range subscriptionRo.AddonPlans {
 			newAddonMap[addon.AddonPlanChannel.ChannelPlanId] = addon
@@ -492,7 +492,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	params := &stripe.SubscriptionParams{
 		Items: items,
 	}
-	if subscriptionRo.PayImmediate {
+	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
@@ -505,7 +505,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		return nil, err
 	}
 
-	////todo mark PayImmediate=false 获取的发票可能不是当前更新产生的发票，需要确认
+	////todo mark EffectImmediate=false 获取的发票是之前最新的发票
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
@@ -516,7 +516,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
 		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
-		Link:                      queryParamsResult.HostedInvoiceURL,
+		LatestInvoiceLink:         queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
 		Paid:                      queryParamsResult.Paid,
 	}, nil

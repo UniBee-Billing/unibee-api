@@ -125,15 +125,15 @@ type ChannelCreateSubscriptionInternalReq struct {
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
-	Plan           *entity.SubscriptionPlan        `json:"plan"`
-	Quantity       int64                           `p:"quantity" dc:"数量" `
-	OldPlan        *entity.SubscriptionPlan        `json:"oldPlan"`
-	AddonPlans     []*SubscriptionPlanAddonRo      `json:"addonPlans"`
-	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
-	OldPlanChannel *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
-	Subscription   *entity.Subscription            `json:"subscription"`
-	ProrationDate  int64                           `json:"prorationDate"`
-	PayImmediate   bool                            `json:"PayImmediate"`
+	Plan            *entity.SubscriptionPlan        `json:"plan"`
+	Quantity        int64                           `p:"quantity" dc:"数量" `
+	OldPlan         *entity.SubscriptionPlan        `json:"oldPlan"`
+	AddonPlans      []*SubscriptionPlanAddonRo      `json:"addonPlans"`
+	PlanChannel     *entity.SubscriptionPlanChannel `json:"planChannel"`
+	OldPlanChannel  *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
+	Subscription    *entity.Subscription            `json:"subscription"`
+	ProrationDate   int64                           `json:"prorationDate"`
+	EffectImmediate bool                            `json:"EffectImmediate"`
 }
 
 type ChannelCancelSubscriptionInternalResp struct {
@@ -152,7 +152,7 @@ type ChannelUpdateSubscriptionInternalResp struct {
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
 	ChannelInvoiceId          string                                   `json:"channelInvoiceId"`
 	Data                      string                                   `json:"data"`
-	Link                      string                                   `json:"link"`
+	LatestInvoiceLink         string                                   `json:"latestInvoiceLink"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 	Paid                      bool                                     `json:"paid"`
 }

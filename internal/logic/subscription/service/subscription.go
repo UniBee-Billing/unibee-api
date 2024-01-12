@@ -271,7 +271,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	OldPlanChannel *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
 	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	ProrationDate  int64                              `json:"prorationDate"`
-	PayImmediate   bool                               `json:"PayImmediate"`
+	PayImmediate   bool                               `json:"EffectImmediate"`
 }
 
 // SubscriptionUpdatePreview 默认行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
@@ -315,7 +315,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
 	var totalAmount int64
-	var payImmediate = false
+	var effectImmediate = false
 	var invoice *ro.ChannelDetailInvoiceRo
 	//升降级判断逻辑，升级设置payImmediate=true，保障马上能够生效；降级payImmediate=false,下周期生效
 	//情况 1，NewPlan单价大于 OldPlan 单价，判断为升级，忽略Quantity 和 addon 变更
@@ -326,15 +326,15 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	if req.WithImmediateEffect > 0 {
 		utility.Assert(req.WithImmediateEffect == 1 || req.WithImmediateEffect == 2, "WithImmediateEffect should be 1 or 2")
 		if req.WithImmediateEffect == 1 {
-			payImmediate = true
+			effectImmediate = true
 		} else {
-			payImmediate = false
+			effectImmediate = false
 		}
 	} else {
 		if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
-			payImmediate = true
+			effectImmediate = true
 		} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
-			payImmediate = false
+			effectImmediate = false
 		} else {
 			var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
 			err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
@@ -351,28 +351,28 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
 					if oldAddonQuantity < newAddonMap[newAddonPlanId] {
 						//数量有增加,视为升级
-						payImmediate = true
+						effectImmediate = true
 					}
 				} else {
 					//新增,视为升级
-					payImmediate = true
+					effectImmediate = true
 					break
 				}
 			}
 		}
 	}
 
-	if payImmediate {
+	if effectImmediate {
 		updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-			Plan:           plan,
-			Quantity:       req.Quantity,
-			OldPlan:        oldPlan,
-			AddonPlans:     addons, //todo mark oldAddonPlans 是否需要传
-			PlanChannel:    planChannel,
-			OldPlanChannel: oldPlanChannel,
-			Subscription:   sub,
-			ProrationDate:  prorationDate,
-			PayImmediate:   payImmediate,
+			Plan:            plan,
+			Quantity:        req.Quantity,
+			OldPlan:         oldPlan,
+			AddonPlans:      addons, //todo mark oldAddonPlans 是否需要传
+			PlanChannel:     planChannel,
+			OldPlanChannel:  oldPlanChannel,
+			Subscription:    sub,
+			ProrationDate:   prorationDate,
+			EffectImmediate: effectImmediate,
 		})
 		if err != nil {
 			return nil, err
@@ -442,7 +442,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		TotalAmount:    totalAmount,
 		Invoice:        invoice,
 		ProrationDate:  prorationDate,
-		PayImmediate:   payImmediate,
+		PayImmediate:   effectImmediate,
 	}, nil
 
 }
@@ -493,15 +493,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Id = uint64(id)
 
 	updateRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-		Plan:           prepare.Plan,
-		Quantity:       prepare.Quantity,
-		OldPlan:        prepare.OldPlan,
-		AddonPlans:     prepare.Addons, //todo mark oldAddonPlans 是否需要传
-		PlanChannel:    prepare.PlanChannel,
-		OldPlanChannel: prepare.OldPlanChannel,
-		Subscription:   prepare.Subscription,
-		ProrationDate:  req.ProrationDate,
-		PayImmediate:   prepare.PayImmediate,
+		Plan:            prepare.Plan,
+		Quantity:        prepare.Quantity,
+		OldPlan:         prepare.OldPlan,
+		AddonPlans:      prepare.Addons, //todo mark oldAddonPlans 是否需要传
+		PlanChannel:     prepare.PlanChannel,
+		OldPlanChannel:  prepare.OldPlanChannel,
+		Subscription:    prepare.Subscription,
+		ProrationDate:   req.ProrationDate,
+		EffectImmediate: prepare.PayImmediate,
 	})
 	if err != nil {
 		return nil, err
@@ -510,6 +510,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	pendingUpdateStatus := consts.SubStatusCreate
 
 	if updateRes.Paid {
+		//todo mark 当需要支付情况下，更新单状态更新逻辑完善
+		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		pendingUpdateStatus = consts.SubStatusActive
 		_, err := FinishPendingUpdateForSubscription(ctx, one)
 		if err != nil {
@@ -522,7 +524,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().Status:           pendingUpdateStatus,
 		dao.SubscriptionPendingUpdate.Columns().ResponseData:     updateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.LatestInvoiceLink,
 		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
@@ -533,12 +535,12 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
-	one.Link = updateRes.Link
+	one.Link = updateRes.LatestInvoiceLink
 	one.Status = pendingUpdateStatus
 	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
 	var PayLink = ""
 	if !updateRes.Paid {
-		PayLink = one.Link
+		PayLink = updateRes.LatestInvoiceLink
 	}
 
 	return &subscription.SubscriptionUpdateRes{
