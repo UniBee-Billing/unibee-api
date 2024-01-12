@@ -60,11 +60,12 @@ type SubscriptionAddNewTrialStartRes struct {
 }
 
 type SubscriptionUpdatePreviewReq struct {
-	g.Meta         `path:"/subscription_update_preview" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-更新预览（仅计算）"`
-	SubscriptionId string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId      int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity       int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	g.Meta              `path:"/subscription_update_preview" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-更新预览（仅计算）"`
+	SubscriptionId      string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId           int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity            int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
+	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"是否立即生效，1-立即生效，2-下周期生效, withImmediateEffect=1，不会直接修改订阅，将会产生PendingUpdate 更新单和按比例发票并要求付款完成之后才会修改订阅，withImmediateEffect=2会直接修改订阅，并在下周期扣款，如果扣款失败，订阅会进入 pass_due" `
+	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
 	TotalAmount   int64                      `json:"totalAmount"                ` // 金额,单位：分
@@ -74,14 +75,15 @@ type SubscriptionUpdatePreviewRes struct {
 }
 
 type SubscriptionUpdateReq struct {
-	g.Meta             `path:"/subscription_update_submit" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-更新提交（需先调用预览接口）"`
-	SubscriptionId     string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId          int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency" dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
-	ProrationDate      int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
+	g.Meta              `path:"/subscription_update_submit" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-更新提交（需先调用预览接口）"`
+	SubscriptionId      string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	NewPlanId           int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity            int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
+	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"是否立即生效，1-立即生效，2-下周期生效, withImmediateEffect=1，不会直接修改订阅，将会产生PendingUpdate 更新单和按比例发票并要求付款完成之后才会修改订阅，withImmediateEffect=2会直接修改订阅，并在下周期扣款，如果扣款失败，订阅会进入 pass_due" `
+	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
+	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
+	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
 	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 

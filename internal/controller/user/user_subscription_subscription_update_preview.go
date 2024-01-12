@@ -15,6 +15,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
+	utility.Assert(req.WithImmediateEffect == 0, "WithImmediateEffect not support in user_portal")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 
 	//Update 可以由 Admin 操作，service 层不做用户校验

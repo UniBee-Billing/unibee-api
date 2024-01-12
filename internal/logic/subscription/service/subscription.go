@@ -323,32 +323,41 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//情况 3，NewPlan总价大于 OldPlan总价，判断为升级
 	//情况 4，NewPlan总价小于 OldPlan总价，判断为降级
 	//情况 5，NewPlan总价等于 OldPlan总价，则看 Addon 的变化，如果 addon 有数量增加情况或者新增 addon 情况为升级，否则降级
-	if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
-		payImmediate = true
-	} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
-		payImmediate = false
+	if req.WithImmediateEffect > 0 {
+		utility.Assert(req.WithImmediateEffect == 1 || req.WithImmediateEffect == 2, "WithImmediateEffect should be 1 or 2")
+		if req.WithImmediateEffect == 1 {
+			payImmediate = true
+		} else {
+			payImmediate = false
+		}
 	} else {
-		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
-		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
-		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
-		var oldAddonMap = make(map[int64]int64)
-		for _, oldAddon := range oldAddonParams {
-			oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
-		}
-		var newAddonMap = make(map[int64]int64)
-		for _, newAddon := range req.AddonParams {
-			newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
-		}
-		for _, newAddonPlanId := range newAddonMap {
-			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
-				if oldAddonQuantity < newAddonMap[newAddonPlanId] {
-					//数量有增加,视为升级
+		if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
+			payImmediate = true
+		} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
+			payImmediate = false
+		} else {
+			var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
+			err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
+			utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+			var oldAddonMap = make(map[int64]int64)
+			for _, oldAddon := range oldAddonParams {
+				oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
+			}
+			var newAddonMap = make(map[int64]int64)
+			for _, newAddon := range req.AddonParams {
+				newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
+			}
+			for _, newAddonPlanId := range newAddonMap {
+				if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+					if oldAddonQuantity < newAddonMap[newAddonPlanId] {
+						//数量有增加,视为升级
+						payImmediate = true
+					}
+				} else {
+					//新增,视为升级
 					payImmediate = true
+					break
 				}
-			} else {
-				//新增,视为升级
-				payImmediate = true
-				break
 			}
 		}
 	}
@@ -440,10 +449,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
-		SubscriptionId: req.SubscriptionId,
-		NewPlanId:      req.NewPlanId,
-		Quantity:       req.Quantity,
-		AddonParams:    req.AddonParams,
+		SubscriptionId:      req.SubscriptionId,
+		NewPlanId:           req.NewPlanId,
+		Quantity:            req.Quantity,
+		AddonParams:         req.AddonParams,
+		WithImmediateEffect: req.WithImmediateEffect,
 	}, req.ProrationDate, merchantUserId)
 	if err != nil {
 		return nil, err
