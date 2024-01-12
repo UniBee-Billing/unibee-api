@@ -251,7 +251,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		ChannelSubscriptionId:     updateSubscription.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.SubscriptionStatus),
 		Data:                      string(jsonData),
-		Link:                      link,
+		LatestInvoiceLink:         link,
 		Status:                    0, //todo mark
 	}, nil //todo mark
 }

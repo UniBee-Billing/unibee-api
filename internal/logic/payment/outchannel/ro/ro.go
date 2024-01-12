@@ -152,7 +152,7 @@ type ChannelUpdateSubscriptionInternalResp struct {
 	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
 	ChannelInvoiceId          string                                   `json:"channelInvoiceId"`
 	Data                      string                                   `json:"data"`
-	Link                      string                                   `json:"link"`
+	LatestInvoiceLink         string                                   `json:"latestInvoiceLink"`
 	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
 	Paid                      bool                                     `json:"paid"`
 }

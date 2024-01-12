@@ -522,7 +522,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().Status:           pendingUpdateStatus,
 		dao.SubscriptionPendingUpdate.Columns().ResponseData:     updateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.LatestInvoiceLink,
 		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
@@ -533,12 +533,12 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
 	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
-	one.Link = updateRes.Link
+	one.Link = updateRes.LatestInvoiceLink
 	one.Status = pendingUpdateStatus
 	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
 	var PayLink = ""
 	if !updateRes.Paid {
-		PayLink = one.Link
+		PayLink = updateRes.LatestInvoiceLink
 	}
 
 	return &subscription.SubscriptionUpdateRes{
