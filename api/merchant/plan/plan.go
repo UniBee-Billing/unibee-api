@@ -20,7 +20,7 @@ type SubscriptionPlanCreateReq struct {
 	ProductDescription string  `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
 	ImageUrl           string  `p:"imageUrl"    dc:"ImageUrl,需 http 开头" `                                                                                              // image_url
 	HomeUrl            string  `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `
-	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `
+	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids" `
 }
 type SubscriptionPlanCreateRes struct {
 	Plan *entity.SubscriptionPlan `json:"plan" dc:"订阅计划"`
@@ -39,7 +39,7 @@ type SubscriptionPlanEditReq struct {
 	ProductDescription string  `p:"productDescription" dc:"不填默认 Description" `                                                                                         //
 	ImageUrl           string  `p:"imageUrl"    dc:"ImageUrl,需 http 开头"  v:"required#请输入ImageUrl,需 http 开头" `                                                          // image_url
 	HomeUrl            string  `p:"homeUrl"    dc:"HomeUrl,需 http 开头"  `
-	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  v:"required#请输入 addonIds" `
+	AddonIds           []int64 `p:"addonIds"  dc:"addon 类型 Plan Ids"  `
 }
 type SubscriptionPlanEditRes struct {
 	Plan *entity.SubscriptionPlan `json:"plan" dc:"订阅计划"`
