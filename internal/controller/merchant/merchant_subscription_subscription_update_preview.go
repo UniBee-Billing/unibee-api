@@ -5,7 +5,6 @@ import (
 	subscription2 "go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/service"
 	"go-oversea-pay/utility"
 
@@ -29,15 +28,9 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 		return nil, err
 	}
 	return &subscription.SubscriptionUpdatePreviewRes{
-		TotalAmount: update.TotalAmount,
-		Currency:    update.Currency,
-		Invoice: &ro.ChannelDetailInvoiceRo{
-			TotalAmount:        update.Invoice.TotalAmount,
-			Currency:           update.Invoice.Currency,
-			TaxAmount:          update.Invoice.TaxAmount,
-			SubscriptionAmount: update.Invoice.SubscriptionAmount,
-			Lines:              update.Invoice.Lines,
-		},
+		TotalAmount:   update.TotalAmount,
+		Currency:      update.Currency,
+		Invoice:       update.Invoice,
 		ProrationDate: update.ProrationDate,
 	}, nil
 }

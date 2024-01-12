@@ -353,7 +353,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 
 var usePendingUpdate = true
 
-func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
@@ -375,7 +375,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, su
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	result, err := invoice.Upcoming(params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdatePreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdateProrationPreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -406,8 +406,8 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	}
 	var items []*stripe.SubscriptionItemsParams
 
-	if !usePendingUpdate {
-		//方案 1 遍历并删除，马上生效，不支持 PendingUpdate
+	if !subscriptionRo.PayImmediate {
+		//方案 1 遍历并删除，下周期生效，不支持 PendingUpdate
 		for _, item := range detail.Items.Data {
 			//删除之前全部，新增 Plan 和 Addons 方式
 			items = append(items, &stripe.SubscriptionItemsParams{
@@ -435,7 +435,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			})
 		}
 	} else {
-		//方案 2 PendingUpdate，只修改 Quantity
+		//方案 2 PayImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
 		newAddonMap := make(map[string]*ro.SubscriptionPlanAddonRo)
 		for _, addon := range subscriptionRo.AddonPlans {
 			newAddonMap[addon.AddonPlanChannel.ChannelPlanId] = addon
@@ -491,31 +491,21 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 
 	params := &stripe.SubscriptionParams{
 		Items: items,
-		//ProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
-		ProrationDate: stripe.Int64(subscriptionRo.ProrationDate),
 	}
-	if usePendingUpdate {
+	if subscriptionRo.PayImmediate {
+		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
+	} else {
+		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
 	}
-	// todo mark 降级不立即收取费用
-	params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
-	////尝试创建发票
-	//invoiceParams := &stripe.InvoiceParams{
-	//	Customer:     stripe.String(subscriptionRo.Subscription.ChannelUserId),
-	//	Subscription: stripe.String(updateSubscription.ID),
-	//}
-	//createInvoice, err := invoice.New(invoiceParams)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//createInvoiceJsonData, _ := gjson.Marshal(createInvoice)
-	//g.Log().Infof(ctx, "create invoice:", createInvoiceJsonData)
-	////todo mark 直接可能会直接支付掉，需要测试不会直接支付的情况
+
+	////todo mark PayImmediate=false 获取的发票可能不是当前更新产生的发票，需要确认
 	queryParams := &stripe.InvoiceParams{}
 	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
@@ -529,7 +519,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Link:                      queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
 		Paid:                      queryParamsResult.Paid,
-	}, nil //todo mark
+	}, nil
 }
 
 // DoRemoteChannelSubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get

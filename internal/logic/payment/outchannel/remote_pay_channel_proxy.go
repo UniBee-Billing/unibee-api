@@ -65,7 +65,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Cont
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, subscription, newTrailEnd)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -77,7 +77,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Co
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdatePreview(ctx, subscriptionRo)
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, subscriptionRo)
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {

@@ -44,7 +44,7 @@ func (e Evonet) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (e Evonet) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

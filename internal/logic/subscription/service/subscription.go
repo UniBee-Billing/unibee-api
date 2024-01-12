@@ -104,8 +104,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		req.Quantity = 1
 	}
 
-	var totalAmount = plan.Amount * req.Quantity
 	var currency = plan.Currency
+
+	var totalAmount = plan.Amount * req.Quantity
 
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
 
@@ -119,16 +120,30 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	//生成临时账单
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-		Currency:    currency,
-		Amount:      req.Quantity * plan.Amount,
-		Description: plan.PlanName,
+		Currency:               currency,
+		Amount:                 req.Quantity * plan.Amount,
+		AmountExcludingTax:     req.Quantity * plan.Amount,
+		UnitAmountExcludingTax: plan.Amount,
+		Description:            plan.PlanName,
 	})
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-			Currency:    currency,
-			Amount:      addon.Quantity * addon.AddonPlan.Amount,
-			Description: addon.AddonPlan.PlanName,
+			Currency:               currency,
+			Amount:                 addon.Quantity * addon.AddonPlan.Amount,
+			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
+			UnitAmountExcludingTax: addon.AddonPlan.Amount,
+			Description:            addon.AddonPlan.PlanName,
 		})
+	}
+
+	invoice := &ro.ChannelDetailInvoiceRo{
+		TotalAmount:                    totalAmount,
+		TotalAmountExcludingTax:        totalAmount,
+		Currency:                       currency,
+		TaxAmount:                      0, // todo mark 暂时不处理 TaxAmount
+		SubscriptionAmount:             totalAmount,
+		SubscriptionAmountExcludingTax: totalAmount,
+		Lines:                          invoiceItems,
 	}
 
 	return &SubscriptionCreatePrepareInternalRes{
@@ -143,13 +158,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		Currency:     currency,
 		UserId:       req.UserId,
 		Email:        email,
-		Invoice: &ro.ChannelDetailInvoiceRo{
-			TotalAmount:        totalAmount,
-			Currency:           currency,
-			TaxAmount:          0, // todo mark 暂时不处理 TaxAmount
-			SubscriptionAmount: totalAmount,
-			Lines:              invoiceItems,
-		},
+		Invoice:      invoice,
 	}, nil
 }
 
@@ -247,23 +256,25 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription   *entity.Subscription                 `json:"subscription"`
-	Plan           *entity.SubscriptionPlan             `json:"planId"`
-	Quantity       int64                                `json:"quantity"`
-	PlanChannel    *entity.SubscriptionPlanChannel      `json:"planChannel"`
-	PayChannel     *entity.OverseaPayChannel            `json:"payChannel"`
-	MerchantInfo   *entity.MerchantInfo                 `json:"merchantInfo"`
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo   `json:"addonParams"`
-	Addons         []*ro.SubscriptionPlanAddonRo        `json:"addons"`
-	TotalAmount    int64                                `json:"totalAmount"                ` // 金额,单位：分
-	Currency       string                               `json:"currency"              `      // 货币
-	UserId         int64                                `json:"userId" `
-	OldPlan        *entity.SubscriptionPlan             `json:"oldPlan"`
-	OldPlanChannel *entity.SubscriptionPlanChannel      `json:"oldPlanChannel"`
-	Invoice        *ro.ChannelDetailInvoiceInternalResp `json:"invoice"`
-	ProrationDate  int64                                `json:"prorationDate"`
+	Subscription   *entity.Subscription               `json:"subscription"`
+	Plan           *entity.SubscriptionPlan           `json:"planId"`
+	Quantity       int64                              `json:"quantity"`
+	PlanChannel    *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel     *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo   *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons         []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount    int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency       string                             `json:"currency"              `      // 货币
+	UserId         int64                              `json:"userId" `
+	OldPlan        *entity.SubscriptionPlan           `json:"oldPlan"`
+	OldPlanChannel *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
+	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	ProrationDate  int64                              `json:"prorationDate"`
+	PayImmediate   bool                               `json:"PayImmediate"`
 }
 
+// SubscriptionUpdatePreview 默认行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantUserId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
@@ -297,28 +308,114 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
 	}
-
 	oldPlan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), sub.ChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
-	updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdatePreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-		Plan:           plan,
-		Quantity:       req.Quantity,
-		OldPlan:        oldPlan,
-		AddonPlans:     addons, //todo mark oldAddonPlans 是否需要传
-		PlanChannel:    planChannel,
-		OldPlanChannel: oldPlanChannel,
-		Subscription:   sub,
-		ProrationDate:  prorationDate,
-	})
-	if err != nil {
-		return nil, err
-	}
-	utility.Assert(strings.Compare(updatePreviewRes.Currency, currency) == 0, fmt.Sprintf("preview currency not match for subscriptionId:%v preview currency:%s", sub.SubscriptionId, updatePreviewRes.Currency))
 
-	var totalAmount = updatePreviewRes.TotalAmount
+	var totalAmount int64
+	var payImmediate = false
+	var invoice *ro.ChannelDetailInvoiceRo
+	//升降级判断逻辑，升级设置payImmediate=true，保障马上能够生效；降级payImmediate=false,下周期生效
+	//情况 1，NewPlan单价大于 OldPlan 单价，判断为升级，忽略Quantity 和 addon 变更
+	//情况 2，NewPlan单价小于 OldPlan 单价，判断为降级，忽略Quantity 和 addon 变更
+	//情况 3，NewPlan总价大于 OldPlan总价，判断为升级
+	//情况 4，NewPlan总价小于 OldPlan总价，判断为降级
+	//情况 5，NewPlan总价等于 OldPlan总价，则看 Addon 的变化，如果 addon 有数量增加情况或者新增 addon 情况为升级，否则降级
+	if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
+		payImmediate = true
+	} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
+		payImmediate = false
+	} else {
+		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
+		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
+		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+		var oldAddonMap = make(map[int64]int64)
+		for _, oldAddon := range oldAddonParams {
+			oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
+		}
+		var newAddonMap = make(map[int64]int64)
+		for _, newAddon := range req.AddonParams {
+			newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
+		}
+		for _, newAddonPlanId := range newAddonMap {
+			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+				if oldAddonQuantity < newAddonMap[newAddonPlanId] {
+					//数量有增加,视为升级
+					payImmediate = true
+				}
+			} else {
+				//新增,视为升级
+				payImmediate = true
+				break
+			}
+		}
+	}
+
+	if payImmediate {
+		updatePreviewRes, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			Plan:           plan,
+			Quantity:       req.Quantity,
+			OldPlan:        oldPlan,
+			AddonPlans:     addons, //todo mark oldAddonPlans 是否需要传
+			PlanChannel:    planChannel,
+			OldPlanChannel: oldPlanChannel,
+			Subscription:   sub,
+			ProrationDate:  prorationDate,
+			PayImmediate:   payImmediate,
+		})
+		if err != nil {
+			return nil, err
+		}
+		utility.Assert(strings.Compare(updatePreviewRes.Currency, currency) == 0, fmt.Sprintf("preview currency not match for subscriptionId:%v preview currency:%s", sub.SubscriptionId, updatePreviewRes.Currency))
+
+		invoice = &ro.ChannelDetailInvoiceRo{
+			TotalAmount:                    updatePreviewRes.Invoice.TotalAmount,
+			TotalAmountExcludingTax:        updatePreviewRes.Invoice.TotalAmountExcludingTax,
+			Currency:                       updatePreviewRes.Invoice.Currency,
+			TaxAmount:                      updatePreviewRes.Invoice.TaxAmount,
+			SubscriptionAmount:             updatePreviewRes.Invoice.SubscriptionAmount,
+			SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
+			Lines:                          updatePreviewRes.Invoice.Lines,
+		}
+		totalAmount = updatePreviewRes.TotalAmount
+		prorationDate = updatePreviewRes.ProrationDate
+	} else {
+		//下周期生效,输出Preview账单
+		var invoiceItems []*ro.ChannelDetailInvoiceItem
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               currency,
+			Amount:                 req.Quantity * plan.Amount,
+			AmountExcludingTax:     req.Quantity * plan.Amount,
+			UnitAmountExcludingTax: plan.Amount,
+			Description:            plan.PlanName,
+		})
+		for _, addon := range addons {
+			invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+				Currency:               currency,
+				Amount:                 addon.Quantity * addon.AddonPlan.Amount,
+				AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
+				UnitAmountExcludingTax: addon.AddonPlan.Amount,
+				Description:            addon.AddonPlan.PlanName,
+			})
+		}
+
+		invoice = &ro.ChannelDetailInvoiceRo{
+			TotalAmount:                    totalAmount,
+			TotalAmountExcludingTax:        totalAmount,
+			Currency:                       currency,
+			TaxAmount:                      0, // todo mark 暂时不处理 TaxAmount
+			SubscriptionAmount:             totalAmount,
+			SubscriptionAmountExcludingTax: totalAmount,
+			Lines:                          invoiceItems,
+		}
+		totalAmount = plan.Amount * req.Quantity
+		for _, addon := range addons {
+			totalAmount = totalAmount + addon.AddonPlan.Amount*addon.Quantity
+		}
+		prorationDate = sub.CurrentPeriodEnd
+	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
 		Subscription:   sub,
@@ -329,13 +426,14 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		MerchantInfo:   merchantInfo,
 		AddonParams:    req.AddonParams,
 		Addons:         addons,
-		TotalAmount:    totalAmount,
 		Currency:       currency,
 		UserId:         sub.UserId,
 		OldPlan:        oldPlan,
 		OldPlanChannel: oldPlanChannel,
-		Invoice:        updatePreviewRes.Invoice,
-		ProrationDate:  updatePreviewRes.ProrationDate,
+		TotalAmount:    totalAmount,
+		Invoice:        invoice,
+		ProrationDate:  prorationDate,
+		PayImmediate:   payImmediate,
 	}, nil
 
 }
@@ -393,6 +491,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		OldPlanChannel: prepare.OldPlanChannel,
 		Subscription:   prepare.Subscription,
 		ProrationDate:  req.ProrationDate,
+		PayImmediate:   prepare.PayImmediate,
 	})
 	if err != nil {
 		return nil, err

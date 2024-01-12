@@ -20,7 +20,7 @@ func (b Blank) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan 
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (b Blank) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

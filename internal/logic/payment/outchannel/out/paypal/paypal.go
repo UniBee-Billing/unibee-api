@@ -50,7 +50,7 @@ func (p Paypal) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (p Paypal) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

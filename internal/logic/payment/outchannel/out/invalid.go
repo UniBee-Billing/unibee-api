@@ -39,7 +39,7 @@ func (i Invalid) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Contex
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelSubscriptionUpdatePreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (i Invalid) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
