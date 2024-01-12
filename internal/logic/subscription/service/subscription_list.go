@@ -12,14 +12,17 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strings"
 )
 
 type SubscriptionListInternalReq struct {
-	MerchantId int64 `p:"merchantId" dc:"MerchantId"`
-	UserId     int64 `p:"userId"  dc:"UserId" `
-	Status     int   `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	Page       int   `p:"page" d:"0"  dc:"分页页码,0开始" `
-	Count      int   `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	MerchantId int64  `p:"merchantId" dc:"MerchantId"`
+	UserId     int64  `p:"userId"  dc:"UserId" `
+	Status     int    `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
+	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscription.SubscriptionDetailRes, error) {
@@ -69,11 +72,22 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if req.Page < 0 {
 		req.Page = 0
 	}
+	var sortKey = "gmt_modify desc"
+	if len(req.SortField) > 0 {
+		utility.Assert(strings.Contains("gmt_create|gmt_modify", req.SortField), "sortField should one of gmt_create|gmt_modify")
+		if len(req.SortType) > 0 {
+			utility.Assert(strings.Contains("asc|desc", req.SortType), "sortType should one of asc|desc")
+			sortKey = req.SortField + " " + req.SortType
+		} else {
+			sortKey = req.SortField + " desc"
+		}
+	}
 	err := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().MerchantId, req.MerchantId).
 		Where(dao.Subscription.Columns().UserId, req.UserId).
 		Where(dao.Subscription.Columns().Status, req.Status).
 		Limit(req.Page*req.Count, req.Count).
+		Order(sortKey).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
 		return nil

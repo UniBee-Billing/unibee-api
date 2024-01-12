@@ -12,6 +12,8 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 		MerchantId: req.MerchantId,
 		UserId:     req.UserId,
 		Status:     req.Status,
+		SortField:  req.SortField,
+		SortType:   req.SortType,
 		Page:       req.Page,
 		Count:      req.Count,
 	})}, nil

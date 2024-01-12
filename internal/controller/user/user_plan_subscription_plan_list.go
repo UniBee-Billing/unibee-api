@@ -14,6 +14,8 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		Type:       req.Type,
 		Status:     consts.PlanStatusPublished,
 		Currency:   req.Currency,
+		SortField:  req.SortField,
+		SortType:   req.SortType,
 		Page:       req.Page,
 		Count:      req.Count,
 	})}, nil
