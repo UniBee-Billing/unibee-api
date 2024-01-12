@@ -16,12 +16,14 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.Subsc
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
 	}
-	
+
 	plans := service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
 		MerchantId: req.MerchantId,
 		Type:       req.Type,
 		Status:     req.Status,
 		Currency:   req.Currency,
+		SortField:  req.SortField,
+		SortType:   req.SortType,
 		Page:       req.Page,
 		Count:      req.Count,
 	})
