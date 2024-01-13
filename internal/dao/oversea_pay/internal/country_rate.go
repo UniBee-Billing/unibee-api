@@ -28,11 +28,11 @@ type CountryRateColumns struct {
 	Longitude             string // longitude
 	Vat                   string // 是否有 vat，1-有，2-没有
 	Eu                    string // 是否欧盟成员国, 1-是，2-不是
-	Provinces             string // provinces 是否包含provinces Rate true or false
-	StandardTypes         string // standard_typs 限定
-	StandardDescription   string // standard_description
-	StandardTaxPencentage string // Standard Tax百分比，10 表示 10%
+	StandardTaxPercentage string // Standard Tax百分比，10 表示 10%
 	Other                 string // other rates(json格式)
+	StandardDescription   string // standard_description
+	StandardTypes         string // standard_typs 限定
+	Provinces             string // provinces 是否包含provinces Rate true or false
 	Mamo                  string // 备注
 	GmtCreate             string // 创建时间
 	GmtModify             string // 更新时间
@@ -49,11 +49,11 @@ var countryRateColumns = CountryRateColumns{
 	Longitude:             "longitude",
 	Vat:                   "vat",
 	Eu:                    "eu",
-	Provinces:             "provinces",
-	StandardTypes:         "standard_types",
-	StandardDescription:   "standard_description",
-	StandardTaxPencentage: "standard_tax_pencentage",
+	StandardTaxPercentage: "standard_tax_percentage",
 	Other:                 "other",
+	StandardDescription:   "standard_description",
+	StandardTypes:         "standard_types",
+	Provinces:             "provinces",
 	Mamo:                  "mamo",
 	GmtCreate:             "gmt_create",
 	GmtModify:             "gmt_modify",

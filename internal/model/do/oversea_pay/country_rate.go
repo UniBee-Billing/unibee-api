@@ -20,11 +20,11 @@ type CountryRate struct {
 	Longitude             interface{} // longitude
 	Vat                   interface{} // 是否有 vat，1-有，2-没有
 	Eu                    interface{} // 是否欧盟成员国, 1-是，2-不是
-	Provinces             interface{} // provinces 是否包含provinces Rate true or false
-	StandardTypes         interface{} // standard_typs 限定
-	StandardDescription   interface{} // standard_description
-	StandardTaxPencentage interface{} // Standard Tax百分比，10 表示 10%
+	StandardTaxPercentage interface{} // Standard Tax百分比，10 表示 10%
 	Other                 interface{} // other rates(json格式)
+	StandardDescription   interface{} // standard_description
+	StandardTypes         interface{} // standard_typs 限定
+	Provinces             interface{} // provinces 是否包含provinces Rate true or false
 	Mamo                  interface{} // 备注
 	GmtCreate             *gtime.Time // 创建时间
 	GmtModify             *gtime.Time // 更新时间

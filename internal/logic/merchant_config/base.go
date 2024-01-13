@@ -13,7 +13,7 @@ func SetMerchantConfig(ctx context.Context, merchantId int64, configKey string, 
 		ConfigKey:   configKey,
 		ConfigValue: configValue,
 	}
-	_, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	_, err := dao.MerchantConfig.Ctx(ctx).Data(one).OmitEmpty().Save(one)
 	if err != nil {
 		err = gerror.Newf(`SetMerchantConfig %s`, err)
 		return err

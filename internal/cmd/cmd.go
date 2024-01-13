@@ -49,7 +49,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenMerchantAuth,
+					//_interface.Middleware().TokenMerchantAuth,
 				)
 				router.MerchantPlan(ctx, group)
 				router.MerchantWebhook(ctx, group)
@@ -57,6 +57,7 @@ var (
 				router.MerchantSubscrption(ctx, group)
 				router.MerchantInvoice(ctx, group)
 				router.MerchantOss(ctx, group)
+				router.MerchantVat(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {

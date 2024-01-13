@@ -18,11 +18,11 @@ type CountryRate struct {
 	Longitude             string      `json:"longitude"             ` // longitude
 	Vat                   int         `json:"vat"                   ` // 是否有 vat，1-有，2-没有
 	Eu                    int         `json:"eu"                    ` // 是否欧盟成员国, 1-是，2-不是
-	Provinces             string      `json:"provinces"             ` // provinces 是否包含provinces Rate true or false
-	StandardTypes         string      `json:"standardTypes"         ` // standard_typs 限定
-	StandardDescription   string      `json:"standardDescription"   ` // standard_description
-	StandardTaxPencentage int64       `json:"standardTaxPencentage" ` // Standard Tax百分比，10 表示 10%
+	StandardTaxPercentage int64       `json:"standardTaxPercentage" ` // Standard Tax百分比，10 表示 10%
 	Other                 string      `json:"other"                 ` // other rates(json格式)
+	StandardDescription   string      `json:"standardDescription"   ` // standard_description
+	StandardTypes         string      `json:"standardTypes"         ` // standard_typs 限定
+	Provinces             string      `json:"provinces"             ` // provinces 是否包含provinces Rate true or false
 	Mamo                  string      `json:"mamo"                  ` // 备注
 	GmtCreate             *gtime.Time `json:"gmtCreate"             ` // 创建时间
 	GmtModify             *gtime.Time `json:"gmtModify"             ` // 更新时间

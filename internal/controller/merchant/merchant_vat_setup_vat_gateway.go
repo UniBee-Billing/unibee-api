@@ -23,7 +23,10 @@ func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGa
 		return nil, err
 	}
 	if req.IsDefault {
-		vat_gateway.InitMerchantDefaultVatGateway(ctx, req.MerchantId)
+		err := vat_gateway.InitMerchantDefaultVatGateway(ctx, req.MerchantId)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &vat.SetupVatGatewayRes{}, nil
 }

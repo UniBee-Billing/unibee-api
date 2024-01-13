@@ -12,8 +12,8 @@ import (
 )
 
 type VatSense struct {
-	Name     string
 	Password string
+	Name     string
 }
 
 func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
@@ -60,16 +60,8 @@ func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
 	return gjson.LoadJson(string(body))
 }
 
-func (c VatSense) SetVatName(name string) {
-	c.Name = name
-}
-
 func (c VatSense) GetVatName() string {
 	return c.Name
-}
-
-func (c VatSense) SetVatSignData(data string) {
-	c.Password = data
 }
 
 func (c VatSense) ListAllCountries() ([]*entity.CountryRate, error) {
@@ -77,7 +69,7 @@ func (c VatSense) ListAllCountries() ([]*entity.CountryRate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if data.Get("code").Int() != 200 {
+	if data.Get("code").Int() == 200 {
 		var countryRates []*entity.CountryRate
 		for _, item := range data.GetJsons("data") {
 			var vat = 0
@@ -118,6 +110,12 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 		var countryRates []*entity.CountryRate
 		for _, item := range response.GetJsons("data") {
 			standard := item.GetJson("standard")
+			var vat = 0
+			if item.Get("vat") != nil && item.Get("vat").Bool() {
+				vat = 1
+			} else {
+				vat = 2
+			}
 			var eu = 0
 			if item.Get("eu") != nil && item.Get("eu").Bool() {
 				eu = 1
@@ -130,11 +128,12 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 				CountryName:           item.Get("country_name").String(),
 				Latitude:              item.Get("latitude").String(),
 				Longitude:             item.Get("longitude").String(),
+				Vat:                   vat,
 				Eu:                    eu,
 				Provinces:             item.Get("provinces").String(),
 				StandardTypes:         standard.Get("types").String(),
 				StandardDescription:   standard.Get("description").String(),
-				StandardTaxPencentage: standard.Get("rate").Int64(),
+				StandardTaxPercentage: standard.Get("rate").Int64(),
 				Other:                 item.GetJson("other").String(),
 			})
 		}
