@@ -24,7 +24,7 @@ type CountryRate struct {
 	Other                 interface{} // other rates(json格式)
 	StandardDescription   interface{} // standard_description
 	StandardTypes         interface{} // standard_typs 限定
-	Provinces             interface{} // provinces 是否包含provinces Rate true or false
+	Provinces             interface{} // Whether the country has provinces with provincial sales tax
 	Mamo                  interface{} // 备注
 	GmtCreate             *gtime.Time // 创建时间
 	GmtModify             *gtime.Time // 更新时间

@@ -7,6 +7,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/merchant_config"
 	"go-oversea-pay/internal/logic/vat_gateway/base"
+	vat "go-oversea-pay/internal/logic/vat_gateway/github"
 	"go-oversea-pay/internal/logic/vat_gateway/vatsense"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"strings"
@@ -17,14 +18,14 @@ const (
 )
 
 const (
-	VAT_IMPLEMENT_NAMES = "vatsense"
+	VAT_IMPLEMENT_NAMES = "vatsense|github"
 )
 
 type VatCountryRate struct {
-	CountryCode           string `json:"countryCode"           `                                      // country_code
-	CountryName           string `json:"countryName"           `                                      // country_name
-	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
-	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Standard Tax百分比，10 表示 10%"`       // Standard Tax百分比，10 表示 10%
+	CountryCode           string  `json:"countryCode"           `                                      // country_code
+	CountryName           string  `json:"countryName"           `                                      // country_name
+	VatSupport            bool    `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
+	StandardTaxPercentage float64 `json:"standardTaxPercentage"  dc:"Standard Tax百分比，10 表示 10%"`       // Standard Tax百分比，10 表示 10%
 }
 
 func GetDefaultVatGateway(ctx context.Context, merchantId int64) base.Gateway {
@@ -34,6 +35,9 @@ func GetDefaultVatGateway(ctx context.Context, merchantId int64) base.Gateway {
 	}
 	if strings.Compare(vatName, "vatsense") == 0 {
 		one := &vatsense.VatSense{Password: vatData, Name: vatName}
+		return one
+	} else if strings.Compare(vatName, "github") == 0 {
+		one := &vat.Github{Password: vatData, Name: vatName}
 		return one
 	}
 	return nil
@@ -75,26 +79,36 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
 		return err
 	}
-	_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
-	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
-		return err
+	if countries != nil && len(countries) > 0 {
+		_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
+		if err != nil {
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+			return err
+		}
 	}
-	countries, err = gateway.ListAllRates()
+	countryRates, err := gateway.ListAllRates()
 	if err != nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
 		return err
 	}
-	_, err = dao.CountryRate.Ctx(ctx).Data(countries).OnDuplicate(
-		dao.CountryRate.Columns().StandardTypes,
-		dao.CountryRate.Columns().StandardDescription,
-		dao.CountryRate.Columns().StandardTaxPercentage,
-		dao.CountryRate.Columns().Other).
-		OmitEmpty().Save()
-	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
-		return err
+	if countryRates != nil && len(countryRates) > 0 {
+		if countries == nil || len(countries) == 0 {
+			//Country 没数据，全覆盖
+			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
+		} else {
+			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(
+				dao.CountryRate.Columns().StandardTypes,
+				dao.CountryRate.Columns().StandardDescription,
+				dao.CountryRate.Columns().StandardTaxPercentage,
+				dao.CountryRate.Columns().Other).
+				OmitEmpty().Save()
+		}
+		if err != nil {
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+			return err
+		}
 	}
+
 	return nil
 }
 

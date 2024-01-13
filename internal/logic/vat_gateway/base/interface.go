@@ -14,6 +14,6 @@ type Gateway interface {
 	GetVatName() string
 	ListAllCountries() ([]*entity.CountryRate, error)
 	ListAllRates() ([]*entity.CountryRate, error)
-	ValidateVatNumber(varNumber string, requesterVatNumber string) (*ValidResult, error)
+	ValidateVatNumber(vatNumber string, requesterVatNumber string) (*ValidResult, error)
 	ValidateEoriNumber(number string) (*ValidResult, error)
 }

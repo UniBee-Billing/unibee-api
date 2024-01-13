@@ -133,7 +133,7 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 				Provinces:             item.Get("provinces").String(),
 				StandardTypes:         standard.Get("types").String(),
 				StandardDescription:   standard.Get("description").String(),
-				StandardTaxPercentage: standard.Get("rate").Int64(),
+				StandardTaxPercentage: standard.Get("rate").Float64(),
 				Other:                 item.GetJson("other").String(),
 			})
 		}
@@ -143,13 +143,13 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 	}
 }
 
-func (c VatSense) ValidateVatNumber(varNumber string, requesterVatNumber string) (*base.ValidResult, error) {
+func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*base.ValidResult, error) {
 	var response *gjson.Json
 	var err error
 	if len(requesterVatNumber) > 0 {
-		response, err = fetchVatSense("https://api.vatsense.com/1.0/validate?vat_number="+varNumber+"&requester_vat_number="+requesterVatNumber, c.Password)
+		response, err = fetchVatSense("https://api.vatsense.com/1.0/validate?vat_number="+vatNumber+"&requester_vat_number="+requesterVatNumber, c.Password)
 	} else {
-		response, err = fetchVatSense("https://api.vatsense.com/1.0/validate?vat_number="+varNumber, c.Password)
+		response, err = fetchVatSense("https://api.vatsense.com/1.0/validate?vat_number="+vatNumber, c.Password)
 	}
 	if err != nil {
 		return nil, err

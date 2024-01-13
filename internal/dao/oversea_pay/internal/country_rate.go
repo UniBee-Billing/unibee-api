@@ -32,7 +32,7 @@ type CountryRateColumns struct {
 	Other                 string // other rates(json格式)
 	StandardDescription   string // standard_description
 	StandardTypes         string // standard_typs 限定
-	Provinces             string // provinces 是否包含provinces Rate true or false
+	Provinces             string // Whether the country has provinces with provincial sales tax
 	Mamo                  string // 备注
 	GmtCreate             string // 创建时间
 	GmtModify             string // 更新时间

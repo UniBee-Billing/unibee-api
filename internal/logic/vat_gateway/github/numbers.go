@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -98,6 +99,15 @@ func ValidateNumberExistence(n string) (bool, error) {
 	return r.Valid, nil
 }
 
+// ValidateNumberExistenceV2 validates a VAT number by its existence using the VIES VAT API (using SOAP)
+func ValidateNumberExistenceV2(n string) (*ViesResponse, error) {
+	r, err := Lookup(n)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
 // Lookup returns *ViesResponse for a VAT number
 func Lookup(vatNumber string) (*ViesResponse, error) {
 	if len(vatNumber) < 3 {
@@ -113,7 +123,12 @@ func Lookup(vatNumber string) (*ViesResponse, error) {
 	if err != nil {
 		return nil, ErrServiceUnavailable
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(res.Body)
 
 	xmlRes, err := ioutil.ReadAll(res.Body)
 	if err != nil {
