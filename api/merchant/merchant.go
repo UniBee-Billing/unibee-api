@@ -13,6 +13,7 @@ import (
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
 	"go-oversea-pay/api/merchant/subscription"
+	"go-oversea-pay/api/merchant/vat"
 	"go-oversea-pay/api/merchant/webhook"
 )
 
@@ -60,6 +61,11 @@ type IMerchantSubscription interface {
 	SubscriptionAddNewTrialStart(ctx context.Context, req *subscription.SubscriptionAddNewTrialStartReq) (res *subscription.SubscriptionAddNewTrialStartRes, err error)
 	SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error)
 	SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error)
+}
+
+type IMerchantVat interface {
+	SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error)
+	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
 }
 
 type IMerchantWebhook interface {

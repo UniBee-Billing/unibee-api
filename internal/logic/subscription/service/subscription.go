@@ -13,6 +13,7 @@ import (
 	"go-oversea-pay/internal/logic/payment/outchannel"
 	"go-oversea-pay/internal/logic/payment/outchannel/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
+	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -99,6 +100,19 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
+	//vat
+	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat Gateway not setup")
+	//todo mark countryCode 计算税率
+	if len(req.VatNumber) > 0 {
+		validateResult, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
+		if err != nil {
+			return nil, err
+		}
+		if !validateResult.Valid {
+			return nil, gerror.New("vat number validate failure:" + req.VatNumber)
+		}
+	}
+
 	//设置默认值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
@@ -163,6 +177,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 }
 
 func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*subscription.SubscriptionCreateRes, error) {
+
+	utility.Assert(len(req.VatCountryCode) > 0, "VatCountryCode invalid")
+
 	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
 		PlanId:      req.PlanId,
 		Quantity:    req.Quantity,

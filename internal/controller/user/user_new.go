@@ -32,3 +32,9 @@ func NewPlan() user.IUserPlan {
 	return &ControllerPlan{}
 }
 
+type ControllerVat struct{}
+
+func NewVat() user.IUserVat {
+	return &ControllerVat{}
+}
+

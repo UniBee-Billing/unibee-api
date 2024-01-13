@@ -22,14 +22,14 @@ type Invoice struct {
 	Lines                          string      `json:"lines"                          ` // lines json data
 	ChannelId                      int64       `json:"channelId"                      ` // 支付渠道Id
 	Status                         int         `json:"status"                         ` // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
-	SendStatus                     int         `json:"sendStatus"                     ` // 订阅单发送状态，0-No | 1- YES
-	SendEmail                      string      `json:"sendEmail"                      ` // send_email
-	SendPdf                        string      `json:"sendPdf"                        ` // send_pdf
+	SendStatus                     int         `json:"sendStatus"                     ` // 邮件发送状态，0-No | 1- YES
+	SendEmail                      string      `json:"sendEmail"                      ` // email 发送地址，取自 UserAccount 表 email
+	SendPdf                        string      `json:"sendPdf"                        ` // pdf 文件地址
 	UserId                         int64       `json:"userId"                         ` // userId
 	Data                           string      `json:"data"                           ` // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time `json:"gmtModify"                      ` // 修改时间
 	IsDeleted                      int         `json:"isDeleted"                      ` //
-	Link                           string      `json:"link"                           ` //
+	Link                           string      `json:"link"                           ` // invoice 链接（可用于支付）
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf

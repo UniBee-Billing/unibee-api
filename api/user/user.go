@@ -11,6 +11,7 @@ import (
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
+	"go-oversea-pay/api/user/vat"
 )
 
 type IUserAuth interface {
@@ -43,6 +44,10 @@ type IUserSubscription interface {
 	SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error)
 	SubscriptionSuspend(ctx context.Context, req *subscription.SubscriptionSuspendReq) (res *subscription.SubscriptionSuspendRes, err error)
 	SubscriptionResume(ctx context.Context, req *subscription.SubscriptionResumeReq) (res *subscription.SubscriptionResumeRes, err error)
+}
+
+type IUserVat interface {
+	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
 }
 
 

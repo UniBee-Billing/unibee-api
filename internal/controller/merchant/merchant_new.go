@@ -50,3 +50,9 @@ func NewInvoice() merchant.IMerchantInvoice {
 	return &ControllerInvoice{}
 }
 
+type ControllerVat struct{}
+
+func NewVat() merchant.IMerchantVat {
+	return &ControllerVat{}
+}
+

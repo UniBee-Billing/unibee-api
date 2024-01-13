@@ -29,7 +29,7 @@ type SubscriptionListReq struct {
 	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionListRes struct {
-	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
+	Subscriptions []*ro.SubscriptionDetailRo `json:"subscriptions" dc:"订阅明细"`
 }
 
 type SubscriptionCancelReq struct {
