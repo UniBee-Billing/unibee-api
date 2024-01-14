@@ -35,6 +35,23 @@ import (
 type Stripe struct {
 }
 
+func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.CustomerParams{}
+	response, err := customer.Get(customerId, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCustomerBalanceQueryInternalResp{
+		Balance:  response.Balance,
+		Currency: strings.ToUpper(string(response.Currency)),
+		Email:    response.Email,
+	}, nil
+}
+
 func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
@@ -88,6 +105,20 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		PeriodStart:                    detail.PeriodStart,
 		PeriodEnd:                      detail.PeriodEnd,
 	}
+}
+
+func (s Stripe) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.InvoicePayParams{}
+	response, err := invoice.Pay(payInvoiceInternalReq.ChannelInvoiceId, params)
+	return parseStripeInvoice(response, int64(payChannel.Id)), nil
 }
 
 func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {

@@ -183,6 +183,12 @@ type ChannelDetailSubscriptionInternalResp struct {
 	TrailEnd               int64                         `json:"trailEnd"`
 }
 
+type ChannelCustomerBalanceQueryInternalResp struct {
+	Balance  int64  `json:"balance"`
+	Currency string `json:"currency"`
+	Email    string `json:"email"`
+}
+
 type ChannelWebhookSubscriptionInternalResp struct {
 }
 
@@ -191,6 +197,16 @@ type ChannelRedirectInternalResp struct {
 	Message   string `json:"message"`
 	ReturnUrl string `json:"returnUrl"`
 	QueryPath string `json:"queryPath"`
+}
+
+type ChannelCreateInvoiceInternalReq struct {
+}
+
+type ChannelCreateInvoiceInternalResp struct {
+}
+
+type ChannelPayInvoiceInternalReq struct {
+	ChannelInvoiceId string `json:"message"`
 }
 
 type ChannelDetailInvoiceInternalResp struct {
