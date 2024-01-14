@@ -1,4 +1,4 @@
-package outchannel
+package gateway
 
 import (
 	"context"

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/payment/outchannel"
-	"go-oversea-pay/internal/logic/payment/outchannel/util"
+	"go-oversea-pay/internal/logic/payment/gateway"
+	"go-oversea-pay/internal/logic/payment/gateway/util"
 	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
@@ -19,7 +19,7 @@ func ChannelPaymentWebhookEntrance(r *ghttp.Request) {
 		return
 	}
 	payChannel := util.GetOverseaPayChannel(r.Context(), int64(channelIdInt))
-	outchannel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelWebhook(r, payChannel)
+	gateway.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelWebhook(r, payChannel)
 }
 
 func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
@@ -30,7 +30,7 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	payChannel := util.GetOverseaPayChannel(r.Context(), int64(channelIdInt))
-	redirect, err := outchannel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
+	redirect, err := gateway.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
 	if err != nil {
 		r.Response.Writeln(fmt.Sprintf("%v", err))
 		return

@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -73,7 +73,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if len(plan.ChannelProductDescription) == 0 {
 			plan.ChannelProductDescription = plan.Description
 		}
-		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
+		res, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
 		if err != nil {
 			return err
 		}
@@ -94,7 +94,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	}
 	if len(planChannel.ChannelPlanId) == 0 {
 		//创建 并激活 Plan
-		res, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
+		res, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 		if err != nil {
 			return err
 		}

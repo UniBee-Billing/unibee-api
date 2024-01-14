@@ -11,7 +11,7 @@ type PaymentsReq struct {
 	Reference                string             `p:"reference" dc:"取消单号" v:"required"`
 	Amount                   *PayAmountVo       `json:"amount"   in:"query" dc:"具体金额" v:"required"`
 	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"支付方式" v:"required"`
-	PaymentBrandAddition     *gjson.Json        `p:"paymentBrandAddtion" dc:"支付方式补充(Json结构）" v:"required"`
+	PaymentBrandAddition     *gjson.Json        `p:"paymentBrandAddition" dc:"支付方式补充(Json结构）" v:"required"`
 	StorePaymentMethod       bool               `p:"storePaymentMethod" dc:"是否创建令牌" v:"required"`
 	ReturnUrl                string             `p:"returnUrl" dc:"支付完成跳转地址" v:"required"`
 	ShopperLocale            string             `p:"shopperLocale" dc:"语言en_US" v:"required"`
@@ -19,7 +19,7 @@ type PaymentsReq struct {
 	TelephoneNumber          string             `p:"telephoneNumber" dc:"手机号" v:"required"`
 	ShopperEmail             string             `p:"shopperEmail" dc:"用户邮箱" v:"required"`
 	ShopperReference         string             `p:"shopperReference" dc:"shopper唯一Id" v:"required"`
-	Channel                  string             `p:"outchannel" dc:"设备类型（WEB，WAP，APP, MINI, INWALLET）" v:"required"`
+	Channel                  string             `p:"channel" dc:"设备类型（WEB，WAP，APP, MINI, INWALLET）" v:"required"`
 	LineItems                []*OutLineItem     `p:"lineItems" dc:"订单物品" v:"required"`
 	DeviceType               string             `p:"deviceType" dc:"手机类型（Android、iOS）" v:"required"`
 	ShopperIP                string             `p:"shopperIP" dc:"用户ip（v4，v6）" v:"required"`

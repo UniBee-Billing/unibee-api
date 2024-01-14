@@ -1,4 +1,4 @@
-package outchannel
+package gateway
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/payment/outchannel/out"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/evonet"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/paypal"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/stripe"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/out"
+	"go-oversea-pay/internal/logic/payment/gateway/out/evonet"
+	"go-oversea-pay/internal/logic/payment/gateway/out/paypal"
+	"go-oversea-pay/internal/logic/payment/gateway/out/stripe"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )

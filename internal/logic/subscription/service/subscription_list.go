@@ -6,8 +6,8 @@ import (
 	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/payment/outchannel"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -41,7 +41,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		utility.Assert(plan != nil, "invalid planId")
 		utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 		planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
-		details, err := outchannel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
+		details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 		if err == nil {
 			err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
 			if err != nil {

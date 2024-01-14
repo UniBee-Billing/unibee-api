@@ -5,7 +5,7 @@ import (
 	"go-oversea-pay/api/merchant/webhook"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/gateway"
 	"go-oversea-pay/utility"
 )
 
@@ -15,6 +15,6 @@ func (c *ControllerWebhook) SubscriptionWebhookCheckAndSetup(ctx context.Context
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
 	}
-	outchannel.CheckAndSetupPayChannelWebhooks(ctx)
+	gateway.CheckAndSetupPayChannelWebhooks(ctx)
 	return &webhook.SubscriptionWebhookCheckAndSetupRes{}, nil
 }

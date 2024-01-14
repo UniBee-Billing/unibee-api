@@ -2,7 +2,7 @@ package invoice
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 )
 
 type SubscriptionInvoicePdfGenerateReq struct {

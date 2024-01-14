@@ -94,7 +94,7 @@ var (
 			// 通道支付 MerchantWebhook 回调
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{channelId}/notifications", channel_webhook_entry.ChannelPaymentWebhookEntrance)
 			//// 初始化通道 MerchantWebhook 配置
-			//outchannel.CheckAndSetupPayChannelWebhooks(ctx)
+			//gateway.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
 				g.Log().Infof(ctx, "server name: %s ", consts.GetConfigInstance().Server.Name)

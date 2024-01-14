@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/oss"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/handler/generator"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
