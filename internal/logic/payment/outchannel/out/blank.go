@@ -30,6 +30,11 @@ func (b Blank) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscripti
 	panic("implement me")
 }
 
+func (b Blank) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

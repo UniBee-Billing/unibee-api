@@ -39,4 +39,5 @@ type Subscription struct {
 	TrailEnd               int64       `json:"trailEnd"               ` // trail_end
 	ReturnUrl              string      `json:"returnUrl"              ` //
 	FirstPayTime           *gtime.Time `json:"firstPayTime"           ` // 首次支付时间
+	CancelReason           string      `json:"cancelReason"           ` //
 }

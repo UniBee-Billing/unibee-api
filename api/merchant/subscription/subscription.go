@@ -35,6 +35,8 @@ type SubscriptionListRes struct {
 type SubscriptionCancelReq struct {
 	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	InvoiceNow     bool   `p:"invoiceNow" dc:"是否立即生成剩余发票，默认 false"`
+	Prorate        bool   `p:"prorate" dc:"是否按比例计算剩余时间，默认 false"`
 }
 type SubscriptionCancelRes struct {
 }

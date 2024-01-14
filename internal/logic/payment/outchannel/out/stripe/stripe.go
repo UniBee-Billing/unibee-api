@@ -333,6 +333,25 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 }
 
+// DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel?dashboard-or-api=api
+func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionCancelInternalReq.Subscription.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionCancelInternalReq.Subscription.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.SubscriptionCancelParams{}
+	params.InvoiceNow = stripe.Bool(subscriptionCancelInternalReq.InvoiceNow)
+	params.Prorate = stripe.Bool(subscriptionCancelInternalReq.Prorate)
+	response, err := sub.Cancel(subscriptionCancelInternalReq.Subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", params, response, err, "", nil, channelEntity)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
+}
+
 // DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
 func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")

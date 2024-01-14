@@ -136,6 +136,17 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	EffectImmediate bool                            `json:"EffectImmediate"`
 }
 
+type ChannelCancelSubscriptionInternalReq struct {
+	Plan         *entity.SubscriptionPlan        `json:"plan"`
+	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
+	Subscription *entity.Subscription            `json:"subscription"`
+	InvoiceNow   bool                            `json:"invoiceNow"`
+	Prorate      bool                            `json:"prorate"`
+}
+
+type ChannelCancelSubscriptionInternalResp struct {
+}
+
 type ChannelCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 

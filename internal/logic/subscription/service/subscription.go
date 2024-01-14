@@ -586,8 +586,33 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	return true, nil
 }
 
+func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool, invoiceNow bool) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
+	utility.Assert(payChannel != nil, "payChannel not found")
+	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	utility.Assert(merchantInfo != nil, "merchant not found")
+	_, err := outchannel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
+		Plan:         plan,
+		PlanChannel:  planChannel,
+		Subscription: sub,
+		InvoiceNow:   invoiceNow,
+		Prorate:      proration,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// todo mark 在版本2018-02-28之前，发送到更新订阅 API 的任何参数都会停止挂起的取消，需验证
 func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool) error {
-	// todo mark proration 实现
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -609,7 +634,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 		return err
 	}
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 1,
+		dao.Subscription.Columns().CancelAtPeriodEnd: 1, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
 	if err != nil {
@@ -623,7 +648,6 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 }
 
 func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool) error {
-	// todo mark proration 实现
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -645,7 +669,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 		return err
 	}
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
+		dao.Subscription.Columns().CancelAtPeriodEnd: 0, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
 	if err != nil {
