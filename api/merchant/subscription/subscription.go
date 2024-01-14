@@ -33,10 +33,24 @@ type SubscriptionListRes struct {
 }
 
 type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-设置周期结束时取消"`
+	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionCancelRes struct {
+}
+
+type SubscriptionUpdateCancelAtPeriodEndReq struct {
+	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-设置周期结束时取消"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionUpdateCancelAtPeriodEndRes struct {
+}
+
+type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-取消上一次的周期结束时取消设置"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {

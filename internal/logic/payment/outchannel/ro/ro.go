@@ -136,7 +136,10 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	EffectImmediate bool                            `json:"EffectImmediate"`
 }
 
-type ChannelCancelSubscriptionInternalResp struct {
+type ChannelCancelAtPeriodEndSubscriptionInternalResp struct {
+}
+
+type ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionPreviewInternalResp struct {

@@ -125,11 +125,18 @@ type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
 }
 
-type SubscriptionCancelReq struct {
+type SubscriptionUpdateCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅设置周期结束时取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
-type SubscriptionCancelRes struct {
+type SubscriptionUpdateCancelAtPeriodEndRes struct {
+}
+
+type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消上一次的周期结束时取消设置"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {

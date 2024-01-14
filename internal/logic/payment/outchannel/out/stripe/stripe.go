@@ -334,7 +334,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 }
 
 // DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
-func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
@@ -348,7 +348,24 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
+	return &ro.ChannelCancelAtPeriodEndSubscriptionInternalResp{}, nil
+}
+
+func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	//params := &stripe.SubscriptionCancelParams{}
+	//response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
+	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(false)} //使用更新方式取代取消接口
+	response, err := sub.Update(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd", params, response, err, "", nil, channelEntity)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp{}, nil
 }
 
 var usePendingUpdate = true
