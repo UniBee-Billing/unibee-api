@@ -14,7 +14,7 @@ func (i Invalid) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payCha
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+func (i Invalid) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

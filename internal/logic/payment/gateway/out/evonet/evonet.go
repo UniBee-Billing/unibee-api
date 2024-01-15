@@ -39,7 +39,7 @@ func (e Evonet) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChan
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+func (e Evonet) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

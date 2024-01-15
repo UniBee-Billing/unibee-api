@@ -200,9 +200,9 @@ type ChannelRedirectInternalResp struct {
 }
 
 type ChannelCreateInvoiceInternalReq struct {
-}
-
-type ChannelCreateInvoiceInternalResp struct {
+	Invoice     *entity.Invoice `json:"invoice"`
+	PayMethod   int             `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
+	DaysUtilDue int64           `json:"daysUtilDue"`
 }
 
 type ChannelPayInvoiceInternalReq struct {
@@ -219,7 +219,7 @@ type ChannelDetailInvoiceInternalResp struct {
 	Currency                       string                      `json:"currency"           `              // 货币
 	Lines                          []*ChannelDetailInvoiceItem `json:"lines"              `              // lines json data
 	ChannelId                      int64                       `json:"channelId"          `              // 支付渠道Id
-	Status                         consts.InvoiceStatusEnum    `json:"status"             `              // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	Status                         consts.InvoiceStatusEnum    `json:"status"             `              // 订阅单状态，0-Init | 1-Pending ｜2-Processing｜3-paid | 4-failed | 5-cancelled
 	ChannelUserId                  string                      `json:"channelUserId"             `       // channelUserId
 	Link                           string                      `json:"link"               `              //
 	ChannelStatus                  string                      `json:"channelStatus"      `              // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
