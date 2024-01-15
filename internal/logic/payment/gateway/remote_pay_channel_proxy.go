@@ -50,7 +50,7 @@ func (p PayChannelProxy) DoRemoteChannelCustomerBalanceQuery(ctx context.Context
 	return p.getRemoteChannel().DoRemoteChannelCustomerBalanceQuery(ctx, payChannel, customerId)
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {

@@ -15,8 +15,8 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 	//Update 可以由 Admin 操作，service 层不做用户校验
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.SubscriptionUpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
@@ -24,7 +24,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 		Quantity:            req.Quantity,
 		AddonParams:         req.AddonParams,
 		WithImmediateEffect: req.WithImmediateEffect,
-	}, 0, int64(_interface.BizCtx().Get(ctx).Merchant.Id))
+	}, 0, int64(_interface.BizCtx().Get(ctx).MerchantUser.Id))
 	if err != nil {
 		return nil, err
 	}

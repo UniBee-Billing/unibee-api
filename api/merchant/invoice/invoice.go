@@ -35,3 +35,12 @@ type SubscriptionInvoiceListReq struct {
 type SubscriptionInvoiceListRes struct {
 	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"invoices明细"`
 }
+
+type NewInvoiceCreateReq struct {
+	g.Meta      `path:"/new_invoice_create_for_pay" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 创建新发票"`
+	UserId      int   `p:"userId" dc:"UserId" v:"required#请输入userId"`
+	TotalAmount int64 `p:"totalAmount"  dc:"UserId" v:"required#请输入totalAmount" `      // 金额,单位：分
+	Description int64 `p:"description"  dc:"Description" v:"required#请输入description" ` // 金额,单位：分
+}
+type NewInvoiceCreateRes struct {
+}

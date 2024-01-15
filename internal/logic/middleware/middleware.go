@@ -251,7 +251,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 	_interface.BizCtx().Init(r, customCtx)
-	customCtx.Merchant = &model.ContextMerchant{
+	customCtx.MerchantUser = &model.ContextMerchantUser{
 		Id:         u.Id,
 		MerchantId: uint64(merchantAccount.MerchantId),
 		Email:      u.Email,

@@ -42,8 +42,8 @@ func (s *sBizCtx) SetUser(ctx context.Context, ctxUser *model.ContextUser) {
 	s.Get(ctx).User = ctxUser
 }
 
-func (s *sBizCtx) SetMerchantUser(ctx context.Context, ctxMerchantUser *model.ContextMerchant) {
-	s.Get(ctx).Merchant = ctxMerchantUser
+func (s *sBizCtx) SetMerchantUser(ctx context.Context, ctxMerchantUser *model.ContextMerchantUser) {
+	s.Get(ctx).MerchantUser = ctxMerchantUser
 }
 
 // SetData 将上下文信息设置到上下文请求中，注意是完整覆盖
