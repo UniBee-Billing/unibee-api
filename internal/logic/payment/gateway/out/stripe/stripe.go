@@ -18,10 +18,10 @@ import (
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/outchannel/out"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/log"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
-	"go-oversea-pay/internal/logic/payment/outchannel/util"
+	"go-oversea-pay/internal/logic/payment/gateway/out"
+	"go-oversea-pay/internal/logic/payment/gateway/out/log"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/util"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -33,6 +33,23 @@ import (
 )
 
 type Stripe struct {
+}
+
+func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.CustomerParams{}
+	response, err := customer.Get(customerId, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCustomerBalanceQueryInternalResp{
+		Balance:  response.Balance,
+		Currency: strings.ToUpper(string(response.Currency)),
+		Email:    response.Email,
+	}, nil
 }
 
 func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
@@ -90,8 +107,22 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	}
 }
 
+func (s Stripe) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.InvoicePayParams{}
+	response, err := invoice.Pay(payInvoiceInternalReq.ChannelInvoiceId, params)
+	return parseStripeInvoice(response, int64(payChannel.Id)), nil
+}
+
 func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -107,7 +138,7 @@ func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 // DoRemoteChannelSubscriptionNewTrailEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
 func (s Stripe) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -148,7 +179,7 @@ func (s Stripe) setUnibeeAppInfo() {
 func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	{
@@ -333,8 +364,27 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 }
 
+// DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel?dashboard-or-api=api
+func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+	utility.Assert(subscriptionCancelInternalReq.Subscription.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionCancelInternalReq.Subscription.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.SubscriptionCancelParams{}
+	params.InvoiceNow = stripe.Bool(subscriptionCancelInternalReq.InvoiceNow)
+	params.Prorate = stripe.Bool(subscriptionCancelInternalReq.Prorate)
+	response, err := sub.Cancel(subscriptionCancelInternalReq.Subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancel", params, response, err, "", nil, channelEntity)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
+}
+
 // DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
-func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
@@ -348,7 +398,24 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCancelSubscriptionInternalResp{}, nil
+	return &ro.ChannelCancelAtPeriodEndSubscriptionInternalResp{}, nil
+}
+
+func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+	//params := &stripe.SubscriptionCancelParams{}
+	//response, err := sub.Cancel(subscription.ChannelSubscriptionId, params)
+	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(false)} //使用更新方式取代取消接口
+	response, err := sub.Update(subscription.ChannelSubscriptionId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd", params, response, err, "", nil, channelEntity)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp{}, nil
 }
 
 var usePendingUpdate = true
@@ -526,7 +593,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionParams{}
@@ -662,7 +729,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
@@ -678,7 +745,7 @@ func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entit
 func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
@@ -694,7 +761,7 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ChannelCreateProductInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.ProductParams{
@@ -723,7 +790,7 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ChannelCreatePlanInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.PlanParams{

@@ -6,6 +6,7 @@ import (
 	_ "go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/model"
+	"go-oversea-pay/internal/query"
 	utility "go-oversea-pay/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -89,7 +90,7 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	_interface.BizCtx().Init(r, customCtx)
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
-			Id:          userEntity.Id,
+			Id: userEntity.Id,
 			// MobilePhone: userEntity.Mobile,
 			// UserName:    userEntity.UserName,
 			// AvatarUrl:   userEntity.AvatarUrl,
@@ -114,7 +115,7 @@ func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 	_interface.BizCtx().Init(r, customCtx)
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
-			Id:          userEntity.Id,
+			Id: userEntity.Id,
 			// MobilePhone: userEntity.Mobile,
 			// UserName:    userEntity.UserName,
 			// AvatarUrl:   userEntity.AvatarUrl,
@@ -158,7 +159,7 @@ func (s *SMiddleware) Auth(r *ghttp.Request) {
 
 // later define a merchantClaim
 type UserClaims struct {
-	Id uint64 `json:"id"`
+	Id    uint64 `json:"id"`
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
@@ -204,7 +205,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	}
 	_interface.BizCtx().Init(r, customCtx)
 	customCtx.User = &model.ContextUser{
-		Id: u.Id,
+		Id:    u.Id,
 		Email: u.Email,
 	}
 
@@ -243,10 +244,17 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
+	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
+	if !token.Valid {
+		fmt.Println("merchant user not found")
+		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
+		r.Exit()
+	}
 	_interface.BizCtx().Init(r, customCtx)
 	customCtx.Merchant = &model.ContextMerchant{
-		Id: u.Id,
-		Email: u.Email,
+		Id:         u.Id,
+		MerchantId: uint64(merchantAccount.MerchantId),
+		Email:      u.Email,
 	}
 
 	r.Assigns(g.Map{

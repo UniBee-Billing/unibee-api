@@ -9,10 +9,10 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/outchannel/out"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/log"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
-	"go-oversea-pay/internal/logic/payment/outchannel/util"
+	"go-oversea-pay/internal/logic/payment/gateway/out"
+	"go-oversea-pay/internal/logic/payment/gateway/out/log"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/util"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -38,6 +38,21 @@ import (
 //APIBaseLive = "https://api-m.paypal.com"
 
 type Paypal struct {
+}
+
+func (p Paypal) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p Paypal) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -148,8 +163,13 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	}, nil
 }
 
+func (p Paypal) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 // todo mark paypal 的 cancel 似乎是无法恢复的，和 stripe 不一样，需要确认是否有真实 cancel 的需求
-func (p Paypal) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (p Paypal) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	utility.Assert(len(planChannel.ChannelProductId) > 0, "Product未创建")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
@@ -165,7 +185,12 @@ func (p Paypal) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 		return nil, err
 	} // cancelReason
 
-	return &ro.ChannelCancelSubscriptionInternalResp{}, nil //todo mark
+	return &ro.ChannelCancelAtPeriodEndSubscriptionInternalResp{}, nil //todo mark
+}
+
+func (p Paypal) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 // Int returns a pointer to the int64 value passed in.

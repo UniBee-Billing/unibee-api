@@ -3,7 +3,7 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -37,12 +37,14 @@ type SubscriptionChannelsRes struct {
 }
 
 type SubscriptionCreatePreviewReq struct {
-	g.Meta      `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建预览（仅计算）"`
-	PlanId      int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity    int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	ChannelId   int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
-	UserId      int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
-	AddonParams []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建预览（仅计算）"`
+	PlanId         int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+	Quantity       int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
+	ChannelId      int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ConfirmChannelId" `
+	UserId         int64                              `p:"UserId" dc:"UserId" v:"required#请输入UserId"`
+	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	VatCountryCode string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName 缩写，Vat 接口输出"`
+	VatNumber      string                             `p:"VatNumber" dc:"VatNumber, 用户输入，用于验证" `
 }
 type SubscriptionCreatePreviewRes struct {
 	Plan        *entity.SubscriptionPlan           `json:"planId"`
@@ -67,6 +69,8 @@ type SubscriptionCreateReq struct {
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
 	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 	ReturnUrl          string                             `p:"returnUrl"  dc:"回调地址"  `
+	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName 缩写，Vat 接口输出" v:"required#请输入VatCountryCode"`
+	VatNumber          string                             `p:"VatNumber" dc:"VatNumber, 用户输入，用于验证" `
 }
 type SubscriptionCreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
@@ -121,11 +125,18 @@ type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
 }
 
-type SubscriptionCancelReq struct {
+type SubscriptionUpdateCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅设置周期结束时取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
-type SubscriptionCancelRes struct {
+type SubscriptionUpdateCancelAtPeriodEndRes struct {
+}
+
+type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消上一次的周期结束时取消设置"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {

@@ -2,12 +2,11 @@ package merchant
 
 import (
 	"context"
+	"go-oversea-pay/api/merchant/subscription"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/subscription/service"
 	"go-oversea-pay/utility"
-
-	"go-oversea-pay/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error) {
@@ -18,7 +17,7 @@ func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *su
 		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
 	}
 
-	err = service.SubscriptionCancel(ctx, req.SubscriptionId, false)
+	err = service.SubscriptionCancel(ctx, req.SubscriptionId, req.Prorate, req.InvoiceNow)
 	if err != nil {
 		return nil, err
 	}

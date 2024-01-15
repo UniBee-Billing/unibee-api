@@ -136,7 +136,21 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	EffectImmediate bool                            `json:"EffectImmediate"`
 }
 
+type ChannelCancelSubscriptionInternalReq struct {
+	Plan         *entity.SubscriptionPlan        `json:"plan"`
+	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
+	Subscription *entity.Subscription            `json:"subscription"`
+	InvoiceNow   bool                            `json:"invoiceNow"`
+	Prorate      bool                            `json:"prorate"`
+}
+
 type ChannelCancelSubscriptionInternalResp struct {
+}
+
+type ChannelCancelAtPeriodEndSubscriptionInternalResp struct {
+}
+
+type ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionPreviewInternalResp struct {
@@ -169,6 +183,12 @@ type ChannelDetailSubscriptionInternalResp struct {
 	TrailEnd               int64                         `json:"trailEnd"`
 }
 
+type ChannelCustomerBalanceQueryInternalResp struct {
+	Balance  int64  `json:"balance"`
+	Currency string `json:"currency"`
+	Email    string `json:"email"`
+}
+
 type ChannelWebhookSubscriptionInternalResp struct {
 }
 
@@ -177,6 +197,16 @@ type ChannelRedirectInternalResp struct {
 	Message   string `json:"message"`
 	ReturnUrl string `json:"returnUrl"`
 	QueryPath string `json:"queryPath"`
+}
+
+type ChannelCreateInvoiceInternalReq struct {
+}
+
+type ChannelCreateInvoiceInternalResp struct {
+}
+
+type ChannelPayInvoiceInternalReq struct {
+	ChannelInvoiceId string `json:"message"`
 }
 
 type ChannelDetailInvoiceInternalResp struct {

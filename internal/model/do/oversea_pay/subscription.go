@@ -41,4 +41,5 @@ type Subscription struct {
 	TrailEnd               interface{} // trail_end
 	ReturnUrl              interface{} //
 	FirstPayTime           *gtime.Time // 首次支付时间
+	CancelReason           interface{} //
 }

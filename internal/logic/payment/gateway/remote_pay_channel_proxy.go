@@ -1,4 +1,4 @@
-package outchannel
+package gateway
 
 import (
 	"context"
@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/payment/outchannel/out"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/evonet"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/paypal"
-	"go-oversea-pay/internal/logic/payment/outchannel/out/stripe"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/out"
+	"go-oversea-pay/internal/logic/payment/gateway/out/evonet"
+	"go-oversea-pay/internal/logic/payment/gateway/out/paypal"
+	"go-oversea-pay/internal/logic/payment/gateway/out/stripe"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
@@ -33,6 +33,51 @@ var (
 
 type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
+}
+
+func (p PayChannelProxy) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelCustomerBalanceQuery(ctx, payChannel, customerId)
+}
+
+func (p PayChannelProxy) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelInvoiceCreate(ctx, payChannel, createInvoiceInternalReq)
+}
+
+func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelInvoicePay(ctx, payChannel, payInvoiceInternalReq)
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -112,7 +157,22 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, subscriptionCancelInternalReq)
+}
+
+func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -125,6 +185,21 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx contex
 		}
 	}()
 	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+}
+
+func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("exception panic error:%s\n", err)
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {

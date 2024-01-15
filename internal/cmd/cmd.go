@@ -49,7 +49,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenMerchantAuth,
+					//_interface.Middleware().TokenMerchantAuth,
 				)
 				router.MerchantPlan(ctx, group)
 				router.MerchantWebhook(ctx, group)
@@ -57,6 +57,7 @@ var (
 				router.MerchantSubscrption(ctx, group)
 				router.MerchantInvoice(ctx, group)
 				router.MerchantOss(ctx, group)
+				router.MerchantVat(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
@@ -93,7 +94,7 @@ var (
 			// 通道支付 MerchantWebhook 回调
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{channelId}/notifications", channel_webhook_entry.ChannelPaymentWebhookEntrance)
 			//// 初始化通道 MerchantWebhook 配置
-			//outchannel.CheckAndSetupPayChannelWebhooks(ctx)
+			//gateway.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
 				g.Log().Infof(ctx, "server name: %s ", consts.GetConfigInstance().Server.Name)

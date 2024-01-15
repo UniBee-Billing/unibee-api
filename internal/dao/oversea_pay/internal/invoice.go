@@ -32,14 +32,14 @@ type InvoiceColumns struct {
 	Lines                          string // lines json data
 	ChannelId                      string // 支付渠道Id
 	Status                         string // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
-	SendStatus                     string // 订阅单发送状态，0-No | 1- YES
-	SendEmail                      string // send_email
-	SendPdf                        string // send_pdf
+	SendStatus                     string // 邮件发送状态，0-No | 1- YES
+	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
+	SendPdf                        string // pdf 文件地址
 	UserId                         string // userId
 	Data                           string // 渠道额外参数，JSON格式
 	GmtModify                      string // 修改时间
 	IsDeleted                      string //
-	Link                           string //
+	Link                           string // invoice 链接（可用于支付）
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf

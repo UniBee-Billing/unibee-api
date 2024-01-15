@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
@@ -19,7 +19,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
 
 	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		//事务处理 outchannel capture
+		//事务处理 gateway capture
 		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.OverseaPay.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
 			g.Map{dao.OverseaPay.Columns().Id: overseaPay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
 		if err != nil || result == nil {
@@ -33,7 +33,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 		}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		_, err = outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCapture(ctx, overseaPay)
+		_, err = gateway.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCapture(ctx, overseaPay)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

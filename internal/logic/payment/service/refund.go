@@ -11,7 +11,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/event"
-	"go-oversea-pay/internal/logic/payment/outchannel"
+	"go-oversea-pay/internal/logic/payment/gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -27,7 +27,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(overseaPay.PayStatus == consts.PAY_SUCCESS, "payment not success")
 
 	channel := query.GetPayChannelById(ctx, overseaPay.ChannelId)
-	utility.Assert(channel != nil, "支付渠道异常 outchannel not found")
+	utility.Assert(channel != nil, "支付渠道异常 gateway not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Value <= overseaPay.PaymentFee, "refund value should <= PaymentFee value")
@@ -77,7 +77,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, overseaRefund.OutRefundNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 outchannel refund
+			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
 			insert, err := dao.OverseaRefund.Ctx(ctx).Data(overseaRefund).OmitEmpty().Insert(overseaRefund)
 			if err != nil {
@@ -92,7 +92,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			overseaRefund.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelResult, err := outchannel.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
+			channelResult, err := gateway.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err

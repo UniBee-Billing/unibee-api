@@ -2,7 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -29,14 +29,30 @@ type SubscriptionListReq struct {
 	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionListRes struct {
-	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
+	Subscriptions []*ro.SubscriptionDetailRo `json:"subscriptions" dc:"订阅明细"`
 }
 
 type SubscriptionCancelReq struct {
+	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅取消"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	InvoiceNow     bool   `p:"invoiceNow" dc:"是否立即生成剩余发票，默认 false"`
+	Prorate        bool   `p:"prorate" dc:"是否按比例计算剩余时间，默认 false"`
+}
+type SubscriptionCancelRes struct {
+}
+
+type SubscriptionUpdateCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-设置周期结束时取消"`
 	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
-type SubscriptionCancelRes struct {
+type SubscriptionUpdateCancelAtPeriodEndRes struct {
+}
+
+type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-取消上一次的周期结束时取消设置"`
+	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+}
+type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {

@@ -24,14 +24,14 @@ type Invoice struct {
 	Lines                          interface{} // lines json data
 	ChannelId                      interface{} // 支付渠道Id
 	Status                         interface{} // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
-	SendStatus                     interface{} // 订阅单发送状态，0-No | 1- YES
-	SendEmail                      interface{} // send_email
-	SendPdf                        interface{} // send_pdf
+	SendStatus                     interface{} // 邮件发送状态，0-No | 1- YES
+	SendEmail                      interface{} // email 发送地址，取自 UserAccount 表 email
+	SendPdf                        interface{} // pdf 文件地址
 	UserId                         interface{} // userId
 	Data                           interface{} // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time // 修改时间
 	IsDeleted                      interface{} //
-	Link                           interface{} //
+	Link                           interface{} // invoice 链接（可用于支付）
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf

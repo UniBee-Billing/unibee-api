@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/payment/outchannel/ro"
+	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/service"
 
 	"go-oversea-pay/api/user/subscription"
