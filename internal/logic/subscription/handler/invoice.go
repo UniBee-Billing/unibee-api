@@ -118,6 +118,13 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 
 	if change {
 		//脱离草稿状态每次变化都生成并发送邮件
+		//  1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
+		// 发送 Invoice  Email 节点
+		// 1、Invoice 状态从 Pending->Processing 等待用户支付
+		// 2、Invoice 状态从 Pending->Paid (自动支付）
+		// 3、Invoice 状态从 Processing->Paid（手动支付）
+		// 4、Invoice 状态从 Processing->Cancelled（手动取消）
+		// 5、Invoice 状态从 Processing->Failed (支付超时->支付失败）
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId, true)
 	}
 

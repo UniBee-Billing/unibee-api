@@ -42,4 +42,8 @@ type Subscription struct {
 	ReturnUrl              interface{} //
 	FirstPayTime           *gtime.Time // 首次支付时间
 	CancelReason           interface{} //
+	CountryCode            interface{} //
+	VatNumber              interface{} //
+	TaxPercentage          interface{} //
+	VatVerifyData          interface{} //
 }

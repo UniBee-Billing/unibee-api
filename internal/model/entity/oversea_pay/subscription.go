@@ -40,4 +40,8 @@ type Subscription struct {
 	ReturnUrl              string      `json:"returnUrl"              ` //
 	FirstPayTime           *gtime.Time `json:"firstPayTime"           ` // 首次支付时间
 	CancelReason           string      `json:"cancelReason"           ` //
+	CountryCode            string      `json:"countryCode"            ` //
+	VatNumber              string      `json:"vatNumber"              ` //
+	TaxPercentage          float64     `json:"taxPercentage"          ` //
+	VatVerifyData          string      `json:"vatVerifyData"          ` //
 }

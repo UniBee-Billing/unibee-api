@@ -153,3 +153,32 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCount
 	}
 	return list, nil
 }
+
+func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*VatCountryRate, error) {
+	gateway := GetDefaultVatGateway(ctx, merchantId)
+	if gateway == nil {
+		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
+		return nil, gerror.New("default vat gateway not setup")
+	}
+	var one *entity.CountryRate
+	err := dao.CountryRate.Ctx(ctx).
+		Where(dao.CountryRate.Columns().IsDeleted, 0).
+		Where(dao.CountryRate.Columns().VatName, gateway.GetVatName()).
+		Where(dao.CountryRate.Columns().CountryName, countryCode).
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil, err
+	}
+	var vatSupport = false
+	if one.Vat == 1 {
+		vatSupport = true
+	} else {
+		vatSupport = false
+	}
+	return &VatCountryRate{
+		CountryCode:           one.CountryCode,
+		CountryName:           one.CountryName,
+		VatSupport:            vatSupport,
+		StandardTaxPercentage: one.StandardTaxPercentage,
+	}, nil
+}
