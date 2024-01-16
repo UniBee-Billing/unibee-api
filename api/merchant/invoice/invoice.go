@@ -62,6 +62,13 @@ type NewInvoiceEditRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
 }
 
+type DeletePendingInvoiceReq struct {
+	g.Meta    `path:"/new_invoice_delete" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 删除Pending 状态的发票"`
+	InvoiceId string `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
+}
+type DeletePendingInvoiceRes struct {
+}
+
 type ProcessInvoiceForPayReq struct {
 	g.Meta      `path:"/finish_new_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 完成新发票，生成支付链接或者完成自动支付"`
 	InvoiceId   string `p:"invoiceId" dc:"invoiceId" v:"required#请输入InvoiceId"`
@@ -70,4 +77,11 @@ type ProcessInvoiceForPayReq struct {
 }
 type ProcessInvoiceForPayRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
+}
+
+type CancelProcessingInvoiceReq struct {
+	g.Meta    `path:"/cancel_processing_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 取消Processing 的发票"`
+	InvoiceId string `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
+}
+type CancelProcessingInvoiceRes struct {
 }

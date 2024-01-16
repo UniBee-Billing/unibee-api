@@ -73,6 +73,8 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
+	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
+	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	if req.ChannelId > 0 {
 		payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
 		utility.Assert(payChannel != nil, "payChannel not found")
@@ -129,9 +131,70 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	return &invoice.NewInvoiceEditRes{Invoice: one}, nil
 }
 
+func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
+	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
+	if one.IsDeleted == 1 {
+		return nil
+	} else {
+		//更新 Subscription
+		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().IsDeleted: 0,
+			dao.Invoice.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("EditInvoice update err:%s", update)
+		}
+		return nil
+	}
+}
+
+func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
+	if one.Status == consts.InvoiceStatusCancelled {
+		return nil
+	}
+	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in pending status")
+	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
+	if one.IsDeleted == 1 {
+		return nil
+	} else {
+		payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
+		utility.Assert(payChannel != nil, "payChannel not found")
+		_, err := gateway.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCancel(ctx, payChannel, &ro.ChannelCancelInvoiceInternalReq{
+			ChannelInvoiceId: one.ChannelInvoiceId,
+		})
+		if err != nil {
+			return gerror.Newf(`FinishInvoice failure %v`, err)
+		}
+		// todo mark 重新生成 cancel 状态的 pdf 并发送邮件
+		//更新 Subscription
+		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().Status:    consts.InvoiceStatusCancelled,
+			dao.Invoice.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("EditInvoice update err:%s", update)
+		}
+		return nil
+	}
+}
+
 func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*invoice.ProcessInvoiceForPayRes, error) {
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
+	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
+	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 	var lines []*ro.NewInvoiceItem
@@ -167,7 +230,8 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	one.Status = int(createRes.Status)
 	one.Link = createRes.Link
 	one.ChannelUserId = createRes.ChannelUserId
-	//todo mark 下面的流程
+	// todo mark 下面的流程
+	// todo mark 生成 pdf 并发送邮件
 
 	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil
 }

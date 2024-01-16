@@ -213,7 +213,11 @@ type NewInvoiceItem struct {
 }
 
 type ChannelPayInvoiceInternalReq struct {
-	ChannelInvoiceId string `json:"message"`
+	ChannelInvoiceId string `json:"channelInvoiceId"`
+}
+
+type ChannelCancelInvoiceInternalReq struct {
+	ChannelInvoiceId string `json:"channelInvoiceId"`
 }
 
 type ChannelDetailInvoiceInternalResp struct {
