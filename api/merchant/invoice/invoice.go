@@ -3,6 +3,7 @@ package invoice
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionInvoicePdfGenerateReq struct {
@@ -38,9 +39,14 @@ type SubscriptionInvoiceListRes struct {
 
 type NewInvoiceCreateReq struct {
 	g.Meta      `path:"/new_invoice_create_for_pay" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 创建新发票"`
-	UserId      int   `p:"userId" dc:"UserId" v:"required#请输入userId"`
-	TotalAmount int64 `p:"totalAmount"  dc:"UserId" v:"required#请输入totalAmount" `      // 金额,单位：分
-	Description int64 `p:"description"  dc:"Description" v:"required#请输入description" ` // 金额,单位：分
+	MerchantId  int64                          `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	UserId      int64                          `p:"userId" dc:"UserId" v:"required#请输入userId"`
+	TotalAmount int64                          `p:"totalAmount"  dc:"UserId" v:"required#请输入totalAmount" ` // 金额,单位：分
+	ChannelId   int64                          `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+	Currency    string                         `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" ` // 货币
+	Description string                         `p:"description"  dc:"Description" v:"required#请输入description" `
+	Lines       []*ro.ChannelDetailInvoiceItem `p:"lines"              `
 }
 type NewInvoiceCreateRes struct {
+	Invoice *entity.Invoice `json:"invoice" `
 }

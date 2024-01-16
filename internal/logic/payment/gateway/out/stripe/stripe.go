@@ -149,8 +149,8 @@ func (s Stripe) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *en
 		Currency:    stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
 		Amount:      stripe.Int64(createInvoiceInternalReq.Invoice.TotalAmount),
 		Description: stripe.String("默认 Item"),
-		Quantity:    stripe.Int64(1),
-		Customer:    stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
+		//Quantity:    stripe.Int64(1),//需要和 UnitAmount 组合使用
+		Customer: stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
 	// todo mark tax 设置
 	_, err = invoiceitem.New(ItemParams)
 	if err != nil {
@@ -202,7 +202,6 @@ func (s Stripe) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *en
 	}
 
 	return &ro.ChannelDetailInvoiceInternalResp{
-		ChannelSubscriptionId:          detail.Subscription.ID,
 		TotalAmount:                    detail.Total,
 		TotalAmountExcludingTax:        detail.TotalExcludingTax,
 		TaxAmount:                      detail.Tax,

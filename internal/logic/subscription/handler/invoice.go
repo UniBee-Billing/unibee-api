@@ -42,7 +42,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
 	var invoiceId string
-	var change bool = false
+	var change = false
 	if one == nil {
 		//创建
 		one := &entity.Invoice{
