@@ -126,7 +126,7 @@ type ChannelCreateSubscriptionInternalReq struct {
 
 type ChannelUpdateSubscriptionInternalReq struct {
 	Plan            *entity.SubscriptionPlan        `json:"plan"`
-	Quantity        int64                           `p:"quantity" dc:"数量" `
+	Quantity        int64                           `json:"quantity" dc:"数量" `
 	OldPlan         *entity.SubscriptionPlan        `json:"oldPlan"`
 	AddonPlans      []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel     *entity.SubscriptionPlanChannel `json:"planChannel"`
@@ -275,7 +275,7 @@ type InvoiceDetailRo struct {
 	ChannelStatus                  string                      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string                      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string                      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
-	TaxPencentage                  int64                       `json:"taxPencentage"                  ` // Tax百分比，10 表示 10%
+	TaxPercentage                  int64                       `json:"taxPercentage"                  ` // Tax百分比，10 表示 10%
 	SendNote                       string                      `json:"sendNote"                       ` // send_note
 	SendTerms                      string                      `json:"sendTerms"                      ` // send_terms
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分
@@ -285,27 +285,27 @@ type InvoiceDetailRo struct {
 }
 
 type PlanDetailRo struct {
-	Plan     *entity.SubscriptionPlan   `json:"plan" dc:"订阅计划"`
-	Channels []*OutChannelRo            `json:"channels" dc:"订阅计划 Channel 开通明细"`
-	Addons   []*entity.SubscriptionPlan `json:"addons" dc:"订阅计划 Addons 明细"`
-	AddonIds []int64                    `json:"addonIds" dc:"订阅计划 Addon Ids"`
+	Plan     *entity.SubscriptionPlan   `p:"plan" json:"plan" dc:"订阅计划"`
+	Channels []*OutChannelRo            `p:"channels" json:"channels" dc:"订阅计划 Channel 开通明细"`
+	Addons   []*entity.SubscriptionPlan `p:"addons" json:"addons" dc:"订阅计划 Addons 明细"`
+	AddonIds []int64                    `p:"addonIds" json:"addonIds" dc:"订阅计划 Addon Ids"`
 }
 
 type SubscriptionPlanAddonParamRo struct {
-	Quantity    int64 `p:"quantity" dc:"数量，默认 1" `
-	AddonPlanId int64 `p:"addonPlanId" dc:"订阅计划Addon ID"`
+	Quantity    int64 `p:"quantity" json:"quantity" dc:"数量，默认 1" `
+	AddonPlanId int64 `p:"addonPlanId" json:"addonPlanId" dc:"订阅计划Addon ID"`
 }
 
 type SubscriptionPlanAddonRo struct {
-	Quantity         int64                           `p:"quantity" dc:"数量" `
-	AddonPlan        *entity.SubscriptionPlan        `p:"addonPlan" dc:"addonPlan" `
-	AddonPlanChannel *entity.SubscriptionPlanChannel `p:"addonPlanChannel" dc:"addonPlanChannel" `
+	Quantity         int64                           `p:"quantity"  json:"quantity" dc:"数量" `
+	AddonPlan        *entity.SubscriptionPlan        `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
+	AddonPlanChannel *entity.SubscriptionPlanChannel `p:"addonPlanChannel"   json:"addonPlanChannel" dc:"addonPlanChannel" `
 }
 
 type SubscriptionDetailRo struct {
-	Subscription *entity.Subscription            `p:"subscription" dc:"订阅"`
-	Plan         *entity.SubscriptionPlan        `p:"planId" dc:"订阅计划"`
-	Channel      *OutChannelRo                   `json:"channel" dc:"订阅渠道"`
-	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" dc:"订阅Addon参数"`
-	Addons       []*SubscriptionPlanAddonRo      `p:"addons" dc:"订阅Addon"`
+	Subscription *entity.Subscription            `p:"subscription" json:"subscription" dc:"订阅"`
+	Plan         *entity.SubscriptionPlan        `p:"plan" json:"plan" dc:"订阅计划"`
+	Channel      *OutChannelRo                   `p:"channel" json:"channel" dc:"订阅渠道"`
+	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" json:"addonParams" dc:"订阅Addon参数"`
+	Addons       []*SubscriptionPlanAddonRo      `p:"addons" json:"addons" dc:"订阅Addon"`
 }

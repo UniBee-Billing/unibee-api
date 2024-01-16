@@ -164,10 +164,13 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countr
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
 		Where(dao.CountryRate.Columns().VatName, gateway.GetVatName()).
-		Where(dao.CountryRate.Columns().CountryName, countryCode).
+		Where(dao.CountryRate.Columns().CountryCode, countryCode).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil, err
+	}
+	if one == nil {
+		return nil, gerror.New("vat data not found")
 	}
 	var vatSupport = false
 	if one.Vat == 1 {

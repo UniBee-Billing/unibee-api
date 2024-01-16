@@ -27,11 +27,11 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	one := &entity.Invoice{
 		MerchantId:                     req.MerchantId,
 		InvoiceId:                      utility.CreateInvoiceOrderNo(),
-		TotalAmount:                    req.TotalAmount,
-		TotalAmountExcludingTax:        req.TotalAmount,
+		TotalAmount:                    0,
+		TotalAmountExcludingTax:        0,
 		TaxAmount:                      0,
-		SubscriptionAmount:             req.TotalAmount,
-		SubscriptionAmountExcludingTax: req.TotalAmount,
+		SubscriptionAmount:             0,
+		SubscriptionAmountExcludingTax: 0,
 		Currency:                       strings.ToUpper(req.Currency),
 		Lines:                          utility.MarshalToJsonString(req.Lines),
 		ChannelId:                      req.ChannelId,
@@ -48,13 +48,55 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := gateway.GetPayChannelServiceProvider(ctx, req.ChannelId).DoRemoteChannelInvoiceCreate(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
+	return &invoice.NewInvoiceCreateRes{Invoice: one}, nil
+}
+
+func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
+	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
+	if req.ChannelId > 0 {
+		payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
+		utility.Assert(payChannel != nil, "payChannel not found")
+	} else {
+		req.ChannelId = one.ChannelId
+	}
+	if len(req.Currency) == 0 {
+		req.Currency = one.Currency
+	}
+	//更新 Subscription
+	update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().Currency:      req.Currency,
+		dao.Invoice.Columns().TaxPercentage: req.TaxPercentage,
+		dao.Invoice.Columns().ChannelId:     req.ChannelId,
+		dao.Invoice.Columns().Lines:         utility.MarshalToJsonString(req.Lines),
+		dao.Invoice.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+	if err != nil {
+		return nil, err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return nil, gerror.Newf("EditInvoice update err:%s", update)
+	}
+	one.Currency = req.Currency
+	one.TaxPercentage = req.TaxPercentage
+	one.ChannelId = req.ChannelId
+	one.Lines = utility.MarshalToJsonString(req.Lines)
+	return &invoice.NewInvoiceEditRes{Invoice: one}, nil
+}
+
+func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*invoice.ProcessInvoiceForPayRes, error) {
+	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
+	utility.Assert(payChannel != nil, "payChannel not found")
+	createRes, err := gateway.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
 		Invoice:     one,
 		PayMethod:   2,
 		DaysUtilDue: 1, //todo 默认值
 	})
 	if err != nil {
-		return nil, gerror.Newf(`CreateChannelInvoice failure %v`, err)
+		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
 	}
 	//更新 Subscription
 	update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -70,12 +112,12 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	}
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
-		return nil, gerror.Newf("ChannelInvoice update err:%s", update)
+		return nil, gerror.Newf("FinishInvoice update err:%s", update)
 	}
 	one.Status = int(createRes.Status)
 	one.Link = createRes.Link
 	one.ChannelUserId = createRes.ChannelUserId
 	//todo mark 下面的流程
 
-	return &invoice.NewInvoiceCreateRes{Invoice: one}, nil
+	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil
 }

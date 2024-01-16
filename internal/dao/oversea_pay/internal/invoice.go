@@ -43,7 +43,7 @@ type InvoiceColumns struct {
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
-	TaxPencentage                  string // Tax百分比，10 表示 10%
+	TaxPercentage                  string // Tax百分比，10 表示 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
@@ -78,7 +78,7 @@ var invoiceColumns = InvoiceColumns{
 	ChannelStatus:                  "channel_status",
 	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
-	TaxPencentage:                  "tax_pencentage",
+	TaxPercentage:                  "tax_percentage",
 	SendNote:                       "send_note",
 	SendTerms:                      "send_terms",
 	TotalAmountExcludingTax:        "total_amount_excluding_tax",

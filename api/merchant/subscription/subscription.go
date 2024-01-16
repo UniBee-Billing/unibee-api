@@ -34,7 +34,7 @@ type SubscriptionListRes struct {
 
 type SubscriptionCancelReq struct {
 	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅取消"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 	InvoiceNow     bool   `p:"invoiceNow" dc:"是否立即生成剩余发票，默认 false"`
 	Prorate        bool   `p:"prorate" dc:"是否按比例计算剩余时间，默认 false"`
 }
@@ -43,36 +43,36 @@ type SubscriptionCancelRes struct {
 
 type SubscriptionUpdateCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-设置周期结束时取消"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionUpdateCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-取消上一次的周期结束时取消设置"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {
 	g.Meta         `path:"/subscription_suspend" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-暂停"  deprecated:"true"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionSuspendRes struct {
 }
 
 type SubscriptionResumeReq struct {
 	g.Meta         `path:"/subscription_resume" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-恢复"  deprecated:"true"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionResumeRes struct {
 }
 
 type SubscriptionAddNewTrialStartReq struct {
-	g.Meta         `path:"/subscription_add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-添加试用以更改计费周期, 免费期为 currentPeriodEnd到 trailEnd 时间段"`
-	SubscriptionId string `p:"SubscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	TrailEnd       int64  `p:"trailEnd" dc:"新计费周期开始时间（ Unix 时间戳）-上一计费点到新周期之间为试用期，不收费" v:"required#请输入trailEnd"`
+	g.Meta             `path:"/subscription_add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-添加试用以更改计费周期, 免费期为 currentPeriodEnd到 trailEnd 时间段"`
+	SubscriptionId     string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	AppendTrailEndHour int64  `p:"appendTrailEndHour" dc:"添加appendTrailEndHour时间为免费期,单位小时，会在新周期时间点往后顺延生效" v:"required#请输入appendTrailEndHour"`
 }
 type SubscriptionAddNewTrialStartRes struct {
 }
