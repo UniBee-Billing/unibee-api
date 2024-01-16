@@ -133,7 +133,7 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 				Provinces:             item.Get("provinces").String(),
 				StandardTypes:         standard.Get("types").String(),
 				StandardDescription:   standard.Get("description").String(),
-				StandardTaxPercentage: standard.Get("rate").Float64(),
+				StandardTaxPercentage: int64(standard.Get("rate").Float64() * 100),
 				Other:                 item.GetJson("other").String(),
 			})
 		}

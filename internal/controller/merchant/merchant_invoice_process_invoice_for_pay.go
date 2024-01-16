@@ -2,13 +2,21 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"go-oversea-pay/internal/consts"
+	_interface "go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/logic/subscription/service"
+	"go-oversea-pay/utility"
 
 	"go-oversea-pay/api/merchant/invoice"
 )
 
 func (c *ControllerInvoice) ProcessInvoiceForPay(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (res *invoice.ProcessInvoiceForPayRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	if !consts.GetConfigInstance().IsLocal() {
+		//User 检查
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
+		//utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
+	}
+	return service.FinishInvoice(ctx, req)
 }

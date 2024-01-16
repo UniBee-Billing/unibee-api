@@ -33,7 +33,7 @@ type Invoice struct {
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
-	TaxPercentage                  int64       `json:"taxPercentage"                  ` // Tax百分比，10 表示 10%
+	TaxPercentage                  int64       `json:"taxPercentage"                  ` // Tax百分比，万分位，1000 表示 10%
 	SendNote                       string      `json:"sendNote"                       ` // send_note
 	SendTerms                      string      `json:"sendTerms"                      ` // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分

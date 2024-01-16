@@ -59,7 +59,7 @@ func (g Github) ListAllRates() ([]*entity.CountryRate, error) {
 			VatName:               g.GetVatName(),
 			CountryCode:           rate.CountryCode,
 			CountryName:           "", // todo mark
-			StandardTaxPercentage: float64(r),
+			StandardTaxPercentage: int64(r * 100),
 			Vat:                   vat,
 			Other:                 utility.FormatToJsonString(rate),
 		})

@@ -35,7 +35,7 @@ type Invoice struct {
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
-	TaxPercentage                  interface{} // Tax百分比，10 表示 10%
+	TaxPercentage                  interface{} // Tax百分比，万分位，1000 表示 10%
 	SendNote                       interface{} // send_note
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} // 金额(不含税）,单位：分

@@ -200,9 +200,16 @@ type ChannelRedirectInternalResp struct {
 }
 
 type ChannelCreateInvoiceInternalReq struct {
-	Invoice     *entity.Invoice `json:"invoice"`
-	PayMethod   int             `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
-	DaysUtilDue int64           `json:"daysUtilDue"`
+	Invoice      *entity.Invoice   `json:"invoice"`
+	InvoiceLines []*NewInvoiceItem `json:"invoiceLines"`
+	PayMethod    int               `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
+	DaysUtilDue  int               `json:"daysUtilDue"`
+}
+
+type NewInvoiceItem struct {
+	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
+	Description            string `json:"description"`
+	Quantity               int64  `json:"quantity"`
 }
 
 type ChannelPayInvoiceInternalReq struct {
@@ -275,7 +282,7 @@ type InvoiceDetailRo struct {
 	ChannelStatus                  string                      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string                      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string                      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
-	TaxPercentage                  int64                       `json:"taxPercentage"                  ` // Tax百分比，10 表示 10%
+	TaxPercentage                  int64                       `json:"taxPercentage"                  ` // Tax百分比，万分位，1000 表示 10%
 	SendNote                       string                      `json:"sendNote"                       ` // send_note
 	SendTerms                      string                      `json:"sendTerms"                      ` // send_terms
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分

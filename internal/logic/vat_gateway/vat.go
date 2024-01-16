@@ -22,10 +22,10 @@ const (
 )
 
 type VatCountryRate struct {
-	CountryCode           string  `json:"countryCode"           `                                      // country_code
-	CountryName           string  `json:"countryName"           `                                      // country_name
-	VatSupport            bool    `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
-	StandardTaxPercentage float64 `json:"standardTaxPercentage"  dc:"Standard Tax百分比，10 表示 10%"`       // Standard Tax百分比，10 表示 10%
+	CountryCode           string `json:"countryCode"           `                                      // country_code
+	CountryName           string `json:"countryName"           `                                      // country_name
+	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
+	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax百分比，万分位，1000 表示 10%"`          // Standard Tax百分比，10 表示 10%
 }
 
 func GetDefaultVatGateway(ctx context.Context, merchantId int64) base.Gateway {

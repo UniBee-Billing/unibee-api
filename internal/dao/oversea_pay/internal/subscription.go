@@ -23,6 +23,7 @@ type SubscriptionColumns struct {
 	Id                     string //
 	SubscriptionId         string // 订阅id（内部编号）
 	GmtCreate              string // 创建时间
+	GmtModify              string // 修改时间
 	Amount                 string // 金额,单位：分
 	Currency               string // 货币
 	MerchantId             string // 商户Id
@@ -38,7 +39,6 @@ type SubscriptionColumns struct {
 	ChannelUserId          string // 渠道用户 Id
 	CustomerName           string // customer_name
 	CustomerEmail          string // customer_email
-	GmtModify              string // 修改时间
 	IsDeleted              string //
 	Link                   string //
 	ChannelStatus          string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -52,7 +52,7 @@ type SubscriptionColumns struct {
 	CancelReason           string //
 	CountryCode            string //
 	VatNumber              string //
-	TaxPercentage          string //
+	TaxPercentage          string // Tax百分比，万分位，1000 表示 10%
 	VatVerifyData          string //
 }
 
@@ -61,6 +61,7 @@ var subscriptionColumns = SubscriptionColumns{
 	Id:                     "id",
 	SubscriptionId:         "subscription_id",
 	GmtCreate:              "gmt_create",
+	GmtModify:              "gmt_modify",
 	Amount:                 "amount",
 	Currency:               "currency",
 	MerchantId:             "merchant_id",
@@ -76,7 +77,6 @@ var subscriptionColumns = SubscriptionColumns{
 	ChannelUserId:          "channel_user_id",
 	CustomerName:           "customer_name",
 	CustomerEmail:          "customer_email",
-	GmtModify:              "gmt_modify",
 	IsDeleted:              "is_deleted",
 	Link:                   "link",
 	ChannelStatus:          "channel_status",

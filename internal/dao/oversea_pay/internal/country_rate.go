@@ -28,7 +28,7 @@ type CountryRateColumns struct {
 	Longitude             string // longitude
 	Vat                   string // 是否有 vat，1-有，2-没有
 	Eu                    string // 是否欧盟成员国, 1-是，2-不是
-	StandardTaxPercentage string // Standard Tax百分比，10 表示 10%
+	StandardTaxPercentage string // Standard Tax 万分比，1000 表示 10%
 	Other                 string // other rates(json格式)
 	StandardDescription   string // standard_description
 	StandardTypes         string // standard_typs 限定

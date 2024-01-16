@@ -135,7 +135,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	} else {
 		params.CollectionMethod = stripe.String("send_invoice")
 		if createInvoiceInternalReq.DaysUtilDue > 0 {
-			params.DaysUntilDue = stripe.Int64(createInvoiceInternalReq.DaysUtilDue)
+			params.DaysUntilDue = stripe.Int64(int64(createInvoiceInternalReq.DaysUtilDue))
 		}
 		// todo mark tax 设置
 	}
@@ -144,17 +144,19 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 		return nil, err
 	}
 
-	ItemParams := &stripe.InvoiceItemParams{
-		Invoice:     stripe.String(result.ID),
-		Currency:    stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Amount:      stripe.Int64(createInvoiceInternalReq.Invoice.TotalAmount),
-		Description: stripe.String("默认 Item"),
-		//Quantity:    stripe.Int64(1),//需要和 UnitAmount 组合使用
-		Customer: stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
-	// todo mark tax 设置
-	_, err = invoiceitem.New(ItemParams)
-	if err != nil {
-		return nil, err
+	for _, line := range createInvoiceInternalReq.InvoiceLines {
+		ItemParams := &stripe.InvoiceItemParams{
+			Invoice:     stripe.String(result.ID),
+			Currency:    stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
+			UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Description: stripe.String(line.Description),
+			Quantity:    stripe.Int64(line.Quantity),
+			Customer:    stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
+		// todo mark tax 设置
+		_, err = invoiceitem.New(ItemParams)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}

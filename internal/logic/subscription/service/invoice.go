@@ -23,15 +23,34 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
+
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var totalAmountExcludingTax int64 = 0
+	var totalTax int64 = 0
+	for _, line := range req.Lines {
+		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
+		tax := int64(float64(amountExcludingTax) * req.TaxPercentage) // 精度损失问题 todo mark
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               req.Currency,
+			Amount:                 amountExcludingTax + tax,
+			AmountExcludingTax:     amountExcludingTax,
+			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
+			Description:            line.Description,
+		})
+		totalTax = totalTax + tax
+		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
+	}
+	var totalAmount = totalTax + totalAmountExcludingTax
+
 	//创建
 	one := &entity.Invoice{
 		MerchantId:                     req.MerchantId,
 		InvoiceId:                      utility.CreateInvoiceOrderNo(),
-		TotalAmount:                    0,
-		TotalAmountExcludingTax:        0,
-		TaxAmount:                      0,
-		SubscriptionAmount:             0,
-		SubscriptionAmountExcludingTax: 0,
+		TotalAmount:                    totalAmount,
+		TotalAmountExcludingTax:        totalAmountExcludingTax,
+		TaxAmount:                      totalTax,
+		SubscriptionAmount:             totalAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Currency:                       strings.ToUpper(req.Currency),
 		Lines:                          utility.MarshalToJsonString(req.Lines),
 		ChannelId:                      req.ChannelId,
@@ -63,13 +82,38 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	if len(req.Currency) == 0 {
 		req.Currency = one.Currency
 	}
+
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var totalAmountExcludingTax int64 = 0
+	var totalTax int64 = 0
+	for _, line := range req.Lines {
+		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToPercentageFloat(req.TaxPercentage))
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               req.Currency,
+			Amount:                 amountExcludingTax + tax,
+			AmountExcludingTax:     amountExcludingTax,
+			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
+			Description:            line.Description,
+		})
+		totalTax = totalTax + tax
+		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
+	}
+	var totalAmount = totalTax + totalAmountExcludingTax
+
 	//更新 Subscription
 	update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().Currency:      req.Currency,
-		dao.Invoice.Columns().TaxPercentage: req.TaxPercentage,
-		dao.Invoice.Columns().ChannelId:     req.ChannelId,
-		dao.Invoice.Columns().Lines:         utility.MarshalToJsonString(req.Lines),
-		dao.Invoice.Columns().GmtModify:     gtime.Now(),
+		dao.Invoice.Columns().TotalAmount:                    totalAmount,
+		dao.Invoice.Columns().TotalAmountExcludingTax:        totalAmountExcludingTax,
+		dao.Invoice.Columns().TaxAmount:                      totalTax,
+		dao.Invoice.Columns().SubscriptionAmount:             totalAmount,
+		dao.Invoice.Columns().SubscriptionAmountExcludingTax: totalAmountExcludingTax,
+		dao.Invoice.Columns().Currency:                       strings.ToUpper(req.Currency),
+		dao.Invoice.Columns().Currency:                       req.Currency,
+		dao.Invoice.Columns().TaxPercentage:                  req.TaxPercentage,
+		dao.Invoice.Columns().ChannelId:                      req.ChannelId,
+		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(req.Lines),
+		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
@@ -90,10 +134,16 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
+	var lines []*ro.NewInvoiceItem
+	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
+	if err != nil {
+		return nil, err
+	}
 	createRes, err := gateway.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
-		Invoice:     one,
-		PayMethod:   2,
-		DaysUtilDue: 1, //todo 默认值
+		Invoice:      one,
+		InvoiceLines: lines,
+		PayMethod:    req.PayMethod,
+		DaysUtilDue:  req.DaysUtilDue,
 	})
 	if err != nil {
 		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
