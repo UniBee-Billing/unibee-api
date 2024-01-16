@@ -11,7 +11,7 @@ import (
 type Context struct {
 	Session       *ghttp.Session // 当前Session管理对象
 	User          *ContextUser   // 上下文用户信息
-	Merchant      *ContextMerchant
+	MerchantUser  *ContextMerchantUser
 	Data          g.Map // 自定KV变量，业务模块根据需要设置，不固定
 	OpenApiConfig *entity.OpenApiConfig
 }
@@ -26,7 +26,7 @@ type ContextUser struct {
 	Email string
 }
 
-type ContextMerchant struct {
+type ContextMerchantUser struct {
 	Id         uint64 // 用户ID
 	MerchantId uint64 // MerchantId
 	// MobilePhone string // 用户手机号

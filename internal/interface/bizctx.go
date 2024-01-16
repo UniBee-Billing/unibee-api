@@ -12,7 +12,7 @@ type IBizCtx interface {
 	Init(r *ghttp.Request, customCtx *model.Context)
 	Get(ctx context.Context) *model.Context
 	SetUser(ctx context.Context, ctxUser *model.ContextUser)
-	SetMerchantUser(ctx context.Context, ctxMerchant *model.ContextMerchant)
+	SetMerchantUser(ctx context.Context, ctxMerchantUser *model.ContextMerchantUser)
 	SetData(ctx context.Context, data g.Map)
 }
 

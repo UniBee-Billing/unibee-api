@@ -2,9 +2,9 @@ package gateway
 
 import (
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/payment/gateway/out"
 	"go-oversea-pay/internal/logic/payment/gateway/out/evonet"
@@ -43,14 +43,14 @@ func (p PayChannelProxy) DoRemoteChannelCustomerBalanceQuery(ctx context.Context
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
 	return p.getRemoteChannel().DoRemoteChannelCustomerBalanceQuery(ctx, payChannel, customerId)
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoiceCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelCreateInvoiceInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -58,11 +58,11 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCreate(ctx context.Context, payCh
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelInvoiceCreate(ctx, payChannel, createInvoiceInternalReq)
+	return p.getRemoteChannel().DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, createInvoiceInternalReq)
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -73,7 +73,7 @@ func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChann
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -88,7 +88,7 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payC
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -103,7 +103,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Cont
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -118,7 +118,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx c
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -150,7 +150,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -165,7 +165,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -180,7 +180,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx contex
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -195,7 +195,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -210,7 +210,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -225,7 +225,7 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -240,7 +240,7 @@ func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -255,7 +255,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *en
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -270,7 +270,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -285,7 +285,7 @@ func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -300,7 +300,7 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -323,7 +323,7 @@ func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayCo
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -338,7 +338,7 @@ func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -353,7 +353,7 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -368,7 +368,7 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -383,7 +383,7 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()
@@ -398,7 +398,7 @@ func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, p
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("exception panic error:%s\n", err)
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
 			return
 		}
 	}()

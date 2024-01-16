@@ -15,8 +15,8 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).Merchant != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).Merchant.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 	update, err := service.SubscriptionUpdate(ctx, &subscription2.SubscriptionUpdateReq{
 		SubscriptionId:      req.SubscriptionId,
@@ -27,7 +27,7 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 		ConfirmTotalAmount:  req.ConfirmTotalAmount,
 		ConfirmCurrency:     req.ConfirmCurrency,
 		ProrationDate:       req.ProrationDate,
-	}, int64(_interface.BizCtx().Get(ctx).Merchant.Id))
+	}, int64(_interface.BizCtx().Get(ctx).MerchantUser.Id))
 	if err != nil {
 		return nil, err
 	}

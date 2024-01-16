@@ -21,7 +21,7 @@ type Invoice struct {
 	Currency                       string      `json:"currency"                       ` // 货币
 	Lines                          string      `json:"lines"                          ` // lines json data
 	ChannelId                      int64       `json:"channelId"                      ` // 支付渠道Id
-	Status                         int         `json:"status"                         ` // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	Status                         int         `json:"status"                         ` // 订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     int         `json:"sendStatus"                     ` // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string      `json:"sendEmail"                      ` // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string      `json:"sendPdf"                        ` // pdf 文件地址
@@ -33,11 +33,12 @@ type Invoice struct {
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
-	TaxPencentage                  int64       `json:"taxPencentage"                  ` // Tax百分比，10 表示 10%
+	TaxPercentage                  int64       `json:"taxPercentage"                  ` // Tax百分比，10 表示 10%
 	SendNote                       string      `json:"sendNote"                       ` // send_note
 	SendTerms                      string      `json:"sendTerms"                      ` // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" ` // Sub金额(不含税）,单位：分
 	PeriodStart                    int64       `json:"periodStart"                    ` // period_start
 	PeriodEnd                      int64       `json:"periodEnd"                      ` // period_end
+	ChannelUserId                  string      `json:"channelUserId"                  ` // 渠道用户 Id
 }

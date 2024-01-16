@@ -50,6 +50,10 @@ type SubscriptionColumns struct {
 	ReturnUrl              string //
 	FirstPayTime           string // 首次支付时间
 	CancelReason           string //
+	CountryCode            string //
+	VatNumber              string //
+	TaxPercentage          string //
+	VatVerifyData          string //
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -84,6 +88,10 @@ var subscriptionColumns = SubscriptionColumns{
 	ReturnUrl:              "return_url",
 	FirstPayTime:           "first_pay_time",
 	CancelReason:           "cancel_reason",
+	CountryCode:            "country_code",
+	VatNumber:              "vat_number",
+	TaxPercentage:          "tax_percentage",
+	VatVerifyData:          "vat_verify_data",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

@@ -42,7 +42,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
 
 	var invoiceId string
-	var change bool = false
+	var change = false
 	if one == nil {
 		//创建
 		one := &entity.Invoice{
@@ -65,6 +65,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			UserId:                         userId,
 			Data:                           utility.MarshalToJsonString(details),
 			Link:                           details.Link,
+			ChannelUserId:                  details.ChannelUserId,
 			ChannelStatus:                  details.ChannelStatus,
 			ChannelInvoiceId:               details.ChannelInvoiceId,
 			ChannelInvoicePdf:              details.ChannelInvoicePdf,
@@ -101,6 +102,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().ChannelStatus:                  details.ChannelStatus,
 			dao.Invoice.Columns().ChannelInvoiceId:               details.ChannelInvoiceId,
 			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
+			dao.Invoice.Columns().ChannelUserId:                  details.ChannelUserId,
 			dao.Invoice.Columns().Link:                           details.Link,
 			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
@@ -118,6 +120,13 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 
 	if change {
 		//脱离草稿状态每次变化都生成并发送邮件
+		//  1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
+		// 发送 Invoice  Email 节点
+		// 1、Invoice 状态从 Pending->Processing 等待用户支付
+		// 2、Invoice 状态从 Pending->Paid (自动支付）
+		// 3、Invoice 状态从 Processing->Paid（手动支付）
+		// 4、Invoice 状态从 Processing->Cancelled（手动取消）
+		// 5、Invoice 状态从 Processing->Failed (支付超时->支付失败）
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId, true)
 	}
 

@@ -2,24 +2,22 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/subscription/service"
 	"go-oversea-pay/utility"
+
+	"go-oversea-pay/api/merchant/invoice"
 )
 
-func (c *ControllerPlan) SubscriptionPlanChannelActivate(ctx context.Context, req *plan.SubscriptionPlanChannelActivateReq) (res *plan.SubscriptionPlanChannelActivateRes, err error) {
-
+func (c *ControllerInvoice) NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
 
-	err = service.SubscriptionPlanChannelActivate(ctx, req.PlanId, req.ChannelId)
-	if err != nil {
-		return nil, err
-	}
-	return &plan.SubscriptionPlanChannelActivateRes{}, nil
+	return service.CreateInvoice(ctx, req)
 }

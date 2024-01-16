@@ -31,7 +31,7 @@ type InvoiceColumns struct {
 	Currency                       string // 货币
 	Lines                          string // lines json data
 	ChannelId                      string // 支付渠道Id
-	Status                         string // 订阅单状态，0-Init | 1-draft｜2-open｜3-paid | 4-uncollectible | 5-void
+	Status                         string // 订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     string // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string // pdf 文件地址
@@ -43,13 +43,14 @@ type InvoiceColumns struct {
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
-	TaxPencentage                  string // Tax百分比，10 表示 10%
+	TaxPercentage                  string // Tax百分比，10 表示 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
 	PeriodStart                    string // period_start
 	PeriodEnd                      string // period_end
+	ChannelUserId                  string // 渠道用户 Id
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -77,13 +78,14 @@ var invoiceColumns = InvoiceColumns{
 	ChannelStatus:                  "channel_status",
 	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
-	TaxPencentage:                  "tax_pencentage",
+	TaxPercentage:                  "tax_percentage",
 	SendNote:                       "send_note",
 	SendTerms:                      "send_terms",
 	TotalAmountExcludingTax:        "total_amount_excluding_tax",
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
+	ChannelUserId:                  "channel_user_id",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.
