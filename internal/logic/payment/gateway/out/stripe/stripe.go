@@ -166,6 +166,8 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 		finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
 	}
 
+	// todo mark 总价格验证
+
 	detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
 	if err != nil {
 		return nil, err
