@@ -35,7 +35,7 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
-func (p PayChannelProxy) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -47,7 +47,22 @@ func (p PayChannelProxy) DoRemoteChannelCustomerBalanceQuery(ctx context.Context
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelCustomerBalanceQuery(ctx, payChannel, customerId)
+	return p.getRemoteChannel().DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+}
+
+func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			return
+		}
+	}()
+	return p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, customerId)
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {

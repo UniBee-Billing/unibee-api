@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/balance"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/invoice"
@@ -38,7 +39,46 @@ import (
 type Stripe struct {
 }
 
-func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.BalanceParams{}
+	response, err := balance.Get(params)
+	if err != nil {
+		return nil, err
+	}
+
+	var availableBalances []*ro.ChannelBalance
+	for _, item := range response.Available {
+		availableBalances = append(availableBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	var connectReservedBalances []*ro.ChannelBalance
+	for _, item := range response.ConnectReserved {
+		connectReservedBalances = append(connectReservedBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	var pendingBalances []*ro.ChannelBalance
+	for _, item := range response.ConnectReserved {
+		pendingBalances = append(pendingBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	return &ro.ChannelMerchantBalanceQueryInternalResp{
+		AvailableBalance:       availableBalances,
+		ConnectReservedBalance: connectReservedBalances,
+		PendingBalance:         pendingBalances,
+	}, nil
+}
+
+func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
@@ -48,10 +88,32 @@ func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChan
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCustomerBalanceQueryInternalResp{
-		Balance:  response.Balance,
-		Currency: strings.ToUpper(string(response.Currency)),
-		Email:    response.Email,
+	var cashBalances []*ro.ChannelBalance
+	if response.CashBalance != nil {
+		for currency, amount := range response.CashBalance.Available {
+			cashBalances = append(cashBalances, &ro.ChannelBalance{
+				Amount:   amount,
+				Currency: strings.ToUpper(currency),
+			})
+		}
+	}
+
+	var invoiceCreditBalances []*ro.ChannelBalance
+	for currency, amount := range response.InvoiceCreditBalance {
+		invoiceCreditBalances = append(invoiceCreditBalances, &ro.ChannelBalance{
+			Amount:   amount,
+			Currency: strings.ToUpper(currency),
+		})
+	}
+	return &ro.ChannelUserBalanceQueryInternalResp{
+		Balance: &ro.ChannelBalance{
+			Amount:   response.Balance,
+			Currency: strings.ToUpper(string(response.Currency)),
+		},
+		CashBalance:          cashBalances,
+		InvoiceCreditBalance: invoiceCreditBalances,
+		Description:          response.Description,
+		Email:                response.Email,
 	}, nil
 }
 

@@ -185,10 +185,23 @@ type ChannelDetailSubscriptionInternalResp struct {
 	TrailEnd               int64                         `json:"trailEnd"`
 }
 
-type ChannelCustomerBalanceQueryInternalResp struct {
-	Balance  int64  `json:"balance"`
+type ChannelBalance struct {
+	Amount   int64  `json:"amount"`
 	Currency string `json:"currency"`
-	Email    string `json:"email"`
+}
+
+type ChannelUserBalanceQueryInternalResp struct {
+	Balance              *ChannelBalance   `json:"balance"`
+	CashBalance          []*ChannelBalance `json:"cashBalance"`
+	InvoiceCreditBalance []*ChannelBalance `json:"invoiceCreditBalance"`
+	Email                string            `json:"email"`
+	Description          string            `json:"description"`
+}
+
+type ChannelMerchantBalanceQueryInternalResp struct {
+	AvailableBalance       []*ChannelBalance `json:"available"`
+	ConnectReservedBalance []*ChannelBalance `json:"connectReserved"`
+	PendingBalance         []*ChannelBalance `json:"pending"`
 }
 
 type ChannelWebhookSubscriptionInternalResp struct {
