@@ -328,7 +328,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
 		if channelVatRate == nil {
 			params := &stripe.TaxRateParams{
-				DisplayName: stripe.String(subscriptionRo.VatCountryRate.Gateway + "-" + subscriptionRo.VatCountryRate.CountryCode), //todo mark 应用的税率名称，会被展示
+				DisplayName: stripe.String("VAT"),
 				Description: stripe.String(subscriptionRo.VatCountryRate.CountryName),
 				Percentage:  stripe.Float64(utility.ConvertTaxPercentageToPercentageFloat(subscriptionRo.VatCountryRate.StandardTaxPercentage)),
 				Country:     stripe.String(subscriptionRo.VatCountryRate.CountryCode),
