@@ -361,6 +361,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
 	// todo mark addon binding check
+	// todo mark 有变化才能调用
 
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")

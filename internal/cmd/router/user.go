@@ -49,7 +49,7 @@ func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 // UserVat 工具类
 func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
 	// vat 库相关接口
-	group.Group("/vat", func(group *ghttp.RouterGroup) {
+	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewVat(),
 		)
