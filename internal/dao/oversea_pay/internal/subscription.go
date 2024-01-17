@@ -52,7 +52,7 @@ type SubscriptionColumns struct {
 	CancelReason           string //
 	CountryCode            string //
 	VatNumber              string //
-	TaxPercentage          string // Tax百分比，万分位，1000 表示 10%
+	TaxPercentage          string // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          string //
 }
 

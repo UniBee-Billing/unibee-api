@@ -72,11 +72,12 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenUserAuth,
+					//_interface.Middleware().TokenUserAuth,
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
 				router.UserProfile(ctx, group)
+				router.UserVat(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {

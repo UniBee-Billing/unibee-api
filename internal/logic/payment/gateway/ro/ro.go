@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -118,10 +119,11 @@ type ChannelCreateSubscriptionInternalResp struct {
 }
 
 type ChannelCreateSubscriptionInternalReq struct {
-	Plan         *entity.SubscriptionPlan        `json:"plan"`
-	AddonPlans   []*SubscriptionPlanAddonRo      `json:"addonPlans"`
-	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription *entity.Subscription            `json:"subscription"`
+	Plan           *entity.SubscriptionPlan        `json:"plan"`
+	AddonPlans     []*SubscriptionPlanAddonRo      `json:"addonPlans"`
+	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
+	Subscription   *entity.Subscription            `json:"subscription"`
+	VatCountryRate *vat_gateway.VatCountryRate     `json:"vatCountryRate"`
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
@@ -286,7 +288,7 @@ type InvoiceDetailRo struct {
 	ChannelStatus                  string                      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string                      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string                      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
-	TaxPercentage                  int64                       `json:"taxPercentage"                  ` // Tax百分比，万分位，1000 表示 10%
+	TaxPercentage                  int64                       `json:"taxPercentage"                  ` // Tax税率，万分位，1000 表示 10%
 	SendNote                       string                      `json:"sendNote"                       ` // send_note
 	SendTerms                      string                      `json:"sendTerms"                      ` // send_terms
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        ` // 金额(不含税）,单位：分

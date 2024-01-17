@@ -43,7 +43,7 @@ type InvoiceColumns struct {
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
-	TaxPercentage                  string // Tax百分比，万分位，1000 表示 10%
+	TaxPercentage                  string // Tax税率，万分位，1000 表示 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string // 金额(不含税）,单位：分

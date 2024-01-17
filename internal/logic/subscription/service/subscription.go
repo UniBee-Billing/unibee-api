@@ -37,6 +37,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId         int64                              `json:"userId" `
 	Email          string                             `json:"email" `
+	VatCountryRate *vat_gateway.VatCountryRate        `json:"vatCountryRate" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -110,6 +111,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var vatCountryCode = req.VatCountryCode
 	var taxPercentage int64 = 0
 	var vatVerifyData = ""
+	var vatCountryRate *vat_gateway.VatCountryRate
 	if len(req.VatNumber) > 0 {
 		validateResult, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
 		if err != nil {
@@ -194,6 +196,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		UserId:         req.UserId,
 		Email:          email,
 		Invoice:        invoice,
+		VatCountryRate: vatCountryRate,
 	}, nil
 }
 
@@ -252,10 +255,11 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one.Id = uint64(uint(id))
 
 	createRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
-		Plan:         prepare.Plan,
-		AddonPlans:   prepare.Addons,
-		PlanChannel:  prepare.PlanChannel,
-		Subscription: one,
+		Plan:           prepare.Plan,
+		AddonPlans:     prepare.Addons,
+		PlanChannel:    prepare.PlanChannel,
+		VatCountryRate: prepare.VatCountryRate,
+		Subscription:   one,
 	})
 	if err != nil {
 		return nil, err

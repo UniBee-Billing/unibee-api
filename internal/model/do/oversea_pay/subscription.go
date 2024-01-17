@@ -44,6 +44,6 @@ type Subscription struct {
 	CancelReason           interface{} //
 	CountryCode            interface{} //
 	VatNumber              interface{} //
-	TaxPercentage          interface{} // Tax百分比，万分位，1000 表示 10%
+	TaxPercentage          interface{} // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          interface{} //
 }
