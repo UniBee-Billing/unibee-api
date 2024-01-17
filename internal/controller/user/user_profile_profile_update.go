@@ -30,6 +30,8 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 		dao.UserAccount.Columns().TikTok :          req.TikTok,
 		dao.UserAccount.Columns().OtherSocialInfo:	req.OtherSocialInfo,
 		dao.UserAccount.Columns().PaymentMethod :          req.PaymmentMethod,
+		dao.UserAccount.Columns().CountryCode: 		req.CountryCode,
+		dao.UserAccount.Columns().CountryName: 		req.CountryName,
 		dao.UserAccount.Columns().GmtModify:             gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.Id).OmitEmpty().Update()
 	if err != nil {
