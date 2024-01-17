@@ -4,6 +4,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/vat_gateway/base"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -47,16 +48,20 @@ type SubscriptionCreatePreviewReq struct {
 	VatNumber      string                             `p:"vatNumber" dc:"VatNumber, 用户输入，用于验证" `
 }
 type SubscriptionCreatePreviewRes struct {
-	Plan        *entity.SubscriptionPlan           `json:"planId"`
-	Quantity    int64                              `json:"quantity"`
-	PayChannel  *ro.OutChannelRo                   `json:"payChannel"`
-	AddonParams []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons      []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency    string                             `json:"currency"              `      // 货币
-	Invoice     *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	UserId      int64                              `json:"userId" `
-	Email       string                             `json:"email" `
+	Plan              *entity.SubscriptionPlan           `json:"planId"`
+	Quantity          int64                              `json:"quantity"`
+	PayChannel        *ro.OutChannelRo                   `json:"payChannel"`
+	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount       int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency          string                             `json:"currency"              `      // 货币
+	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	UserId            int64                              `json:"userId" `
+	Email             string                             `json:"email" `
+	VatCountryCode    string                             `json:"vatCountryCode"              `
+	VatCountryName    string                             `json:"vatCountryName"              `
+	VatNumber         string                             `json:"vatNumber"              `
+	VatNumberValidate *base.ValidResult                  `json:"vatNumberValidate"              `
 }
 
 type SubscriptionCreateReq struct {
