@@ -14,6 +14,7 @@ type Subscription struct {
 	g.Meta                 `orm:"table:subscription, do:true"`
 	Id                     interface{} //
 	SubscriptionId         interface{} // 订阅id（内部编号）
+	UserId                 interface{} // userId
 	GmtCreate              *gtime.Time // 创建时间
 	GmtModify              *gtime.Time // 修改时间
 	Amount                 interface{} // 金额,单位：分
@@ -24,7 +25,6 @@ type Subscription struct {
 	AddonData              interface{} // plan addon json data
 	ChannelId              interface{} // 支付渠道Id
 	Status                 interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire
-	UserId                 interface{} // userId
 	ChannelSubscriptionId  interface{} // 支付渠道订阅id
 	Data                   interface{} // 渠道额外参数，JSON格式
 	ResponseData           interface{} // 渠道返回参数，JSON格式

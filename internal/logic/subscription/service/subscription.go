@@ -132,8 +132,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var vatCountryName = ""
 	var vatCountryRate *vat_gateway.VatCountryRate
 	var vatNumberValidate *base.ValidResult
+	var err error
 	if len(req.VatNumber) > 0 {
-		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
+		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +145,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	if len(vatCountryCode) > 0 {
-		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
+		vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
 		utility.Assert(err == nil, fmt.Sprintf("vat vatCountryCode check error:%s", err))
 		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vat not found for countryCode:%v", vatCountryCode))
 		vatCountryName = vatCountryRate.CountryName
@@ -174,9 +175,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 		Currency:               currency,
-		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
+		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
-		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
+		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
 		Quantity:               req.Quantity,
@@ -184,15 +185,15 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
-			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
 			Quantity:               addon.Quantity,
 		})
 	}
-	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage))
+	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage))
 	var totalAmount = TotalAmountExcludingTax + taxAmount
 
 	invoice := &ro.ChannelDetailInvoiceRo{
@@ -233,11 +234,13 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	utility.Assert(len(req.VatCountryCode) > 0, "VatCountryCode invalid")
 
 	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
-		PlanId:      req.PlanId,
-		Quantity:    req.Quantity,
-		ChannelId:   req.ChannelId,
-		UserId:      req.UserId,
-		AddonParams: req.AddonParams,
+		PlanId:         req.PlanId,
+		Quantity:       req.Quantity,
+		ChannelId:      req.ChannelId,
+		UserId:         req.UserId,
+		AddonParams:    req.AddonParams,
+		VatCountryCode: req.VatCountryCode,
+		VatNumber:      req.VatNumber,
 	})
 	if err != nil {
 		return nil, err

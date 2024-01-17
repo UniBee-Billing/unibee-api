@@ -22,6 +22,7 @@ type InvoiceDao struct {
 type InvoiceColumns struct {
 	Id                             string //
 	MerchantId                     string // 商户Id
+	UserId                         string // userId
 	SubscriptionId                 string // 订阅id（内部编号）
 	InvoiceId                      string // 发票ID（内部编号）
 	GmtCreate                      string // 创建时间
@@ -35,7 +36,6 @@ type InvoiceColumns struct {
 	SendStatus                     string // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string // pdf 文件地址
-	UserId                         string // userId
 	Data                           string // 渠道额外参数，JSON格式
 	GmtModify                      string // 修改时间
 	IsDeleted                      string //
@@ -57,6 +57,7 @@ type InvoiceColumns struct {
 var invoiceColumns = InvoiceColumns{
 	Id:                             "id",
 	MerchantId:                     "merchant_id",
+	UserId:                         "user_id",
 	SubscriptionId:                 "subscription_id",
 	InvoiceId:                      "invoice_id",
 	GmtCreate:                      "gmt_create",
@@ -70,7 +71,6 @@ var invoiceColumns = InvoiceColumns{
 	SendStatus:                     "send_status",
 	SendEmail:                      "send_email",
 	SendPdf:                        "send_pdf",
-	UserId:                         "user_id",
 	Data:                           "data",
 	GmtModify:                      "gmt_modify",
 	IsDeleted:                      "is_deleted",

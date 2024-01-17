@@ -12,7 +12,7 @@ type ValidResult struct {
 }
 
 type Gateway interface {
-	GetVatName() string
+	GetGatewayName() string
 	ListAllCountries() ([]*entity.CountryRate, error)
 	ListAllRates() ([]*entity.CountryRate, error)
 	ValidateVatNumber(vatNumber string, requesterVatNumber string) (*ValidResult, error)

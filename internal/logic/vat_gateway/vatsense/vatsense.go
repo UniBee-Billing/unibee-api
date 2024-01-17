@@ -60,7 +60,7 @@ func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
 	return gjson.LoadJson(string(body))
 }
 
-func (c VatSense) GetVatName() string {
+func (c VatSense) GetGatewayName() string {
 	return c.Name
 }
 
@@ -85,7 +85,7 @@ func (c VatSense) ListAllCountries() ([]*entity.CountryRate, error) {
 				eu = 2
 			}
 			countryRates = append(countryRates, &entity.CountryRate{
-				VatName:     c.GetVatName(),
+				Gateway:     c.GetGatewayName(),
 				CountryCode: item.Get("country_code").String(),
 				CountryName: item.Get("country_name").String(),
 				Latitude:    item.Get("latitude").String(),
@@ -123,7 +123,7 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 				eu = 2
 			}
 			countryRates = append(countryRates, &entity.CountryRate{
-				VatName:               c.GetVatName(),
+				Gateway:               c.GetGatewayName(),
 				CountryCode:           item.Get("country_code").String(),
 				CountryName:           item.Get("country_name").String(),
 				Latitude:              item.Get("latitude").String(),

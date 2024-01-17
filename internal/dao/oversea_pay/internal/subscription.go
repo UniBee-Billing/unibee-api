@@ -22,6 +22,7 @@ type SubscriptionDao struct {
 type SubscriptionColumns struct {
 	Id                     string //
 	SubscriptionId         string // 订阅id（内部编号）
+	UserId                 string // userId
 	GmtCreate              string // 创建时间
 	GmtModify              string // 修改时间
 	Amount                 string // 金额,单位：分
@@ -32,7 +33,6 @@ type SubscriptionColumns struct {
 	AddonData              string // plan addon json data
 	ChannelId              string // 支付渠道Id
 	Status                 string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire
-	UserId                 string // userId
 	ChannelSubscriptionId  string // 支付渠道订阅id
 	Data                   string // 渠道额外参数，JSON格式
 	ResponseData           string // 渠道返回参数，JSON格式
@@ -60,6 +60,7 @@ type SubscriptionColumns struct {
 var subscriptionColumns = SubscriptionColumns{
 	Id:                     "id",
 	SubscriptionId:         "subscription_id",
+	UserId:                 "user_id",
 	GmtCreate:              "gmt_create",
 	GmtModify:              "gmt_modify",
 	Amount:                 "amount",
@@ -70,7 +71,6 @@ var subscriptionColumns = SubscriptionColumns{
 	AddonData:              "addon_data",
 	ChannelId:              "channel_id",
 	Status:                 "status",
-	UserId:                 "user_id",
 	ChannelSubscriptionId:  "channel_subscription_id",
 	Data:                   "data",
 	ResponseData:           "response_data",

@@ -22,6 +22,8 @@ const (
 )
 
 type VatCountryRate struct {
+	Id                    uint64 `json:"id"  dc:"TaxId"`
+	Gateway               string `json:"gateway"           `                                          // gateway
 	CountryCode           string `json:"countryCode"           `                                      // country_code
 	CountryName           string `json:"countryName"           `                                      // country_name
 	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
@@ -72,23 +74,23 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId int64, vatName strin
 func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetGatewayName())
 	}
 	countries, err := gateway.ListAllCountries()
 	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
 	}
 	if countries != nil && len(countries) > 0 {
 		_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
 		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 			return err
 		}
 	}
 	countryRates, err := gateway.ListAllRates()
 	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
 	}
 	if countryRates != nil && len(countryRates) > 0 {
@@ -104,7 +106,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 				OmitEmpty().Save()
 		}
 		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetVatName(), err)
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gateway:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 			return err
 		}
 	}
@@ -140,7 +142,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 	}
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetGatewayName())
 		return nil, gerror.New("default vat gateway not setup")
 	}
 	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
@@ -155,7 +157,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 		MerchantId:      merchantId,
 		VatNumber:       vatNumber,
 		Valid:           int64(valid),
-		ValidateChannel: gateway.GetVatName(),
+		ValidateChannel: gateway.GetGatewayName(),
 		CountryCode:     result.CountryCode,
 		CompanyName:     result.CompanyName,
 		CompanyAddress:  result.CompanyAddress,
@@ -171,13 +173,13 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
+		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetGatewayName())
 		return nil, gerror.New("default vat gateway not setup")
 	}
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
-		Where(dao.CountryRate.Columns().VatName, gateway.GetVatName()).
+		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
 		Order("country_name").
 		OmitEmpty().Scan(&countryRateList)
 	if err != nil {
@@ -204,13 +206,13 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCount
 func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
+		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetGatewayName())
 		return nil, gerror.New("default vat gateway not setup")
 	}
 	var one *entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
-		Where(dao.CountryRate.Columns().VatName, gateway.GetVatName()).
+		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
 		Where(dao.CountryRate.Columns().CountryCode, countryCode).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -226,6 +228,8 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countr
 		vatSupport = false
 	}
 	return &VatCountryRate{
+		Id:                    one.Id,
+		Gateway:               one.Gateway,
 		CountryCode:           one.CountryCode,
 		CountryName:           one.CountryName,
 		VatSupport:            vatSupport,
