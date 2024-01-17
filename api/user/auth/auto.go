@@ -37,21 +37,23 @@ type LoginOtpVerifyRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta           `path:"/sso/logout" tags:"User-Auth-Controller" method:"post" summary:"1.1 user logout"`
+	g.Meta `path:"/sso/logout" tags:"User-Auth-Controller" method:"post" summary:"1.1 user logout"`
 }
 
 type LogoutRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta    `path:"/sso/register" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户注册"`
-	FirstName string `p:"firstName" dc:"first name" v:"required"`
-	LastName  string `p:"lastName" dc:"last name" v:"required"`
-	Email     string `p:"email" dc:"email" v:"required"`
-	Password  string `p:"password" dc:"password" v:"required"`
-	Phone     string `p:"phone" dc:"phone" `
-	Address   string `p:"address" dc:"adderss"`
-	UserName  string `p:"userName" dc:"userName" v:"required"`
+	g.Meta      `path:"/sso/register" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户注册"`
+	FirstName   string `p:"firstName" dc:"first name" v:"required"`
+	LastName    string `p:"lastName" dc:"last name" v:"required"`
+	Email       string `p:"email" dc:"email" v:"required"`
+	Password    string `p:"password" dc:"password" v:"required"`
+	Phone       string `p:"phone" dc:"phone" `
+	Address     string `p:"address" dc:"adderss"`
+	CountryCode string `p:"countryCode" dc:"countryCode"`
+	CountryName string `p:"countryName" dc:"countryName"`
+	UserName    string `p:"userName" dc:"userName" v:"required"`
 }
 type RegisterRes struct {
 	// User *entity.UserAccount `p:"user" dc:"user"`

@@ -37,18 +37,20 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}
 
 	u := struct {
-		FirstName, LastName, Email, Password, Phone, Address, UserName string
+		FirstName, LastName, Email, Password, Phone, Address, UserName, CountryCode, CountryName string
 	}{}
 	err = json.Unmarshal([]byte(userStr.String()), &u)
 
 	user := &entity.UserAccount{
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Email:     u.Email,
-		Password:  u.Password,
-		Phone:     u.Phone,
-		Address:   u.Address,
-		UserName:  u.UserName,
+		FirstName:   u.FirstName,
+		LastName:    u.LastName,
+		Email:       u.Email,
+		CountryCode: u.CountryCode,
+		CountryName: u.CountryName,
+		Password:    u.Password,
+		Phone:       u.Phone,
+		Address:     u.Address,
+		UserName:    u.UserName,
 	}
 
 	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)

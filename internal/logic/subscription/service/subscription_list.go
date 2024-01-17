@@ -55,7 +55,12 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		one.Data = ""
 		one.ResponseData = ""
 	}
+	user := query.GetUserAccountById(ctx, uint64(one.UserId))
+	if user != nil {
+		user.Password = ""
+	}
 	return &subscription.SubscriptionDetailRes{
+		User:                       user,
 		Subscription:               one,
 		Channel:                    ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
 		Plan:                       query.GetPlanById(ctx, one.PlanId),
@@ -108,7 +113,12 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			sub.Data = ""
 			sub.ResponseData = ""
 		}
+		user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+		if user != nil {
+			user.Password = ""
+		}
 		list = append(list, &ro.SubscriptionDetailRo{
+			User:         user,
 			Subscription: sub,
 			Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, sub.ChannelId)),
 			Plan:         nil,

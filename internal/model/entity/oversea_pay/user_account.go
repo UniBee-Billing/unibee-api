@@ -45,4 +45,6 @@ type UserAccount struct {
 	Facebook        string      `json:"facebook"        ` //
 	OtherSocialInfo string      `json:"otherSocialInfo" ` //
 	PaymentMethod   string      `json:"paymentMethod"   ` //
+	CountryCode     string      `json:"countryCode"     ` // country_code
+	CountryName     string      `json:"countryName"     ` // country_name
 }

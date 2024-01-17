@@ -13,6 +13,7 @@ func (c *ControllerSubscription) SubscriptionDetail(ctx context.Context, req *su
 		return nil, err
 	}
 	return &subscription.SubscriptionDetailRes{
+		User:                       detail.User,
 		Subscription:               detail.Subscription,
 		Plan:                       detail.Plan,
 		Channel:                    detail.Channel,

@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -15,6 +16,20 @@ import (
 //	}
 //	return
 //}
+
+func GetLatestSubscriptionByUserId(ctx context.Context, userId int64, merchantId int64) (one *entity.Subscription) {
+	err := dao.Subscription.Ctx(ctx).
+		Where(entity.Subscription{UserId: userId}).
+		Where(entity.Subscription{MerchantId: merchantId}).
+		Where(entity.Subscription{IsDeleted: 0}).
+		Where(entity.Subscription{Status: consts.SubStatusActive}).
+		OrderDesc(dao.Subscription.Columns().GmtModify).
+		OmitEmpty().Scan(&one) // todo 限制每个用户同时只有一个有效订阅
+	if err != nil {
+		one = nil
+	}
+	return
+}
 
 func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string) (one *entity.Subscription) {
 	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{SubscriptionId: subscriptionId}).OmitEmpty().Scan(&one)

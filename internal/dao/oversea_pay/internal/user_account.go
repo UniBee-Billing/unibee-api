@@ -55,6 +55,8 @@ type UserAccountColumns struct {
 	Facebook        string //
 	OtherSocialInfo string //
 	PaymentMethod   string //
+	CountryCode     string // country_code
+	CountryName     string // country_name
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -94,6 +96,8 @@ var userAccountColumns = UserAccountColumns{
 	Facebook:        "Facebook",
 	OtherSocialInfo: "other_social_info",
 	PaymentMethod:   "payment_method",
+	CountryCode:     "country_code",
+	CountryName:     "country_name",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

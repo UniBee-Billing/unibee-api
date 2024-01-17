@@ -47,4 +47,6 @@ type UserAccount struct {
 	Facebook        interface{} //
 	OtherSocialInfo interface{} //
 	PaymentMethod   interface{} //
+	CountryCode     interface{} // country_code
+	CountryName     interface{} // country_name
 }

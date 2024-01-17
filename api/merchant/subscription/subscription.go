@@ -11,6 +11,7 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
+	User                       *entity.UserAccount                 `json:"user" dc:"user"`
 	Subscription               *entity.Subscription                `json:"subscription" dc:"订阅"`
 	Plan                       *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
 	Channel                    *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`
@@ -109,4 +110,19 @@ type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
 	Paid                      bool                              `json:"paid"`
 	Link                      string                            `json:"link"`
+}
+
+type UserSubscriptionDetailReq struct {
+	g.Meta     `path:"/user_subscription_detail" tags:"Merchant-Subscription-Controller" method:"post" summary:"用户订阅详情"`
+	UserId     int64 `p:"userId" dc:"userId" v:"required#请输入 UserId"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+}
+
+type UserSubscriptionDetailRes struct {
+	User                       *entity.UserAccount                 `json:"user" dc:"user"`
+	Subscription               *entity.Subscription                `json:"subscription" dc:"订阅"`
+	Plan                       *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
+	Channel                    *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`
+	Addons                     []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
+	SubscriptionPendingUpdates []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdates" dc:"订阅更新明细"`
 }

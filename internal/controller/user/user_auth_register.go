@@ -49,15 +49,17 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 
 	userStr, err := json.Marshal(
 		struct {
-			FirstName, LastName, Email, Password, Phone, Address, UserName string
+			FirstName, LastName, Email, Password, Phone, Address, UserName, CountryCode, CountryName string
 		}{
-			FirstName: req.FirstName,
-			LastName:  req.LastName,
-			Email:     req.Email,
-			Password:  hashAndSalt([]byte(req.Password)),
-			Phone:     req.Phone,
-			Address:   req.Address,
-			UserName:  req.UserName,
+			FirstName:   req.FirstName,
+			LastName:    req.LastName,
+			Email:       req.Email,
+			CountryCode: req.CountryCode,
+			CountryName: req.CountryName,
+			Password:    hashAndSalt([]byte(req.Password)),
+			Phone:       req.Phone,
+			Address:     req.Address,
+			UserName:    req.UserName,
 		},
 	)
 	if err != nil {
