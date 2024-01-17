@@ -72,7 +72,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					//_interface.Middleware().TokenUserAuth,
+					_interface.Middleware().TokenUserAuth,
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
