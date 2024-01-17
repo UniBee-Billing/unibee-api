@@ -20,7 +20,7 @@ type CountryRate struct {
 	Longitude             interface{} // longitude
 	Vat                   interface{} // 是否有 vat，1-有，2-没有
 	Eu                    interface{} // 是否欧盟成员国, 1-是，2-不是
-	StandardTaxPercentage interface{} // Standard Tax百分比，10 表示 10%
+	StandardTaxPercentage interface{} // Standard Tax 万分比，1000 表示 10%
 	Other                 interface{} // other rates(json格式)
 	StandardDescription   interface{} // standard_description
 	StandardTypes         interface{} // standard_typs 限定

@@ -31,12 +31,13 @@ type SubscriptionCreatePrepareInternalRes struct {
 	TotalAmount    int64                              `json:"totalAmount"                ` // 金额,单位：分
 	Currency       string                             `json:"currency"              `      // 货币
 	VatCountryCode string                             `json:"vatCountryCode"              `
-	TaxPercentage  float64                            `json:"taxPercentage"              `
+	TaxPercentage  int64                              `json:"taxPercentage"              `
 	VatNumber      string                             `json:"vatNumber"              `
 	VatVerifyData  string                             `json:"vatVerifyData"              `
 	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId         int64                              `json:"userId" `
 	Email          string                             `json:"email" `
+	VatCountryRate *vat_gateway.VatCountryRate        `json:"vatCountryRate" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -108,8 +109,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat Gateway not setup")
 	//todo mark countryCode 计算税率
 	var vatCountryCode = req.VatCountryCode
-	var taxPercentage float64 = 0
+	var taxPercentage int64 = 0
 	var vatVerifyData = ""
+	var vatCountryRate *vat_gateway.VatCountryRate
 	if len(req.VatNumber) > 0 {
 		validateResult, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
 		if err != nil {
@@ -165,7 +167,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		})
 	}
 	var TotalAmountExcludingTax = totalAmount
-	var taxAmount = int64(float64(totalAmount) * taxPercentage) // 精度损失问题 todo mark
+	var taxAmount = int64(float64(totalAmount) * utility.ConvertTaxPercentageToPercentageFloat(taxPercentage))
 
 	invoice := &ro.ChannelDetailInvoiceRo{
 		TotalAmount:                    totalAmount,
@@ -194,6 +196,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		UserId:         req.UserId,
 		Email:          email,
 		Invoice:        invoice,
+		VatCountryRate: vatCountryRate,
 	}, nil
 }
 
@@ -252,10 +255,11 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one.Id = uint64(uint(id))
 
 	createRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
-		Plan:         prepare.Plan,
-		AddonPlans:   prepare.Addons,
-		PlanChannel:  prepare.PlanChannel,
-		Subscription: one,
+		Plan:           prepare.Plan,
+		AddonPlans:     prepare.Addons,
+		PlanChannel:    prepare.PlanChannel,
+		VatCountryRate: prepare.VatCountryRate,
+		Subscription:   one,
 	})
 	if err != nil {
 		return nil, err

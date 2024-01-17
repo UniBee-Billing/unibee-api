@@ -22,3 +22,11 @@ func ConvertYuanStrToFen(target string) int64 {
 	fen := int64(yuan * 100)
 	return fen
 }
+
+func ConvertTaxPercentageToPercentageString(taxPercentage int64) string {
+	return fmt.Sprintf("%f", float64(taxPercentage)/100)
+}
+
+func ConvertTaxPercentageToPercentageFloat(taxPercentage int64) float64 {
+	return float64(taxPercentage) / 100
+}

@@ -77,6 +77,7 @@ var (
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
 				router.UserProfile(ctx, group)
+				router.UserVat(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {

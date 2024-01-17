@@ -37,20 +37,14 @@ type SubscriptionInvoiceListRes struct {
 	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"invoices明细"`
 }
 
-type NewInvoiceItem struct {
-	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
-	Description            string `json:"description"`
-	Quantity               int64  `json:"quantity"`
-}
-
 type NewInvoiceCreateReq struct {
 	g.Meta        `path:"/new_invoice_create" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 创建新发票"`
-	MerchantId    int64             `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入MerchantId"`
-	UserId        int64             `p:"userId" dc:"UserId" v:"required#请输入userId"`
-	TaxPercentage int64             `p:"taxPercentage"  dc:"TaxPercentage" v:"required#请输入TaxPercentage" `
-	ChannelId     int64             `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
-	Currency      string            `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" ` // 货币
-	Lines         []*NewInvoiceItem `p:"lines"              `
+	MerchantId    int64                `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入MerchantId"`
+	UserId        int64                `p:"userId" dc:"UserId" v:"required#请输入userId"`
+	TaxPercentage float64              `p:"taxPercentage"  dc:"Tax税率，万分位，1000 表示 10%" v:"required#请输入TaxPercentage" `
+	ChannelId     int64                `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
+	Currency      string               `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" ` // 货币
+	Lines         []*ro.NewInvoiceItem `p:"lines"              `
 }
 type NewInvoiceCreateRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
@@ -58,14 +52,21 @@ type NewInvoiceCreateRes struct {
 
 type NewInvoiceEditReq struct {
 	g.Meta        `path:"/new_invoice_edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 修改新发票"`
-	InvoiceId     string            `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
-	TaxPercentage int64             `p:"taxPercentage"  dc:"TaxPercentage"`
-	ChannelId     int64             `p:"channelId" dc:"支付通道 ID" `
-	Currency      string            `p:"currency"   dc:"订阅计划货币" `
-	Lines         []*NewInvoiceItem `p:"lines"              `
+	InvoiceId     string               `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
+	TaxPercentage int64                `p:"taxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
+	ChannelId     int64                `p:"channelId" dc:"支付通道 ID" `
+	Currency      string               `p:"currency"   dc:"订阅计划货币" `
+	Lines         []*ro.NewInvoiceItem `p:"lines"              `
 }
 type NewInvoiceEditRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
+}
+
+type DeletePendingInvoiceReq struct {
+	g.Meta    `path:"/new_invoice_delete" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 删除Pending 状态的发票"`
+	InvoiceId string `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
+}
+type DeletePendingInvoiceRes struct {
 }
 
 type ProcessInvoiceForPayReq struct {
@@ -76,4 +77,11 @@ type ProcessInvoiceForPayReq struct {
 }
 type ProcessInvoiceForPayRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
+}
+
+type CancelProcessingInvoiceReq struct {
+	g.Meta    `path:"/cancel_processing_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 取消Processing 的发票"`
+	InvoiceId string `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入InvoiceId"`
+}
+type CancelProcessingInvoiceRes struct {
 }

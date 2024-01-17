@@ -13,6 +13,7 @@ type Subscription struct {
 	Id                     uint64      `json:"id"                     ` //
 	SubscriptionId         string      `json:"subscriptionId"         ` // 订阅id（内部编号）
 	GmtCreate              *gtime.Time `json:"gmtCreate"              ` // 创建时间
+	GmtModify              *gtime.Time `json:"gmtModify"              ` // 修改时间
 	Amount                 int64       `json:"amount"                 ` // 金额,单位：分
 	Currency               string      `json:"currency"               ` // 货币
 	MerchantId             int64       `json:"merchantId"             ` // 商户Id
@@ -28,7 +29,6 @@ type Subscription struct {
 	ChannelUserId          string      `json:"channelUserId"          ` // 渠道用户 Id
 	CustomerName           string      `json:"customerName"           ` // customer_name
 	CustomerEmail          string      `json:"customerEmail"          ` // customer_email
-	GmtModify              *gtime.Time `json:"gmtModify"              ` // 修改时间
 	IsDeleted              int         `json:"isDeleted"              ` //
 	Link                   string      `json:"link"                   ` //
 	ChannelStatus          string      `json:"channelStatus"          ` // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -42,6 +42,6 @@ type Subscription struct {
 	CancelReason           string      `json:"cancelReason"           ` //
 	CountryCode            string      `json:"countryCode"            ` //
 	VatNumber              string      `json:"vatNumber"              ` //
-	TaxPercentage          float64     `json:"taxPercentage"          ` //
+	TaxPercentage          int64       `json:"taxPercentage"          ` // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          string      `json:"vatVerifyData"          ` //
 }

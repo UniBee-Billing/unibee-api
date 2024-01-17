@@ -15,6 +15,7 @@ type Subscription struct {
 	Id                     interface{} //
 	SubscriptionId         interface{} // 订阅id（内部编号）
 	GmtCreate              *gtime.Time // 创建时间
+	GmtModify              *gtime.Time // 修改时间
 	Amount                 interface{} // 金额,单位：分
 	Currency               interface{} // 货币
 	MerchantId             interface{} // 商户Id
@@ -30,7 +31,6 @@ type Subscription struct {
 	ChannelUserId          interface{} // 渠道用户 Id
 	CustomerName           interface{} // customer_name
 	CustomerEmail          interface{} // customer_email
-	GmtModify              *gtime.Time // 修改时间
 	IsDeleted              interface{} //
 	Link                   interface{} //
 	ChannelStatus          interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -44,6 +44,6 @@ type Subscription struct {
 	CancelReason           interface{} //
 	CountryCode            interface{} //
 	VatNumber              interface{} //
-	TaxPercentage          interface{} //
+	TaxPercentage          interface{} // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          interface{} //
 }

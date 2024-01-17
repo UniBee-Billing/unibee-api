@@ -10,7 +10,7 @@ import (
 	"go-oversea-pay/api/merchant/invoice"
 )
 
-func (c *ControllerInvoice) NewInvoiceEdit(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
+func (c *ControllerInvoice) CancelProcessingInvoice(ctx context.Context, req *invoice.CancelProcessingInvoiceReq) (res *invoice.CancelProcessingInvoiceRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
@@ -18,5 +18,6 @@ func (c *ControllerInvoice) NewInvoiceEdit(ctx context.Context, req *invoice.New
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
 		//utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-	return service.EditInvoice(ctx, req)
+
+	return &invoice.CancelProcessingInvoiceRes{}, service.CancelProcessingInvoice(ctx, req.InvoiceId)
 }
