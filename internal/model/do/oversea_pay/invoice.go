@@ -14,6 +14,7 @@ type Invoice struct {
 	g.Meta                         `orm:"table:invoice, do:true"`
 	Id                             interface{} //
 	MerchantId                     interface{} // 商户Id
+	UserId                         interface{} // userId
 	SubscriptionId                 interface{} // 订阅id（内部编号）
 	InvoiceId                      interface{} // 发票ID（内部编号）
 	GmtCreate                      *gtime.Time // 创建时间
@@ -27,7 +28,6 @@ type Invoice struct {
 	SendStatus                     interface{} // 邮件发送状态，0-No | 1- YES
 	SendEmail                      interface{} // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        interface{} // pdf 文件地址
-	UserId                         interface{} // userId
 	Data                           interface{} // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time // 修改时间
 	IsDeleted                      interface{} //

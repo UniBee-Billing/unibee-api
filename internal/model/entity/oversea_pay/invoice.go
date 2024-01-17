@@ -12,6 +12,7 @@ import (
 type Invoice struct {
 	Id                             uint64      `json:"id"                             ` //
 	MerchantId                     int64       `json:"merchantId"                     ` // 商户Id
+	UserId                         int64       `json:"userId"                         ` // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 ` // 订阅id（内部编号）
 	InvoiceId                      string      `json:"invoiceId"                      ` // 发票ID（内部编号）
 	GmtCreate                      *gtime.Time `json:"gmtCreate"                      ` // 创建时间
@@ -25,7 +26,6 @@ type Invoice struct {
 	SendStatus                     int         `json:"sendStatus"                     ` // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string      `json:"sendEmail"                      ` // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string      `json:"sendPdf"                        ` // pdf 文件地址
-	UserId                         int64       `json:"userId"                         ` // userId
 	Data                           string      `json:"data"                           ` // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time `json:"gmtModify"                      ` // 修改时间
 	IsDeleted                      int         `json:"isDeleted"                      ` //

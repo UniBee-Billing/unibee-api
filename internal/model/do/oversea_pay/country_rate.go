@@ -13,7 +13,7 @@ import (
 type CountryRate struct {
 	g.Meta                `orm:"table:country_rate, do:true"`
 	Id                    interface{} // id
-	VatName               interface{} // vat channel name, em vatsense
+	Gateway               interface{} // vat channel name, em vatsense
 	CountryCode           interface{} // country_code
 	CountryName           interface{} // country_name
 	Latitude              interface{} // latitude

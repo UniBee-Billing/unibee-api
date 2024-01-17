@@ -33,7 +33,7 @@ type Github struct {
 	Name     string
 }
 
-func (g Github) GetVatName() string {
+func (g Github) GetGatewayName() string {
 	return g.Name
 }
 
@@ -56,7 +56,7 @@ func (g Github) ListAllRates() ([]*entity.CountryRate, error) {
 			vat = 2
 		}
 		list = append(list, &entity.CountryRate{
-			VatName:               g.GetVatName(),
+			Gateway:               g.GetGatewayName(),
 			CountryCode:           rate.CountryCode,
 			CountryName:           "", // todo mark
 			StandardTaxPercentage: int64(r * 100),

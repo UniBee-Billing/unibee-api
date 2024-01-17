@@ -12,6 +12,7 @@ import (
 type Subscription struct {
 	Id                     uint64      `json:"id"                     ` //
 	SubscriptionId         string      `json:"subscriptionId"         ` // 订阅id（内部编号）
+	UserId                 int64       `json:"userId"                 ` // userId
 	GmtCreate              *gtime.Time `json:"gmtCreate"              ` // 创建时间
 	GmtModify              *gtime.Time `json:"gmtModify"              ` // 修改时间
 	Amount                 int64       `json:"amount"                 ` // 金额,单位：分
@@ -22,7 +23,6 @@ type Subscription struct {
 	AddonData              string      `json:"addonData"              ` // plan addon json data
 	ChannelId              int64       `json:"channelId"              ` // 支付渠道Id
 	Status                 int         `json:"status"                 ` // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire
-	UserId                 int64       `json:"userId"                 ` // userId
 	ChannelSubscriptionId  string      `json:"channelSubscriptionId"  ` // 支付渠道订阅id
 	Data                   string      `json:"data"                   ` // 渠道额外参数，JSON格式
 	ResponseData           string      `json:"responseData"           ` // 渠道返回参数，JSON格式

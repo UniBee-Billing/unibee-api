@@ -16,9 +16,11 @@ import (
 	"github.com/stripe/stripe-go/v76/price"
 	"github.com/stripe/stripe-go/v76/product"
 	sub "github.com/stripe/stripe-go/v76/subscription"
+	"github.com/stripe/stripe-go/v76/taxrate"
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"go-oversea-pay/internal/consts"
+	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/payment/gateway/out"
 	"go-oversea-pay/internal/logic/payment/gateway/out/log"
 	"go-oversea-pay/internal/logic/payment/gateway/ro"
@@ -321,6 +323,38 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 			subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
 		}
+		//税率创建并处理
+
+		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
+		if channelVatRate == nil {
+			params := &stripe.TaxRateParams{
+				DisplayName: stripe.String(subscriptionRo.VatCountryRate.Gateway + "-" + subscriptionRo.VatCountryRate.CountryCode), //todo mark 应用的税率名称，会被展示
+				Description: stripe.String(subscriptionRo.VatCountryRate.CountryName),
+				Percentage:  stripe.Float64(utility.ConvertTaxPercentageToPercentageFloat(subscriptionRo.VatCountryRate.StandardTaxPercentage)),
+				Country:     stripe.String(subscriptionRo.VatCountryRate.CountryCode),
+				Active:      stripe.Bool(true),
+				//Jurisdiction: stripe.String("DE"),
+				Inclusive: stripe.Bool(false),
+			}
+			vatCreateResult, err := taxrate.New(params)
+			if err != nil {
+				g.Log().Printf(ctx, "taxrate.New: %v", err)
+				return nil, err
+			}
+			channelVatRate = &entity.SubscriptionVatRateChannel{
+				VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
+				ChannelId:        int64(channelEntity.Id),
+				ChannelVatRateId: vatCreateResult.ID,
+			}
+			result, err := dao.SubscriptionVatRateChannel.Ctx(ctx).Data(channelVatRate).OmitEmpty().Insert(channelVatRate)
+			if err != nil {
+				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err)
+				return nil, err
+			}
+			id, _ := result.LastInsertId()
+			channelVatRate.Id = uint64(uint(id))
+		}
+
 		taxInclusive := true
 		if subscriptionRo.Plan.TaxInclusive == 0 {
 			//税费不包含
@@ -355,6 +389,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 					Metadata: map[string]string{
 						"SubId": subscriptionRo.Subscription.SubscriptionId,
 					},
+					DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
 				},
 			}
 			createSubscription, err := session.New(subscriptionParams)
@@ -404,6 +439,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
+				DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
 			}
 			subscriptionParams.AddExpand("latest_invoice.payment_intent")
 			createSubscription, err := sub.New(subscriptionParams)
