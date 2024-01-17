@@ -171,6 +171,11 @@ func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string)
 				Valid: false,
 			}, nil
 		}
+	} else if response.Contains("error") && response.GetJson("error").Contains("detail") {
+		return &base.ValidResult{
+			Valid:           false,
+			ValidateMessage: fmt.Sprintf("%s-%s", response.GetJson("error").Get("title").String(), response.GetJson("error").Get("detail").String()),
+		}, nil
 	} else {
 		return nil, gerror.New(response.String())
 	}

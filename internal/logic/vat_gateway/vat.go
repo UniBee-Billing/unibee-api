@@ -112,13 +112,60 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 	return nil
 }
 
+func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumber string) (res *entity.MerchantVatNumberValicationHistory) {
+	err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).
+		Where(entity.MerchantVatNumberValicationHistory{MerchantId: merchantId}).
+		Where(entity.MerchantVatNumberValicationHistory{VatNumber: vatNumber}).OmitEmpty().Scan(&res)
+	if err != nil {
+		return nil
+	}
+	return res
+}
+
 func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, vatNumber string, requestVatNumber string) (*base.ValidResult, error) {
+	one := GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
+	if one != nil {
+		var valid = false
+		if one.Valid == 1 {
+			valid = true
+		}
+		return &base.ValidResult{
+			Valid:           valid,
+			VatNumber:       one.VatNumber,
+			CountryCode:     one.CountryCode,
+			CompanyName:     one.CompanyName,
+			CompanyAddress:  one.CompanyAddress,
+			ValidateMessage: one.ValidateMessage,
+		}, nil
+	}
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gateway:%s", merchantId, gateway.GetVatName())
 		return nil, gerror.New("default vat gateway not setup")
 	}
-	return gateway.ValidateVatNumber(vatNumber, requestVatNumber)
+	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
+	if validateError != nil {
+		return nil, validateError
+	}
+	var valid = 0
+	if result.Valid {
+		valid = 1
+	}
+	one = &entity.MerchantVatNumberValicationHistory{
+		MerchantId:      merchantId,
+		VatNumber:       vatNumber,
+		Valid:           int64(valid),
+		ValidateChannel: gateway.GetVatName(),
+		CountryCode:     result.CountryCode,
+		CompanyName:     result.CompanyName,
+		CompanyAddress:  result.CompanyAddress,
+		ValidateMessage: result.ValidateMessage,
+	}
+	_, err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	if err != nil {
+		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
+	}
+	return result, nil
 }
 
 func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCountryRate, error) {

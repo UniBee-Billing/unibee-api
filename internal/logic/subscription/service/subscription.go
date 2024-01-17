@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/api/user/subscription"
+	"go-oversea-pay/api/user/vat"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
@@ -14,6 +15,7 @@ import (
 	"go-oversea-pay/internal/logic/payment/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
+	"go-oversea-pay/internal/logic/vat_gateway/base"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -21,23 +23,25 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan           *entity.SubscriptionPlan           `json:"planId"`
-	Quantity       int64                              `json:"quantity"`
-	PlanChannel    *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel     *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo   *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons         []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount    int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency       string                             `json:"currency"              `      // 货币
-	VatCountryCode string                             `json:"vatCountryCode"              `
-	TaxPercentage  int64                              `json:"taxPercentage"              `
-	VatNumber      string                             `json:"vatNumber"              `
-	VatVerifyData  string                             `json:"vatVerifyData"              `
-	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	UserId         int64                              `json:"userId" `
-	Email          string                             `json:"email" `
-	VatCountryRate *vat_gateway.VatCountryRate        `json:"vatCountryRate" `
+	Plan                  *entity.SubscriptionPlan           `json:"planId"`
+	Quantity              int64                              `json:"quantity"`
+	PlanChannel           *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel            *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo          *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams           []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons                []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount           int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency              string                             `json:"currency"              `      // 货币
+	VatCountryCode        string                             `json:"vatCountryCode"              `
+	VatCountryName        string                             `json:"vatCountryName"              `
+	VatNumber             string                             `json:"vatNumber"              `
+	VatNumberValidate     *base.ValidResult                  `json:"vatNumberValidate"              `
+	StandardTaxPercentage int64                              `json:"standardTaxPercentage"              `
+	VatVerifyData         string                             `json:"vatVerifyData"              `
+	Invoice               *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	UserId                int64                              `json:"userId" `
+	Email                 string                             `json:"email" `
+	VatCountryRate        *vat_gateway.VatCountryRate        `json:"vatCountryRate" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -83,6 +87,22 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 	return addons
 }
 
+func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.NumberValidateRes, error) {
+	utility.Assert(req != nil, "req not found")
+	utility.Assert(req.MerchantId > 0, "merchantId invalid")
+	utility.Assert(len(req.VatNumber) > 0, "vatNumber invalid")
+	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, req.MerchantId, req.VatNumber, "")
+	if err != nil {
+		return nil, err
+	}
+	if vatNumberValidate.Valid {
+		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, req.MerchantId, vatNumberValidate.CountryCode)
+		utility.Assert(err == nil, fmt.Sprintf("vatNumber vatCountryCode check error:%s", err))
+		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
+	}
+	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
+}
+
 func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
@@ -107,27 +127,30 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat Gateway not setup")
-	//todo mark countryCode 计算税率
 	var vatCountryCode = req.VatCountryCode
-	var taxPercentage int64 = 0
-	var vatVerifyData = ""
+	var standardTaxPercentage int64 = 0
+	var vatCountryName = ""
 	var vatCountryRate *vat_gateway.VatCountryRate
+	var vatNumberValidate *base.ValidResult
 	if len(req.VatNumber) > 0 {
-		validateResult, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
+		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}
-		if !validateResult.Valid {
+		if !vatNumberValidate.Valid {
 			return nil, gerror.New("vat number validate failure:" + req.VatNumber)
 		}
-		vatCountryCode = req.VatCountryCode
-		vatVerifyData = utility.FormatToJsonString(validateResult)
-	} else {
-		utility.Assert(len(vatCountryCode) > 0, "vatCountryCode required")
+		vatCountryCode = vatNumberValidate.CountryCode
+	}
+
+	if len(vatCountryCode) > 0 {
 		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-		utility.Assert(err == nil, fmt.Sprintf("vat check error:%s", err))
+		utility.Assert(err == nil, fmt.Sprintf("vat vatCountryCode check error:%s", err))
 		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vat not found for countryCode:%v", vatCountryCode))
-		taxPercentage = vatCountryRate.StandardTaxPercentage
+		vatCountryName = vatCountryRate.CountryName
+		if vatNumberValidate == nil || !vatNumberValidate.Valid {
+			standardTaxPercentage = vatCountryRate.StandardTaxPercentage
+		}
 	}
 
 	//设置默认值
@@ -136,8 +159,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	var currency = plan.Currency
-
-	var totalAmount = plan.Amount * req.Quantity
+	var TotalAmountExcludingTax = plan.Amount * req.Quantity
 
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
 
@@ -145,29 +167,33 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
-		totalAmount = totalAmount + addon.AddonPlan.Amount*addon.Quantity
+		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 	}
 
 	//生成临时账单
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 		Currency:               currency,
-		Amount:                 req.Quantity * plan.Amount,
+		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
+		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
+		Quantity:               req.Quantity,
 	})
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 addon.Quantity * addon.AddonPlan.Amount,
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage)),
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
+			Quantity:               addon.Quantity,
 		})
 	}
-	var TotalAmountExcludingTax = totalAmount
-	var taxAmount = int64(float64(totalAmount) * utility.ConvertTaxPercentageToPercentageFloat(taxPercentage))
+	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToPercentageFloat(standardTaxPercentage))
+	var totalAmount = TotalAmountExcludingTax + taxAmount
 
 	invoice := &ro.ChannelDetailInvoiceRo{
 		TotalAmount:                    totalAmount,
@@ -180,23 +206,25 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	return &SubscriptionCreatePrepareInternalRes{
-		Plan:           plan,
-		Quantity:       req.Quantity,
-		PlanChannel:    planChannel,
-		PayChannel:     payChannel,
-		MerchantInfo:   merchantInfo,
-		AddonParams:    req.AddonParams,
-		Addons:         addons,
-		TotalAmount:    totalAmount,
-		Currency:       currency,
-		VatCountryCode: vatCountryCode,
-		VatNumber:      req.VatNumber,
-		VatVerifyData:  vatVerifyData,
-		TaxPercentage:  taxPercentage,
-		UserId:         req.UserId,
-		Email:          email,
-		Invoice:        invoice,
-		VatCountryRate: vatCountryRate,
+		Plan:                  plan,
+		Quantity:              req.Quantity,
+		PlanChannel:           planChannel,
+		PayChannel:            payChannel,
+		MerchantInfo:          merchantInfo,
+		AddonParams:           req.AddonParams,
+		Addons:                addons,
+		TotalAmount:           totalAmount,
+		Currency:              currency,
+		VatCountryCode:        vatCountryCode,
+		VatCountryName:        vatCountryName,
+		VatNumber:             req.VatNumber,
+		VatNumberValidate:     vatNumberValidate,
+		VatVerifyData:         utility.FormatToJsonString(vatNumberValidate),
+		StandardTaxPercentage: standardTaxPercentage,
+		UserId:                req.UserId,
+		Email:                 email,
+		Invoice:               invoice,
+		VatCountryRate:        vatCountryRate,
 	}, nil
 }
 
@@ -243,7 +271,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		VatNumber:      prepare.VatNumber,
 		VatVerifyData:  prepare.VatVerifyData,
 		CountryCode:    prepare.VatCountryCode,
-		TaxPercentage:  prepare.TaxPercentage,
+		TaxPercentage:  prepare.StandardTaxPercentage,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
