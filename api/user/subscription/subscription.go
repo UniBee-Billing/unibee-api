@@ -13,6 +13,7 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
+	User                       *entity.UserAccount                 `json:"user" dc:"user"`
 	Subscription               *entity.Subscription                `json:"subscription" dc:"订阅"`
 	Plan                       *entity.SubscriptionPlan            `json:"planId" dc:"订阅计划"`
 	Channel                    *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`

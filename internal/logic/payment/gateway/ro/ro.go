@@ -317,6 +317,7 @@ type SubscriptionPlanAddonRo struct {
 }
 
 type SubscriptionDetailRo struct {
+	User         *entity.UserAccount             `json:"user" dc:"user"`
 	Subscription *entity.Subscription            `p:"subscription" json:"subscription" dc:"订阅"`
 	Plan         *entity.SubscriptionPlan        `p:"plan" json:"plan" dc:"订阅计划"`
 	Channel      *OutChannelRo                   `p:"channel" json:"channel" dc:"订阅渠道"`

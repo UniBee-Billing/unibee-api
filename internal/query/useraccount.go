@@ -7,7 +7,7 @@ import (
 )
 
 func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount) {
-	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Id: id}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
@@ -21,4 +21,3 @@ func GetUserAccountByEmail(ctx context.Context, email string) (one *entity.UserA
 	}
 	return one
 }
-
