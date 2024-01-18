@@ -30,6 +30,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
 		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
 		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().ChannelItemData:        details.ChannelItemData,
 		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
 		dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,

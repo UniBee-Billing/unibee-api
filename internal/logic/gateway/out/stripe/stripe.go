@@ -690,15 +690,25 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 }
 
 func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) ([]*stripe.SubscriptionItemsParams, error) {
-	detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
-	if err != nil {
-		return nil, err
-	}
+
 	var items []*stripe.SubscriptionItemsParams
 
+	var stripeSubscriptionItems []*stripe.SubscriptionItem
 	if !subscriptionRo.EffectImmediate {
+		if len(subscriptionRo.Subscription.ChannelItemData) > 0 {
+			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.ChannelItemData, &stripeSubscriptionItems)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
+			if err != nil {
+				return nil, err
+			}
+			stripeSubscriptionItems = detail.Items.Data
+		}
 		//方案 1 遍历并删除，下周期生效，不支持 PendingUpdate
-		for _, item := range detail.Items.Data {
+		for _, item := range stripeSubscriptionItems {
 			//删除之前全部，新增 Plan 和 Addons 方式
 			items = append(items, &stripe.SubscriptionItemsParams{
 				ID:      stripe.String(item.ID),
@@ -725,13 +735,26 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			})
 		}
 	} else {
+		//使用PendingUpdate
+		if len(subscriptionRo.Subscription.ChannelItemData) > 0 {
+			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.ChannelItemData, &stripeSubscriptionItems)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			detail, err := sub.Get(subscriptionRo.Subscription.ChannelSubscriptionId, &stripe.SubscriptionParams{})
+			if err != nil {
+				return nil, err
+			}
+			stripeSubscriptionItems = detail.Items.Data
+		}
 		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
 		newAddonMap := make(map[string]*ro.SubscriptionPlanAddonRo)
 		for _, addon := range subscriptionRo.AddonPlans {
 			newAddonMap[addon.AddonPlanChannel.ChannelPlanId] = addon
 		}
 		//匹配
-		for _, item := range detail.Items.Data {
+		for _, item := range stripeSubscriptionItems {
 			if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
 				items = append(items, &stripe.SubscriptionItemsParams{
 					ID:       stripe.String(item.ID),
@@ -865,6 +888,7 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		ChannelSubscriptionId:  subscription.ID,
 		ChannelStatus:          string(subscription.Status),
 		Data:                   utility.FormatToJsonString(subscription),
+		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
 		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
 		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
 		CurrentPeriodStart:     subscription.CurrentPeriodStart,

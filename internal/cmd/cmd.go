@@ -96,6 +96,16 @@ var (
 				router.UserVat(ctx, group)
 			})
 
+			if !consts.GetConfigInstance().IsProd() {
+				s.Group("/"+consts.GetConfigInstance().Server.Name+"/system", func(group *ghttp.RouterGroup) {
+					group.Middleware(
+						_interface.Middleware().CORS,
+						_interface.Middleware().ResponseHandler,
+					)
+					router.SystemSubscription(ctx, group)
+				})
+			}
+
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// 通道支付 Redirect 回调

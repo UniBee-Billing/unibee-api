@@ -178,6 +178,7 @@ type ChannelDetailSubscriptionInternalResp struct {
 	ChannelSubscriptionId  string                        `json:"channelSubscriptionId"`
 	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
 	Data                   string                        `json:"data"`
+	ChannelItemData        string                        `json:"channelItemData"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
 	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`

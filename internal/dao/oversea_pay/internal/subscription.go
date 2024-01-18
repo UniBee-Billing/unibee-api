@@ -43,6 +43,7 @@ type SubscriptionColumns struct {
 	Link                   string //
 	ChannelStatus          string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelLatestInvoiceId string // 渠道最新发票 id
+	ChannelItemData        string // channel_item_data
 	CancelAtPeriodEnd      string // 是否在周期结束时取消，0-false | 1-true
 	CurrentPeriodStart     string // current_period_start
 	CurrentPeriodEnd       string // current_period_end
@@ -81,6 +82,7 @@ var subscriptionColumns = SubscriptionColumns{
 	Link:                   "link",
 	ChannelStatus:          "channel_status",
 	ChannelLatestInvoiceId: "channel_latest_invoice_id",
+	ChannelItemData:        "channel_item_data",
 	CancelAtPeriodEnd:      "cancel_at_period_end",
 	CurrentPeriodStart:     "current_period_start",
 	CurrentPeriodEnd:       "current_period_end",

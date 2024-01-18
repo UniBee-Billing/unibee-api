@@ -168,6 +168,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.IntervalUnit == plan.IntervalUnit, "update addon must have same recurring interval to plan")
+		utility.Assert(addon.AddonPlan.IntervalCount == plan.IntervalCount, "update addon must have same recurring interval to plan")
 		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 	}
 
@@ -384,13 +386,15 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.IntervalUnit == plan.IntervalUnit, "update addon must have same recurring interval to plan")
+		utility.Assert(addon.AddonPlan.IntervalCount == plan.IntervalCount, "update addon must have same recurring interval to plan")
 	}
 	oldPlan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
 
 	if req.NewPlanId != sub.PlanId {
-		utility.Assert(oldPlan.IntervalUnit == plan.IntervalUnit, "subscription update must have the same recurring interval")
-		utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "subscription update must have the same recurring interval")
+		utility.Assert(oldPlan.IntervalUnit == plan.IntervalUnit, "newPlan must have same recurring interval to old")
+		utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "newPlan must have same recurring interval to old")
 	}
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), sub.ChannelId)

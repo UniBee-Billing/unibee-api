@@ -33,6 +33,7 @@ type Subscription struct {
 	Link                   string      `json:"link"                   ` //
 	ChannelStatus          string      `json:"channelStatus"          ` // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelLatestInvoiceId string      `json:"channelLatestInvoiceId" ` // 渠道最新发票 id
+	ChannelItemData        string      `json:"channelItemData"        ` // channel_item_data
 	CancelAtPeriodEnd      int         `json:"cancelAtPeriodEnd"      ` // 是否在周期结束时取消，0-false | 1-true
 	CurrentPeriodStart     int64       `json:"currentPeriodStart"     ` // current_period_start
 	CurrentPeriodEnd       int64       `json:"currentPeriodEnd"       ` // current_period_end
