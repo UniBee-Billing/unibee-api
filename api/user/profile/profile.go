@@ -35,7 +35,13 @@ type ProfileUpdateReq struct {
 	Facebook        string `p:"facebook" dc:"facebook"`
 	TikTok          string `p:"tiktok" dc:"tiktok"`
 	OtherSocialInfo string `p:"otherSocialInfo" dc:"other social info"`
+<<<<<<< HEAD
 	PaymmentMethod  string `p:"paymentMethod" dc:"payment method"`
+=======
+	PaymmentMethod string `p:"paymentMethod" dc:"payment method"`
+	CountryCode string `p:"countryCode" dc:"country code" v:"required"`
+	CountryName string `p:"countryName" dc:"country name" v:"required"`
+>>>>>>> a5a90fd9718a5ee818df3018585251a89624036c
 	// Email string `p:"email" dc:"email" v:"required"`
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
