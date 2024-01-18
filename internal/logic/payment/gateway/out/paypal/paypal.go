@@ -356,6 +356,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
 				{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
 				{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+				{Name: "PAYMENT.SALE.COMPLETED"},
+				{Name: "PAYMENT.SALE.REFUNDED"},
+				{Name: "PAYMENT.SALE.REVERSED"},
 			},
 		}
 		response, err := client.CreateWebhook(ctx, param)
@@ -389,6 +392,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 					{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
 					{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
 					{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+					{Name: "PAYMENT.SALE.COMPLETED"},
+					{Name: "PAYMENT.SALE.REFUNDED"},
+					{Name: "PAYMENT.SALE.REVERSED"},
 				},
 			},
 			{

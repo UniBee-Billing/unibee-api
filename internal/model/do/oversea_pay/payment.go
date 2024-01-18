@@ -17,7 +17,7 @@ type Payment struct {
 	MerchantId             interface{} // 商户ID
 	OpenApiId              interface{} // 使用的开放平台配置Id
 	UserId                 interface{} // user_id
-	BizType                interface{} // 业务类型。1-single payment, 3-subscription
+	BizType                interface{} // 业务类型。1-single payment, 3-invoice
 	BizId                  interface{} // 业务id-即商户订单号
 	TerminalIp             interface{} // 实时交易终端IP
 	CountryCode            interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
@@ -36,7 +36,8 @@ type Payment struct {
 	CreateTime             *gtime.Time // 支付单创建时间
 	CancelTime             *gtime.Time // 支付单取消时间
 	PaidTime               *gtime.Time // 付款成功时间
-	InvoiceTime            *gtime.Time // 入账成功时间
+	ChannelInvoiceId       interface{} // 渠道发票号
+	InvoiceId              interface{} // 发票号
 	GmtCreate              *gtime.Time // 创建时间
 	GmtModify              *gtime.Time // 更新时间
 	AppId                  interface{} // 支付使用的APPID

@@ -33,6 +33,7 @@ type Invoice struct {
 	IsDeleted                      interface{} //
 	Link                           interface{} // invoice 链接（可用于支付）
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelUserId                  interface{} // 渠道用户 Id
 	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
 	TaxPercentage                  interface{} // Tax税率，万分位，1000 表示 10%
@@ -42,5 +43,7 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
 	PeriodStart                    interface{} // period_start
 	PeriodEnd                      interface{} // period_end
-	ChannelUserId                  interface{} // 渠道用户 Id
+	ChannelPaymentId               interface{} // 关联渠道 PaymentId
+	PaymentId                      interface{} // PaymentId
+	RefundId                       interface{} // refundId
 }

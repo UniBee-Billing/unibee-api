@@ -25,7 +25,7 @@ type PaymentColumns struct {
 	MerchantId             string // 商户ID
 	OpenApiId              string // 使用的开放平台配置Id
 	UserId                 string // user_id
-	BizType                string // 业务类型。1-single payment, 3-subscription
+	BizType                string // 业务类型。1-single payment, 3-invoice
 	BizId                  string // 业务id-即商户订单号
 	TerminalIp             string // 实时交易终端IP
 	CountryCode            string // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
@@ -44,7 +44,8 @@ type PaymentColumns struct {
 	CreateTime             string // 支付单创建时间
 	CancelTime             string // 支付单取消时间
 	PaidTime               string // 付款成功时间
-	InvoiceTime            string // 入账成功时间
+	ChannelInvoiceId       string // 渠道发票号
+	InvoiceId              string // 发票号
 	GmtCreate              string // 创建时间
 	GmtModify              string // 更新时间
 	AppId                  string // 支付使用的APPID
@@ -84,7 +85,8 @@ var paymentColumns = PaymentColumns{
 	CreateTime:             "create_time",
 	CancelTime:             "cancel_time",
 	PaidTime:               "paid_time",
-	InvoiceTime:            "invoice_time",
+	ChannelInvoiceId:       "channel_invoice_id",
+	InvoiceId:              "invoice_id",
 	GmtCreate:              "gmt_create",
 	GmtModify:              "gmt_modify",
 	AppId:                  "app_id",

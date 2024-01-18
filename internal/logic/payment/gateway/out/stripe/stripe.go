@@ -900,6 +900,8 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
+				stripe.String("payment_intent.created"),
+				stripe.String("payment_intent.succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -934,6 +936,8 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
+				stripe.String("payment_intent.created"),
+				stripe.String("payment_intent.succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -1105,61 +1109,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 
 	var responseBack = http.StatusOK
 	switch event.Type {
-	case "customer.subscription.deleted":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the deleted subscription.
-			// handleSubscriptionCanceled(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.updated":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionUpdated(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.created":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionCreated(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.trial_will_end":
+	case "customer.subscription.deleted", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.trial_will_end":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
@@ -1190,7 +1140,25 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			}
+		}
+	case "payment_intent.created", "payment_intent.succeeded":
+		var stripePayment stripe.PaymentIntent
+		err := json.Unmarshal(event.Data.Raw, &stripePayment)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Payment %s for %d.", payChannel.Channel, string(event.Type), stripePayment.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionTrialWillEnd(subscription)
+			//err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}

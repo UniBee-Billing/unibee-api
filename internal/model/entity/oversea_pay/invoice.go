@@ -31,6 +31,7 @@ type Invoice struct {
 	IsDeleted                      int         `json:"isDeleted"                      ` //
 	Link                           string      `json:"link"                           ` // invoice 链接（可用于支付）
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelUserId                  string      `json:"channelUserId"                  ` // 渠道用户 Id
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
 	TaxPercentage                  int64       `json:"taxPercentage"                  ` // Tax税率，万分位，1000 表示 10%
@@ -40,5 +41,7 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" ` // Sub金额(不含税）,单位：分
 	PeriodStart                    int64       `json:"periodStart"                    ` // period_start
 	PeriodEnd                      int64       `json:"periodEnd"                      ` // period_end
-	ChannelUserId                  string      `json:"channelUserId"                  ` // 渠道用户 Id
+	ChannelPaymentId               string      `json:"channelPaymentId"               ` // 关联渠道 PaymentId
+	PaymentId                      string      `json:"paymentId"                      ` // PaymentId
+	RefundId                       string      `json:"refundId"                       ` // refundId
 }

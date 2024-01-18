@@ -41,6 +41,7 @@ type InvoiceColumns struct {
 	IsDeleted                      string //
 	Link                           string // invoice 链接（可用于支付）
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelUserId                  string // 渠道用户 Id
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
 	TaxPercentage                  string // Tax税率，万分位，1000 表示 10%
@@ -50,7 +51,9 @@ type InvoiceColumns struct {
 	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
 	PeriodStart                    string // period_start
 	PeriodEnd                      string // period_end
-	ChannelUserId                  string // 渠道用户 Id
+	ChannelPaymentId               string // 关联渠道 PaymentId
+	PaymentId                      string // PaymentId
+	RefundId                       string // refundId
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -76,6 +79,7 @@ var invoiceColumns = InvoiceColumns{
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
 	ChannelStatus:                  "channel_status",
+	ChannelUserId:                  "channel_user_id",
 	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
 	TaxPercentage:                  "tax_percentage",
@@ -85,7 +89,9 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
-	ChannelUserId:                  "channel_user_id",
+	ChannelPaymentId:               "channel_payment_id",
+	PaymentId:                      "payment_id",
+	RefundId:                       "refund_id",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.
