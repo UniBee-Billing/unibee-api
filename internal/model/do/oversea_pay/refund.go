@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaRefund is the golang structure of table oversea_refund for DAO operations like Where/Data.
-type OverseaRefund struct {
-	g.Meta               `orm:"table:oversea_refund, do:true"`
+// Refund is the golang structure of table refund for DAO operations like Where/Data.
+type Refund struct {
+	g.Meta               `orm:"table:refund, do:true"`
 	Id                   interface{} // 主键ID
 	CompanyId            interface{} // 公司Id
 	MerchantId           interface{} // 商户ID

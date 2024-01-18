@@ -30,7 +30,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if len(req.MerchantRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
@@ -43,15 +43,15 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
 		return gerror.New("支付记录不存在")
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_FAILED, dao.OverseaRefund.Columns().RefundComment: req.Reason},
-				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
+		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().RefundStatus: consts.REFUND_FAILED, dao.Refund.Columns().RefundComment: req.Reason},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -94,7 +94,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if len(req.MerchantRefundNo) == 0 && req.RefundFee > 0 {
 		return gerror.New("invalid param RefundFee, should > 0")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
@@ -103,7 +103,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund already success")
 		return nil
 	}
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
 		return gerror.New("支付记录不存在")
@@ -123,9 +123,9 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	//	return BusinessWrapper.success();
 	//}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_SUCCESS, dao.OverseaRefund.Columns().RefundTime: req.RefundTime},
-				g.Map{dao.OverseaRefund.Columns().Id: one.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
+		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().RefundStatus: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: req.RefundTime},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -136,7 +136,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.OverseaPay.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundFee, pay.Id, one.RefundFee, one.RefundFee)
+			update, err := transaction.Update(dao.Payment.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundFee, pay.Id, one.RefundFee, one.RefundFee)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -188,7 +188,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	if len(req.MerchantRefundNo) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetOverseaRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
 		return gerror.New("退款记录不存在")
@@ -197,7 +197,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		g.Log().Infof(ctx, "already failure")
 		return nil
 	}
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
 		return gerror.New("支付记录不存在")

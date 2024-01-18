@@ -6,8 +6,8 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetOverseaRefundByMerchantRefundNo(ctx context.Context, merchantRefundNo string) (one *entity.OverseaRefund) {
-	err := dao.OverseaRefund.Ctx(ctx).Where(entity.OverseaRefund{OutRefundNo: merchantRefundNo}).OmitEmpty().Scan(&one)
+func GetRefundByMerchantRefundNo(ctx context.Context, merchantRefundNo string) (one *entity.Refund) {
+	err := dao.Refund.Ctx(ctx).Where(entity.Refund{OutRefundNo: merchantRefundNo}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPay is the golang structure of table oversea_pay for DAO operations like Where/Data.
-type OverseaPay struct {
-	g.Meta             `orm:"table:oversea_pay, do:true"`
+// Payment is the golang structure of table payment for DAO operations like Where/Data.
+type Payment struct {
+	g.Meta             `orm:"table:payment, do:true"`
 	Id                 interface{} // 主键id
 	CompanyId          interface{} // 公司Id
 	MerchantId         interface{} // 商户ID

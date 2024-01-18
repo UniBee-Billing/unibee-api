@@ -13,7 +13,7 @@ func (c *ControllerPayment) Cancels(ctx context.Context, req *payment.CancelsReq
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantId)
 
-	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
+	overseaPay := query.GetPaymentByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")
 	err = service.DoChannelCancel(ctx, overseaPay)
 	if err != nil {

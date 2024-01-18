@@ -19,8 +19,8 @@ import (
 	"strings"
 )
 
-func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.OverseaRefund, err error) {
-	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
+func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
+	overseaPay := query.GetPaymentByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")
 	utility.Assert(overseaPay.PaymentFee > 0, "payment fee error")
 	utility.Assert(strings.Compare(overseaPay.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
@@ -48,16 +48,16 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 
 	var (
-		overseaRefund *entity.OverseaRefund
+		overseaRefund *entity.Refund
 	)
-	err = dao.OverseaRefund.Ctx(ctx).Where(entity.OverseaRefund{
+	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
 		OutTradeNo: req.PaymentsPspReference,
 		BizId:      req.Reference,
 		BizType:    bizType,
 	}).OmitEmpty().Scan(&overseaRefund)
 	utility.Assert(err == nil && overseaRefund == nil, "duplicate reference call")
 
-	overseaRefund = &entity.OverseaRefund{
+	overseaRefund = &entity.Refund{
 		CompanyId:    overseaPay.CompanyId,
 		MerchantId:   overseaPay.MerchantId,
 		BizId:        req.Reference,
@@ -76,10 +76,10 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, overseaRefund.OutRefundNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaRefund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
-			insert, err := dao.OverseaRefund.Ctx(ctx).Data(overseaRefund).OmitEmpty().Insert(overseaRefund)
+			insert, err := dao.Refund.Ctx(ctx).Data(overseaRefund).OmitEmpty().Insert(overseaRefund)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -99,8 +99,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			}
 
 			overseaRefund.ChannelRefundNo = channelResult.ChannelRefundNo
-			result, err := transaction.Update(dao.OverseaRefund.Table(), g.Map{dao.OverseaRefund.Columns().ChannelRefundNo: channelResult.ChannelRefundNo},
-				g.Map{dao.OverseaRefund.Columns().Id: overseaRefund.Id, dao.OverseaRefund.Columns().RefundStatus: consts.REFUND_ING})
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().ChannelRefundNo: channelResult.ChannelRefundNo},
+				g.Map{dao.Refund.Columns().Id: overseaRefund.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err

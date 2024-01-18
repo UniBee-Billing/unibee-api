@@ -11,17 +11,17 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err error) {
+func DoChannelCapture(ctx context.Context, overseaPay *entity.Payment) (err error) {
 	utility.Assert(overseaPay != nil, "entity not found")
 	utility.Assert(overseaPay.PayStatus == consts.TO_BE_PAID, "payment not waiting for pay")
 	utility.Assert(overseaPay.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
 	utility.Assert(overseaPay.BuyerPayFee > 0, "capture value should > 0")
 	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
 
-	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 gateway capture
-		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.OverseaPay.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
-			g.Map{dao.OverseaPay.Columns().Id: overseaPay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.Payment.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
+			g.Map{dao.Payment.Columns().Id: overseaPay.Id, dao.Payment.Columns().PayStatus: consts.TO_BE_PAID})
 		if err != nil || result == nil {
 			//_ = transaction.Rollback()
 			return err

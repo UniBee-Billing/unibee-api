@@ -6,16 +6,16 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetOverseaPayById(ctx context.Context, payId int64) (one *entity.OverseaPay) {
-	err := dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{Id: payId}).OmitEmpty().Scan(&one)
+func GetPaymentById(ctx context.Context, payId int64) (one *entity.Payment) {
+	err := dao.Payment.Ctx(ctx).Where(entity.Payment{Id: payId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetOverseaPayByMerchantOrderNo(ctx context.Context, merchantOrderNo string) (one *entity.OverseaPay) {
-	err := dao.OverseaPay.Ctx(ctx).Where(entity.OverseaPay{MerchantOrderNo: merchantOrderNo}).OmitEmpty().Scan(&one)
+func GetPaymentByMerchantOrderNo(ctx context.Context, merchantOrderNo string) (one *entity.Payment) {
+	err := dao.Payment.Ctx(ctx).Where(entity.Payment{MerchantOrderNo: merchantOrderNo}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

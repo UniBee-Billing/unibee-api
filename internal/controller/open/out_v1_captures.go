@@ -13,7 +13,7 @@ func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesR
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantId)
 
-	overseaPay := query.GetOverseaPayByMerchantOrderNo(ctx, req.PaymentsPspReference)
+	overseaPay := query.GetPaymentByMerchantOrderNo(ctx, req.PaymentsPspReference)
 	utility.Assert(overseaPay != nil, "payment not found")
 	utility.Assert(overseaPay.Currency == req.Amount.Currency, "Currency not match the payment")
 	overseaPay.BuyerPayFee = req.Amount.Value

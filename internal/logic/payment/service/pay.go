@@ -51,10 +51,10 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.MerchantOrderNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
-			insert, err := dao.OverseaPay.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
+			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -79,8 +79,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 				return err
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
-			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
-				g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().PaymentData: createPayContext.Pay.PaymentData},
+				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err

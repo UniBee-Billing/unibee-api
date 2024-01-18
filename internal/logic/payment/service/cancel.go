@@ -10,12 +10,12 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func DoChannelCancel(ctx context.Context, overseaPay *entity.OverseaPay) (err error) {
+func DoChannelCancel(ctx context.Context, overseaPay *entity.Payment) (err error) {
 	utility.Assert(overseaPay != nil, "entity not found")
 	utility.Assert(overseaPay.PayStatus == consts.TO_BE_PAID, "payment not waiting for pay")
 	utility.Assert(overseaPay.AuthorizeStatus < consts.CAPTURE_REQUEST, "payment has capture request")
 
-	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		////事务处理 gateway capture
 		//result, err := transaction.Update("oversea_pay", g.Map{"pay_status": consts.PAY_FAILED},
 		//	g.Map{"id": overseaPay.Id, "pay_status": consts.TO_BE_PAID})

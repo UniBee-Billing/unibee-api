@@ -31,7 +31,7 @@ type HandlePayReq struct {
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, req.MerchantOrderNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, req.MerchantOrderNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", req.MerchantOrderNo)
 		return errors.New("支付不存在")
@@ -55,7 +55,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 
 func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, req.MerchantOrderNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, req.MerchantOrderNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", req.MerchantOrderNo)
 		return errors.New("支付不存在")
@@ -73,7 +73,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	return nil
 }
 
-func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error) {
+func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 	g.Log().Infof(ctx, "HandlePayAuthorized, pay=%s", pay)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil")
@@ -84,9 +84,9 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.OverseaPay.Columns().ChannelTradeNo: pay.ChannelTradeNo},
-				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID, dao.OverseaPay.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.Payment.Columns().ChannelTradeNo: pay.ChannelTradeNo},
+				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().PayStatus: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -122,7 +122,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.OverseaPay) (err error
 
 func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "handlePayFailure, req=%s", req)
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, req.MerchantOrderNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, req.MerchantOrderNo)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay null, merchantOrderNo=%s", req.MerchantOrderNo)
 		return errors.New("支付不存在")
@@ -143,9 +143,9 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		refundFee = pay.PaymentFee
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PayStatus: consts.PAY_FAILED, dao.OverseaPay.Columns().RefundFee: refundFee},
-				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().PayStatus: consts.PAY_FAILED, dao.Payment.Columns().RefundFee: refundFee},
+				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -192,7 +192,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if len(req.MerchantOrderNo) == 0 {
 		return errors.New("invalid param MerchantOrderNo is nil")
 	}
-	pay := query.GetOverseaPayByMerchantOrderNo(ctx, req.MerchantOrderNo)
+	pay := query.GetPaymentByMerchantOrderNo(ctx, req.MerchantOrderNo)
 
 	if pay == nil {
 		g.Log().Infof(ctx, "pay not found, merchantOrderNo=%s", req.MerchantOrderNo)
@@ -206,15 +206,15 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{
-				dao.OverseaPay.Columns().PayStatus:      consts.PAY_SUCCESS,
-				dao.OverseaPay.Columns().PaidTime:       req.PaidTime,
-				dao.OverseaPay.Columns().ChannelPayId:   req.ChannelPayId,
-				dao.OverseaPay.Columns().ChannelTradeNo: req.ChannelTradeNo,
-				dao.OverseaPay.Columns().ReceiptFee:     req.ReceiptFee,
-				dao.OverseaPay.Columns().RefundFee:      pay.PaymentFee - req.ReceiptFee},
-				g.Map{dao.OverseaPay.Columns().Id: pay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{
+				dao.Payment.Columns().PayStatus:      consts.PAY_SUCCESS,
+				dao.Payment.Columns().PaidTime:       req.PaidTime,
+				dao.Payment.Columns().ChannelPayId:   req.ChannelPayId,
+				dao.Payment.Columns().ChannelTradeNo: req.ChannelTradeNo,
+				dao.Payment.Columns().ReceiptFee:     req.ReceiptFee,
+				dao.Payment.Columns().RefundFee:      pay.PaymentFee - req.ReceiptFee},
+				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().PayStatus: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err

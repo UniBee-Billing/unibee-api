@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaRefund is the golang structure for table oversea_refund.
-type OverseaRefund struct {
+// Refund is the golang structure for table refund.
+type Refund struct {
 	Id                   int64       `json:"id"                   ` // 主键ID
 	CompanyId            int64       `json:"companyId"            ` // 公司Id
 	MerchantId           int64       `json:"merchantId"           ` // 商户ID

@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPay is the golang structure for table oversea_pay.
-type OverseaPay struct {
+// Payment is the golang structure for table payment.
+type Payment struct {
 	Id                 int64       `json:"id"                 ` // 主键id
 	CompanyId          int64       `json:"companyId"          ` // 公司Id
 	MerchantId         int64       `json:"merchantId"         ` // 商户ID

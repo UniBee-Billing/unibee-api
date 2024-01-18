@@ -41,7 +41,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		OpenApiId:            int64(openApiConfig.Id),
 		PayChannel:           payChannel,
 		PaymentBrandAddition: req.PaymentBrandAddition,
-		Pay: &entity.OverseaPay{
+		Pay: &entity.Payment{
 			BizId:             req.Reference,
 			BizType:           consts.PAYMENT_BIZ_TYPE_ORDER,
 			ChannelId:         int64(payChannel.Id),

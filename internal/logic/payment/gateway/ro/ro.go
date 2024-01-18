@@ -13,7 +13,7 @@ type CreatePayContext struct {
 	OpenApiId                int64                     `json:"openApiId"`
 	AppId                    string                    `json:"appId"`
 	Desc                     string                    `json:"desc"`
-	Pay                      *entity.OverseaPay        `json:"pay"`
+	Pay                      *entity.Payment           `json:"pay"`
 	PayChannel               *entity.OverseaPayChannel `json:"payChannel"`
 	PaymentBrandAddition     *gjson.Json               `json:"paymentBrandAddition"`
 	TerminalIp               string                    `json:"terminalIp"`
