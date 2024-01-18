@@ -59,7 +59,7 @@ func CreateSubscriptionId() string {
 }
 
 func CreateInvoiceId() string {
-	return fmt.Sprintf("in%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
 func CreateSubscriptionUpdateId() string {

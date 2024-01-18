@@ -17,10 +17,10 @@ import (
 )
 
 func HandleInvoiceWebhookEvent(ctx context.Context, eventType string, details *ro.ChannelDetailInvoiceInternalResp) error {
-	return CreateOrUpdateInvoiceByDetail(ctx, details)
+	return CreateOrUpdateInvoiceByDetail(ctx, details, details.ChannelInvoiceId)
 }
 
-func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetailInvoiceInternalResp) error {
+func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetailInvoiceInternalResp, uniqueId string) error {
 	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
 	var subscriptionId string
 	var merchantId int64
@@ -71,6 +71,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			ChannelInvoiceId:               details.ChannelInvoiceId,
 			ChannelInvoicePdf:              details.ChannelInvoicePdf,
 			ChannelPaymentId:               details.ChannelPaymentId,
+			UniqueId:                       uniqueId,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)

@@ -31,6 +31,7 @@ type Invoice struct {
 	IsDeleted                      int         `json:"isDeleted"                      ` //
 	Link                           string      `json:"link"                           ` // invoice 链接（可用于支付）
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelPaymentId               string      `json:"channelPaymentId"               ` // 关联渠道 PaymentId
 	ChannelUserId                  string      `json:"channelUserId"                  ` // 渠道用户 Id
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
@@ -41,7 +42,7 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" ` // Sub金额(不含税）,单位：分
 	PeriodStart                    int64       `json:"periodStart"                    ` // period_start
 	PeriodEnd                      int64       `json:"periodEnd"                      ` // period_end
-	ChannelPaymentId               string      `json:"channelPaymentId"               ` // 关联渠道 PaymentId
 	PaymentId                      string      `json:"paymentId"                      ` // PaymentId
 	RefundId                       string      `json:"refundId"                       ` // refundId
+	UniqueId                       string      `json:"uniqueId"                       ` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }

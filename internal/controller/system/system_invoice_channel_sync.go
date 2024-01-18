@@ -53,7 +53,7 @@ func (c *ControllerInvoice) ChannelSync(ctx context.Context, req *invoice.Channe
 				utility.Assert(payChannel != nil, "invalid planChannel")
 				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
 				if err == nil {
-					err := handler.CreateOrUpdateInvoiceByDetail(backgroundCtx, details)
+					err := handler.CreateOrUpdateInvoiceByDetail(backgroundCtx, details, details.ChannelInvoiceId)
 					if err != nil {
 						fmt.Printf("ChannelSync Background CreateOrUpdateInvoiceByDetail InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
 						return

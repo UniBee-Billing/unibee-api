@@ -41,6 +41,7 @@ type InvoiceColumns struct {
 	IsDeleted                      string //
 	Link                           string // invoice 链接（可用于支付）
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelPaymentId               string // 关联渠道 PaymentId
 	ChannelUserId                  string // 渠道用户 Id
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
@@ -51,9 +52,9 @@ type InvoiceColumns struct {
 	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
 	PeriodStart                    string // period_start
 	PeriodEnd                      string // period_end
-	ChannelPaymentId               string // 关联渠道 PaymentId
 	PaymentId                      string // PaymentId
 	RefundId                       string // refundId
+	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -79,6 +80,7 @@ var invoiceColumns = InvoiceColumns{
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
 	ChannelStatus:                  "channel_status",
+	ChannelPaymentId:               "channel_payment_id",
 	ChannelUserId:                  "channel_user_id",
 	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
@@ -89,9 +91,9 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
-	ChannelPaymentId:               "channel_payment_id",
 	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
+	UniqueId:                       "unique_id",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

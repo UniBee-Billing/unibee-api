@@ -33,6 +33,7 @@ type Invoice struct {
 	IsDeleted                      interface{} //
 	Link                           interface{} // invoice 链接（可用于支付）
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelPaymentId               interface{} // 关联渠道 PaymentId
 	ChannelUserId                  interface{} // 渠道用户 Id
 	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
@@ -43,7 +44,7 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
 	PeriodStart                    interface{} // period_start
 	PeriodEnd                      interface{} // period_end
-	ChannelPaymentId               interface{} // 关联渠道 PaymentId
 	PaymentId                      interface{} // PaymentId
 	RefundId                       interface{} // refundId
+	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }

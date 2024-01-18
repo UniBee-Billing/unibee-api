@@ -43,9 +43,11 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	var totalAmount = totalTax + totalAmountExcludingTax
 
 	//创建
+	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
 		MerchantId:                     req.MerchantId,
-		InvoiceId:                      utility.CreateInvoiceId(),
+		InvoiceId:                      invoiceId,
+		UniqueId:                       invoiceId,
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		TaxAmount:                      totalTax,
