@@ -17,7 +17,7 @@ import (
 )
 
 type HandleRefundReq struct {
-	MerchantRefundNo string
+	RefundId         string
 	ChannelRefundNo  string
 	RefundFee        int64
 	RefundStatusEnum consts.RefundStatusEnum
@@ -27,31 +27,31 @@ type HandleRefundReq struct {
 
 func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundFailure, req=%s", req)
-	if len(req.MerchantRefundNo) == 0 {
+	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
+		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
 		return gerror.New("退款记录不存在")
 	}
-	if one.RefundStatus == consts.REFUND_FAILED {
+	if one.Status == consts.REFUND_FAILED {
 		g.Log().Infof(ctx, "already failure")
 		return nil
 	}
-	if one.RefundStatus == consts.REFUND_SUCCESS {
+	if one.Status == consts.REFUND_SUCCESS {
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
-	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByPaymentId(ctx, one.RefundId)
 	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
+		g.Log().Infof(ctx, "pay is nil, refundId=%s", one.RefundId)
 		return gerror.New("支付记录不存在")
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().RefundStatus: consts.REFUND_FAILED, dao.Refund.Columns().RefundComment: req.Reason},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_FAILED, dao.Refund.Columns().RefundComment: req.Reason},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -72,13 +72,14 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		event.SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveTimeLine(ctx, entity.Timeline{
 			BizType:   0,
-			BizId:     pay.Id,
+			BizId:     pay.PaymentId,
 			Fee:       one.RefundFee,
 			EventType: event.RefundFailed.Type,
 			Event:     event.RefundFailed.Desc,
-			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "RefundFailed", one.OutRefundNo),
+			OpenApiId: one.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundFailed", one.RefundId),
 			Message:   req.Reason,
 		})
 	}
@@ -88,24 +89,24 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 
 func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundSuccess, req=%s", req)
-	if len(req.MerchantRefundNo) == 0 {
+	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	if len(req.MerchantRefundNo) == 0 && req.RefundFee > 0 {
+	if len(req.RefundId) == 0 && req.RefundFee > 0 {
 		return gerror.New("invalid param RefundFee, should > 0")
 	}
-	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
+		g.Log().Infof(ctx, "refund is nil, refundId=%s", req.RefundId)
 		return gerror.New("退款记录不存在")
 	}
-	if one.RefundStatus == consts.REFUND_SUCCESS {
+	if one.Status == consts.REFUND_SUCCESS {
 		g.Log().Infof(ctx, "refund already success")
 		return nil
 	}
-	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
+		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("支付记录不存在")
 	}
 	//if (refund.getRefundComment().equals("手动触发重复支付单退款")) {
@@ -124,8 +125,8 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	//}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().RefundStatus: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: req.RefundTime},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: req.RefundTime},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -158,13 +159,14 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		event.SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveTimeLine(ctx, entity.Timeline{
 			BizType:   0,
-			BizId:     pay.Id,
+			BizId:     pay.PaymentId,
 			Fee:       one.RefundFee,
 			EventType: event.Refunded.Type,
 			Event:     event.Refunded.Desc,
-			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "Refunded", one.OutRefundNo),
+			OpenApiId: one.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.Status, "Refunded", one.RefundId),
 			Message:   req.Reason,
 		})
 
@@ -185,31 +187,32 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 
 func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error) {
 	g.Log().Infof(ctx, "HandleRefundReversed, req=%s", req)
-	if len(req.MerchantRefundNo) == 0 {
+	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	one := query.GetRefundByMerchantRefundNo(ctx, req.MerchantRefundNo)
+	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
-		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.MerchantRefundNo)
+		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
 		return gerror.New("退款记录不存在")
 	}
-	if one.RefundStatus == consts.REFUND_FAILED {
+	if one.Status == consts.REFUND_FAILED {
 		g.Log().Infof(ctx, "already failure")
 		return nil
 	}
-	pay := query.GetPaymentByMerchantOrderNo(ctx, one.OutTradeNo)
+	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil, merchantOrderNo=%s", one.OutTradeNo)
+		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("支付记录不存在")
 	}
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
-	event.SaveEvent(ctx, entity.OverseaPayEvent{
+	event.SaveTimeLine(ctx, entity.Timeline{
 		BizType:   0,
-		BizId:     pay.Id,
+		BizId:     pay.PaymentId,
 		Fee:       one.RefundFee,
 		EventType: event.RefundedReversed.Type,
 		Event:     event.RefundedReversed.Desc,
-		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.MerchantOrderNo, "RefundedReversed", one.OutRefundNo),
+		OpenApiId: one.OpenApiId,
+		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundedReversed", one.RefundId),
 		Message:   req.Reason,
 	})
 

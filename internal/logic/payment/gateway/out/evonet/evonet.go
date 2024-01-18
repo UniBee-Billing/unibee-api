@@ -163,20 +163,20 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		//授权成功
 		data := payment
 		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetPaymentByMerchantOrderNo(r.Context(), merchantTradeNo)
+		channelPaymentId := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil && transAmount != nil &&
 			one.PaymentFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
-			one.ChannelTradeNo = channelTradeNo
+			one.ChannelPaymentId = channelPaymentId
 			err := handler.HandlePayAuthorized(r.Context(), one)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
-				notifyMerchantReference = one.MerchantOrderNo
+				notifyMerchantReference = one.PaymentId
 				notifyIsSuccess = true
 				notifyEventCode = "AUTHORISATION"
 				executeResult = true
@@ -216,18 +216,18 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			merchantTradeNo = payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		}
 		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetPaymentByMerchantOrderNo(r.Context(), merchantTradeNo)
-		if one != nil && len(one.ChannelTradeNo) > 0 {
-			utility.Assert(strings.Compare(channelTradeNo, one.ChannelTradeNo) == 0, "channelTradeNo not match")
+		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
+		if one != nil && len(one.ChannelPaymentId) > 0 {
+			utility.Assert(strings.Compare(channelTradeNo, one.ChannelPaymentId) == 0, "channelPaymentId not match")
 		}
 
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
 		if one != nil {
 			req := &handler.HandlePayReq{
-				MerchantOrderNo: merchantTradeNo,
-				ChannelTradeNo:  channelTradeNo,
-				PayStatusEnum:   consts.PAY_FAILED,
-				Reason:          reason,
+				PaymentId:      merchantTradeNo,
+				ChannelTradeNo: channelTradeNo,
+				PayStatusEnum:  consts.PAY_FAILED,
+				Reason:         reason,
 			}
 			err := handler.HandlePayFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
@@ -235,7 +235,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			if err != nil {
 				executeResult = false
 			} else {
-				notifyMerchantReference = one.MerchantOrderNo
+				notifyMerchantReference = one.PaymentId
 				notifyIsSuccess = true
 				notifyEventCode = "CANCELLATION"
 				notifyReason = reason
@@ -277,7 +277,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			merchantTradeNo = payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		}
 		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetPaymentByMerchantOrderNo(r.Context(), merchantTradeNo)
+		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil &&
 			transAmount != nil &&
@@ -287,12 +287,12 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			receiveFee := utility.ConvertYuanStrToFen(transAmount.Get("value").String())
 			req := &handler.HandlePayReq{
-				MerchantOrderNo: merchantTradeNo,
-				ChannelTradeNo:  channelTradeNo,
-				PayStatusEnum:   consts.PAY_SUCCESS,
-				PayFee:          one.PaymentFee,
-				ReceiptFee:      receiveFee,
-				PaidTime:        gtime.Now(),
+				PaymentId:      merchantTradeNo,
+				ChannelTradeNo: channelTradeNo,
+				PayStatusEnum:  consts.PAY_SUCCESS,
+				PayFee:         one.PaymentFee,
+				ReceiptFee:     receiveFee,
+				PaidTime:       gtime.Now(),
 			}
 			err := handler.HandlePaySuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
@@ -300,7 +300,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			if err != nil {
 				executeResult = false
 			} else {
-				notifyMerchantReference = one.MerchantOrderNo
+				notifyMerchantReference = one.PaymentId
 				notifyIsSuccess = true
 				notifyEventCode = "CAPTURE"
 				executeResult = true
@@ -321,7 +321,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantRefundNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		channelRefundNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetRefundByMerchantRefundNo(r.Context(), merchantRefundNo)
+		one := query.GetRefundByRefundId(r.Context(), merchantRefundNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil &&
 			transAmount != nil &&
@@ -330,7 +330,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			one.RefundFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
-				MerchantRefundNo: merchantRefundNo,
+				RefundId:         merchantRefundNo,
 				ChannelRefundNo:  channelRefundNo,
 				RefundStatusEnum: consts.REFUND_SUCCESS,
 				RefundTime:       gtime.Now(),
@@ -341,7 +341,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			if err != nil {
 				executeResult = false
 			} else {
-				notifyMerchantReference = one.OutRefundNo
+				notifyMerchantReference = one.RefundId
 				notifyIsSuccess = true
 				notifyEventCode = "REFUND"
 				executeResult = true
@@ -362,7 +362,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantRefundNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		channelRefundNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
-		one := query.GetRefundByMerchantRefundNo(r.Context(), merchantRefundNo)
+		one := query.GetRefundByRefundId(r.Context(), merchantRefundNo)
 		transAmount := data.GetJson("transAmount")
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
 		if one != nil &&
@@ -371,7 +371,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
-				MerchantRefundNo: merchantRefundNo,
+				RefundId:         merchantRefundNo,
 				ChannelRefundNo:  channelRefundNo,
 				RefundStatusEnum: consts.REFUND_FAILED,
 				RefundTime:       gtime.Now(),
@@ -383,7 +383,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			if err != nil {
 				executeResult = false
 			} else {
-				notifyMerchantReference = one.OutRefundNo
+				notifyMerchantReference = one.RefundId
 				notifyIsSuccess = true
 				notifyEventCode = "REFUND_FAILED"
 				executeResult = true
@@ -439,9 +439,9 @@ func (e Evonet) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
 	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.ChannelId)
 	utility.Assert(channelEntity != nil, fmt.Sprintf("支付渠道异常 payId: %s", payIdStr))
-	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.NotifyUrl)
-	if len(overseaPay.NotifyUrl) > 0 {
-		r.Response.Writeln(fmt.Sprintf("<head>\n<meta http-equiv=\"refresh\" content=\"1;url=%s\">\n</head>", overseaPay.NotifyUrl))
+	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
+	if len(overseaPay.ReturnUrl) > 0 {
+		r.Response.Writeln(fmt.Sprintf("<head>\n<meta http-equiv=\"refresh\" content=\"1;url=%s\">\n</head>", overseaPay.ReturnUrl))
 	} else {
 		//r.Response.Writeln(r.Get("channelId"))
 		r.Response.Writeln(overseaPay)
@@ -460,7 +460,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(createPayContext.Pay.PaymentFee > 0, "paymentFee is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
-	utility.Assert(len(createPayContext.Pay.MerchantOrderNo) > 0, "merchantOrderNo is nil")
+	utility.Assert(len(createPayContext.Pay.PaymentId) > 0, "paymentId is nil")
 	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(len(createPayContext.UserId) > 0, "shopperReference is nil")
 	utility.Assert(createPayContext.Items != nil, "lineItems is nil")
@@ -471,7 +471,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	}
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":        createPayContext.Pay.MerchantOrderNo,
+			"merchantTransID":        createPayContext.Pay.PaymentId,
 			"merchantOrderReference": createPayContext.MerchantOrderReference,
 			"merchantTransTime":      getCurrentDateTime(),
 		},
@@ -561,15 +561,15 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment)
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + pay.MerchantOrderNo
+	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + pay.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":   utility.CreateMerchantOrderNo(),
+			"merchantTransID":   utility.CreatePaymentId(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"transAmount": map[string]interface{}{
 			"currency": pay.Currency,
-			"value":    utility.ConvertFenToYuanMinUnitStr(pay.BuyerPayFee),
+			"value":    utility.ConvertFenToYuanMinUnitStr(pay.ChannelPaymentFee),
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}
@@ -600,10 +600,10 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + pay.MerchantOrderNo
+	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + pay.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":   utility.CreateMerchantOrderNo(),
+			"merchantTransID":   utility.CreatePaymentId(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
@@ -637,7 +637,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.P
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.payment"
 	param := map[string]interface{}{
-		"merchantTransID": pay.MerchantOrderNo,
+		"merchantTransID": pay.PaymentId,
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -658,7 +658,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.P
 	pspReference := payment.GetJson("evoTransInfo").Get("evoTransID").String()
 	merchantPspReference := payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.Channel)
-	utility.Assert(strings.Compare(merchantPspReference, pay.MerchantOrderNo) == 0, "merchantPspReference not match")
+	utility.Assert(strings.Compare(merchantPspReference, pay.PaymentId) == 0, "merchantPspReference not match")
 	res = &ro.OutPayRo{
 		PayFee:    pay.PaymentFee,
 		PayStatus: consts.TO_BE_PAID,
@@ -678,10 +678,10 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + pay.MerchantOrderNo
+	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + pay.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
-			"merchantTransID":   refund.OutRefundNo,
+			"merchantTransID":   refund.RefundId,
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"transAmount": map[string]interface{}{
@@ -706,8 +706,8 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund", responseJson.String(), "支付退款", pspReference, channelEntity.Channel)
 	res = &ro.OutPayRefundRo{
-		ChannelRefundNo: pspReference,
-		RefundStatus:    consts.REFUND_ING,
+		ChannelRefundId: pspReference,
+		Status:          consts.REFUND_ING,
 	}
 	return res, nil
 }
@@ -718,7 +718,7 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.ChannelAccountId + "/evo.e-commerce.refund"
 	param := map[string]interface{}{
-		"merchantTransID": refund.OutRefundNo,
+		"merchantTransID": refund.RefundId,
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -738,18 +738,18 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	status := refundJson.Get("status").String()
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	merchantPspReference := refundJson.GetJson("merchantTransInfo").Get("merchantTransID").String()
-	utility.Assert(strings.Compare(merchantPspReference, refund.OutRefundNo) == 0, "merchantPspReference not match")
+	utility.Assert(strings.Compare(merchantPspReference, refund.RefundId) == 0, "merchantPspReference not match")
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund_query", responseJson.String(), "退款查询", pspReference, channelEntity.Channel)
 	res = &ro.OutPayRefundRo{
-		RefundFee:    refund.RefundFee,
-		RefundStatus: consts.REFUND_ING,
+		RefundFee: refund.RefundFee,
+		Status:    consts.REFUND_ING,
 	}
 	if strings.Compare(status, "Failed") == 0 {
-		res.RefundStatus = consts.REFUND_FAILED
+		res.Status = consts.REFUND_FAILED
 		res.Reason = "from_query:" + refundJson.Get("failureReason").String()
 	} else if strings.Compare(status, "Success") == 0 {
-		res.RefundStatus = consts.REFUND_SUCCESS
-		res.ChannelRefundNo = pspReference
+		res.Status = consts.REFUND_SUCCESS
+		res.ChannelRefundId = pspReference
 		res.RefundTime = gtime.Now()
 	}
 	return res, nil

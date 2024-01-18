@@ -10,10 +10,10 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func DoChannelCancel(ctx context.Context, overseaPay *entity.Payment) (err error) {
-	utility.Assert(overseaPay != nil, "entity not found")
-	utility.Assert(overseaPay.PayStatus == consts.TO_BE_PAID, "payment not waiting for pay")
-	utility.Assert(overseaPay.AuthorizeStatus < consts.CAPTURE_REQUEST, "payment has capture request")
+func DoChannelCancel(ctx context.Context, payment *entity.Payment) (err error) {
+	utility.Assert(payment != nil, "entity not found")
+	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
+	utility.Assert(payment.AuthorizeStatus < consts.CAPTURE_REQUEST, "payment has capture request")
 
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		////事务处理 gateway capture
@@ -30,7 +30,7 @@ func DoChannelCancel(ctx context.Context, overseaPay *entity.Payment) (err error
 		//}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
-		_, err = gateway.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCancel(ctx, overseaPay)
+		_, err = gateway.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelCancel(ctx, payment)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

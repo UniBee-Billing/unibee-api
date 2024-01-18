@@ -50,7 +50,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 			CountryCode:       req.CountryCode,
 			MerchantId:        merchantInfo.Id,
 			CompanyId:         merchantInfo.CompanyId,
-			NotifyUrl:         req.ReturnUrl,
+			ReturnUrl:         req.ReturnUrl,
 			CaptureDelayHours: req.CaptureDelayHours,
 		},
 		Platform:                 req.Channel,

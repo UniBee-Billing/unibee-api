@@ -20,19 +20,19 @@ import (
 )
 
 func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
-	overseaPay := query.GetPaymentByMerchantOrderNo(ctx, req.PaymentsPspReference)
-	utility.Assert(overseaPay != nil, "payment not found")
-	utility.Assert(overseaPay.PaymentFee > 0, "payment fee error")
-	utility.Assert(strings.Compare(overseaPay.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
-	utility.Assert(overseaPay.PayStatus == consts.PAY_SUCCESS, "payment not success")
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentsPspReference)
+	utility.Assert(payment != nil, "payment not found")
+	utility.Assert(payment.PaymentFee > 0, "payment fee error")
+	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
+	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
 
-	channel := query.GetPayChannelById(ctx, overseaPay.ChannelId)
+	channel := query.GetPayChannelById(ctx, payment.ChannelId)
 	utility.Assert(channel != nil, "支付渠道异常 gateway not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
-	utility.Assert(req.Amount.Value <= overseaPay.PaymentFee, "refund value should <= PaymentFee value")
+	utility.Assert(req.Amount.Value <= payment.PaymentFee, "refund value should <= PaymentFee value")
 
-	redisKey := fmt.Sprintf("createRefund-payMerchantOrderNo:%s-bizId:%s", overseaPay.MerchantOrderNo, req.Reference)
+	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.Reference)
 	isDuplicatedInvoke := false
 
 	//- 退款并发调用严重，加上Redis排它锁, todo mark 使用数据库锁
@@ -48,38 +48,38 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 
 	var (
-		overseaRefund *entity.Refund
+		one *entity.Refund
 	)
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
-		OutTradeNo: req.PaymentsPspReference,
-		BizId:      req.Reference,
-		BizType:    bizType,
-	}).OmitEmpty().Scan(&overseaRefund)
-	utility.Assert(err == nil && overseaRefund == nil, "duplicate reference call")
+		PaymentId: req.PaymentsPspReference,
+		BizId:     req.Reference,
+		BizType:   bizType,
+	}).OmitEmpty().Scan(&one)
+	utility.Assert(err == nil && one == nil, "duplicate reference call")
 
-	overseaRefund = &entity.Refund{
-		CompanyId:    overseaPay.CompanyId,
-		MerchantId:   overseaPay.MerchantId,
-		BizId:        req.Reference,
-		BizType:      bizType,
-		OutTradeNo:   overseaPay.MerchantOrderNo,
-		OutRefundNo:  utility.CreateOutRefundNo(),
-		RefundFee:    req.Amount.Value,
-		RefundStatus: consts.REFUND_ING,
-		ChannelId:    overseaPay.ChannelId,
-		AppId:        overseaPay.AppId,
-		Currency:     overseaPay.Currency,
-		CountryCode:  overseaPay.CountryCode,
-		OpenApiId:    openApiId,
+	one = &entity.Refund{
+		CompanyId:   payment.CompanyId,
+		MerchantId:  payment.MerchantId,
+		BizId:       req.Reference,
+		BizType:     bizType,
+		PaymentId:   payment.PaymentId,
+		RefundId:    utility.CreateRefundId(),
+		RefundFee:   req.Amount.Value,
+		Status:      consts.REFUND_ING,
+		ChannelId:   payment.ChannelId,
+		AppId:       payment.AppId,
+		Currency:    payment.Currency,
+		CountryCode: payment.CountryCode,
+		OpenApiId:   openApiId,
 		//AdditionalData: req.
 		//RefundComment: payBizTypeEnum.getDesc() +"退款",
 
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, overseaRefund.OutRefundNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
-			insert, err := dao.Refund.Ctx(ctx).Data(overseaRefund).OmitEmpty().Insert(overseaRefund)
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -89,18 +89,18 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 				//_ = transaction.Rollback()
 				return err
 			}
-			overseaRefund.Id = id
+			one.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelResult, err := gateway.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelRefund(ctx, overseaPay, overseaRefund)
+			channelResult, err := gateway.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelRefund(ctx, payment, one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
 			}
 
-			overseaRefund.ChannelRefundNo = channelResult.ChannelRefundNo
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().ChannelRefundNo: channelResult.ChannelRefundNo},
-				g.Map{dao.Refund.Columns().Id: overseaRefund.Id, dao.Refund.Columns().RefundStatus: consts.REFUND_ING})
+			one.ChannelRefundId = channelResult.ChannelRefundId
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().ChannelRefundId: channelResult.ChannelRefundId},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -123,14 +123,15 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		return nil, err
 	} else {
 		//交易事件记录
-		event.SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveTimeLine(ctx, entity.Timeline{
 			BizType:   0,
-			BizId:     overseaPay.Id,
-			Fee:       overseaPay.PaymentFee,
+			BizId:     payment.PaymentId,
+			Fee:       payment.PaymentFee,
 			EventType: event.SentForRefund.Type,
 			Event:     event.SentForRefund.Desc,
-			UniqueNo:  fmt.Sprintf("%s_%s_%s", overseaPay.MerchantOrderNo, "SentForRefund", overseaRefund.OutRefundNo),
+			OpenApiId: one.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "SentForRefund", one.RefundId),
 		})
 	}
-	return overseaRefund, nil
+	return one, nil
 }

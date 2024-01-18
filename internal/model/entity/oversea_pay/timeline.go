@@ -8,11 +8,15 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPayEvent is the golang structure for table oversea_pay_event.
-type OverseaPayEvent struct {
+// Timeline is the golang structure for table timeline.
+type Timeline struct {
 	Id              int64       `json:"id"              ` // 主键id
-	BizType         int         `json:"bizType"         ` // biz_type=0，oversea_pay表
-	BizId           int64       `json:"bizId"           ` // biz_type=0，oversea_pay表Id；
+	UserId          int64       `json:"userId"          ` // user_id
+	MerchantUserId  int64       `json:"merchantUserId"  ` // merchant_user_id
+	OpenApiId       int64       `json:"openApiId"       ` // 使用的开放平台配置Id
+	TerminalIp      string      `json:"terminalIp"      ` // terminal_ip
+	BizType         int         `json:"bizType"         ` // biz_type=1，Payment表
+	BizId           string      `json:"bizId"           ` // biz_type=1，pay；
 	Fee             int64       `json:"fee"             ` // 金额（分）
 	EventType       int         `json:"eventType"       ` // 0-未知
 	Event           string      `json:"event"           ` // 事件
@@ -20,7 +24,5 @@ type OverseaPayEvent struct {
 	UniqueNo        string      `json:"uniqueNo"        ` // 唯一键
 	GmtCreate       *gtime.Time `json:"gmtCreate"       ` // 创建时间
 	GmtModify       *gtime.Time `json:"gmtModify"       ` // 更新时间
-	OpenApiId       int64       `json:"openApiId"       ` // 使用的开放平台配置Id
-	TerminalIp      string      `json:"terminalIp"      ` // 实时交易终端IP
 	Message         string      `json:"message"         ` // message
 }

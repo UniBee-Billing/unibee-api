@@ -8,19 +8,19 @@ import (
 	"go-oversea-pay/internal/dao/oversea_pay/internal"
 )
 
-// internalOverseaPayEventDao is internal type for wrapping internal DAO implements.
-type internalOverseaPayEventDao = *internal.OverseaPayEventDao
+// internalTimelineDao is internal type for wrapping internal DAO implements.
+type internalTimelineDao = *internal.TimelineDao
 
-// overseaPayEventDao is the data access object for table oversea_pay_event.
+// timelineDao is the data access object for table timeline.
 // You can define custom methods on it to extend its functionality as you wish.
-type overseaPayEventDao struct {
-	internalOverseaPayEventDao
+type timelineDao struct {
+	internalTimelineDao
 }
 
 var (
-	// OverseaPayEvent is globally public accessible object for table oversea_pay_event operations.
-	OverseaPayEvent = overseaPayEventDao{
-		internal.NewOverseaPayEventDao(),
+	// Timeline is globally public accessible object for table timeline operations.
+	Timeline = timelineDao{
+		internal.NewTimelineDao(),
 	}
 )
 

@@ -14,8 +14,8 @@ func GetPaymentById(ctx context.Context, payId int64) (one *entity.Payment) {
 	return
 }
 
-func GetPaymentByMerchantOrderNo(ctx context.Context, merchantOrderNo string) (one *entity.Payment) {
-	err := dao.Payment.Ctx(ctx).Where(entity.Payment{MerchantOrderNo: merchantOrderNo}).OmitEmpty().Scan(&one)
+func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.Payment) {
+	err := dao.Payment.Ctx(ctx).Where(entity.Payment{PaymentId: paymentId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

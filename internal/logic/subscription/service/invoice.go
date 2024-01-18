@@ -45,7 +45,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	//创建
 	one := &entity.Invoice{
 		MerchantId:                     req.MerchantId,
-		InvoiceId:                      utility.CreateInvoiceOrderNo(),
+		InvoiceId:                      utility.CreateInvoiceId(),
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		TaxAmount:                      totalTax,

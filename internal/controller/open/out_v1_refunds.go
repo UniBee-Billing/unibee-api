@@ -24,9 +24,9 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 	}
 	res = &payment.RefundsRes{
 		Status:              "SentForRefund",
-		PspReference:        resp.OutRefundNo,
+		PspReference:        resp.RefundId,
 		Reference:           req.Reference,
-		PaymentPspReference: resp.OutTradeNo,
+		PaymentPspReference: resp.PaymentId,
 	}
 	return res, nil
 }
