@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
+	_interface "go-oversea-pay/internal/interface"
 	out2 "go-oversea-pay/internal/logic/gateway/out"
 	"go-oversea-pay/internal/logic/gateway/out/evonet"
 	"go-oversea-pay/internal/logic/gateway/out/paypal"
@@ -55,7 +56,7 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
@@ -64,6 +65,9 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 	res, err = p.getRemoteChannel().DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
 
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelMerchantBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -75,13 +79,16 @@ func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, p
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, customerId)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -93,13 +100,16 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context,
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, createInvoiceInternalReq)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCreateAndPay cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -111,13 +121,16 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCancel(ctx context.Context, payCh
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCancel(ctx, payChannel, cancelInvoiceInternalReq)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCancel cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -129,13 +142,16 @@ func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChann
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelInvoicePay(ctx, payChannel, payInvoiceInternalReq)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoicePay cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -147,13 +163,16 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payC
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceDetails(ctx, payChannel, channelInvoiceId)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceDetails cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -165,13 +184,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Cont
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, subscription, newTrialEnd)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -183,13 +205,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx c
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, subscriptionRo)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdateProrationPreview cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -218,13 +243,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCreate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -236,13 +264,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, subscriptionCancelInternalReq)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancel cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -254,13 +285,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx contex
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -272,13 +306,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -290,13 +327,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, subscriptionRo)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -308,13 +348,16 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionDetails cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -326,13 +369,16 @@ func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	err = p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return err
 }
 
@@ -344,13 +390,16 @@ func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *en
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	err = p.getRemoteChannel().DoRemoteChannelPlanActive(ctx, plan, planChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanActive cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return err
 }
 
@@ -362,13 +411,16 @@ func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	err = p.getRemoteChannel().DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanDeactivate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return err
 }
 
@@ -380,13 +432,16 @@ func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelProductCreate(ctx, plan, planChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelProductCreate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -398,13 +453,16 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanCreateAndActivate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -412,12 +470,14 @@ func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *en
 	startTime := time.Now()
 	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
 	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelWebhook cost：%s \n", time.Now().Sub(startTime))
-
 }
 func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
 	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelRedirect cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -429,13 +489,16 @@ func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayCo
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelPayment(ctx, createPayContext)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayment cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -447,13 +510,16 @@ func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelCapture(ctx, pay)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCapture cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -465,13 +531,16 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelCancel(ctx, pay)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCancel cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -483,13 +552,16 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelPayStatusCheck(ctx, pay)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }
 
@@ -501,14 +573,21 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelRefund(ctx, pay, refund)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefund cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
+}
+
+func printChannelPanic(ctx context.Context, err error) {
+	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", _interface.BizCtx().Get(ctx).RequestId, err.Error())
 }
 
 func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
@@ -519,12 +598,15 @@ func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, p
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			g.Log().Errorf(ctx, "ChannelException error:%s", err.Error())
+			printChannelPanic(ctx, err)
 			return
 		}
 	}()
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelRefundStatusCheck(ctx, pay, refund)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
 	return res, err
 }

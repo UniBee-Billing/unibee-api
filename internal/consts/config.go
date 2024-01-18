@@ -48,7 +48,7 @@ func (config Config) IsServerDev() bool {
 }
 
 func (config Config) IsLocal() bool {
-	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "local") == 0
+	return config.IsServerDev() || (len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "local") == 0)
 }
 
 func (config Config) IsStage() bool {

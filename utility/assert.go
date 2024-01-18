@@ -4,9 +4,13 @@ import (
 	"fmt"
 )
 
+const (
+	SystemAssertPrefix = "system_assert: "
+)
+
 func Assert(check bool, message string) {
 	if !check {
-		panic(message)
+		panic(SystemAssertPrefix + message)
 	}
 }
 

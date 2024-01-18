@@ -388,6 +388,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 	oldPlan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
+
+	if req.NewPlanId != sub.PlanId {
+		//utility.Assert(oldPlan.IntervalUnit == plan.IntervalUnit, "subscription update must have the same recurring interval")
+		//utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "subscription update must have the same recurring interval")
+	}
 	//暂时不开放不同通道升级功能 todo mark
 	oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), sub.ChannelId)
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")

@@ -8,6 +8,7 @@ import (
 	"go-oversea-pay/internal/model"
 	"go-oversea-pay/internal/query"
 	utility "go-oversea-pay/utility"
+	"strings"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -38,6 +39,15 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 
 // ResponseHandler 返回处理中间件
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
+	customCtx := &model.Context{
+		Session: r.Session,
+		Data:    make(g.Map),
+	}
+	customCtx.RequestId = utility.CreateRequestId()
+	_interface.BizCtx().Init(r, customCtx)
+	r.Assigns(g.Map{
+		consts.ContextKey: customCtx,
+	})
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
 		json, _ := r.GetJson()
@@ -62,32 +72,30 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 			code = gcode.CodeInternalError
 		}
 		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_exception err url: %s params:%s code:%d error:%s", r.GetUrl(), json, code.Code(), err.Error())
-		//if r.IsAjaxRequest() {
+		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.BizCtx().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
 		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
-		utility.JsonExit(r, code.Code(), err.Error())
-		//} else {
-		//interface.View().Render500(r.Context(), model.Vie w{
-		//	Error: err.Error(),
-		//})
-		//}
+		r.Response.Status = 200  // 发生错误时候错误码Http 状态吗设置成 200，错误以 Json 形式返回
+		message := err.Error()
+		if strings.Contains(message, utility.SystemAssertPrefix) {
+			utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, gcode.CodeValidationFailed.Message()+": ", 1))
+		} else {
+			utility.JsonExit(r, code.Code(), fmt.Sprintf("System Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+		}
 	} else {
-		//if r.IsAjaxRequest() {
+		r.Response.Status = 200
 		utility.JsonExit(r, code.Code(), "", res)
-		//} else {
-		// 什么都不做，业务API自行处理模板渲染的成功逻辑。
-		//}
 	}
 }
 
 // PreAuth 从 Session 中获取用户
 func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 	// 初始化，务必最开始执行
-	customCtx := &model.Context{
-		Session: r.Session,
-		Data:    make(g.Map),
-	}
-	_interface.BizCtx().Init(r, customCtx)
+	//customCtx := &model.Context{
+	//	Session: r.Session,
+	//	Data:    make(g.Map),
+	//}
+	//_interface.BizCtx().Init(r, customCtx)
+	customCtx := _interface.BizCtx().Get(r.Context())
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id: userEntity.Id,
@@ -98,9 +106,9 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 		}
 	}
 	// 将自定义的上下文对象传递到模板变量中使用
-	r.Assigns(g.Map{
-		consts.ContextKey: customCtx,
-	})
+	//r.Assigns(g.Map{
+	//	consts.ContextKey: customCtx,
+	//})
 	// 执行下一步请求逻辑
 	r.Middleware.Next()
 }
@@ -108,11 +116,12 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 // PreOpenApiAuth 从 Session 中获取用户 (obsolete)
 func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 	// 初始化，务必最开始执行
-	customCtx := &model.Context{
-		Session: r.Session,
-		Data:    make(g.Map),
-	}
-	_interface.BizCtx().Init(r, customCtx)
+	//customCtx := &model.Context{
+	//	Session: r.Session,
+	//	Data:    make(g.Map),
+	//}
+	//_interface.BizCtx().Init(r, customCtx)
+	customCtx := _interface.BizCtx().Get(r.Context())
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
 			Id: userEntity.Id,
@@ -128,9 +137,9 @@ func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 		customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
 	}
 	// 将自定义的上下文对象传递到模板变量中使用
-	r.Assigns(g.Map{
-		consts.ContextKey: customCtx,
-	})
+	//r.Assigns(g.Map{
+	//	consts.ContextKey: customCtx,
+	//})
 	// 执行下一步请求逻辑
 	r.Middleware.Next()
 }
@@ -175,15 +184,6 @@ func parseAccessToken(accessToken string) *UserClaims {
 
 func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	if consts.GetConfigInstance().IsServerDev() {
-		customCtx := &model.Context{
-			Session: r.Session,
-			Data:    make(g.Map),
-		}
-		_interface.BizCtx().Init(r, customCtx)
-		r.Assigns(g.Map{
-			consts.ContextKey: customCtx,
-		})
-
 		r.Middleware.Next()
 		return
 	}
@@ -212,33 +212,34 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 
 	u := parseAccessToken(tokenString)
 	fmt.Println("parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
-	customCtx := &model.Context{
-		Session: r.Session,
-		Data:    make(g.Map),
-	}
-	_interface.BizCtx().Init(r, customCtx)
+	//customCtx := &model.Context{
+	//	Session: r.Session,
+	//	Data:    make(g.Map),
+	//}
+	//_interface.BizCtx().Init(r, customCtx)
+	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
 		Id:    u.Id,
 		Email: u.Email,
 	}
 
-	r.Assigns(g.Map{
-		consts.ContextKey: customCtx,
-	})
+	//r.Assigns(g.Map{
+	//	consts.ContextKey: customCtx,
+	//})
 
 	r.Middleware.Next()
 }
 
 func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	if consts.GetConfigInstance().IsServerDev() {
-		customCtx := &model.Context{
-			Session: r.Session,
-			Data:    make(g.Map),
-		}
-		_interface.BizCtx().Init(r, customCtx)
-		r.Assigns(g.Map{
-			consts.ContextKey: customCtx,
-		})
+		//customCtx := &model.Context{
+		//	Session: r.Session,
+		//	Data:    make(g.Map),
+		//}
+		//_interface.BizCtx().Init(r, customCtx)
+		//r.Assigns(g.Map{
+		//	consts.ContextKey: customCtx,
+		//})
 
 		r.Middleware.Next()
 		return
@@ -266,11 +267,11 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
-	customCtx := &model.Context{
-		Session: r.Session,
-		Data:    make(g.Map),
-	}
-	_interface.BizCtx().Init(r, customCtx)
+	//customCtx := &model.Context{
+	//	Session: r.Session,
+	//	Data:    make(g.Map),
+	//}
+	//_interface.BizCtx().Init(r, customCtx)
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if !token.Valid {
@@ -279,6 +280,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 
+	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.MerchantUser = &model.ContextMerchantUser{
 		Id:         u.Id,
 		MerchantId: uint64(merchantAccount.MerchantId),

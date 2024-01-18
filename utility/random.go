@@ -50,6 +50,10 @@ func JodaTimePrefix() (prefix string) {
 	return time.Now().Format("20060102")
 }
 
+func CreateRequestId() string {
+	return fmt.Sprintf("req%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+}
+
 func CreateSubscriptionId() string {
 	return fmt.Sprintf("sub%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
