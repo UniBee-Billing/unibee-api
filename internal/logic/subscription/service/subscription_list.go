@@ -3,6 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -32,7 +35,13 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("SubscriptionDetail Background panic error:%s\n", exception)
+				var err error
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				g.Log().Errorf(context.Background(), "SubscriptionDetail Background panic error:%s\n", err.Error())
 				return
 			}
 		}()

@@ -1,9 +1,5 @@
 package utility
 
-import (
-	"fmt"
-)
-
 const (
 	SystemAssertPrefix = "system_assert: "
 )
@@ -22,13 +18,4 @@ func Try(fun func(), handler func(interface{})) {
 		}
 	}()
 	fun()
-}
-
-func resume() {
-	defer func() {
-		if exception := recover(); exception != nil {
-			fmt.Printf("exception panic error:%s\n", exception)
-			return
-		}
-	}()
 }

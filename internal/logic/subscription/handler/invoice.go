@@ -70,6 +70,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			ChannelStatus:                  details.ChannelStatus,
 			ChannelInvoiceId:               details.ChannelInvoiceId,
 			ChannelInvoicePdf:              details.ChannelInvoicePdf,
+			ChannelPaymentId:               details.ChannelPaymentId,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
@@ -104,10 +105,12 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().ChannelInvoiceId:               details.ChannelInvoiceId,
 			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
 			dao.Invoice.Columns().ChannelUserId:                  details.ChannelUserId,
+			dao.Invoice.Columns().ChannelInvoicePdf:              details.ChannelInvoicePdf,
 			dao.Invoice.Columns().Link:                           details.Link,
 			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
+			dao.Invoice.Columns().ChannelPaymentId:               details.ChannelPaymentId,
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
 		if err != nil {
 			return err
@@ -143,7 +146,7 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				fmt.Printf("CreateOrUpdateInvoiceByDetail Background Generate PDF panic error:%s\n", err.Error())
+				g.Log().Errorf(context.Background(), "CreateOrUpdateInvoiceByDetail Background Generate PDF panic error:%s\n", err.Error())
 				return
 			}
 		}()

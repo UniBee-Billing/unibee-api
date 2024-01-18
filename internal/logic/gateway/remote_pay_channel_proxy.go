@@ -587,7 +587,11 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 }
 
 func printChannelPanic(ctx context.Context, err error) {
-	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", _interface.BizCtx().Get(ctx).RequestId, err.Error())
+	var requestId = "init"
+	if _interface.BizCtx().Get(ctx) != nil {
+		requestId = _interface.BizCtx().Get(ctx).RequestId
+	}
+	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", requestId, err.Error())
 }
 
 func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {

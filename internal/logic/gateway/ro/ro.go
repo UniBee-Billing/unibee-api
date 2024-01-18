@@ -254,6 +254,7 @@ type ChannelDetailInvoiceInternalResp struct {
 	ChannelInvoicePdf              string                      `json:"ChannelInvoicePdf"   `             // 关联渠道发票 Pdf
 	PeriodEnd                      int64                       `json:"periodEnd"`
 	PeriodStart                    int64                       `json:"periodStart"`
+	ChannelPaymentId               string                      `json:"channelPaymentId"`
 }
 
 type ChannelDetailInvoiceRo struct {

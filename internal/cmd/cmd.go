@@ -103,6 +103,7 @@ var (
 						_interface.Middleware().ResponseHandler,
 					)
 					router.SystemSubscription(ctx, group)
+					router.SystemInvoice(ctx, group)
 				})
 			}
 

@@ -15,12 +15,13 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
+				var panicError error
 				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					err = v
+					panicError = v
 				} else {
-					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+					panicError = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				g.Log().Errorf(context.Background(), "SaveChannelHttpLog exception panic error:%s\n", err)
+				g.Log().Errorf(context.Background(), "SaveChannelHttpLog exception panic error:%s\n", panicError.Error())
 				return
 			}
 		}()

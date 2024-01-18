@@ -14,3 +14,9 @@ func NewSubscription() system.ISystemSubscription {
 	return &ControllerSubscription{}
 }
 
+type ControllerInvoice struct{}
+
+func NewInvoice() system.ISystemInvoice {
+	return &ControllerInvoice{}
+}
+

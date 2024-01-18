@@ -14,3 +14,12 @@ func SystemSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func SystemInvoice(ctx context.Context, group *ghttp.RouterGroup) {
+	// profile 库相关接口
+	group.Group("/invoice", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			system.NewInvoice(),
+		)
+	})
+}

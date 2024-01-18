@@ -151,6 +151,11 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		})
 	}
 
+	var channelPaymentId string
+	if detail.PaymentIntent != nil {
+		channelPaymentId = detail.PaymentIntent.ID
+	}
+
 	return &ro.ChannelDetailInvoiceInternalResp{
 		ChannelSubscriptionId:          detail.Subscription.ID,
 		TotalAmount:                    detail.Total,
@@ -169,6 +174,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		ChannelInvoicePdf:              detail.InvoicePDF,
 		PeriodStart:                    detail.PeriodStart,
 		PeriodEnd:                      detail.PeriodEnd,
+		ChannelPaymentId:               channelPaymentId,
 	}
 }
 
@@ -181,6 +187,7 @@ func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 	if err != nil {
 		return nil, err
 	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", params, response, err, "", nil, payChannel)
 	return parseStripeInvoice(response, int64(payChannel.Id)), nil
 }
 
@@ -219,6 +226,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	if err != nil {
 		return nil, err
 	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", params, result, err, "New", nil, payChannel)
 
 	for _, line := range createInvoiceInternalReq.InvoiceLines {
 		ItemParams := &stripe.InvoiceItemParams{
@@ -248,6 +256,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	if err != nil {
 		return nil, err
 	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, payChannel)
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
 		status = consts.InvoiceStatusPending
@@ -307,6 +316,7 @@ func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entit
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoicePayParams{}
 	response, err := invoice.Pay(payInvoiceInternalReq.ChannelInvoiceId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelInvoicePay", params, response, err, "", nil, payChannel)
 	return parseStripeInvoice(response, int64(payChannel.Id)), nil
 }
 
@@ -320,7 +330,7 @@ func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 	if err != nil {
 		return nil, err
 	}
-
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceDetails", params, detail, err, "", nil, payChannel)
 	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
 }
 
