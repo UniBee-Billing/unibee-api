@@ -197,7 +197,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 
 		createCustomResult, err := customer.New(params)
 		if err != nil {
-			g.Log().Printf(ctx, "customer.New: %v", err)
+			g.Log().Printf(ctx, "customer.New: %v", err.Error())
 			return nil, err
 		}
 		createInvoiceInternalReq.Invoice.ChannelUserId = createCustomResult.ID
@@ -380,7 +380,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 
 			createCustomResult, err := customer.New(params)
 			if err != nil {
-				g.Log().Printf(ctx, "customer.New: %v", err)
+				g.Log().Printf(ctx, "customer.New: %v", err.Error())
 				return nil, err
 			}
 			subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
@@ -400,7 +400,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 			vatCreateResult, err := taxrate.New(params)
 			if err != nil {
-				g.Log().Printf(ctx, "taxrate.New: %v", err)
+				g.Log().Printf(ctx, "taxrate.New: %v", err.Error())
 				return nil, err
 			}
 			channelVatRate = &entity.SubscriptionVatRateChannel{
@@ -410,7 +410,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 			result, err := dao.SubscriptionVatRateChannel.Ctx(ctx).Data(channelVatRate).OmitEmpty().Insert(channelVatRate)
 			if err != nil {
-				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err)
+				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err.Error())
 				return nil, err
 			}
 			id, _ := result.LastInsertId()
@@ -1100,7 +1100,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	signatureHeader := r.Header.Get("Stripe-Signature")
 	event, err := webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel, err)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
@@ -1113,7 +1113,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
@@ -1122,7 +1122,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -1131,7 +1131,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		var stripeInvoice stripe.Invoice
 		err := json.Unmarshal(event.Data.Raw, &stripeInvoice)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
@@ -1140,7 +1140,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -1149,7 +1149,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		var stripePayment stripe.PaymentIntent
 		err := json.Unmarshal(event.Data.Raw, &stripePayment)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
@@ -1158,7 +1158,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			//err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -1172,7 +1172,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 
 func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	params, err := r.GetJson()
-	g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err)
+	g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err.Error())
 	if err != nil {
 		r.Response.Writeln(err)
 		return

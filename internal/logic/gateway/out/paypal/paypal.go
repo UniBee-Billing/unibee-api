@@ -580,7 +580,7 @@ func (p Paypal) processWebhook(ctx context.Context, eventType string, resource *
 func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	jsonData, err := r.GetJson()
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.Channel, err)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.Channel, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
@@ -613,7 +613,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionCanceled(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -630,7 +630,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -647,7 +647,7 @@ func (p Paypal) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
