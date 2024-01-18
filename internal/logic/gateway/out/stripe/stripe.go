@@ -796,19 +796,19 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	////todo mark EffectImmediate=false 获取的发票是之前最新的发票
-	//queryParams := &stripe.InvoiceParams{}
-	//queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-	//log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
-	//g.Log().Infof(ctx, "query invoice:", queryParamsResult)
+	queryParams := &stripe.InvoiceParams{}
+	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
+	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     updateSubscription.LatestInvoice.ID,
+		ChannelSubscriptionId:     queryParamsResult.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
-		ChannelInvoiceId:          updateSubscription.LatestInvoice.ID,
+		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
-		LatestInvoiceLink:         updateSubscription.LatestInvoice.HostedInvoiceURL,
+		LatestInvoiceLink:         queryParamsResult.HostedInvoiceURL,
 		Status:                    0, //todo mark
-		Paid:                      updateSubscription.LatestInvoice.Paid,
+		Paid:                      queryParamsResult.Paid,
 	}, nil
 }
 
