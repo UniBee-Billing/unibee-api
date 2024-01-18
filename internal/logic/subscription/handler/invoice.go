@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -137,7 +138,12 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("CreateOrUpdateInvoiceByDetail Background Generate PDF panic error:%s\n", exception)
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				fmt.Printf("CreateOrUpdateInvoiceByDetail Background Generate PDF panic error:%s\n", err.Error())
 				return
 			}
 		}()
