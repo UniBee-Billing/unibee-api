@@ -587,11 +587,11 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment)
 		captureJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay捕获失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := captureJson.Get("status").String()
-	pspReference := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "capture", responseJson.String(), "支付捕获", pspReference, channelEntity.Channel)
+	channelCaptureId := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "capture", responseJson.String(), "支付捕获", channelCaptureId, channelEntity.Channel)
 	res = &ro.OutPayCaptureRo{
-		PspReference: pspReference,
-		Status:       status,
+		ChannelCaptureId: channelCaptureId,
+		Status:           status,
 	}
 	return res, nil
 }
@@ -622,11 +622,11 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 		cancelJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := cancelJson.Get("status").String()
-	pspReference := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "cancel", responseJson.String(), "支付取消", pspReference, channelEntity.Channel)
+	channelCancelId := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "cancel", responseJson.String(), "支付取消", channelCancelId, channelEntity.Channel)
 	res = &ro.OutPayCancelRo{
-		PspReference: pspReference,
-		Status:       status,
+		ChannelCancelId: channelCancelId,
+		Status:          status,
 	}
 	return res, nil
 }

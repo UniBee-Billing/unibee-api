@@ -20,7 +20,7 @@ import (
 )
 
 func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
-	payment := query.GetPaymentByPaymentId(ctx, req.PaymentsPspReference)
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.PaymentFee > 0, "payment fee error")
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
@@ -51,7 +51,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		one *entity.Refund
 	)
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
-		PaymentId: req.PaymentsPspReference,
+		PaymentId: req.PaymentId,
 		BizId:     req.Reference,
 		BizType:   bizType,
 	}).OmitEmpty().Scan(&one)

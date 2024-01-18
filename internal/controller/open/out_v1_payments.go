@@ -76,10 +76,10 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	resp, err := service.DoChannelPay(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.PaymentsRes{
-		Status:       "Pending",
-		PspReference: resp.PayOrderNo,
-		Reference:    req.Reference,
-		Action:       resp.Action,
+		Status:    "Pending",
+		PaymentId: resp.PaymentId,
+		Reference: req.Reference,
+		Action:    resp.Action,
 	}
 	return
 }

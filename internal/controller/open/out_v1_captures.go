@@ -13,11 +13,11 @@ func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesR
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantId)
 
-	payment := query.GetPaymentByPaymentId(ctx, req.PaymentsPspReference)
-	utility.Assert(payment != nil, "payment not found")
-	utility.Assert(payment.Currency == req.Amount.Currency, "Currency not match the payment")
-	payment.ChannelPaymentFee = req.Amount.Value
-	err = service.DoChannelCapture(ctx, payment)
+	one := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	utility.Assert(one != nil, "payment not found")
+	utility.Assert(one.Currency == req.Amount.Currency, "Currency not match the payment")
+	one.ChannelPaymentFee = req.Amount.Value
+	err = service.DoChannelCapture(ctx, one)
 	if err != nil {
 		return nil, err
 	}

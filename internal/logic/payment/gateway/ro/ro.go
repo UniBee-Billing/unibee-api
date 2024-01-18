@@ -39,13 +39,13 @@ type CreatePayContext struct {
 
 type CreatePayInternalResp struct {
 	AlipayOrderNo  string      `json:"alipayOrderNo"`
-	PayOrderNo     string      `json:"payOrderNo"`
+	PaymentId      string      `json:"payOrderNo"`
 	AlreadyPaid    bool        `json:"alreadyPaid"`
 	OrderString    string      `json:"orderString"`
 	Message        string      `json:"message"`
 	TppOrderNo     string      `json:"tppOrderNo"`
 	TppPayId       string      `json:"tppPayId"`
-	PayChannel     int64       `json:"payChannel"`
+	ChannelId      int64       `json:"payChannel"`
 	PayChannelType string      `json:"payChannelType"`
 	Action         *gjson.Json `json:"action"`
 	AdditionalData *gjson.Json `json:"additionalData"`
@@ -53,19 +53,19 @@ type CreatePayInternalResp struct {
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
 type OutPayCaptureRo struct {
-	MerchantId   string          `json:"merchantId"         `      // 商户ID
-	PspReference string          `json:"pspReference"            ` // 业务类型。1-订单
-	Reference    string          `json:"reference"              `  // 业务id-即商户订单号
-	Amount       *v1.PayAmountVo `json:"amount"`
-	Status       string          `json:"status"`
+	MerchantId       string          `json:"merchantId"         `          // 商户ID
+	ChannelCaptureId string          `json:"channelCaptureId"            ` // 业务类型。1-订单
+	Reference        string          `json:"reference"              `      // 业务id-即商户订单号
+	Amount           *v1.PayAmountVo `json:"amount"`
+	Status           string          `json:"status"`
 }
 
 // OutPayCancelRo is the golang structure for table oversea_pay.
 type OutPayCancelRo struct {
-	MerchantId   string `json:"merchantId"         `      // 商户ID
-	PspReference string `json:"pspReference"            ` // 业务类型。1-订单
-	Reference    string `json:"reference"              `  // 业务id-即商户订单号
-	Status       string `json:"status"`
+	MerchantId      string `json:"merchantId"         `         // 商户ID
+	ChannelCancelId string `json:"channelCancelId"            ` // 业务类型。1-订单
+	Reference       string `json:"reference"              `     // 业务id-即商户订单号
+	Status          string `json:"status"`
 }
 
 // OutPayRefundRo is the golang structure for table oversea_pay.

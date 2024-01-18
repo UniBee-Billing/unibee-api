@@ -72,8 +72,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 				//_ = transaction.Rollback()
 				return err
 			}
-			channelInternalPayResult.PayChannel = createPayContext.Pay.ChannelId
-			channelInternalPayResult.PayOrderNo = createPayContext.Pay.PaymentId
+			channelInternalPayResult.ChannelId = createPayContext.Pay.ChannelId
+			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			jsonData, err := gjson.Marshal(channelInternalPayResult)
 			if err != nil {
 				return err

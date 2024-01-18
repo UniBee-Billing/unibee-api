@@ -18,9 +18,9 @@ func (c *ControllerMock) Cancel(ctx context.Context, req *mock.CancelReq) (res *
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 	cancelsReq := &v12.CancelsReq{
-		PaymentsPspReference: req.PaymentPspReference,
-		MerchantId:           req.MerchantId,
-		Reference:            uuid.New().String(),
+		PaymentId:  req.PaymentId,
+		MerchantId: req.MerchantId,
+		Reference:  uuid.New().String(),
 	}
 	_, err = NewPayment().Cancels(ctx, cancelsReq)
 	if err != nil {
