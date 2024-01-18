@@ -50,7 +50,7 @@ type SubscriptionUpdateCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-取消上一次的周期结束时取消设置"`
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-取消上一次的周期结束时取消设置"`
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
