@@ -174,6 +174,19 @@ func parseAccessToken(accessToken string) *UserClaims {
 }
 
 func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
+	if consts.GetConfigInstance().IsServerDev() {
+		customCtx := &model.Context{
+			Session: r.Session,
+			Data:    make(g.Map),
+		}
+		_interface.BizCtx().Init(r, customCtx)
+		r.Assigns(g.Map{
+			consts.ContextKey: customCtx,
+		})
+
+		r.Middleware.Next()
+		return
+	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		fmt.Println("empty token string of auth header")
@@ -217,6 +230,19 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
+	if consts.GetConfigInstance().IsServerDev() {
+		customCtx := &model.Context{
+			Session: r.Session,
+			Data:    make(g.Map),
+		}
+		_interface.BizCtx().Init(r, customCtx)
+		r.Assigns(g.Map{
+			consts.ContextKey: customCtx,
+		})
+
+		r.Middleware.Next()
+		return
+	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		fmt.Println("empty token string of auth header")
@@ -244,13 +270,15 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		Session: r.Session,
 		Data:    make(g.Map),
 	}
+	_interface.BizCtx().Init(r, customCtx)
+
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if !token.Valid {
 		fmt.Println("merchant user not found")
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()
 	}
-	_interface.BizCtx().Init(r, customCtx)
+
 	customCtx.MerchantUser = &model.ContextMerchantUser{
 		Id:         u.Id,
 		MerchantId: uint64(merchantAccount.MerchantId),

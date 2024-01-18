@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"go-oversea-pay/api/merchant/auth"
+	"go-oversea-pay/api/merchant/balance"
 	"go-oversea-pay/api/merchant/invoice"
 	"go-oversea-pay/api/merchant/oss"
 	"go-oversea-pay/api/merchant/plan"
@@ -24,6 +25,11 @@ type IMerchantAuth interface {
 	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
+
+type IMerchantBalance interface {
+	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
+	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
 }
 
 type IMerchantInvoice interface {

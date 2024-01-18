@@ -73,10 +73,10 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 		return nil, err
 	}
 	res = &mock.SamplePaymentNetherlandsRes{
-		Status:       payments.Status,
-		PspReference: payments.PspReference,
-		Reference:    payments.Reference,
-		Action:       payments.Action,
+		Status:    payments.Status,
+		PaymentId: payments.PaymentId,
+		Reference: payments.Reference,
+		Action:    payments.Action,
 	}
 	return
 }

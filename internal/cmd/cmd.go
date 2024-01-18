@@ -58,6 +58,7 @@ var (
 				router.MerchantInvoice(ctx, group)
 				router.MerchantOss(ctx, group)
 				router.MerchantVat(ctx, group)
+				router.MerchantBalance(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {

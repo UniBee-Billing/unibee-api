@@ -77,7 +77,16 @@ func MerchantVat(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth 库相关接口
 	group.Group("/vat", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			merchant.NewVat(), //Oss 文件接口-Go Server使用
+			merchant.NewVat(), //Vat 文件接口-Go Server使用
+		)
+	})
+}
+
+func MerchantBalance(ctx context.Context, group *ghttp.RouterGroup) {
+	// auth 库相关接口
+	group.Group("/balance", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewBalance(), //Balance 文件接口-Go Server使用
 		)
 	})
 }

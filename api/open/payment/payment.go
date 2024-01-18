@@ -37,10 +37,10 @@ type PaymentsReq struct {
 	DateOfBrith              string             `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
 }
 type PaymentsRes struct {
-	Status       string      `p:"status" dc:"交易状态"`
-	PspReference string      `p:"pspReference" dc:"系统交易唯一编码-平台订单号"`
-	Reference    string      `p:"reference" dc:"商户订单号"`
-	Action       *gjson.Json `p:"action" dc:"action"`
+	Status    string      `p:"status" dc:"交易状态"`
+	PaymentId string      `p:"paymentId" dc:"系统交易唯一编码-平台订单号"`
+	Reference string      `p:"reference" dc:"商户订单号"`
+	Action    *gjson.Json `p:"action" dc:"action"`
 }
 
 type OutShopperName struct {
@@ -86,8 +86,8 @@ type OutPaymentMethodIssur struct {
 }
 
 type PaymentDetailsReq struct {
-	g.Meta               `path:"/paymentDetails/{PaymentsPspReference}" tags:"Out-Controller" method:"post" summary:"1.5 查询当前交易状态及详情"`
-	PaymentsPspReference string `in:"path" dc:"平台支付单号" v:"required|length:4,30#请输入平台支付单号长度为:{min}到:{max}位"`
+	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"1.5 查询当前交易状态及详情"`
+	PaymentId string `in:"path" dc:"平台支付单号" v:"required|length:4,30#请输入平台支付单号长度为:{min}到:{max}位"`
 }
 type PaymentDetailsRes struct {
 }

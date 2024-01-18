@@ -50,24 +50,24 @@ func JodaTimePrefix() (prefix string) {
 	return time.Now().Format("20060102")
 }
 
-func CreateSubscriptionOrderNo() string {
+func CreateSubscriptionId() string {
 	return fmt.Sprintf("sub%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-func CreateInvoiceOrderNo() string {
+func CreateInvoiceId() string {
 	return fmt.Sprintf("in%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-func CreateSubscriptionUpdateOrderNo() string {
+func CreateSubscriptionUpdateId() string {
 	return fmt.Sprintf("subup%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-func CreateMerchantOrderNo() string {
-	return fmt.Sprintf("mon%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+func CreatePaymentId() string {
+	return fmt.Sprintf("pay%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
-func CreateOutRefundNo() string {
-	return fmt.Sprintf("orn%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+func CreateRefundId() string {
+	return fmt.Sprintf("ref%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
 // todo mark 高并发情况下生成结果不稳定

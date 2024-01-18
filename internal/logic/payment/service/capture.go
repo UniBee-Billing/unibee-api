@@ -11,17 +11,17 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err error) {
-	utility.Assert(overseaPay != nil, "entity not found")
-	utility.Assert(overseaPay.PayStatus == consts.TO_BE_PAID, "payment not waiting for pay")
-	utility.Assert(overseaPay.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
-	utility.Assert(overseaPay.BuyerPayFee > 0, "capture value should > 0")
-	utility.Assert(overseaPay.BuyerPayFee <= overseaPay.PaymentFee, "capture value should <= authorized value")
+func DoChannelCapture(ctx context.Context, payment *entity.Payment) (err error) {
+	utility.Assert(payment != nil, "entity not found")
+	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
+	utility.Assert(payment.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
+	utility.Assert(payment.ChannelPaymentFee > 0, "capture value should > 0")
+	utility.Assert(payment.ChannelPaymentFee <= payment.PaymentFee, "capture value should <= authorized value")
 
-	return dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 gateway capture
-		result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.OverseaPay.Columns().BuyerPayFee: overseaPay.BuyerPayFee},
-			g.Map{dao.OverseaPay.Columns().Id: overseaPay.Id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.Payment.Columns().ChannelPaymentFee: payment.ChannelPaymentFee},
+			g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 		if err != nil || result == nil {
 			//_ = transaction.Rollback()
 			return err
@@ -33,7 +33,7 @@ func DoChannelCapture(ctx context.Context, overseaPay *entity.OverseaPay) (err e
 		}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		_, err = gateway.GetPayChannelServiceProvider(ctx, overseaPay.ChannelId).DoRemoteChannelCapture(ctx, overseaPay)
+		_, err = gateway.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelCapture(ctx, payment)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

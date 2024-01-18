@@ -9,12 +9,16 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPayEvent is the golang structure of table oversea_pay_event for DAO operations like Where/Data.
-type OverseaPayEvent struct {
-	g.Meta          `orm:"table:oversea_pay_event, do:true"`
+// Timeline is the golang structure of table timeline for DAO operations like Where/Data.
+type Timeline struct {
+	g.Meta          `orm:"table:timeline, do:true"`
 	Id              interface{} // 主键id
-	BizType         interface{} // biz_type=0，oversea_pay表
-	BizId           interface{} // biz_type=0，oversea_pay表Id；
+	UserId          interface{} // user_id
+	MerchantUserId  interface{} // merchant_user_id
+	OpenApiId       interface{} // 使用的开放平台配置Id
+	TerminalIp      interface{} // terminal_ip
+	BizType         interface{} // biz_type=1，Payment表
+	BizId           interface{} // biz_type=1，pay；
 	Fee             interface{} // 金额（分）
 	EventType       interface{} // 0-未知
 	Event           interface{} // 事件
@@ -22,7 +26,5 @@ type OverseaPayEvent struct {
 	UniqueNo        interface{} // 唯一键
 	GmtCreate       *gtime.Time // 创建时间
 	GmtModify       *gtime.Time // 更新时间
-	OpenApiId       interface{} // 使用的开放平台配置Id
-	TerminalIp      interface{} // 实时交易终端IP
 	Message         interface{} // message
 }

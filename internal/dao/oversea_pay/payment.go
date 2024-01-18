@@ -8,19 +8,19 @@ import (
 	"go-oversea-pay/internal/dao/oversea_pay/internal"
 )
 
-// internalOverseaPayDao is internal type for wrapping internal DAO implements.
-type internalOverseaPayDao = *internal.OverseaPayDao
+// internalPaymentDao is internal type for wrapping internal DAO implements.
+type internalPaymentDao = *internal.PaymentDao
 
-// overseaPayDao is the data access object for table oversea_pay.
+// paymentDao is the data access object for table payment.
 // You can define custom methods on it to extend its functionality as you wish.
-type overseaPayDao struct {
-	internalOverseaPayDao
+type paymentDao struct {
+	internalPaymentDao
 }
 
 var (
-	// OverseaPay is globally public accessible object for table oversea_pay operations.
-	OverseaPay = overseaPayDao{
-		internal.NewOverseaPayDao(),
+	// Payment is globally public accessible object for table payment operations.
+	Payment = paymentDao{
+		internal.NewPaymentDao(),
 	}
 )
 

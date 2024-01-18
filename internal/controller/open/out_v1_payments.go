@@ -41,7 +41,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		OpenApiId:            int64(openApiConfig.Id),
 		PayChannel:           payChannel,
 		PaymentBrandAddition: req.PaymentBrandAddition,
-		Pay: &entity.OverseaPay{
+		Pay: &entity.Payment{
 			BizId:             req.Reference,
 			BizType:           consts.PAYMENT_BIZ_TYPE_ORDER,
 			ChannelId:         int64(payChannel.Id),
@@ -50,7 +50,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 			CountryCode:       req.CountryCode,
 			MerchantId:        merchantInfo.Id,
 			CompanyId:         merchantInfo.CompanyId,
-			NotifyUrl:         req.ReturnUrl,
+			ReturnUrl:         req.ReturnUrl,
 			CaptureDelayHours: req.CaptureDelayHours,
 		},
 		Platform:                 req.Channel,
@@ -76,10 +76,10 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	resp, err := service.DoChannelPay(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.PaymentsRes{
-		Status:       "Pending",
-		PspReference: resp.PayOrderNo,
-		Reference:    req.Reference,
-		Action:       resp.Action,
+		Status:    "Pending",
+		PaymentId: resp.PaymentId,
+		Reference: req.Reference,
+		Action:    resp.Action,
 	}
 	return
 }

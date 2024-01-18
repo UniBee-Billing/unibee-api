@@ -48,7 +48,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		one := &entity.Invoice{
 			MerchantId:                     merchantId,
 			SubscriptionId:                 subscriptionId,
-			InvoiceId:                      utility.CreateInvoiceOrderNo(),
+			InvoiceId:                      utility.CreateInvoiceId(),
 			TotalAmount:                    details.TotalAmount,
 			TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
 			TaxAmount:                      details.TaxAmount,

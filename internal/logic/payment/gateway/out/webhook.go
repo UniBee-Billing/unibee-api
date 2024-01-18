@@ -14,7 +14,7 @@ func GetPaymentWebhookEntranceUrl(channelId int64) string {
 //	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.ChannelId)
 //}
 
-func GetPaymentRedirectEntranceUrl(pay *entity.OverseaPay) string {
+func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {
 	return fmt.Sprintf("%s/payment/redirect/%d/forward?payId=%d", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.Id)
 }
 

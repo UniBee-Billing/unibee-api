@@ -40,12 +40,17 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p Paypal) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.OverseaPayChannel, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+func (p Paypal) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -351,6 +356,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
 				{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
 				{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+				{Name: "PAYMENT.SALE.COMPLETED"},
+				{Name: "PAYMENT.SALE.REFUNDED"},
+				{Name: "PAYMENT.SALE.REVERSED"},
 			},
 		}
 		response, err := client.CreateWebhook(ctx, param)
@@ -384,6 +392,9 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 					{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
 					{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
 					{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
+					{Name: "PAYMENT.SALE.COMPLETED"},
+					{Name: "PAYMENT.SALE.REFUNDED"},
+					{Name: "PAYMENT.SALE.REVERSED"},
 				},
 			},
 			{
@@ -664,27 +675,27 @@ func (p Paypal) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error) {
+func (p Paypal) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error) {
+func (p Paypal) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayRo, err error) {
+func (p Paypal) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.OutPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
+func (p Paypal) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
+func (p Paypal) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

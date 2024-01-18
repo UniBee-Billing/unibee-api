@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/balance"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/invoice"
@@ -38,7 +39,46 @@ import (
 type Stripe struct {
 }
 
-func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelCustomerBalanceQueryInternalResp, err error) {
+func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.BalanceParams{}
+	response, err := balance.Get(params)
+	if err != nil {
+		return nil, err
+	}
+
+	var availableBalances []*ro.ChannelBalance
+	for _, item := range response.Available {
+		availableBalances = append(availableBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	var connectReservedBalances []*ro.ChannelBalance
+	for _, item := range response.ConnectReserved {
+		connectReservedBalances = append(connectReservedBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	var pendingBalances []*ro.ChannelBalance
+	for _, item := range response.ConnectReserved {
+		pendingBalances = append(pendingBalances, &ro.ChannelBalance{
+			Amount:   item.Amount,
+			Currency: strings.ToUpper(string(item.Currency)),
+		})
+	}
+	return &ro.ChannelMerchantBalanceQueryInternalResp{
+		AvailableBalance:       availableBalances,
+		ConnectReservedBalance: connectReservedBalances,
+		PendingBalance:         pendingBalances,
+	}, nil
+}
+
+func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
@@ -48,10 +88,32 @@ func (s Stripe) DoRemoteChannelCustomerBalanceQuery(ctx context.Context, payChan
 	if err != nil {
 		return nil, err
 	}
-	return &ro.ChannelCustomerBalanceQueryInternalResp{
-		Balance:  response.Balance,
-		Currency: strings.ToUpper(string(response.Currency)),
-		Email:    response.Email,
+	var cashBalances []*ro.ChannelBalance
+	if response.CashBalance != nil {
+		for currency, amount := range response.CashBalance.Available {
+			cashBalances = append(cashBalances, &ro.ChannelBalance{
+				Amount:   amount,
+				Currency: strings.ToUpper(currency),
+			})
+		}
+	}
+
+	var invoiceCreditBalances []*ro.ChannelBalance
+	for currency, amount := range response.InvoiceCreditBalance {
+		invoiceCreditBalances = append(invoiceCreditBalances, &ro.ChannelBalance{
+			Amount:   amount,
+			Currency: strings.ToUpper(currency),
+		})
+	}
+	return &ro.ChannelUserBalanceQueryInternalResp{
+		Balance: &ro.ChannelBalance{
+			Amount:   response.Balance,
+			Currency: strings.ToUpper(string(response.Currency)),
+		},
+		CashBalance:          cashBalances,
+		InvoiceCreditBalance: invoiceCreditBalances,
+		Description:          response.Description,
+		Email:                response.Email,
 	}, nil
 }
 
@@ -838,6 +900,8 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
+				stripe.String("payment_intent.created"),
+				stripe.String("payment_intent.succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -872,6 +936,8 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
+				stripe.String("payment_intent.created"),
+				stripe.String("payment_intent.succeeded"),
 			},
 			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
@@ -1043,61 +1109,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 
 	var responseBack = http.StatusOK
 	switch event.Type {
-	case "customer.subscription.deleted":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the deleted subscription.
-			// handleSubscriptionCanceled(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.updated":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %s.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionUpdated(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.created":
-		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
-		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
-			r.Response.WriteHeader(http.StatusBadRequest)
-			responseBack = http.StatusBadRequest
-		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %s.", payChannel.Channel, subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionCreated(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
-		}
-	case "customer.subscription.trial_will_end":
+	case "customer.subscription.deleted", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.trial_will_end":
 		var subscription stripe.Subscription
 		err := json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
@@ -1128,7 +1140,25 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %v\n", payChannel.Channel, err)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			}
+		}
+	case "payment_intent.created", "payment_intent.succeeded":
+		var stripePayment stripe.PaymentIntent
+		err := json.Unmarshal(event.Data.Raw, &stripePayment)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err)
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Payment %s for %d.", payChannel.Channel, string(event.Type), stripePayment.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// handleSubscriptionTrialWillEnd(subscription)
+			//err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %v\n", payChannel.Channel, err)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -1212,27 +1242,27 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelCapture(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCaptureRo, err error) {
+func (s Stripe) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelCancel(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayCancelRo, err error) {
+func (s Stripe) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.OverseaPay) (res *ro.OutPayRo, err error) {
+func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.OutPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.OverseaPay, refund *entity.OverseaRefund) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

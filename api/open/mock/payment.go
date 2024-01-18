@@ -15,16 +15,16 @@ type SamplePaymentNetherlandsReq struct {
 	//PaymentBrandAddtion string `p:"paymentBrandAddtion" dc:"paymentBrandAddtion" v:""`
 }
 type SamplePaymentNetherlandsRes struct {
-	Status       string      `p:"status" dc:"交易状态"`
-	PspReference string      `p:"pspReference" dc:"系统交易唯一编码-平台订单号"`
-	Reference    string      `p:"reference" dc:"商户订单号"`
-	Action       *gjson.Json `p:"action" dc:"action"`
+	Status    string      `p:"status" dc:"交易状态"`
+	PaymentId string      `p:"paymentId" dc:"系统交易唯一编码-平台订单号"`
+	Reference string      `p:"reference" dc:"商户订单号"`
+	Action    *gjson.Json `p:"action" dc:"action"`
 }
 
 type DetailPayReq struct {
-	g.Meta              `path:"/detail_pay" tags:"Open-Mock-Controller" method:"post" summary:"1.5支付单详情"`
-	PaymentPspReference string `p:"paymentPspReference" dc:"平台支付单号" v:"required"`
-	MerchantId          int64  `p:"merchantId" d:"15621" dc:"商户号" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
+	g.Meta     `path:"/detail_pay" tags:"Open-Mock-Controller" method:"post" summary:"1.5支付单详情"`
+	PaymentId  string `p:"paymentId" dc:"平台支付单号" v:"required"`
+	MerchantId int64  `p:"merchantId" d:"15621" dc:"商户号" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
 }
 type DetailPayRes struct {
 }

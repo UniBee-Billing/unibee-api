@@ -10,7 +10,7 @@ import (
 
 func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq) (res *payment.RefundsRes, err error) {
 	utility.Assert(req != nil, "req should not be nil")
-	utility.Assert(len(req.PaymentsPspReference) > 0, "PaymentsPspReference should not be nil")
+	utility.Assert(len(req.PaymentId) > 0, "PaymentId should not be nil")
 	utility.Assert(req.Amount != nil, "Amount should not be nil")
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(len(req.Amount.Currency) > 0, "refund currency should not be nil")
@@ -23,10 +23,10 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 		return nil, err
 	}
 	res = &payment.RefundsRes{
-		Status:              "SentForRefund",
-		PspReference:        resp.OutRefundNo,
-		Reference:           req.Reference,
-		PaymentPspReference: resp.OutTradeNo,
+		Status:    "SentForRefund",
+		RefundId:  resp.RefundId,
+		Reference: req.Reference,
+		PaymentId: resp.PaymentId,
 	}
 	return res, nil
 }

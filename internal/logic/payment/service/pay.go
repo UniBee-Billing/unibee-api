@@ -31,9 +31,9 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId为空")
 	// 查询并处理所有待支付订单 todo mark
 
-	createPayContext.Pay.PayStatus = consts.TO_BE_PAID
+	createPayContext.Pay.Status = consts.TO_BE_PAID
 	//createPayContext.Pay.AdditionalData = todo mark
-	createPayContext.Pay.MerchantOrderNo = utility.CreateMerchantOrderNo()
+	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
 	//toSave.setServiceRate(iMerchantInfoService.getServiceDeductPoint(toSave.getMerchantId(),toSave.getChannelId()));//记录当下的服务费率
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
@@ -50,11 +50,11 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.MerchantOrderNo), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
-		err = dao.OverseaPay.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
-			insert, err := dao.OverseaPay.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
+			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -72,15 +72,15 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 				//_ = transaction.Rollback()
 				return err
 			}
-			channelInternalPayResult.PayChannel = createPayContext.Pay.ChannelId
-			channelInternalPayResult.PayOrderNo = createPayContext.Pay.MerchantOrderNo
+			channelInternalPayResult.ChannelId = createPayContext.Pay.ChannelId
+			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			jsonData, err := gjson.Marshal(channelInternalPayResult)
 			if err != nil {
 				return err
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
-			result, err := transaction.Update(dao.OverseaPay.Table(), g.Map{dao.OverseaPay.Columns().PaymentData: createPayContext.Pay.PaymentData},
-				g.Map{dao.OverseaPay.Columns().Id: id, dao.OverseaPay.Columns().PayStatus: consts.TO_BE_PAID})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().PaymentData: createPayContext.Pay.PaymentData},
+				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -103,13 +103,14 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		return nil, err
 	} else {
 		//交易事件记录
-		event.SaveEvent(ctx, entity.OverseaPayEvent{
+		event.SaveTimeLine(ctx, entity.Timeline{
 			BizType:   0,
-			BizId:     createPayContext.Pay.Id,
+			BizId:     createPayContext.Pay.PaymentId,
 			Fee:       createPayContext.Pay.PaymentFee,
 			EventType: event.SentForSettle.Type,
 			Event:     event.SentForSettle.Desc,
-			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.MerchantOrderNo, "SentForSettle"),
+			OpenApiId: createPayContext.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
 		})
 	}
 	return channelInternalPayResult, nil

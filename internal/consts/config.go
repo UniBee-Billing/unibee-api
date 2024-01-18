@@ -43,6 +43,10 @@ func GetConfigInstance() *Config {
 	return instance
 }
 
+func (config Config) IsServerDev() bool {
+	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "server_dev") == 0
+}
+
 func (config Config) IsLocal() bool {
 	return len(config.Env) > 0 && strings.Compare(strings.ToLower(config.Env), "local") == 0
 }

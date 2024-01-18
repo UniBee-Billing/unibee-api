@@ -7,7 +7,7 @@ import (
 )
 
 type ProfileReq struct {
-	g.Meta `path:"/profile" tags:"User-Profile-Controller" method:"get" summary:"1.1 get merchant user profile"`
+	g.Meta `path:"/profile" tags:"User-Profile-Controller" method:"get" summary:"get merchant user profile"`
 	// Email string `p:"email" dc:"email" v:"required"`
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
