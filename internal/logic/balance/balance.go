@@ -2,8 +2,8 @@ package balance
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/payment/gateway"
-	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/gateway"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 )

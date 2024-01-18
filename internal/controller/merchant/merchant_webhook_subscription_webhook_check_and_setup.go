@@ -5,7 +5,7 @@ import (
 	"go-oversea-pay/api/merchant/webhook"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/payment/gateway"
+	"go-oversea-pay/internal/logic/gateway"
 	"go-oversea-pay/utility"
 )
 

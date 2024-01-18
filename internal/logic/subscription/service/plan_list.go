@@ -6,8 +6,7 @@ import (
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/payment/gateway/ro"
-	ro2 "go-oversea-pay/internal/logic/payment/gateway/ro"
+	ro2 "go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -30,7 +29,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
 	return &plan.SubscriptionPlanDetailRes{
-		Plan: &ro.PlanDetailRo{
+		Plan: &ro2.PlanDetailRo{
 			Plan:     one,
 			Channels: query.GetListActiveOutChannelRos(ctx, planId),
 			Addons:   query.GetPlanBindingAddonsByPlanId(ctx, planId),
@@ -38,7 +37,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	}, nil
 }
 
-func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro.PlanDetailRo) {
+func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro2.PlanDetailRo) {
 	var mainList []*entity.SubscriptionPlan
 	if req.Count <= 0 {
 		req.Count = 10 //每页数量默认 10
@@ -73,7 +72,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		totalPlanIds = append(totalPlanIds, p.Id)
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
-			list = append(list, &ro.PlanDetailRo{
+			list = append(list, &ro2.PlanDetailRo{
 				Plan:     p,
 				Channels: []*ro2.OutChannelRo{},
 				Addons:   nil,
@@ -96,7 +95,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 				}
 			}
 		}
-		list = append(list, &ro.PlanDetailRo{
+		list = append(list, &ro2.PlanDetailRo{
 			Plan:     p,
 			Channels: []*ro2.OutChannelRo{},
 			Addons:   nil,

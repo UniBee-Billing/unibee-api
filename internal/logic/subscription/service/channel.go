@@ -1,7 +1,7 @@
 package service
 
 import (
-	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 

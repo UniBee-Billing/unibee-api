@@ -6,13 +6,15 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/payment/gateway/out"
-	"go-oversea-pay/internal/logic/payment/gateway/out/evonet"
-	"go-oversea-pay/internal/logic/payment/gateway/out/paypal"
-	"go-oversea-pay/internal/logic/payment/gateway/out/stripe"
-	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"github.com/gogf/gf/v2/os/glog"
+	out2 "go-oversea-pay/internal/logic/gateway/out"
+	"go-oversea-pay/internal/logic/gateway/out/evonet"
+	"go-oversea-pay/internal/logic/gateway/out/paypal"
+	"go-oversea-pay/internal/logic/gateway/out/stripe"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
+	"time"
 )
 
 type PayChannelKeyEnum struct {
@@ -35,6 +37,16 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
+//func channelFunctionAop(ctx context.Context, fn func(), res interface{}, err error) {
+//	startTime := time.Now()
+//
+//	// 调用目标函数
+//	res, err = fn()
+//
+//	endTime := time.Now()
+//	fmt.Printf("执行完成，耗时：%v\n", endTime.Sub(startTime))
+//}
+
 func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -47,7 +59,12 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+	startTime := time.Now()
+
+	res, err = p.getRemoteChannel().DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelMerchantBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
@@ -62,7 +79,10 @@ func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, p
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, customerId)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, customerId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -77,7 +97,10 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context,
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, createInvoiceInternalReq)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, createInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCreateAndPay cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.OverseaPayChannel, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -92,7 +115,10 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCancel(ctx context.Context, payCh
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelInvoiceCancel(ctx, payChannel, cancelInvoiceInternalReq)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCancel(ctx, payChannel, cancelInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCancel cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -107,7 +133,10 @@ func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChann
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelInvoicePay(ctx, payChannel, payInvoiceInternalReq)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelInvoicePay(ctx, payChannel, payInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoicePay cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -122,7 +151,10 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payC
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelInvoiceDetails(ctx, payChannel, channelInvoiceId)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceDetails(ctx, payChannel, channelInvoiceId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceDetails cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
@@ -137,7 +169,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Cont
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, subscription, newTrailEnd)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, subscription, newTrailEnd)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrailEnd cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
@@ -152,7 +187,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx c
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, subscriptionRo)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdateProrationPreview cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
@@ -164,11 +202,11 @@ func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInte
 	} else if p.channel.EnumKey == Stripe.Code {
 		return &stripe.Stripe{}
 	} else if p.channel.EnumKey == Blank.Code {
-		return &out.Blank{}
+		return &out2.Blank{}
 	} else if p.channel.EnumKey == AutoTest.Code {
-		return &out.AutoTest{}
+		return &out2.AutoTest{}
 	} else {
-		return &out.Invalid{}
+		return &out2.Invalid{}
 	}
 }
 
@@ -184,7 +222,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCreate cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
@@ -199,7 +240,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, subscriptionCancelInternalReq)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, subscriptionCancelInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancel cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
@@ -214,7 +258,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx contex
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
@@ -229,7 +276,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
@@ -244,7 +294,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, subscriptionRo)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdate cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
@@ -259,7 +312,10 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionDetails cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
@@ -274,7 +330,10 @@ func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
+	startTime := time.Now()
+	err = p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
+	return err
 }
 
 func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
@@ -289,7 +348,10 @@ func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *en
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPlanActive(ctx, plan, planChannel)
+	startTime := time.Now()
+	err = p.getRemoteChannel().DoRemoteChannelPlanActive(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanActive cost：%s \n", time.Now().Sub(startTime))
+	return err
 }
 
 func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
@@ -304,7 +366,10 @@ func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
+	startTime := time.Now()
+	err = p.getRemoteChannel().DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanDeactivate cost：%s \n", time.Now().Sub(startTime))
+	return err
 }
 
 func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ChannelCreateProductInternalResp, err error) {
@@ -319,7 +384,10 @@ func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelProductCreate(ctx, plan, planChannel)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelProductCreate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelProductCreate cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ChannelCreatePlanInternalResp, err error) {
@@ -334,15 +402,23 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanCreateAndActivate cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+	startTime := time.Now()
 	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
-}
+	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelWebhook cost：%s \n", time.Now().Sub(startTime))
 
+}
 func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
-	return p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
+	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelRedirect cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
@@ -357,7 +433,10 @@ func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayCo
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPayment(ctx, createPayContext)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelPayment(ctx, createPayContext)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayment cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
@@ -372,7 +451,10 @@ func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelCapture(ctx, pay)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelCapture(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCapture cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
@@ -387,7 +469,10 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelCancel(ctx, pay)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelCancel(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCancel cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.OutPayRo, err error) {
@@ -402,7 +487,10 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelPayStatusCheck(ctx, pay)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelPayStatusCheck(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
@@ -417,7 +505,10 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 			return
 		}
 	}()
-	return p.getRemoteChannel().DoRemoteChannelRefund(ctx, pay, refund)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelRefund(ctx, pay, refund)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefund cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }
 
 func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
@@ -432,6 +523,8 @@ func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, p
 			return
 		}
 	}()
-
-	return p.getRemoteChannel().DoRemoteChannelRefundStatusCheck(ctx, pay, refund)
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelRefundStatusCheck(ctx, pay, refund)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	return res, err
 }

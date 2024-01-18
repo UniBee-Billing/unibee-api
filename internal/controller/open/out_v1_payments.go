@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/gateway/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"

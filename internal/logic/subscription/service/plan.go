@@ -10,7 +10,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/payment/gateway"
+	"go-oversea-pay/internal/logic/gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
