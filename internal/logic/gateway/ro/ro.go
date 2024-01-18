@@ -182,7 +182,7 @@ type ChannelDetailSubscriptionInternalResp struct {
 	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`
 	CurrentPeriodStart     int64                         `json:"currentPeriodStart"`
-	TrailEnd               int64                         `json:"trailEnd"`
+	TrialEnd               int64                         `json:"trialEnd"`
 }
 
 type ChannelBalance struct {

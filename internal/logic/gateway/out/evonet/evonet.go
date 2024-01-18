@@ -74,7 +74,7 @@ func (e Evonet) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (e Evonet) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

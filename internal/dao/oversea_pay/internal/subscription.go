@@ -46,7 +46,7 @@ type SubscriptionColumns struct {
 	CancelAtPeriodEnd      string // 是否在周期结束时取消，0-false | 1-true
 	CurrentPeriodStart     string // current_period_start
 	CurrentPeriodEnd       string // current_period_end
-	TrailEnd               string // trail_end
+	TrialEnd               string // trial_end
 	ReturnUrl              string //
 	FirstPayTime           string // 首次支付时间
 	CancelReason           string //
@@ -84,7 +84,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CancelAtPeriodEnd:      "cancel_at_period_end",
 	CurrentPeriodStart:     "current_period_start",
 	CurrentPeriodEnd:       "current_period_end",
-	TrailEnd:               "trail_end",
+	TrialEnd:               "trial_end",
 	ReturnUrl:              "return_url",
 	FirstPayTime:           "first_pay_time",
 	CancelReason:           "cancel_reason",

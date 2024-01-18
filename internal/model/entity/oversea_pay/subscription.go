@@ -36,7 +36,7 @@ type Subscription struct {
 	CancelAtPeriodEnd      int         `json:"cancelAtPeriodEnd"      ` // 是否在周期结束时取消，0-false | 1-true
 	CurrentPeriodStart     int64       `json:"currentPeriodStart"     ` // current_period_start
 	CurrentPeriodEnd       int64       `json:"currentPeriodEnd"       ` // current_period_end
-	TrailEnd               int64       `json:"trailEnd"               ` // trail_end
+	TrialEnd               int64       `json:"trialEnd"               ` // trial_end
 	ReturnUrl              string      `json:"returnUrl"              ` //
 	FirstPayTime           *gtime.Time `json:"firstPayTime"           ` // 首次支付时间
 	CancelReason           string      `json:"cancelReason"           ` //

@@ -70,7 +70,7 @@ func (p Paypal) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (p Paypal) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

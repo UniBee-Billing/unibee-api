@@ -324,15 +324,15 @@ func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
 }
 
-// DoRemoteChannelSubscriptionNewTrailEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
-func (s Stripe) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+// DoRemoteChannelSubscriptionNewTrialEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
+func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.SubscriptionParams{
-		TrialEnd:          stripe.Int64(newTrailEnd),
+		TrialEnd:          stripe.Int64(newTrialEnd),
 		ProrationBehavior: stripe.String("none"),
 	}
 	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
@@ -344,8 +344,8 @@ func (s Stripe) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan
 	if err != nil {
 		return nil, err
 	}
-	if details.TrailEnd != newTrailEnd {
-		return nil, gerror.New("update new trail end error")
+	if details.TrialEnd != newTrialEnd {
+		return nil, gerror.New("update new trial end error")
 	}
 	return details, nil
 }
@@ -796,19 +796,19 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	////todo mark EffectImmediate=false 获取的发票是之前最新的发票
-	queryParams := &stripe.InvoiceParams{}
-	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
-	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
+	//queryParams := &stripe.InvoiceParams{}
+	//queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+	//log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
+	//g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
 	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     queryParamsResult.ID,
+		ChannelSubscriptionId:     updateSubscription.LatestInvoice.ID,
 		ChannelSubscriptionStatus: string(updateSubscription.Status),
-		ChannelInvoiceId:          queryParamsResult.ID,
+		ChannelInvoiceId:          updateSubscription.LatestInvoice.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
-		LatestInvoiceLink:         queryParamsResult.HostedInvoiceURL,
+		LatestInvoiceLink:         updateSubscription.LatestInvoice.HostedInvoiceURL,
 		Status:                    0, //todo mark
-		Paid:                      queryParamsResult.Paid,
+		Paid:                      updateSubscription.LatestInvoice.Paid,
 	}, nil
 }
 
@@ -869,7 +869,7 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
 		CurrentPeriodStart:     subscription.CurrentPeriodStart,
 		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
-		TrailEnd:               subscription.TrialEnd,
+		TrialEnd:               subscription.TrialEnd,
 	}
 }
 

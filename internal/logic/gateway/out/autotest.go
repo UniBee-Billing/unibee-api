@@ -40,7 +40,7 @@ func (a AutoTest) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel 
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (a AutoTest) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

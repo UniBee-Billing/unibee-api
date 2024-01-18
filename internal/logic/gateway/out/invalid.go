@@ -89,7 +89,7 @@ func (i Invalid) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (i Invalid) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

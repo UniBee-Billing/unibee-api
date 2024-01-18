@@ -743,7 +743,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	return nil
 }
 
-func SubscriptionAddNewTrailEnd(ctx context.Context, subscriptionId string, AppendNewTrailEnd int64) error {
+func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, AppendNewTrialEnd int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -759,15 +759,15 @@ func SubscriptionAddNewTrailEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
 	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
 	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
-	//utility.Assert(newTrailEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
-	utility.Assert(AppendNewTrailEnd > 0, "invalid AppendNewTrailEnd , should > 0")
-	newTrailEnd := details.CurrentPeriodEnd + AppendNewTrailEnd*3600
-	_, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, sub, newTrailEnd)
+	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
+	utility.Assert(AppendNewTrialEnd > 0, "invalid AppendNewTrialEnd , should > 0")
+	newTrialEnd := details.CurrentPeriodEnd + AppendNewTrialEnd*3600
+	_, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 	if err != nil {
 		return err
 	}
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrailEnd:  newTrailEnd,
+		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
 		dao.Subscription.Columns().GmtModify: gtime.Now(), // todo 存在并发调用问题
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
 	if err != nil {
@@ -775,7 +775,7 @@ func SubscriptionAddNewTrailEnd(ctx context.Context, subscriptionId string, Appe
 	}
 	//rowAffected, err := update.RowsAffected()
 	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionAddNewTrailEnd subscription err:%s", update)
+	//	return gerror.Newf("SubscriptionAddNewTrialEnd subscription err:%s", update)
 	//}
 	return nil
 }

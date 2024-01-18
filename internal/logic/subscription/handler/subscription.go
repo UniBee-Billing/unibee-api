@@ -33,7 +33,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
 		dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
-		dao.Subscription.Columns().TrailEnd:               details.TrailEnd,
+		dao.Subscription.Columns().TrialEnd:               details.TrialEnd,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().FirstPayTime:           firstPayTime,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()

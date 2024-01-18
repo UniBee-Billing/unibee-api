@@ -157,7 +157,7 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payC
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrailEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -170,8 +170,8 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrailEnd(ctx context.Cont
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrailEnd(ctx, plan, planChannel, subscription, newTrailEnd)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrailEnd cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, subscription, newTrialEnd)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
 	return res, err
 }
 

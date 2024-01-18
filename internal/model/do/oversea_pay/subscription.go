@@ -38,7 +38,7 @@ type Subscription struct {
 	CancelAtPeriodEnd      interface{} // 是否在周期结束时取消，0-false | 1-true
 	CurrentPeriodStart     interface{} // current_period_start
 	CurrentPeriodEnd       interface{} // current_period_end
-	TrailEnd               interface{} // trail_end
+	TrialEnd               interface{} // trial_end
 	ReturnUrl              interface{} //
 	FirstPayTime           *gtime.Time // 首次支付时间
 	CancelReason           interface{} //

@@ -16,7 +16,7 @@ func (c *ControllerSubscription) SubscriptionAddNewTrialStart(ctx context.Contex
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
-	err = service.SubscriptionAddNewTrailEnd(ctx, req.SubscriptionId, req.AppendTrailEndHour)
+	err = service.SubscriptionAddNewTrialEnd(ctx, req.SubscriptionId, req.AppendTrialEndHour)
 	if err != nil {
 		return nil, err
 	}

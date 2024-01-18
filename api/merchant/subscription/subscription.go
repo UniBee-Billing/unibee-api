@@ -71,9 +71,9 @@ type SubscriptionResumeRes struct {
 }
 
 type SubscriptionAddNewTrialStartReq struct {
-	g.Meta             `path:"/subscription_add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-添加试用以更改计费周期, 免费期为 currentPeriodEnd到 trailEnd 时间段"`
+	g.Meta             `path:"/subscription_add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant 修改用户订阅-添加试用以更改计费周期, 免费期为 currentPeriodEnd到 trialEnd 时间段"`
 	SubscriptionId     string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	AppendTrailEndHour int64  `p:"appendTrailEndHour" dc:"添加appendTrailEndHour时间为免费期,单位小时，会在新周期时间点往后顺延生效" v:"required#请输入appendTrailEndHour"`
+	AppendTrialEndHour int64  `p:"appendTrialEndHour" dc:"添加appendTrialEndHour时间为免费期,单位小时，会在新周期时间点往后顺延生效" v:"required#请输入appendTrialEndHour"`
 }
 type SubscriptionAddNewTrialStartRes struct {
 }
