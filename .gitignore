@@ -20,3 +20,4 @@ bin
 **/**/*.log
 cache
 config.yaml
+publish_daily.sh
