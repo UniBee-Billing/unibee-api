@@ -40,6 +40,26 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p Paypal) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

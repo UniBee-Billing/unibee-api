@@ -34,6 +34,26 @@ import (
 
 type Evonet struct{}
 
+func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (e Evonet) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (e Evonet) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (e Evonet) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -660,15 +680,15 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.P
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.Channel)
 	utility.Assert(strings.Compare(merchantPspReference, pay.PaymentId) == 0, "merchantPspReference not match")
 	res = &ro.OutPayRo{
-		PayFee:    pay.PaymentFee,
-		PayStatus: consts.TO_BE_PAID,
+		PayFee: pay.PaymentFee,
+		Status: consts.TO_BE_PAID,
 	}
 	if strings.Compare(status, "Failed") == 0 || strings.Compare(status, "Cancelled") == 0 {
-		res.PayStatus = consts.PAY_FAILED
+		res.Status = consts.PAY_FAILED
 		res.Reason = "from_query:" + payment.Get("failureReason").String()
 	} else if strings.Compare(status, "Captured") == 0 {
-		res.PayStatus = consts.PAY_SUCCESS
-		res.ChannelTradeNo = pspReference
+		res.Status = consts.PAY_SUCCESS
+		res.ChannelPaymentId = pspReference
 		res.PayTime = gtime.Now()
 	}
 	return res, nil

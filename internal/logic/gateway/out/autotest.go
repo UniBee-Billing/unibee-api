@@ -10,6 +10,26 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a AutoTest) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a AutoTest) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a AutoTest) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

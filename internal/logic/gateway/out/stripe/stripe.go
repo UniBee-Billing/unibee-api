@@ -8,14 +8,17 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/balance"
 	"github.com/stripe/stripe-go/v76/checkout/session"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/invoice"
 	"github.com/stripe/stripe-go/v76/invoiceitem"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/price"
 	"github.com/stripe/stripe-go/v76/product"
+	"github.com/stripe/stripe-go/v76/refund"
 	sub "github.com/stripe/stripe-go/v76/subscription"
 	"github.com/stripe/stripe-go/v76/taxrate"
 	"github.com/stripe/stripe-go/v76/webhook"
@@ -37,6 +40,118 @@ import (
 )
 
 type Stripe struct {
+}
+
+func parseRefund(item *stripe.Refund) *ro.OutPayRefundRo {
+	var channelPaymentId string
+	if item.PaymentIntent != nil {
+		channelPaymentId = item.PaymentIntent.ID
+	}
+	var status = consts.REFUND_ING
+	if strings.Compare(string(item.Status), "succeeded") == 0 {
+		status = consts.REFUND_SUCCESS
+	} else if strings.Compare(string(item.Status), "canceled") == 0 || strings.Compare(string(item.Status), "failed") == 0 {
+		status = consts.REFUND_FAILED
+	}
+	return &ro.OutPayRefundRo{
+		MerchantId:       "",
+		ChannelRefundId:  item.ID,
+		ChannelPaymentId: channelPaymentId,
+		Status:           status,
+		Reason:           string(item.Reason),
+		RefundFee:        item.Amount,
+		Currency:         strings.ToUpper(string(item.Currency)),
+		RefundTime:       gtime.NewFromTimeStamp(item.Created),
+	}
+}
+
+func parsePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
+	var channelInvoiceId string
+	if item.Invoice != nil {
+		channelInvoiceId = item.Invoice.ID
+	}
+	var channelUserId string
+	if item.Customer != nil {
+		channelUserId = item.Customer.ID
+	}
+	var status = consts.TO_BE_PAID
+	if strings.Compare(string(item.Status), "succeeded") == 0 {
+		status = consts.PAY_SUCCESS
+	} else if strings.Compare(string(item.Status), "canceled") == 0 {
+		status = consts.PAY_FAILED
+	}
+	return &ro.OutPayRo{
+		ChannelInvoiceId: channelInvoiceId,
+		ChannelUserId:    channelUserId,
+		ChannelPaymentId: item.ID,
+		Status:           status,
+		PayFee:           item.Amount,
+		Currency:         strings.ToUpper(string(item.Currency)),
+		PayTime:          gtime.NewFromTimeStamp(item.Created),
+	}
+}
+
+func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.PaymentIntentListParams{}
+	params.Customer = stripe.String(listReq.ChannelUserId)
+	params.Limit = stripe.Int64(200)
+	paymentList := paymentintent.List(params)
+	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
+	var list []*ro.OutPayRo
+	for _, item := range paymentList.PaymentIntentList().Data {
+		list = append(list, parsePayment(item))
+	}
+
+	return list, nil
+}
+
+func (s Stripe) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.RefundListParams{}
+	params.PaymentIntent = stripe.String(channelPaymentId)
+	params.Limit = stripe.Int64(100)
+	refundList := refund.List(params)
+	log.SaveChannelHttpLog("DoRemoteChannelRefundList", params, refundList, err, "", nil, payChannel)
+	var list []*ro.OutPayRefundRo
+	for _, item := range refundList.RefundList().Data {
+		list = append(list, parseRefund(item))
+	}
+
+	return list, nil
+}
+
+func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.PaymentIntentParams{}
+	response, err := paymentintent.Get(channelPaymentId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelPaymentDetail", params, response, err, "", nil, payChannel)
+	if err != nil {
+		return nil, err
+	}
+
+	return parsePayment(response), nil
+}
+
+func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.RefundParams{}
+	response, err := refund.Get(channelRefundId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelRefundDetail", params, response, err, "", nil, payChannel)
+	if err != nil {
+		return nil, err
+	}
+	return parseRefund(response), nil
 }
 
 func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {

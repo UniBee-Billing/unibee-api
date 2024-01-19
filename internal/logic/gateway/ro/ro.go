@@ -70,25 +70,34 @@ type OutPayCancelRo struct {
 
 // OutPayRefundRo is the golang structure for table oversea_pay.
 type OutPayRefundRo struct {
-	MerchantId      string      `json:"merchantId"         `          // 商户ID
-	ChannelRefundId string      `json:"channelRefundId"            `  // 业务类型。1-订单
-	ChargeRefundNo  string      `json:"chargeRefundNo"              ` // 业务id-即商户订单号
-	Status          int         `json:"status"`
-	Reason          string      `json:"reason"              `    // 业务id-即商户订单号
-	RefundFee       int64       `json:"refundFee"              ` // 业务id-即商户订单号
-	RefundTime      *gtime.Time `json:"refundTime" `             // 创建时间
+	MerchantId       string      `json:"merchantId"         ` // 商户ID
+	RefundId         string      `json:"refundId"              `
+	ChannelRefundId  string      `json:"channelRefundId"            `  // 渠道退款订单
+	ChannelPaymentId string      `json:"channelPaymentId"            ` // 渠道支付订单
+	Status           int         `json:"status"`
+	Reason           string      `json:"reason"              `    // 业务id-即商户订单号
+	RefundFee        int64       `json:"refundFee"              ` // 业务id-即商户订单号
+	Currency         string      `json:"currency"              `
+	RefundTime       *gtime.Time `json:"refundTime" `
+}
+
+type ChannelPaymentListReq struct {
+	ChannelUserId string `json:"channelUserId"         `
 }
 
 // OutPayRo is the golang structure for table oversea_pay.
 type OutPayRo struct {
-	MerchantId      string      `json:"merchantId"         `        // 商户ID
-	MerchantOrderNo string      `json:"merchantOrderNo"         `   // 商户ID
-	ChannelTradeNo  string      `json:"ChannelTradeNo"            ` // 业务类型。1-订单
-	ChannelPayId    string      `json:"channelPayId"              ` // 业务id-即商户订单号
-	PayStatus       int         `json:"payStatus"`
-	Reason          string      `json:"reason"              ` // 业务id-即商户订单号
-	PayFee          int64       `json:"PayFee"              ` // 业务id-即商户订单号
-	PayTime         *gtime.Time `json:"PayTime" `             // 创建时间
+	MerchantId       string      `json:"merchantId"         `
+	ChannelInvoiceId string      `json:"channelInvoiceId"         `
+	ChannelUserId    string      `json:"channelUserId"         `
+	PaymentId        string      `json:"paymentId"         `
+	ChannelPaymentId string      `json:"channelPaymentId"              ` // 业务id-即渠道支付单号
+	Status           int         `json:"status"`
+	Reason           string      `json:"reason"              `
+	PayFee           int64       `json:"PayFee"              `
+	Currency         string      `json:"currency"              `
+	PayTime          *gtime.Time `json:"PayTime" `
+	TotalRefundFee   int64       `json:"totalRefundFee"              `
 }
 
 type OutChannelRo struct {

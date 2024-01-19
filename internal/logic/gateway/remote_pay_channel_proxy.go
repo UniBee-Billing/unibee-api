@@ -38,6 +38,23 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
+func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
+	utility.Assert(p.channel != nil, "channel is not set")
+	if p.channel.EnumKey == Evonet.Code {
+		return &evonet.Evonet{}
+	} else if p.channel.EnumKey == Paypal.Code {
+		return &paypal.Paypal{}
+	} else if p.channel.EnumKey == Stripe.Code {
+		return &stripe.Stripe{}
+	} else if p.channel.EnumKey == Blank.Code {
+		return &out2.Blank{}
+	} else if p.channel.EnumKey == AutoTest.Code {
+		return &out2.AutoTest{}
+	} else {
+		return &out2.Invalid{}
+	}
+}
+
 //func channelFunctionAop(ctx context.Context, fn func(), res interface{}, err error) {
 //	startTime := time.Now()
 //
@@ -216,23 +233,6 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx c
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
-}
-
-func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
-	utility.Assert(p.channel != nil, "channel is not set")
-	if p.channel.EnumKey == Evonet.Code {
-		return &evonet.Evonet{}
-	} else if p.channel.EnumKey == Paypal.Code {
-		return &paypal.Paypal{}
-	} else if p.channel.EnumKey == Stripe.Code {
-		return &stripe.Stripe{}
-	} else if p.channel.EnumKey == Blank.Code {
-		return &out2.Blank{}
-	} else if p.channel.EnumKey == AutoTest.Code {
-		return &out2.AutoTest{}
-	} else {
-		return &out2.Invalid{}
-	}
 }
 
 func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
@@ -565,6 +565,48 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 	return res, err
 }
 
+func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelPaymentList(ctx, payChannel, listReq)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPaymentList cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
+func (p PayChannelProxy) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelPaymentDetail(ctx, payChannel, channelPaymentId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPaymentDetail cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
 func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -586,14 +628,6 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 	return res, err
 }
 
-func printChannelPanic(ctx context.Context, err error) {
-	var requestId = "init"
-	if _interface.BizCtx().Get(ctx) != nil {
-		requestId = _interface.BizCtx().Get(ctx).RequestId
-	}
-	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", requestId, err.Error())
-}
-
 func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -613,4 +647,54 @@ func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, p
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
+}
+
+func (p PayChannelProxy) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelRefundDetail(ctx, payChannel, channelRefundId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundDetail cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
+func (p PayChannelProxy) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteChannel().DoRemoteChannelRefundList(ctx, payChannel, channelPaymentId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundList cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
+func printChannelPanic(ctx context.Context, err error) {
+	var requestId = "init"
+	if _interface.BizCtx().Get(ctx) != nil {
+		requestId = _interface.BizCtx().Get(ctx).RequestId
+	}
+	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", requestId, err.Error())
 }
