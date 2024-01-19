@@ -34,9 +34,13 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			merchantId = sub.MerchantId
 			channelId = sub.ChannelId
 			userId = sub.UserId
-			merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
-			if merchantInfo != nil {
-				sendEmail = merchantInfo.Email
+			if len(sub.CustomerEmail) > 0 {
+				sendEmail = sub.CustomerEmail
+			} else {
+				userAccount := query.GetUserAccountById(ctx, uint64(sub.UserId))
+				if userAccount != nil {
+					sendEmail = userAccount.Email
+				}
 			}
 		}
 	}
