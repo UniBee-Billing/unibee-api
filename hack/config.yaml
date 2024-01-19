@@ -32,4 +32,6 @@ gfcli:
         daoPath:  "dao/oversea_pay"
         doPath:  "model/do/oversea_pay"
         entityPath:  "model/entity/oversea_pay"
+        noModelComment: false
+        descriptionTag: true
         tables: ""
