@@ -333,7 +333,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			InvoiceId:              invoiceId,
 		}
 
-		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdatePaymentByDetail record insert failure %s`, err.Error())
 			return err
