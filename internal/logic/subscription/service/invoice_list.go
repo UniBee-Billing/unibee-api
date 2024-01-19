@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -12,7 +11,6 @@ import (
 )
 
 type SubscriptionInvoiceListInternalReq struct {
-	g.Meta        `path:"/subscription_invoice_list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice列表"`
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	UserId        int    `p:"userId" dc:"UserId 不填查询所有" `
 	SendEmail     int    `p:"sendEmail" dc:"SendEmail 不填查询所有" `
