@@ -20,3 +20,15 @@ func NewInvoice() system.ISystemInvoice {
 	return &ControllerInvoice{}
 }
 
+type ControllerPayment struct{}
+
+func NewPayment() system.ISystemPayment {
+	return &ControllerPayment{}
+}
+
+type ControllerRefund struct{}
+
+func NewRefund() system.ISystemRefund {
+	return &ControllerRefund{}
+}
+
