@@ -25,7 +25,7 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusPublished,
 		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitEmpty().Update()
+	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			Status:    consts.PlanChannelStatusInit,
 		}
 		//保存planChannel
-		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitEmpty().Insert(planChannel)
+		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitNil().Insert(planChannel)
 		if err != nil {
 			err = gerror.Newf(`SubscriptionPlanChannelTransferAndActivate record insert failure %s`, err)
 			planChannel = nil
@@ -81,7 +81,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
 			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
 			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
 			dao.SubscriptionPlanChannel.Columns().Status:            int(res.Status),
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
+		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}

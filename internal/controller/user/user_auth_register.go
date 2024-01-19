@@ -92,7 +92,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	return &auth.RegisterRes{}, nil
 
 	/*
-		result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)
+		result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
 		if err != nil {
 			err = gerror.Newf(`record insert failure %s`, err)
 			return

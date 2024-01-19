@@ -24,7 +24,7 @@ type Subscription struct {
 	Quantity               interface{} // quantity
 	AddonData              interface{} // plan addon json data
 	ChannelId              interface{} // 支付渠道Id
-	Status                 interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire
+	Status                 interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend
 	ChannelSubscriptionId  interface{} // 支付渠道订阅id
 	Data                   interface{} // 渠道额外参数，JSON格式
 	ResponseData           interface{} // 渠道返回参数，JSON格式

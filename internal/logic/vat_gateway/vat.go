@@ -163,7 +163,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 		CompanyAddress:  result.CompanyAddress,
 		ValidateMessage: result.ValidateMessage,
 	}
-	_, err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	_, err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
 	}

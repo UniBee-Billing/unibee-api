@@ -533,7 +533,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				ChannelId:        int64(channelEntity.Id),
 				ChannelVatRateId: vatCreateResult.ID,
 			}
-			result, err := dao.SubscriptionVatRateChannel.Ctx(ctx).Data(channelVatRate).OmitEmpty().Insert(channelVatRate)
+			result, err := dao.SubscriptionVatRateChannel.Ctx(ctx).Data(channelVatRate).OmitNil().Insert(channelVatRate)
 			if err != nil {
 				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err.Error())
 				return nil, err
@@ -1001,8 +1001,9 @@ func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.Channe
 		status = consts.SubStatusCreate
 	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
 		status = consts.SubStatusExpired
-	} else if strings.Compare(string(subscription.Status), "past_due") == 0 ||
-		strings.Compare(string(subscription.Status), "paused") == 0 {
+	} else if strings.Compare(string(subscription.Status), "pass_due") == 0 {
+		status = consts.SubStatusPendingInActive
+	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended
 	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
 		status = consts.SubStatusCancelled

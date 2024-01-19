@@ -27,7 +27,7 @@ func SaveUserChannel(ctx context.Context, userId int64, channelId int64, channel
 		ChannelId:     channelId,
 		ChannelUserId: channelUserId,
 	}
-	result, err := dao.SubscriptionUserChannel.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.SubscriptionUserChannel.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionCreate record insert failure %s`, err)
 		return nil, err

@@ -279,7 +279,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		TaxPercentage:  prepare.StandardTaxPercentage,
 	}
 
-	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionCreate record insert failure %s`, err)
 		return nil, err
@@ -306,7 +306,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		dao.Subscription.Columns().Link:                  createRes.Link,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
 		dao.Subscription.Columns().GmtModify:             gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -717,6 +717,17 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	})
 	if err != nil {
 		return err
+	}
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:    consts.SubStatusPendingInActive,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return gerror.Newf("SubscriptionCancel update subscription err:%s", update)
 	}
 	return nil
 }

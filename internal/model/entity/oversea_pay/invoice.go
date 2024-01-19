@@ -15,6 +15,8 @@ type Invoice struct {
 	UserId                         int64       `json:"userId"                         ` // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 ` // 订阅id（内部编号）
 	InvoiceId                      string      `json:"invoiceId"                      ` // 发票ID（内部编号）
+	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
+	UniqueId                       string      `json:"uniqueId"                       ` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time `json:"gmtCreate"                      ` // 创建时间
 	TotalAmount                    int64       `json:"totalAmount"                    ` // 金额,单位：分
 	TaxAmount                      int64       `json:"taxAmount"                      ` // Tax金额,单位：分
@@ -33,7 +35,6 @@ type Invoice struct {
 	ChannelStatus                  string      `json:"channelStatus"                  ` // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelPaymentId               string      `json:"channelPaymentId"               ` // 关联渠道 PaymentId
 	ChannelUserId                  string      `json:"channelUserId"                  ` // 渠道用户 Id
-	ChannelInvoiceId               string      `json:"channelInvoiceId"               ` // 关联渠道发票 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              ` // 关联渠道发票 pdf
 	TaxPercentage                  int64       `json:"taxPercentage"                  ` // Tax税率，万分位，1000 表示 10%
 	SendNote                       string      `json:"sendNote"                       ` // send_note
@@ -44,5 +45,4 @@ type Invoice struct {
 	PeriodEnd                      int64       `json:"periodEnd"                      ` // period_end
 	PaymentId                      string      `json:"paymentId"                      ` // PaymentId
 	RefundId                       string      `json:"refundId"                       ` // refundId
-	UniqueId                       string      `json:"uniqueId"                       ` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }

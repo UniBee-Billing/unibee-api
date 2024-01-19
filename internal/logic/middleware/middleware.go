@@ -76,7 +76,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
 		r.Response.Status = 200  // 发生错误时候错误码Http 状态吗设置成 200，错误以 Json 形式返回
 		message := err.Error()
-		if strings.Contains(message, utility.SystemAssertPrefix) {
+		if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
 			utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, gcode.CodeValidationFailed.Message()+": ", 1))
 		} else {
 			utility.JsonExit(r, code.Code(), fmt.Sprintf("System Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))

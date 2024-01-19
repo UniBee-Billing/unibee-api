@@ -79,7 +79,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
-			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err

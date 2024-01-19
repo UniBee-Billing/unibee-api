@@ -17,6 +17,8 @@ type Invoice struct {
 	UserId                         interface{} // userId
 	SubscriptionId                 interface{} // 订阅id（内部编号）
 	InvoiceId                      interface{} // 发票ID（内部编号）
+	ChannelInvoiceId               interface{} // 关联渠道发票 Id
+	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time // 创建时间
 	TotalAmount                    interface{} // 金额,单位：分
 	TaxAmount                      interface{} // Tax金额,单位：分
@@ -35,7 +37,6 @@ type Invoice struct {
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelPaymentId               interface{} // 关联渠道 PaymentId
 	ChannelUserId                  interface{} // 渠道用户 Id
-	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
 	TaxPercentage                  interface{} // Tax税率，万分位，1000 表示 10%
 	SendNote                       interface{} // send_note
@@ -46,5 +47,4 @@ type Invoice struct {
 	PeriodEnd                      interface{} // period_end
 	PaymentId                      interface{} // PaymentId
 	RefundId                       interface{} // refundId
-	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }

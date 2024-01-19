@@ -34,7 +34,7 @@ var (
 )
 
 func SaveTimeLine(ctx context.Context, overseaPayEvent entity.Timeline) {
-	_, err := dao.Timeline.Ctx(ctx).Data(overseaPayEvent).OmitEmpty().Insert(overseaPayEvent)
+	_, err := dao.Timeline.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)
 	}

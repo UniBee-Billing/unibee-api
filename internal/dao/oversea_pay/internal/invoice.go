@@ -25,6 +25,8 @@ type InvoiceColumns struct {
 	UserId                         string // userId
 	SubscriptionId                 string // 订阅id（内部编号）
 	InvoiceId                      string // 发票ID（内部编号）
+	ChannelInvoiceId               string // 关联渠道发票 Id
+	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      string // 创建时间
 	TotalAmount                    string // 金额,单位：分
 	TaxAmount                      string // Tax金额,单位：分
@@ -43,7 +45,6 @@ type InvoiceColumns struct {
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelPaymentId               string // 关联渠道 PaymentId
 	ChannelUserId                  string // 渠道用户 Id
-	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
 	TaxPercentage                  string // Tax税率，万分位，1000 表示 10%
 	SendNote                       string // send_note
@@ -54,7 +55,6 @@ type InvoiceColumns struct {
 	PeriodEnd                      string // period_end
 	PaymentId                      string // PaymentId
 	RefundId                       string // refundId
-	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -64,6 +64,8 @@ var invoiceColumns = InvoiceColumns{
 	UserId:                         "user_id",
 	SubscriptionId:                 "subscription_id",
 	InvoiceId:                      "invoice_id",
+	ChannelInvoiceId:               "channel_invoice_id",
+	UniqueId:                       "unique_id",
 	GmtCreate:                      "gmt_create",
 	TotalAmount:                    "total_amount",
 	TaxAmount:                      "tax_amount",
@@ -82,7 +84,6 @@ var invoiceColumns = InvoiceColumns{
 	ChannelStatus:                  "channel_status",
 	ChannelPaymentId:               "channel_payment_id",
 	ChannelUserId:                  "channel_user_id",
-	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
 	TaxPercentage:                  "tax_percentage",
 	SendNote:                       "send_note",
@@ -93,7 +94,6 @@ var invoiceColumns = InvoiceColumns{
 	PeriodEnd:                      "period_end",
 	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
-	UniqueId:                       "unique_id",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

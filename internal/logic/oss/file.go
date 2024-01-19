@@ -87,7 +87,7 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 		FileName: uploadFileName,
 		Tag:      uploadPath,
 	}
-	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitEmpty().Insert()
+	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitNil().Insert()
 	if err != nil {
 		return nil, err
 	}

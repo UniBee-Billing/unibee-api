@@ -62,7 +62,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		UserId:                         req.UserId,
 	}
 
-	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`CreateInvoice record insert failure %s`, err)
 	}
@@ -118,7 +118,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		dao.Invoice.Columns().ChannelId:                      req.ChannelId,
 		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(req.Lines),
 		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().IsDeleted: 0,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -180,7 +180,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().Status:    consts.InvoiceStatusCancelled,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -221,7 +221,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		dao.Invoice.Columns().Status:            int(createRes.Status),
 		dao.Invoice.Columns().Link:              createRes.Link,
 		dao.Invoice.Columns().GmtModify:         gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.Id).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}

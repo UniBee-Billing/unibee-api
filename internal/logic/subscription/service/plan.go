@@ -198,6 +198,25 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		}
 	}
 
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().PlanName:                  req.PlanName,
+		dao.SubscriptionPlan.Columns().Amount:                    req.Amount,
+		dao.SubscriptionPlan.Columns().Currency:                  strings.ToUpper(req.Currency),
+		dao.SubscriptionPlan.Columns().IntervalUnit:              req.IntervalUnit,
+		dao.SubscriptionPlan.Columns().IntervalCount:             req.IntervalCount,
+		dao.SubscriptionPlan.Columns().Description:               req.Description,
+		dao.SubscriptionPlan.Columns().ImageUrl:                  req.ImageUrl,
+		dao.SubscriptionPlan.Columns().HomeUrl:                   req.HomeUrl,
+		dao.SubscriptionPlan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
+		dao.SubscriptionPlan.Columns().ChannelProductName:        req.ProductName,
+		dao.SubscriptionPlan.Columns().ChannelProductDescription: req.ProductDescription,
+	}).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).OmitNil().Update()
+	if err != nil {
+		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
+		one = nil
+		return
+	}
+
 	one.PlanName = req.PlanName
 	one.Amount = req.Amount
 	one.Currency = strings.ToUpper(req.Currency)
@@ -209,14 +228,6 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.BindingAddonIds = intListToString(req.AddonIds)
 	one.ChannelProductName = req.ProductName
 	one.ChannelProductDescription = req.ProductDescription
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(one).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).Update(one)
-	if err != nil {
-		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
-		one = nil
-		return
-	}
-
-	//todo mark 是否直接发布
 
 	return one, nil
 }

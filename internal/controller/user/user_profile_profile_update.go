@@ -33,7 +33,7 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 		dao.UserAccount.Columns().CountryCode:     req.CountryCode,
 		dao.UserAccount.Columns().CountryName:     req.CountryName,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
-	}).Where(dao.UserAccount.Columns().Id, req.Id).OmitEmpty().Update()
+	}).Where(dao.UserAccount.Columns().Id, req.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}

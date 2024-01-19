@@ -33,7 +33,7 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 			Mamo:      memo,
 			ChannelId: strconv.FormatUint(channel.Id, 10),
 		}
-		_, _ = dao.ChannelHttpLog.Ctx(context.Background()).Data(httpLog).OmitEmpty().Insert(httpLog)
+		_, _ = dao.ChannelHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
 		g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)
 	}()
 }
