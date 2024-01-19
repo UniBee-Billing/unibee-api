@@ -2,7 +2,8 @@ package generator
 
 // Address represent an address
 type Address struct {
-	Address    string `json:"address,omitempty" validate:"required"`
+	//Address    string `json:"address,omitempty" validate:"required"`
+	Address    string `json:"address,omitempty"`
 	Address2   string `json:"address_2,omitempty"`
 	PostalCode string `json:"postal_code,omitempty"`
 	City       string `json:"city,omitempty"`
