@@ -279,10 +279,11 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
-	return CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
+	_, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
+	return err
 }
 
-func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, uniqueId string) error {
+func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, uniqueId string) (*entity.Payment, error) {
 	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
 	var subscriptionId string
 	var merchantId int64
@@ -336,7 +337,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdatePaymentByDetail record insert failure %s`, err.Error())
-			return err
+			return nil, err
 		}
 		id, _ := result.LastInsertId()
 		one.Id = id
@@ -370,13 +371,13 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			dao.Invoice.Columns().GmtModify:              gtime.Now(),
 		}).Where(dao.Payment.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		rowAffected, err := update.RowsAffected()
 		if rowAffected != 1 {
-			return gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
+			return nil, gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
 		}
 	}
 
-	return nil
+	return one, nil
 }

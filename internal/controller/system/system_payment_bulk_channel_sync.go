@@ -36,7 +36,7 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 		for {
 			backgroundCtx := context.Background()
 			var mainList []*entity.Invoice
-			err := dao.Invoice.Ctx(backgroundCtx).
+			err = dao.Invoice.Ctx(backgroundCtx).
 				Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
 				WhereNotNull(dao.Invoice.Columns().ChannelPaymentId).
 				OrderDesc("id").
@@ -51,11 +51,14 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				utility.Assert(payChannel != nil, "invalid planChannel")
 				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.ChannelPaymentId)
 				if err == nil {
-					err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
+					pay, err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
 					if err != nil {
 						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail ChannelPaymentId:%s error%s\n", details.ChannelPaymentId, err.Error())
 						return
 					}
+					_, _ = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
+						dao.Invoice.Columns().PaymentId: pay.PaymentId,
+					}).Where(dao.Invoice.Columns().InvoiceId, one.InvoiceId).OmitNil().Update()
 					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentId:%s success\n", details.ChannelPaymentId)
 				} else {
 					fmt.Printf("BulkChannelSync Background Fetch InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
