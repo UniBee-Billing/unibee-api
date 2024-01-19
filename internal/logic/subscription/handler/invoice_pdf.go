@@ -84,11 +84,17 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 			//Email:   merchantInfo.Email,
 		},
 	})
+	var userName = ""
+	var userAddress = ""
+	if user != nil {
+		userName = user.UserName
+		userAddress = user.Address
+	}
 
 	doc.SetCustomer(&generator.Contact{
-		Name: user.UserName,
+		Name: userName,
 		Address: &generator.Address{
-			Address: user.Address,
+			Address: userAddress,
 			//PostalCode: "29200",
 			//City:       "Brest",
 			//Country:    "France",
