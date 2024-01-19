@@ -52,12 +52,12 @@ func (c *ControllerInvoice) BulkChannelSync(ctx context.Context, req *invoice.Bu
 				if err == nil {
 					err := handler.CreateOrUpdateInvoiceByDetail(backgroundCtx, details, details.ChannelInvoiceId)
 					if err != nil {
-						fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByDetail InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
+						fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByDetail ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
 						return
 					}
-					fmt.Printf("BulkChannelSync Background Fetch InvoiceId:%s success\n", one.InvoiceId)
+					fmt.Printf("BulkChannelSync Background Fetch ChannelInvoiceId:%s success\n", one.ChannelInvoiceId)
 				} else {
-					fmt.Printf("BulkChannelSync Background Fetch InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
+					fmt.Printf("BulkChannelSync Background Fetch ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
 				}
 			}
 			if len(mainList) == 0 {

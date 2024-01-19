@@ -53,12 +53,12 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				if err == nil {
 					err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
 					if err != nil {
-						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail PaymentId:%s error%s\n", one.PaymentId, err.Error())
+						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail ChannelPaymentId:%s error%s\n", details.ChannelPaymentId, err.Error())
 						return
 					}
-					fmt.Printf("BulkChannelSync Background Fetch PaymentId:%s success\n", one.PaymentId)
+					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentId:%s success\n", details.ChannelPaymentId)
 				} else {
-					fmt.Printf("BulkChannelSync Background Fetch PaymentId:%s error%s\n", one.PaymentId, err.Error())
+					fmt.Printf("BulkChannelSync Background Fetch InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
 				}
 			}
 			if len(mainList) == 0 {

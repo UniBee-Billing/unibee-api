@@ -32,3 +32,12 @@ func SystemPayment(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func SystemRefund(ctx context.Context, group *ghttp.RouterGroup) {
+	// profile 库相关接口
+	group.Group("/refund", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			system.NewRefund(),
+		)
+	})
+}

@@ -45,6 +45,7 @@ type RefundColumns struct {
 	AdditionalData       string //
 	UniqueId             string // 唯一键，以同步为逻辑加入使用自定义唯一键
 	SubscriptionId       string // 订阅id（内部编号）
+	ChannelPaymentId     string // 外部支付渠道订单号，支付成功回调返回
 }
 
 // refundColumns holds the columns for table refund.
@@ -74,6 +75,7 @@ var refundColumns = RefundColumns{
 	AdditionalData:       "additional_data",
 	UniqueId:             "unique_id",
 	SubscriptionId:       "subscription_id",
+	ChannelPaymentId:     "channel_payment_id",
 }
 
 // NewRefundDao creates and returns a new DAO object for table data access.

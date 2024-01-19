@@ -2,7 +2,13 @@ package system
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/gateway"
+	handler2 "go-oversea-pay/internal/logic/payment/handler"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -25,42 +31,44 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 				return
 			}
 		}()
-		//var page = 0
-		//var count = 10
-		//for {
-		//	backgroundCtx := context.Background()
-		//	var mainList []*entity.Invoice
-		//	err := dao.Payment.Ctx(backgroundCtx).
-		//		Where(dao.Payment.Columns().MerchantId, req.MerchantId).
-		//		WhereNotNull(dao.Payment.Columns().ChannelPaymentId).
-		//		OrderDesc("id").
-		//		Limit(page*count, count).
-		//		OmitEmpty().Scan(&mainList)
-		//	if err != nil {
-		//		fmt.Printf("BulkChannelSync Background List error%s\n", err.Error())
-		//		return
-		//	}
-		//	for _, one := range mainList {
-		//		payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
-		//		utility.Assert(payChannel != nil, "invalid planChannel")
-		//		details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.ChannelPaymentId)
-		//		if err == nil {
-		//			err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
-		//			if err != nil {
-		//				fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail PaymentId:%s error%s\n", one.PaymentId, err.Error())
-		//				return
-		//			}
-		//			fmt.Printf("BulkChannelSync Background Fetch PaymentId:%s success\n", one.PaymentId)
-		//		} else {
-		//			fmt.Printf("BulkChannelSync Background Fetch PaymentId:%s error%s\n", one.PaymentId, err.Error())
-		//		}
-		//	}
-		//	if len(mainList) == 0 {
-		//		break
-		//	}
-		//	clear(mainList)
-		//	page = page + 1
-		//}
+		var page = 0
+		var count = 10
+		for {
+			backgroundCtx := context.Background()
+			var mainList []*entity.Payment
+			err := dao.Payment.Ctx(backgroundCtx).
+				Where(dao.Payment.Columns().MerchantId, req.MerchantId).
+				WhereNotNull(dao.Payment.Columns().ChannelPaymentId).
+				OrderDesc("id").
+				Limit(page*count, count).
+				OmitEmpty().Scan(&mainList)
+			if err != nil {
+				fmt.Printf("BulkChannelSync Background List error%s\n", err.Error())
+				return
+			}
+			for _, one := range mainList {
+				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
+				utility.Assert(payChannel != nil, "invalid planChannel")
+				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.ChannelPaymentId)
+				if err == nil {
+					for _, detail := range details {
+						err := handler2.CreateOrUpdateRefundByDetail(backgroundCtx, one, detail, detail.ChannelRefundId)
+						if err != nil {
+							fmt.Printf("BulkChannelSync Background CreateOrUpdateRefundByDetail ChannelRefundId:%s error%s\n", detail.ChannelRefundId, err.Error())
+							return
+						}
+						fmt.Printf("BulkChannelSync Background Fetch ChannelRefundId:%s success\n", detail.ChannelRefundId)
+					}
+				} else {
+					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentId:%s error%s\n", one.ChannelPaymentId, err.Error())
+				}
+			}
+			if len(mainList) == 0 {
+				break
+			}
+			clear(mainList)
+			page = page + 1
+		}
 	}()
 	return nil, nil
 }

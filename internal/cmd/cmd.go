@@ -105,6 +105,7 @@ var (
 					router.SystemSubscription(ctx, group)
 					router.SystemInvoice(ctx, group)
 					router.SystemPayment(ctx, group)
+					router.SystemRefund(ctx, group)
 				})
 			}
 

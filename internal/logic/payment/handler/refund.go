@@ -10,10 +10,12 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
+	"go-oversea-pay/utility"
 )
 
 type HandleRefundReq struct {
@@ -215,6 +217,77 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundedReversed", one.RefundId),
 		Message:   req.Reason,
 	})
+
+	return nil
+}
+
+func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, details *ro.OutPayRefundRo, uniqueId string) error {
+	utility.Assert(len(details.ChannelPaymentId) > 0, "paymentId is null")
+	utility.Assert(payment != nil, "payment is null")
+
+	one := query.GetRefundByChannelRefundId(ctx, details.ChannelRefundId)
+
+	if one == nil {
+		//创建
+		one = &entity.Refund{
+			CompanyId:            payment.CompanyId,
+			MerchantId:           payment.MerchantId,
+			UserId:               payment.UserId,
+			OpenApiId:            payment.OpenApiId,
+			ChannelId:            payment.ChannelId,
+			CountryCode:          payment.CountryCode,
+			Currency:             details.Currency,
+			PaymentId:            payment.PaymentId,
+			ChannelPaymentId:     details.ChannelPaymentId,
+			RefundId:             utility.CreateRefundId(),
+			RefundFee:            details.RefundFee,
+			RefundComment:        details.Reason,
+			Status:               details.Status,
+			RefundTime:           details.RefundTime,
+			ChannelRefundId:      details.ChannelRefundId,
+			RefundCommentExplain: details.Reason,
+			UniqueId:             uniqueId,
+			SubscriptionId:       payment.SubscriptionId,
+		}
+
+		result, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdateRefundByDetail record insert failure %s`, err.Error())
+			return err
+		}
+		id, _ := result.LastInsertId()
+		one.Id = id
+	} else {
+		//更新
+
+		update, err := dao.Refund.Ctx(ctx).Data(g.Map{
+			dao.Refund.Columns().CompanyId:            payment.CompanyId,
+			dao.Refund.Columns().MerchantId:           payment.MerchantId,
+			dao.Refund.Columns().UserId:               payment.UserId,
+			dao.Refund.Columns().OpenApiId:            payment.OpenApiId,
+			dao.Refund.Columns().ChannelId:            payment.ChannelId,
+			dao.Refund.Columns().CountryCode:          payment.CountryCode,
+			dao.Refund.Columns().Currency:             details.Currency,
+			dao.Refund.Columns().PaymentId:            payment.PaymentId,
+			dao.Refund.Columns().ChannelPaymentId:     details.ChannelPaymentId,
+			dao.Refund.Columns().RefundFee:            details.RefundFee,
+			dao.Refund.Columns().RefundComment:        details.Reason,
+			dao.Refund.Columns().Status:               details.Status,
+			dao.Refund.Columns().RefundTime:           details.RefundTime,
+			dao.Refund.Columns().ChannelRefundId:      details.ChannelRefundId,
+			dao.Refund.Columns().RefundCommentExplain: details.Reason,
+			dao.Refund.Columns().UniqueId:             uniqueId,
+			dao.Refund.Columns().SubscriptionId:       payment.SubscriptionId,
+			dao.Refund.Columns().GmtModify:            gtime.Now(),
+		}).Where(dao.Refund.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("CreateOrUpdateRefundByDetail err:%s", update)
+		}
+	}
 
 	return nil
 }
