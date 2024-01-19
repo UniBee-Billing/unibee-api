@@ -6,11 +6,14 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/google/uuid"
 	"go-oversea-pay/api/merchant/invoice"
+	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/gateway"
 	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -236,4 +239,27 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	// todo mark 生成 pdf 并发送邮件
 
 	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil
+}
+
+func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (*entity.Refund, error) {
+	utility.Assert(req.RefundAmount > 0, "refundFee should > 0")
+	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
+	utility.Assert(len(req.Reason) > 0, "reason should not be blank")
+	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.TotalAmount > req.RefundAmount, "not enough amount to refund")
+	refund, err := service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_INVOICE, &v1.RefundsReq{
+		PaymentId:  one.PaymentId,
+		MerchantId: one.MerchantId,
+		Reference:  uuid.New().String(), //todo make internal refund reference
+		Reason:     req.Reason,
+		Amount: &v1.PayAmountVo{
+			Currency: one.Currency,
+			Value:    req.RefundAmount,
+		},
+	}, 0)
+	if err != nil {
+		return nil, err
+	}
+	return refund, nil
 }

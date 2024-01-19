@@ -58,19 +58,20 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(err == nil && one == nil, "duplicate reference call")
 
 	one = &entity.Refund{
-		CompanyId:   payment.CompanyId,
-		MerchantId:  payment.MerchantId,
-		BizId:       req.Reference,
-		BizType:     bizType,
-		PaymentId:   payment.PaymentId,
-		RefundId:    utility.CreateRefundId(),
-		RefundFee:   req.Amount.Value,
-		Status:      consts.REFUND_ING,
-		ChannelId:   payment.ChannelId,
-		AppId:       payment.AppId,
-		Currency:    payment.Currency,
-		CountryCode: payment.CountryCode,
-		OpenApiId:   openApiId,
+		CompanyId:     payment.CompanyId,
+		MerchantId:    payment.MerchantId,
+		BizId:         req.Reference,
+		BizType:       bizType,
+		PaymentId:     payment.PaymentId,
+		RefundId:      utility.CreateRefundId(),
+		RefundFee:     req.Amount.Value,
+		Status:        consts.REFUND_ING,
+		ChannelId:     payment.ChannelId,
+		AppId:         payment.AppId,
+		Currency:      payment.Currency,
+		CountryCode:   payment.CountryCode,
+		RefundComment: req.Reason,
+		OpenApiId:     openApiId,
 		//AdditionalData: req.
 		//RefundComment: payBizTypeEnum.getDesc() +"退款",
 
@@ -124,7 +125,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		return nil, err
 	} else {
 		//交易事件记录
-		event.SaveTimeLine(ctx, entity.Timeline{
+		event.SaveTimeLine(ctx, entity.PaymentTimeline{
 			BizType:   0,
 			BizId:     payment.PaymentId,
 			Fee:       payment.PaymentFee,

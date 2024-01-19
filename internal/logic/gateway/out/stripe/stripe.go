@@ -1436,7 +1436,20 @@ func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entit
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	//TODO implement me
-	panic("implement me")
+func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
+	params := &stripe.RefundParams{PaymentIntent: stripe.String(pay.ChannelPaymentId)}
+	params.Reason = stripe.String(one.RefundComment)
+	params.Amount = stripe.Int64(one.RefundFee)
+	params.Currency = stripe.String(strings.ToLower(one.Currency))
+	result, err := refund.New(params)
+	log.SaveChannelHttpLog("DoRemoteChannelRefund", params, result, err, "refund", nil, channelEntity)
+	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))
+	utility.Assert(result != nil, "Stripe refund failed, result is nil")
+	return &ro.OutPayRefundRo{
+		ChannelRefundId: result.ID,
+		Status:          consts.REFUND_ING,
+	}, nil
 }

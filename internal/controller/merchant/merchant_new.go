@@ -62,3 +62,9 @@ func NewBalance() merchant.IMerchantBalance {
 	return &ControllerBalance{}
 }
 
+type ControllerPayment struct{}
+
+func NewPayment() merchant.IMerchantPayment {
+	return &ControllerPayment{}
+}
+

@@ -11,6 +11,7 @@ import (
 	"go-oversea-pay/api/merchant/balance"
 	"go-oversea-pay/api/merchant/invoice"
 	"go-oversea-pay/api/merchant/oss"
+	"go-oversea-pay/api/merchant/payment"
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
 	"go-oversea-pay/api/merchant/subscription"
@@ -41,10 +42,15 @@ type IMerchantInvoice interface {
 	DeletePendingInvoice(ctx context.Context, req *invoice.DeletePendingInvoiceReq) (res *invoice.DeletePendingInvoiceRes, err error)
 	ProcessInvoiceForPay(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (res *invoice.ProcessInvoiceForPayRes, err error)
 	CancelProcessingInvoice(ctx context.Context, req *invoice.CancelProcessingInvoiceReq) (res *invoice.CancelProcessingInvoiceRes, err error)
+	NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error)
 }
 
 type IMerchantOss interface {
 	FileUpload(ctx context.Context, req *oss.FileUploadReq) (res *oss.FileUploadRes, err error)
+}
+
+type IMerchantPayment interface {
+	EventList(ctx context.Context, req *payment.EventListReq) (res *payment.EventListRes, err error)
 }
 
 type IMerchantPlan interface {

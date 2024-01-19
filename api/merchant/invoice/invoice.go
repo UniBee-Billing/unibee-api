@@ -85,3 +85,14 @@ type CancelProcessingInvoiceReq struct {
 }
 type CancelProcessingInvoiceRes struct {
 }
+
+type NewInvoiceRefundReq struct {
+	g.Meta       `path:"/new_invoice_refund" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin 发起退款"`
+	InvoiceId    string `p:"invoiceId" dc:"invoiceId" v:"required|length:4,30#请输入 InvoiceId"`
+	RefundAmount int64  `p:"refundAmount" dc:"退款金额" v:"required#请输入 RefundAmount"`
+	Reason       string `p:"reason" dc:"退款原因" v:"required#请输入 Reason"`
+}
+
+type NewInvoiceRefundRes struct {
+	Refund *entity.Refund `json:"refund" `
+}

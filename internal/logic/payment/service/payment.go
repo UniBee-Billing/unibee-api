@@ -104,7 +104,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		return nil, err
 	} else {
 		//交易事件记录
-		event.SaveTimeLine(ctx, entity.Timeline{
+		event.SaveTimeLine(ctx, entity.PaymentTimeline{
 			BizType:   0,
 			BizId:     createPayContext.Pay.PaymentId,
 			Fee:       createPayContext.Pay.PaymentFee,
