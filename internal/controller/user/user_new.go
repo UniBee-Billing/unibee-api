@@ -38,3 +38,9 @@ func NewVat() user.IUserVat {
 	return &ControllerVat{}
 }
 
+type ControllerInvoice struct{}
+
+func NewInvoice() user.IUserInvoice {
+	return &ControllerInvoice{}
+}
+

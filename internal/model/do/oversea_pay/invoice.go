@@ -45,6 +45,8 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
 	PeriodStart                    interface{} // period_start
 	PeriodEnd                      interface{} // period_end
+	PeriodStartTime                *gtime.Time //
+	PeriodEndTime                  *gtime.Time //
 	PaymentId                      interface{} // PaymentId
 	RefundId                       interface{} // refundId
 }

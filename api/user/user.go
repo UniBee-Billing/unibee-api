@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"go-oversea-pay/api/user/auth"
+	"go-oversea-pay/api/user/invoice"
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
@@ -21,6 +22,10 @@ type IUserAuth interface {
 	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
+
+type IUserInvoice interface {
+	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
 }
 
 type IUserPlan interface {

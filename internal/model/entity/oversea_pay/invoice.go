@@ -43,6 +43,8 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" description:"Sub金额(不含税）,单位：分"`                                                       // Sub金额(不含税）,单位：分
 	PeriodStart                    int64       `json:"periodStart"                    description:"period_start"`                                                          // period_start
 	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end"`                                                            // period_end
+	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                      //
+	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                      //
 	PaymentId                      string      `json:"paymentId"                      description:"PaymentId"`                                                             // PaymentId
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                              // refundId
 }

@@ -53,6 +53,8 @@ type InvoiceColumns struct {
 	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
 	PeriodStart                    string // period_start
 	PeriodEnd                      string // period_end
+	PeriodStartTime                string //
+	PeriodEndTime                  string //
 	PaymentId                      string // PaymentId
 	RefundId                       string // refundId
 }
@@ -92,6 +94,8 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
+	PeriodStartTime:                "period_start_time",
+	PeriodEndTime:                  "period_end_time",
 	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
 }

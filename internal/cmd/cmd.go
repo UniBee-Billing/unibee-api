@@ -77,6 +77,7 @@ var (
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
+				router.UserInvoice(ctx, group)
 				router.UserProfile(ctx, group)
 			})
 

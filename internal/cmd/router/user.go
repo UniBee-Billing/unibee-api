@@ -55,3 +55,13 @@ func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+// UserInvoice 工具类
+func UserInvoice(ctx context.Context, group *ghttp.RouterGroup) {
+	// invoice 库相关接口
+	group.Group("/invoice", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewInvoice(),
+		)
+	})
+}
