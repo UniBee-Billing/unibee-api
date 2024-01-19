@@ -33,4 +33,6 @@ type Refund struct {
 	RefundCommentExplain string      `json:"refundCommentExplain" ` // 退款备注说明
 	ReturnUrl            string      `json:"returnUrl"            ` // 退款成功回调Url
 	AdditionalData       string      `json:"additionalData"       ` //
+	UniqueId             string      `json:"uniqueId"             ` // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId       string      `json:"subscriptionId"       ` // 订阅id（内部编号）
 }

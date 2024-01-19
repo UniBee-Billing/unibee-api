@@ -49,4 +49,6 @@ type Payment struct {
 	Token                  interface{} //
 	AdditionalData         interface{} // 额外信息，JSON结构
 	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构
+	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId         interface{} // 订阅id（内部编号）
 }

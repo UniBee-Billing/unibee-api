@@ -93,10 +93,15 @@ type OutPayRo struct {
 	PaymentId        string      `json:"paymentId"         `
 	ChannelPaymentId string      `json:"channelPaymentId"              ` // 业务id-即渠道支付单号
 	Status           int         `json:"status"`
+	CaptureStatus    int         `json:"captureStatus"`
 	Reason           string      `json:"reason"              `
 	PayFee           int64       `json:"PayFee"              `
+	ReceiptFee       int64       `json:"receiptFee"              `
 	Currency         string      `json:"currency"              `
-	PayTime          *gtime.Time `json:"PayTime" `
+	PayTime          *gtime.Time `json:"payTime" `
+	CreateTime       *gtime.Time `json:"createTime" `
+	CancelTime       *gtime.Time `json:"cancelTime" `
+	CancelReason     string      `json:"cancelReason" `
 	TotalRefundFee   int64       `json:"totalRefundFee"              `
 }
 

@@ -57,6 +57,8 @@ type PaymentColumns struct {
 	Token                  string //
 	AdditionalData         string // 额外信息，JSON结构
 	PaymentData            string // 渠道支付接口返回核心参数，JSON结构
+	UniqueId               string // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId         string // 订阅id（内部编号）
 }
 
 // paymentColumns holds the columns for table payment.
@@ -98,6 +100,8 @@ var paymentColumns = PaymentColumns{
 	Token:                  "token",
 	AdditionalData:         "additional_data",
 	PaymentData:            "payment_data",
+	UniqueId:               "unique_id",
+	SubscriptionId:         "subscription_id",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

@@ -46,7 +46,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 	var change = false
 	if one == nil {
 		//创建
-		one := &entity.Invoice{
+		one = &entity.Invoice{
 			MerchantId:                     merchantId,
 			SubscriptionId:                 subscriptionId,
 			InvoiceId:                      utility.CreateInvoiceId(),
@@ -76,7 +76,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateInvoiceByDetail record insert failure %s`, err)
+			err = gerror.Newf(`CreateOrUpdateInvoiceByDetail record insert failure %s`, err.Error())
 			return err
 		}
 		id, _ := result.LastInsertId()

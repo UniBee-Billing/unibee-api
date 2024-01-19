@@ -35,4 +35,6 @@ type Refund struct {
 	RefundCommentExplain interface{} // 退款备注说明
 	ReturnUrl            interface{} // 退款成功回调Url
 	AdditionalData       interface{} //
+	UniqueId             interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId       interface{} // 订阅id（内部编号）
 }

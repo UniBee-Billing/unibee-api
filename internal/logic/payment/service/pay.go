@@ -54,6 +54,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
+			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
 			if err != nil {
 				//_ = transaction.Rollback()

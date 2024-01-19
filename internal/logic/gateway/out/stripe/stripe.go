@@ -29,6 +29,7 @@ import (
 	"go-oversea-pay/internal/logic/gateway/out/log"
 	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/gateway/util"
+	handler2 "go-oversea-pay/internal/logic/payment/handler"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -80,14 +81,25 @@ func parsePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
 		status = consts.PAY_FAILED
 	}
+	var captureStatus = consts.WAITING_AUTHORIZED
+	if strings.Compare(string(item.Status), "requires_capture") == 0 {
+		captureStatus = consts.AUTHORIZED
+	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
+		captureStatus = consts.CAPTURE_REQUEST
+	}
 	return &ro.OutPayRo{
 		ChannelInvoiceId: channelInvoiceId,
 		ChannelUserId:    channelUserId,
 		ChannelPaymentId: item.ID,
 		Status:           status,
+		CaptureStatus:    captureStatus,
 		PayFee:           item.Amount,
+		ReceiptFee:       item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
 		PayTime:          gtime.NewFromTimeStamp(item.Created),
+		CreateTime:       gtime.NewFromTimeStamp(item.Created),
+		CancelTime:       gtime.NewFromTimeStamp(item.CanceledAt),
+		CancelReason:     string(item.CancellationReason),
 	}
 }
 
@@ -1207,6 +1219,18 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	}, nil
 }
 
+func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, payment stripe.PaymentIntent, payChannel *entity.OverseaPayChannel) error {
+	details, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, payment.ID)
+	if err != nil {
+		return err
+	}
+	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.OverseaPayChannel) error {
 	details, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
 	if err != nil {
@@ -1261,7 +1285,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 	switch event.Type {
 	case "customer.subscription.deleted", "customer.subscription.created", "customer.subscription.updated", "customer.subscription.trial_will_end":
 		var subscription stripe.Subscription
-		err := json.Unmarshal(event.Data.Raw, &subscription)
+		err = json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
@@ -1270,7 +1294,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event &s for Sub %d.", payChannel.Channel, string(event.Type), subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
+			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -1279,7 +1303,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		}
 	case "invoice.upcoming", "invoice.created", "invoice.updated", "invoice.paid", "invoice.payment_failed", "invoice.payment_action_required":
 		var stripeInvoice stripe.Invoice
-		err := json.Unmarshal(event.Data.Raw, &stripeInvoice)
+		err = json.Unmarshal(event.Data.Raw, &stripeInvoice)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
@@ -1288,7 +1312,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %d.", payChannel.Channel, string(event.Type), stripeInvoice.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
+			err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -1297,7 +1321,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		}
 	case "payment_intent.created", "payment_intent.succeeded":
 		var stripePayment stripe.PaymentIntent
-		err := json.Unmarshal(event.Data.Raw, &stripePayment)
+		err = json.Unmarshal(event.Data.Raw, &stripePayment)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %v\n", payChannel.Channel, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
@@ -1306,7 +1330,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %d.", payChannel.Channel, string(event.Type), stripePayment.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			//err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
+			err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %v\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)

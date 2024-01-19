@@ -5,15 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
+	"go-oversea-pay/utility"
 )
 
 type HandlePayReq struct {
@@ -273,4 +276,107 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryPay.getBizType()).paySuccessCallback(queryPay,req.getPaidTime());
 	}
 	return err
+}
+
+func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
+	return CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
+}
+
+func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, uniqueId string) error {
+	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
+	var subscriptionId string
+	var merchantId int64
+	var channelId int64
+	var userId int64
+	var invoiceId string
+	var countryCode string
+	if len(details.ChannelInvoiceId) > 0 {
+		invoice := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
+		if invoice != nil {
+			invoiceId = invoice.InvoiceId
+			subscriptionId = invoice.SubscriptionId
+			if len(subscriptionId) > 0 {
+				sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+				countryCode = sub.CountryCode
+			}
+			merchantId = invoice.MerchantId
+			channelId = invoice.ChannelId
+			userId = invoice.UserId
+		}
+	}
+	one := query.GetPaymentByChannelPaymentId(ctx, details.ChannelPaymentId)
+
+	if one == nil {
+		//创建
+		one = &entity.Payment{
+			MerchantId:             merchantId,
+			UserId:                 userId,
+			CountryCode:            countryCode,
+			PaymentId:              utility.CreatePaymentId(),
+			Currency:               details.Currency,
+			PaymentFee:             details.PayFee,
+			RefundFee:              details.TotalRefundFee,
+			ReceiptFee:             details.PayFee,
+			Status:                 details.Status,
+			AuthorizeStatus:        details.CaptureStatus,
+			ChannelId:              channelId,
+			ChannelPaymentFee:      details.PayFee,
+			ChannelPaymentIntentId: details.ChannelPaymentId,
+			ChannelPaymentId:       details.ChannelPaymentId,
+			CreateTime:             details.CreateTime,
+			CancelTime:             details.CancelTime,
+			PaidTime:               details.PayTime,
+			ChannelInvoiceId:       details.ChannelInvoiceId,
+			PaymentData:            details.CancelReason,
+			UniqueId:               uniqueId,
+			SubscriptionId:         subscriptionId,
+			InvoiceId:              invoiceId,
+		}
+
+		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdatePaymentByDetail record insert failure %s`, err.Error())
+			return err
+		}
+		id, _ := result.LastInsertId()
+		one.Id = id
+	} else {
+		//更新
+
+		update, err := dao.Payment.Ctx(ctx).Data(g.Map{
+			dao.Payment.Columns().MerchantId:             merchantId,
+			dao.Payment.Columns().MerchantId:             merchantId,
+			dao.Payment.Columns().UserId:                 userId,
+			dao.Payment.Columns().CountryCode:            countryCode,
+			dao.Payment.Columns().PaymentId:              utility.CreatePaymentId(),
+			dao.Payment.Columns().Currency:               details.Currency,
+			dao.Payment.Columns().PaymentFee:             details.PayFee,
+			dao.Payment.Columns().RefundFee:              details.TotalRefundFee,
+			dao.Payment.Columns().ReceiptFee:             details.PayFee,
+			dao.Payment.Columns().Status:                 details.Status,
+			dao.Payment.Columns().AuthorizeStatus:        details.CaptureStatus,
+			dao.Payment.Columns().ChannelId:              channelId,
+			dao.Payment.Columns().ChannelPaymentFee:      details.PayFee,
+			dao.Payment.Columns().ChannelPaymentIntentId: details.ChannelPaymentId,
+			dao.Payment.Columns().ChannelPaymentId:       details.ChannelPaymentId,
+			dao.Payment.Columns().CreateTime:             details.CreateTime,
+			dao.Payment.Columns().CancelTime:             details.CancelTime,
+			dao.Payment.Columns().PaidTime:               details.PayTime,
+			dao.Payment.Columns().ChannelInvoiceId:       details.ChannelInvoiceId,
+			dao.Payment.Columns().PaymentData:            details.CancelReason,
+			dao.Payment.Columns().UniqueId:               uniqueId,
+			dao.Payment.Columns().SubscriptionId:         subscriptionId,
+			dao.Payment.Columns().InvoiceId:              invoiceId,
+			dao.Invoice.Columns().GmtModify:              gtime.Now(),
+		}).Where(dao.Payment.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
+		}
+	}
+
+	return nil
 }

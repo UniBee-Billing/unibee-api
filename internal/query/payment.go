@@ -21,3 +21,11 @@ func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.P
 	}
 	return
 }
+
+func GetPaymentByChannelPaymentId(ctx context.Context, channelPaymentId string) (one *entity.Payment) {
+	err := dao.Payment.Ctx(ctx).Where(entity.Invoice{ChannelPaymentId: channelPaymentId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}

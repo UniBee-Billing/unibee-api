@@ -43,6 +43,8 @@ type RefundColumns struct {
 	RefundCommentExplain string // 退款备注说明
 	ReturnUrl            string // 退款成功回调Url
 	AdditionalData       string //
+	UniqueId             string // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId       string // 订阅id（内部编号）
 }
 
 // refundColumns holds the columns for table refund.
@@ -70,6 +72,8 @@ var refundColumns = RefundColumns{
 	RefundCommentExplain: "refund_comment_explain",
 	ReturnUrl:            "return_url",
 	AdditionalData:       "additional_data",
+	UniqueId:             "unique_id",
+	SubscriptionId:       "subscription_id",
 }
 
 // NewRefundDao creates and returns a new DAO object for table data access.

@@ -47,4 +47,6 @@ type Payment struct {
 	Token                  string      `json:"token"                  ` //
 	AdditionalData         string      `json:"additionalData"         ` // 额外信息，JSON结构
 	PaymentData            string      `json:"paymentData"            ` // 渠道支付接口返回核心参数，JSON结构
+	UniqueId               string      `json:"uniqueId"               ` // 唯一键，以同步为逻辑加入使用自定义唯一键
+	SubscriptionId         string      `json:"subscriptionId"         ` // 订阅id（内部编号）
 }
