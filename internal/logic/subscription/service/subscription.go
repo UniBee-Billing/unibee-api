@@ -611,7 +611,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		MerchantUserId:       merchantUserId,
 	}
 
-	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionPendingUpdate record insert failure %s`, err)
 		return nil, err
@@ -653,7 +653,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
 		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.LatestInvoiceLink,
 		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
-	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitEmpty().Update()
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
@@ -685,7 +685,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 		dao.Subscription.Columns().Amount:    one.UpdateAmount,
 		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return false, err
 	}
@@ -746,7 +746,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 1, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -781,7 +781,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 0, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -818,7 +818,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
 		dao.Subscription.Columns().GmtModify: gtime.Now(), // todo 存在并发调用问题
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}

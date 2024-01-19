@@ -53,7 +53,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		UserName:    u.UserName,
 	}
 
-	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)
+	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
 	// dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Update()
 	if err != nil {
 		// err = gerror.Newf(`record insert failure %s`, err)

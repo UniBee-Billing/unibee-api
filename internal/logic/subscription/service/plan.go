@@ -76,7 +76,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanChannelStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusInActive,// todo mark
 		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitEmpty().Update()
+	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		ChannelProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
 	}
-	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		err = gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
 		one = nil

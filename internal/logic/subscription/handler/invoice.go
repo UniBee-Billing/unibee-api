@@ -74,7 +74,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			UniqueId:                       uniqueId,
 		}
 
-		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdateInvoiceByDetail record insert failure %s`, err)
 			return err
@@ -112,7 +112,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().ChannelPaymentId:               details.ChannelPaymentId,
-		}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -159,7 +159,7 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 			update, err := dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
 				dao.Invoice.Columns().SendPdf:   url,
 				dao.Invoice.Columns().GmtModify: gtime.Now(),
-			}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
+			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 			if err != nil {
 				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", update)
 			}
@@ -192,7 +192,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendStatus: 1,
 			dao.Invoice.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.Invoice.Columns().Id, one.Id).OmitEmpty().Update()
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
 		}

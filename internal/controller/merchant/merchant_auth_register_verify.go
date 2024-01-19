@@ -39,25 +39,25 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 
 	u := struct {
 		FirstName, LastName, Email, Password, Phone, Address, UserName string
-		MerchantId int64
+		MerchantId                                                     int64
 	}{}
 	err = json.Unmarshal([]byte(userStr.String()), &u)
 	// TOO: check err != nil
 
 	user := &entity.MerchantUserAccount{
-		FirstName: u.FirstName,
-		LastName:  u.LastName,
-		Email:     u.Email,
-		Password:  u.Password,
+		FirstName:  u.FirstName,
+		LastName:   u.LastName,
+		Email:      u.Email,
+		Password:   u.Password,
 		MerchantId: u.MerchantId,
 		// Phone:     u.Phone,
 		// Address:   u.Address,
-		UserName:  u.UserName,
+		UserName: u.UserName,
 	}
 
 	// race condition: email exist checking is too earlier
-	result, err := dao.MerchantUserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)
-	// dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Update()
+	result, err := dao.MerchantUserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
+	// dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Update()
 	if err != nil {
 		// err = gerror.Newf(`record insert failure %s`, err)
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
@@ -78,7 +78,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 
 func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error) {
 	// utility.Assert(len(req.Phone) > 0, "phone not null")
-	
+
 }
 
 */

@@ -50,16 +50,16 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	userStr, err := json.Marshal(
 		struct {
 			FirstName, LastName, Email, Password, Phone, Address, UserName string
-			MerchantId uint64
+			MerchantId                                                     uint64
 		}{
-			FirstName: req.FirstName,
-			LastName:  req.LastName,
-			Email:     req.Email,
-			Password:  hashAndSalt([]byte(req.Password)),
-			Phone:     req.Phone,
+			FirstName:  req.FirstName,
+			LastName:   req.LastName,
+			Email:      req.Email,
+			Password:   hashAndSalt([]byte(req.Password)),
+			Phone:      req.Phone,
 			MerchantId: req.MerchantId,
 			// Address:   req.Address,
-			UserName:  req.UserName,
+			UserName: req.UserName,
 		},
 	)
 	if err != nil {
@@ -93,7 +93,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	return &auth.RegisterRes{}, nil
 
 	/*
-		result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Insert(user)
+		result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
 		if err != nil {
 			err = gerror.Newf(`record insert failure %s`, err)
 			return

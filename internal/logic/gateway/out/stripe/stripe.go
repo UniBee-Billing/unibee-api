@@ -1266,7 +1266,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription trial will end for %d.", payChannel.Channel, subscription.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event &s for Sub %d.", payChannel.Channel, string(event.Type), subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
@@ -1284,7 +1284,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Invoice %s for %d.", payChannel.Channel, string(event.Type), stripeInvoice.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %d.", payChannel.Channel, string(event.Type), stripeInvoice.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
@@ -1302,7 +1302,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Payment %s for %d.", payChannel.Channel, string(event.Type), stripePayment.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %d.", payChannel.Channel, string(event.Type), stripePayment.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			//err := s.processInvoiceWebhook(r.Context(), string(event.Type), stripePayment, payChannel)

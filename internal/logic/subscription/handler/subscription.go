@@ -37,7 +37,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().TrialEnd:               details.TrialEnd,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().FirstPayTime:           firstPayTime,
-	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitEmpty().Update()
+	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}
