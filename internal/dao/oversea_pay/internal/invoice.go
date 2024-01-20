@@ -25,7 +25,6 @@ type InvoiceColumns struct {
 	UserId                         string // userId
 	SubscriptionId                 string // 订阅id（内部编号）
 	InvoiceId                      string // 发票ID（内部编号）
-	ChannelInvoiceId               string // 关联渠道发票 Id
 	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      string // 创建时间
 	TotalAmount                    string // 金额,单位：分
@@ -38,7 +37,6 @@ type InvoiceColumns struct {
 	SendStatus                     string // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string // pdf 文件地址
-	Data                           string // 渠道额外参数，JSON格式
 	GmtModify                      string // 修改时间
 	IsDeleted                      string //
 	Link                           string // invoice 链接（可用于支付）
@@ -51,12 +49,14 @@ type InvoiceColumns struct {
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
-	PeriodStart                    string // period_start
+	ChannelInvoiceId               string // 关联渠道发票 Id
+	PeriodStart                    string // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
 	PeriodEnd                      string // period_end
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
 	PaymentId                      string // PaymentId
 	RefundId                       string // refundId
+	Data                           string // 渠道额外参数，JSON格式
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -66,7 +66,6 @@ var invoiceColumns = InvoiceColumns{
 	UserId:                         "user_id",
 	SubscriptionId:                 "subscription_id",
 	InvoiceId:                      "invoice_id",
-	ChannelInvoiceId:               "channel_invoice_id",
 	UniqueId:                       "unique_id",
 	GmtCreate:                      "gmt_create",
 	TotalAmount:                    "total_amount",
@@ -79,7 +78,6 @@ var invoiceColumns = InvoiceColumns{
 	SendStatus:                     "send_status",
 	SendEmail:                      "send_email",
 	SendPdf:                        "send_pdf",
-	Data:                           "data",
 	GmtModify:                      "gmt_modify",
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
@@ -92,12 +90,14 @@ var invoiceColumns = InvoiceColumns{
 	SendTerms:                      "send_terms",
 	TotalAmountExcludingTax:        "total_amount_excluding_tax",
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
+	ChannelInvoiceId:               "channel_invoice_id",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
 	PeriodStartTime:                "period_start_time",
 	PeriodEndTime:                  "period_end_time",
 	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
+	Data:                           "data",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

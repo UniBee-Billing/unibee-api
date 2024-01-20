@@ -31,12 +31,12 @@ type SubscriptionPendingUpdate struct {
 	ChannelId            interface{} // 支付渠道Id
 	UserId               interface{} // userId
 	ChannelUpdateId      interface{} // 支付渠道订阅更新单id
-	Data                 interface{} // 渠道额外参数，JSON格式
-	ResponseData         interface{} // 渠道返回参数，JSON格式
 	GmtModify            *gtime.Time // 修改时间
 	IsDeleted            interface{} //
 	Link                 interface{} //
 	ChannelStatus        interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelInvoiceId     interface{} // 关联渠道发票 Id
 	MerchantUserId       interface{} // merchant_user_id
+	Data                 interface{} // 渠道额外参数，JSON格式
+	ResponseData         interface{} // 渠道返回参数，JSON格式
 }

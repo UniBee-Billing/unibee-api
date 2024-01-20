@@ -15,7 +15,6 @@ type Invoice struct {
 	UserId                         int64       `json:"userId"                         description:"userId"`                                                                // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                                            // 订阅id（内部编号）
 	InvoiceId                      string      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                                            // 发票ID（内部编号）
-	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	UniqueId                       string      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"`                // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time `json:"gmtCreate"                      description:"创建时间"`                                                                  // 创建时间
 	TotalAmount                    int64       `json:"totalAmount"                    description:"金额,单位：分"`                                                               // 金额,单位：分
@@ -28,7 +27,6 @@ type Invoice struct {
 	SendStatus                     int         `json:"sendStatus"                     description:"邮件发送状态，0-No | 1- YES"`                                                  // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string      `json:"sendEmail"                      description:"email 发送地址，取自 UserAccount 表 email"`                                     // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string      `json:"sendPdf"                        description:"pdf 文件地址"`                                                              // pdf 文件地址
-	Data                           string      `json:"data"                           description:"渠道额外参数，JSON格式"`                                                         // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time `json:"gmtModify"                      description:"修改时间"`                                                                  // 修改时间
 	IsDeleted                      int         `json:"isDeleted"                      description:""`                                                                      //
 	Link                           string      `json:"link"                           description:"invoice 链接（可用于支付）"`                                                     // invoice 链接（可用于支付）
@@ -41,10 +39,12 @@ type Invoice struct {
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                            // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        description:"金额(不含税）,单位：分"`                                                          // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" description:"Sub金额(不含税）,单位：分"`                                                       // Sub金额(不含税）,单位：分
-	PeriodStart                    int64       `json:"periodStart"                    description:"period_start"`                                                          // period_start
+	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
+	PeriodStart                    int64       `json:"periodStart"                    description:"period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期"`                       // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
 	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end"`                                                            // period_end
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                      //
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                      //
 	PaymentId                      string      `json:"paymentId"                      description:"PaymentId"`                                                             // PaymentId
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                              // refundId
+	Data                           string      `json:"data"                           description:"渠道额外参数，JSON格式"`                                                         // 渠道额外参数，JSON格式
 }

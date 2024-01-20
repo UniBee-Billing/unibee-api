@@ -20,6 +20,6 @@ type SubscriptionPlanChannel struct {
 	ChannelProductId     string      `json:"channelProductId"     description:"支付渠道product_Id"`                               // 支付渠道product_Id
 	ChannelPlanStatus    string      `json:"channelPlanStatus"    description:"channel_plan_status"`                          // channel_plan_status
 	ChannelProductStatus string      `json:"channelProductStatus" description:"channel_product_status"`                       // channel_product_status
-	Data                 string      `json:"data"                 description:"渠道额外参数，JSON格式"`                                // 渠道额外参数，JSON格式
 	IsDeleted            int         `json:"isDeleted"            description:""`                                             //
+	Data                 string      `json:"data"                 description:"渠道额外参数，JSON格式"`                                // 渠道额外参数，JSON格式
 }

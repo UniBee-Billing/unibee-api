@@ -26,17 +26,15 @@ type Subscription struct {
 	ChannelId              interface{} // 支付渠道Id
 	Status                 interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend
 	ChannelSubscriptionId  interface{} // 支付渠道订阅id
-	Data                   interface{} // 渠道额外参数，JSON格式
-	ResponseData           interface{} // 渠道返回参数，JSON格式
 	ChannelUserId          interface{} // 渠道用户 Id
 	CustomerName           interface{} // customer_name
 	CustomerEmail          interface{} // customer_email
 	IsDeleted              interface{} //
 	Link                   interface{} //
 	ChannelStatus          interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelLatestInvoiceId interface{} // 渠道最新发票 id
 	ChannelItemData        interface{} // channel_item_data
 	CancelAtPeriodEnd      interface{} // 是否在周期结束时取消，0-false | 1-true
+	ChannelLatestInvoiceId interface{} // 渠道最新发票 id
 	CurrentPeriodStart     interface{} // current_period_start
 	CurrentPeriodEnd       interface{} // current_period_end
 	CurrentPeriodStartTime *gtime.Time //
@@ -49,4 +47,6 @@ type Subscription struct {
 	VatNumber              interface{} //
 	TaxPercentage          interface{} // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          interface{} //
+	Data                   interface{} // 渠道额外参数，JSON格式
+	ResponseData           interface{} // 渠道返回参数，JSON格式
 }

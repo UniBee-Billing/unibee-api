@@ -17,7 +17,6 @@ type Invoice struct {
 	UserId                         interface{} // userId
 	SubscriptionId                 interface{} // 订阅id（内部编号）
 	InvoiceId                      interface{} // 发票ID（内部编号）
-	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time // 创建时间
 	TotalAmount                    interface{} // 金额,单位：分
@@ -30,7 +29,6 @@ type Invoice struct {
 	SendStatus                     interface{} // 邮件发送状态，0-No | 1- YES
 	SendEmail                      interface{} // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        interface{} // pdf 文件地址
-	Data                           interface{} // 渠道额外参数，JSON格式
 	GmtModify                      *gtime.Time // 修改时间
 	IsDeleted                      interface{} //
 	Link                           interface{} // invoice 链接（可用于支付）
@@ -43,10 +41,12 @@ type Invoice struct {
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
-	PeriodStart                    interface{} // period_start
+	ChannelInvoiceId               interface{} // 关联渠道发票 Id
+	PeriodStart                    interface{} // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
 	PeriodEnd                      interface{} // period_end
 	PeriodStartTime                *gtime.Time //
 	PeriodEndTime                  *gtime.Time //
 	PaymentId                      interface{} // PaymentId
 	RefundId                       interface{} // refundId
+	Data                           interface{} // 渠道额外参数，JSON格式
 }
