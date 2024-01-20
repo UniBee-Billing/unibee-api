@@ -987,20 +987,25 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		return nil, err
 	}
 
-	////todo mark EffectImmediate=false 获取的发票是之前最新的发票
-	queryParams := &stripe.InvoiceParams{}
-	queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
-	g.Log().Infof(ctx, "query invoice:", queryParamsResult)
+	if subscriptionRo.EffectImmediate {
+		queryParams := &stripe.InvoiceParams{}
+		queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
+		g.Log().Infof(ctx, "query invoice:", queryParamsResult)
 
-	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     queryParamsResult.ID,
-		ChannelSubscriptionStatus: string(updateSubscription.Status),
-		ChannelInvoiceId:          queryParamsResult.ID,
-		Data:                      utility.FormatToJsonString(updateSubscription),
-		LatestInvoiceLink:         queryParamsResult.HostedInvoiceURL,
-		Paid:                      queryParamsResult.Paid,
-	}, nil
+		return &ro.ChannelUpdateSubscriptionInternalResp{
+			Data:             utility.FormatToJsonString(updateSubscription),
+			ChannelInvoiceId: queryParamsResult.ID,
+			Link:             queryParamsResult.HostedInvoiceURL,
+			Paid:             queryParamsResult.Paid,
+		}, nil
+	} else {
+		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票
+		return &ro.ChannelUpdateSubscriptionInternalResp{
+			Data: utility.FormatToJsonString(updateSubscription),
+			Paid: true,
+		}, nil
+	}
 }
 
 // DoRemoteChannelSubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -1226,6 +1231,36 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
 	if err != nil {
 		return err
+	}
+	if payment.Invoice != nil {
+		invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
+		if err != nil {
+			return err
+		}
+		unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+		if unibSub == nil {
+			plan := query.GetPlanById(ctx, unibSub.PlanId)
+			planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
+			subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+			if err != nil {
+				return err
+			}
+			err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+				ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
+				ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
+				Status:                subDetails.Status,
+				ChannelStatus:         invoiceDetails.ChannelStatus,
+				Data:                  subDetails.Data,
+				ChannelItemData:       subDetails.ChannelItemData,
+				CancelAtPeriodEnd:     subDetails.CancelAtPeriodEnd,
+				CurrentPeriodEnd:      subDetails.CurrentPeriodEnd,
+				CurrentPeriodStart:    subDetails.CurrentPeriodStart,
+				TrialEnd:              subDetails.TrialEnd,
+			})
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }

@@ -483,7 +483,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			Plan:            plan,
 			Quantity:        req.Quantity,
 			OldPlan:         oldPlan,
-			AddonPlans:      addons, //todo mark oldAddonPlans 是否需要传
+			AddonPlans:      addons,
 			PlanChannel:     planChannel,
 			OldPlanChannel:  oldPlanChannel,
 			Subscription:    sub,
@@ -596,6 +596,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UserId:               prepare.Subscription.UserId,
 		SubscriptionId:       prepare.Subscription.SubscriptionId,
 		UpdateSubscriptionId: utility.CreateSubscriptionUpdateId(),
+		ChannelUpdateId:      prepare.Subscription.ChannelSubscriptionId,
 		Amount:               prepare.Subscription.Amount,
 		Currency:             prepare.Subscription.Currency,
 		PlanId:               prepare.Subscription.PlanId,
@@ -623,7 +624,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		Plan:            prepare.Plan,
 		Quantity:        prepare.Quantity,
 		OldPlan:         prepare.OldPlan,
-		AddonPlans:      prepare.Addons, //todo mark oldAddonPlans 是否需要传
+		AddonPlans:      prepare.Addons,
 		PlanChannel:     prepare.PlanChannel,
 		OldPlanChannel:  prepare.OldPlanChannel,
 		Subscription:    prepare.Subscription,
@@ -635,23 +636,21 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	pendingUpdateStatus := consts.SubStatusCreate
-
 	if updateRes.Paid {
-		//todo mark 当需要支付情况下，更新单状态更新逻辑完善
 		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		pendingUpdateStatus = consts.SubStatusActive
-		_, err := FinishPendingUpdateForSubscription(ctx, one)
+		_, err = handler.FinishPendingUpdateForSubscription(ctx, one)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	//更新 Subscription
+	//更新 SubscriptionPendingUpdate
 	update, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:           pendingUpdateStatus,
 		dao.SubscriptionPendingUpdate.Columns().ResponseData:     updateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.LatestInvoiceLink,
+		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.Link,
 		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
@@ -661,39 +660,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if rowAffected != 1 {
 		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
-	one.ChannelUpdateId = updateRes.ChannelSubscriptionId
-	one.Link = updateRes.LatestInvoiceLink
 	one.Status = pendingUpdateStatus
 	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
-	var PayLink = ""
-	if !updateRes.Paid {
-		PayLink = updateRes.LatestInvoiceLink
-	}
+	one.Link = updateRes.Link
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
 		Paid:                      updateRes.Paid,
-		Link:                      PayLink,
+		Link:                      updateRes.Link,
 	}, nil
-}
-
-func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
-		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
-		dao.Subscription.Columns().AddonData: one.UpdatedAddonData,
-		dao.Subscription.Columns().Amount:    one.UpdateAmount,
-		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
-	if err != nil {
-		return false, err
-	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
-	}
-	return true, nil
 }
 
 func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool, invoiceNow bool) error {

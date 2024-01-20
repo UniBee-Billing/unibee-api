@@ -9,6 +9,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 )
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
@@ -49,5 +50,61 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	}
 	//处理更新事件 todo mark
 
+	return nil
+}
+
+type SubscriptionPaymentSuccessWebHookReq struct {
+	ChannelSubscriptionId string                        `json:"channelSubscriptionId" `
+	ChannelInvoiceId      string                        `json:"channelInvoiceId"`
+	Status                consts.SubscriptionStatusEnum `json:"status"`
+	ChannelStatus         string                        `json:"channelStatus"                  ` // 货币
+	Data                  string                        `json:"data"`
+	ChannelItemData       string                        `json:"channelItemData"`
+	CancelAtPeriodEnd     bool                          `json:"cancelAtPeriodEnd"`
+	CurrentPeriodEnd      int64                         `json:"currentPeriodEnd"`
+	CurrentPeriodStart    int64                         `json:"currentPeriodStart"`
+	TrialEnd              int64                         `json:"trialEnd"`
+}
+
+func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
+		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
+		dao.Subscription.Columns().AddonData: one.UpdatedAddonData,
+		dao.Subscription.Columns().Amount:    one.UpdateAmount,
+		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
+	if err != nil {
+		return false, err
+	}
+	rowAffected, err := update.RowsAffected()
+	if rowAffected != 1 {
+		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
+	}
+	// todo mark sub 更新成功，生成 Invoice 发票、 timeline等后续流程
+	return true, nil
+}
+
+func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
+	//sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	pendingSubUpdate := query.GetSubscriptionPendingUpdateByChannelInvoiceId(ctx, req.ChannelInvoiceId)
+	if pendingSubUpdate != nil {
+		//更新单支付成功
+		_, err := FinishPendingUpdateForSubscription(ctx, pendingSubUpdate)
+		if err != nil {
+			return err
+		}
+		//更新 SubscriptionPendingUpdate
+		_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+			dao.SubscriptionPendingUpdate.Columns().Status:    consts.SubStatusActive,
+			dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, pendingSubUpdate.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+	} else {
+		// todo mark sub 进入下一周期，生成 Invoice 发票、 timeline等后续流程
+	}
 	return nil
 }

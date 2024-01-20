@@ -113,8 +113,8 @@ type SubscriptionUpdateReq struct {
 }
 type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
-	Paid                      bool                              `json:"paid"`
-	Link                      string                            `json:"link"`
+	Paid                      bool                              `json:"paid" dc:"是否已支付，false-未支付，需要支付，true-已支付或不需要支付"`
+	Link                      string                            `json:"link" dc:"支付链接，paid=false 输出"`
 }
 
 type SubscriptionListReq struct {
