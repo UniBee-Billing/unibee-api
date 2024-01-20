@@ -335,22 +335,22 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription   *entity.Subscription               `json:"subscription"`
-	Plan           *entity.SubscriptionPlan           `json:"planId"`
-	Quantity       int64                              `json:"quantity"`
-	PlanChannel    *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel     *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo   *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons         []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount    int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency       string                             `json:"currency"              `      // 货币
-	UserId         int64                              `json:"userId" `
-	OldPlan        *entity.SubscriptionPlan           `json:"oldPlan"`
-	OldPlanChannel *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
-	Invoice        *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	ProrationDate  int64                              `json:"prorationDate"`
-	PayImmediate   bool                               `json:"EffectImmediate"`
+	Subscription    *entity.Subscription               `json:"subscription"`
+	Plan            *entity.SubscriptionPlan           `json:"planId"`
+	Quantity        int64                              `json:"quantity"`
+	PlanChannel     *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel      *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo    *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams     []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons          []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount     int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency        string                             `json:"currency"              `      // 货币
+	UserId          int64                              `json:"userId" `
+	OldPlan         *entity.SubscriptionPlan           `json:"oldPlan"`
+	OldPlanChannel  *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
+	Invoice         *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	ProrationDate   int64                              `json:"prorationDate"`
+	EffectImmediate bool                               `json:"EffectImmediate"`
 }
 
 // SubscriptionUpdatePreview 默认行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
@@ -554,22 +554,22 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
-		Subscription:   sub,
-		Plan:           plan,
-		Quantity:       req.Quantity,
-		PlanChannel:    planChannel,
-		PayChannel:     payChannel,
-		MerchantInfo:   merchantInfo,
-		AddonParams:    req.AddonParams,
-		Addons:         addons,
-		Currency:       currency,
-		UserId:         sub.UserId,
-		OldPlan:        oldPlan,
-		OldPlanChannel: oldPlanChannel,
-		TotalAmount:    totalAmount,
-		Invoice:        invoice,
-		ProrationDate:  prorationDate,
-		PayImmediate:   effectImmediate,
+		Subscription:    sub,
+		Plan:            plan,
+		Quantity:        req.Quantity,
+		PlanChannel:     planChannel,
+		PayChannel:      payChannel,
+		MerchantInfo:    merchantInfo,
+		AddonParams:     req.AddonParams,
+		Addons:          addons,
+		Currency:        currency,
+		UserId:          sub.UserId,
+		OldPlan:         oldPlan,
+		OldPlanChannel:  oldPlanChannel,
+		TotalAmount:     totalAmount,
+		Invoice:         invoice,
+		ProrationDate:   prorationDate,
+		EffectImmediate: effectImmediate,
 	}, nil
 
 }
@@ -628,14 +628,14 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		OldPlanChannel:  prepare.OldPlanChannel,
 		Subscription:    prepare.Subscription,
 		ProrationDate:   req.ProrationDate,
-		EffectImmediate: prepare.PayImmediate,
+		EffectImmediate: prepare.EffectImmediate,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	pendingUpdateStatus := consts.SubStatusCreate
-	if updateRes.Paid {
+	if prepare.EffectImmediate && updateRes.Paid {
 		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		pendingUpdateStatus = consts.SubStatusActive
 		_, err = handler.FinishPendingUpdateForSubscription(ctx, one)

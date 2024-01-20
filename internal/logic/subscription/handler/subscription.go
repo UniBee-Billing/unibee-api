@@ -91,6 +91,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
 	//sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 	pendingSubUpdate := query.GetLatestUnFinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	// todo mark 处理逻辑需要优化，降级或者不马上生效的更新，是在下一周期生效
 	if pendingSubUpdate != nil {
 		//更新单支付成功
 		//todo mark 更新之前 先 校验渠道 Sub Plan 是否已更改， 金额是否一致
