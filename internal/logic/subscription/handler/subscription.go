@@ -90,7 +90,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 
 func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
 	//sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	pendingSubUpdate := query.GetLatestUnFinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	pendingSubUpdate := query.GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
 	// todo mark 处理逻辑需要优化，降级或者不马上生效的更新，是在下一周期生效
 	if pendingSubUpdate != nil {
 		//更新单支付成功
@@ -101,7 +101,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 		}
 		//更新 SubscriptionPendingUpdate
 		_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPendingUpdate.Columns().Status:    consts.SubStatusActive,
+			dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusInit,
 			dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, pendingSubUpdate.Id).OmitNil().Update()
 		if err != nil {
