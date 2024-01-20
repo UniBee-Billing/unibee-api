@@ -178,13 +178,12 @@ type ChannelUpdateSubscriptionPreviewInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {
-	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
-	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
-	ChannelInvoiceId          string                                   `json:"channelInvoiceId"`
-	Data                      string                                   `json:"data"`
-	LatestInvoiceLink         string                                   `json:"latestInvoiceLink"`
-	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
-	Paid                      bool                                     `json:"paid"`
+	ChannelSubscriptionId     string `json:"channelSubscriptionId"`
+	ChannelSubscriptionStatus string `json:"channelSubscriptionStatus"`
+	ChannelInvoiceId          string `json:"channelInvoiceId"`
+	Data                      string `json:"data"`
+	LatestInvoiceLink         string `json:"latestInvoiceLink"`
+	Paid                      bool   `json:"paid"`
 }
 
 type ChannelDetailSubscriptionInternalResp struct {

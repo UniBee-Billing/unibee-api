@@ -999,7 +999,6 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		ChannelInvoiceId:          queryParamsResult.ID,
 		Data:                      utility.FormatToJsonString(updateSubscription),
 		LatestInvoiceLink:         queryParamsResult.HostedInvoiceURL,
-		Status:                    0, //todo mark
 		Paid:                      queryParamsResult.Paid,
 	}, nil
 }
