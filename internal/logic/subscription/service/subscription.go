@@ -590,6 +590,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
+	// 需要取消其他 PendingUpdate，保证只有一个在 Create 状态
+	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.Id).WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:           prepare.MerchantInfo.Id,
 		ChannelId:            prepare.Subscription.ChannelId,
@@ -634,21 +643,10 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 
-	// todo mark 需要取消其他 PendingUpdate，保证只有一个在 Create 状态
-
-	pendingUpdateStatus := consts.PendingSubStatusCreate
-	if prepare.EffectImmediate && updateRes.Paid {
-		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
-		pendingUpdateStatus = consts.PendingSubStatusFinished
-		_, err = handler.FinishPendingUpdateForSubscription(ctx, one)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	//更新 SubscriptionPendingUpdate
-	update, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:          pendingUpdateStatus,
+	one.Link = updateRes.Link
+	one.Status = consts.PendingSubStatusCreate
+	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
 		dao.SubscriptionPendingUpdate.Columns().ResponseData:    updateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
 		dao.SubscriptionPendingUpdate.Columns().Link:            updateRes.Link,
@@ -657,12 +655,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
+
+	if prepare.EffectImmediate && updateRes.Paid {
+		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
+		one.Status = consts.PendingSubStatusFinished
+		_, err = handler.FinishPendingUpdateForSubscription(ctx, one)
+		if err != nil {
+			return nil, err
+		}
 	}
-	one.Status = pendingUpdateStatus
-	one.Link = updateRes.Link
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,

@@ -69,6 +69,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 }
 
 func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	// todo 使用事务
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
@@ -83,6 +84,13 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	rowAffected, err := update.RowsAffected()
 	if rowAffected != 1 {
 		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
+	}
+	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		return false, err
 	}
 	// todo mark sub 更新成功，生成 Proration Invoice 发票、 timeline等后续流程
 	return true, nil
