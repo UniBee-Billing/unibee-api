@@ -43,7 +43,7 @@ import (
 type Stripe struct {
 }
 
-func parseRefund(item *stripe.Refund) *ro.OutPayRefundRo {
+func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	var channelPaymentId string
 	if item.PaymentIntent != nil {
 		channelPaymentId = item.PaymentIntent.ID
@@ -66,7 +66,7 @@ func parseRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	}
 }
 
-func parsePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
+func parseStripePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
 	var channelInvoiceId string
 	if item.Invoice != nil {
 		channelInvoiceId = item.Invoice.ID
@@ -103,6 +103,99 @@ func parsePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
 	}
 }
 
+func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
+	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
+	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
+		strings.Compare(string(subscription.Status), "active") == 0 {
+		status = consts.SubStatusActive
+	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
+		strings.Compare(string(subscription.Status), "unpaid") == 0 {
+		status = consts.SubStatusCreate
+	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		status = consts.SubStatusExpired
+	} else if strings.Compare(string(subscription.Status), "pass_due") == 0 {
+		status = consts.SubStatusPendingInActive
+	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
+		status = consts.SubStatusSuspended
+	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
+		status = consts.SubStatusCancelled
+	}
+
+	return &ro.ChannelDetailSubscriptionInternalResp{
+		Status:                 status,
+		ChannelSubscriptionId:  subscription.ID,
+		ChannelStatus:          string(subscription.Status),
+		Data:                   utility.FormatToJsonString(subscription),
+		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
+		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
+		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
+		CurrentPeriodStart:     subscription.CurrentPeriodStart,
+		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
+		TrialEnd:               subscription.TrialEnd,
+	}
+}
+
+func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
+	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	if strings.Compare(string(detail.Status), "draft") == 0 {
+		status = consts.InvoiceStatusPending
+	} else if strings.Compare(string(detail.Status), "open") == 0 {
+		status = consts.InvoiceStatusProcessing
+	} else if strings.Compare(string(detail.Status), "paid") == 0 {
+		status = consts.InvoiceStatusPaid
+	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
+		status = consts.InvoiceStatusFailed
+	} else if strings.Compare(string(detail.Status), "void") == 0 {
+		status = consts.InvoiceStatusCancelled
+	}
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	for _, line := range detail.Lines.Data {
+		var start int64 = 0
+		var end int64 = 0
+		if line.Period != nil {
+			start = line.Period.Start
+			end = line.Period.End
+		}
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               strings.ToUpper(string(line.Currency)),
+			Amount:                 line.Amount,
+			AmountExcludingTax:     line.AmountExcludingTax,
+			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+			Description:            line.Description,
+			Proration:              line.Proration,
+			Quantity:               line.Quantity,
+			PeriodStart:            start,
+			PeriodEnd:              end,
+		})
+	}
+
+	var channelPaymentId string
+	if detail.PaymentIntent != nil {
+		channelPaymentId = detail.PaymentIntent.ID
+	}
+
+	return &ro.ChannelDetailInvoiceInternalResp{
+		ChannelSubscriptionId:          detail.Subscription.ID,
+		TotalAmount:                    detail.Total,
+		TotalAmountExcludingTax:        detail.TotalExcludingTax,
+		TaxAmount:                      detail.Tax,
+		SubscriptionAmount:             detail.Subtotal,
+		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		Lines:                          invoiceItems,
+		ChannelId:                      channelId,
+		Status:                         status,
+		ChannelUserId:                  detail.Customer.ID,
+		Link:                           detail.HostedInvoiceURL,
+		ChannelStatus:                  string(detail.Status),
+		ChannelInvoiceId:               detail.ID,
+		ChannelInvoicePdf:              detail.InvoicePDF,
+		PeriodStart:                    detail.PeriodStart,
+		PeriodEnd:                      detail.PeriodEnd,
+		ChannelPaymentId:               channelPaymentId,
+	}
+}
+
 func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 gateway not found")
 	stripe.Key = payChannel.ChannelSecret
@@ -115,7 +208,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
 	var list []*ro.OutPayRo
 	for _, item := range paymentList.PaymentIntentList().Data {
-		list = append(list, parsePayment(item))
+		list = append(list, parseStripePayment(item))
 	}
 
 	return list, nil
@@ -133,7 +226,7 @@ func (s Stripe) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 	log.SaveChannelHttpLog("DoRemoteChannelRefundList", params, refundList, err, "", nil, payChannel)
 	var list []*ro.OutPayRefundRo
 	for _, item := range refundList.RefundList().Data {
-		list = append(list, parseRefund(item))
+		list = append(list, parseStripeRefund(item))
 	}
 
 	return list, nil
@@ -150,7 +243,7 @@ func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *en
 		return nil, err
 	}
 
-	return parsePayment(response), nil
+	return parseStripePayment(response), nil
 }
 
 func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
@@ -163,7 +256,7 @@ func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *ent
 	if err != nil {
 		return nil, err
 	}
-	return parseRefund(response), nil
+	return parseStripeRefund(response), nil
 }
 
 func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
@@ -242,67 +335,6 @@ func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel
 		Description:          response.Description,
 		Email:                response.Email,
 	}, nil
-}
-
-func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
-	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
-	if strings.Compare(string(detail.Status), "draft") == 0 {
-		status = consts.InvoiceStatusPending
-	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		status = consts.InvoiceStatusProcessing
-	} else if strings.Compare(string(detail.Status), "paid") == 0 {
-		status = consts.InvoiceStatusPaid
-	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		status = consts.InvoiceStatusFailed
-	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		status = consts.InvoiceStatusCancelled
-	}
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
-	for _, line := range detail.Lines.Data {
-		var start int64 = 0
-		var end int64 = 0
-		if line.Period != nil {
-			start = line.Period.Start
-			end = line.Period.End
-		}
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-			Currency:               strings.ToUpper(string(line.Currency)),
-			Amount:                 line.Amount,
-			AmountExcludingTax:     line.AmountExcludingTax,
-			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
-			Description:            line.Description,
-			Proration:              line.Proration,
-			Quantity:               line.Quantity,
-			PeriodStart:            start,
-			PeriodEnd:              end,
-		})
-	}
-
-	var channelPaymentId string
-	if detail.PaymentIntent != nil {
-		channelPaymentId = detail.PaymentIntent.ID
-	}
-
-	return &ro.ChannelDetailInvoiceInternalResp{
-		ChannelSubscriptionId:          detail.Subscription.ID,
-		TotalAmount:                    detail.Total,
-		TotalAmountExcludingTax:        detail.TotalExcludingTax,
-		TaxAmount:                      detail.Tax,
-		SubscriptionAmount:             detail.Subtotal,
-		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
-		Currency:                       strings.ToUpper(string(detail.Currency)),
-		Lines:                          invoiceItems,
-		ChannelId:                      channelId,
-		Status:                         status,
-		ChannelUserId:                  detail.Customer.ID,
-		Link:                           detail.HostedInvoiceURL,
-		ChannelStatus:                  string(detail.Status),
-		ChannelInvoiceId:               detail.ID,
-		ChannelInvoicePdf:              detail.InvoicePDF,
-		PeriodStart:                    detail.PeriodStart,
-		PeriodEnd:                      detail.PeriodEnd,
-		ChannelPaymentId:               channelPaymentId,
-	}
 }
 
 func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.OverseaPayChannel, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
@@ -1000,39 +1032,7 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	//	status = consts.SubStatusCancelled
 	//}
 
-	return parseStripeSubscriptionDetail(response), nil
-}
-
-func parseStripeSubscriptionDetail(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
-	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
-	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
-		strings.Compare(string(subscription.Status), "active") == 0 {
-		status = consts.SubStatusActive
-	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
-		strings.Compare(string(subscription.Status), "unpaid") == 0 {
-		status = consts.SubStatusCreate
-	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
-		status = consts.SubStatusExpired
-	} else if strings.Compare(string(subscription.Status), "pass_due") == 0 {
-		status = consts.SubStatusPendingInActive
-	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
-		status = consts.SubStatusSuspended
-	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
-		status = consts.SubStatusCancelled
-	}
-
-	return &ro.ChannelDetailSubscriptionInternalResp{
-		Status:                 status,
-		ChannelSubscriptionId:  subscription.ID,
-		ChannelStatus:          string(subscription.Status),
-		Data:                   utility.FormatToJsonString(subscription),
-		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
-		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
-		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
-		CurrentPeriodStart:     subscription.CurrentPeriodStart,
-		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
-		TrialEnd:               subscription.TrialEnd,
-	}
+	return parseStripeSubscription(response), nil
 }
 
 // DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks
@@ -1384,7 +1384,7 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, unibSub.ChannelUserId) != 0 {
 						response = "customId not match"
 					} else {
-						detail := parseStripeSubscriptionDetail(result.SubscriptionSearchResult().Data[0])
+						detail := parseStripeSubscription(result.SubscriptionSearchResult().Data[0])
 						err := handler.UpdateSubWithChannelDetailBack(r.Context(), unibSub, detail)
 						if err != nil {
 							response = fmt.Sprintf("%v", err)
