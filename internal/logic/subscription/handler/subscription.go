@@ -54,6 +54,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 }
 
 type SubscriptionPaymentSuccessWebHookReq struct {
+	ChannelPaymentId      string                        `json:"channelPaymentId" `
 	ChannelSubscriptionId string                        `json:"channelSubscriptionId" `
 	ChannelInvoiceId      string                        `json:"channelInvoiceId"`
 	Status                consts.SubscriptionStatusEnum `json:"status"`

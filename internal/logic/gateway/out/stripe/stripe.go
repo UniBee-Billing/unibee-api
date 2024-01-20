@@ -1246,6 +1246,7 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 				return err
 			}
 			err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+				ChannelPaymentId:      details.ChannelPaymentId,
 				ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
 				ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
 				Status:                subDetails.Status,
