@@ -634,7 +634,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 
-	// todo mark 需要取消其他 PendingUpdate
+	// todo mark 需要取消其他 PendingUpdate，保证只有一个在进行中
 
 	pendingUpdateStatus := consts.SubStatusCreate
 	if prepare.EffectImmediate && updateRes.Paid {
