@@ -27,22 +27,22 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err == nil {
 			return &subscription.UserSubscriptionDetailRes{
-				User:                       user,
-				Subscription:               detail.Subscription,
-				Plan:                       detail.Plan,
-				Channel:                    detail.Channel,
-				Addons:                     detail.Addons,
-				SubscriptionPendingUpdates: detail.SubscriptionPendingUpdates,
+				User:                      user,
+				Subscription:              detail.Subscription,
+				Plan:                      detail.Plan,
+				Channel:                   detail.Channel,
+				Addons:                    detail.Addons,
+				SubscriptionPendingUpdate: detail.SubscriptionPendingUpdate,
 			}, nil
 		}
 	}
 
 	return &subscription.UserSubscriptionDetailRes{
-		User:                       user,
-		Subscription:               nil,
-		Plan:                       nil,
-		Channel:                    nil,
-		Addons:                     nil,
-		SubscriptionPendingUpdates: nil,
+		User:                      user,
+		Subscription:              nil,
+		Plan:                      nil,
+		Channel:                   nil,
+		Addons:                    nil,
+		SubscriptionPendingUpdate: nil,
 	}, nil
 }

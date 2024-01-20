@@ -67,13 +67,17 @@ func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId s
 	return addons
 }
 
-func GetSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) []*entity.SubscriptionPendingUpdate {
-	var list []*entity.SubscriptionPendingUpdate
-	err := dao.SubscriptionPendingUpdate.Ctx(ctx).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).OmitEmpty().Scan(&list)
+func GetCreatedSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) *entity.SubscriptionPendingUpdate {
+	var one *entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).
+		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
+		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
-	return list
+	return one
 }
 
 func GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {

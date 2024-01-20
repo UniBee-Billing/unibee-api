@@ -69,12 +69,12 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		user.Password = ""
 	}
 	return &subscription.SubscriptionDetailRes{
-		User:                       user,
-		Subscription:               one,
-		Channel:                    ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
-		Plan:                       query.GetPlanById(ctx, one.PlanId),
-		Addons:                     query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
-		SubscriptionPendingUpdates: query.GetSubscriptionPendingUpdatesBySubscriptionId(ctx, one.SubscriptionId),
+		User:                      user,
+		Subscription:              one,
+		Channel:                   ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
+		Plan:                      query.GetPlanById(ctx, one.PlanId),
+		Addons:                    query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
+		SubscriptionPendingUpdate: query.GetCreatedSubscriptionPendingUpdatesBySubscriptionId(ctx, one.SubscriptionId),
 	}, nil
 }
 
