@@ -24,6 +24,7 @@ type SubscriptionPendingUpdateColumns struct {
 	MerchantId           string // 商户Id
 	SubscriptionId       string // 订阅id（内部编号）
 	UpdateSubscriptionId string // 升级单ID（内部编号）
+	ChannelUpdateId      string // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
 	GmtCreate            string // 创建时间
 	Amount               string // 金额,单位：分
 	Status               string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
@@ -38,12 +39,10 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdatedAddonData     string // 升级到plan addon json data
 	ChannelId            string // 支付渠道Id
 	UserId               string // userId
-	ChannelUpdateId      string // 支付渠道订阅更新单id
 	GmtModify            string // 修改时间
 	IsDeleted            string //
 	Link                 string //
 	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelInvoiceId     string // 关联渠道发票 Id
 	MerchantUserId       string // merchant_user_id
 	Data                 string // 渠道额外参数，JSON格式
 	ResponseData         string // 渠道返回参数，JSON格式
@@ -55,6 +54,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	MerchantId:           "merchant_id",
 	SubscriptionId:       "subscription_id",
 	UpdateSubscriptionId: "update_subscription_id",
+	ChannelUpdateId:      "channel_update_id",
 	GmtCreate:            "gmt_create",
 	Amount:               "amount",
 	Status:               "status",
@@ -69,12 +69,10 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UpdatedAddonData:     "updated_addon_data",
 	ChannelId:            "channel_id",
 	UserId:               "user_id",
-	ChannelUpdateId:      "channel_update_id",
 	GmtModify:            "gmt_modify",
 	IsDeleted:            "is_deleted",
 	Link:                 "link",
 	ChannelStatus:        "channel_status",
-	ChannelInvoiceId:     "channel_invoice_id",
 	MerchantUserId:       "merchant_user_id",
 	Data:                 "data",
 	ResponseData:         "response_data",

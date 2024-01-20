@@ -57,6 +57,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	ChannelPaymentId      string                        `json:"channelPaymentId" `
 	ChannelSubscriptionId string                        `json:"channelSubscriptionId" `
 	ChannelInvoiceId      string                        `json:"channelInvoiceId"`
+	ChannelUpdateId       string                        `json:"channelUpdateId"`
 	Status                consts.SubscriptionStatusEnum `json:"status"`
 	ChannelStatus         string                        `json:"channelStatus"                  ` // 货币
 	Data                  string                        `json:"data"`
@@ -83,15 +84,16 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	if rowAffected != 1 {
 		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
 	}
-	// todo mark sub 更新成功，生成 Invoice 发票、 timeline等后续流程
+	// todo mark sub 更新成功，生成 Proration Invoice 发票、 timeline等后续流程
 	return true, nil
 }
 
 func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
 	//sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	pendingSubUpdate := query.GetSubscriptionPendingUpdateByChannelInvoiceId(ctx, req.ChannelInvoiceId)
+	pendingSubUpdate := query.GetLatestUnFinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
 	if pendingSubUpdate != nil {
 		//更新单支付成功
+		//todo mark 更新之前 先 校验渠道 Sub Plan 是否已更改， 金额是否一致
 		_, err := FinishPendingUpdateForSubscription(ctx, pendingSubUpdate)
 		if err != nil {
 			return err
@@ -105,7 +107,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			return err
 		}
 	} else {
-		// todo mark sub 进入下一周期，生成 Invoice 发票、 timeline等后续流程
+		// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
 	}
 	return nil
 }

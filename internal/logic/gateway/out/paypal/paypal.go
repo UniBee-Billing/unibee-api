@@ -303,11 +303,11 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		}
 	}
 	return &ro.ChannelUpdateSubscriptionInternalResp{
-		ChannelSubscriptionId:     updateSubscription.ID,
-		ChannelSubscriptionStatus: string(updateSubscription.SubscriptionStatus),
-		Data:                      string(jsonData),
-		Link:                      link,
-	}, nil //todo mark
+		ChannelUpdateId: updateSubscription.ID,
+		Data:            string(jsonData),
+		Link:            link,
+		Paid:            false,
+	}, nil
 }
 
 func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {

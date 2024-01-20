@@ -76,9 +76,16 @@ func GetSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscrip
 	return list
 }
 
-func GetSubscriptionPendingUpdateByChannelInvoiceId(ctx context.Context, channelInvoiceId string) *entity.SubscriptionPendingUpdate {
+func GetLatestUnFinishedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(channelUpdateId) == 0 {
+		return nil
+	}
 	var one *entity.SubscriptionPendingUpdate
-	err := dao.SubscriptionPendingUpdate.Ctx(ctx).Where(dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId, channelInvoiceId).OmitEmpty().Scan(&one)
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.SubStatusCreate).
+		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}

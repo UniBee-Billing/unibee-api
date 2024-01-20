@@ -596,7 +596,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UserId:               prepare.Subscription.UserId,
 		SubscriptionId:       prepare.Subscription.SubscriptionId,
 		UpdateSubscriptionId: utility.CreateSubscriptionUpdateId(),
-		ChannelUpdateId:      prepare.Subscription.ChannelSubscriptionId,
 		Amount:               prepare.Subscription.Amount,
 		Currency:             prepare.Subscription.Currency,
 		PlanId:               prepare.Subscription.PlanId,
@@ -647,11 +646,11 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	//更新 SubscriptionPendingUpdate
 	update, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:           pendingUpdateStatus,
-		dao.SubscriptionPendingUpdate.Columns().ResponseData:     updateRes.Data,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify:        gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Link:             updateRes.Link,
-		dao.SubscriptionPendingUpdate.Columns().ChannelInvoiceId: updateRes.ChannelInvoiceId,
+		dao.SubscriptionPendingUpdate.Columns().Status:          pendingUpdateStatus,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData:    updateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Link:            updateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId: updateRes.ChannelUpdateId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
@@ -661,7 +660,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, gerror.Newf("SubscriptionPendingUpdate update err:%s", update)
 	}
 	one.Status = pendingUpdateStatus
-	one.ChannelInvoiceId = updateRes.ChannelInvoiceId
 	one.Link = updateRes.Link
 
 	return &subscription.SubscriptionUpdateRes{

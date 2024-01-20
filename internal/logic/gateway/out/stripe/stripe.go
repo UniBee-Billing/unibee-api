@@ -989,15 +989,15 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 
 	if subscriptionRo.EffectImmediate {
 		queryParams := &stripe.InvoiceParams{}
-		queryParamsResult, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, queryParamsResult, err, "GetInvoice", nil, channelEntity)
-		g.Log().Infof(ctx, "query invoice:", queryParamsResult)
+		newInvoice, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
+		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, channelEntity)
+		g.Log().Infof(ctx, "query new invoice:", newInvoice)
 
 		return &ro.ChannelUpdateSubscriptionInternalResp{
-			Data:             utility.FormatToJsonString(updateSubscription),
-			ChannelInvoiceId: queryParamsResult.ID,
-			Link:             queryParamsResult.HostedInvoiceURL,
-			Paid:             queryParamsResult.Paid,
+			Data:            utility.FormatToJsonString(updateSubscription),
+			ChannelUpdateId: newInvoice.ID,
+			Link:            newInvoice.HostedInvoiceURL,
+			Paid:            newInvoice.Paid,
 		}, nil
 	} else {
 		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票
@@ -1249,6 +1249,7 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 				ChannelPaymentId:      details.ChannelPaymentId,
 				ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
 				ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
+				ChannelUpdateId:       invoiceDetails.ChannelInvoiceId,
 				Status:                subDetails.Status,
 				ChannelStatus:         invoiceDetails.ChannelStatus,
 				Data:                  subDetails.Data,
