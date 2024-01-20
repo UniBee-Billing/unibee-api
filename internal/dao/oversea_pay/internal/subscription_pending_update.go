@@ -27,7 +27,7 @@ type SubscriptionPendingUpdateColumns struct {
 	ChannelUpdateId      string // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
 	GmtCreate            string // 创建时间
 	Amount               string // 金额,单位：分
-	Status               string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend
+	Status               string // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	UpdateAmount         string // 升级到金额,单位：分
 	Currency             string // 货币
 	UpdateCurrency       string // 升级到货币
