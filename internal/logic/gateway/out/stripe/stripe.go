@@ -833,8 +833,8 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		SubscriptionItems: items,
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
-	result, err := invoice.Upcoming(params)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdateProrationPreview", params, result, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	detail, err := invoice.Upcoming(params)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdateProrationPreview", params, detail, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -848,15 +848,76 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	//		Proration:   line.Proration,
 	//	})
 	//}
-	// todo mark 拆开 invoice Proration into invoice,nextPeriodInvoice
+
+	// 拆开 invoice Proration into invoice,nextPeriodInvoice
+	var currentInvoiceItems []*ro.ChannelDetailInvoiceItem
+	var nextInvoiceItems []*ro.ChannelDetailInvoiceItem
+	var currentSubAmount int64 = 0
+	var currentSubAmountExcludingTax int64 = 0
+	var nextSubAmount int64 = 0
+	var nextSubAmountExcludingTax int64 = 0
+	for _, line := range detail.Lines.Data {
+		if line.Proration {
+			currentInvoiceItems = append(currentInvoiceItems, &ro.ChannelDetailInvoiceItem{
+				Amount:                 line.Amount,
+				AmountExcludingTax:     line.AmountExcludingTax,
+				UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+				Description:            line.Description,
+				Proration:              line.Proration,
+				Quantity:               line.Quantity,
+				Currency:               strings.ToUpper(string(line.Currency)),
+			})
+			currentSubAmount = currentSubAmount + line.Amount
+			currentSubAmountExcludingTax = currentSubAmountExcludingTax + line.AmountExcludingTax
+		} else {
+			nextInvoiceItems = append(nextInvoiceItems, &ro.ChannelDetailInvoiceItem{
+				Amount:                 line.Amount,
+				AmountExcludingTax:     line.AmountExcludingTax,
+				UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+				Description:            line.Description,
+				Proration:              line.Proration,
+				Quantity:               line.Quantity,
+				Currency:               strings.ToUpper(string(line.Currency)),
+			})
+			nextSubAmount = nextSubAmount + line.Amount
+			nextSubAmountExcludingTax = nextSubAmountExcludingTax + line.AmountExcludingTax
+		}
+	}
+
+	currentInvoice := &ro.ChannelDetailInvoiceInternalResp{
+		TotalAmount:                    currentSubAmount,
+		TotalAmountExcludingTax:        currentSubAmountExcludingTax,
+		TaxAmount:                      currentSubAmount - currentSubAmountExcludingTax,
+		SubscriptionAmount:             currentSubAmount,
+		SubscriptionAmountExcludingTax: currentSubAmountExcludingTax,
+		Lines:                          currentInvoiceItems,
+		ChannelSubscriptionId:          detail.Subscription.ID,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		ChannelId:                      int64(channelEntity.Id),
+		ChannelUserId:                  detail.Customer.ID,
+	}
+
+	nextPeriodInvoice := &ro.ChannelDetailInvoiceInternalResp{
+		TotalAmount:                    nextSubAmount,
+		TotalAmountExcludingTax:        nextSubAmountExcludingTax,
+		TaxAmount:                      nextSubAmount - nextSubAmountExcludingTax,
+		SubscriptionAmount:             nextSubAmount,
+		SubscriptionAmountExcludingTax: nextSubAmountExcludingTax,
+		Lines:                          nextInvoiceItems,
+		ChannelSubscriptionId:          detail.Subscription.ID,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		ChannelId:                      int64(channelEntity.Id),
+		ChannelUserId:                  detail.Customer.ID,
+	}
 
 	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
-		Data:              utility.FormatToJsonString(result),
-		TotalAmount:       result.Total,
-		Currency:          strings.ToUpper(string(result.Currency)),
-		ProrationDate:     updateUnixTime,
-		Invoice:           parseStripeInvoice(result, int64(channelEntity.Id)),
-		NextPeriodInvoice: nil,
+		Data:          utility.FormatToJsonString(detail),
+		TotalAmount:   currentInvoice.TotalAmount,
+		Currency:      strings.ToUpper(string(detail.Currency)),
+		ProrationDate: updateUnixTime,
+		Invoice:       currentInvoice,
+		//Invoice: parseStripeInvoice(detail, int64(channelEntity.Id)),
+		NextPeriodInvoice: nextPeriodInvoice,
 	}, nil
 }
 
