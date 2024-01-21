@@ -41,7 +41,8 @@ type SubscriptionPendingUpdateColumns struct {
 	UserId               string // userId
 	GmtModify            string // 修改时间
 	IsDeleted            string //
-	Link                 string //
+	Paid                 string // 是否已支付，0-否，1-是
+	Link                 string // 支付链接
 	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	MerchantUserId       string // merchant_user_id
 	Data                 string // 渠道额外参数，JSON格式
@@ -73,6 +74,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UserId:               "user_id",
 	GmtModify:            "gmt_modify",
 	IsDeleted:            "is_deleted",
+	Paid:                 "paid",
 	Link:                 "link",
 	ChannelStatus:        "channel_status",
 	MerchantUserId:       "merchant_user_id",

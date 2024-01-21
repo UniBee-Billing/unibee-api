@@ -651,6 +651,10 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
+	var PaidInt = 0
+	if updateRes.Paid {
+		PaidInt = 1
+	}
 
 	one.Link = updateRes.Link
 	one.Status = consts.PendingSubStatusCreate
@@ -658,6 +662,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
 		dao.SubscriptionPendingUpdate.Columns().ResponseData:    updateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
 		dao.SubscriptionPendingUpdate.Columns().Link:            updateRes.Link,
 		dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId: updateRes.ChannelUpdateId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
