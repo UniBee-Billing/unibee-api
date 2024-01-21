@@ -36,4 +36,6 @@ type SubscriptionPendingUpdate struct {
 	MerchantUserId       int64       `json:"merchantUserId"       description:"merchant_user_id"`                                                                                                                                       // merchant_user_id
 	Data                 string      `json:"data"                 description:"渠道额外参数，JSON格式"`                                                                                                                                          // 渠道额外参数，JSON格式
 	ResponseData         string      `json:"responseData"         description:"渠道返回参数，JSON格式"`                                                                                                                                          // 渠道返回参数，JSON格式
+	EffectImmediate      int         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                                                                                                                                         // 是否马上生效，0-否，1-是
+	EffectTime           int64       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`                                                                                                                   // effect_immediate=0, 预计生效时间 unit_time
 }

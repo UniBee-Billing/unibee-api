@@ -599,6 +599,13 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 
+	var effectImmediate = 0
+	var effectTime = prepare.Subscription.CurrentPeriodEnd
+	if prepare.EffectImmediate {
+		effectImmediate = 1
+		effectTime = gtime.Now().Timestamp()
+	}
+
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:           prepare.MerchantInfo.Id,
 		ChannelId:            prepare.Subscription.ChannelId,
@@ -618,6 +625,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		Status:               consts.PendingSubStatusInit,
 		Data:                 "", //额外参数配置
 		MerchantUserId:       merchantUserId,
+		EffectImmediate:      effectImmediate,
+		EffectTime:           effectTime,
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)

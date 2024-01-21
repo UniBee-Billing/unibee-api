@@ -38,4 +38,6 @@ type SubscriptionPendingUpdate struct {
 	MerchantUserId       interface{} // merchant_user_id
 	Data                 interface{} // 渠道额外参数，JSON格式
 	ResponseData         interface{} // 渠道返回参数，JSON格式
+	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
+	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
 }

@@ -46,6 +46,8 @@ type SubscriptionPendingUpdateColumns struct {
 	MerchantUserId       string // merchant_user_id
 	Data                 string // 渠道额外参数，JSON格式
 	ResponseData         string // 渠道返回参数，JSON格式
+	EffectImmediate      string // 是否马上生效，0-否，1-是
+	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -76,6 +78,8 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	MerchantUserId:       "merchant_user_id",
 	Data:                 "data",
 	ResponseData:         "response_data",
+	EffectImmediate:      "effect_immediate",
+	EffectTime:           "effect_time",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.
