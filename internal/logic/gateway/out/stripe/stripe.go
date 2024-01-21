@@ -848,6 +848,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	//		Proration:   line.Proration,
 	//	})
 	//}
+	// todo mark 拆开 invoice Proration into invoice,nextPeriodInvoice
 
 	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
 		Data:              utility.FormatToJsonString(result),
