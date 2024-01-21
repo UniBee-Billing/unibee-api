@@ -1230,15 +1230,13 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 	if err != nil {
 		return err
 	}
-	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
-	if err != nil {
-		return err
-	}
 	if payment.Invoice != nil {
 		invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
 		if err != nil {
 			return err
 		}
+		details.ChannelInvoiceDetail = invoiceDetails
+		details.ChannelUpdateId = invoiceDetails.ChannelInvoiceId
 		unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
 		if unibSub == nil {
 			plan := query.GetPlanById(ctx, unibSub.PlanId)
@@ -1247,25 +1245,45 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 			if err != nil {
 				return err
 			}
-			err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
-				ChannelPaymentId:      details.ChannelPaymentId,
-				ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
-				ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
-				ChannelUpdateId:       invoiceDetails.ChannelInvoiceId,
-				Status:                subDetails.Status,
-				ChannelStatus:         invoiceDetails.ChannelStatus,
-				Data:                  subDetails.Data,
-				ChannelItemData:       subDetails.ChannelItemData,
-				CancelAtPeriodEnd:     subDetails.CancelAtPeriodEnd,
-				CurrentPeriodEnd:      subDetails.CurrentPeriodEnd,
-				CurrentPeriodStart:    subDetails.CurrentPeriodStart,
-				TrialEnd:              subDetails.TrialEnd,
-			})
-			if err != nil {
-				return err
-			}
+			details.ChannelSubscriptionDetail = subDetails
 		}
 	}
+	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
+	if err != nil {
+		return err
+	}
+	//if payment.Invoice != nil {
+	//	invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+	//	if unibSub == nil {
+	//		plan := query.GetPlanById(ctx, unibSub.PlanId)
+	//		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
+	//		subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+	//			ChannelPaymentId:      details.ChannelPaymentId,
+	//			ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
+	//			ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
+	//			ChannelUpdateId:       invoiceDetails.ChannelInvoiceId,
+	//			Status:                subDetails.Status,
+	//			ChannelStatus:         invoiceDetails.ChannelStatus,
+	//			Data:                  subDetails.Data,
+	//			ChannelItemData:       subDetails.ChannelItemData,
+	//			CancelAtPeriodEnd:     subDetails.CancelAtPeriodEnd,
+	//			CurrentPeriodEnd:      subDetails.CurrentPeriodEnd,
+	//			CurrentPeriodStart:    subDetails.CurrentPeriodStart,
+	//			TrialEnd:              subDetails.TrialEnd,
+	//		})
+	//		if err != nil {
+	//			return err
+	//		}
+	//	}
+	//}
 	return nil
 }
 

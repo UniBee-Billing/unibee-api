@@ -13,6 +13,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/payment/event"
+	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -280,7 +281,31 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
 	_, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
-	return err
+	if err != nil {
+		return err
+	}
+
+	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
+		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+			ChannelPaymentId:      details.ChannelPaymentId,
+			ChannelSubscriptionId: details.ChannelInvoiceDetail.ChannelSubscriptionId,
+			ChannelInvoiceId:      details.ChannelInvoiceDetail.ChannelInvoiceId,
+			ChannelUpdateId:       details.ChannelUpdateId,
+			Status:                details.ChannelSubscriptionDetail.Status,
+			ChannelStatus:         details.ChannelInvoiceDetail.ChannelStatus,
+			Data:                  details.ChannelSubscriptionDetail.Data,
+			ChannelItemData:       details.ChannelSubscriptionDetail.ChannelItemData,
+			CancelAtPeriodEnd:     details.ChannelSubscriptionDetail.CancelAtPeriodEnd,
+			CurrentPeriodEnd:      details.ChannelSubscriptionDetail.CurrentPeriodEnd,
+			CurrentPeriodStart:    details.ChannelSubscriptionDetail.CurrentPeriodStart,
+			TrialEnd:              details.ChannelSubscriptionDetail.TrialEnd,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, uniqueId string) (*entity.Payment, error) {
