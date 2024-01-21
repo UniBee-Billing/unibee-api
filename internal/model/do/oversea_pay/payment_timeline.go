@@ -11,20 +11,19 @@ import (
 
 // PaymentTimeline is the golang structure of table payment_timeline for DAO operations like Where/Data.
 type PaymentTimeline struct {
-	g.Meta          `orm:"table:payment_timeline, do:true"`
-	Id              interface{} // 主键id
-	UserId          interface{} // user_id
-	MerchantUserId  interface{} // merchant_user_id
-	OpenApiId       interface{} // 使用的开放平台配置Id
-	TerminalIp      interface{} // terminal_ip
-	BizType         interface{} // biz_type=1，Payment表
-	BizId           interface{} // biz_type=1，pay；
-	Fee             interface{} // 金额（分）
-	EventType       interface{} // 0-未知
-	Event           interface{} // 事件
-	RelativeTradeNo interface{} // 关联单号
-	UniqueNo        interface{} // 唯一键
-	GmtCreate       *gtime.Time // 创建时间
-	GmtModify       *gtime.Time // 更新时间
-	Message         interface{} // message
+	g.Meta         `orm:"table:payment_timeline, do:true"`
+	Id             interface{} //
+	MerchantId     interface{} // 商户Id
+	UserId         interface{} // userId
+	SubscriptionId interface{} // 订阅id（内部编号）
+	InvoiceId      interface{} // 发票ID（内部编号）
+	UniqueId       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	Currency       interface{} // 货币
+	Amount         interface{} // 金额,单位：分
+	ChannelId      interface{} // 支付渠道Id
+	GmtCreate      *gtime.Time // 创建时间
+	GmtModify      *gtime.Time // 修改时间
+	IsDeleted      interface{} //
+	PaymentId      interface{} // PaymentId
+	Status         interface{} // 0-success, 1-failure
 }

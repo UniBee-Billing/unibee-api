@@ -40,7 +40,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("支付不存在")
 	}
 
-	event.SaveTimeLine(ctx, entity.PaymentTimeline{
+	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
 		Fee:       pay.PaymentFee,
@@ -65,7 +65,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("支付不存在")
 	}
 	//交易事件记录
-	event.SaveTimeLine(ctx, entity.PaymentTimeline{
+	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
 		Fee:       req.CaptureFee,
@@ -111,7 +111,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
 			Fee:       pay.PaymentFee,
@@ -176,7 +176,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
 		//交易事件记录
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
 			Fee:       0,
@@ -248,7 +248,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if err == nil {
 		//try {
 		//交易事件记录
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
 			Fee:       req.ReceiptFee,

@@ -74,7 +74,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
 			Fee:       one.RefundFee,
@@ -161,7 +161,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
 			Fee:       one.RefundFee,
@@ -207,7 +207,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		return gerror.New("支付记录不存在")
 	}
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
-	event.SaveTimeLine(ctx, entity.PaymentTimeline{
+	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
 		Fee:       one.RefundFee,

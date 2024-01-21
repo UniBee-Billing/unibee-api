@@ -10,19 +10,18 @@ import (
 
 // PaymentTimeline is the golang structure for table payment_timeline.
 type PaymentTimeline struct {
-	Id              int64       `json:"id"              description:"主键id"`                // 主键id
-	UserId          int64       `json:"userId"          description:"user_id"`             // user_id
-	MerchantUserId  int64       `json:"merchantUserId"  description:"merchant_user_id"`    // merchant_user_id
-	OpenApiId       int64       `json:"openApiId"       description:"使用的开放平台配置Id"`         // 使用的开放平台配置Id
-	TerminalIp      string      `json:"terminalIp"      description:"terminal_ip"`         // terminal_ip
-	BizType         int         `json:"bizType"         description:"biz_type=1，Payment表"` // biz_type=1，Payment表
-	BizId           string      `json:"bizId"           description:"biz_type=1，pay；"`     // biz_type=1，pay；
-	Fee             int64       `json:"fee"             description:"金额（分）"`               // 金额（分）
-	EventType       int         `json:"eventType"       description:"0-未知"`                // 0-未知
-	Event           string      `json:"event"           description:"事件"`                  // 事件
-	RelativeTradeNo string      `json:"relativeTradeNo" description:"关联单号"`                // 关联单号
-	UniqueNo        string      `json:"uniqueNo"        description:"唯一键"`                 // 唯一键
-	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"创建时间"`                // 创建时间
-	GmtModify       *gtime.Time `json:"gmtModify"       description:"更新时间"`                // 更新时间
-	Message         string      `json:"message"         description:"message"`             // message
+	Id             uint64      `json:"id"             description:""`                                                       //
+	MerchantId     int64       `json:"merchantId"     description:"商户Id"`                                                   // 商户Id
+	UserId         int64       `json:"userId"         description:"userId"`                                                 // userId
+	SubscriptionId string      `json:"subscriptionId" description:"订阅id（内部编号）"`                                             // 订阅id（内部编号）
+	InvoiceId      string      `json:"invoiceId"      description:"发票ID（内部编号）"`                                             // 发票ID（内部编号）
+	UniqueId       string      `json:"uniqueId"       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	Currency       string      `json:"currency"       description:"货币"`                                                     // 货币
+	Amount         int64       `json:"amount"         description:"金额,单位：分"`                                                // 金额,单位：分
+	ChannelId      int64       `json:"channelId"      description:"支付渠道Id"`                                                 // 支付渠道Id
+	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"创建时间"`                                                   // 创建时间
+	GmtModify      *gtime.Time `json:"gmtModify"      description:"修改时间"`                                                   // 修改时间
+	IsDeleted      int         `json:"isDeleted"      description:""`                                                       //
+	PaymentId      string      `json:"paymentId"      description:"PaymentId"`                                              // PaymentId
+	Status         int         `json:"status"         description:"0-success, 1-failure"`                                   // 0-success, 1-failure
 }

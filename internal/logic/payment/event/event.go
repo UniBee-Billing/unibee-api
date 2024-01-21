@@ -33,8 +33,8 @@ var (
 	SettledReversed = TradeEventTypeEnum{16, "扣款资金退回"}
 )
 
-func SaveTimeLine(ctx context.Context, overseaPayEvent entity.PaymentTimeline) {
-	_, err := dao.PaymentTimeline.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
+func SaveTimeLine(ctx context.Context, overseaPayEvent entity.PaymentEvent) {
+	_, err := dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)
 	}

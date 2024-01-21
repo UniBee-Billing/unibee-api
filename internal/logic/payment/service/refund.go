@@ -125,7 +125,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		return nil, err
 	} else {
 		//交易事件记录
-		event.SaveTimeLine(ctx, entity.PaymentTimeline{
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,
 			Fee:       payment.PaymentFee,

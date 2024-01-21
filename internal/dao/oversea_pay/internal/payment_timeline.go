@@ -20,40 +20,38 @@ type PaymentTimelineDao struct {
 
 // PaymentTimelineColumns defines and stores column names for table payment_timeline.
 type PaymentTimelineColumns struct {
-	Id              string // 主键id
-	UserId          string // user_id
-	MerchantUserId  string // merchant_user_id
-	OpenApiId       string // 使用的开放平台配置Id
-	TerminalIp      string // terminal_ip
-	BizType         string // biz_type=1，Payment表
-	BizId           string // biz_type=1，pay；
-	Fee             string // 金额（分）
-	EventType       string // 0-未知
-	Event           string // 事件
-	RelativeTradeNo string // 关联单号
-	UniqueNo        string // 唯一键
-	GmtCreate       string // 创建时间
-	GmtModify       string // 更新时间
-	Message         string // message
+	Id             string //
+	MerchantId     string // 商户Id
+	UserId         string // userId
+	SubscriptionId string // 订阅id（内部编号）
+	InvoiceId      string // 发票ID（内部编号）
+	UniqueId       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	Currency       string // 货币
+	Amount         string // 金额,单位：分
+	ChannelId      string // 支付渠道Id
+	GmtCreate      string // 创建时间
+	GmtModify      string // 修改时间
+	IsDeleted      string //
+	PaymentId      string // PaymentId
+	Status         string // 0-success, 1-failure
 }
 
 // paymentTimelineColumns holds the columns for table payment_timeline.
 var paymentTimelineColumns = PaymentTimelineColumns{
-	Id:              "id",
-	UserId:          "user_id",
-	MerchantUserId:  "merchant_user_id",
-	OpenApiId:       "open_api_id",
-	TerminalIp:      "terminal_ip",
-	BizType:         "biz_type",
-	BizId:           "biz_id",
-	Fee:             "fee",
-	EventType:       "event_type",
-	Event:           "event",
-	RelativeTradeNo: "relative_trade_no",
-	UniqueNo:        "unique_no",
-	GmtCreate:       "gmt_create",
-	GmtModify:       "gmt_modify",
-	Message:         "message",
+	Id:             "id",
+	MerchantId:     "merchant_id",
+	UserId:         "user_id",
+	SubscriptionId: "subscription_id",
+	InvoiceId:      "invoice_id",
+	UniqueId:       "unique_id",
+	Currency:       "currency",
+	Amount:         "amount",
+	ChannelId:      "channel_id",
+	GmtCreate:      "gmt_create",
+	GmtModify:      "gmt_modify",
+	IsDeleted:      "is_deleted",
+	PaymentId:      "payment_id",
+	Status:         "status",
 }
 
 // NewPaymentTimelineDao creates and returns a new DAO object for table data access.
