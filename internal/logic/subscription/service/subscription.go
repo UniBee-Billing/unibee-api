@@ -480,7 +480,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	var totalAmount int64
 	var invoice *ro.ChannelDetailInvoiceRo
 	//var nextPeriodTotalAmount int64
-	var nextPeroidInvoice *ro.ChannelDetailInvoiceRo
+	var nextPeriodInvoice *ro.ChannelDetailInvoiceRo
 	if effectImmediate {
 		updatePreviewRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            plan,
@@ -510,7 +510,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			Lines:                          updatePreviewRes.Invoice.Lines,
 		}
 		//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
-		nextPeroidInvoice = &ro.ChannelDetailInvoiceRo{
+		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
 			TotalAmountExcludingTax:        updatePreviewRes.NextPeriodInvoice.TotalAmountExcludingTax,
 			Currency:                       updatePreviewRes.NextPeriodInvoice.Currency,
@@ -551,7 +551,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			})
 		}
 		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
-		nextPeroidInvoice = &ro.ChannelDetailInvoiceRo{
+		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
 			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
 			Currency:                       currency,
@@ -579,7 +579,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		OldPlanChannel:    oldPlanChannel,
 		TotalAmount:       totalAmount,
 		Invoice:           invoice,
-		NextPeriodInvoice: nextPeroidInvoice,
+		NextPeriodInvoice: nextPeriodInvoice,
 		ProrationDate:     prorationDate,
 		EffectImmediate:   effectImmediate,
 	}, nil
