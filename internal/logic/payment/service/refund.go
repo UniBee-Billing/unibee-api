@@ -12,6 +12,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/gateway"
 	"go-oversea-pay/internal/logic/payment/event"
+	"go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -134,6 +135,10 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			OpenApiId: one.OpenApiId,
 			UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "SentForRefund", one.RefundId),
 		})
+		err = handler.CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
 	}
 	return one, nil
 }

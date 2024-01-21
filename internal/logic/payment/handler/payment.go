@@ -51,6 +51,11 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		UniqueNo:  fmt.Sprintf("%s_%s", pay.PaymentId, "Expird"),
 	})
 
+	err = CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+	if err != nil {
+		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+	}
+
 	return HandlePayFailure(ctx, &HandlePayReq{
 		PaymentId:     req.PaymentId,
 		PayStatusEnum: consts.PAY_FAILED,
@@ -121,6 +126,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 			OpenApiId: pay.OpenApiId,
 			UniqueNo:  fmt.Sprintf("%s_%s", pay.ChannelPaymentId, "Authorised"),
 		})
+
 	}
 
 	return err
@@ -187,6 +193,10 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 			UniqueNo:  fmt.Sprintf("%s_%s", pay.PaymentId, "Cancelled"),
 			Message:   req.Reason,
 		})
+		err := CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+		}
 	}
 	return err
 }
@@ -275,6 +285,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		//	queryPay = pay;
 		//}
 		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryPay.getBizType()).paySuccessCallback(queryPay,req.getPaidTime());
+		err := CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+		}
 	}
 	return err
 }

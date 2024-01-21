@@ -84,6 +84,10 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundFailed", one.RefundId),
 			Message:   req.Reason,
 		})
+		err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
 	}
 
 	return err
@@ -182,6 +186,10 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		//	queryRefund = refund;
 		//}
 		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryRefund.getBizType()).refundSuccessCallback(queryRefund,req.getRefundTime());
+		err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
 	}
 
 	return err
@@ -217,6 +225,10 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundedReversed", one.RefundId),
 		Message:   req.Reason,
 	})
+	err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
+	if err != nil {
+		fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+	}
 
 	return nil
 }
@@ -289,5 +301,63 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 		}
 	}
 
+	return nil
+}
+
+func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity.Refund, uniqueId string) error {
+	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
+
+	var status = 0
+	if refund.Status == consts.REFUND_SUCCESS {
+		status = 1
+	} else if refund.Status == consts.REFUND_FAILED {
+		status = 2
+	}
+
+	if one == nil {
+		//创建
+		one = &entity.PaymentTimeline{
+			MerchantId:     refund.MerchantId,
+			UserId:         refund.UserId,
+			SubscriptionId: refund.SubscriptionId,
+			//InvoiceId:      refund.InvoiceId,
+			UniqueId:     uniqueId,
+			Currency:     refund.Currency,
+			Amount:       refund.RefundFee,
+			ChannelId:    refund.ChannelId,
+			Status:       status,
+			TimelineType: 1,
+		}
+
+		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdatePaymentTimelineFromRefund record insert failure %s`, err.Error())
+			return err
+		}
+		id, _ := result.LastInsertId()
+		one.Id = uint64(id)
+	} else {
+		//更新
+		update, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
+			dao.PaymentTimeline.Columns().MerchantId:     refund.MerchantId,
+			dao.PaymentTimeline.Columns().UserId:         refund.UserId,
+			dao.PaymentTimeline.Columns().SubscriptionId: refund.SubscriptionId,
+			//dao.PaymentTimeline.Columns().InvoiceId:      refund.InvoiceId,
+			dao.PaymentTimeline.Columns().Currency:  refund.Currency,
+			dao.PaymentTimeline.Columns().Amount:    refund.RefundFee,
+			dao.PaymentTimeline.Columns().ChannelId: refund.ChannelId,
+			//dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
+			dao.PaymentTimeline.Columns().GmtModify:    gtime.Now(),
+			dao.PaymentTimeline.Columns().Status:       status,
+			dao.PaymentTimeline.Columns().TimelineType: 1,
+		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("CreateOrUpdatePaymentTimelineFromRefund err:%s", update)
+		}
+	}
 	return nil
 }
