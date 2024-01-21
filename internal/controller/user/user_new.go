@@ -44,3 +44,9 @@ func NewInvoice() user.IUserInvoice {
 	return &ControllerInvoice{}
 }
 
+type ControllerPayment struct{}
+
+func NewPayment() user.IUserPayment {
+	return &ControllerPayment{}
+}
+

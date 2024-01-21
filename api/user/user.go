@@ -9,6 +9,7 @@ import (
 	
 	"go-oversea-pay/api/user/auth"
 	"go-oversea-pay/api/user/invoice"
+	"go-oversea-pay/api/user/payment"
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
@@ -26,6 +27,10 @@ type IUserAuth interface {
 
 type IUserInvoice interface {
 	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
+}
+
+type IUserPayment interface {
+	TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error)
 }
 
 type IUserPlan interface {

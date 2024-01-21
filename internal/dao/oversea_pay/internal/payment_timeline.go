@@ -33,7 +33,8 @@ type PaymentTimelineColumns struct {
 	GmtModify      string // 修改时间
 	IsDeleted      string //
 	PaymentId      string // PaymentId
-	Status         string // 0-success, 1-failure
+	Status         string // 0-pending, 1-success, 2-failure
+	TimelineType   string // 0-pay, 1-refund
 }
 
 // paymentTimelineColumns holds the columns for table payment_timeline.
@@ -52,6 +53,7 @@ var paymentTimelineColumns = PaymentTimelineColumns{
 	IsDeleted:      "is_deleted",
 	PaymentId:      "payment_id",
 	Status:         "status",
+	TimelineType:   "timeline_type",
 }
 
 // NewPaymentTimelineDao creates and returns a new DAO object for table data access.

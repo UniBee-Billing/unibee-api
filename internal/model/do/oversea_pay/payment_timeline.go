@@ -25,5 +25,6 @@ type PaymentTimeline struct {
 	GmtModify      *gtime.Time // 修改时间
 	IsDeleted      interface{} //
 	PaymentId      interface{} // PaymentId
-	Status         interface{} // 0-success, 1-failure
+	Status         interface{} // 0-pending, 1-success, 2-failure
+	TimelineType   interface{} // 0-pay, 1-refund
 }

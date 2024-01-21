@@ -29,3 +29,11 @@ func GetPaymentByChannelPaymentId(ctx context.Context, channelPaymentId string) 
 	}
 	return
 }
+
+func GetPaymentTimeLineByUniqueId(ctx context.Context, uniqueId string) (one *entity.PaymentTimeline) {
+	err := dao.PaymentTimeline.Ctx(ctx).Where(entity.PaymentTimeline{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}

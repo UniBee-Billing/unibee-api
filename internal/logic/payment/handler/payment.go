@@ -330,6 +330,11 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			userId = invoice.UserId
 		}
 	}
+	if details.ChannelSubscriptionDetail != nil {
+		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionDetail.ChannelSubscriptionId)
+		subscriptionId = sub.SubscriptionId
+		countryCode = sub.CountryCode
+	}
 	one := query.GetPaymentByChannelPaymentId(ctx, details.ChannelPaymentId)
 
 	if one == nil {
@@ -358,7 +363,6 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			SubscriptionId:         subscriptionId,
 			InvoiceId:              invoiceId,
 		}
-
 		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdatePaymentByDetail record insert failure %s`, err.Error())
@@ -368,7 +372,6 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		one.Id = id
 	} else {
 		//更新
-
 		update, err := dao.Payment.Ctx(ctx).Data(g.Map{
 			dao.Payment.Columns().MerchantId:             merchantId,
 			dao.Payment.Columns().MerchantId:             merchantId,
@@ -403,6 +406,73 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			return nil, gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
 		}
 	}
-
+	err := CreateOrUpdatePaymentTimeline(ctx, one, one.PaymentId)
+	if err != nil {
+		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+	}
 	return one, nil
+}
+
+func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment, uniqueId string) error {
+	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
+
+	var status = 0
+	if payment.Status == consts.PAY_SUCCESS {
+		status = 1
+	} else if payment.Status == consts.PAY_FAILED {
+		status = 2
+	}
+	var timeLineType = 0
+	if payment.PaymentFee > 0 {
+		timeLineType = 0
+	} else if payment.PaymentFee < 0 {
+		timeLineType = 1
+	}
+	if one == nil {
+		//创建
+		one = &entity.PaymentTimeline{
+			MerchantId:     payment.MerchantId,
+			UserId:         payment.UserId,
+			SubscriptionId: payment.SubscriptionId,
+			InvoiceId:      payment.InvoiceId,
+			UniqueId:       uniqueId,
+			Currency:       payment.Currency,
+			Amount:         payment.PaymentFee,
+			ChannelId:      payment.ChannelId,
+			PaymentId:      payment.PaymentId,
+			Status:         status,
+			TimelineType:   timeLineType,
+		}
+
+		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdatePaymentTimeline record insert failure %s`, err.Error())
+			return err
+		}
+		id, _ := result.LastInsertId()
+		one.Id = uint64(id)
+	} else {
+		//更新
+		update, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
+			dao.PaymentTimeline.Columns().MerchantId:     payment.MerchantId,
+			dao.PaymentTimeline.Columns().UserId:         payment.UserId,
+			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
+			dao.PaymentTimeline.Columns().InvoiceId:      payment.InvoiceId,
+			dao.PaymentTimeline.Columns().Currency:       payment.Currency,
+			dao.PaymentTimeline.Columns().Amount:         payment.PaymentFee,
+			dao.PaymentTimeline.Columns().ChannelId:      payment.ChannelId,
+			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
+			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),
+			dao.PaymentTimeline.Columns().Status:         status,
+			dao.PaymentTimeline.Columns().TimelineType:   timeLineType,
+		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		rowAffected, err := update.RowsAffected()
+		if rowAffected != 1 {
+			return gerror.Newf("CreateOrUpdatePaymentTimeline err:%s", update)
+		}
+	}
+	return nil
 }

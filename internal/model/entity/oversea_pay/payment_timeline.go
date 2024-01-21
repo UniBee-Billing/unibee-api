@@ -23,5 +23,6 @@ type PaymentTimeline struct {
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"修改时间"`                                                   // 修改时间
 	IsDeleted      int         `json:"isDeleted"      description:""`                                                       //
 	PaymentId      string      `json:"paymentId"      description:"PaymentId"`                                              // PaymentId
-	Status         int         `json:"status"         description:"0-success, 1-failure"`                                   // 0-success, 1-failure
+	Status         int         `json:"status"         description:"0-pending, 1-success, 2-failure"`                        // 0-pending, 1-success, 2-failure
+	TimelineType   int         `json:"timelineType"   description:"0-pay, 1-refund"`                                        // 0-pay, 1-refund
 }

@@ -50,7 +50,7 @@ type IMerchantOss interface {
 }
 
 type IMerchantPayment interface {
-	EventList(ctx context.Context, req *payment.EventListReq) (res *payment.EventListRes, err error)
+	TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error)
 }
 
 type IMerchantPlan interface {
