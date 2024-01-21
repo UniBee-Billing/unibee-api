@@ -127,3 +127,17 @@ type UserSubscriptionDetailRes struct {
 	Addons                    []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
 }
+
+type SubscriptionTimeLineListReq struct {
+	g.Meta     `path:"/subscription_timeline_list" tags:"Merchant-Subscription-Timeline-Controller" method:"post" summary:"Merchant-Subscription-TimeLine列表"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	UserId     int    `p:"userId" dc:"UserId 不填查询所有" `
+	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page       int    `p:"page"  dc:"分页页码,0开始" `
+	Count      int    `p:"count" dc:"每页数量" `
+}
+
+type SubscriptionTimeLineListRes struct {
+	SubscriptionTimeLines []*entity.SubscriptionTimeline `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+}

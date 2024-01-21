@@ -65,3 +65,12 @@ func UserInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func UserPayment(ctx context.Context, group *ghttp.RouterGroup) {
+	// invoice 库相关接口
+	group.Group("/payment", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewPayment(),
+		)
+	})
+}

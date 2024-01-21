@@ -294,13 +294,14 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
-	_, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
+	payment, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
 	if err != nil {
 		return err
 	}
 
 	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+			Payment:               payment,
 			ChannelPaymentId:      details.ChannelPaymentId,
 			ChannelSubscriptionId: details.ChannelInvoiceDetail.ChannelSubscriptionId,
 			ChannelInvoiceId:      details.ChannelInvoiceDetail.ChannelInvoiceId,

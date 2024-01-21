@@ -54,6 +54,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 }
 
 type SubscriptionPaymentSuccessWebHookReq struct {
+	Payment               *entity.Payment               `json:"payment" `
 	ChannelPaymentId      string                        `json:"channelPaymentId" `
 	ChannelSubscriptionId string                        `json:"channelSubscriptionId" `
 	ChannelInvoiceId      string                        `json:"channelInvoiceId"`
@@ -115,8 +116,60 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 		if err != nil {
 			return err
 		}
+		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+		if sub != nil {
+			one := &entity.SubscriptionTimeline{
+				MerchantId:      sub.MerchantId,
+				UserId:          sub.UserId,
+				SubscriptionId:  sub.SubscriptionId,
+				InvoiceId:       "", // todo mark
+				UniqueId:        req.Payment.PaymentId,
+				Currency:        sub.Currency,
+				PlanId:          sub.PlanId,
+				Quantity:        sub.Quantity,
+				AddonData:       sub.AddonData,
+				ChannelId:       sub.ChannelId,
+				PeriodStart:     gtime.Now().Timestamp(),
+				PeriodEnd:       sub.CurrentPeriodEnd,
+				PeriodStartTime: gtime.Now(),
+				PeriodEndTime:   sub.CurrentPeriodEndTime,
+				PaymentId:       req.Payment.PaymentId,
+			}
+
+			_, err = dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			if err != nil {
+				err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
+				return err
+			}
+		}
 	} else {
-		// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
+		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+		if sub != nil {
+			// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
+			one := &entity.SubscriptionTimeline{
+				MerchantId:      sub.MerchantId,
+				UserId:          sub.UserId,
+				SubscriptionId:  sub.SubscriptionId,
+				InvoiceId:       "", // todo mark
+				UniqueId:        req.Payment.PaymentId,
+				Currency:        sub.Currency,
+				PlanId:          sub.PlanId,
+				Quantity:        sub.Quantity,
+				AddonData:       sub.AddonData,
+				ChannelId:       sub.ChannelId,
+				PeriodStart:     sub.CurrentPeriodStart,
+				PeriodEnd:       sub.CurrentPeriodEnd,
+				PeriodStartTime: sub.CurrentPeriodStartTime,
+				PeriodEndTime:   sub.CurrentPeriodEndTime,
+				PaymentId:       req.Payment.PaymentId,
+			}
+
+			_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			if err != nil {
+				err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
+				return err
+			}
+		}
 	}
 	return nil
 }

@@ -59,6 +59,7 @@ var (
 				router.MerchantOss(ctx, group)
 				router.MerchantVat(ctx, group)
 				router.MerchantBalance(ctx, group)
+				router.MerchantPayment(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
@@ -79,6 +80,7 @@ var (
 				router.UserSubscription(ctx, group)
 				router.UserInvoice(ctx, group)
 				router.UserProfile(ctx, group)
+				router.UserPayment(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {

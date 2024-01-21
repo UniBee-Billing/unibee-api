@@ -159,3 +159,17 @@ type SubscriptionResumeReq struct {
 }
 type SubscriptionResumeRes struct {
 }
+
+type SubscriptionTimeLineListReq struct {
+	g.Meta     `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User-Subscription-TimeLine列表"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	UserId     int    `p:"userId" dc:"UserId 不填查询所有" `
+	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page       int    `p:"page"  dc:"分页页码,0开始" `
+	Count      int    `p:"count" dc:"每页数量" `
+}
+
+type SubscriptionTimeLineListRes struct {
+	SubscriptionTimeLines []*entity.SubscriptionTimeline `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+}

@@ -90,3 +90,11 @@ func MerchantBalance(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantPayment(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/payment", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewPayment(),
+		)
+	})
+}
