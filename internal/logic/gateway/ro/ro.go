@@ -170,11 +170,12 @@ type ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionPreviewInternalResp struct {
-	Data          string                            `json:"data"`
-	TotalAmount   int64                             `json:"totalAmount"`
-	Currency      string                            `json:"currency"`
-	Invoice       *ChannelDetailInvoiceInternalResp `json:"invoice"`
-	ProrationDate int64                             `json:"prorationDate"`
+	Data              string                            `json:"data"`
+	TotalAmount       int64                             `json:"totalAmount"`
+	Currency          string                            `json:"currency"`
+	Invoice           *ChannelDetailInvoiceInternalResp `json:"invoice"`
+	NextPeriodInvoice *ChannelDetailInvoiceInternalResp `json:"nextPeriodInvoice"`
+	ProrationDate     int64                             `json:"prorationDate"`
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {

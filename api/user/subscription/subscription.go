@@ -93,10 +93,11 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount   int64                      `json:"totalAmount"                ` // 金额,单位：分
-	Currency      string                     `json:"currency"              `      // 货币
-	Invoice       *ro.ChannelDetailInvoiceRo `json:"invoice"`
-	ProrationDate int64                      `json:"prorationDate"`
+	TotalAmount       int64                      `json:"totalAmount"                ` // 金额,单位：分
+	Currency          string                     `json:"currency"              `      // 货币
+	Invoice           *ro.ChannelDetailInvoiceRo `json:"invoice"`
+	NextPeriodInvoice *ro.ChannelDetailInvoiceRo `json:"nextPeriodInvoice"`
+	ProrationDate     int64                      `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {

@@ -29,9 +29,10 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 		return nil, err
 	}
 	return &subscription.SubscriptionUpdatePreviewRes{
-		TotalAmount:   prepare.TotalAmount,
-		Currency:      prepare.Currency,
-		Invoice:       prepare.Invoice,
-		ProrationDate: prepare.ProrationDate,
+		TotalAmount:       prepare.TotalAmount,
+		Currency:          prepare.Currency,
+		Invoice:           prepare.Invoice,
+		NextPeriodInvoice: prepare.NextPeriodInvoice,
+		ProrationDate:     prepare.ProrationDate,
 	}, nil
 }

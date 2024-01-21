@@ -335,22 +335,23 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription    *entity.Subscription               `json:"subscription"`
-	Plan            *entity.SubscriptionPlan           `json:"planId"`
-	Quantity        int64                              `json:"quantity"`
-	PlanChannel     *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel      *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo    *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams     []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons          []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount     int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency        string                             `json:"currency"              `      // 货币
-	UserId          int64                              `json:"userId" `
-	OldPlan         *entity.SubscriptionPlan           `json:"oldPlan"`
-	OldPlanChannel  *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
-	Invoice         *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	ProrationDate   int64                              `json:"prorationDate"`
-	EffectImmediate bool                               `json:"EffectImmediate"`
+	Subscription      *entity.Subscription               `json:"subscription"`
+	Plan              *entity.SubscriptionPlan           `json:"planId"`
+	Quantity          int64                              `json:"quantity"`
+	PlanChannel       *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel        *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount       int64                              `json:"totalAmount"                ` // 金额,单位：分
+	Currency          string                             `json:"currency"              `      // 货币
+	UserId            int64                              `json:"userId" `
+	OldPlan           *entity.SubscriptionPlan           `json:"oldPlan"`
+	OldPlanChannel    *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
+	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	NextPeriodInvoice *ro.ChannelDetailInvoiceRo         `json:"nextPeriodInvoice"`
+	ProrationDate     int64                              `json:"prorationDate"`
+	EffectImmediate   bool                               `json:"EffectImmediate"`
 }
 
 // SubscriptionUpdatePreview 默认行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
@@ -401,7 +402,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
 
 	var effectImmediate = false
-	var invoice *ro.ChannelDetailInvoiceRo
 	//升降级判断逻辑，升级设置payImmediate=true，保障马上能够生效；降级payImmediate=false,下周期生效
 	//情况 1，NewPlan单价大于 OldPlan 单价，判断为升级，忽略Quantity 和 addon 变更
 	//情况 2，NewPlan单价小于 OldPlan 单价，判断为降级，忽略Quantity 和 addon 变更
@@ -478,6 +478,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	var totalAmount int64
+	var invoice *ro.ChannelDetailInvoiceRo
+	//var nextPeriodTotalAmount int64
+	var nextPeroidInvoice *ro.ChannelDetailInvoiceRo
 	if effectImmediate {
 		updatePreviewRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            plan,
@@ -495,6 +498,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 		utility.Assert(strings.Compare(updatePreviewRes.Currency, currency) == 0, fmt.Sprintf("preview currency not match for subscriptionId:%v preview currency:%s", sub.SubscriptionId, updatePreviewRes.Currency))
 
+		prorationDate = updatePreviewRes.ProrationDate
+		totalAmount = updatePreviewRes.TotalAmount
 		invoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    updatePreviewRes.Invoice.TotalAmount,
 			TotalAmountExcludingTax:        updatePreviewRes.Invoice.TotalAmountExcludingTax,
@@ -504,21 +509,28 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
 			Lines:                          updatePreviewRes.Invoice.Lines,
 		}
-		totalAmount = updatePreviewRes.TotalAmount
-		prorationDate = updatePreviewRes.ProrationDate
+		//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
+		nextPeroidInvoice = &ro.ChannelDetailInvoiceRo{
+			TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
+			TotalAmountExcludingTax:        updatePreviewRes.NextPeriodInvoice.TotalAmountExcludingTax,
+			Currency:                       updatePreviewRes.NextPeriodInvoice.Currency,
+			TaxAmount:                      updatePreviewRes.NextPeriodInvoice.TaxAmount,
+			SubscriptionAmount:             updatePreviewRes.NextPeriodInvoice.SubscriptionAmount,
+			SubscriptionAmountExcludingTax: updatePreviewRes.NextPeriodInvoice.SubscriptionAmountExcludingTax,
+			Lines:                          updatePreviewRes.NextPeriodInvoice.Lines,
+		}
 	} else {
 		//下周期生效,输出Preview账单
-		var TotalAmountExcludingTax = plan.Amount * req.Quantity
-
+		var nextPeriodTotalAmountExcludingTax = plan.Amount * req.Quantity
 		for _, addon := range addons {
 			utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 			utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
 			utility.Assert(addon.AddonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
-			TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
+			nextPeriodTotalAmountExcludingTax = nextPeriodTotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 		}
 
-		var invoiceItems []*ro.ChannelDetailInvoiceItem
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		var nextPeriodInvoiceItems []*ro.ChannelDetailInvoiceItem
+		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
 			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
 			AmountExcludingTax:     req.Quantity * plan.Amount,
@@ -528,7 +540,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			Quantity:               req.Quantity,
 		})
 		for _, addon := range addons {
-			invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 				Currency:               currency,
 				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
 				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
@@ -538,38 +550,38 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				Quantity:               addon.Quantity,
 			})
 		}
-		var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
-		totalAmount = TotalAmountExcludingTax + taxAmount
-
-		invoice = &ro.ChannelDetailInvoiceRo{
-			TotalAmount:                    totalAmount,
-			TotalAmountExcludingTax:        TotalAmountExcludingTax,
+		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
+		nextPeroidInvoice = &ro.ChannelDetailInvoiceRo{
+			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
+			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
 			Currency:                       currency,
-			TaxAmount:                      taxAmount,
-			SubscriptionAmount:             totalAmount,             // 在没有 discount 之前，保持于 Total 一致
-			SubscriptionAmountExcludingTax: TotalAmountExcludingTax, // 在没有 discount 之前，保持于 Total 一致
-			Lines:                          invoiceItems,
+			TaxAmount:                      nextPeriodTaxAmount,
+			SubscriptionAmount:             nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount, // 在没有 discount 之前，保持于 Total 一致
+			SubscriptionAmountExcludingTax: nextPeriodTotalAmountExcludingTax,                       // 在没有 discount 之前，保持于 Total 一致
+			Lines:                          nextPeriodInvoiceItems,
 		}
+		//nextPeriodTotalAmount = nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount
 		prorationDate = sub.CurrentPeriodEnd
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
-		Subscription:    sub,
-		Plan:            plan,
-		Quantity:        req.Quantity,
-		PlanChannel:     planChannel,
-		PayChannel:      payChannel,
-		MerchantInfo:    merchantInfo,
-		AddonParams:     req.AddonParams,
-		Addons:          addons,
-		Currency:        currency,
-		UserId:          sub.UserId,
-		OldPlan:         oldPlan,
-		OldPlanChannel:  oldPlanChannel,
-		TotalAmount:     totalAmount,
-		Invoice:         invoice,
-		ProrationDate:   prorationDate,
-		EffectImmediate: effectImmediate,
+		Subscription:      sub,
+		Plan:              plan,
+		Quantity:          req.Quantity,
+		PlanChannel:       planChannel,
+		PayChannel:        payChannel,
+		MerchantInfo:      merchantInfo,
+		AddonParams:       req.AddonParams,
+		Addons:            addons,
+		Currency:          currency,
+		UserId:            sub.UserId,
+		OldPlan:           oldPlan,
+		OldPlanChannel:    oldPlanChannel,
+		TotalAmount:       totalAmount,
+		Invoice:           invoice,
+		NextPeriodInvoice: nextPeroidInvoice,
+		ProrationDate:     prorationDate,
+		EffectImmediate:   effectImmediate,
 	}, nil
 
 }
