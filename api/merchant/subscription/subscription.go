@@ -11,12 +11,12 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
-	User                      *entity.UserAccount               `json:"user" dc:"user"`
-	Subscription              *entity.Subscription              `json:"subscription" dc:"订阅"`
-	Plan                      *entity.SubscriptionPlan          `json:"planId" dc:"订阅计划"`
-	Channel                   *ro.OutChannelRo                  `json:"channel" dc:"订阅渠道"`
-	Addons                    []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
-	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
+	User                                *entity.UserAccount               `json:"user" dc:"user"`
+	Subscription                        *entity.Subscription              `json:"subscription" dc:"订阅"`
+	Plan                                *entity.SubscriptionPlan          `json:"planId" dc:"订阅计划"`
+	Channel                             *ro.OutChannelRo                  `json:"channel" dc:"订阅渠道"`
+	Addons                              []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
+	UnfinishedSubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"unfinishedSubscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
 }
 
 type SubscriptionListReq struct {
@@ -104,6 +104,7 @@ type SubscriptionUpdateReq struct {
 	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
 	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
 	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
+	AdminNote           string                             `p:"adminNote" dc:"Admin 修改备注" `
 	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
 }
 
@@ -120,12 +121,12 @@ type UserSubscriptionDetailReq struct {
 }
 
 type UserSubscriptionDetailRes struct {
-	User                      *entity.UserAccount               `json:"user" dc:"user"`
-	Subscription              *entity.Subscription              `json:"subscription" dc:"订阅"`
-	Plan                      *entity.SubscriptionPlan          `json:"planId" dc:"订阅计划"`
-	Channel                   *ro.OutChannelRo                  `json:"channel" dc:"订阅渠道"`
-	Addons                    []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
-	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
+	User                                *entity.UserAccount               `json:"user" dc:"user"`
+	Subscription                        *entity.Subscription              `json:"subscription" dc:"订阅"`
+	Plan                                *entity.SubscriptionPlan          `json:"planId" dc:"订阅计划"`
+	Channel                             *ro.OutChannelRo                  `json:"channel" dc:"订阅渠道"`
+	Addons                              []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
+	UnfinishedSubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"unfinishedSubscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
 }
 
 type SubscriptionTimeLineListReq struct {
@@ -140,4 +141,18 @@ type SubscriptionTimeLineListReq struct {
 
 type SubscriptionTimeLineListRes struct {
 	SubscriptionTimeLines []*entity.SubscriptionTimeline `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+}
+
+type SubscriptionMerchantPendingUpdateListReq struct {
+	g.Meta         `path:"/subscription_merchant_pending_update" tags:"Merchant-SubscriptionPendingUpdate-Controller" method:"post" summary:"Merchant-SubscriptionPendingUpdate列表"`
+	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	SortField      string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType       string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page           int    `p:"page"  dc:"分页页码,0开始" `
+	Count          int    `p:"count" dc:"每页数量" `
+}
+
+type SubscriptionMerchantPendingUpdateListRes struct {
+	SubscriptionPendingUpdates []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdates" description:"SubscriptionPendingUpdates" `
 }

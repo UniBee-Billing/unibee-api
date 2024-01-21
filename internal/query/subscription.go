@@ -67,7 +67,7 @@ func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId s
 	return addons
 }
 
-func GetCreatedSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) *entity.SubscriptionPendingUpdate {
+func GetUnfinishedSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) *entity.SubscriptionPendingUpdate {
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
 		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).

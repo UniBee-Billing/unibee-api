@@ -27,7 +27,7 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 		ConfirmTotalAmount:  req.ConfirmTotalAmount,
 		ConfirmCurrency:     req.ConfirmCurrency,
 		ProrationDate:       req.ProrationDate,
-	}, int64(_interface.BizCtx().Get(ctx).MerchantUser.Id))
+	}, int64(_interface.BizCtx().Get(ctx).MerchantUser.Id), req.AdminNote)
 	if err != nil {
 		return nil, err
 	}

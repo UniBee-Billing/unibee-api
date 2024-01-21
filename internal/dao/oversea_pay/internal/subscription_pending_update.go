@@ -49,6 +49,7 @@ type SubscriptionPendingUpdateColumns struct {
 	ResponseData         string // 渠道返回参数，JSON格式
 	EffectImmediate      string // 是否马上生效，0-否，1-是
 	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
+	AdminNote            string // Admin 修改备注
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -82,6 +83,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	ResponseData:         "response_data",
 	EffectImmediate:      "effect_immediate",
 	EffectTime:           "effect_time",
+	AdminNote:            "admin_note",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.

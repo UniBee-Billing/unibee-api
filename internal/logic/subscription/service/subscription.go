@@ -586,7 +586,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64, adminNote string) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
@@ -637,6 +637,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		Status:               consts.PendingSubStatusInit,
 		Data:                 "", //额外参数配置
 		MerchantUserId:       merchantUserId,
+		AdminNote:            adminNote,
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
 	}

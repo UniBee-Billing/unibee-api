@@ -41,4 +41,5 @@ type SubscriptionPendingUpdate struct {
 	ResponseData         interface{} // 渠道返回参数，JSON格式
 	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
 	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
+	AdminNote            interface{} // Admin 修改备注
 }
