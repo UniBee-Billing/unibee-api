@@ -850,11 +850,12 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	//}
 
 	return &ro.ChannelUpdateSubscriptionPreviewInternalResp{
-		Data:          utility.FormatToJsonString(result),
-		TotalAmount:   result.Total,
-		Currency:      strings.ToUpper(string(result.Currency)),
-		ProrationDate: updateUnixTime,
-		Invoice:       parseStripeInvoice(result, int64(channelEntity.Id)),
+		Data:              utility.FormatToJsonString(result),
+		TotalAmount:       result.Total,
+		Currency:          strings.ToUpper(string(result.Currency)),
+		ProrationDate:     updateUnixTime,
+		Invoice:           parseStripeInvoice(result, int64(channelEntity.Id)),
+		NextPeriodInvoice: nil,
 	}, nil
 }
 
