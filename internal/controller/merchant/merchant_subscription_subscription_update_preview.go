@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	subscription2 "go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
@@ -20,6 +21,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 		merchantUserId = int64(_interface.BizCtx().Get(ctx).MerchantUser.Id)
 	}
+	g.Log().Infof(ctx, "SubscriptionUpdatePreview merchantUserId:%d", merchantUserId)
 	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.SubscriptionUpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
