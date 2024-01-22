@@ -1408,7 +1408,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event &s for Sub %s\n", payChannel.Channel, string(event.Type), subscription.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Sub %s\n", payChannel.Channel, string(event.Type), subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
