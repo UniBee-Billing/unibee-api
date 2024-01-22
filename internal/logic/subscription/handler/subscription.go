@@ -30,10 +30,47 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().Status:                 details.Status,
 		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
 		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
-		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
 		dao.Subscription.Columns().ChannelItemData:        details.ChannelItemData,
 		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
-		dao.Subscription.Columns().BillingCycleAnchor:     details.CurrentPeriodStart,
+		dao.Subscription.Columns().BillingCycleAnchor:     details.BillingCycleAnchor,
+		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		//dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
+		//dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
+		//dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),
+		//dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(details.CurrentPeriodEnd),
+		dao.Subscription.Columns().TrialEnd:     details.TrialEnd,
+		dao.Subscription.Columns().GmtModify:    gtime.Now(),
+		dao.Subscription.Columns().FirstPayTime: firstPayTime,
+	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
+	//}
+	//处理更新事件 todo mark
+
+	return nil
+}
+
+func UpdateSubWithPayment(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
+	var cancelAtPeriodEnd = 0
+	if details.CancelAtPeriodEnd {
+		cancelAtPeriodEnd = 1
+	}
+	var firstPayTime *gtime.Time
+	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
+		firstPayTime = gtime.Now()
+	}
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:                 details.Status,
+		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
+		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
+		dao.Subscription.Columns().ChannelItemData:        details.ChannelItemData,
+		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
+		dao.Subscription.Columns().BillingCycleAnchor:     details.BillingCycleAnchor,
+		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
 		dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),
@@ -55,19 +92,20 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 }
 
 type SubscriptionPaymentSuccessWebHookReq struct {
-	Payment               *entity.Payment               `json:"payment" `
-	ChannelPaymentId      string                        `json:"channelPaymentId" `
-	ChannelSubscriptionId string                        `json:"channelSubscriptionId" `
-	ChannelInvoiceId      string                        `json:"channelInvoiceId"`
-	ChannelUpdateId       string                        `json:"channelUpdateId"`
-	Status                consts.SubscriptionStatusEnum `json:"status"`
-	ChannelStatus         string                        `json:"channelStatus"                  ` // 货币
-	Data                  string                        `json:"data"`
-	ChannelItemData       string                        `json:"channelItemData"`
-	CancelAtPeriodEnd     bool                          `json:"cancelAtPeriodEnd"`
-	CurrentPeriodEnd      int64                         `json:"currentPeriodEnd"`
-	CurrentPeriodStart    int64                         `json:"currentPeriodStart"`
-	TrialEnd              int64                         `json:"trialEnd"`
+	Payment                   *entity.Payment                           `json:"payment" `
+	ChannelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelPaymentId          string                                    `json:"channelPaymentId" `
+	ChannelSubscriptionId     string                                    `json:"channelSubscriptionId" `
+	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
+	ChannelUpdateId           string                                    `json:"channelUpdateId"`
+	Status                    consts.SubscriptionStatusEnum             `json:"status"`
+	ChannelStatus             string                                    `json:"channelStatus"                  ` // 货币
+	Data                      string                                    `json:"data"`
+	ChannelItemData           string                                    `json:"channelItemData"`
+	CancelAtPeriodEnd         bool                                      `json:"cancelAtPeriodEnd"`
+	CurrentPeriodEnd          int64                                     `json:"currentPeriodEnd"`
+	CurrentPeriodStart        int64                                     `json:"currentPeriodStart"`
+	TrialEnd                  int64                                     `json:"trialEnd"`
 }
 
 func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
@@ -83,10 +121,6 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	if err != nil {
 		return false, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
-	//}
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
@@ -99,7 +133,10 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 }
 
 func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
-	//sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	if sub == nil {
+		return gerror.Newf("HandleSubscriptionPaymentSuccess sub not found %s", req.ChannelSubscriptionId)
+	}
 	pendingSubUpdate := query.GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
 	// todo mark 处理逻辑需要优化，降级或者不马上生效的更新，是在下一周期生效
 	if pendingSubUpdate != nil {
@@ -144,33 +181,33 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			}
 		}
 	} else {
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-		if sub != nil {
-			// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
-			one := &entity.SubscriptionTimeline{
-				MerchantId:      sub.MerchantId,
-				UserId:          sub.UserId,
-				SubscriptionId:  sub.SubscriptionId,
-				InvoiceId:       "", // todo mark
-				UniqueId:        req.Payment.PaymentId,
-				Currency:        sub.Currency,
-				PlanId:          sub.PlanId,
-				Quantity:        sub.Quantity,
-				AddonData:       sub.AddonData,
-				ChannelId:       sub.ChannelId,
-				PeriodStart:     sub.CurrentPeriodStart,
-				PeriodEnd:       sub.CurrentPeriodEnd,
-				PeriodStartTime: sub.CurrentPeriodStartTime,
-				PeriodEndTime:   sub.CurrentPeriodEndTime,
-				PaymentId:       req.Payment.PaymentId,
-			}
-
-			_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
-			if err != nil {
-				err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
-				return err
-			}
+		// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
+		one := &entity.SubscriptionTimeline{
+			MerchantId:      sub.MerchantId,
+			UserId:          sub.UserId,
+			SubscriptionId:  sub.SubscriptionId,
+			InvoiceId:       "", // todo mark
+			UniqueId:        req.Payment.PaymentId,
+			Currency:        sub.Currency,
+			PlanId:          sub.PlanId,
+			Quantity:        sub.Quantity,
+			AddonData:       sub.AddonData,
+			ChannelId:       sub.ChannelId,
+			PeriodStart:     sub.CurrentPeriodStart,
+			PeriodEnd:       sub.CurrentPeriodEnd,
+			PeriodStartTime: sub.CurrentPeriodStartTime,
+			PeriodEndTime:   sub.CurrentPeriodEndTime,
+			PaymentId:       req.Payment.PaymentId,
 		}
+		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
+			return err
+		}
+	}
+	err := UpdateSubWithPayment(ctx, sub, req.ChannelSubscriptionDetail)
+	if err != nil {
+		return err
 	}
 	return nil
 }

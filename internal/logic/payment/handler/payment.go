@@ -301,19 +301,20 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *r
 
 	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
-			Payment:               payment,
-			ChannelPaymentId:      details.ChannelPaymentId,
-			ChannelSubscriptionId: details.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelInvoiceId:      details.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelUpdateId:       details.ChannelUpdateId,
-			Status:                details.ChannelSubscriptionDetail.Status,
-			ChannelStatus:         details.ChannelInvoiceDetail.ChannelStatus,
-			Data:                  details.ChannelSubscriptionDetail.Data,
-			ChannelItemData:       details.ChannelSubscriptionDetail.ChannelItemData,
-			CancelAtPeriodEnd:     details.ChannelSubscriptionDetail.CancelAtPeriodEnd,
-			CurrentPeriodEnd:      details.ChannelSubscriptionDetail.CurrentPeriodEnd,
-			CurrentPeriodStart:    details.ChannelSubscriptionDetail.CurrentPeriodStart,
-			TrialEnd:              details.ChannelSubscriptionDetail.TrialEnd,
+			Payment:                   payment,
+			ChannelSubscriptionDetail: details.ChannelSubscriptionDetail,
+			ChannelPaymentId:          details.ChannelPaymentId,
+			ChannelSubscriptionId:     details.ChannelInvoiceDetail.ChannelSubscriptionId,
+			ChannelInvoiceId:          details.ChannelInvoiceDetail.ChannelInvoiceId,
+			ChannelUpdateId:           details.ChannelUpdateId,
+			Status:                    details.ChannelSubscriptionDetail.Status,
+			ChannelStatus:             details.ChannelInvoiceDetail.ChannelStatus,
+			Data:                      details.ChannelSubscriptionDetail.Data,
+			ChannelItemData:           details.ChannelSubscriptionDetail.ChannelItemData,
+			CancelAtPeriodEnd:         details.ChannelSubscriptionDetail.CancelAtPeriodEnd,
+			CurrentPeriodEnd:          details.ChannelSubscriptionDetail.CurrentPeriodEnd,
+			CurrentPeriodStart:        details.ChannelSubscriptionDetail.CurrentPeriodStart,
+			TrialEnd:                  details.ChannelSubscriptionDetail.TrialEnd,
 		})
 		if err != nil {
 			return err
