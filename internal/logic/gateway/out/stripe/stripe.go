@@ -828,10 +828,11 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:                stripe.String(subscriptionRo.Subscription.ChannelUserId),
-		Subscription:            stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
-		SubscriptionItems:       items,
-		SubscriptionTrialEndNow: stripe.Bool(true),
+		Customer:          stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
+		SubscriptionItems: items,
+		//SubscriptionTrialEndNow: stripe.Bool(true),
+		SubscriptionTrialEnd: stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	detail, err := invoice.Upcoming(params)
@@ -1044,8 +1045,8 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	params := &stripe.SubscriptionParams{
-		Items:       items,
-		TrialEndNow: stripe.Bool(true),
+		Items:    items,
+		TrialEnd: stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
 	}
 	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
