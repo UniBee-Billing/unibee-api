@@ -824,7 +824,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	return nil
 }
 
-func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, AppendNewTrialEnd int64) error {
+func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, AppendNewTrialEndByHour int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -841,8 +841,8 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
 	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
 	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
-	utility.Assert(AppendNewTrialEnd > 0, "invalid AppendNewTrialEnd , should > 0")
-	newTrialEnd := details.CurrentPeriodEnd + AppendNewTrialEnd*3600
+	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
+	newTrialEnd := details.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 	_, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 	if err != nil {
 		return err
