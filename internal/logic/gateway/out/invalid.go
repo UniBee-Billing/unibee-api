@@ -9,6 +9,11 @@ import (
 
 type Invalid struct{}
 
+func (i Invalid) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i Invalid) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
 	//TODO implement me
 	panic("implement me")

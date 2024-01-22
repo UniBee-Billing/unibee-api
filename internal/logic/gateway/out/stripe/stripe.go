@@ -493,6 +493,28 @@ func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
 }
 
+func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+	utility.Assert(channelEntity != nil, "支付渠道异常 gateway not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.SubscriptionParams{
+		TrialEndNow:       stripe.Bool(true),
+		ProrationBehavior: stripe.String("none"),
+	}
+	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
+	if err != nil {
+		return nil, err
+	}
+
+	details, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
+	if err != nil {
+		return nil, err
+	}
+	return details, nil
+}
+
 // DoRemoteChannelSubscriptionNewTrialEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
 func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
@@ -833,7 +855,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		SubscriptionItems: items,
 		//SubscriptionTrialEndNow: stripe.Bool(true),
 		//SubscriptionTrialEnd:          stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
-		SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),
+		//SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),// 设置了就只会输出 Proration 账单
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	detail, err := invoice.Upcoming(params)
@@ -1048,7 +1070,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	params := &stripe.SubscriptionParams{
 		Items: items,
 		//TrialEnd:          stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
-		TrialEndNow: stripe.Bool(true),
+		//TrialEndNow: stripe.Bool(true),
 	}
 	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)

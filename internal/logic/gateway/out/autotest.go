@@ -10,6 +10,11 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
 	//TODO implement me
 	panic("implement me")

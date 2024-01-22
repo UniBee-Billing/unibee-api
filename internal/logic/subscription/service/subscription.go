@@ -860,3 +860,38 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	//}
 	return nil
 }
+
+func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	utility.Assert(plan != nil, "invalid planId")
+	utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
+	utility.Assert(payChannel != nil, "payChannel not found")
+
+	details, err := gateway.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
+	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
+	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
+	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
+	details, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+	if err != nil {
+		return err
+	}
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().TrialEnd:  details.TrialEnd,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("SubscriptionAddNewTrialEnd subscription err:%s", update)
+	//}
+	return nil
+}
