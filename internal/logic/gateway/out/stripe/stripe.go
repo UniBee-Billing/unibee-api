@@ -1298,11 +1298,11 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 		}
 		details.ChannelInvoiceDetail = invoiceDetails
 		details.ChannelUpdateId = invoiceDetails.ChannelInvoiceId
-		unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
-		if unibSub == nil {
-			plan := query.GetPlanById(ctx, unibSub.PlanId)
-			planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
-			subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+		oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+		if oneSub != nil {
+			plan := query.GetPlanById(ctx, oneSub.PlanId)
+			planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
+			subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
 			if err != nil {
 				return err
 			}
