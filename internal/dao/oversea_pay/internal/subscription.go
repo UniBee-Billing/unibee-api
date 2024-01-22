@@ -47,6 +47,7 @@ type SubscriptionColumns struct {
 	CurrentPeriodEnd       string // current_period_end
 	CurrentPeriodStartTime string //
 	CurrentPeriodEndTime   string //
+	BillingCycleAnchor     string // billing_cycle_anchor
 	TrialEnd               string // trial_end
 	ReturnUrl              string //
 	FirstPayTime           string // 首次支付时间
@@ -88,6 +89,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CurrentPeriodEnd:       "current_period_end",
 	CurrentPeriodStartTime: "current_period_start_time",
 	CurrentPeriodEndTime:   "current_period_end_time",
+	BillingCycleAnchor:     "billing_cycle_anchor",
 	TrialEnd:               "trial_end",
 	ReturnUrl:              "return_url",
 	FirstPayTime:           "first_pay_time",

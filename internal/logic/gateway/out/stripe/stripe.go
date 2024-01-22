@@ -131,6 +131,7 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetai
 		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
 		CurrentPeriodStart:     subscription.CurrentPeriodStart,
 		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
+		BillingCycleAnchor:     subscription.BillingCycleAnchor,
 		TrialEnd:               subscription.TrialEnd,
 	}
 }

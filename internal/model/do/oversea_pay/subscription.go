@@ -39,6 +39,7 @@ type Subscription struct {
 	CurrentPeriodEnd       interface{} // current_period_end
 	CurrentPeriodStartTime *gtime.Time //
 	CurrentPeriodEndTime   *gtime.Time //
+	BillingCycleAnchor     interface{} // billing_cycle_anchor
 	TrialEnd               interface{} // trial_end
 	ReturnUrl              interface{} //
 	FirstPayTime           *gtime.Time // 首次支付时间

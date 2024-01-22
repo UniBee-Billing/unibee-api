@@ -198,6 +198,7 @@ type ChannelDetailSubscriptionInternalResp struct {
 	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`
 	CurrentPeriodStart     int64                         `json:"currentPeriodStart"`
+	BillingCycleAnchor     int64                         `json:"billingCycleAnchor"`
 	TrialEnd               int64                         `json:"trialEnd"`
 }
 
