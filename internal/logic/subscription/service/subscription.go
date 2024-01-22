@@ -616,7 +616,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.Id).WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
+	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.SubscriptionId).WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
