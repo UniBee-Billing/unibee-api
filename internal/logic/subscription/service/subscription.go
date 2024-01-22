@@ -560,8 +560,18 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: nextPeriodTotalAmountExcludingTax,                       // 在没有 discount 之前，保持于 Total 一致
 			Lines:                          nextPeriodInvoiceItems,
 		}
+		invoice = &ro.ChannelDetailInvoiceRo{
+			TotalAmount:                    0,
+			TotalAmountExcludingTax:        0,
+			Currency:                       currency,
+			TaxAmount:                      0,
+			SubscriptionAmount:             0,
+			SubscriptionAmountExcludingTax: 0,
+			Lines:                          make([]*ro.ChannelDetailInvoiceItem, 0),
+		}
 		//nextPeriodTotalAmount = nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount
 		prorationDate = sub.CurrentPeriodEnd
+
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
