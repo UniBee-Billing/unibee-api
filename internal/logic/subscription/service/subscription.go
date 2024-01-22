@@ -374,6 +374,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+	utility.Assert(sub.TrialEnd < gtime.Now().Timestamp(), "subscription is in trial period ,should end trial before update")
 
 	//设置默认值
 	if req.Quantity <= 0 {
