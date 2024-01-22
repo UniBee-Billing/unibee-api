@@ -1048,8 +1048,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	params := &stripe.SubscriptionParams{
 		Items: items,
 		//TrialEnd:          stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
-		TrialEndNow:       stripe.Bool(true),
-		CancelAtPeriodEnd: stripe.Bool(false), //任何变更都取消 CancelAtPeriodEnd
+		TrialEndNow: stripe.Bool(true),
 	}
 	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
