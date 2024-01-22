@@ -521,9 +521,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
 			Lines:                          updatePreviewRes.Invoice.Lines,
 		}
-		if updatePreviewRes.NextPeriodInvoice.Lines == nil {
-			updatePreviewRes.NextPeriodInvoice.Lines = make([]*ro.ChannelDetailInvoiceItem, 0)
-		}
+
+		utility.Assert(updatePreviewRes.NextPeriodInvoice.Lines != nil, "internal error, next_period_line is blank")
+
 		//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
 		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
