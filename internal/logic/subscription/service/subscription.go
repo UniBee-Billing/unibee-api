@@ -477,6 +477,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
+	if sub.TrialEnd > gtime.Now().Timestamp() {
+		//试用期内，所有变更马上生效 todo mark 讨论
+		effectImmediate = true
+	}
+
 	var totalAmount int64
 	var invoice *ro.ChannelDetailInvoiceRo
 	//var nextPeriodTotalAmount int64
