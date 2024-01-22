@@ -517,6 +517,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
 			Lines:                          updatePreviewRes.Invoice.Lines,
 		}
+		if updatePreviewRes.NextPeriodInvoice.Lines == nil {
+			updatePreviewRes.NextPeriodInvoice.Lines = make([]*ro.ChannelDetailInvoiceItem, 0)
+		}
 		//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
 		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
