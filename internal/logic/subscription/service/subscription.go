@@ -651,7 +651,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		PlanId:               prepare.Subscription.PlanId,
 		Quantity:             prepare.Subscription.Quantity,
 		AddonData:            prepare.Subscription.AddonData,
-		UpdateAmount:         prepare.NextPeriodInvoice.TotalAmount,
+		UpdateAmount:         prepare.NextPeriodInvoice.TotalAmount, // todo mark 标记为下周期取消情况下，下周期异常
 		UpdateCurrency:       prepare.Currency,
 		UpdatePlanId:         int64(prepare.Plan.Id),
 		UpdateQuantity:       prepare.Quantity,
