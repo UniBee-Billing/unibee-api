@@ -1140,7 +1140,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 		params := &stripe.WebhookEndpointParams{
 			EnabledEvents: []*string{
 				stripe.String("customer.subscription.deleted"),
-				stripe.String("customer.subscription.updated"),
+				//stripe.String("customer.subscription.updated"),
 				stripe.String("customer.subscription.created"),
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
@@ -1148,7 +1148,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.upcoming"),
 				stripe.String("invoice.created"),
 				stripe.String("invoice.updated"),
-				stripe.String("invoice.paid"),
+				//stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
@@ -1176,7 +1176,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			EnabledEvents: []*string{
 				//订阅相关 webhook
 				stripe.String("customer.subscription.deleted"),
-				stripe.String("customer.subscription.updated"),
+				//stripe.String("customer.subscription.updated"),
 				stripe.String("customer.subscription.created"),
 				stripe.String("customer.subscription.trial_will_end"),
 				stripe.String("customer.subscription.paused"),
@@ -1184,7 +1184,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("invoice.upcoming"),
 				stripe.String("invoice.created"),
 				stripe.String("invoice.updated"),
-				stripe.String("invoice.paid"),
+				//stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
