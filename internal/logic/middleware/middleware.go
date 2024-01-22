@@ -247,7 +247,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
 		g.Log().Errorf(r.Context(), "TokenMerchantAuth empty token string of auth header")
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -256,13 +256,13 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 
 	if err != nil {
 		g.Log().Errorf(r.Context(), "TokenMerchantAuth parse error:%s", err.Error())
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
 
 	if !token.Valid {
 		g.Log().Errorf(r.Context(), "TokenMerchantAuth token invalid")
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
 
@@ -287,9 +287,9 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		Email:      u.Email,
 	}
 
-	r.Assigns(g.Map{
-		consts.ContextKey: customCtx,
-	})
+	//r.Assigns(g.Map{
+	//	consts.ContextKey: customCtx,
+	//})
 
 	r.Middleware.Next()
 }
