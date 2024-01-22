@@ -189,7 +189,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		fmt.Println("empty token string of auth header")
+		g.Log().Errorf(r.Context(), "TokenUserAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
@@ -199,19 +199,19 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	})
 
 	if err != nil {
-		fmt.Println("parse error")
+		g.Log().Errorf(r.Context(), "TokenUserAuth parse error:%s", err.Error())
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
 
 	if !token.Valid {
-		fmt.Println("token invalid")
+		g.Log().Errorf(r.Context(), "TokenUserAuth token invalid")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
 
 	u := parseAccessToken(tokenString)
-	fmt.Println("parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
+	g.Log().Infof(r.Context(), "parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
 	//customCtx := &model.Context{
 	//	Session: r.Session,
 	//	Data:    make(g.Map),
@@ -246,7 +246,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		fmt.Println("empty token string of auth header")
+		g.Log().Errorf(r.Context(), "TokenMerchantAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
@@ -255,13 +255,13 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	})
 
 	if err != nil {
-		fmt.Println("parse error")
+		g.Log().Errorf(r.Context(), "TokenMerchantAuth parse error:%s", err.Error())
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
 
 	if !token.Valid {
-		fmt.Println("token invalid")
+		g.Log().Errorf(r.Context(), "TokenMerchantAuth token invalid")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
@@ -275,7 +275,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if !token.Valid {
-		fmt.Println("merchant user not found")
+		g.Log().Errorf(r.Context(), "TokenMerchantAuth merchant user not found")
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()
 	}
