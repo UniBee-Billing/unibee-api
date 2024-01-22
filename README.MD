@@ -78,3 +78,6 @@ http://daily-local.wangqubi.cn/nacos/
 nacos.data.id
 
 > > > > > > > origin/main
+
+
+https://openapi-generator.tech/docs/generators/
