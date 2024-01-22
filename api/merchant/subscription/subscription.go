@@ -144,7 +144,7 @@ type SubscriptionTimeLineListRes struct {
 }
 
 type SubscriptionMerchantPendingUpdateListReq struct {
-	g.Meta         `path:"/subscription_merchant_pending_update" tags:"Merchant-SubscriptionPendingUpdate-Controller" method:"post" summary:"Merchant-SubscriptionPendingUpdate列表"`
+	g.Meta         `path:"/subscription_merchant_pending_update_list" tags:"Merchant-SubscriptionPendingUpdate-Controller" method:"post" summary:"Merchant-SubscriptionPendingUpdate列表"`
 	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 	SortField      string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
