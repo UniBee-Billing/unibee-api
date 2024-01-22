@@ -74,7 +74,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
-		dao.Subscription.Columns().AddonData: one.UpdatedAddonData,
+		dao.Subscription.Columns().AddonData: one.UpdateAddonData,
 		dao.Subscription.Columns().Amount:    one.UpdateAmount,
 		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),

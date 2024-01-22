@@ -73,8 +73,8 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		Subscription:                        one,
 		Channel:                             ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
 		Plan:                                query.GetPlanById(ctx, one.PlanId),
-		Addons:                              query.GetSubscriptionAddonsBySubscriptionId(ctx, one.SubscriptionId),
-		UnfinishedSubscriptionPendingUpdate: query.GetUnfinishedSubscriptionPendingUpdatesBySubscriptionId(ctx, one.SubscriptionId),
+		Addons:                              query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailBySubscriptionId(ctx, one.SubscriptionId),
 	}, nil
 }
 

@@ -36,7 +36,7 @@ type SubscriptionPendingUpdateColumns struct {
 	Quantity             string // quantity
 	UpdateQuantity       string // 升级到quantity
 	AddonData            string // plan addon json data
-	UpdatedAddonData     string // 升级到plan addon json data
+	UpdateAddonData      string // 升级到plan addon json data
 	ChannelId            string // 支付渠道Id
 	UserId               string // userId
 	GmtModify            string // 修改时间
@@ -70,7 +70,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	Quantity:             "quantity",
 	UpdateQuantity:       "update_quantity",
 	AddonData:            "addon_data",
-	UpdatedAddonData:     "updated_addon_data",
+	UpdateAddonData:      "update_addon_data",
 	ChannelId:            "channel_id",
 	UserId:               "user_id",
 	GmtModify:            "gmt_modify",

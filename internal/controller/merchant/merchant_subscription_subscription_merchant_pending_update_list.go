@@ -19,5 +19,5 @@ func (c *ControllerSubscription) SubscriptionMerchantPendingUpdateList(ctx conte
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionMerchantPendingUpdateListRes{SubscriptionPendingUpdates: result.SubscriptionPendingUpdates}, nil
+	return &subscription.SubscriptionMerchantPendingUpdateListRes{SubscriptionPendingUpdateDetails: result.SubscriptionPendingUpdateDetails}, nil
 }

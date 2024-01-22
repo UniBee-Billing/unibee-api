@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 )
@@ -18,7 +21,52 @@ type SubscriptionPendingUpdateListInternalReq struct {
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {
-	SubscriptionPendingUpdates []*entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
+	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+}
+
+func GetUnfinishedSubscriptionPendingUpdateDetailBySubscriptionId(ctx context.Context, subscriptionId string) *ro.SubscriptionPendingUpdateDetail {
+	var one *entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).
+		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
+		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	if one == nil {
+		return nil
+	}
+	return &ro.SubscriptionPendingUpdateDetail{
+		MerchantId:           one.MerchantId,
+		SubscriptionId:       one.SubscriptionId,
+		UpdateSubscriptionId: one.UpdateSubscriptionId,
+		GmtCreate:            one.GmtCreate,
+		Amount:               one.Amount,
+		Status:               one.Status,
+		UpdateAmount:         one.UpdateAmount,
+		Currency:             one.Currency,
+		UpdateCurrency:       one.UpdateCurrency,
+		PlanId:               one.PlanId,
+		UpdatePlanId:         one.UpdatePlanId,
+		Quantity:             one.Quantity,
+		UpdateQuantity:       one.UpdateQuantity,
+		AddonData:            one.AddonData,
+		UpdateAddonData:      one.UpdateAddonData,
+		ChannelId:            one.ChannelId,
+		UserId:               one.UserId,
+		GmtModify:            one.GmtModify,
+		Paid:                 one.Paid,
+		Link:                 one.Link,
+		MerchantUser:         query.GetMerchantAccountById(ctx, uint64(one.MerchantUserId)),
+		EffectImmediate:      one.EffectImmediate,
+		EffectTime:           one.EffectTime,
+		AdminNote:            one.AdminNote,
+		Plan:                 query.GetPlanById(ctx, one.PlanId),
+		Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
+		UpdateAddons:         query.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+	}
 }
 
 func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPendingUpdateListInternalReq) (res *SubscriptionPendingUpdateListInternalRes, err error) {
@@ -52,5 +100,39 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		return nil, err
 	}
 
-	return &SubscriptionPendingUpdateListInternalRes{SubscriptionPendingUpdates: mainList}, nil
+	var updateList []*ro.SubscriptionPendingUpdateDetail
+	for _, one := range mainList {
+		updateList = append(updateList, &ro.SubscriptionPendingUpdateDetail{
+			MerchantId:           one.MerchantId,
+			SubscriptionId:       one.SubscriptionId,
+			UpdateSubscriptionId: one.UpdateSubscriptionId,
+			GmtCreate:            one.GmtCreate,
+			Amount:               one.Amount,
+			Status:               one.Status,
+			UpdateAmount:         one.UpdateAmount,
+			Currency:             one.Currency,
+			UpdateCurrency:       one.UpdateCurrency,
+			PlanId:               one.PlanId,
+			UpdatePlanId:         one.UpdatePlanId,
+			Quantity:             one.Quantity,
+			UpdateQuantity:       one.UpdateQuantity,
+			AddonData:            one.AddonData,
+			UpdateAddonData:      one.UpdateAddonData,
+			ChannelId:            one.ChannelId,
+			UserId:               one.UserId,
+			GmtModify:            one.GmtModify,
+			Paid:                 one.Paid,
+			Link:                 one.Link,
+			MerchantUser:         query.GetMerchantAccountById(ctx, uint64(one.MerchantUserId)),
+			EffectImmediate:      one.EffectImmediate,
+			EffectTime:           one.EffectTime,
+			AdminNote:            one.AdminNote,
+			Plan:                 query.GetPlanById(ctx, one.PlanId),
+			Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
+			UpdateAddons:         query.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+		})
+	}
+
+	return &SubscriptionPendingUpdateListInternalRes{SubscriptionPendingUpdateDetails: updateList}, nil
 }

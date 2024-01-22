@@ -47,13 +47,12 @@ func GetSubscriptionByChannelSubscriptionId(ctx context.Context, channelSubscrip
 	return
 }
 
-func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId string) []*ro.SubscriptionPlanAddonRo {
-	one := GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	if one == nil || len(one.AddonData) == 0 {
+func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*ro.SubscriptionPlanAddonRo {
+	if len(addonJson) == 0 {
 		return nil
 	}
 	var addonParams []*ro.SubscriptionPlanAddonParamRo
-	err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
+	err := utility.UnmarshalFromJsonString(addonJson, &addonParams)
 	if err != nil {
 		return nil
 	}
@@ -65,19 +64,6 @@ func GetSubscriptionAddonsBySubscriptionId(ctx context.Context, subscriptionId s
 		})
 	}
 	return addons
-}
-
-func GetUnfinishedSubscriptionPendingUpdatesBySubscriptionId(ctx context.Context, subscriptionId string) *entity.SubscriptionPendingUpdate {
-	var one *entity.SubscriptionPendingUpdate
-	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).
-		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
-		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
-		OmitEmpty().Scan(&one)
-	if err != nil {
-		return nil
-	}
-	return one
 }
 
 func GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {

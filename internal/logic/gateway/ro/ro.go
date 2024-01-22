@@ -359,3 +359,34 @@ type SubscriptionDetailRo struct {
 	AddonParams  []*SubscriptionPlanAddonParamRo `p:"addonParams" json:"addonParams" dc:"订阅Addon参数"`
 	Addons       []*SubscriptionPlanAddonRo      `p:"addons" json:"addons" dc:"订阅Addon"`
 }
+
+type SubscriptionPendingUpdateDetail struct {
+	MerchantId           int64                       `json:"merchantId"           description:"商户Id"`                                           // 商户Id
+	SubscriptionId       string                      `json:"subscriptionId"       description:"订阅id（内部编号）"`                                     // 订阅id（内部编号）
+	UpdateSubscriptionId string                      `json:"updateSubscriptionId" description:"升级单ID（内部编号）"`                                    // 升级单ID（内部编号）
+	GmtCreate            *gtime.Time                 `json:"gmtCreate"            description:"创建时间"`                                           // 创建时间
+	Amount               int64                       `json:"amount"               description:"金额,单位：分"`                                        // 金额,单位：分
+	Status               int                         `json:"status"               description:"订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled"` // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	UpdateAmount         int64                       `json:"updateAmount"         description:"升级到金额,单位：分"`                                     // 升级到金额,单位：分
+	Currency             string                      `json:"currency"             description:"货币"`                                             // 货币
+	UpdateCurrency       string                      `json:"updateCurrency"       description:"升级到货币"`                                          // 升级到货币
+	PlanId               int64                       `json:"planId"               description:"计划ID"`                                           // 计划ID
+	UpdatePlanId         int64                       `json:"updatePlanId"         description:"升级到计划ID"`                                        // 升级到计划ID
+	Quantity             int64                       `json:"quantity"             description:"quantity"`                                       // quantity
+	UpdateQuantity       int64                       `json:"updateQuantity"       description:"升级到quantity"`                                    // 升级到quantity
+	AddonData            string                      `json:"addonData"            description:"plan addon json data"`                           // plan addon json data
+	UpdateAddonData      string                      `json:"updateAddonData"     description:"升级到plan addon json data"`                         // 升级到plan addon json data
+	ChannelId            int64                       `json:"channelId"            description:"支付渠道Id"`                                         // 支付渠道Id
+	UserId               int64                       `json:"userId"               description:"userId"`                                         // userId
+	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"修改时间"`                                           // 修改时间
+	Paid                 int                         `json:"paid"                 description:"是否已支付，0-否，1-是"`                                  // 是否已支付，0-否，1-是
+	Link                 string                      `json:"link"                 description:"支付链接"`                                           // 支付链接
+	MerchantUser         *entity.MerchantUserAccount `json:"merchantUser"       description:"merchant_user"`                                    // merchant_user_id
+	EffectImmediate      int                         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                                 // 是否马上生效，0-否，1-是
+	EffectTime           int64                       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`           // effect_immediate=0, 预计生效时间 unit_time
+	AdminNote            string                      `json:"adminNote"            description:"Admin 修改备注"`
+	Plan                 *entity.SubscriptionPlan    `json:"plan" dc:"旧订阅计划"`
+	Addons               []*SubscriptionPlanAddonRo  `json:"addons" dc:"旧订阅Addon"`
+	UpdatePlan           *entity.SubscriptionPlan    `json:"updatePlan" dc:"更新订阅计划"`
+	UpdateAddons         []*SubscriptionPlanAddonRo  `json:"updateAddons" dc:"更新订阅Addon"`
+}

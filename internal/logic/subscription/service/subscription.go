@@ -633,7 +633,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UpdateCurrency:       prepare.Currency,
 		UpdatePlanId:         int64(prepare.Plan.Id),
 		UpdateQuantity:       prepare.Quantity,
-		UpdatedAddonData:     utility.MarshalToJsonString(prepare.AddonParams), // addon 暂定不带上之前订阅
+		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams), // addon 暂定不带上之前订阅
 		Status:               consts.PendingSubStatusInit,
 		Data:                 "", //额外参数配置
 		MerchantUserId:       merchantUserId,

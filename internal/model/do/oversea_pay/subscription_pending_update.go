@@ -28,7 +28,7 @@ type SubscriptionPendingUpdate struct {
 	Quantity             interface{} // quantity
 	UpdateQuantity       interface{} // 升级到quantity
 	AddonData            interface{} // plan addon json data
-	UpdatedAddonData     interface{} // 升级到plan addon json data
+	UpdateAddonData      interface{} // 升级到plan addon json data
 	ChannelId            interface{} // 支付渠道Id
 	UserId               interface{} // userId
 	GmtModify            *gtime.Time // 修改时间

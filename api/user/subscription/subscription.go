@@ -13,12 +13,12 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
 }
 type SubscriptionDetailRes struct {
-	User                                *entity.UserAccount               `json:"user" dc:"user"`
-	Subscription                        *entity.Subscription              `json:"subscription" dc:"订阅"`
-	Plan                                *entity.SubscriptionPlan          `json:"planId" dc:"订阅计划"`
-	Channel                             *ro.OutChannelRo                  `json:"channel" dc:"订阅渠道"`
-	Addons                              []*ro.SubscriptionPlanAddonRo     `json:"addons" dc:"订阅Addon"`
-	UnfinishedSubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"unfinishedSubscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
+	User                                *entity.UserAccount                 `json:"user" dc:"user"`
+	Subscription                        *entity.Subscription                `json:"subscription" dc:"订阅"`
+	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"订阅计划"`
+	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`
+	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
+	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
 }
 
 type SubscriptionPayCheckReq struct {
