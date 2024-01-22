@@ -828,9 +828,10 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:          stripe.String(subscriptionRo.Subscription.ChannelUserId),
-		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
-		SubscriptionItems: items,
+		Customer:                stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Subscription:            stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
+		SubscriptionItems:       items,
+		SubscriptionTrialEndNow: stripe.Bool(true),
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	detail, err := invoice.Upcoming(params)
@@ -981,11 +982,12 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			stripeSubscriptionItems = detail.Items.Data
 		}
 		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
-		newAddonMap := make(map[string]*ro.SubscriptionPlanAddonRo)
+		newMap := make(map[string]*ro.SubscriptionPlanAddonRo)
 		for _, addon := range subscriptionRo.AddonPlans {
-			newAddonMap[addon.AddonPlanChannel.ChannelPlanId] = addon
+			newMap[addon.AddonPlanChannel.ChannelPlanId] = addon
 		}
 		//匹配
+		var replace = false
 		for _, item := range stripeSubscriptionItems {
 			if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
 				items = append(items, &stripe.SubscriptionItemsParams{
@@ -993,14 +995,15 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
 					Quantity: stripe.Int64(subscriptionRo.Quantity),
 				})
-			} else if addon, ok := newAddonMap[item.Price.ID]; ok {
+				replace = true
+			} else if addon, ok := newMap[item.Price.ID]; ok {
 				//替换
 				items = append(items, &stripe.SubscriptionItemsParams{
 					ID:       stripe.String(item.ID),
 					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
 					Quantity: stripe.Int64(addon.Quantity),
 				})
-				delete(newAddonMap, item.Price.ID)
+				delete(newMap, item.Price.ID)
 			} else {
 				//删除之前全部，新增 Plan 和 Addons 方式
 				items = append(items, &stripe.SubscriptionItemsParams{
@@ -1009,8 +1012,14 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 				})
 			}
 		}
+		if !replace {
+			items = append(items, &stripe.SubscriptionItemsParams{
+				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+				Quantity: stripe.Int64(subscriptionRo.Quantity),
+			})
+		}
 		//新增剩余的Addons
-		for channelPlanId, addon := range newAddonMap {
+		for channelPlanId, addon := range newMap {
 			items = append(items, &stripe.SubscriptionItemsParams{
 				Price:    stripe.String(channelPlanId),
 				Quantity: stripe.Int64(addon.Quantity),
@@ -1035,7 +1044,8 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 	}
 
 	params := &stripe.SubscriptionParams{
-		Items: items,
+		Items:       items,
+		TrialEndNow: stripe.Bool(true),
 	}
 	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
