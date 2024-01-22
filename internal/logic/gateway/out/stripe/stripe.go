@@ -854,8 +854,6 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		Customer:          stripe.String(subscriptionRo.Subscription.ChannelUserId),
 		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
 		SubscriptionItems: items,
-		//SubscriptionTrialEndNow: stripe.Bool(true),
-		//SubscriptionTrialEnd:          stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
 		//SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),// 设置了就只会输出 Proration 账单
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
@@ -864,16 +862,6 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	if err != nil {
 		return nil, err
 	}
-
-	//var invoiceItems []*ro2.SubscriptionInvoiceItemRo
-	//for _, line := range result.Lines.Data {
-	//	invoiceItems = append(invoiceItems, &ro2.SubscriptionInvoiceItemRo{
-	//		Currency:    strings.ToUpper(string(line.Currency)),
-	//		Amount:      line.Amount,
-	//		Description: line.Description,
-	//		Proration:   line.Proration,
-	//	})
-	//}
 
 	// 拆开 invoice Proration into invoice,nextPeriodInvoice
 	var currentInvoiceItems []*ro.ChannelDetailInvoiceItem
@@ -1070,8 +1058,6 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 
 	params := &stripe.SubscriptionParams{
 		Items: items,
-		//TrialEnd:          stripe.Int64(subscriptionRo.Subscription.CurrentPeriodStart),
-		//TrialEndNow: stripe.Bool(true),
 	}
 	if subscriptionRo.EffectImmediate {
 		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
