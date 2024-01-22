@@ -500,6 +500,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 		prorationDate = updatePreviewRes.ProrationDate
 		totalAmount = updatePreviewRes.TotalAmount
+		if updatePreviewRes.Invoice.Lines == nil {
+			updatePreviewRes.Invoice.Lines = make([]*ro.ChannelDetailInvoiceItem, 0)
+		}
 		invoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    updatePreviewRes.Invoice.TotalAmount,
 			TotalAmountExcludingTax:        updatePreviewRes.Invoice.TotalAmountExcludingTax,
