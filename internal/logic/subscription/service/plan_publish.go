@@ -78,17 +78,17 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			return err
 		}
 		//更新 planChannel
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+		_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
 			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
 		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
+		//}
 		planChannel.ChannelProductId = res.ChannelProductId
 		planChannel.ChannelProductStatus = res.ChannelProductStatus
 	}
@@ -98,7 +98,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if err != nil {
 			return err
 		}
-		update, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
+		_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionPlanChannel.Columns().ChannelPlanId:     res.ChannelPlanId,
 			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
 			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
@@ -107,10 +107,10 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
+		//}
 		planChannel.ChannelPlanId = res.ChannelPlanId
 		planChannel.ChannelPlanStatus = res.ChannelPlanStatus
 		planChannel.Data = res.Data

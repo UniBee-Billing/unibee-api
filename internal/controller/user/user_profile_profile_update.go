@@ -3,8 +3,6 @@ package user
 import (
 	"context"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 
@@ -14,7 +12,7 @@ import (
 
 func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error) {
 
-	update, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		// dao.UserAccount.Columns().Email :        req.Email,
 		dao.UserAccount.Columns().LastName:        req.LastName,
 		dao.UserAccount.Columns().FirstName:       req.FirstName,
@@ -37,10 +35,10 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 	if err != nil {
 		return nil, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+	//}
 
 	// TODO: return the updated user account
 	return &profile.ProfileUpdateRes{}, nil

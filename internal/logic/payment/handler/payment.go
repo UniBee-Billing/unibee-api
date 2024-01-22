@@ -387,7 +387,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		one.Id = id
 	} else {
 		//更新
-		update, err := dao.Payment.Ctx(ctx).Data(g.Map{
+		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
 			dao.Payment.Columns().MerchantId:             merchantId,
 			dao.Payment.Columns().MerchantId:             merchantId,
 			dao.Payment.Columns().UserId:                 userId,
@@ -416,10 +416,10 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		if err != nil {
 			return nil, err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return nil, gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return nil, gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
+		//}
 	}
 	err := CreateOrUpdatePaymentTimeline(ctx, one, one.PaymentId)
 	if err != nil {
@@ -468,7 +468,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		one.Id = uint64(id)
 	} else {
 		//更新
-		update, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
+		_, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
 			dao.PaymentTimeline.Columns().MerchantId:     payment.MerchantId,
 			dao.PaymentTimeline.Columns().UserId:         payment.UserId,
 			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
@@ -484,10 +484,10 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("CreateOrUpdatePaymentTimeline err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("CreateOrUpdatePaymentTimeline err:%s", update)
+		//}
 	}
 	return nil
 }

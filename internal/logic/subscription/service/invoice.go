@@ -109,7 +109,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	var totalAmount = totalTax + totalAmountExcludingTax
 
 	//更新 Subscription
-	update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().TotalAmount:                    totalAmount,
 		dao.Invoice.Columns().TotalAmountExcludingTax:        totalAmountExcludingTax,
 		dao.Invoice.Columns().TaxAmount:                      totalTax,
@@ -125,10 +125,10 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	if err != nil {
 		return nil, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return nil, gerror.Newf("EditInvoice update err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return nil, gerror.Newf("EditInvoice update err:%s", update)
+	//}
 	one.Currency = req.Currency
 	one.TaxPercentage = req.TaxPercentage
 	one.ChannelId = req.ChannelId
@@ -144,17 +144,17 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 		return nil
 	} else {
 		//更新 Subscription
-		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().IsDeleted: 0,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("EditInvoice update err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("EditInvoice update err:%s", update)
+		//}
 		return nil
 	}
 }
@@ -180,17 +180,17 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 		}
 		// todo mark 重新生成 cancel 状态的 pdf 并发送邮件
 		//更新 Subscription
-		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().Status:    consts.InvoiceStatusCancelled,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("EditInvoice update err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("EditInvoice update err:%s", update)
+		//}
 		return nil
 	}
 }
@@ -217,7 +217,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
 	}
 	//更新 Subscription
-	update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().ChannelUserId:     createRes.ChannelUserId,
 		dao.Invoice.Columns().ChannelInvoiceId:  createRes.ChannelInvoiceId,
 		dao.Invoice.Columns().ChannelInvoicePdf: createRes.ChannelInvoicePdf,
@@ -228,10 +228,10 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	if err != nil {
 		return nil, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return nil, gerror.Newf("FinishInvoice update err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return nil, gerror.Newf("FinishInvoice update err:%s", update)
+	//}
 	one.Status = int(createRes.Status)
 	one.Link = createRes.Link
 	one.ChannelUserId = createRes.ChannelUserId

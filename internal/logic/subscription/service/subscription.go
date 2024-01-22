@@ -299,7 +299,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	}
 
 	//更新 Subscription
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId,
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
@@ -310,10 +310,10 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return nil, gerror.Newf("SubscriptionCreate update err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return nil, gerror.Newf("SubscriptionCreate update err:%s", update)
+	//}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
 	one.Status = consts.PlanChannelStatusCreate
 	one.Link = createRes.Link
@@ -746,17 +746,17 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	if err != nil {
 		return err
 	}
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:    consts.SubStatusPendingInActive,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("SubscriptionCancel update subscription err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("SubscriptionCancel update subscription err:%s", update)
+	//}
 	return nil
 }
 
@@ -782,17 +782,17 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	if err != nil {
 		return err
 	}
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 1, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("SubscriptionCancel subscription err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("SubscriptionCancel subscription err:%s", update)
+	//}
 	return nil
 }
 
@@ -817,17 +817,17 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	if err != nil {
 		return err
 	}
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 0, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("SubscriptionCancel subscription err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("SubscriptionCancel subscription err:%s", update)
+	//}
 	return nil
 }
 

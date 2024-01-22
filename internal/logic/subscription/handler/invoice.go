@@ -94,7 +94,7 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		if one.Status != int(details.Status) {
 			change = true
 		}
-		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().MerchantId:                     merchantId,
 			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
 			dao.Invoice.Columns().ChannelId:                      channelId,
@@ -124,10 +124,10 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 		if err != nil {
 			return err
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			return gerror.Newf("CreateOrUpdateInvoiceByDetail err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	return gerror.Newf("CreateOrUpdateInvoiceByDetail err:%s", update)
+		//}
 		invoiceId = one.InvoiceId
 	}
 
@@ -164,17 +164,17 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 		utility.Assert(one != nil, "invoice not found")
 		url := GenerateAndUploadInvoicePdf(backgroundCtx, one)
 		if len(url) > 0 {
-			update, err := dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
+			_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
 				dao.Invoice.Columns().SendPdf:   url,
 				dao.Invoice.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 			if err != nil {
-				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", update)
+				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", err.Error())
 			}
-			rowAffected, err := update.RowsAffected()
-			if rowAffected != 1 {
-				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", update)
-			}
+			//rowAffected, err := update.RowsAffected()
+			//if rowAffected != 1 {
+			//	fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", update)
+			//}
 		}
 		if sendUserEmail {
 			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
@@ -197,17 +197,17 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 			return err
 		}
 		//修改发送状态
-		update, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendStatus: 1,
 			dao.Invoice.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
+			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
 		}
-		rowAffected, err := update.RowsAffected()
-		if rowAffected != 1 {
-			fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
-		}
+		//rowAffected, err := update.RowsAffected()
+		//if rowAffected != 1 {
+		//	fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
+		//}
 	} else {
 		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
 	}

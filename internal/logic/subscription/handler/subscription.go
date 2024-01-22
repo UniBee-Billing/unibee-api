@@ -26,7 +26,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
 		firstPayTime = gtime.Now()
 	}
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 details.Status,
 		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
 		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
@@ -45,10 +45,10 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
+	//}
 	//处理更新事件 todo mark
 
 	return nil
@@ -72,7 +72,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 
 func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	// todo 使用事务
-	update, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
 		dao.Subscription.Columns().AddonData: one.UpdateAddonData,
@@ -83,10 +83,10 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	if err != nil {
 		return false, err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return false, gerror.Newf("SubscriptionPendingUpdate update subscription err:%s", update)
+	//}
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),

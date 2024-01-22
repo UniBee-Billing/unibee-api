@@ -2,7 +2,6 @@ package query
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
@@ -72,31 +71,31 @@ func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.Ove
 }
 
 func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId string) error {
-	update, err := dao.OverseaPayChannel.Ctx(ctx).Data(g.Map{
+	_, err := dao.OverseaPayChannel.Ctx(ctx).Data(g.Map{
 		dao.OverseaPayChannel.Columns().UniqueProductId: productId,
 		dao.OverseaPayChannel.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.OverseaPayChannel.Columns().Id, id).Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("savePayChannelUniqueProductId update err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("savePayChannelUniqueProductId update err:%s", update)
+	//}
 	return nil
 }
 
 func UpdatePayChannelWebhookSecret(ctx context.Context, id int64, secret string) error {
-	update, err := dao.OverseaPayChannel.Ctx(ctx).Data(g.Map{
+	_, err := dao.OverseaPayChannel.Ctx(ctx).Data(g.Map{
 		dao.OverseaPayChannel.Columns().WebhookSecret: secret,
 		dao.OverseaPayChannel.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.OverseaPayChannel.Columns().Id, id).Update()
 	if err != nil {
 		return err
 	}
-	rowAffected, err := update.RowsAffected()
-	if rowAffected != 1 {
-		return gerror.Newf("UpdatePayChannelWebhookSecret update err:%s", update)
-	}
+	//rowAffected, err := update.RowsAffected()
+	//if rowAffected != 1 {
+	//	return gerror.Newf("UpdatePayChannelWebhookSecret update err:%s", update)
+	//}
 	return nil
 }
