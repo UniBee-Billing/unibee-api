@@ -110,7 +110,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 	}
-	// todo 使用事务
+	// todo mark 使用事务
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:          one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:        one.UpdateQuantity,
