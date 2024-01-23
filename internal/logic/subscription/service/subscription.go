@@ -138,9 +138,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		if err != nil {
 			return nil, err
 		}
-		if !vatNumberValidate.Valid {
-			return nil, gerror.New("vat number validate failure:" + req.VatNumber)
-		}
+		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("vat number validate failure:"+req.VatNumber))
 		vatCountryCode = vatNumberValidate.CountryCode
 	}
 
