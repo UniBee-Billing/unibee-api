@@ -303,6 +303,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *r
 	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
 			Payment:                   payment,
+			ChannelInvoiceDetail:      details.ChannelInvoiceDetail,
 			ChannelSubscriptionDetail: details.ChannelSubscriptionDetail,
 			ChannelPaymentId:          details.ChannelPaymentId,
 			ChannelSubscriptionId:     details.ChannelInvoiceDetail.ChannelSubscriptionId,

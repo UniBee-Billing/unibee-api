@@ -90,6 +90,7 @@ func UpdateSubWithPayment(ctx context.Context, subscription *entity.Subscription
 type SubscriptionPaymentSuccessWebHookReq struct {
 	Payment                   *entity.Payment                           `json:"payment" `
 	ChannelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelInvoiceDetail      *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
 	ChannelPaymentId          string                                    `json:"channelPaymentId" `
 	ChannelSubscriptionId     string                                    `json:"channelSubscriptionId" `
 	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
@@ -168,8 +169,10 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 		}
 	}
 	err := UpdateSubWithPayment(ctx, sub, req.ChannelSubscriptionDetail)
-	// todo mark sub 更新成功，根据sub 和 payment 生成 Invoice
-
+	if err != nil {
+		return err
+	}
+	err = CreateInvoiceFromSubscriptionPaymentSuccess(ctx, sub.SubscriptionId, req.Payment, req.ChannelInvoiceDetail)
 	if err != nil {
 		return err
 	}

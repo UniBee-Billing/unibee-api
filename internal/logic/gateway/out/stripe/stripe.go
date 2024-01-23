@@ -104,16 +104,17 @@ func parseStripePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
 }
 
 func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
+	//https://stripe.com/docs/billing/subscriptions/overview
 	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
 	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
 		strings.Compare(string(subscription.Status), "active") == 0 {
 		status = consts.SubStatusActive
-	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
-		strings.Compare(string(subscription.Status), "unpaid") == 0 {
+	} else if strings.Compare(string(subscription.Status), "unpaid") == 0 {
 		status = consts.SubStatusCreate
 	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
 		status = consts.SubStatusExpired
-	} else if strings.Compare(string(subscription.Status), "pass_due") == 0 {
+	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
+		strings.Compare(string(subscription.Status), "pass_due") == 0 {
 		status = consts.SubStatusPendingInActive
 	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended

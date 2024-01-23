@@ -17,7 +17,9 @@ import (
 )
 
 func HandleInvoiceWebhookEvent(ctx context.Context, eventType string, details *ro.ChannelDetailInvoiceInternalResp) error {
-	return CreateOrUpdateInvoiceByChannelDetail(ctx, details, details.ChannelInvoiceId)
+	//return CreateOrUpdateInvoiceByChannelDetail(ctx, details, details.ChannelInvoiceId)
+	// 不再由 Invoice Hook 触发产生发票，改由 Payment Hook 自行生成发票
+	return nil
 }
 
 func CreateOrUpdateInvoiceByChannelDetail(ctx context.Context, details *ro.ChannelDetailInvoiceInternalResp, uniqueId string) error {
@@ -125,39 +127,53 @@ func CreateOrUpdateInvoiceByChannelDetail(ctx context.Context, details *ro.Chann
 	return nil
 }
 
-func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscriptionId string, payment *entity.Payment) error {
+func CreateInvoiceFromSubscriptionPaymentFailure(ctx context.Context, subscriptionId string, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
+	//https://stripe.com/docs/billing/subscriptions/overview#requires-payment-method
+	return nil
+}
+
+func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscriptionId string, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	one := query.GetInvoiceByChannelUniqueId(ctx, payment.PaymentId)
+	invoice := CalculateInvoiceForSubscription(ctx, sub)
+	var channelInvoicePdf = ""
+	var channelInvoiceStatus = ""
+	var channelLink = ""
+	if channelDetailInvoiceInternalResp != nil {
+		channelInvoicePdf = channelDetailInvoiceInternalResp.ChannelInvoicePdf
+		channelInvoiceStatus = channelDetailInvoiceInternalResp.ChannelStatus
+		channelLink = channelDetailInvoiceInternalResp.Link
+	}
 	if one == nil {
 		//创建
 		one = &entity.Invoice{
-			UserId:           sub.UserId,
-			MerchantId:       sub.MerchantId,
-			SubscriptionId:   sub.SubscriptionId,
-			InvoiceId:        utility.CreateInvoiceId(),
-			PeriodStart:      sub.CurrentPeriodStart,
-			PeriodEnd:        sub.CurrentPeriodEnd,
-			PeriodStartTime:  gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
-			PeriodEndTime:    gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
-			Currency:         sub.Currency,
-			ChannelId:        sub.ChannelId,
-			Status:           consts.InvoiceStatusPaid,
-			SendStatus:       0,
-			SendEmail:        sub.CustomerEmail,
-			ChannelUserId:    sub.ChannelUserId,
-			ChannelInvoiceId: payment.ChannelInvoiceId,
-			ChannelPaymentId: payment.ChannelPaymentId,
-			UniqueId:         payment.PaymentId,
-			TotalAmount:      sub.Amount,
-			//TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
-			//TaxAmount:                      details.TaxAmount,
-			//SubscriptionAmount:             details.SubscriptionAmount,
-			//SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
-			//Lines:             utility.MarshalToJsonString(details.Lines),
-			//Link:              details.Link,
-			//ChannelStatus:     details.ChannelStatus,
-			//ChannelInvoicePdf: details.ChannelInvoicePdf,
+			UserId:                         sub.UserId,
+			MerchantId:                     sub.MerchantId,
+			SubscriptionId:                 sub.SubscriptionId,
+			InvoiceId:                      utility.CreateInvoiceId(),
+			PeriodStart:                    sub.CurrentPeriodStart,
+			PeriodEnd:                      sub.CurrentPeriodEnd,
+			PeriodStartTime:                gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
+			PeriodEndTime:                  gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+			Currency:                       sub.Currency,
+			ChannelId:                      sub.ChannelId,
+			Status:                         consts.InvoiceStatusPaid,
+			SendStatus:                     0,
+			SendEmail:                      sub.CustomerEmail,
+			ChannelUserId:                  sub.ChannelUserId,
+			ChannelInvoiceId:               payment.ChannelInvoiceId,
+			ChannelPaymentId:               payment.ChannelPaymentId,
+			UniqueId:                       payment.PaymentId,
+			TotalAmount:                    sub.Amount,
+			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
+			TaxAmount:                      invoice.TaxAmount,
+			SubscriptionAmount:             invoice.SubscriptionAmount,
+			SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
+			Lines:                          utility.MarshalToJsonString(invoice.Lines),
+			Link:                           channelLink,
+			ChannelStatus:                  channelInvoiceStatus,
+			ChannelInvoicePdf:              channelInvoicePdf,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -167,40 +183,86 @@ func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscripti
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
-
+		//新建 Invoice 发送邮件
+		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	} else {
 		//更新
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().MerchantId:       sub.MerchantId,
-			dao.Invoice.Columns().UserId:           sub.UserId,
-			dao.Invoice.Columns().SubscriptionId:   sub.SubscriptionId,
-			dao.Invoice.Columns().ChannelId:        sub.ChannelId,
-			dao.Invoice.Columns().PeriodStart:      sub.CurrentPeriodStart,
-			dao.Invoice.Columns().PeriodEnd:        sub.CancelAtPeriodEnd,
-			dao.Invoice.Columns().PeriodStartTime:  gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
-			dao.Invoice.Columns().PeriodEndTime:    gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
-			dao.Invoice.Columns().Currency:         sub.Currency,
-			dao.Invoice.Columns().Status:           consts.InvoiceStatusPaid,
-			dao.Invoice.Columns().ChannelInvoiceId: payment.ChannelInvoiceId,
-			dao.Invoice.Columns().ChannelUserId:    sub.ChannelUserId,
-			dao.Invoice.Columns().SendEmail:        sub.CustomerEmail,
-			dao.Invoice.Columns().GmtModify:        gtime.Now(),
-			dao.Invoice.Columns().ChannelPaymentId: payment.ChannelPaymentId,
-			dao.Invoice.Columns().TotalAmount:      sub.Amount,
-			//dao.Invoice.Columns().TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
-			//dao.Invoice.Columns().TaxAmount:                      details.TaxAmount,
-			//dao.Invoice.Columns().SubscriptionAmount:             details.SubscriptionAmount,
-			//dao.Invoice.Columns().SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
-			//dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(details.Lines),
-			//dao.Invoice.Columns().Link:                           details.Link,
-			//dao.Invoice.Columns().ChannelStatus:                  details.ChannelStatus,
-			//dao.Invoice.Columns().ChannelInvoicePdf:              details.ChannelInvoicePdf,
+			dao.Invoice.Columns().MerchantId:                     sub.MerchantId,
+			dao.Invoice.Columns().UserId:                         sub.UserId,
+			dao.Invoice.Columns().SubscriptionId:                 sub.SubscriptionId,
+			dao.Invoice.Columns().ChannelId:                      sub.ChannelId,
+			dao.Invoice.Columns().PeriodStart:                    sub.CurrentPeriodStart,
+			dao.Invoice.Columns().PeriodEnd:                      sub.CancelAtPeriodEnd,
+			dao.Invoice.Columns().PeriodStartTime:                gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
+			dao.Invoice.Columns().PeriodEndTime:                  gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+			dao.Invoice.Columns().Currency:                       sub.Currency,
+			dao.Invoice.Columns().Status:                         consts.InvoiceStatusPaid,
+			dao.Invoice.Columns().ChannelInvoiceId:               payment.ChannelInvoiceId,
+			dao.Invoice.Columns().ChannelUserId:                  sub.ChannelUserId,
+			dao.Invoice.Columns().SendEmail:                      sub.CustomerEmail,
+			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
+			dao.Invoice.Columns().ChannelPaymentId:               payment.ChannelPaymentId,
+			dao.Invoice.Columns().TotalAmount:                    sub.Amount,
+			dao.Invoice.Columns().TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
+			dao.Invoice.Columns().TaxAmount:                      invoice.TaxAmount,
+			dao.Invoice.Columns().SubscriptionAmount:             invoice.SubscriptionAmount,
+			dao.Invoice.Columns().SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
+			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(invoice.Lines),
+			dao.Invoice.Columns().Link:                           channelLink,
+			dao.Invoice.Columns().ChannelStatus:                  channelInvoiceStatus,
+			dao.Invoice.Columns().ChannelInvoicePdf:              channelInvoicePdf,
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
+		if one.Status != consts.InvoiceStatusPaid {
+			//更新状态发送邮件
+			_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		}
 	}
 	return nil
+}
+
+func CalculateInvoiceForSubscription(ctx context.Context, sub *entity.Subscription) *ro.ChannelDetailInvoiceRo {
+	plan := query.GetPlanById(ctx, sub.PlanId)
+	addons := query.GetSubscriptionAddonsByAddonJson(ctx, sub.AddonData)
+	var totalAmountExcludingTax = plan.Amount * sub.Quantity
+	for _, addon := range addons {
+		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
+	}
+
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		Currency:               sub.Currency,
+		Amount:                 sub.Quantity*plan.Amount + int64(float64(sub.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+		AmountExcludingTax:     sub.Quantity * plan.Amount,
+		Tax:                    int64(float64(sub.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+		UnitAmountExcludingTax: plan.Amount,
+		Description:            plan.PlanName,
+		Quantity:               sub.Quantity,
+	})
+	for _, addon := range addons {
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               sub.Currency,
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
+			UnitAmountExcludingTax: addon.AddonPlan.Amount,
+			Description:            addon.AddonPlan.PlanName,
+			Quantity:               addon.Quantity,
+		})
+	}
+	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
+	return &ro.ChannelDetailInvoiceRo{
+		TotalAmount:                    totalAmountExcludingTax + taxAmount,
+		TotalAmountExcludingTax:        totalAmountExcludingTax,
+		Currency:                       sub.Currency,
+		TaxAmount:                      taxAmount,
+		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
+		Lines:                          invoiceItems,
+	}
 }
 
 func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
