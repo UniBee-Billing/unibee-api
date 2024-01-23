@@ -50,9 +50,9 @@ func (c *ControllerInvoice) BulkChannelSync(ctx context.Context, req *invoice.Bu
 				utility.Assert(payChannel != nil, "invalid planChannel")
 				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
 				if err == nil {
-					err := handler.CreateOrUpdateInvoiceByDetail(backgroundCtx, details, details.ChannelInvoiceId)
+					err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.ChannelInvoiceId)
 					if err != nil {
-						fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByDetail ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
+						fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByChannelDetail ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
 						return
 					}
 					fmt.Printf("BulkChannelSync Background Fetch ChannelInvoiceId:%s success\n", one.ChannelInvoiceId)
