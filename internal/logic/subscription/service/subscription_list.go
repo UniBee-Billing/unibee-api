@@ -22,9 +22,9 @@ type SubscriptionListInternalReq struct {
 	MerchantId int64  `p:"merchantId" dc:"MerchantId"`
 	UserId     int64  `p:"userId"  dc:"UserId" `
 	Status     int    `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
-	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
+	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page       int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
 	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 
@@ -81,7 +81,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*ro.SubscriptionDetailRo) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量默认 10
+		req.Count = 10 //每页数量Default 10
 	}
 	if req.Page < 0 {
 		req.Page = 0

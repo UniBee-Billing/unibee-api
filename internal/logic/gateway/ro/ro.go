@@ -195,7 +195,7 @@ type ChannelUpdateSubscriptionInternalResp struct {
 type ChannelDetailSubscriptionInternalResp struct {
 	Status                 consts.SubscriptionStatusEnum `json:"status"`
 	ChannelSubscriptionId  string                        `json:"channelSubscriptionId"`
-	ChannelStatus          string                        `json:"channelStatus"                  ` // 货币
+	ChannelStatus          string                        `json:"channelStatus"                  `
 	Data                   string                        `json:"data"`
 	ChannelItemData        string                        `json:"channelItemData"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
@@ -257,21 +257,21 @@ type ChannelCancelInvoiceInternalReq struct {
 }
 
 type ChannelDetailInvoiceInternalResp struct {
-	ChannelSubscriptionId          string                      `json:"channelSubscriptionId"           ` // 货币
-	TotalAmount                    int64                       `json:"totalAmount"        `              // 金额,单位：分
-	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        `  // 金额,单位：分
-	TaxAmount                      int64                       `json:"taxAmount"          `              // Tax金额,单位：分
-	SubscriptionAmount             int64                       `json:"subscriptionAmount" `              // Sub金额,单位：分
-	SubscriptionAmountExcludingTax int64                       `json:"subscriptionAmountExcludingTax" `  // Sub金额,单位：分
-	Currency                       string                      `json:"currency"           `              // 货币
-	Lines                          []*ChannelDetailInvoiceItem `json:"lines"              `              // lines json data
-	ChannelId                      int64                       `json:"channelId"          `              // 支付渠道Id
-	Status                         consts.InvoiceStatusEnum    `json:"status"             `              // 订阅单状态，0-Init | 1-Pending ｜2-Processing｜3-paid | 4-failed | 5-cancelled
-	ChannelUserId                  string                      `json:"channelUserId"             `       // channelUserId
-	Link                           string                      `json:"link"               `              //
-	ChannelStatus                  string                      `json:"channelStatus"      `              // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelInvoiceId               string                      `json:"channelInvoiceId"   `              // 关联渠道发票 Id
-	ChannelInvoicePdf              string                      `json:"ChannelInvoicePdf"   `             // 关联渠道发票 Pdf
+	ChannelSubscriptionId          string                      `json:"channelSubscriptionId"           `
+	TotalAmount                    int64                       `json:"totalAmount"        `
+	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        `
+	TaxAmount                      int64                       `json:"taxAmount"          `             // Tax金额,单位：分
+	SubscriptionAmount             int64                       `json:"subscriptionAmount" `             // Sub金额,单位：分
+	SubscriptionAmountExcludingTax int64                       `json:"subscriptionAmountExcludingTax" ` // Sub金额,单位：分
+	Currency                       string                      `json:"currency"           `
+	Lines                          []*ChannelDetailInvoiceItem `json:"lines"              `        // lines json data
+	ChannelId                      int64                       `json:"channelId"          `        // 支付渠道Id
+	Status                         consts.InvoiceStatusEnum    `json:"status"             `        // 订阅单状态，0-Init | 1-Pending ｜2-Processing｜3-paid | 4-failed | 5-cancelled
+	ChannelUserId                  string                      `json:"channelUserId"             ` // channelUserId
+	Link                           string                      `json:"link"               `        //
+	ChannelStatus                  string                      `json:"channelStatus"      `        // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelInvoiceId               string                      `json:"channelInvoiceId"   `        // 关联渠道发票 Id
+	ChannelInvoicePdf              string                      `json:"ChannelInvoicePdf"   `       // 关联渠道发票 Pdf
 	PeriodEnd                      int64                       `json:"periodEnd"`
 	PeriodStart                    int64                       `json:"periodStart"`
 	ChannelPaymentId               string                      `json:"channelPaymentId"`
@@ -301,19 +301,19 @@ type ChannelDetailInvoiceItem struct {
 }
 
 type InvoiceDetailRo struct {
-	Id                             uint64                      `json:"id"                             description:""`                                                                      //
-	MerchantId                     int64                       `json:"merchantId"                     description:"商户Id"`                                                                  // 商户Id
-	UserId                         int64                       `json:"userId"                         description:"userId"`                                                                // userId
-	SubscriptionId                 string                      `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                                            // 订阅id（内部编号）
-	InvoiceName                    string                      `json:"invoiceName"                    description:"发票名称"`                                                                  // 发票名称
-	InvoiceId                      string                      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                                            // 发票ID（内部编号）
-	ChannelInvoiceId               string                      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
-	UniqueId                       string                      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"`                // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      description:"创建时间"`                                                                  // 创建时间
-	TotalAmount                    int64                       `json:"totalAmount"                    description:"金额,单位：分"`                                                               // 金额,单位：分
-	TaxAmount                      int64                       `json:"taxAmount"                      description:"Tax金额,单位：分"`                                                            // Tax金额,单位：分
-	SubscriptionAmount             int64                       `json:"subscriptionAmount"             description:"Sub金额,单位：分"`                                                            // Sub金额,单位：分
-	Currency                       string                      `json:"currency"                       description:"货币"`                                                                    // 货币
+	Id                             uint64                      `json:"id"                             description:""`                                                       //
+	MerchantId                     int64                       `json:"merchantId"                     description:"商户Id"`                                                   // 商户Id
+	UserId                         int64                       `json:"userId"                         description:"userId"`                                                 // userId
+	SubscriptionId                 string                      `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                             // 订阅id（内部编号）
+	InvoiceName                    string                      `json:"invoiceName"                    description:"发票名称"`                                                   // 发票名称
+	InvoiceId                      string                      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                             // 发票ID（内部编号）
+	ChannelInvoiceId               string                      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                              // 关联渠道发票 Id
+	UniqueId                       string                      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      description:"创建时间"`                                                   // 创建时间
+	TotalAmount                    int64                       `json:"totalAmount"                    description:"金额,单位：分"`
+	TaxAmount                      int64                       `json:"taxAmount"                      description:"Tax金额,单位：分"` // Tax金额,单位：分
+	SubscriptionAmount             int64                       `json:"subscriptionAmount"             description:"Sub金额,单位：分"` // Sub金额,单位：分
+	Currency                       string                      `json:"currency"                       description:"货币"`
 	Lines                          []*ChannelDetailInvoiceItem `json:"lines"                          description:"lines json data"`                                                       // lines json data
 	ChannelId                      int64                       `json:"channelId"                      description:"支付渠道Id"`                                                                // 支付渠道Id
 	Status                         int                         `json:"status"                         description:"订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // 订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
@@ -347,7 +347,7 @@ type PlanDetailRo struct {
 }
 
 type SubscriptionPlanAddonParamRo struct {
-	Quantity    int64 `p:"quantity" json:"quantity" dc:"数量，默认 1" `
+	Quantity    int64 `p:"quantity" json:"quantity" dc:"数量，Default 1" `
 	AddonPlanId int64 `p:"addonPlanId" json:"addonPlanId" dc:"订阅计划Addon ID"`
 }
 
@@ -367,29 +367,29 @@ type SubscriptionDetailRo struct {
 }
 
 type SubscriptionPendingUpdateDetail struct {
-	MerchantId           int64                       `json:"merchantId"           description:"商户Id"`                                           // 商户Id
-	SubscriptionId       string                      `json:"subscriptionId"       description:"订阅id（内部编号）"`                                     // 订阅id（内部编号）
-	UpdateSubscriptionId string                      `json:"updateSubscriptionId" description:"升级单ID（内部编号）"`                                    // 升级单ID（内部编号）
-	GmtCreate            *gtime.Time                 `json:"gmtCreate"            description:"创建时间"`                                           // 创建时间
-	Amount               int64                       `json:"amount"               description:"金额,单位：分"`                                        // 金额,单位：分
+	MerchantId           int64                       `json:"merchantId"           description:"商户Id"`        // 商户Id
+	SubscriptionId       string                      `json:"subscriptionId"       description:"订阅id（内部编号）"`  // 订阅id（内部编号）
+	UpdateSubscriptionId string                      `json:"updateSubscriptionId" description:"升级单ID（内部编号）"` // 升级单ID（内部编号）
+	GmtCreate            *gtime.Time                 `json:"gmtCreate"            description:"创建时间"`        // 创建时间
+	Amount               int64                       `json:"amount"               description:"金额,单位：分"`
 	Status               int                         `json:"status"               description:"订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled"` // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	UpdateAmount         int64                       `json:"updateAmount"         description:"升级到金额,单位：分"`                                     // 升级到金额,单位：分
-	Currency             string                      `json:"currency"             description:"货币"`                                             // 货币
-	UpdateCurrency       string                      `json:"updateCurrency"       description:"升级到货币"`                                          // 升级到货币
-	PlanId               int64                       `json:"planId"               description:"计划ID"`                                           // 计划ID
-	UpdatePlanId         int64                       `json:"updatePlanId"         description:"升级到计划ID"`                                        // 升级到计划ID
-	Quantity             int64                       `json:"quantity"             description:"quantity"`                                       // quantity
-	UpdateQuantity       int64                       `json:"updateQuantity"       description:"升级到quantity"`                                    // 升级到quantity
-	AddonData            string                      `json:"addonData"            description:"plan addon json data"`                           // plan addon json data
-	UpdateAddonData      string                      `json:"updateAddonData"     description:"升级到plan addon json data"`                         // 升级到plan addon json data
-	ChannelId            int64                       `json:"channelId"            description:"支付渠道Id"`                                         // 支付渠道Id
-	UserId               int64                       `json:"userId"               description:"userId"`                                         // userId
-	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"修改时间"`                                           // 修改时间
-	Paid                 int                         `json:"paid"                 description:"是否已支付，0-否，1-是"`                                  // 是否已支付，0-否，1-是
-	Link                 string                      `json:"link"                 description:"支付链接"`                                           // 支付链接
-	MerchantUser         *entity.MerchantUserAccount `json:"merchantUser"       description:"merchant_user"`                                    // merchant_user_id
-	EffectImmediate      int                         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                                 // 是否马上生效，0-否，1-是
-	EffectTime           int64                       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`           // effect_immediate=0, 预计生效时间 unit_time
+	Currency             string                      `json:"currency"             description:"货币"`
+	UpdateCurrency       string                      `json:"updateCurrency"       description:"升级到货币"`                                // 升级到货币
+	PlanId               int64                       `json:"planId"               description:"计划ID"`                                 // 计划ID
+	UpdatePlanId         int64                       `json:"updatePlanId"         description:"升级到计划ID"`                              // 升级到计划ID
+	Quantity             int64                       `json:"quantity"             description:"quantity"`                             // quantity
+	UpdateQuantity       int64                       `json:"updateQuantity"       description:"升级到quantity"`                          // 升级到quantity
+	AddonData            string                      `json:"addonData"            description:"plan addon json data"`                 // plan addon json data
+	UpdateAddonData      string                      `json:"updateAddonData"     description:"升级到plan addon json data"`               // 升级到plan addon json data
+	ChannelId            int64                       `json:"channelId"            description:"支付渠道Id"`                               // 支付渠道Id
+	UserId               int64                       `json:"userId"               description:"userId"`                               // userId
+	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"修改时间"`                                 // 修改时间
+	Paid                 int                         `json:"paid"                 description:"是否已支付，0-否，1-是"`                        // 是否已支付，0-否，1-是
+	Link                 string                      `json:"link"                 description:"支付链接"`                                 // 支付链接
+	MerchantUser         *entity.MerchantUserAccount `json:"merchantUser"       description:"merchant_user"`                          // merchant_user_id
+	EffectImmediate      int                         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                       // 是否马上生效，0-否，1-是
+	EffectTime           int64                       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"` // effect_immediate=0, 预计生效时间 unit_time
 	AdminNote            string                      `json:"adminNote"            description:"Admin 修改备注"`
 	Plan                 *entity.SubscriptionPlan    `json:"plan" dc:"旧订阅计划"`
 	Addons               []*SubscriptionPlanAddonRo  `json:"addons" dc:"旧订阅Addon"`

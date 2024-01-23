@@ -9,12 +9,12 @@ import (
 )
 
 type SubscriptionTimeLineListInternalReq struct {
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	UserId     int    `p:"userId" dc:"UserId 不填查询所有" `
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc" `
-	Page       int    `p:"page"  dc:"分页页码,0开始" `
-	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
+	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `
+	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
+	Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `
 }
 
 type SubscriptionTimeLineListInternalRes struct {
@@ -24,7 +24,7 @@ type SubscriptionTimeLineListInternalRes struct {
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
 	var mainList []*entity.SubscriptionTimeline
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量默认 10
+		req.Count = 10 //每页数量Default 10
 	}
 	if req.Page < 0 {
 		req.Page = 0

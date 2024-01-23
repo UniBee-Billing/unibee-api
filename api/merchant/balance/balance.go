@@ -6,9 +6,9 @@ import (
 )
 
 type DetailQueryReq struct {
-	g.Meta     `path:"/merchant_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Merchant余额查询"`
-	ChannelId  int64 `p:"channelId" dc:"channelId" v:"required#请输入 ChannelId"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	g.Meta     `path:"/merchant_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query Merchant Gateway Balance"`
+	ChannelId  int64 `p:"channelId" dc:"channelId" v:"required"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
 type DetailQueryRes struct {
@@ -18,10 +18,10 @@ type DetailQueryRes struct {
 }
 
 type UserDetailQueryReq struct {
-	g.Meta     `path:"/user_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"User余额查询"`
-	UserId     int64 `p:"userId" dc:"userId" v:"required#请输入 UserId"`
-	ChannelId  int64 `p:"channelId" dc:"channelId" v:"required#请输入 ChannelId"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	g.Meta     `path:"/user_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query User Balance"`
+	UserId     int64 `p:"userId" dc:"userId" v:"required"`
+	ChannelId  int64 `p:"channelId" dc:"channelId" v:"required"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
 type UserDetailQueryRes struct {

@@ -7,7 +7,7 @@ import (
 
 type PaymentsReq struct {
 	g.Meta                   `path:"/payments" tags:"Open-Payment-Controller" method:"post" summary:"1.1 用于接收商户段的请求（包括 token 请求）"`
-	MerchantId               int64              `p:"merchantId" dc:"商户号" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
+	MerchantId               int64              `p:"merchantId" dc:"商户号" v:"required长度为:{min}到:{max}位"`
 	Reference                string             `p:"reference" dc:"取消单号" v:"required"`
 	Amount                   *PayAmountVo       `json:"amount"   in:"query" dc:"具体金额" v:"required"`
 	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"支付方式" v:"required"`

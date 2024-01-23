@@ -7,51 +7,51 @@ import (
 )
 
 type LoginReq struct {
-	g.Meta   `path:"/sso/login" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.1 用户登录"`
-	Email    string `p:"email" dc:"email" v:"required"`
-	Password string `p:"password" dc:"password" v:"required"`
+	g.Meta   `path:"/sso/login" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Login"`
+	Email    string `p:"email" dc:"Email" v:"required"`
+	Password string `p:"password" dc:"Password" v:"required"`
 }
 
 type LoginRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"merchant user"`
-	Token        string                      `p:"token" dc:"token string"`
+	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"Merchant User"`
+	Token        string                      `p:"token" dc:"Token"`
 }
 
 type LoginOtpReq struct {
-	g.Meta `path:"/sso/loginOTP" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
-	Email  string `p:"email" dc:"email" v:"required"`
+	g.Meta `path:"/sso/loginOTP" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Login OTP"`
+	Email  string `p:"email" dc:"Email" v:"required"`
 }
 
 type LoginOtpRes struct {
 }
 
 type LoginOtpVerifyReq struct {
-	g.Meta           `path:"/sso/loginOTPVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
-	Email            string `p:"email" dc:"email" v:"required"`
-	VerificationCode string `p:"verificationCode" dc:"verificationCode" v:"required"`
+	g.Meta           `path:"/sso/loginOTPVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User OTP Login Verify Code"`
+	Email            string `p:"email" dc:"Email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }
 
 type LoginOtpVerifyRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"merchant user"`
-	Token        string                      `p:"token" dc:"token string"`
+	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"Merchant User"`
+	Token        string                      `p:"token" dc:"Token"`
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/sso/logout" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.1 user logout"`
+	g.Meta `path:"/sso/logout" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User Logout"`
 }
 
 type LogoutRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta     `path:"/sso/register" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.1 用户注册"`
-	FirstName  string `p:"firstName" dc:"first name" v:"required"`
-	LastName   string `p:"lastName" dc:"last name" v:"required"`
-	Email      string `p:"email" dc:"email" v:"required"`
-	Password   string `p:"password" dc:"password" v:"required"`
-	Phone      string `p:"phone" dc:"phone"`
-	MerchantId uint64 `p:"merchantId" dc:"merchant id" v:"required"`
-	UserName   string `p:"userName" dc:"user name"`
+	g.Meta     `path:"/sso/register" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User Register"`
+	FirstName  string `p:"firstName" dc:"First Name" v:"required"`
+	LastName   string `p:"lastName" dc:"Last Name" v:"required"`
+	Email      string `p:"email" dc:"Email" v:"required"`
+	Password   string `p:"password" dc:"Password" v:"required"`
+	Phone      string `p:"phone" dc:"Phone"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserName   string `p:"userName" dc:"UserName"`
 	// Address   string `p:"address" dc:"adderss"`
 }
 type RegisterRes struct {
@@ -59,12 +59,12 @@ type RegisterRes struct {
 }
 
 type RegisterVerifyReq struct {
-	g.Meta           `path:"/sso/registerVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"1.2 用户注册(verify email)"`
-	Email            string `p:"email" dc:"email" v:"required"`
-	VerificationCode string `p:"verificationCode" dc:"verification code" v:"required"`
+	g.Meta           `path:"/sso/registerVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Verify Email"`
+	Email            string `p:"email" dc:"Email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }
 
 // NO, after successful signup, res should be empty, front-end should be redirectd to /login
 type RegisterVerifyRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"merchant user"`
+	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"MerchantUser"`
 }

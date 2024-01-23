@@ -9,44 +9,44 @@ import (
 )
 
 type SubscriptionDetailReq struct {
-	g.Meta         `path:"/subscription_detail" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅详情"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_detail" tags:"User-Subscription-Controller" method:"post" summary:"Subscription Detail"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionDetailRes struct {
 	User                                *entity.UserAccount                 `json:"user" dc:"user"`
-	Subscription                        *entity.Subscription                `json:"subscription" dc:"订阅"`
-	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"订阅计划"`
-	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"订阅渠道"`
-	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"订阅Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"进行中订阅更新单，更新单未授权｜未支付或者下周期才会更新等情况会出现"`
+	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
+	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"Plan"`
+	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"Channel"`
+	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type SubscriptionPayCheckReq struct {
-	g.Meta         `path:"/subscription_pay_check" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅支付状态检查"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_pay_check" tags:"User-Subscription-Controller" method:"post" summary:"Subscription Pay Status Check"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionPayCheckRes struct {
-	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"支付状态，1-支付中，2-支付完成，3-暂停，4-取消, 5-过期"`
-	Subscription *entity.Subscription          `json:"subscription" dc:"订阅"`
+	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"Pay Status，1-Pending，2-Paid，3-Suspend，4-Cancel, 5-Expired"`
+	Subscription *entity.Subscription          `json:"subscription" dc:"Subscription"`
 }
 
 type SubscriptionChannelsReq struct {
-	g.Meta     `path:"/subscription_pay_channels" tags:"User-Subscription-Controller" method:"post" summary:"订阅支持的支付渠道"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号长度为:{min}到:{max}位"`
+	g.Meta     `path:"/subscription_pay_channels" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway Channel"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type SubscriptionChannelsRes struct {
-	Channels []*ro.OutChannelRo `json:"channels"`
+	Channels []*ro.OutChannelRo `json:"Channels"`
 }
 
 type SubscriptionCreatePreviewReq struct {
-	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建预览（仅计算）"`
-	PlanId         int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity       int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	ChannelId      int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
-	UserId         int64                              `p:"userId" dc:"UserId" v:"required#请输入UserId"`
+	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription Preview"`
+	PlanId         int64                              `p:"planId" dc:"PlanId" v:"required"`
+	Quantity       int64                              `p:"quantity" dc:"Quantity，Default 1" `
+	ChannelId      int64                              `p:"channelId" dc:"ChannelId"   v:"required" `
+	UserId         int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	VatCountryCode string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName 缩写，Vat 接口输出"`
-	VatNumber      string                             `p:"vatNumber" dc:"VatNumber, 用户输入，用于验证" `
+	VatCountryCode string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber      string                             `p:"vatNumber" dc:"VatNumber" `
 }
 type SubscriptionCreatePreviewRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
@@ -54,8 +54,8 @@ type SubscriptionCreatePreviewRes struct {
 	PayChannel        *ro.OutChannelRo                   `json:"payChannel"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount       int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency          string                             `json:"currency"              `      // 货币
+	TotalAmount       int64                              `json:"totalAmount"                `
+	Currency          string                             `json:"currency"              `
 	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId            int64                              `json:"userId" `
 	Email             string                             `json:"email" `
@@ -66,108 +66,107 @@ type SubscriptionCreatePreviewRes struct {
 }
 
 type SubscriptionCreateReq struct {
-	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅创建提交（需先调用预览接口）"`
-	PlanId             int64                              `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity           int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	ChannelId          int64                              `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
-	UserId             int64                              `p:"userId" dc:"UserId" v:"required#请输入UserId"`
+	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription"`
+	PlanId             int64                              `p:"planId" dc:"PlanId" v:"required"`
+	Quantity           int64                              `p:"quantity" dc:"Quantity，Default 1" `
+	ChannelId          int64                              `p:"channelId" dc:"ChannelId"   v:"required" `
+	UserId             int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
-	ReturnUrl          string                             `p:"returnUrl"  dc:"回调地址"  `
-	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName 缩写，Vat 接口输出" v:"required#请输入VatCountryCode"`
-	VatNumber          string                             `p:"vatNumber" dc:"VatNumber, 用户输入，用于验证" `
+	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ReturnUrl          string                             `p:"returnUrl"  dc:"ReturnUrl"  `
+	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName" v:"required"`
+	VatNumber          string                             `p:"vatNumber" dc:"VatNumber" `
 }
 type SubscriptionCreateRes struct {
-	Subscription *entity.Subscription `json:"subscription" dc:"订阅"`
+	Subscription *entity.Subscription `json:"subscription" dc:"Subscription"`
 	Paid         bool                 `json:"paid"`
 	Link         string               `json:"link"`
 }
 
 type SubscriptionUpdatePreviewReq struct {
-	g.Meta              `path:"/subscription_update_preview" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新预览（仅计算）"`
-	SubscriptionId      string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId           int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity            int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
-	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"是否立即生效，1-立即生效，2-下周期生效, withImmediateEffect=1，不会直接修改订阅，将会产生PendingUpdate 更新单和按比例发票并要求付款完成之后才会修改订阅，withImmediateEffect=2会直接修改订阅，并在下周期扣款，如果扣款失败，订阅会进入 pass_due" `
+	g.Meta              `path:"/subscription_update_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription Preview"`
+	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           int64                              `p:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
+	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount       int64                      `json:"totalAmount"                ` // 金额,单位：分
-	Currency          string                     `json:"currency"              `      // 货币
+	TotalAmount       int64                      `json:"totalAmount"                `
+	Currency          string                     `json:"currency"              `
 	Invoice           *ro.ChannelDetailInvoiceRo `json:"invoice"`
 	NextPeriodInvoice *ro.ChannelDetailInvoiceRo `json:"nextPeriodInvoice"`
 	ProrationDate     int64                      `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {
-	g.Meta              `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅更新提交（需先调用预览接口）"`
-	SubscriptionId      string                             `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
-	NewPlanId           int64                              `p:"newPlanId" dc:" 新的订阅计划 ID" v:"required#请输入订阅计划 ID"`
-	Quantity            int64                              `p:"quantity" dc:"订阅计划数量，默认 1" `
+	g.Meta              `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription"`
+	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           int64                              `p:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"CreatePrepare 总金额，由Preview 接口输出"  v:"required#请输入 confirmTotalAmount"            ` // 金额,单位：分
-	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"CreatePrepare 货币，由Preview 接口输出" v:"required#请输入 confirmCurrency"  `
-	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDate 按比例计算开始时间，由Preview 接口输出" v:"required#请输入 prorationDate" `
-	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"是否立即生效，1-立即生效，2-下周期生效， withImmediateEffect=1，不会直接修改订阅，将会产生PendingUpdate 更新单和按比例发票并要求付款完成之后才会修改订阅，withImmediateEffect=2会直接修改订阅，并在下周期扣款，如果扣款失败，订阅会进入 pass_due" `
-	//ConfirmChannelId int64                              `p:"confirmChannelId" dc:"Web 端展示的支付通道 ID，用于验证"   v:"required#请输入 ConfirmChannelId" `
+	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDatem Date Start Proration" v:"required" `
+	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 }
 type SubscriptionUpdateRes struct {
-	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"订阅"`
-	Paid                      bool                              `json:"paid" dc:"是否已支付，false-未支付，需要支付，true-已支付或不需要支付"`
-	Link                      string                            `json:"link" dc:"支付链接，paid=false 输出"`
+	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
+	Paid                      bool                              `json:"paid" dc:"Paid，true|false"`
+	Link                      string                            `json:"link" dc:"Pay Link"`
 }
 
 type SubscriptionListReq struct {
-	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"订阅列表"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	UserId     int64  `p:"userId" dc:"UserId" v:"required|length:4,30#请输入UserId" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
-	Page       int    `p:"page"  dc:"分页页码,0开始" `
-	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
+	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int64  `p:"userId" dc:"UserId" v:"required|length:4,30" `
+	Status     int    `p:"status" dc:"Filter Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
+	Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type SubscriptionListRes struct {
-	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"订阅明细"`
+	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"Subscription List"`
 }
 
 type SubscriptionUpdateCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅设置周期结束时取消"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Set Cancel Ad Period End"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionUpdateCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅取消上一次的周期结束时取消设置"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Cancel Last CancelAtPeriod"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {
-	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅暂停"  deprecated:"true"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_suspend" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Stop"  deprecated:"true"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionSuspendRes struct {
 }
 
 type SubscriptionResumeReq struct {
-	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"用户订阅恢复"  deprecated:"true"`
-	SubscriptionId string `p:"subscriptionId" dc:"订阅 ID" v:"required#请输入订阅 ID"`
+	g.Meta         `path:"/subscription_resume" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Resume"  deprecated:"true"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionResumeRes struct {
 }
 
 type SubscriptionTimeLineListReq struct {
-	g.Meta     `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User-Subscription-TimeLine列表"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	UserId     int    `p:"userId" dc:"UserId 不填查询所有" `
-	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
-	Page       int    `p:"page"  dc:"分页页码,0开始" `
-	Count      int    `p:"count" dc:"每页数量" `
+	g.Meta     `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User Subscription TimeLine List"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
+	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
+	Count      int    `p:"count" dc:"Count Of Page" `
 }
 
 type SubscriptionTimeLineListRes struct {

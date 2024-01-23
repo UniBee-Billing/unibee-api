@@ -634,7 +634,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				LineItems: items,
 				AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
-					Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+					Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
 				},
 				Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 				SuccessURL: stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
@@ -686,10 +686,10 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				Items:    items,
 				AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
-					Enabled: stripe.Bool(!taxInclusive), //默认值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+					Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
 				},
 				PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
-				CollectionMethod: stripe.String("charge_automatically"), //默认行为 charge_automatically，自动扣款
+				CollectionMethod: stripe.String("charge_automatically"), //Default行为 charge_automatically，自动扣款
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},

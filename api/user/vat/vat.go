@@ -8,7 +8,7 @@ import (
 
 type CountryVatListReq struct {
 	g.Meta     `path:"/vat_country_list" tags:"User-Vat-Controller" method:"post" summary:"Vat Country List"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type CountryVatListRes struct {
 	VatCountryList []*vat_gateway.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
@@ -16,8 +16,8 @@ type CountryVatListRes struct {
 
 type NumberValidateReq struct {
 	g.Meta     `path:"/vat_number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	VatNumber  string `p:"vatNumber" dc:"VatNumber" v:"required#请输入VatNumber"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	VatNumber  string `p:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
 	VatNumberValidate *base.ValidResult `json:"vatNumberValidate"`

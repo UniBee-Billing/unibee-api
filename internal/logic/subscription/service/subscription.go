@@ -30,8 +30,8 @@ type SubscriptionCreatePrepareInternalRes struct {
 	MerchantInfo          *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams           []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons                []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount           int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency              string                             `json:"currency"              `      // 货币
+	TotalAmount           int64                              `json:"totalAmount"                `
+	Currency              string                             `json:"currency"              `
 	VatCountryCode        string                             `json:"vatCountryCode"              `
 	VatCountryName        string                             `json:"vatCountryName"              `
 	VatNumber             string                             `json:"vatNumber"              `
@@ -152,7 +152,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
-	//设置默认值
+	//设置Default值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
@@ -341,8 +341,8 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount       int64                              `json:"totalAmount"                ` // 金额,单位：分
-	Currency          string                             `json:"currency"              `      // 货币
+	TotalAmount       int64                              `json:"totalAmount"                `
+	Currency          string                             `json:"currency"              `
 	UserId            int64                              `json:"userId" `
 	OldPlan           *entity.SubscriptionPlan           `json:"oldPlan"`
 	OldPlanChannel    *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
@@ -352,7 +352,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	EffectImmediate   bool                               `json:"EffectImmediate"`
 }
 
-// SubscriptionUpdatePreview 默认行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
+// SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantUserId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
@@ -377,7 +377,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//设置了下周期取消不允许修改计划
 	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription cannot be update as it will cancel at period end, should resume subscription first")
 
-	//设置默认值
+	//设置Default值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
@@ -739,9 +739,9 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	utility.Assert(payChannel != nil, "payment gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	_, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{

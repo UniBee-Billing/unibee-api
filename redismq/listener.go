@@ -37,7 +37,7 @@ func RegisterListener(i IMessageListener) {
 		return
 	}
 	if !isValidTopic(i.GetTopic()) {
-		fmt.Printf("redismq 注册默认消费者失败 无效topic:%s,已忽略\n", i.GetTopic())
+		fmt.Printf("redismq 注册Default消费者失败 无效topic:%s,已忽略\n", i.GetTopic())
 		return
 	}
 	if Listeners()[GetMessageKey(i.GetTopic(), i.GetTag())] != nil {

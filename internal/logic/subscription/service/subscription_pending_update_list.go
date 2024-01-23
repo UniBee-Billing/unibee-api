@@ -12,11 +12,11 @@ import (
 )
 
 type SubscriptionPendingUpdateListInternalReq struct {
-	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	SubscriptionId string `p:"subscriptionId" `
 	SortField      string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify" `
-	SortType       string `p:"sortType" dc:"排序类型，asc|desc" `
-	Page           int    `p:"page"  dc:"分页页码,0开始" `
+	SortType       string `p:"sortType" dc:"Sort Type，asc|desc" `
+	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
 	Count          int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 
@@ -74,7 +74,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPendingUpdateListInternalReq) (res *SubscriptionPendingUpdateListInternalRes, err error) {
 	var mainList []*entity.SubscriptionPendingUpdate
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量默认 10
+		req.Count = 10 //每页数量Default 10
 	}
 	if req.Page < 0 {
 		req.Page = 0

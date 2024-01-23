@@ -31,7 +31,7 @@ type MerchantAccountOrderColumns struct {
 	OrigTradeFee                  string // 原始货币交易金额。单位：分
 	CurrencyRate                  string // 汇率，万分位
 	CurrencyRateDataJson          string // 汇率数据JSON结构
-	Currency                      string // 货币类型
+	Currency                      string
 	TradeFee                      string // 交易金额（正值，退款代表退还金额）。单位：分
 	DeductPoint                   string // 服务费扣点，万分位
 	DeductFee                     string // 扣点金额（正值，退款代表退服务费）。单位：分

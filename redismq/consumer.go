@@ -31,7 +31,7 @@ func StartRedisMqConsumer() {
 	innerLoadTransactionChecker()
 	fmt.Println("redismq 事务checkloader汇总完毕！！！！！！")
 	innerLoadConsumer()
-	fmt.Println("redismq 默认订阅信息汇总完毕！！！！！！")
+	fmt.Println("redismq Default订阅信息汇总完毕！！！！！！")
 	startScheduleTrimStream()
 	fmt.Println("redismq 定时修剪长度任务完毕！！！！！！")
 }

@@ -95,7 +95,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
 	ChannelUpdateId           string                                    `json:"channelUpdateId"`
 	Status                    consts.SubscriptionStatusEnum             `json:"status"`
-	ChannelStatus             string                                    `json:"channelStatus"                  ` // 货币
+	ChannelStatus             string                                    `json:"channelStatus"                  `
 	Data                      string                                    `json:"data"`
 	ChannelItemData           string                                    `json:"channelItemData"`
 	CancelAtPeriodEnd         bool                                      `json:"cancelAtPeriodEnd"`

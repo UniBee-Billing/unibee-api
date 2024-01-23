@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-oversea-pay/api/user/auth"
+	"go-oversea-pay/utility"
 	"log"
 	"math/rand"
 	"time"
@@ -43,9 +44,10 @@ func hashAndSalt(pwd []byte) string {
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
 	var newOne *entity.UserAccount
 	newOne = query.GetUserAccountByEmail(ctx, req.Email) //Id(ctx, user.Id)
-	if newOne != nil {
-		return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
-	}
+	utility.Assert(newOne == nil, "Email already existed")
+	//if newOne != nil {
+	//	return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
+	//}
 
 	userStr, err := json.Marshal(
 		struct {

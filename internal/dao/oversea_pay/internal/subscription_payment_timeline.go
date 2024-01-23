@@ -26,8 +26,8 @@ type SubscriptionPaymentTimelineColumns struct {
 	SubscriptionId string // 订阅id（内部编号）
 	InvoiceId      string // 发票ID（内部编号）
 	UniqueId       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	Currency       string // 货币
-	Amount         string // 金额,单位：分
+	Currency       string 
+	Amount         string 
 	ChannelId      string // 支付渠道Id
 	GmtCreate      string // 创建时间
 	GmtModify      string // 修改时间

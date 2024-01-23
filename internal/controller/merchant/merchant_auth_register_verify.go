@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"go-oversea-pay/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -21,21 +22,24 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		// return nil, gerror.New("internal error")
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	if verificationCode == nil {
-		return nil, gerror.NewCode(gcode.New(400, "invalid code", nil))
-	}
+	utility.Assert(verificationCode != nil, "Invalid Code")
+	//if verificationCode == nil {
+	//	return nil, gerror.NewCode(gcode.New(400, "invalid code", nil))
+	//}
 
-	if (verificationCode.String()) != req.VerificationCode {
-		return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	}
+	utility.Assert((verificationCode.String()) == req.VerificationCode, "Invalid Code")
+	//if (verificationCode.String()) != req.VerificationCode {
+	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
+	//}
 
 	userStr, err := g.Redis().Get(ctx, req.Email)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	if userStr == nil {
-		return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	}
+	utility.Assert(userStr != nil, "Invalid Code")
+	//if userStr == nil {
+	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
+	//}
 
 	u := struct {
 		FirstName, LastName, Email, Password, Phone, Address, UserName string

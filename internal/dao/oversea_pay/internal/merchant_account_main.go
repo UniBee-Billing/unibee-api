@@ -23,7 +23,7 @@ type MerchantAccountMainColumns struct {
 	Id          string // 主键ID
 	CompanyId   string //
 	MerchantId  string // 商户ID
-	Currency    string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
+	Currency    string
 	TotalTrade  string // 交易金额总计
 	TotalRefund string // 退款金额总计
 	TotalCut    string // 服务扣点金额总计

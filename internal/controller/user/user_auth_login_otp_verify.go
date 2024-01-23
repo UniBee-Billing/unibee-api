@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"go-oversea-pay/api/user/auth"
+	"go-oversea-pay/utility"
 
 	// "github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -18,19 +19,21 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	if verificationCode == nil { // expired
-		return nil, gerror.NewCode(gcode.New(400, "code expired", nil))
-	}
-
-	if (verificationCode.String()) != req.VerificationCode {
-		return nil, gerror.NewCode(gcode.New(400, "code not match", nil))
-	}
+	utility.Assert(verificationCode != nil, "code expired")
+	//if verificationCode == nil { // expired
+	//	return nil, gerror.NewCode(gcode.New(400, "code expired", nil))
+	//}
+	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
+	//if (verificationCode.String()) != req.VerificationCode {
+	//	return nil, gerror.NewCode(gcode.New(400, "code not match", nil))
+	//}
 
 	var newOne *entity.UserAccount
 	newOne = query.GetUserAccountByEmail(ctx, req.Email)
-	if newOne == nil {
-		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
-	}
+	utility.Assert(newOne != nil, "Login Failed")
+	//if newOne == nil {
+	//	return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
+	//}
 
 	token, err := createToken(req.Email, newOne.Id)
 	if err != nil {

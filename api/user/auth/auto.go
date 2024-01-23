@@ -7,7 +7,7 @@ import (
 )
 
 type LoginReq struct {
-	g.Meta   `path:"/sso/login" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户登录"`
+	g.Meta   `path:"/sso/login" tags:"User-Auth-Controller" method:"post" summary:"User Login"`
 	Email    string `p:"email" dc:"email" v:"required"`
 	Password string `p:"password" dc:"password" v:"required"`
 }
@@ -18,7 +18,7 @@ type LoginRes struct {
 }
 
 type LoginOtpReq struct {
-	g.Meta `path:"/sso/loginOTP" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
+	g.Meta `path:"/sso/loginOTP" tags:"User-Auth-Controller" method:"post" summary:"User OTP Login"`
 	Email  string `p:"email" dc:"email" v:"required"`
 }
 
@@ -26,45 +26,45 @@ type LoginOtpRes struct {
 }
 
 type LoginOtpVerifyReq struct {
-	g.Meta           `path:"/sso/loginOTPVerify" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户OTP登录"`
+	g.Meta           `path:"/sso/loginOTPVerify" tags:"User-Auth-Controller" method:"post" summary:"User OTP Login"`
 	Email            string `p:"email" dc:"email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"verificationCode" v:"required"`
 }
 
 type LoginOtpVerifyRes struct {
 	User  *entity.UserAccount `p:"user" dc:"user"`
-	Token string              `p:"token" dc:"token string"`
+	Token string              `p:"token" dc:"token"`
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/sso/logout" tags:"User-Auth-Controller" method:"post" summary:"1.1 user logout"`
+	g.Meta `path:"/sso/logout" tags:"User-Auth-Controller" method:"post" summary:"User Logout"`
 }
 
 type LogoutRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta      `path:"/sso/register" tags:"User-Auth-Controller" method:"post" summary:"1.1 用户注册"`
-	FirstName   string `p:"firstName" dc:"first name" v:"required"`
-	LastName    string `p:"lastName" dc:"last name" v:"required"`
-	Email       string `p:"email" dc:"email" v:"required"`
-	Password    string `p:"password" dc:"password" v:"required"`
-	Phone       string `p:"phone" dc:"phone" `
-	Address     string `p:"address" dc:"adderss"`
-	CountryCode string `p:"countryCode" dc:"countryCode"`
-	CountryName string `p:"countryName" dc:"countryName"`
-	UserName    string `p:"userName" dc:"userName" v:"required"`
+	g.Meta      `path:"/sso/register" tags:"User-Auth-Controller" method:"post" summary:"User Register"`
+	FirstName   string `p:"firstName" dc:"First Name" v:"required"`
+	LastName    string `p:"lastName" dc:"Last Name" v:"required"`
+	Email       string `p:"email" dc:"Email" v:"required"`
+	Password    string `p:"password" dc:"Password" v:"required"`
+	Phone       string `p:"phone" dc:"Phone" `
+	Address     string `p:"address" dc:"Address"`
+	CountryCode string `p:"countryCode" dc:"CountryCode"`
+	CountryName string `p:"countryName" dc:"CountryName"`
+	UserName    string `p:"userName" dc:"UserName" v:"required"`
 }
 type RegisterRes struct {
 	// User *entity.UserAccount `p:"user" dc:"user"`
 }
 
 type RegisterVerifyReq struct {
-	g.Meta           `path:"/sso/registerVerify" tags:"User-Auth-Controller" method:"post" summary:"1.2 用户注册(verify email)"`
-	Email            string `p:"email" dc:"email" v:"required"`
-	VerificationCode string `p:"verificationCode" dc:"verification code" v:"required"`
+	g.Meta           `path:"/sso/registerVerify" tags:"User-Auth-Controller" method:"post" summary:"User Register Via Email"`
+	Email            string `p:"email" dc:"Email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"Verification Code" v:"required"`
 }
 
 type RegisterVerifyRes struct {
-	User *entity.UserAccount `p:"user" dc:"user"`
+	User *entity.UserAccount `p:"user" dc:"User"`
 }

@@ -7,43 +7,43 @@ import (
 )
 
 type ProfileReq struct {
-	g.Meta `path:"/profile" tags:"User-Profile-Controller" method:"get" summary:"get user profile"`
+	g.Meta `path:"/profile" tags:"User-Profile-Controller" method:"get" summary:"Get User Profile"`
 	// Email string `p:"email" dc:"email" v:"required"`
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
 
 // with token to be implemented in the future
 type ProfileRes struct {
-	User *entity.UserAccount `p:"user" dc:"user"`
+	User *entity.UserAccount `p:"user" dc:"User"`
 	// Token string `p:"token" dc:"token string"`
 }
 
 type ProfileUpdateReq struct {
-	g.Meta          `path:"/profile" tags:"User-Profile-Controller" method:"post" summary:"update user profile"`
-	Id              uint64 `p:"id" dc:"user id" v:"required"`
-	FirstName       string `p:"firstName" dc:"first name" v:"required"`
-	LastName        string `p:"lastName" dc:"last name" v:"required"`
-	Email           string `p:"email" dc:"email" v:"required"`
-	Address         string `p:"address" dc:"billing address" v:"required"`
-	CompanyName     string `p:"companyName" dc:"company name"`
-	VATNumber       string `p:"vATNumber" dc:"VAT number"`
-	Phone           string `p:"phone" dc:"phone"`
-	Telegram        string `p:"telegram" dc:"telegram"`
-	WhatsApp        string `p:"WhatsApp" dc:"whatsApp"`
-	WeChat          string `p:"WeChat" dc:"weChat"`
-	LinkedIn        string `p:"LinkedIn" dc:"linkedIn"`
-	Facebook        string `p:"facebook" dc:"facebook"`
-	TikTok          string `p:"tiktok" dc:"tiktok"`
-	OtherSocialInfo string `p:"otherSocialInfo" dc:"other social info"`
-	PaymentMethod   string `p:"paymentMethod" dc:"payment method"`
-	CountryCode     string `p:"countryCode" dc:"country code" v:"required"`
-	CountryName     string `p:"countryName" dc:"country name" v:"required"`
+	g.Meta          `path:"/profile" tags:"User-Profile-Controller" method:"post" summary:"Update User Profile"`
+	Id              uint64 `p:"id" dc:"User Id" v:"required"`
+	FirstName       string `p:"firstName" dc:"First name" v:"required"`
+	LastName        string `p:"lastName" dc:"Last Name" v:"required"`
+	Email           string `p:"email" dc:"Email" v:"required"`
+	Address         string `p:"address" dc:"Billing Address" v:"required"`
+	CompanyName     string `p:"companyName" dc:"Company Name"`
+	VATNumber       string `p:"vATNumber" dc:"VAT Number"`
+	Phone           string `p:"phone" dc:"Phone"`
+	Telegram        string `p:"telegram" dc:"Telegram"`
+	WhatsApp        string `p:"WhatsApp" dc:"WhatsApp"`
+	WeChat          string `p:"WeChat" dc:"WeChat"`
+	LinkedIn        string `p:"LinkedIn" dc:"LinkedIn"`
+	Facebook        string `p:"facebook" dc:"Facebook"`
+	TikTok          string `p:"tiktok" dc:"Tiktok"`
+	OtherSocialInfo string `p:"otherSocialInfo" dc:"Other Social Info"`
+	PaymentMethod   string `p:"paymentMethod" dc:"Payment Method"`
+	CountryCode     string `p:"countryCode" dc:"Country Code" v:"required"`
+	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
 	// Email string `p:"email" dc:"email" v:"required"`
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
 
 // with token to be implemented in the future
 type ProfileUpdateRes struct {
-	User *entity.UserAccount `p:"user" dc:"user"`
+	User *entity.UserAccount `p:"user" dc:"User"`
 	// Token string `p:"token" dc:"token string"`
 }

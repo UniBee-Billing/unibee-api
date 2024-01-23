@@ -6,7 +6,7 @@ import (
 	"go-oversea-pay/api/merchant/auth"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
-	"log"
+	"go-oversea-pay/utility"
 	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -21,19 +21,20 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 	byteHash := []byte(hashedPwd)
 	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
 	if err != nil {
-		log.Println(err)
+		fmt.Printf("comparePasswords err:%s\n", err.Error())
 		return false
 	}
 	return true
 }
 
 var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
+
 func createToken(email string, userId uint64) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"email": email,
-			"id": userId,
-			"exp": time.Now().Add(time.Hour * 1).Unix(),
+			"id":    userId,
+			"exp":   time.Now().Add(time.Hour * 1).Unix(),
 		})
 
 	tokenString, err := token.SignedString(secretKey)
@@ -62,25 +63,28 @@ func verifyToken(tokenString string) error {
 
 func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error) {
 	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
-
-	if req.Email == "" {
-		// return nil, gerror.New("email empty")
-		return nil, gerror.NewCode(gcode.New(400, "email cannot be empty", nil))
-	}
-
-	if req.Password == "" {
-		return nil, gerror.NewCode(gcode.New(400, "password cannot be empty", nil))
-	}
+	utility.Assert(req.Email != "", "email cannot be empty")
+	utility.Assert(req.Password != "", "password cannot be empty")
+	//if req.Email == "" {
+	//	// return nil, gerror.New("email empty")
+	//	return nil, gerror.NewCode(gcode.New(400, "email cannot be empty", nil))
+	//}
+	//
+	//if req.Password == "" {
+	//	return nil, gerror.NewCode(gcode.New(400, "password cannot be empty", nil))
+	//}
 
 	var newOne *entity.MerchantUserAccount
 	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
-	if newOne == nil {
-		// return nil, gerror.New("internal err: user not found")
-		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
-	}
-	if !comparePasswords(newOne.Password, []byte(req.Password)) { // wrong password
-		return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
-	}
+	utility.Assert(newOne != nil, "Login Failed")
+	//if newOne == nil {
+	//	// return nil, gerror.New("internal err: user not found")
+	//	return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
+	//}
+	utility.Assert(comparePasswords(newOne.Password, []byte(req.Password)), "Login Failed, Password Not Match")
+	//if !comparePasswords(newOne.Password, []byte(req.Password)) { // wrong password
+	//	return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
+	//}
 
 	token, err := createToken(req.Email, newOne.Id)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)

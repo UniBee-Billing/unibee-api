@@ -23,7 +23,7 @@ type MerchantAccountOrder struct {
 	OrigTradeFee                  interface{} // 原始货币交易金额。单位：分
 	CurrencyRate                  interface{} // 汇率，万分位
 	CurrencyRateDataJson          interface{} // 汇率数据JSON结构
-	Currency                      interface{} // 货币类型
+	Currency                      interface{} 类型
 	TradeFee                      interface{} // 交易金额（正值，退款代表退还金额）。单位：分
 	DeductPoint                   interface{} // 服务费扣点，万分位
 	DeductFee                     interface{} // 扣点金额（正值，退款代表退服务费）。单位：分

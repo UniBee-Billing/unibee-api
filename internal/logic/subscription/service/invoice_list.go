@@ -11,13 +11,13 @@ import (
 )
 
 type SubscriptionInvoiceListInternalReq struct {
-	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId        int    `p:"userId" dc:"UserId 不填查询所有" `
 	SendEmail     int    `p:"sendEmail" dc:"SendEmail 不填查询所有" `
 	SortField     string `p:"sortField" dc:"排序字段，invoice_id|gmt_create|period_end|total_amount" `
-	SortType      string `p:"sortType" dc:"排序类型，asc|desc" `
+	SortType      string `p:"sortType" dc:"Sort Type，asc|desc" `
 	DeleteInclude bool   `p:"deleteInclude" dc:"是否包含删除，查看已删除发票需要超级管理员权限" `
-	Page          int    `p:"page"  dc:"分页页码,0开始" `
+	Page          int    `p:"page"  dc:"Page, Start WIth 0" `
 	Count         int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 
@@ -28,7 +28,7 @@ type SubscriptionInvoiceListInternalRes struct {
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
 	var mainList []*entity.Invoice
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量默认 10
+		req.Count = 10 //每页数量Default 10
 	}
 	if req.Page < 0 {
 		req.Page = 0
