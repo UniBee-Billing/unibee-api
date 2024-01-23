@@ -10,7 +10,8 @@ import (
 
 // Contact contact a company informations
 type Contact struct {
-	Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
+	//Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
+	Name    string   `json:"name,omitempty"`
 	Logo    []byte   `json:"logo,omitempty"` // Logo byte array
 	Address *Address `json:"address,omitempty"`
 
