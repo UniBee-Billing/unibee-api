@@ -126,90 +126,79 @@ func CreateOrUpdateInvoiceByChannelDetail(ctx context.Context, details *ro.Chann
 }
 
 func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscriptionId string, payment *entity.Payment) error {
-	//sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	//utility.Assert(sub != nil, "subscription not found")
-	//one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
-	//if one == nil {
-	//	//创建
-	//	one = &entity.Invoice{
-	//		MerchantId:                     sub.MerchantId,
-	//		SubscriptionId:                 sub.SubscriptionId,
-	//		InvoiceId:                      utility.CreateInvoiceId(),
-	//		TotalAmount:                    details.TotalAmount,
-	//		TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
-	//		TaxAmount:                      details.TaxAmount,
-	//		SubscriptionAmount:             details.SubscriptionAmount,
-	//		SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
-	//		PeriodStart:                    details.PeriodStart,
-	//		PeriodEnd:                      details.PeriodEnd,
-	//		PeriodStartTime:                gtime.NewFromTimeStamp(details.PeriodStart),
-	//		PeriodEndTime:                  gtime.NewFromTimeStamp(details.PeriodEnd),
-	//		Currency:                       details.Currency,
-	//		Lines:                          utility.MarshalToJsonString(details.Lines),
-	//		ChannelId:                      sub.ChannelId,
-	//		Status:                         int(details.Status),
-	//		SendStatus:                     0,
-	//		SendEmail:                      sub.CustomerEmail,
-	//		UserId:                         sub.UserId,
-	//		Data:                           utility.MarshalToJsonString(details),
-	//		Link:                           details.Link,
-	//		ChannelUserId:                  details.ChannelUserId,
-	//		ChannelStatus:                  details.ChannelStatus,
-	//		ChannelInvoiceId:               payment.ChannelInvoiceId,
-	//		ChannelInvoicePdf:              details.ChannelInvoicePdf,
-	//		ChannelPaymentId:               payment.ChannelPaymentId,
-	//		UniqueId:                       payment.PaymentId,
-	//	}
-	//
-	//	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
-	//	if err != nil {
-	//		err = gerror.Newf(`CreateOrUpdateInvoiceByChannelDetail record insert failure %s`, err.Error())
-	//		return err
-	//	}
-	//	id, _ := result.LastInsertId()
-	//	one.Id = uint64(uint(id))
-	//	invoiceId = one.InvoiceId
-	//	change = true
-	//} else {
-	//	//更新
-	//	if one.Status != int(details.Status) {
-	//		change = true
-	//	}
-	//	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-	//		dao.Invoice.Columns().MerchantId:                     sub.MerchantId,
-	//		dao.Invoice.Columns().SubscriptionId:                 sub.SubscriptionId,
-	//		dao.Invoice.Columns().ChannelId:                      sub.ChannelId,
-	//		dao.Invoice.Columns().TotalAmount:                    details.TotalAmount,
-	//		dao.Invoice.Columns().TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
-	//		dao.Invoice.Columns().TaxAmount:                      details.TaxAmount,
-	//		dao.Invoice.Columns().SubscriptionAmount:             details.SubscriptionAmount,
-	//		dao.Invoice.Columns().SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
-	//		dao.Invoice.Columns().PeriodStart:                    details.PeriodStart,
-	//		dao.Invoice.Columns().PeriodEnd:                      details.PeriodEnd,
-	//		dao.Invoice.Columns().PeriodStartTime:                gtime.NewFromTimeStamp(details.PeriodStart),
-	//		dao.Invoice.Columns().PeriodEndTime:                  gtime.NewFromTimeStamp(details.PeriodEnd),
-	//		dao.Invoice.Columns().Currency:                       details.Currency,
-	//		dao.Invoice.Columns().Status:                         details.Status,
-	//		dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(details.Lines),
-	//		dao.Invoice.Columns().ChannelStatus:                  details.ChannelStatus,
-	//		dao.Invoice.Columns().ChannelInvoiceId:               details.ChannelInvoiceId,
-	//		dao.Invoice.Columns().ChannelUserId:                  details.ChannelUserId,
-	//		dao.Invoice.Columns().ChannelInvoicePdf:              details.ChannelInvoicePdf,
-	//		dao.Invoice.Columns().Link:                           details.Link,
-	//		dao.Invoice.Columns().SendEmail:                      sub.CustomerEmail,
-	//		dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
-	//		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-	//		dao.Invoice.Columns().ChannelPaymentId:               details.ChannelPaymentId,
-	//	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-	//	if err != nil {
-	//		return err
-	//	}
-	//	//rowAffected, err := update.RowsAffected()
-	//	//if rowAffected != 1 {
-	//	//	return gerror.Newf("CreateOrUpdateInvoiceByChannelDetail err:%s", update)
-	//	//}
-	//	invoiceId = one.InvoiceId
-	//}
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	one := query.GetInvoiceByChannelUniqueId(ctx, payment.PaymentId)
+	if one == nil {
+		//创建
+		one = &entity.Invoice{
+			MerchantId:     sub.MerchantId,
+			SubscriptionId: sub.SubscriptionId,
+			InvoiceId:      utility.CreateInvoiceId(),
+			TotalAmount:    sub.Amount,
+			//TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
+			//TaxAmount:                      details.TaxAmount,
+			//SubscriptionAmount:             details.SubscriptionAmount,
+			//SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
+			PeriodStart:     sub.CurrentPeriodStart,
+			PeriodEnd:       sub.CurrentPeriodEnd,
+			PeriodStartTime: gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
+			PeriodEndTime:   gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+			Currency:        sub.Currency,
+			//Lines:             utility.MarshalToJsonString(details.Lines),
+			ChannelId:  sub.ChannelId,
+			Status:     consts.InvoiceStatusPaid,
+			SendStatus: 0,
+			SendEmail:  sub.CustomerEmail,
+			UserId:     sub.UserId,
+			//Link:              details.Link,
+			//ChannelUserId:     details.ChannelUserId,
+			//ChannelStatus:     details.ChannelStatus,
+			ChannelInvoiceId: payment.ChannelInvoiceId,
+			//ChannelInvoicePdf: details.ChannelInvoicePdf,
+			ChannelPaymentId: payment.ChannelPaymentId,
+			UniqueId:         payment.PaymentId,
+		}
+
+		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdateInvoiceByChannelDetail record insert failure %s`, err.Error())
+			return err
+		}
+		id, _ := result.LastInsertId()
+		one.Id = uint64(uint(id))
+
+	} else {
+		//更新
+		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().MerchantId:     sub.MerchantId,
+			dao.Invoice.Columns().SubscriptionId: sub.SubscriptionId,
+			dao.Invoice.Columns().ChannelId:      sub.ChannelId,
+			dao.Invoice.Columns().TotalAmount:    sub.Amount,
+			//dao.Invoice.Columns().TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
+			//dao.Invoice.Columns().TaxAmount:                      details.TaxAmount,
+			//dao.Invoice.Columns().SubscriptionAmount:             details.SubscriptionAmount,
+			//dao.Invoice.Columns().SubscriptionAmountExcludingTax: details.SubscriptionAmountExcludingTax,
+			dao.Invoice.Columns().PeriodStart:     sub.CurrentPeriodStart,
+			dao.Invoice.Columns().PeriodEnd:       sub.CancelAtPeriodEnd,
+			dao.Invoice.Columns().PeriodStartTime: gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
+			dao.Invoice.Columns().PeriodEndTime:   gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+			dao.Invoice.Columns().Currency:        sub.Currency,
+			dao.Invoice.Columns().Status:          consts.InvoiceStatusPaid,
+			//dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(details.Lines),
+			//dao.Invoice.Columns().ChannelStatus:                  details.ChannelStatus,
+			dao.Invoice.Columns().ChannelInvoiceId: payment.ChannelInvoiceId,
+			//dao.Invoice.Columns().ChannelUserId:                  details.ChannelUserId,
+			//dao.Invoice.Columns().ChannelInvoicePdf:              details.ChannelInvoicePdf,
+			//dao.Invoice.Columns().Link:                           details.Link,
+			dao.Invoice.Columns().SendEmail:        sub.CustomerEmail,
+			dao.Invoice.Columns().GmtModify:        gtime.Now(),
+			dao.Invoice.Columns().ChannelPaymentId: payment.ChannelPaymentId,
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
