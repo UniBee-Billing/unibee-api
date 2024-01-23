@@ -50,6 +50,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	one := &entity.Invoice{
 		MerchantId:                     req.MerchantId,
 		InvoiceId:                      invoiceId,
+		InvoiceName:                    req.Name,
 		UniqueId:                       invoiceId,
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -110,6 +111,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().InvoiceName:                    req.Name,
 		dao.Invoice.Columns().TotalAmount:                    totalAmount,
 		dao.Invoice.Columns().TotalAmountExcludingTax:        totalAmountExcludingTax,
 		dao.Invoice.Columns().TaxAmount:                      totalTax,
@@ -165,7 +167,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	if one.Status == consts.InvoiceStatusCancelled {
 		return nil
 	}
-	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in pending status")
+	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	if one.IsDeleted == 1 {
 		return nil

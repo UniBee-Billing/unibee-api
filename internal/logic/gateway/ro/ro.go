@@ -88,10 +88,9 @@ type ChannelPaymentListReq struct {
 // OutPayRo is the golang structure for table oversea_pay.
 type OutPayRo struct {
 	MerchantId                string                                 `json:"merchantId"         `
-	ChannelInvoiceId          string                                 `json:"channelInvoiceId"         `
-	ChannelUserId             string                                 `json:"channelUserId"         `
-	PaymentId                 string                                 `json:"paymentId"         `
+	ChannelId                 int64                                  `json:"channelId"         `
 	ChannelPaymentId          string                                 `json:"channelPaymentId"              ` // 业务id-即渠道支付单号
+	ChannelUserId             string                                 `json:"channelUserId"         `
 	Status                    int                                    `json:"status"`
 	CaptureStatus             int                                    `json:"captureStatus"`
 	Reason                    string                                 `json:"reason"              `
@@ -103,9 +102,13 @@ type OutPayRo struct {
 	CancelTime                *gtime.Time                            `json:"cancelTime" `
 	CancelReason              string                                 `json:"cancelReason" `
 	TotalRefundFee            int64                                  `json:"totalRefundFee"              `
+	ChannelInvoiceId          string                                 `json:"channelInvoiceId"         `
+	ChannelSubscriptionId     string                                 `json:"channelSubscriptionId"         `
+	ChannelUpdateId           string                                 `json:"channelUpdateId"`
+	Subscription              *entity.Subscription                   `json:"subscription"         `
+	ChannelUser               *entity.SubscriptionUserChannel        `json:"channelUser"         `
 	ChannelInvoiceDetail      *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"              `
 	ChannelSubscriptionDetail *ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"              `
-	ChannelUpdateId           string                                 `json:"channelUpdateId"`
 }
 
 type OutChannelRo struct {
@@ -301,6 +304,7 @@ type InvoiceDetailRo struct {
 	MerchantId                     int64                       `json:"merchantId"                     description:"商户Id"`                                                                  // 商户Id
 	UserId                         int64                       `json:"userId"                         description:"userId"`                                                                // userId
 	SubscriptionId                 string                      `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                                            // 订阅id（内部编号）
+	InvoiceName                    string                      `json:"invoiceName"                    description:"发票名称"`                                                                  // 发票名称
 	InvoiceId                      string                      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                                            // 发票ID（内部编号）
 	ChannelInvoiceId               string                      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	UniqueId                       string                      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"`                // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键

@@ -15,6 +15,7 @@ type Invoice struct {
 	UserId                         int64       `json:"userId"                         description:"userId"`                                                                // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                                            // 订阅id（内部编号）
 	InvoiceId                      string      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                                            // 发票ID（内部编号）
+	InvoiceName                    string      `json:"invoiceName"                    description:"发票名称"`                                                                  // 发票名称
 	UniqueId                       string      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"`                // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time `json:"gmtCreate"                      description:"创建时间"`                                                                  // 创建时间
 	TotalAmount                    int64       `json:"totalAmount"                    description:"金额,单位：分"`                                                               // 金额,单位：分

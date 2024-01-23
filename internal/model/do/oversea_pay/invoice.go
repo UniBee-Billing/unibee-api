@@ -17,6 +17,7 @@ type Invoice struct {
 	UserId                         interface{} // userId
 	SubscriptionId                 interface{} // 订阅id（内部编号）
 	InvoiceId                      interface{} // 发票ID（内部编号）
+	InvoiceName                    interface{} // 发票名称
 	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time // 创建时间
 	TotalAmount                    interface{} // 金额,单位：分

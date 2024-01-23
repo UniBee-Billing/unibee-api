@@ -18,6 +18,16 @@ func GetUserChannel(ctx context.Context, userId int64, channelId int64) (one *en
 	return
 }
 
+func GetUserChannelByChannelUserId(ctx context.Context, channelUserId string, channelId int64) (one *entity.SubscriptionUserChannel) {
+	utility.Assert(len(channelUserId) > 0, "invalid channelUserId")
+	utility.Assert(channelId > 0, "invalid channelId")
+	err := dao.SubscriptionUserChannel.Ctx(ctx).Where(entity.SubscriptionUserChannel{ChannelUserId: channelUserId, ChannelId: channelId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func SaveUserChannel(ctx context.Context, userId int64, channelId int64, channelUserId string) (*entity.SubscriptionUserChannel, error) {
 	utility.Assert(userId > 0, "invalid userId")
 	utility.Assert(channelId > 0, "invalid channelId")

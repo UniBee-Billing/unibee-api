@@ -79,6 +79,7 @@ func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
 		MerchantId:                     invoice.MerchantId,
 		SubscriptionId:                 invoice.SubscriptionId,
 		InvoiceId:                      invoice.InvoiceId,
+		InvoiceName:                    invoice.InvoiceName,
 		GmtCreate:                      invoice.GmtCreate,
 		TotalAmount:                    invoice.TotalAmount,
 		TaxAmount:                      invoice.TaxAmount,

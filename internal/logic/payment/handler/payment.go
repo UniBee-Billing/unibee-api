@@ -294,6 +294,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
+	//先保存 Payment 信息
 	payment, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
 	if err != nil {
 		return err
@@ -328,28 +329,24 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
 	var subscriptionId string
 	var merchantId int64
-	var channelId int64
-	var userId int64
 	var invoiceId string
 	var countryCode string
-	if len(details.ChannelInvoiceId) > 0 {
-		invoice := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
-		if invoice != nil {
-			invoiceId = invoice.InvoiceId
-			subscriptionId = invoice.SubscriptionId
-			if len(subscriptionId) > 0 {
-				sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-				countryCode = sub.CountryCode
-			}
-			merchantId = invoice.MerchantId
-			channelId = invoice.ChannelId
-			userId = invoice.UserId
+	if details.ChannelSubscriptionDetail != nil {
+		//From Sub Create Pay or Sub Update Pay
+		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionDetail.ChannelSubscriptionId)
+		if sub != nil {
+			subscriptionId = sub.SubscriptionId
+			countryCode = sub.CountryCode
+			merchantId = sub.MerchantId
 		}
 	}
-	if details.ChannelSubscriptionDetail != nil {
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionDetail.ChannelSubscriptionId)
-		subscriptionId = sub.SubscriptionId
-		countryCode = sub.CountryCode
+	if details.ChannelInvoiceDetail != nil {
+		//From Invoice Pay
+		invoice := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
+		if invoice != nil {
+			merchantId = invoice.MerchantId
+			invoiceId = invoice.InvoiceId
+		}
 	}
 	one := query.GetPaymentByChannelPaymentId(ctx, details.ChannelPaymentId)
 
@@ -357,7 +354,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		//创建
 		one = &entity.Payment{
 			MerchantId:             merchantId,
-			UserId:                 userId,
+			UserId:                 details.ChannelUser.UserId,
 			CountryCode:            countryCode,
 			PaymentId:              utility.CreatePaymentId(),
 			Currency:               details.Currency,
@@ -366,7 +363,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			ReceiptFee:             details.PayFee,
 			Status:                 details.Status,
 			AuthorizeStatus:        details.CaptureStatus,
-			ChannelId:              channelId,
+			ChannelId:              details.ChannelId,
 			ChannelPaymentFee:      details.PayFee,
 			ChannelPaymentIntentId: details.ChannelPaymentId,
 			ChannelPaymentId:       details.ChannelPaymentId,
@@ -390,8 +387,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		//更新
 		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
 			dao.Payment.Columns().MerchantId:             merchantId,
-			dao.Payment.Columns().MerchantId:             merchantId,
-			dao.Payment.Columns().UserId:                 userId,
+			dao.Payment.Columns().UserId:                 details.ChannelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,
 			dao.Payment.Columns().PaymentId:              utility.CreatePaymentId(),
 			dao.Payment.Columns().Currency:               details.Currency,
@@ -400,7 +396,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			dao.Payment.Columns().ReceiptFee:             details.PayFee,
 			dao.Payment.Columns().Status:                 details.Status,
 			dao.Payment.Columns().AuthorizeStatus:        details.CaptureStatus,
-			dao.Payment.Columns().ChannelId:              channelId,
+			dao.Payment.Columns().ChannelId:              details.ChannelId,
 			dao.Payment.Columns().ChannelPaymentFee:      details.PayFee,
 			dao.Payment.Columns().ChannelPaymentIntentId: details.ChannelPaymentId,
 			dao.Payment.Columns().ChannelPaymentId:       details.ChannelPaymentId,
@@ -417,10 +413,6 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		if err != nil {
 			return nil, err
 		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return nil, gerror.Newf("CreateOrUpdatePaymentByDetail err:%s", update)
-		//}
 	}
 	err := CreateOrUpdatePaymentTimeline(ctx, one, one.PaymentId)
 	if err != nil {

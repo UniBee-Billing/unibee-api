@@ -1313,12 +1313,18 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 	if err != nil {
 		return err
 	}
+	details.ChannelId = int64(payChannel.Id)
+	utility.Assert(len(details.ChannelUserId) > 0, "invalid channelUserId")
+	details.ChannelUser = query.GetUserChannelByChannelUserId(ctx, details.ChannelUserId, details.ChannelId)
+	utility.Assert(details.ChannelUser != nil, "channelUser not found")
 	if payment.Invoice != nil {
+		//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 ChannelUpdateId
 		invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
 		if err != nil {
 			return err
 		}
 		details.ChannelInvoiceDetail = invoiceDetails
+		details.ChannelInvoiceId = payment.Invoice.ID
 		details.ChannelUpdateId = invoiceDetails.ChannelInvoiceId
 		oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
 		if oneSub != nil {
@@ -1329,44 +1335,13 @@ func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, pay
 				return err
 			}
 			details.ChannelSubscriptionDetail = subDetails
+			details.Subscription = oneSub
 		}
 	}
 	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
 	if err != nil {
 		return err
 	}
-	//if payment.Invoice != nil {
-	//	invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
-	//	if unibSub == nil {
-	//		plan := query.GetPlanById(ctx, unibSub.PlanId)
-	//		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
-	//		subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
-	//			ChannelPaymentId:      details.ChannelPaymentId,
-	//			ChannelSubscriptionId: invoiceDetails.ChannelSubscriptionId,
-	//			ChannelInvoiceId:      invoiceDetails.ChannelInvoiceId,
-	//			ChannelUpdateId:       invoiceDetails.ChannelInvoiceId,
-	//			Status:                subDetails.Status,
-	//			ChannelStatus:         invoiceDetails.ChannelStatus,
-	//			Data:                  subDetails.Data,
-	//			ChannelItemData:       subDetails.ChannelItemData,
-	//			CancelAtPeriodEnd:     subDetails.CancelAtPeriodEnd,
-	//			CurrentPeriodEnd:      subDetails.CurrentPeriodEnd,
-	//			CurrentPeriodStart:    subDetails.CurrentPeriodStart,
-	//			TrialEnd:              subDetails.TrialEnd,
-	//		})
-	//		if err != nil {
-	//			return err
-	//		}
-	//	}
-	//}
 	return nil
 }
 

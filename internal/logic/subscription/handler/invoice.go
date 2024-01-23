@@ -22,37 +22,17 @@ func HandleInvoiceWebhookEvent(ctx context.Context, eventType string, details *r
 
 func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetailInvoiceInternalResp, uniqueId string) error {
 	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
-	var subscriptionId string
-	var merchantId int64
-	var channelId int64
-	var userId int64
-	var sendEmail string
-	if len(details.ChannelSubscriptionId) > 0 {
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionId)
-		if sub != nil {
-			subscriptionId = sub.SubscriptionId
-			merchantId = sub.MerchantId
-			channelId = sub.ChannelId
-			userId = sub.UserId
-			if len(sub.CustomerEmail) > 0 {
-				sendEmail = sub.CustomerEmail
-			} else {
-				userAccount := query.GetUserAccountById(ctx, uint64(sub.UserId))
-				if userAccount != nil {
-					sendEmail = userAccount.Email
-				}
-			}
-		}
-	}
+	utility.Assert(len(details.ChannelSubscriptionId) > 0, "channelSubscriptionId invalid")
+	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionId)
+	utility.Assert(sub != nil, "subscription of invoice not found ")
 	one := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
-
 	var invoiceId string
 	var change = false
 	if one == nil {
 		//创建
 		one = &entity.Invoice{
-			MerchantId:                     merchantId,
-			SubscriptionId:                 subscriptionId,
+			MerchantId:                     sub.MerchantId,
+			SubscriptionId:                 sub.SubscriptionId,
 			InvoiceId:                      utility.CreateInvoiceId(),
 			TotalAmount:                    details.TotalAmount,
 			TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
@@ -65,11 +45,11 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			PeriodEndTime:                  gtime.NewFromTimeStamp(details.PeriodEnd),
 			Currency:                       details.Currency,
 			Lines:                          utility.MarshalToJsonString(details.Lines),
-			ChannelId:                      channelId,
+			ChannelId:                      sub.ChannelId,
 			Status:                         int(details.Status),
 			SendStatus:                     0,
-			SendEmail:                      sendEmail,
-			UserId:                         userId,
+			SendEmail:                      sub.CustomerEmail,
+			UserId:                         sub.UserId,
 			Data:                           utility.MarshalToJsonString(details),
 			Link:                           details.Link,
 			ChannelUserId:                  details.ChannelUserId,
@@ -95,9 +75,9 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			change = true
 		}
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().MerchantId:                     merchantId,
-			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
-			dao.Invoice.Columns().ChannelId:                      channelId,
+			dao.Invoice.Columns().MerchantId:                     sub.MerchantId,
+			dao.Invoice.Columns().SubscriptionId:                 sub.SubscriptionId,
+			dao.Invoice.Columns().ChannelId:                      sub.ChannelId,
 			dao.Invoice.Columns().TotalAmount:                    details.TotalAmount,
 			dao.Invoice.Columns().TotalAmountExcludingTax:        details.TotalAmountExcludingTax,
 			dao.Invoice.Columns().TaxAmount:                      details.TaxAmount,
@@ -112,11 +92,10 @@ func CreateOrUpdateInvoiceByDetail(ctx context.Context, details *ro.ChannelDetai
 			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(details.Lines),
 			dao.Invoice.Columns().ChannelStatus:                  details.ChannelStatus,
 			dao.Invoice.Columns().ChannelInvoiceId:               details.ChannelInvoiceId,
-			dao.Invoice.Columns().SubscriptionId:                 subscriptionId,
 			dao.Invoice.Columns().ChannelUserId:                  details.ChannelUserId,
 			dao.Invoice.Columns().ChannelInvoicePdf:              details.ChannelInvoicePdf,
 			dao.Invoice.Columns().Link:                           details.Link,
-			dao.Invoice.Columns().SendEmail:                      sendEmail,
+			dao.Invoice.Columns().SendEmail:                      sub.CustomerEmail,
 			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().ChannelPaymentId:               details.ChannelPaymentId,

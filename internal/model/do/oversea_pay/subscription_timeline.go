@@ -16,6 +16,10 @@ type SubscriptionTimeline struct {
 	MerchantId      interface{} // 商户Id
 	UserId          interface{} // userId
 	SubscriptionId  interface{} // 订阅id（内部编号）
+	PeriodStart     interface{} // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
+	PeriodEnd       interface{} // period_end
+	PeriodStartTime *gtime.Time //
+	PeriodEndTime   *gtime.Time //
 	InvoiceId       interface{} // 发票ID（内部编号）
 	UniqueId        interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	Currency        interface{} // 货币
@@ -26,9 +30,5 @@ type SubscriptionTimeline struct {
 	GmtCreate       *gtime.Time // 创建时间
 	GmtModify       *gtime.Time // 修改时间
 	IsDeleted       interface{} //
-	PeriodStart     interface{} // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
-	PeriodEnd       interface{} // period_end
-	PeriodStartTime *gtime.Time //
-	PeriodEndTime   *gtime.Time //
 	PaymentId       interface{} // PaymentId
 }

@@ -43,7 +43,8 @@ type NewInvoiceCreateReq struct {
 	UserId        int64                `p:"userId" dc:"UserId" v:"required#请输入userId"`
 	TaxPercentage float64              `p:"taxPercentage"  dc:"Tax税率，万分位，1000 表示 10%" v:"required#请输入TaxPercentage" `
 	ChannelId     int64                `p:"channelId" dc:"支付通道 ID"   v:"required#请输入 ChannelId" `
-	Currency      string               `p:"currency"   dc:"订阅计划货币" v:"required#请输入订阅计划货币" ` // 货币
+	Currency      string               `p:"currency"   dc:"货币" v:"required#请输入货币" ` // 货币
+	Name          string               `p:"name"   dc:"名称" `
 	Lines         []*ro.NewInvoiceItem `p:"lines"              `
 }
 type NewInvoiceCreateRes struct {
@@ -56,6 +57,7 @@ type NewInvoiceEditReq struct {
 	TaxPercentage int64                `p:"taxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
 	ChannelId     int64                `p:"channelId" dc:"支付通道 ID" `
 	Currency      string               `p:"currency"   dc:"订阅计划货币" `
+	Name          string               `p:"name"   dc:"名称" `
 	Lines         []*ro.NewInvoiceItem `p:"lines"              `
 }
 type NewInvoiceEditRes struct {
