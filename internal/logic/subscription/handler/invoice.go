@@ -11,6 +11,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/invoice/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -132,11 +133,17 @@ func CreateInvoiceFromSubscriptionPaymentFailure(ctx context.Context, subscripti
 	return nil
 }
 
-func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscriptionId string, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
+func CreateOrUpdateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscriptionId string, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	one := query.GetInvoiceByChannelUniqueId(ctx, payment.PaymentId)
-	invoice := CalculateInvoiceForSubscription(ctx, sub)
+	invoice := util.CalculateInternalInvoiceRo(ctx, &util.CalculateInvoiceReq{
+		Currency:      sub.Currency,
+		PlanId:        sub.PlanId,
+		Quantity:      sub.Quantity,
+		AddonJsonData: sub.AddonData,
+		TaxScale:      sub.TaxPercentage,
+	})
 	var channelInvoicePdf = ""
 	var channelInvoiceStatus = ""
 	var channelLink = ""
@@ -222,47 +229,6 @@ func CreateInvoiceFromSubscriptionPaymentSuccess(ctx context.Context, subscripti
 		}
 	}
 	return nil
-}
-
-func CalculateInvoiceForSubscription(ctx context.Context, sub *entity.Subscription) *ro.ChannelDetailInvoiceRo {
-	plan := query.GetPlanById(ctx, sub.PlanId)
-	addons := query.GetSubscriptionAddonsByAddonJson(ctx, sub.AddonData)
-	var totalAmountExcludingTax = plan.Amount * sub.Quantity
-	for _, addon := range addons {
-		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
-	}
-
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
-	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-		Currency:               sub.Currency,
-		Amount:                 sub.Quantity*plan.Amount + int64(float64(sub.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
-		AmountExcludingTax:     sub.Quantity * plan.Amount,
-		Tax:                    int64(float64(sub.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
-		UnitAmountExcludingTax: plan.Amount,
-		Description:            plan.PlanName,
-		Quantity:               sub.Quantity,
-	})
-	for _, addon := range addons {
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-			Currency:               sub.Currency,
-			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
-			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
-			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
-			UnitAmountExcludingTax: addon.AddonPlan.Amount,
-			Description:            addon.AddonPlan.PlanName,
-			Quantity:               addon.Quantity,
-		})
-	}
-	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
-	return &ro.ChannelDetailInvoiceRo{
-		TotalAmount:                    totalAmountExcludingTax + taxAmount,
-		TotalAmountExcludingTax:        totalAmountExcludingTax,
-		Currency:                       sub.Currency,
-		TaxAmount:                      taxAmount,
-		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
-		Lines:                          invoiceItems,
-	}
 }
 
 func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {

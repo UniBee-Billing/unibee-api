@@ -172,7 +172,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	if err != nil {
 		return err
 	}
-	err = CreateInvoiceFromSubscriptionPaymentSuccess(ctx, sub.SubscriptionId, req.Payment, req.ChannelInvoiceDetail)
+	err = CreateOrUpdateInvoiceFromSubscriptionPaymentSuccess(ctx, sub.SubscriptionId, req.Payment, req.ChannelInvoiceDetail)
 	if err != nil {
 		return err
 	}
