@@ -18,6 +18,34 @@ import (
 	"strings"
 )
 
+func SubscriptionPlanPublish(ctx context.Context, planId int64) (err error) {
+	utility.Assert(planId > 0, "invalid planId")
+	plan := query.GetPlanById(ctx, planId)
+	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().PublishStatus: 2,
+		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SubscriptionPlanUnPublish(ctx context.Context, planId int64) (err error) {
+	utility.Assert(planId > 0, "invalid planId")
+	plan := query.GetPlanById(ctx, planId)
+	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().PublishStatus: 1,
+		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelId int64) (err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -127,7 +155,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-			utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
 
@@ -194,7 +222,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-			utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
 
@@ -264,7 +292,7 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-		utility.Assert(addonPlan.Status == consts.PlanStatusPublished, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		//addon 周期校验
 		utility.Assert(addonPlan.IntervalUnit == one.IntervalUnit && addonPlan.IntervalCount == one.IntervalCount, fmt.Sprintf("addon not match plan's recycle interval, id:%d", addonPlan.Id))
 	}

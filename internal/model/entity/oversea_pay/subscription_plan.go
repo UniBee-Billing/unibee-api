@@ -31,4 +31,5 @@ type SubscriptionPlan struct {
 	Type                      int         `json:"type"                      description:"类型，1-main plan，2-addon plan"`                                                        // 类型，1-main plan，2-addon plan
 	Status                    int         `json:"status"                    description:"状态，1-编辑中，2-活跃，3-非活跃，4-过期"`                                                           // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
 	BindingAddonIds           string      `json:"bindingAddonIds"           description:"绑定的 Addon PlanIds，以逗号隔开"`                                                            // 绑定的 Addon PlanIds，以逗号隔开
+	PublishStatus             int         `json:"publishStatus"             description:"0-UnPublish,1-Publish,用于控制是否在 UserPortal 端展示"`                                       // 0-UnPublish,1-Publish,用于控制是否在 UserPortal 端展示
 }

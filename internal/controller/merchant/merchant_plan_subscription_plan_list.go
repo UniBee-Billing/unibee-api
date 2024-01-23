@@ -18,14 +18,15 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.Subsc
 	}
 
 	plans := service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
-		MerchantId: req.MerchantId,
-		Type:       req.Type,
-		Status:     req.Status,
-		Currency:   req.Currency,
-		SortField:  req.SortField,
-		SortType:   req.SortType,
-		Page:       req.Page,
-		Count:      req.Count,
+		MerchantId:    req.MerchantId,
+		Type:          req.Type,
+		Status:        req.Status,
+		PublishStatus: req.PublishStatus,
+		Currency:      req.Currency,
+		SortField:     req.SortField,
+		SortType:      req.SortType,
+		Page:          req.Page,
+		Count:         req.Count,
 	})
 	return &v1.SubscriptionPlanListRes{Plans: plans}, nil
 }

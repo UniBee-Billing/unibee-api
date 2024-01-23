@@ -56,22 +56,23 @@ type SubscriptionPlanAddonsBindingRes struct {
 }
 
 type SubscriptionPlanListReq struct {
-	g.Meta     `path:"/subscription_plan_list" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划列表"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	Type       int    `p:"type"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency" dc:"订阅计划货币"  `
-	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
-	Page       int    `p:"page"  dc:"分页页码,0开始" `
-	Count      int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
+	g.Meta        `path:"/subscription_plan_list" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划列表"`
+	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	Type          int    `p:"type"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
+	Status        int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
+	PublishStatus int    `p:"publishStatus" dc:"不填查询所有状态，,状态，1-未发布，2-已发布" `
+	Currency      string `p:"currency" dc:"订阅计划货币"  `
+	SortField     string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType      string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page          int    `p:"page"  dc:"分页页码,0开始" `
+	Count         int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
 }
 type SubscriptionPlanListRes struct {
 	Plans []*ro.PlanDetailRo `p:"plans" dc:"订阅计划明细"`
 }
 
 type SubscriptionPlanChannelTransferAndActivateReq struct {
-	g.Meta `path:"/subscription_plan_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划支付通道激活并发布"`
+	g.Meta `path:"/subscription_plan_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划支付通道激活"`
 	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
 	//ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
@@ -92,6 +93,20 @@ type SubscriptionPlanChannelDeactivateReq struct {
 	ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionPlanChannelDeactivateRes struct {
+}
+
+type SubscriptionPlanPublishReq struct {
+	g.Meta `path:"/subscription_plan_publish" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划发布，用于显示在 UserPortal" `
+	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+}
+type SubscriptionPlanPublishRes struct {
+}
+
+type SubscriptionPlanUnPublishReq struct {
+	g.Meta `path:"/subscription_plan_unpublish" tags:"Merchant-Plan-Controller" method:"post" summary:"订阅计划取消发布" `
+	PlanId int64 `p:"planId" dc:"订阅计划 ID" v:"required#请输入订阅计划 ID"`
+}
+type SubscriptionPlanUnPublishRes struct {
 }
 
 type SubscriptionPlanDetailReq struct {

@@ -49,7 +49,7 @@ func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subsc
 			for _, one := range mainList {
 				plan := query.GetPlanById(backgroundCtx, one.PlanId)
 				utility.Assert(plan != nil, "invalid planId")
-				utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+				utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 				planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
 				utility.Assert(planChannel != nil, "invalid planChannel")
 				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)

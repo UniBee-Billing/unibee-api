@@ -48,7 +48,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		backgroundCtx := context.Background()
 		plan := query.GetPlanById(backgroundCtx, one.PlanId)
 		utility.Assert(plan != nil, "invalid planId")
-		utility.Assert(plan.Status == consts.PlanStatusPublished, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+		utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 		planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
 		details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 		if err == nil {

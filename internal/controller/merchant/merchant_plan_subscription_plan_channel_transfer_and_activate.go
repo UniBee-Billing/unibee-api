@@ -67,7 +67,7 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		var allAddonList []*entity.SubscriptionPlan
 		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			if addonPlan.Status != consts.PlanStatusPublished {
+			if addonPlan.Status != consts.PlanStatusActive {
 				//发布 addonPlan
 				for _, channel := range list {
 					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(channel.Id))

@@ -52,17 +52,17 @@ const (
 type SubscriptionPlanStatusEnum int
 
 const (
-	PlanStatusEditable  = 1
-	PlanStatusPublished = 2
-	PlanStatusExpired   = 3
+	PlanStatusEditable = 1
+	PlanStatusActive   = 2
+	PlanStatusExpired  = 3
 )
 
 func (status SubscriptionPlanStatusEnum) Description() string {
 	switch status {
 	case PlanStatusEditable:
 		return "PlanStatusEditable"
-	case PlanStatusPublished:
-		return "PlanStatusPublished"
+	case PlanStatusActive:
+		return "PlanStatusActive"
 	case PlanStatusExpired:
 		return "PlanStatusExpired"
 	default:

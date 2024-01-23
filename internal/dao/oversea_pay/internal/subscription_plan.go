@@ -41,6 +41,7 @@ type SubscriptionPlanColumns struct {
 	Type                      string // 类型，1-main plan，2-addon plan
 	Status                    string // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
 	BindingAddonIds           string // 绑定的 Addon PlanIds，以逗号隔开
+	PublishStatus             string // 0-UnPublish,1-Publish,用于控制是否在 UserPortal 端展示
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
@@ -66,6 +67,7 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	Type:                      "type",
 	Status:                    "status",
 	BindingAddonIds:           "binding_addon_ids",
+	PublishStatus:             "publish_status",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.

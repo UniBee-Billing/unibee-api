@@ -15,14 +15,15 @@ import (
 )
 
 type SubscriptionPlanListInternalReq struct {
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
-	Type       int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	Currency   string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
-	SortField  string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
-	SortType   string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
-	Page       int    `p:"page" d:"0"  dc:"分页页码,0开始" `
-	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	MerchantId    int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required|length:4,30#请输入商户号"`
+	Type          int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
+	Status        int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
+	PublishStatus int    `p:"publishStatus" dc:"不填查询所有状态，,状态，1-未发布，2-已发布" `
+	Currency      string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
+	SortField     string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，默认 gmt_modify" `
+	SortType      string `p:"sortType" dc:"排序类型，asc|desc，默认 desc" `
+	Page          int    `p:"page" d:"0"  dc:"分页页码,0开始" `
+	Count         int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
 }
 
 func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.SubscriptionPlanDetailRes, error) {
@@ -59,6 +60,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
 		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
+		Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).

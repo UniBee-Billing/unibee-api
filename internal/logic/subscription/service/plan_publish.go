@@ -18,12 +18,12 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 	utility.Assert(planId > 0, "invalid planId")
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found, invalid planId")
-	if one.Status == consts.PlanStatusPublished {
+	if one.Status == consts.PlanStatusActive {
 		//已成功
 		return nil
 	}
 	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusPublished,
+		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusActive,
 		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitNil().Update()
 	if err != nil {
