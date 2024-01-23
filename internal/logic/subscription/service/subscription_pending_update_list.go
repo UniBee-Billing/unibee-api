@@ -24,12 +24,14 @@ type SubscriptionPendingUpdateListInternalRes struct {
 	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
-func GetUnfinishedSubscriptionPendingUpdateDetailBySubscriptionId(ctx context.Context, subscriptionId string) *ro.SubscriptionPendingUpdateDetail {
+func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *ro.SubscriptionPendingUpdateDetail {
+	if len(pendingUpdateId) == 0 {
+		return nil
+	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).
+		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
 		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
-		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil

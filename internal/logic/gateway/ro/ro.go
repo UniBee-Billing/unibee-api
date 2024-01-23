@@ -185,10 +185,11 @@ type ChannelUpdateSubscriptionPreviewInternalResp struct {
 }
 
 type ChannelUpdateSubscriptionInternalResp struct {
-	ChannelUpdateId string `json:"channelUpdateId" description:"渠道更新单Id"`
-	Data            string `json:"data"`
-	Link            string `json:"link" description:"需要支付情况下，提供支付链接"`
-	Paid            bool   `json:"paid" description:"是否已支付，false-未支付，需要支付，true-已支付或不需要支付"`
+	ChannelPaymentId string `json:"channelPaymentId" description:"ChannelPaymentId"`
+	ChannelUpdateId  string `json:"channelUpdateId" description:"渠道更新单Id"`
+	Data             string `json:"data"`
+	Link             string `json:"link" description:"需要支付情况下，提供支付链接"`
+	Paid             bool   `json:"paid" description:"是否已支付，false-未支付，需要支付，true-已支付或不需要支付"`
 }
 
 type ChannelDetailSubscriptionInternalResp struct {

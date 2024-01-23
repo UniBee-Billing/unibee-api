@@ -48,4 +48,5 @@ type Subscription struct {
 	VatVerifyData          string      `json:"vatVerifyData"          description:""`                                                                                                                                                       //
 	Data                   string      `json:"data"                   description:"渠道额外参数，JSON格式"`                                                                                                                                          // 渠道额外参数，JSON格式
 	ResponseData           string      `json:"responseData"           description:"渠道返回参数，JSON格式"`                                                                                                                                          // 渠道返回参数，JSON格式
+	PendingUpdateId        string      `json:"pendingUpdateId"        description:""`                                                                                                                                                       //
 }

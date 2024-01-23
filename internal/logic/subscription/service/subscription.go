@@ -627,15 +627,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
-	// 需要取消其他 PendingUpdate，保证只有一个在 Create 状态
-	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.SubscriptionId).WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
-	if err != nil {
-		return nil, err
-	}
-
 	var effectImmediate = 0
 	var effectTime = prepare.Subscription.CurrentPeriodEnd
 	if prepare.EffectImmediate {
@@ -689,6 +680,25 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
+	// 标记更新单
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().PendingUpdateId: one.UpdateSubscriptionId,
+		dao.Subscription.Columns().GmtModify:       gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+	// 当前更新单渠道执行成功，需要取消其他 PendingUpdate，保证只有一个在 Create 状态
+	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.SubscriptionId).
+		WhereNot(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).
+		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+
 	var PaidInt = 0
 	if updateRes.Paid {
 		PaidInt = 1
@@ -711,7 +721,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if prepare.EffectImmediate && updateRes.Paid {
 		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		one.Status = consts.PendingSubStatusFinished
-		_, err = handler.FinishPendingUpdateForSubscription(ctx, one)
+		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, updateRes.ChannelPaymentId, one)
 		if err != nil {
 			return nil, err
 		}

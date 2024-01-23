@@ -50,4 +50,5 @@ type Subscription struct {
 	VatVerifyData          interface{} //
 	Data                   interface{} // 渠道额外参数，JSON格式
 	ResponseData           interface{} // 渠道返回参数，JSON格式
+	PendingUpdateId        interface{} //
 }

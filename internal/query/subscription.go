@@ -66,18 +66,41 @@ func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*
 	return addons
 }
 
-func GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
+func GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context, pendingUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(pendingUpdateId) == 0 {
+		return nil
+	}
+	var one *entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
 	if len(channelUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
 		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
-		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
-		OrderDesc(dao.SubscriptionPendingUpdate.Columns().Id).
+		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
+		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
+}
+
+func GetSubscriptionTimeLineByUniqueId(ctx context.Context, uniqueId string) (one *entity.SubscriptionTimeline) {
+	err := dao.SubscriptionTimeline.Ctx(ctx).Where(entity.SubscriptionTimeline{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
 }

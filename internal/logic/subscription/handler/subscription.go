@@ -82,10 +82,6 @@ func UpdateSubWithPayment(ctx context.Context, subscription *entity.Subscription
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
-	//}
 	//处理更新事件 todo mark
 
 	return nil
@@ -108,15 +104,21 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	TrialEnd                  int64                                     `json:"trialEnd"`
 }
 
-func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
+func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, channelPaymentId string, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	// 先创建 SubscriptionTimeLine 在做 Sub 更新
+	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, channelPaymentId)
+	if err != nil {
+		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
+	}
 	// todo 使用事务
-	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().PlanId:    one.UpdatePlanId,
-		dao.Subscription.Columns().Quantity:  one.UpdateQuantity,
-		dao.Subscription.Columns().AddonData: one.UpdateAddonData,
-		dao.Subscription.Columns().Amount:    one.UpdateAmount,
-		dao.Subscription.Columns().Currency:  one.UpdateCurrency,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().PlanId:          one.UpdatePlanId,
+		dao.Subscription.Columns().Quantity:        one.UpdateQuantity,
+		dao.Subscription.Columns().AddonData:       one.UpdateAddonData,
+		dao.Subscription.Columns().Amount:          one.UpdateAmount,
+		dao.Subscription.Columns().Currency:        one.UpdateCurrency,
+		dao.Subscription.Columns().GmtModify:       gtime.Now(),
+		dao.Subscription.Columns().PendingUpdateId: "", //清除标记的更新单
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return false, err
@@ -128,7 +130,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, one *entity.Subscri
 	if err != nil {
 		return false, err
 	}
-	// todo mark sub 更新成功，生成 Proration Invoice 发票、 timeline等后续流程
+
 	return true, nil
 }
 
@@ -137,75 +139,37 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	if sub == nil {
 		return gerror.Newf("HandleSubscriptionPaymentSuccess sub not found %s", req.ChannelSubscriptionId)
 	}
-	pendingSubUpdate := query.GetCreatedSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
-	// todo mark 处理逻辑需要优化，降级或者不马上生效的更新，是在下一周期生效
-	if pendingSubUpdate != nil {
-		//更新单支付成功
-		//todo mark 更新之前 先 校验渠道 Sub Plan 是否已更改， 金额是否一致
-		_, err := FinishPendingUpdateForSubscription(ctx, pendingSubUpdate)
+	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	if eiPendingSubUpdate != nil {
+		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
+		_, err := FinishPendingUpdateForSubscription(ctx, sub, req.ChannelPaymentId, eiPendingSubUpdate)
 		if err != nil {
 			return err
-		}
-		//更新 SubscriptionPendingUpdate
-		_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusInit,
-			dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, pendingSubUpdate.Id).OmitNil().Update()
-		if err != nil {
-			return err
-		}
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-		if sub != nil {
-			one := &entity.SubscriptionTimeline{
-				MerchantId:      sub.MerchantId,
-				UserId:          sub.UserId,
-				SubscriptionId:  sub.SubscriptionId,
-				InvoiceId:       "", // todo mark
-				UniqueId:        req.Payment.PaymentId,
-				Currency:        sub.Currency,
-				PlanId:          sub.PlanId,
-				Quantity:        sub.Quantity,
-				AddonData:       sub.AddonData,
-				ChannelId:       sub.ChannelId,
-				PeriodStart:     gtime.Now().Timestamp(),
-				PeriodEnd:       sub.CurrentPeriodEnd,
-				PeriodStartTime: gtime.Now(),
-				PeriodEndTime:   sub.CurrentPeriodEndTime,
-				PaymentId:       req.Payment.PaymentId,
-			}
-
-			_, err = dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
-			if err != nil {
-				err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
-				return err
-			}
 		}
 	} else {
-		// todo mark sub Next Period，生成 对应 Invoice 发票、 timeline等后续流程
-		one := &entity.SubscriptionTimeline{
-			MerchantId:      sub.MerchantId,
-			UserId:          sub.UserId,
-			SubscriptionId:  sub.SubscriptionId,
-			InvoiceId:       "", // todo mark
-			UniqueId:        req.Payment.PaymentId,
-			Currency:        sub.Currency,
-			PlanId:          sub.PlanId,
-			Quantity:        sub.Quantity,
-			AddonData:       sub.AddonData,
-			ChannelId:       sub.ChannelId,
-			PeriodStart:     sub.CurrentPeriodStart,
-			PeriodEnd:       sub.CurrentPeriodEnd,
-			PeriodStartTime: sub.CurrentPeriodStartTime,
-			PeriodEndTime:   sub.CurrentPeriodEndTime,
-			PaymentId:       req.Payment.PaymentId,
+		var byUpdate = false
+		if len(sub.PendingUpdateId) > 0 {
+			//有 pending 的更新单存在，检查支付是否对应更新单
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
+				//金额一致
+				_, err := FinishPendingUpdateForSubscription(ctx, sub, req.ChannelPaymentId, pendingSubUpdate)
+				if err != nil {
+					return err
+				}
+				byUpdate = true
+			}
 		}
-		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			err = gerror.Newf(`HandleSubscriptionPaymentSuccess record insert failure %s`, err.Error())
-			return err
+		if !byUpdate {
+			err := CreateOrUpdateSubscriptionTimeline(ctx, sub, req.ChannelPaymentId)
+			if err != nil {
+				g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
+			}
 		}
 	}
 	err := UpdateSubWithPayment(ctx, sub, req.ChannelSubscriptionDetail)
+	// todo mark sub 更新成功，根据sub 和 payment 生成 Invoice
+
 	if err != nil {
 		return err
 	}

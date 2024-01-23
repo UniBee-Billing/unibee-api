@@ -1079,10 +1079,11 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		g.Log().Infof(ctx, "query new invoice:", newInvoice)
 
 		return &ro.ChannelUpdateSubscriptionInternalResp{
-			Data:            utility.FormatToJsonString(updateSubscription),
-			ChannelUpdateId: newInvoice.ID,
-			Link:            newInvoice.HostedInvoiceURL,
-			Paid:            newInvoice.Paid,
+			Data:             utility.FormatToJsonString(updateSubscription),
+			ChannelUpdateId:  newInvoice.ID,
+			ChannelPaymentId: newInvoice.PaymentIntent.ID,
+			Link:             newInvoice.HostedInvoiceURL,
+			Paid:             newInvoice.Paid,
 		}, nil
 	} else {
 		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票

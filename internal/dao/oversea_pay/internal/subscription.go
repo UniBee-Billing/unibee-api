@@ -58,6 +58,7 @@ type SubscriptionColumns struct {
 	VatVerifyData          string //
 	Data                   string // 渠道额外参数，JSON格式
 	ResponseData           string // 渠道返回参数，JSON格式
+	PendingUpdateId        string //
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -100,6 +101,7 @@ var subscriptionColumns = SubscriptionColumns{
 	VatVerifyData:          "vat_verify_data",
 	Data:                   "data",
 	ResponseData:           "response_data",
+	PendingUpdateId:        "pendingUpdateId",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.
