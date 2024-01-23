@@ -125,11 +125,15 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetai
 		status = consts.SubStatusExpired
 	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
 		strings.Compare(string(subscription.Status), "pass_due") == 0 {
-		status = consts.SubStatusPendingInActive
+		status = consts.SubStatusIncomplete
 	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
 		status = consts.SubStatusSuspended
 	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
 		status = consts.SubStatusCancelled
+	}
+	var latestChannelPaymentId = ""
+	if subscription.LatestInvoice != nil && subscription.LatestInvoice.PaymentIntent != nil {
+		latestChannelPaymentId = subscription.LatestInvoice.PaymentIntent.ID
 	}
 
 	return &ro.ChannelDetailSubscriptionInternalResp{
@@ -139,6 +143,7 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetai
 		Data:                   utility.FormatToJsonString(subscription),
 		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
 		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
+		ChannelLatestPaymentId: latestChannelPaymentId,
 		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
 		CurrentPeriodStart:     subscription.CurrentPeriodStart,
 		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
@@ -1369,7 +1374,7 @@ func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, inv
 	return nil
 }
 
-func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription) error {
+func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription, payChannel *entity.OverseaPayChannel) error {
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
 	if unibSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
@@ -1388,6 +1393,28 @@ func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string
 		err = handler.HandleSubscriptionWebhookEvent(ctx, unibSub, eventType, details)
 		if err != nil {
 			return err
+		}
+		if details.Status == consts.SubStatusIncomplete && len(details.ChannelLatestPaymentId) > 0 {
+			//处理支付失败事件
+			paymentDetails, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, details.ChannelLatestPaymentId)
+			if err != nil {
+				return err
+			}
+			if paymentDetails.Status != consts.PAY_SUCCESS {
+				//有支付失败
+				paymentDetails.ChannelSubscriptionDetail = details
+				paymentDetails.ChannelInvoiceId = details.ChannelLatestInvoiceId
+				paymentDetails.ChannelUpdateId = details.ChannelLatestInvoiceId
+				invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, details.ChannelLatestInvoiceId)
+				if err != nil {
+					return err
+				}
+				paymentDetails.ChannelInvoiceDetail = invoiceDetails
+				err = handler2.HandlePaymentWebhookEvent(ctx, "payment_intent.failure.mock", paymentDetails)
+				if err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	} else {
@@ -1420,7 +1447,7 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Sub %s\n", payChannel.Channel, string(event.Type), subscription.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription)
+			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %s\n", payChannel.Channel, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)

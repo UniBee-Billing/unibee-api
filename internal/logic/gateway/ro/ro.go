@@ -199,6 +199,7 @@ type ChannelDetailSubscriptionInternalResp struct {
 	Data                   string                        `json:"data"`
 	ChannelItemData        string                        `json:"channelItemData"`
 	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
+	ChannelLatestPaymentId string                        `json:"channelLatestPaymentId"`
 	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`
 	CurrentPeriodStart     int64                         `json:"currentPeriodStart"`

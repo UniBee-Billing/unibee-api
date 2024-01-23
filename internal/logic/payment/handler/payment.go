@@ -301,6 +301,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *r
 	}
 
 	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
+		//Subscription Payment Success
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
 			Payment:                   payment,
 			ChannelInvoiceDetail:      details.ChannelInvoiceDetail,
@@ -321,6 +322,17 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *r
 		if err != nil {
 			return err
 		}
+	} else if details.ChannelInvoiceDetail != nil && details.Status != consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
+		//Subscription Payment Failure
+		err = handler.HandleSubscriptionPaymentFailure(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
+			Payment:                   payment,
+			ChannelInvoiceDetail:      details.ChannelInvoiceDetail,
+			ChannelSubscriptionDetail: details.ChannelSubscriptionDetail,
+			ChannelPaymentId:          details.ChannelPaymentId,
+			ChannelSubscriptionId:     details.ChannelInvoiceDetail.ChannelSubscriptionId,
+			ChannelInvoiceId:          details.ChannelInvoiceDetail.ChannelInvoiceId,
+			ChannelUpdateId:           details.ChannelUpdateId,
+		})
 	}
 
 	return nil

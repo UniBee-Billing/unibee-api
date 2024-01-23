@@ -178,3 +178,42 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	}
 	return nil
 }
+
+type SubscriptionPaymentFailureWebHookReq struct {
+	Payment                   *entity.Payment                           `json:"payment" `
+	ChannelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelInvoiceDetail      *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
+	ChannelPaymentId          string                                    `json:"channelPaymentId" `
+	ChannelSubscriptionId     string                                    `json:"channelSubscriptionId" `
+	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
+	ChannelUpdateId           string                                    `json:"channelUpdateId"`
+}
+
+func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
+	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	if sub == nil {
+		return gerror.Newf("HandleSubscriptionPaymentFailure sub not found %s", req.ChannelSubscriptionId)
+	}
+
+	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	if eiPendingSubUpdate != nil {
+		//更新单支付失败, EffectImmediate=true 需要用户 3DS 验证等场景
+
+	} else {
+		var byUpdate = false
+		if len(sub.PendingUpdateId) > 0 {
+			//有 pending 的更新单存在，检查支付是否对应更新单
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
+				//金额一致
+
+				byUpdate = true
+			}
+		}
+		if !byUpdate {
+			//没有匹配到更新单
+
+		}
+	}
+	return nil
+}

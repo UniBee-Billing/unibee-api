@@ -17,10 +17,11 @@ const (
 	SubStatusInit             = 0 //初始化
 	SubStatusCreate           = 1 //创建-渠道状态
 	SubStatusActive           = 2 //有效-渠道状态
-	SubStatusPendingInActive  = 3 //有效-PendingInActive-渠道状态
+	SubStatusPendingInActive  = 3 //PendingInActive
 	SubStatusCancelled        = 4 //取消-渠道状态
 	SubStatusExpired          = 5 //过期-渠道状态
 	SubStatusSuspended        = 6 //暂停-渠道状态
+	SubStatusIncomplete       = 7 //付款支付失败-渠道状态
 	PendingSubStatusInit      = 0
 	PendingSubStatusCreate    = 1
 	PendingSubStatusFinished  = 2
