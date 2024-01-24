@@ -1103,11 +1103,10 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		g.Log().Infof(ctx, "query new invoice:", newInvoice)
 
 		return &ro.ChannelUpdateSubscriptionInternalResp{
-			Data:             utility.FormatToJsonString(updateSubscription),
-			ChannelUpdateId:  newInvoice.ID,
-			ChannelPaymentId: newInvoice.PaymentIntent.ID,
-			Link:             newInvoice.HostedInvoiceURL,
-			Paid:             newInvoice.Paid,
+			Data:            utility.FormatToJsonString(updateSubscription),
+			ChannelUpdateId: newInvoice.ID,
+			Link:            newInvoice.HostedInvoiceURL,
+			Paid:            newInvoice.Paid,
 		}, nil
 	} else {
 		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票
@@ -1172,7 +1171,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("customer.subscription.resumed"),
 				stripe.String("invoice.upcoming"),
 				stripe.String("invoice.created"),
-				stripe.String("invoice.updated"),
+				stripe.String("invoice.updated"), //todo mark 并发所有发票都会产生支付，并发所有订阅更新都会产生支付，可能从贷方余额支付（需确认）或者更新会产生退款从情况，所有 invoice.paid 可能必须要接
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),

@@ -37,5 +37,4 @@ type Refund struct {
 	AdditionalData       interface{} //
 	UniqueId             interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
 	SubscriptionId       interface{} // 订阅id（内部编号）
-	ChannelPaymentId     interface{} // 外部支付渠道订单号，支付成功回调返回
 }

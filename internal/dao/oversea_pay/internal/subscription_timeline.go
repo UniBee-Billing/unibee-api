@@ -20,48 +20,46 @@ type SubscriptionTimelineDao struct {
 
 // SubscriptionTimelineColumns defines and stores column names for table subscription_timeline.
 type SubscriptionTimelineColumns struct {
-	Id               string //
-	MerchantId       string // 商户Id
-	UserId           string // userId
-	SubscriptionId   string // 订阅id（内部编号）
-	PeriodStart      string // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
-	PeriodEnd        string // period_end
-	PeriodStartTime  string //
-	PeriodEndTime    string //
-	InvoiceId        string // 发票ID（内部编号）
-	UniqueId         string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	Currency         string // 货币
-	PlanId           string // 计划ID
-	Quantity         string // quantity
-	AddonData        string // plan addon json data
-	ChannelId        string // 支付渠道Id
-	GmtCreate        string // 创建时间
-	GmtModify        string // 修改时间
-	IsDeleted        string //
-	ChannelPaymentId string // PaymentId
+	Id              string //
+	MerchantId      string // 商户Id
+	UserId          string // userId
+	SubscriptionId  string // 订阅id（内部编号）
+	PeriodStart     string // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
+	PeriodEnd       string // period_end
+	PeriodStartTime string //
+	PeriodEndTime   string //
+	InvoiceId       string // 发票ID（内部编号）
+	UniqueId        string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	Currency        string // 货币
+	PlanId          string // 计划ID
+	Quantity        string // quantity
+	AddonData       string // plan addon json data
+	ChannelId       string // 支付渠道Id
+	GmtCreate       string // 创建时间
+	GmtModify       string // 修改时间
+	IsDeleted       string //
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.
 var subscriptionTimelineColumns = SubscriptionTimelineColumns{
-	Id:               "id",
-	MerchantId:       "merchant_id",
-	UserId:           "user_id",
-	SubscriptionId:   "subscription_id",
-	PeriodStart:      "period_start",
-	PeriodEnd:        "period_end",
-	PeriodStartTime:  "period_start_time",
-	PeriodEndTime:    "period_end_time",
-	InvoiceId:        "invoice_id",
-	UniqueId:         "unique_id",
-	Currency:         "currency",
-	PlanId:           "plan_id",
-	Quantity:         "quantity",
-	AddonData:        "addon_data",
-	ChannelId:        "channel_id",
-	GmtCreate:        "gmt_create",
-	GmtModify:        "gmt_modify",
-	IsDeleted:        "is_deleted",
-	ChannelPaymentId: "channel_payment_id",
+	Id:              "id",
+	MerchantId:      "merchant_id",
+	UserId:          "user_id",
+	SubscriptionId:  "subscription_id",
+	PeriodStart:     "period_start",
+	PeriodEnd:       "period_end",
+	PeriodStartTime: "period_start_time",
+	PeriodEndTime:   "period_end_time",
+	InvoiceId:       "invoice_id",
+	UniqueId:        "unique_id",
+	Currency:        "currency",
+	PlanId:          "plan_id",
+	Quantity:        "quantity",
+	AddonData:       "addon_data",
+	ChannelId:       "channel_id",
+	GmtCreate:       "gmt_create",
+	GmtModify:       "gmt_modify",
+	IsDeleted:       "is_deleted",
 }
 
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.

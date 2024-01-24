@@ -34,6 +34,7 @@ type Invoice struct {
 	IsDeleted                      interface{} //
 	Link                           interface{} // invoice 链接（可用于支付）
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelPaymentId               interface{} // 关联渠道 PaymentId
 	ChannelUserId                  interface{} // 渠道用户 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
@@ -42,7 +43,6 @@ type Invoice struct {
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax interface{} // Sub金额(不含税）,单位：分
-	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	PeriodStart                    interface{} // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
 	PeriodEnd                      interface{} // period_end
 	PeriodStartTime                *gtime.Time //

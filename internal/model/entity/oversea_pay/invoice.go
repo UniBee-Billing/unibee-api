@@ -32,6 +32,7 @@ type Invoice struct {
 	IsDeleted                      int         `json:"isDeleted"                      description:""`                                                                      //
 	Link                           string      `json:"link"                           description:"invoice 链接（可用于支付）"`                                                     // invoice 链接（可用于支付）
 	ChannelStatus                  string      `json:"channelStatus"                  description:"渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object"`             // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	ChannelPaymentId               string      `json:"channelPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
 	ChannelUserId                  string      `json:"channelUserId"                  description:"渠道用户 Id"`                                                               // 渠道用户 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
@@ -40,7 +41,6 @@ type Invoice struct {
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                            // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        description:"金额(不含税）,单位：分"`                                                          // 金额(不含税）,单位：分
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" description:"Sub金额(不含税）,单位：分"`                                                       // Sub金额(不含税）,单位：分
-	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	PeriodStart                    int64       `json:"periodStart"                    description:"period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期"`                       // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
 	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end"`                                                            // period_end
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                      //

@@ -35,5 +35,4 @@ type Refund struct {
 	AdditionalData       string      `json:"additionalData"       description:""`                                                                //
 	UniqueId             string      `json:"uniqueId"             description:"唯一键，以同步为逻辑加入使用自定义唯一键"`                                            // 唯一键，以同步为逻辑加入使用自定义唯一键
 	SubscriptionId       string      `json:"subscriptionId"       description:"订阅id（内部编号）"`                                                      // 订阅id（内部编号）
-	ChannelPaymentId     string      `json:"channelPaymentId"     description:"外部支付渠道订单号，支付成功回调返回"`                                              // 外部支付渠道订单号，支付成功回调返回
 }

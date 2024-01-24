@@ -106,9 +106,9 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	TrialEnd                  int64                                     `json:"trialEnd"`
 }
 
-func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, channelPaymentId string, one *entity.SubscriptionPendingUpdate) (bool, error) {
+func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	// 先创建 SubscriptionTimeLine 在做 Sub 更新
-	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, channelPaymentId)
+	err := CreateOrUpdateSubscriptionTimeline(ctx, sub)
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 	}
@@ -144,7 +144,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
 	if eiPendingSubUpdate != nil {
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
-		_, err := FinishPendingUpdateForSubscription(ctx, sub, req.ChannelPaymentId, eiPendingSubUpdate)
+		_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
 				//金额一致
-				_, err := FinishPendingUpdateForSubscription(ctx, sub, req.ChannelPaymentId, pendingSubUpdate)
+				_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
 				if err != nil {
 					return err
 				}
@@ -163,7 +163,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			}
 		}
 		if !byUpdate {
-			err := CreateOrUpdateSubscriptionTimeline(ctx, sub, req.ChannelPaymentId)
+			err := CreateOrUpdateSubscriptionTimeline(ctx, sub)
 			if err != nil {
 				g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 			}
