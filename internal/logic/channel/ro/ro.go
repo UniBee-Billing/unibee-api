@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -143,7 +142,7 @@ type ChannelCreateSubscriptionInternalReq struct {
 	AddonPlans     []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
 	Subscription   *entity.Subscription            `json:"subscription"`
-	VatCountryRate *vat_gateway.VatCountryRate     `json:"vatCountryRate"`
+	VatCountryRate *VatCountryRate                 `json:"vatCountryRate"`
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
@@ -396,4 +395,22 @@ type SubscriptionPendingUpdateDetail struct {
 	Addons               []*SubscriptionPlanAddonRo  `json:"addons" dc:"旧订阅Addon"`
 	UpdatePlan           *entity.SubscriptionPlan    `json:"updatePlan" dc:"更新订阅计划"`
 	UpdateAddons         []*SubscriptionPlanAddonRo  `json:"updateAddons" dc:"更新订阅Addon"`
+}
+
+type ValidResult struct {
+	Valid           bool   `json:"valid"           `
+	VatNumber       string `json:"vatNumber"           `
+	CountryCode     string `json:"countryCode"           `
+	CompanyName     string `json:"companyName"           `
+	CompanyAddress  string `json:"companyAddress"           `
+	ValidateMessage string `json:"validateMessage"           `
+}
+
+type VatCountryRate struct {
+	Id                    uint64 `json:"id"  dc:"TaxId"`
+	Gateway               string `json:"channel"           `                                          // channel
+	CountryCode           string `json:"countryCode"           `                                      // country_code
+	CountryName           string `json:"countryName"           `                                      // country_name
+	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
+	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
 }

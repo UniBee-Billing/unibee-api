@@ -38,7 +38,7 @@ type PayChannelProxy struct {
 	channel *entity.OverseaPayChannel
 }
 
-func (p PayChannelProxy) getRemoteChannel() (channelService RemotePayChannelInterface) {
+func (p PayChannelProxy) getRemoteChannel() (channelService _interface.RemotePayChannelInterface) {
 	utility.Assert(p.channel != nil, "channel is not set")
 	if p.channel.EnumKey == Evonet.Code {
 		return &evonet.Evonet{}

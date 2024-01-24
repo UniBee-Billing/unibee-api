@@ -1,4 +1,4 @@
-package channel
+package _interface
 
 import (
 	"context"

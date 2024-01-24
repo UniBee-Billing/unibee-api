@@ -17,7 +17,7 @@ package vat
 import (
 	"errors"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"go-oversea-pay/internal/logic/vat_gateway/base"
+	"go-oversea-pay/internal/logic/channel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
@@ -67,7 +67,7 @@ func (g Github) ListAllRates() ([]*entity.CountryRate, error) {
 	return list, nil
 }
 
-func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*base.ValidResult, error) {
+func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*ro.ValidResult, error) {
 	format, err := ValidateNumberFormat(vatNumber)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (
 	if !valid.Valid {
 		return nil, gerror.New(vatNumber + " is not valid")
 	}
-	return &base.ValidResult{
+	return &ro.ValidResult{
 		Valid:          valid.Valid,
 		VatNumber:      valid.VATNumber,
 		CountryCode:    valid.CountryCode,
@@ -91,6 +91,6 @@ func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (
 	}, nil
 }
 
-func (g Github) ValidateEoriNumber(number string) (*base.ValidResult, error) {
+func (g Github) ValidateEoriNumber(number string) (*ro.ValidResult, error) {
 	return nil, gerror.New("not support")
 }

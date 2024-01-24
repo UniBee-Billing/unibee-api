@@ -15,7 +15,6 @@ import (
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
-	"go-oversea-pay/internal/logic/vat_gateway/base"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -35,13 +34,13 @@ type SubscriptionCreatePrepareInternalRes struct {
 	VatCountryCode        string                             `json:"vatCountryCode"              `
 	VatCountryName        string                             `json:"vatCountryName"              `
 	VatNumber             string                             `json:"vatNumber"              `
-	VatNumberValidate     *base.ValidResult                  `json:"vatNumberValidate"              `
+	VatNumberValidate     *ro.ValidResult                    `json:"vatNumberValidate"              `
 	StandardTaxPercentage int64                              `json:"standardTaxPercentage"              `
 	VatVerifyData         string                             `json:"vatVerifyData"              `
 	Invoice               *ro.ChannelDetailInvoiceRo         `json:"invoice"`
 	UserId                int64                              `json:"userId" `
 	Email                 string                             `json:"email" `
-	VatCountryRate        *vat_gateway.VatCountryRate        `json:"vatCountryRate" `
+	VatCountryRate        *ro.VatCountryRate                 `json:"vatCountryRate" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -130,8 +129,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var vatCountryCode = req.VatCountryCode
 	var standardTaxPercentage int64 = 0
 	var vatCountryName = ""
-	var vatCountryRate *vat_gateway.VatCountryRate
-	var vatNumberValidate *base.ValidResult
+	var vatCountryRate *ro.VatCountryRate
+	var vatNumberValidate *ro.ValidResult
 	var err error
 	if len(req.VatNumber) > 0 {
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")

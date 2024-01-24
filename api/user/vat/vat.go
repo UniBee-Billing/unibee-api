@@ -2,8 +2,7 @@ package vat
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/vat_gateway"
-	"go-oversea-pay/internal/logic/vat_gateway/base"
+	"go-oversea-pay/internal/logic/channel/ro"
 )
 
 type CountryVatListReq struct {
@@ -11,7 +10,7 @@ type CountryVatListReq struct {
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type CountryVatListRes struct {
-	VatCountryList []*vat_gateway.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
+	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }
 
 type NumberValidateReq struct {
@@ -20,5 +19,5 @@ type NumberValidateReq struct {
 	VatNumber  string `p:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
-	VatNumberValidate *base.ValidResult `json:"vatNumberValidate"`
+	VatNumberValidate *ro.ValidResult `json:"vatNumberValidate"`
 }

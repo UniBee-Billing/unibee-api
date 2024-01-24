@@ -5,8 +5,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/merchant_config"
-	"go-oversea-pay/internal/logic/vat_gateway/base"
 	vat "go-oversea-pay/internal/logic/vat_gateway/github"
 	"go-oversea-pay/internal/logic/vat_gateway/vatsense"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -21,16 +22,7 @@ const (
 	VAT_IMPLEMENT_NAMES = "vatsense|github"
 )
 
-type VatCountryRate struct {
-	Id                    uint64 `json:"id"  dc:"TaxId"`
-	Gateway               string `json:"channel"           `                                          // channel
-	CountryCode           string `json:"countryCode"           `                                      // country_code
-	CountryName           string `json:"countryName"           `                                      // country_name
-	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
-	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
-}
-
-func GetDefaultVatGateway(ctx context.Context, merchantId int64) base.Gateway {
+func GetDefaultVatGateway(ctx context.Context, merchantId int64) _interface.Gateway {
 	vatName, vatData := getDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
 		return nil
@@ -124,14 +116,14 @@ func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumbe
 	return res
 }
 
-func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, vatNumber string, requestVatNumber string) (*base.ValidResult, error) {
+func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
 	one := GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
 		if one.Valid == 1 {
 			valid = true
 		}
-		return &base.ValidResult{
+		return &ro.ValidResult{
 			Valid:           valid,
 			VatNumber:       one.VatNumber,
 			CountryCode:     one.CountryCode,
@@ -170,7 +162,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 	return result, nil
 }
 
-func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCountryRate, error) {
+func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "MerchantCountryRateList merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
@@ -185,7 +177,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCount
 	if err != nil {
 		return nil, err
 	}
-	var list []*VatCountryRate
+	var list []*ro.VatCountryRate
 	for _, countryRate := range countryRateList {
 		var vatSupport = false
 		if countryRate.Vat == 1 {
@@ -193,7 +185,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCount
 		} else {
 			vatSupport = false
 		}
-		list = append(list, &VatCountryRate{
+		list = append(list, &ro.VatCountryRate{
 			CountryCode:           countryRate.CountryCode,
 			CountryName:           countryRate.CountryName,
 			VatSupport:            vatSupport,
@@ -203,7 +195,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*VatCount
 	return list, nil
 }
 
-func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*VatCountryRate, error) {
+func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "MerchantCountryRateList merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
@@ -227,7 +219,7 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countr
 	} else {
 		vatSupport = false
 	}
-	return &VatCountryRate{
+	return &ro.VatCountryRate{
 		Id:                    one.Id,
 		Gateway:               one.Gateway,
 		CountryCode:           one.CountryCode,

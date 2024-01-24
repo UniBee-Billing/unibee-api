@@ -4,7 +4,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/vat_gateway/base"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
@@ -62,7 +61,7 @@ type SubscriptionCreatePreviewRes struct {
 	VatCountryCode    string                             `json:"vatCountryCode"              `
 	VatCountryName    string                             `json:"vatCountryName"              `
 	VatNumber         string                             `json:"vatNumber"              `
-	VatNumberValidate *base.ValidResult                  `json:"vatNumberValidate"              `
+	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
 }
 
 type SubscriptionCreateReq struct {
