@@ -43,6 +43,7 @@ type SubscriptionColumns struct {
 	ChannelItemData        string // channel_item_data
 	CancelAtPeriodEnd      string // 是否在周期结束时取消，0-false | 1-true
 	ChannelLatestInvoiceId string // 渠道最新发票 id
+	LastUpdateTime         string //
 	CurrentPeriodStart     string // current_period_start
 	CurrentPeriodEnd       string // current_period_end
 	CurrentPeriodStartTime string //
@@ -86,6 +87,7 @@ var subscriptionColumns = SubscriptionColumns{
 	ChannelItemData:        "channel_item_data",
 	CancelAtPeriodEnd:      "cancel_at_period_end",
 	ChannelLatestInvoiceId: "channel_latest_invoice_id",
+	LastUpdateTime:         "last_update_time",
 	CurrentPeriodStart:     "current_period_start",
 	CurrentPeriodEnd:       "current_period_end",
 	CurrentPeriodStartTime: "current_period_start_time",

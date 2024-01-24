@@ -35,6 +35,7 @@ type Subscription struct {
 	ChannelItemData        interface{} // channel_item_data
 	CancelAtPeriodEnd      interface{} // 是否在周期结束时取消，0-false | 1-true
 	ChannelLatestInvoiceId interface{} // 渠道最新发票 id
+	LastUpdateTime         interface{} //
 	CurrentPeriodStart     interface{} // current_period_start
 	CurrentPeriodEnd       interface{} // current_period_end
 	CurrentPeriodStartTime *gtime.Time //

@@ -17,6 +17,10 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 	uniqueId := util.Md5(fmt.Sprintf("%s-%d-%d-%s-%d-%d", sub.SubscriptionId, sub.PlanId, sub.Quantity, sub.AddonData, sub.CurrentPeriodStart, sub.CurrentPeriodEnd))
 	one := query.GetSubscriptionTimeLineByUniqueId(ctx, uniqueId)
 	if one == nil {
+		var periodStart = sub.CurrentPeriodStart
+		if sub.LastUpdateTime > 0 {
+			periodStart = sub.LastUpdateTime
+		}
 		var periodEnd = gtime.Now().Timestamp()
 		if periodEnd > sub.CurrentPeriodEnd {
 			//表示已经过了当前周期, 部分通道可能会提前支付并生成发票 todo mark
@@ -34,9 +38,9 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 			Quantity:        sub.Quantity,
 			AddonData:       sub.AddonData,
 			ChannelId:       sub.ChannelId,
-			PeriodStart:     sub.CurrentPeriodStart,
+			PeriodStart:     periodStart,
 			PeriodEnd:       periodEnd,
-			PeriodStartTime: gtime.NewFromTimeStamp(sub.CurrentPeriodStart),
+			PeriodStartTime: gtime.NewFromTimeStamp(periodStart),
 			PeriodEndTime:   gtime.NewFromTimeStamp(periodEnd),
 		}
 

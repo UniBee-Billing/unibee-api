@@ -119,6 +119,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().AddonData:       one.UpdateAddonData,
 		dao.Subscription.Columns().Amount:          one.UpdateAmount,
 		dao.Subscription.Columns().Currency:        one.UpdateCurrency,
+		dao.Subscription.Columns().LastUpdateTime:  gtime.Now(),
 		dao.Subscription.Columns().GmtModify:       gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId: "", //清除标记的更新单
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
