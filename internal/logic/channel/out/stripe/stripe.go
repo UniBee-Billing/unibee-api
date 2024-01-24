@@ -1012,33 +1012,19 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			stripeSubscriptionItems = detail.Items.Data
 		}
 		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
-		newMap := make(map[string]*ro.SubscriptionPlanAddonRo)
+		newMap := make(map[string]int64)
 		for _, addon := range subscriptionRo.AddonPlans {
-			newMap[addon.AddonPlanChannel.ChannelPlanId] = addon
+			newMap[addon.AddonPlanChannel.ChannelPlanId] = addon.Quantity
 		}
+		newMap[subscriptionRo.PlanChannel.ChannelPlanId] = subscriptionRo.Quantity
 		//匹配
-		var replace = false
 		for _, item := range stripeSubscriptionItems {
-			if strings.Compare(item.Price.ID, subscriptionRo.OldPlanChannel.ChannelPlanId) == 0 {
-				items = append(items, &stripe.SubscriptionItemsParams{
-					ID:       stripe.String(item.ID),
-					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-					Quantity: stripe.Int64(subscriptionRo.Quantity),
-				})
-				replace = true
-			} else if strings.Compare(item.Price.ID, subscriptionRo.PlanChannel.ChannelPlanId) == 0 {
-				items = append(items, &stripe.SubscriptionItemsParams{
-					ID:       stripe.String(item.ID),
-					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-					Quantity: stripe.Int64(subscriptionRo.Quantity),
-				})
-				replace = true
-			} else if addon, ok := newMap[item.Price.ID]; ok {
+			if quantity, ok := newMap[item.Price.ID]; ok {
 				//替换
 				items = append(items, &stripe.SubscriptionItemsParams{
 					ID:       stripe.String(item.ID),
-					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
-					Quantity: stripe.Int64(addon.Quantity),
+					Price:    stripe.String(item.Price.ID),
+					Quantity: stripe.Int64(quantity),
 				})
 				delete(newMap, item.Price.ID)
 			} else {
@@ -1049,17 +1035,11 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 				})
 			}
 		}
-		if !replace {
-			items = append(items, &stripe.SubscriptionItemsParams{
-				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
-				Quantity: stripe.Int64(subscriptionRo.Quantity),
-			})
-		}
-		//新增剩余的Addons
-		for channelPlanId, addon := range newMap {
+		//新增剩余的
+		for channelPlanId, quantity := range newMap {
 			items = append(items, &stripe.SubscriptionItemsParams{
 				Price:    stripe.String(channelPlanId),
-				Quantity: stripe.Int64(addon.Quantity),
+				Quantity: stripe.Int64(quantity),
 			})
 		}
 	}
