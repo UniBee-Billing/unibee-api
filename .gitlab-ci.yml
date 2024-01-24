@@ -42,6 +42,7 @@ push:
 #    - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
 #    - docker rmi easzlab.io.local:5000/heiku/heiku_gooverseapay:daily
     - docker build -f manifest/docker/Dockerfile -t easzlab.io.local:5000/heiku/heiku_gooverseapay:daily --platform linux/amd64 .
+    - docker push easzlab.io.local:5000/heiku/heiku_gooverseapay:daily
 
 deploy:
   only:
