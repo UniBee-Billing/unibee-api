@@ -122,17 +122,17 @@ var (
 			//gateway.CheckAndSetupPayChannelWebhooks(ctx)
 
 			{
-				g.Log().Infof(ctx, "server name: %s ", consts.GetConfigInstance().Server.Name)
-				g.Log().Infof(ctx, "server port: %s ", consts.GetConfigInstance().Server.Address)
-				g.Log().Infof(ctx, "server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
+				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)
+				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
-				liberr.ErrIsNil(ctx, err, "redis write check failure")
+				liberr.ErrIsNil(ctx, err, "Redis write check failure")
 				value, err := g.Redis().Get(ctx, "g_check")
-				liberr.ErrIsNil(ctx, err, "redis read check failure")
+				liberr.ErrIsNil(ctx, err, "Redis read check failure")
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
-				liberr.ErrIsNil(ctx, err, "redis write expire failure")
-				g.Log().Infof(ctx, "redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
+				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
+				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
+				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
 			}
 
 			s.Run()
