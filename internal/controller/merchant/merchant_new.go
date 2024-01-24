@@ -68,3 +68,9 @@ func NewPayment() merchant.IMerchantPayment {
 	return &ControllerPayment{}
 }
 
+type ControllerUser struct{}
+
+func NewUser() merchant.IMerchantUser {
+	return &ControllerUser{}
+}
+

@@ -12,13 +12,13 @@ import (
 
 type SubscriptionInvoiceListInternalReq struct {
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId        int    `p:"userId" dc:"UserId 不填查询所有" `
-	SendEmail     int    `p:"sendEmail" dc:"SendEmail 不填查询所有" `
-	SortField     string `p:"sortField" dc:"排序字段，invoice_id|gmt_create|period_end|total_amount" `
+	UserId        int    `p:"userId" dc:"FilterUserId Default All" `
+	SendEmail     int    `p:"sendEmail" dc:"Filter SendEmail Default All" `
+	SortField     string `p:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
 	SortType      string `p:"sortType" dc:"Sort Type，asc|desc" `
-	DeleteInclude bool   `p:"deleteInclude" dc:"是否包含删除，查看已删除发票需要超级管理员权限" `
+	DeleteInclude bool   `p:"deleteInclude" dc:"Is Delete Include" `
 	Page          int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count         int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
+	Count         int    `p:"count"  dc:"Count Of Page"`
 }
 
 type SubscriptionInvoiceListInternalRes struct {

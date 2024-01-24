@@ -12,7 +12,7 @@ type TimeLineListReq struct {
 	SortField  string `p:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page       int    `p:"page"  dc:"Page,Start 0" `
-	Count      int    `p:"count" dc:"COUNT OF Page" `
+	Count      int    `p:"count" dc:"Count Of Page" `
 }
 
 type TimeLineListRes struct {

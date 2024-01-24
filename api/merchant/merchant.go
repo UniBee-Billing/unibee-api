@@ -15,6 +15,7 @@ import (
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
 	"go-oversea-pay/api/merchant/subscription"
+	"go-oversea-pay/api/merchant/user"
 	"go-oversea-pay/api/merchant/vat"
 	"go-oversea-pay/api/merchant/webhook"
 )
@@ -85,6 +86,10 @@ type IMerchantSubscription interface {
 	UserSubscriptionDetail(ctx context.Context, req *subscription.UserSubscriptionDetailReq) (res *subscription.UserSubscriptionDetailRes, err error)
 	SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error)
 	SubscriptionMerchantPendingUpdateList(ctx context.Context, req *subscription.SubscriptionMerchantPendingUpdateListReq) (res *subscription.SubscriptionMerchantPendingUpdateListRes, err error)
+}
+
+type IMerchantUser interface {
+	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
 }
 
 type IMerchantVat interface {
