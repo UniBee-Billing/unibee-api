@@ -299,7 +299,7 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
-	utility.Assert(len(one.SendEmail) > 0, "SendEmail is nil")
+	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
 	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
 	if one.Status > consts.InvoiceStatusPending {
 		pdfFileName := utility.DownloadFile(one.SendPdf)
