@@ -1293,7 +1293,9 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 			IntervalCount: stripe.Int64(int64(targetPlan.IntervalCount)),
 		},
 		Product: stripe.String(planChannel.ChannelProductId),
-
+		Metadata: map[string]string{
+			"PlanId": strconv.FormatUint(targetPlan.Id, 10),
+		},
 		//ProductData: &stripe.PriceProductDataParams{
 		//	ID:   stripe.String(planChannel.ChannelProductId),
 		//	Name: stripe.String(targetPlan.PlanName),
