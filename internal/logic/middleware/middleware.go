@@ -192,7 +192,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
-	g.Log().Infof(r.Context(), "parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
+	g.Log().Infof(r.Context(), "Parsed User Token: %s, Email: %s, userId: %d", tokenString, u.Email, u.ID)
 
 	userAccount := query.GetUserAccountById(r.Context(), u.Id)
 	if userAccount == nil {
@@ -239,6 +239,8 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
+
+	g.Log().Infof(r.Context(), "Parsed Merchant Token: %s, Email: %s, merchantUserId: %d", tokenString, u.Email, u.ID)
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if merchantAccount == nil {
