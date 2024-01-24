@@ -1026,6 +1026,13 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 					Quantity: stripe.Int64(subscriptionRo.Quantity),
 				})
 				replace = true
+			} else if strings.Compare(item.Price.ID, subscriptionRo.PlanChannel.ChannelPlanId) == 0 {
+				items = append(items, &stripe.SubscriptionItemsParams{
+					ID:       stripe.String(item.ID),
+					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Quantity: stripe.Int64(subscriptionRo.Quantity),
+				})
+				replace = true
 			} else if addon, ok := newMap[item.Price.ID]; ok {
 				//替换
 				items = append(items, &stripe.SubscriptionItemsParams{
