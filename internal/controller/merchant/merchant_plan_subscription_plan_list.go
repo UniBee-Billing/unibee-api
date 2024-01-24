@@ -5,7 +5,7 @@ import (
 	v1 "go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
+	"go-oversea-pay/internal/logic/plan/service"
 	"go-oversea-pay/utility"
 )
 

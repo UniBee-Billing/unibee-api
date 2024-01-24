@@ -2,7 +2,7 @@ package balance
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel/ro"
 )
 
 type DetailQueryReq struct {

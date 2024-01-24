@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway"
-	"go-oversea-pay/internal/logic/subscription/handler"
+	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/invoice/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -51,7 +51,7 @@ func (c *ControllerInvoice) ChannelSync(ctx context.Context, req *invoice.Channe
 			for _, one := range mainList {
 				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
 				utility.Assert(payChannel != nil, "invalid planChannel")
-				details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
+				details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
 				if err == nil {
 					err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.ChannelInvoiceId)
 					if err != nil {

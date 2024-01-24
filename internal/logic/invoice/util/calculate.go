@@ -2,7 +2,7 @@ package util
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 )

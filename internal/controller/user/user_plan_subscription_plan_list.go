@@ -2,10 +2,9 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/subscription/service"
-
 	"go-oversea-pay/api/user/plan"
+	"go-oversea-pay/internal/consts"
+	"go-oversea-pay/internal/logic/plan/service"
 )
 
 func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.SubscriptionPlanListReq) (res *plan.SubscriptionPlanListRes, err error) {

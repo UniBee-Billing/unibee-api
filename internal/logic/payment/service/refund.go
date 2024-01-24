@@ -10,7 +10,7 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway"
+	"go-oversea-pay/internal/logic/channel"
 	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -27,8 +27,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
 
-	channel := query.GetPayChannelById(ctx, payment.ChannelId)
-	utility.Assert(channel != nil, "支付渠道异常 gateway not found")
+	payChannel := query.GetPayChannelById(ctx, payment.ChannelId)
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Value <= payment.PaymentFee, "refund value should <= PaymentFee value")
@@ -79,7 +79,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 gateway refund
+			//事务处理 channel refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
 			one.UniqueId = one.RefundId
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -95,7 +95,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			one.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelResult, err := gateway.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelRefund(ctx, payment, one)
+			channelResult, err := channel.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelRefund(ctx, payment, one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err

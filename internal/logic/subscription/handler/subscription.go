@@ -7,7 +7,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/invoice/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 )
@@ -174,7 +175,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	}
 	//重新获取
 	sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	err = CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &CreateInvoiceInternalReq{
+	err = handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
 		Payment:                          req.Payment,
 		Currency:                         sub.Currency,
 		PlanId:                           sub.PlanId,
@@ -216,7 +217,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 	if eiPendingSubUpdate != nil {
 		//更新单支付失败, EffectImmediate=true 需要用户 3DS 验证等场景
 		//金额一致
-		err := CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &CreateInvoiceInternalReq{
+		err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
 			Payment:                          req.Payment,
 			Currency:                         eiPendingSubUpdate.UpdateCurrency,
 			PlanId:                           eiPendingSubUpdate.UpdatePlanId,
@@ -242,7 +243,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
 				//金额一致
-				err := CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &CreateInvoiceInternalReq{
+				err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
 					Payment:                          req.Payment,
 					Currency:                         pendingSubUpdate.UpdateCurrency,
 					PlanId:                           pendingSubUpdate.UpdatePlanId,
@@ -266,7 +267,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 		}
 		if !byUpdate {
 			//没有匹配到更新单
-			err := CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &CreateInvoiceInternalReq{
+			err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
 				Payment:                          req.Payment,
 				Currency:                         sub.Currency,
 				PlanId:                           sub.PlanId,

@@ -1,4 +1,4 @@
-package gateway
+package channel
 
 import (
 	"context"
@@ -8,11 +8,11 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	_interface "go-oversea-pay/internal/interface"
-	out2 "go-oversea-pay/internal/logic/gateway/out"
-	"go-oversea-pay/internal/logic/gateway/out/evonet"
-	"go-oversea-pay/internal/logic/gateway/out/paypal"
-	"go-oversea-pay/internal/logic/gateway/out/stripe"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	out2 "go-oversea-pay/internal/logic/channel/out"
+	"go-oversea-pay/internal/logic/channel/out/evonet"
+	"go-oversea-pay/internal/logic/channel/out/paypal"
+	"go-oversea-pay/internal/logic/channel/out/stripe"
+	"go-oversea-pay/internal/logic/channel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"time"

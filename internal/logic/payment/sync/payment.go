@@ -22,7 +22,7 @@ package sync
 //		}()
 //		backgroundCtx := context.Background()
 //		payChannel := query.GetPayChannelById(backgroundCtx, channelId)
-//		details, err := gateway.GetPayChannelServiceProvider(backgroundCtx, channelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, channelPaymentId)
+//		details, err := channel.GetPayChannelServiceProvider(backgroundCtx, channelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, channelPaymentId)
 //		if err == nil {
 //			err := handler.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
 //			if err != nil {

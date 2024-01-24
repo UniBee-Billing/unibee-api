@@ -3,7 +3,7 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/vat_gateway/base"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )

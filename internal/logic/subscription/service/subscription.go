@@ -11,8 +11,8 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/gateway"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
 	"go-oversea-pay/internal/logic/vat_gateway/base"
@@ -285,7 +285,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
+	createRes, err := channel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
 		Plan:           prepare.Plan,
 		AddonPlans:     prepare.Addons,
 		PlanChannel:    prepare.PlanChannel,
@@ -489,7 +489,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//var nextPeriodTotalAmount int64
 	var nextPeriodInvoice *ro.ChannelDetailInvoiceRo
 	if effectImmediate {
-		updatePreviewRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		updatePreviewRes, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            plan,
 			Quantity:        req.Quantity,
 			OldPlan:         oldPlan,
@@ -664,7 +664,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 
-	updateRes, err := gateway.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+	updateRes, err := channel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 		Plan:            prepare.Plan,
 		Quantity:        prepare.Quantity,
 		OldPlan:         prepare.OldPlan,
@@ -741,10 +741,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
 	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payment gateway not found")
+	utility.Assert(payChannel != nil, "payment channel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
+	_, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
 		Plan:         plan,
 		PlanChannel:  planChannel,
 		Subscription: sub,
@@ -786,7 +786,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+	_, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 	if err != nil {
 		return err
 	}
@@ -821,7 +821,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+	_, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 	if err != nil {
 		return err
 	}
@@ -851,14 +851,14 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	details, err := gateway.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+	details, err := channel.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
 	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
 	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
 	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
 	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := details.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
-	_, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
+	_, err = channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 	if err != nil {
 		return err
 	}
@@ -888,12 +888,12 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	details, err := gateway.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+	details, err := channel.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
 	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
 	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
 	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
 	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
-	details, err = gateway.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+	details, err = channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
 	if err != nil {
 		return err
 	}

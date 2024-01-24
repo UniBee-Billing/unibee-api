@@ -2,9 +2,8 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/subscription/service"
-
 	"go-oversea-pay/api/merchant/plan"
+	"go-oversea-pay/internal/logic/plan/service"
 )
 
 func (c *ControllerPlan) SubscriptionPlanPublish(ctx context.Context, req *plan.SubscriptionPlanPublishReq) (res *plan.SubscriptionPlanPublishRes, err error) {

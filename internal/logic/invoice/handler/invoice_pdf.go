@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel/ro"
+	generator2 "go-oversea-pay/internal/logic/invoice/handler/generator"
 	"go-oversea-pay/internal/logic/oss"
-	"go-oversea-pay/internal/logic/subscription/handler/generator"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -36,18 +36,18 @@ func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoic
 }
 
 func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchantInfo *entity.MerchantInfo, user *entity.UserAccount, savePath string) error {
-	doc, _ := generator.New(generator.Invoice, &generator.Options{
+	doc, _ := generator2.New(generator2.Invoice, &generator2.Options{
 		TextTypeInvoice: "INVOICE",
 		AutoPrint:       true,
 		CurrencySymbol:  fmt.Sprintf("%v", currency.Symbol(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency)))),
 	})
 
-	doc.SetHeader(&generator.HeaderFooter{
+	doc.SetHeader(&generator2.HeaderFooter{
 		Text:       "<center>Unibee Billing</center>",
 		Pagination: true,
 	})
 
-	doc.SetFooter(&generator.HeaderFooter{
+	doc.SetFooter(&generator2.HeaderFooter{
 		Text:       "<center>Unibee Billing</center>",
 		Pagination: true,
 	})
@@ -72,10 +72,10 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		return err
 	}
 
-	doc.SetCompany(&generator.Contact{
+	doc.SetCompany(&generator2.Contact{
 		Name: merchantInfo.Name,
 		Logo: logoBytes,
-		Address: &generator.Address{
+		Address: &generator2.Address{
 			Address: merchantInfo.Location + " " + merchantInfo.Address,
 			//PostalCode: "75000",
 			City: merchantInfo.Location,
@@ -91,9 +91,9 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		userAddress = user.Address
 	}
 
-	doc.SetCustomer(&generator.Contact{
+	doc.SetCustomer(&generator2.Contact{
 		Name: userName,
-		Address: &generator.Address{
+		Address: &generator2.Address{
 			Address: userAddress,
 			//PostalCode: "29200",
 			//City:       "Brest",
@@ -110,29 +110,29 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	for i, line := range lines {
 		//scale, _ := currency.Cash.Rounding(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency)))
 		//dec := fmt.Sprintf("%v", number.Decimal(float64(line.UnitAmountExcludingTax)/100.0, number.Scale(scale)))
-		doc.AppendItem(&generator.Item{
+		doc.AppendItem(&generator2.Item{
 			Name:        fmt.Sprintf("%s #%d", line.Description, i),
 			Description: fmt.Sprintf("%s-%s", utility.FormatUnixTime(unibInvoice.PeriodStart), utility.FormatUnixTime(unibInvoice.PeriodEnd)),
 			UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 			Quantity:    strconv.FormatInt(line.Quantity, 10),
-			Tax: &generator.Tax{
+			Tax: &generator2.Tax{
 				Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage),
 			},
-			Discount: &generator.Discount{
+			Discount: &generator2.Discount{
 				Percent: "0",
 				Amount:  "0",
 			},
 		})
 	}
 
-	doc.SetDefaultTax(&generator.Tax{
+	doc.SetDefaultTax(&generator2.Tax{
 		Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage),
 	})
 
 	// doc.SetDiscount(&generator.Discount{
 	// Percent: "90",
 	// })
-	doc.SetDiscount(&generator.Discount{
+	doc.SetDiscount(&generator2.Discount{
 		Amount: "0",
 	})
 

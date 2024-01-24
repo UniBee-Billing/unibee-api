@@ -32,7 +32,7 @@ type SubscriptionColumns struct {
 	Quantity               string // quantity
 	AddonData              string // plan addon json data
 	ChannelId              string // 支付渠道Id
-	Status                 string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend
+	Status                 string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	ChannelSubscriptionId  string // 支付渠道订阅id
 	ChannelUserId          string // 渠道用户 Id
 	CustomerName           string // customer_name

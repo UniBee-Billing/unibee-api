@@ -10,8 +10,8 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/redismq"
@@ -20,7 +20,7 @@ import (
 
 func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
-	utility.Assert(createPayContext.PayChannel != nil, "pay gateway is nil")
+	utility.Assert(createPayContext.PayChannel != nil, "pay channel is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "支付单号为空")
 	utility.Assert(createPayContext.Pay.ChannelId > 0, "pay channelId is nil")
@@ -52,7 +52,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 gateway refund
+			//事务处理 channel refund
 			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
@@ -68,7 +68,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			createPayContext.Pay.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelInternalPayResult, err = gateway.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
+			channelInternalPayResult, err = channel.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
