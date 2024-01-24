@@ -22,7 +22,7 @@ const (
 	VAT_IMPLEMENT_NAMES = "vatsense|github"
 )
 
-func GetDefaultVatGateway(ctx context.Context, merchantId int64) _interface.Gateway {
+func GetDefaultVatGateway(ctx context.Context, merchantId int64) _interface.VATGateway {
 	vatName, vatData := getDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
 		return nil

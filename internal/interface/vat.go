@@ -5,7 +5,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-type Gateway interface {
+type VATGateway interface {
 	GetGatewayName() string
 	ListAllCountries() ([]*entity.CountryRate, error)
 	ListAllRates() ([]*entity.CountryRate, error)

@@ -125,7 +125,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
 	//vat
-	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat Gateway not setup")
+	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
 	var vatCountryCode = req.VatCountryCode
 	var standardTaxPercentage int64 = 0
 	var vatCountryName = ""
