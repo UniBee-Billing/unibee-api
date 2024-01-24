@@ -19,7 +19,8 @@ type Context struct {
 
 // ContextUser 请求上下文中的用户信息
 type ContextUser struct {
-	Id uint64 // 用户ID
+	Id    uint64 // 用户ID
+	Token string // token
 	// MobilePhone string // 用户手机号
 	// UserName    string // 用户名称
 	// AvatarUrl   string // 用户头像
@@ -30,6 +31,7 @@ type ContextUser struct {
 type ContextMerchantUser struct {
 	Id         uint64 // 用户ID
 	MerchantId uint64 // MerchantId
+	Token      string // token
 	// MobilePhone string // 用户手机号
 	// UserName    string // 用户名称
 	// AvatarUrl   string // 用户头像

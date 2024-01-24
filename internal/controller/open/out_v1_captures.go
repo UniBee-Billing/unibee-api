@@ -2,7 +2,6 @@ package open
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/logic/payment/service"
 	"go-oversea-pay/internal/query"
@@ -21,6 +20,5 @@ func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesR
 	if err != nil {
 		return nil, err
 	}
-	utility.SuccessJsonExit(g.RequestFromCtx(ctx), err == nil)
-	return
+	return &payment.CapturesRes{}, nil
 }

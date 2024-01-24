@@ -2,7 +2,6 @@ package open
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/google/uuid"
 	"go-oversea-pay/api/open/mock"
 	v12 "go-oversea-pay/api/open/payment"
@@ -26,6 +25,5 @@ func (c *ControllerMock) Cancel(ctx context.Context, req *mock.CancelReq) (res *
 	if err != nil {
 		return nil, err
 	}
-	utility.SuccessJsonExit(g.RequestFromCtx(ctx), err == nil)
-	return
+	return &mock.CancelRes{}, nil
 }

@@ -2,13 +2,16 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	_interface "go-oversea-pay/internal/interface"
+	auth2 "go-oversea-pay/internal/logic/auth"
+	"go-oversea-pay/utility"
 
 	"go-oversea-pay/api/merchant/auth"
 )
 
 func (c *ControllerAuth) Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "Merchant User Not Found")
+	utility.Assert(len(_interface.BizCtx().Get(ctx).MerchantUser.Token) > 0, "Merchant Token Not Found")
+	auth2.DelAuthToken(ctx, _interface.BizCtx().Get(ctx).MerchantUser.Token)
+	return &auth.LogoutRes{}, nil
 }

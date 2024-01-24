@@ -2,8 +2,6 @@ package merchant
 
 import (
 	"context"
-	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
 	_plan "go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -34,7 +32,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 	for _, channel := range list {
 		err = service.SubscriptionPlanChannelTransferAndActivate(ctx, req.PlanId, int64(channel.Id))
 		if err != nil {
-			utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
 			return nil, err
 		}
 	}
@@ -42,7 +39,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 	//发布 Plan
 	err = service.SubscriptionPlanActivate(ctx, req.PlanId)
 	if err != nil {
-		utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
 		return nil, err
 	}
 
@@ -56,7 +52,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 			for _, s := range strList {
 				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
 				if err != nil {
-					utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("Internal Error converting string to int: %s", err))
 					return nil, err
 				}
 				addonIdsList = append(addonIdsList, num) // 添加到整数列表中
@@ -72,7 +67,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 				for _, channel := range list {
 					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(channel.Id))
 					if err != nil {
-						utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
 						return nil, err
 					}
 				}
@@ -80,13 +74,11 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 				//发布 Plan
 				err = service.SubscriptionPlanActivate(ctx, int64(addonPlan.Id))
 				if err != nil {
-					utility.FailureJsonExit(g.RequestFromCtx(ctx), fmt.Sprintf("%s", err))
 					return nil, err
 				}
 			}
 		}
 	}
 
-	//utility.SuccessJsonExit(g.RequestFromCtx(ctx), nil)
 	return &_plan.SubscriptionPlanChannelTransferAndActivateRes{}, nil
 }

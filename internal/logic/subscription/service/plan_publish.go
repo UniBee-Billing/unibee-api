@@ -11,6 +11,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strings"
 )
 
 func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
@@ -40,8 +41,19 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 }
 
 func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, channelId int64) error {
+	intervals := []string{"day", "month", "year", "week"}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")
+	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(plan.IntervalUnit)), "IntervalUnit Error，Must One Of day｜month｜year｜week")
+	if strings.ToLower(plan.IntervalUnit) == "day" {
+		utility.Assert(plan.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+	} else if strings.ToLower(plan.IntervalUnit) == "month" {
+		utility.Assert(plan.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+	} else if strings.ToLower(plan.IntervalUnit) == "year" {
+		utility.Assert(plan.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+	} else if strings.ToLower(plan.IntervalUnit) == "week" {
+		utility.Assert(plan.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	}
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 	planChannel := query.GetPlanChannel(ctx, planId, channelId)

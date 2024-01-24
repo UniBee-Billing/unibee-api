@@ -137,7 +137,16 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
-	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
+	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+	if strings.ToLower(req.IntervalUnit) == "day" {
+		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+	} else if strings.ToLower(req.IntervalUnit) == "month" {
+		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+	} else if strings.ToLower(req.IntervalUnit) == "year" {
+		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+	} else if strings.ToLower(req.IntervalUnit) == "week" {
+		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	}
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
 	}
@@ -178,14 +187,11 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
-		one = nil
-		return
+		return nil, gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	//todo mark 是否直接发布
 	return one, nil
 }
 
@@ -200,7 +206,16 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
-	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit 错误，day｜month｜year｜week\"")
+	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+	if strings.ToLower(req.IntervalUnit) == "day" {
+		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+	} else if strings.ToLower(req.IntervalUnit) == "month" {
+		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+	} else if strings.ToLower(req.IntervalUnit) == "year" {
+		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+	} else if strings.ToLower(req.IntervalUnit) == "week" {
+		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	}
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
 	}
@@ -240,9 +255,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 		dao.SubscriptionPlan.Columns().ChannelProductDescription: req.ProductDescription,
 	}).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
-		err = gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
-		one = nil
-		return
+		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
 	}
 
 	one.PlanName = req.PlanName

@@ -197,6 +197,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
 		Id:    u.Id,
+		Token: tokenString,
 		Email: u.Email,
 	}
 
@@ -245,6 +246,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	customCtx.MerchantUser = &model.ContextMerchantUser{
 		Id:         u.Id,
 		MerchantId: uint64(merchantAccount.MerchantId),
+		Token:      tokenString,
 		Email:      u.Email,
 	}
 
