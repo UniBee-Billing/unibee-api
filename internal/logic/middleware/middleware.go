@@ -5,6 +5,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	_ "go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/logic/auth"
 	"go-oversea-pay/internal/model"
 	"go-oversea-pay/internal/query"
 	utility "go-oversea-pay/utility"
@@ -89,12 +90,6 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 
 // PreAuth 从 Session 中获取用户
 func (s *SMiddleware) PreAuth(r *ghttp.Request) {
-	// 初始化，务必最开始执行
-	//customCtx := &model.Context{
-	//	Session: r.Session,
-	//	Data:    make(g.Map),
-	//}
-	//_interface.BizCtx().Init(r, customCtx)
 	customCtx := _interface.BizCtx().Get(r.Context())
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
@@ -105,22 +100,12 @@ func (s *SMiddleware) PreAuth(r *ghttp.Request) {
 			// IsAdmin:     false,
 		}
 	}
-	// 将自定义的上下文对象传递到模板变量中使用
-	//r.Assigns(g.Map{
-	//	consts.ContextKey: customCtx,
-	//})
-	// 执行下一步请求逻辑
 	r.Middleware.Next()
 }
 
 // PreOpenApiAuth 从 Session 中获取用户 (obsolete)
 func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
-	// 初始化，务必最开始执行
-	//customCtx := &model.Context{
-	//	Session: r.Session,
-	//	Data:    make(g.Map),
-	//}
-	//_interface.BizCtx().Init(r, customCtx)
+
 	customCtx := _interface.BizCtx().Get(r.Context())
 	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
 		customCtx.User = &model.ContextUser{
@@ -136,11 +121,7 @@ func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
 		customCtx.Data[consts.ApiKey] = key
 		customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
 	}
-	// 将自定义的上下文对象传递到模板变量中使用
-	//r.Assigns(g.Map{
-	//	consts.ContextKey: customCtx,
-	//})
-	// 执行下一步请求逻辑
+
 	r.Middleware.Next()
 }
 
@@ -193,7 +174,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
-	// fmt.Println("token str: ", tokenString)
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
@@ -212,35 +193,18 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 
 	u := parseAccessToken(tokenString)
 	g.Log().Infof(r.Context(), "parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
-	//customCtx := &model.Context{
-	//	Session: r.Session,
-	//	Data:    make(g.Map),
-	//}
-	//_interface.BizCtx().Init(r, customCtx)
+
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
 		Id:    u.Id,
 		Email: u.Email,
 	}
 
-	//r.Assigns(g.Map{
-	//	consts.ContextKey: customCtx,
-	//})
-
 	r.Middleware.Next()
 }
 
 func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	if consts.GetConfigInstance().IsServerDev() {
-		//customCtx := &model.Context{
-		//	Session: r.Session,
-		//	Data:    make(g.Map),
-		//}
-		//_interface.BizCtx().Init(r, customCtx)
-		//r.Assigns(g.Map{
-		//	consts.ContextKey: customCtx,
-		//})
-
 		r.Middleware.Next()
 		return
 	}
@@ -260,18 +224,13 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 
-	if !token.Valid {
+	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
 		g.Log().Errorf(r.Context(), "TokenMerchantAuth token invalid")
 		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
 
 	u := parseAccessToken(tokenString)
-	//customCtx := &model.Context{
-	//	Session: r.Session,
-	//	Data:    make(g.Map),
-	//}
-	//_interface.BizCtx().Init(r, customCtx)
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if !token.Valid {
@@ -279,6 +238,8 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()
 	}
+	//有接口调用，顺延 5 分钟失效时间
+	auth.SetAuthTokenNewTTL(r.Context(), tokenString, 5*60)
 
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.MerchantUser = &model.ContextMerchantUser{
@@ -286,10 +247,6 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		MerchantId: uint64(merchantAccount.MerchantId),
 		Email:      u.Email,
 	}
-
-	//r.Assigns(g.Map{
-	//	consts.ContextKey: customCtx,
-	//})
 
 	r.Middleware.Next()
 }
