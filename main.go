@@ -14,12 +14,7 @@ import (
 )
 
 func main() {
-	// https://goframe.org/pages/viewpage.action?pageId=3672072 时区处理
-	//err := gtime.SetTimeZone("Asia/Shanghai")
-	//if err != nil {
-	//	panic(err)
-	//}
-	fmt.Println("Current Go version:", runtime.Version())
+	fmt.Println("Go version:", runtime.Version())
 	nacos.Init()
 	redismq.StartRedisMqConsumer()
 	cmd.Main.Run(gctx.GetInitCtx())
