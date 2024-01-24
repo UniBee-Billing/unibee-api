@@ -227,7 +227,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 			MerchantId:                       sub.MerchantId,
 			SubscriptionId:                   sub.SubscriptionId,
 			ChannelId:                        sub.ChannelId,
-			InvoiceStatus:                    consts.InvoiceStatusPending,
+			InvoiceStatus:                    consts.InvoiceStatusProcessing,
 			ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
 			PeriodStart:                      sub.CurrentPeriodStart, // todo mark 周期不确定
 			PeriodEnd:                        sub.CurrentPeriodEnd,
@@ -253,7 +253,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 					MerchantId:                       sub.MerchantId,
 					SubscriptionId:                   sub.SubscriptionId,
 					ChannelId:                        sub.ChannelId,
-					InvoiceStatus:                    consts.InvoiceStatusPending,
+					InvoiceStatus:                    consts.InvoiceStatusProcessing,
 					ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
 					PeriodStart:                      sub.CurrentPeriodStart, // todo mark 周期不确定
 					PeriodEnd:                        sub.CurrentPeriodEnd,
@@ -277,7 +277,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 				MerchantId:                       sub.MerchantId,
 				SubscriptionId:                   sub.SubscriptionId,
 				ChannelId:                        sub.ChannelId,
-				InvoiceStatus:                    consts.InvoiceStatusPending,
+				InvoiceStatus:                    consts.InvoiceStatusProcessing,
 				ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
 				PeriodStart:                      sub.CurrentPeriodEnd,
 				PeriodEnd:                        sub.CurrentPeriodEnd + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart), // + 1 周期 todo mark 确认

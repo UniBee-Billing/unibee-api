@@ -244,7 +244,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 		if err != nil {
 			return err
 		}
-		if one.Status != consts.InvoiceStatusPaid {
+		if one.Status != req.InvoiceStatus {
 			//更新状态发送邮件
 			_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		}
