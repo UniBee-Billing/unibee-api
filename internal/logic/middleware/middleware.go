@@ -175,7 +175,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
@@ -185,7 +185,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 
-	if !token.Valid {
+	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
 		g.Log().Errorf(r.Context(), "TokenUserAuth token invalid")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
@@ -193,6 +193,13 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 
 	u := parseAccessToken(tokenString)
 	g.Log().Infof(r.Context(), "parsed user token: ", u.Email, "/", u.Id, "/", u.ID)
+
+	userAccount := query.GetUserAccountById(r.Context(), u.Id)
+	if userAccount == nil {
+		g.Log().Errorf(r.Context(), "TokenUserAuth user not found")
+		utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
+		r.Exit()
+	}
 
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
@@ -215,7 +222,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
@@ -234,7 +241,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	u := parseAccessToken(tokenString)
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
-	if !token.Valid {
+	if merchantAccount == nil {
 		g.Log().Errorf(r.Context(), "TokenMerchantAuth merchant user not found")
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()

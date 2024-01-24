@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-oversea-pay/api/user/auth"
+	auth2 "go-oversea-pay/internal/logic/auth"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -91,6 +92,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
+	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", newOne.Id), 5*60), "Cache Error")
 
 	return &auth.LoginRes{User: newOne, Token: token}, nil
 }
