@@ -152,8 +152,6 @@ type CreateInvoiceInternalReq struct {
 
 func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req *CreateInvoiceInternalReq) error {
 	one := query.GetInvoiceByChannelUniqueId(ctx, req.Payment.PaymentId)
-	user := query.GetUserAccountById(ctx, uint64(req.UserId))
-	userChannel := query.GetUserChannel(ctx, req.UserId, req.ChannelId)
 	invoice := util.CalculateInternalInvoiceRo(ctx, &util.CalculateInvoiceReq{
 		Currency:      req.Currency,
 		PlanId:        req.PlanId,
@@ -165,13 +163,21 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 	var channelInvoiceStatus = ""
 	var channelLink = ""
 	var channelUserId = ""
+	var sendEmail = ""
 	if req.ChannelDetailInvoiceInternalResp != nil {
 		channelInvoicePdf = req.ChannelDetailInvoiceInternalResp.ChannelInvoicePdf
 		channelInvoiceStatus = req.ChannelDetailInvoiceInternalResp.ChannelStatus
 		channelLink = req.ChannelDetailInvoiceInternalResp.Link
 	}
+	userChannel := query.GetUserChannel(ctx, req.UserId, req.ChannelId)
 	if userChannel != nil {
 		channelUserId = userChannel.ChannelUserId
+	}
+	user := query.GetUserAccountById(ctx, uint64(req.UserId))
+	if user != nil {
+		sendEmail = user.Email
+	} else if one != nil && len(one.SendEmail) > 0 {
+		sendEmail = one.SendEmail
 	}
 	if one == nil {
 		//创建
@@ -188,7 +194,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 			ChannelId:                      req.ChannelId,
 			Status:                         req.InvoiceStatus,
 			SendStatus:                     0,
-			SendEmail:                      user.Email,
+			SendEmail:                      sendEmail,
 			ChannelUserId:                  channelUserId,
 			ChannelInvoiceId:               req.Payment.ChannelInvoiceId,
 			ChannelPaymentId:               req.Payment.ChannelPaymentId,
@@ -228,7 +234,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 			dao.Invoice.Columns().Status:                         req.InvoiceStatus,
 			dao.Invoice.Columns().ChannelInvoiceId:               req.Payment.ChannelInvoiceId,
 			dao.Invoice.Columns().ChannelUserId:                  channelUserId,
-			dao.Invoice.Columns().SendEmail:                      user.Email,
+			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().ChannelPaymentId:               req.Payment.ChannelPaymentId,
 			dao.Invoice.Columns().TotalAmount:                    invoice.TotalAmount,
