@@ -38,6 +38,7 @@ push:
     - chmod +x temp/linux_amd64/main
     - docker rmi registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
     - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily --platform linux/amd64 .
+    - docker tag registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:1.0
     - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
     - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
 
