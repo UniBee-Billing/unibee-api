@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"go-oversea-pay/internal/consts"
 )
 
 func getAuthTokenRedisKey(token string) string {
-	return fmt.Sprintf("auth#%s", token)
+	return fmt.Sprintf("auth#%s#%s", consts.GetConfigInstance().Env, token)
 }
 
-func PutAuthTokenToCache(ctx context.Context, token string, value string, ttlSecond int64) bool {
-	err := g.Redis().SetEX(ctx, getAuthTokenRedisKey(token), value, ttlSecond)
+func PutAuthTokenToCache(ctx context.Context, token string, value string) bool {
+	err := g.Redis().SetEX(ctx, getAuthTokenRedisKey(token), value, consts.GetConfigInstance().Auth.Login.Expire)
 	if err != nil {
 		return false
 	}
@@ -29,8 +30,8 @@ func IsAuthTokenExpired(ctx context.Context, token string) bool {
 	return false
 }
 
-func SetAuthTokenNewTTL(ctx context.Context, token string, newTTLSecond int64) bool {
-	expire, err := g.Redis().Expire(ctx, getAuthTokenRedisKey(token), newTTLSecond)
+func ResetAuthTokenTTL(ctx context.Context, token string) bool {
+	expire, err := g.Redis().Expire(ctx, getAuthTokenRedisKey(token), consts.GetConfigInstance().Auth.Login.Expire)
 	if err != nil {
 		return false
 	}

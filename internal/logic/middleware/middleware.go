@@ -201,7 +201,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 	//有接口调用，顺延 5 分钟失效时间
-	auth.SetAuthTokenNewTTL(r.Context(), tokenString, 5*60)
+	auth.ResetAuthTokenTTL(r.Context(), tokenString)
 
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
@@ -251,7 +251,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 		r.Exit()
 	}
 	//有接口调用，顺延 5 分钟失效时间
-	auth.SetAuthTokenNewTTL(r.Context(), tokenString, 5*60)
+	auth.ResetAuthTokenTTL(r.Context(), tokenString)
 
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.MerchantUser = &model.ContextMerchantUser{

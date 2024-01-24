@@ -92,7 +92,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id), 5*60), "Cache Error")
+	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id)), "Cache Error")
 
 	return &auth.LoginRes{MerchantUser: newOne, Token: token}, nil
 

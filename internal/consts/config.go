@@ -10,6 +10,7 @@ type Config struct {
 	RedisMqConfig RedisMqConfig `yaml:"redismq"`
 	MinioConfig   MinioConfig   `yaml:"minio"`
 	Server        Server        `yaml:"server"`
+	Auth          Auth          `yaml:"auth"`
 }
 
 type Server struct {
@@ -22,6 +23,14 @@ type RedisMqConfig struct {
 	Address string `yaml:"address"`
 	DB      int    `yaml:"db"`
 	Pass    string `yaml:"pass"`
+}
+
+type Auth struct {
+	Login Login `yaml:"login"`
+}
+
+type Login struct {
+	Expire int64 `yaml:"expire"`
 }
 
 type MinioConfig struct {
