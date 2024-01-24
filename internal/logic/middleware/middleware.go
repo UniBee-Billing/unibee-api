@@ -200,6 +200,8 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
 		r.Exit()
 	}
+	//有接口调用，顺延 5 分钟失效时间
+	auth.SetAuthTokenNewTTL(r.Context(), tokenString, 5*60)
 
 	customCtx := _interface.BizCtx().Get(r.Context())
 	customCtx.User = &model.ContextUser{
