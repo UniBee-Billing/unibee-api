@@ -31,8 +31,8 @@ push:
   image: docker
   stage: push
   script:
-    - apk add --no-cache curl jq python3 py3-pip
-    - pip install awscli
+#    - apk add --no-cache curl jq python3 py3-pip
+#    - pip install awscli
     - mkdir -p temp/linux_amd64
     - cp /data/artifacts/main temp/linux_amd64/main
     - chmod +x temp/linux_amd64/main
