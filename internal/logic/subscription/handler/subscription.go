@@ -153,7 +153,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 		if len(sub.PendingUpdateId) > 0 {
 			//有 pending 的更新单存在，检查支付是否对应更新单
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
+			if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee { // todo mark 有贷方余额存在，金额可能不一致，另外，如果贷方余额大于支付金额，可能不会由 Payment webhook 过来
 				//金额一致
 				_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
 				if err != nil {
