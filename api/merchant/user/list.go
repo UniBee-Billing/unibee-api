@@ -29,7 +29,7 @@ type ListRes struct {
 type SearchReq struct {
 	g.Meta     `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
 	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|VatNumber|InvoiceId|SubscriptionId|PaymentId" `
+	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
 type SearchRes struct {

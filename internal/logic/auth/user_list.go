@@ -4,6 +4,7 @@ import (
 	"context"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 )
@@ -42,7 +43,7 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 		isDeletes = append(isDeletes, 1)
 	}
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "gmt_modify desc"
+	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
 		utility.Assert(strings.Contains("user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type", req.SortField), "sortField should one of user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type")
 		if len(req.SortType) > 0 {
@@ -72,4 +73,57 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 	}
 
 	return &UserListInternalRes{UserAccounts: mainList}, nil
+}
+
+func SearchUser(ctx context.Context, searchKey string) (list []*entity.UserAccount, err error) {
+	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
+	var mainList []*entity.UserAccount
+	var isDeletes = []int{0}
+	var sortKey = "gmt_create desc"
+	_ = dao.UserAccount.Ctx(ctx).
+		WhereOr(dao.UserAccount.Columns().Id, searchKey).
+		WhereOr(dao.UserAccount.Columns().SubscriptionId, searchKey).
+		WhereOr(dao.UserAccount.Columns().VATNumber, searchKey).
+		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
+		Order(sortKey).
+		Limit(0, 10).
+		OmitEmpty().Scan(&mainList)
+	if len(mainList) < 10 {
+		//继续查 InvoiceId 和 PaymentId
+		invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
+		if invoice != nil && invoice.UserId > 0 {
+			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
+			if user != nil {
+				mainList = append(mainList, user)
+			}
+		}
+		payment := query.GetPaymentByPaymentId(ctx, searchKey)
+		if payment != nil && payment.UserId > 0 {
+			user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+			if user != nil {
+				mainList = append(mainList, user)
+			}
+		}
+	}
+	if len(mainList) < 10 {
+		//模糊查询
+		var likeList []*entity.UserAccount
+		_ = dao.UserAccount.Ctx(ctx).
+			WhereOrLike(dao.UserAccount.Columns().Email, searchKey).
+			WhereOrLike(dao.UserAccount.Columns().UserName, searchKey).
+			WhereOrLike(dao.UserAccount.Columns().CompanyName, searchKey).
+			WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
+			Order(sortKey).
+			Limit(0, 10).
+			OmitEmpty().Scan(&likeList)
+		if len(likeList) > 0 {
+			for _, item := range likeList {
+				mainList = append(mainList, item)
+			}
+		}
+	}
+	for _, user := range mainList {
+		user.Password = ""
+	}
+	return mainList, err
 }
