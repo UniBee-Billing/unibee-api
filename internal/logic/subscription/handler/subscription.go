@@ -172,7 +172,24 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	if err != nil {
 		return err
 	}
-	err = CreateOrUpdateInvoiceFromSubscriptionPaymentSuccess(ctx, sub.SubscriptionId, req.Payment, req.ChannelInvoiceDetail)
+	//重新获取
+	sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	err = CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &CreateInvoiceInternalReq{
+		Payment:                          req.Payment,
+		Currency:                         sub.Currency,
+		PlanId:                           sub.PlanId,
+		Quantity:                         sub.Quantity,
+		AddonJsonData:                    sub.AddonData,
+		TaxScale:                         sub.TaxPercentage,
+		UserId:                           sub.UserId,
+		MerchantId:                       sub.MerchantId,
+		SubscriptionId:                   sub.SubscriptionId,
+		ChannelId:                        sub.ChannelId,
+		InvoiceStatus:                    consts.InvoiceStatusPaid,
+		ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
+		PeriodStart:                      sub.CurrentPeriodStart,
+		PeriodEnd:                        sub.CurrentPeriodEnd,
+	})
 	if err != nil {
 		return err
 	}
