@@ -25,3 +25,13 @@ type ListReq struct {
 type ListRes struct {
 	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
 }
+
+type SearchReq struct {
+	g.Meta     `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|VatNumber|InvoiceId|SubscriptionId|PaymentId" `
+}
+
+type SearchRes struct {
+	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
+}
