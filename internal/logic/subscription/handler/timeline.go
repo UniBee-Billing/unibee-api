@@ -18,7 +18,7 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 	one := query.GetSubscriptionTimeLineByUniqueId(ctx, uniqueId)
 	if one == nil {
 		var periodStart = sub.CurrentPeriodStart
-		if sub.LastUpdateTime > 0 {
+		if sub.LastUpdateTime > sub.CurrentPeriodStart {
 			periodStart = sub.LastUpdateTime
 		}
 		var periodEnd = gtime.Now().Timestamp()
