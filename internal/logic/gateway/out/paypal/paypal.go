@@ -151,7 +151,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 						Version: 1,
 						FixedPrice: paypal.Money{
 							Currency: strings.ToUpper(subscriptionRo.Subscription.Currency),
-							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Subscription.Amount), //paypal 需要元为单位，小数点处理
+							Value:    utility.ConvertCentToDollarStr(subscriptionRo.Subscription.Amount, subscriptionRo.Subscription.Currency), //paypal 需要元为单位，小数点处理
 						},
 						CreateTime: time.Now(),
 						UpdateTime: time.Now(),
@@ -259,7 +259,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 						Version: 1,
 						FixedPrice: paypal.Money{
 							Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-							Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount), //paypal 需要元为单位，小数点处理
+							Value:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount, subscriptionRo.Plan.Currency), //paypal need float
 						},
 						CreateTime: time.Now(),
 						UpdateTime: time.Now(),
@@ -271,7 +271,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 				//		Version: 1,
 				//		FixedPrice: paypal.Money{
 				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-				//			Value:    utility.ConvertFenToYuanMinUnitStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
+				//			Value:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
 				//		},
 				//		CreateTime: time.Now(),
 				//		UpdateTime: time.Now(),
@@ -541,7 +541,7 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 					Version: 1,
 					FixedPrice: paypal.Money{
 						Currency: strings.ToUpper(plan.Currency),
-						Value:    utility.ConvertFenToYuanMinUnitStr(plan.Amount), //paypal 需要元为单位，小数点处理
+						Value:    utility.ConvertCentToDollarStr(plan.Amount, plan.Currency), //paypal 需要元为单位，小数点处理
 					},
 					CreateTime: time.Now(),
 					UpdateTime: time.Now(),

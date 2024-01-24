@@ -192,7 +192,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil && transAmount != nil &&
-			one.PaymentFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
+			one.PaymentFee == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			one.ChannelPaymentId = channelPaymentId
 			err := handler.HandlePayAuthorized(r.Context(), one)
@@ -307,10 +307,10 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		if one != nil &&
 			transAmount != nil &&
 			len(transAmount.Get("value").String()) > 0 &&
-			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
-			one.PaymentFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
+			utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) > 0 &&
+			one.PaymentFee == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
-			receiveFee := utility.ConvertYuanStrToFen(transAmount.Get("value").String())
+			receiveFee := utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String())
 			req := &handler.HandlePayReq{
 				PaymentId:      merchantTradeNo,
 				ChannelTradeNo: channelTradeNo,
@@ -351,8 +351,8 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		if one != nil &&
 			transAmount != nil &&
 			len(transAmount.Get("value").String()) > 0 &&
-			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
-			one.RefundFee == utility.ConvertYuanStrToFen(transAmount.Get("value").String()) &&
+			utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) > 0 &&
+			one.RefundFee == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundNo,
@@ -393,7 +393,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		if one != nil &&
 			transAmount != nil &&
 			len(transAmount.Get("value").String()) > 0 &&
-			utility.ConvertYuanStrToFen(transAmount.Get("value").String()) > 0 &&
+			utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) > 0 &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundNo,
@@ -502,7 +502,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		},
 		"transAmount": map[string]interface{}{
 			"currency": createPayContext.Pay.Currency,
-			"value":    utility.ConvertFenToYuanMinUnitStr(createPayContext.Pay.PaymentFee),
+			"value":    utility.ConvertCentToDollarStr(createPayContext.Pay.PaymentFee, createPayContext.Pay.Currency),
 		},
 		"paymentMethod": map[string]interface{}{
 			"recurringProcessingModel": createPayContext.RecurringProcessingModel,
@@ -594,7 +594,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment)
 		},
 		"transAmount": map[string]interface{}{
 			"currency": pay.Currency,
-			"value":    utility.ConvertFenToYuanMinUnitStr(pay.ChannelPaymentFee),
+			"value":    utility.ConvertCentToDollarStr(pay.ChannelPaymentFee, pay.Currency),
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}
@@ -711,7 +711,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 		},
 		"transAmount": map[string]interface{}{
 			"currency": pay.Currency,
-			"value":    utility.ConvertFenToYuanMinUnitStr(refund.RefundFee),
+			"value":    utility.ConvertCentToDollarStr(refund.RefundFee, pay.Currency),
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}

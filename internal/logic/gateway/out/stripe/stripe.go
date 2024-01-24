@@ -1300,7 +1300,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	// 使用 Price 代替 Plan https://stripe.com/docs/api/plans
 	params := &stripe.PriceParams{
 		Currency:   stripe.String(strings.ToLower(targetPlan.Currency)),
-		UnitAmount: stripe.Int64(targetPlan.Amount), //todo mark 小数点可能不用处理
+		UnitAmount: stripe.Int64(targetPlan.Amount),
 		Recurring: &stripe.PriceRecurringParams{
 			Interval:      stripe.String(targetPlan.IntervalUnit),
 			IntervalCount: stripe.Int64(int64(targetPlan.IntervalCount)),

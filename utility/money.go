@@ -6,21 +6,28 @@ import (
 	"strings"
 )
 
-// ConvertFenToYuanMinUnitStr 将分转换为元的字符串
-func ConvertFenToYuanMinUnitStr(cents int64) string {
+// ConvertCentToDollarStr cents change to dollar
+func ConvertCentToDollarStr(cents int64, currency string) string {
+	if strings.Compare(strings.ToUpper(currency), "JPY") == 0 {
+		return fmt.Sprintf("%d", cents)
+	}
 	dollars := float64(cents) / 100.0
 	return strings.Replace(fmt.Sprintf("%.2f", dollars), ".00", "", -1)
 }
 
-func ConvertYuanStrToFen(target string) int64 {
+func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
+
 	// 将字符串解析为浮点数
-	yuan, err := strconv.ParseFloat(target, 64)
+	dollars, err := strconv.ParseFloat(dollarStr, 64)
 	if err != nil {
-		panic(fmt.Sprintf("ConvertYuanStrToFen panic:%s", target))
+		panic(fmt.Sprintf("ConvertDollarStrToCent panic:%s", dollarStr))
+	}
+	if strings.Compare(strings.ToUpper(currency), "JPY") == 0 {
+		return int64(dollars)
 	}
 	// 将浮点数表示的元转换为分的整数
-	fen := int64(yuan * 100)
-	return fen
+	cents := int64(dollars * 100)
+	return cents
 }
 
 func ConvertTaxPercentageToPercentageString(taxPercentage int64) string {
