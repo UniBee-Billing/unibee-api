@@ -385,6 +385,7 @@ type SubscriptionPendingUpdateDetail struct {
 	Amount               int64                       `json:"amount"               description:"金额,单位：分"`
 	Status               int                         `json:"status"               description:"订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled"` // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	UpdateAmount         int64                       `json:"updateAmount"         description:"升级到金额,单位：分"`                                     // 升级到金额,单位：分
+	ProrationAmount      int64                       `json:"prorationAmount"      description:"按比例金额,单位：分"`                                     // 升级到金额,单位：分
 	Currency             string                      `json:"currency"             description:"货币"`
 	UpdateCurrency       string                      `json:"updateCurrency"       description:"升级到货币"`                                // 升级到货币
 	PlanId               int64                       `json:"planId"               description:"计划ID"`                                 // 计划ID
