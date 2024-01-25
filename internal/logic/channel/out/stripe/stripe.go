@@ -680,6 +680,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx conte
 }
 
 var usePendingUpdate = true
+var downGradeUsePendingUpdate = true
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
@@ -689,6 +690,9 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	s.setUnibeeAppInfo()
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
+	if downGradeUsePendingUpdate && !subscriptionRo.EffectImmediate {
+		updateUnixTime = subscriptionRo.Subscription.CurrentPeriodEnd
+	}
 	if subscriptionRo.ProrationDate > 0 {
 		updateUnixTime = subscriptionRo.ProrationDate
 	}
@@ -786,7 +790,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	var items []*stripe.SubscriptionItemsParams
 
 	var stripeSubscriptionItems []*stripe.SubscriptionItem
-	if !subscriptionRo.EffectImmediate {
+	if !subscriptionRo.EffectImmediate && !downGradeUsePendingUpdate {
 		if len(subscriptionRo.Subscription.ChannelItemData) > 0 {
 			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.ChannelItemData, &stripeSubscriptionItems)
 			if err != nil {
@@ -897,7 +901,13 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	} else {
-		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
+		if downGradeUsePendingUpdate {
+			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
+			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
+		} else {
+			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
+		}
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.ChannelSubscriptionId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
