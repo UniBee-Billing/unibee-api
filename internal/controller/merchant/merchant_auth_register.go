@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-oversea-pay/api/merchant/auth"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/utility"
 	"log"
 	"math/rand"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	"go-oversea-pay/internal/logic/email"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 
@@ -90,7 +90,14 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	email.SendEmailToUser(req.Email, "Verification Code from UniBee", verificationCode)
+	//email.SendEmailToUser(req.Email, "Verification Code from UniBee", verificationCode)
+	err = email.SendTemplateEmail(ctx, 0, req.Email, email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
+		CodeExpireMinute: "3",
+		Code:             verificationCode,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &auth.RegisterRes{}, nil
 

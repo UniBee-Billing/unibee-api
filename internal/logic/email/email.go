@@ -3,6 +3,7 @@ package email
 import (
 	"context"
 	"encoding/base64"
+	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"os"
@@ -19,7 +20,9 @@ import (
 )
 
 const (
-	TemplateInvoiceAutomaticPaid = "InvoiceAutomaticPaid"
+	TemplateInvoiceAutomaticPaid       = "InvoiceAutomaticPaid"
+	TemplateUserRegistrationCodeVerify = "UserRegistrationCodeVerify"
+	TemplateUserOTPLogin               = "UserOTPLogin"
 )
 
 const SG_KEY = "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"
@@ -83,7 +86,9 @@ type TemplateVariable struct {
 	MerchantName        string `json:"Merchant Name"`
 	DateNow             string `json:"DateNow"`
 	PaymentAmount       string `json:"Payment Amount"`
-	TokenExpireMin      string `json:"TokenExpireMin"`
+	TokenExpireMinute   string `json:"TokenExpireMinute"`
+	CodeExpireMinute    string `json:"CodeExpireMinute"`
+	Code                string `json:"Code"`
 }
 
 func ToMap(in interface{}) (map[string]interface{}, error) {
@@ -111,8 +116,13 @@ func ToMap(in interface{}) (map[string]interface{}, error) {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(ctx context.Context, mailTo string, templateName string, templateVariables *TemplateVariable, pdfFilePath string) error {
-	template := query.GetEmailTemplateByTemplateName(ctx, templateName)
+func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+	var template *entity.EmailTemplate
+	if merchantId > 0 {
+		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
+	} else {
+		template = query.GetEmailTemplateByTemplateName(ctx, templateName)
+	}
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(templateVariables != nil, "templateVariables not found")
 	variableMap, err := ToMap(templateVariables)

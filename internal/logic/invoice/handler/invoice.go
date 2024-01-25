@@ -318,7 +318,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		pdfFileName := utility.DownloadFile(one.SendPdf)
 		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
 		//err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName, fmt.Sprintf("%s.pdf", one.InvoiceId))
-		err := email.SendTemplateEmail(ctx, one.SendEmail, email.TemplateInvoiceAutomaticPaid, &email.TemplateVariable{
+		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, email.TemplateInvoiceAutomaticPaid, pdfFileName, &email.TemplateVariable{
 			InvoiceId:           one.InvoiceId,
 			UserName:            user.UserName,
 			MerchantProductName: merchantProductName,
@@ -326,8 +326,8 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 			MerchantName:        merchant.Name,
 			DateNow:             gtime.Now().Layout(`2006-01-02`),
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
-			TokenExpireMin:      strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
-		}, pdfFileName)
+			TokenExpireMinute:   strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
+		})
 		if err != nil {
 			return err
 		}

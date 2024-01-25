@@ -13,3 +13,14 @@ func GetEmailTemplateByTemplateName(ctx context.Context, templateName string) (o
 	}
 	return
 }
+
+func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId int64, templateName string) (one *entity.EmailTemplate) {
+	err := dao.EmailTemplate.Ctx(ctx).
+		Where(entity.EmailTemplate{TemplateName: templateName}).
+		Where(entity.EmailTemplate{MerchantId: merchantId}).
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
