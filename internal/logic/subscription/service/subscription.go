@@ -250,7 +250,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
-	utility.Assert(len(req.VatCountryCode) > 0, "VatCountryCode invalid")
+	utility.Assert(len(prepare.VatCountryCode) > 0, "VatCountryCode invalid")
 
 	//校验
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
