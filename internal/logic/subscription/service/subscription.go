@@ -123,6 +123,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
+	user := query.GetUserAccountById(ctx, uint64(req.UserId))
+	utility.Assert(user != nil, "user not found")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
@@ -139,6 +141,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("vat number validate failure:"+req.VatNumber))
 		vatCountryCode = vatNumberValidate.CountryCode
+	}
+
+	if len(vatCountryCode) == 0 && len(user.CountryCode) > 0 {
+		//if not set , default user countryCode
+		vatCountryCode = user.CountryCode
+		req.VatCountryCode = user.CountryCode
 	}
 
 	if len(vatCountryCode) > 0 {
@@ -230,8 +238,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 
 func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*subscription.SubscriptionCreateRes, error) {
 
-	utility.Assert(len(req.VatCountryCode) > 0, "VatCountryCode invalid")
-
 	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
 		PlanId:         req.PlanId,
 		Quantity:       req.Quantity,
@@ -244,6 +250,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
+	utility.Assert(len(req.VatCountryCode) > 0, "VatCountryCode invalid")
 
 	//校验
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
