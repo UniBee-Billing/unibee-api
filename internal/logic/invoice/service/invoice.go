@@ -36,6 +36,8 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
+			Tax:                    tax,
+			Quantity:               line.Quantity,
 			Amount:                 amountExcludingTax + tax,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
@@ -104,10 +106,12 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
+			Tax:                    tax,
 			Amount:                 amountExcludingTax + tax,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
 			Description:            line.Description,
+			Quantity:               line.Quantity,
 		})
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
