@@ -15,6 +15,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strconv"
 )
 
 //
@@ -301,12 +302,32 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.UserId > 0, "invoice userId not found")
+	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
 	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
+	user := query.GetUserAccountById(ctx, uint64(one.UserId))
+	merchant := query.GetMerchantInfoById(ctx, one.MerchantId)
+	var merchantProductName = ""
+	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
+	if sub != nil {
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		merchantProductName = plan.PlanName
+	}
 	if one.Status > consts.InvoiceStatusPending {
 		pdfFileName := utility.DownloadFile(one.SendPdf)
 		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
-		err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName)
+		//err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName, fmt.Sprintf("%s.pdf", one.InvoiceId))
+		err := email.SendTemplateEmail(ctx, one.SendEmail, email.TemplateInvoiceAutomaticPaid, &email.TemplateVariable{
+			InvoiceId:           one.InvoiceId,
+			UserName:            user.UserName,
+			MerchantProductName: merchantProductName,
+			MerchantCustomEmail: merchant.Email,
+			MerchantName:        merchant.Name,
+			DateNow:             gtime.Now().Layout(`2006-01-02`),
+			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
+			TokenExpireMin:      strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
+		}, pdfFileName)
 		if err != nil {
 			return err
 		}
