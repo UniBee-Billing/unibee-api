@@ -24,8 +24,9 @@ type Payment struct {
 	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              interface{} // 内部支付编号（系统生成唯一）
 	TotalAmount            interface{} // 总计金额
+	PaymentAmount          interface{} // payment_amount
+	BalanceAmount          interface{} // balance_amount
 	RefundAmount           interface{} // 总共已退款金额
-	ReceiveAmount          interface{} // receive_amount
 	Status                 interface{} // 支付状态。10-支付中，20-支付成功，30-支付取消
 	TerminalIp             interface{} // 实时交易终端IP
 	CountryCode            interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
@@ -49,4 +50,6 @@ type Payment struct {
 	AdditionalData         interface{} // 额外信息，JSON结构
 	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
+	BalanceStart           interface{} // balance_start
+	BalanceEnd             interface{} // balance_end
 }

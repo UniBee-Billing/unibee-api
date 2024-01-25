@@ -93,7 +93,7 @@ type ChannelPaymentRo struct {
 	CaptureStatus             int                                    `json:"captureStatus"`
 	Currency                  string                                 `json:"currency"              `
 	TotalAmount               int64                                  `json:"totalAmount"              `
-	ReceiveAmount             int64                                  `json:"receiveAmount"              `
+	PaymentAmount             int64                                  `json:"paymentAmount"              `
 	BalanceAmount             int64                                  `json:"balanceAmount"              `
 	RefundAmount              int64                                  `json:"refundAmount"              `
 	BalanceStart              int64                                  `json:"balanceStart"              `

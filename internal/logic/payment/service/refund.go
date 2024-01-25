@@ -31,7 +31,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
-	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= PaymentFee value")
+	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= TotalAmount value")
 
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.Reference)
 	isDuplicatedInvoke := false

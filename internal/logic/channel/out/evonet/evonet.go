@@ -594,7 +594,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment)
 		},
 		"transAmount": map[string]interface{}{
 			"currency": pay.Currency,
-			"value":    utility.ConvertCentToDollarStr(pay.ReceiveAmount, pay.Currency),
+			"value":    utility.ConvertCentToDollarStr(pay.PaymentAmount, pay.Currency),
 		},
 		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}

@@ -95,7 +95,7 @@ func parseStripePayment(item *stripe.PaymentIntent) *ro.ChannelPaymentRo {
 		Status:           status,
 		CaptureStatus:    captureStatus,
 		TotalAmount:      item.Amount,
-		ReceiveAmount:    item.AmountReceived,
+		PaymentAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
 		PayTime:          gtime.NewFromTimeStamp(item.Created),
 		CreateTime:       gtime.NewFromTimeStamp(item.Created),

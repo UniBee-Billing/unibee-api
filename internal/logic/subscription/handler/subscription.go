@@ -244,7 +244,7 @@ func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaym
 	//	if len(sub.PendingUpdateId) > 0 {
 	//		//有 pending 的更新单存在，检查支付是否对应更新单
 	//		pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-	//		if pendingSubUpdate.UpdateAmount == req.Payment.PaymentFee {
+	//		if pendingSubUpdate.UpdateAmount == req.Payment.TotalAmount {
 	//			//金额一致
 	//			err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
 	//				Payment:                          req.Payment,

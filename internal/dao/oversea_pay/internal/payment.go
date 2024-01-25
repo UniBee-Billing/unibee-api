@@ -32,8 +32,9 @@ type PaymentColumns struct {
 	Currency               string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              string // 内部支付编号（系统生成唯一）
 	TotalAmount            string // 总计金额
+	PaymentAmount          string // payment_amount
+	BalanceAmount          string // balance_amount
 	RefundAmount           string // 总共已退款金额
-	ReceiveAmount          string // receive_amount
 	Status                 string // 支付状态。10-支付中，20-支付成功，30-支付取消
 	TerminalIp             string // 实时交易终端IP
 	CountryCode            string // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
@@ -57,6 +58,8 @@ type PaymentColumns struct {
 	AdditionalData         string // 额外信息，JSON结构
 	PaymentData            string // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               string // 唯一键，以同步为逻辑加入使用自定义唯一键
+	BalanceStart           string // balance_start
+	BalanceEnd             string // balance_end
 }
 
 // paymentColumns holds the columns for table payment.
@@ -73,8 +76,9 @@ var paymentColumns = PaymentColumns{
 	Currency:               "currency",
 	PaymentId:              "payment_id",
 	TotalAmount:            "total_amount",
+	PaymentAmount:          "payment_amount",
+	BalanceAmount:          "balance_amount",
 	RefundAmount:           "refund_amount",
-	ReceiveAmount:          "receive_amount",
 	Status:                 "status",
 	TerminalIp:             "terminal_ip",
 	CountryCode:            "country_code",
@@ -98,6 +102,8 @@ var paymentColumns = PaymentColumns{
 	AdditionalData:         "additional_data",
 	PaymentData:            "payment_data",
 	UniqueId:               "unique_id",
+	BalanceStart:           "balance_start",
+	BalanceEnd:             "balance_end",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.
