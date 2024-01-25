@@ -12,9 +12,10 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscription) error {
+func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscription, source string) error {
 	utility.Assert(sub != nil, "subscription is null ")
-	uniqueId := util.Md5(fmt.Sprintf("%s-%d-%d-%s-%d-%d", sub.SubscriptionId, sub.PlanId, sub.Quantity, sub.AddonData, sub.CurrentPeriodStart, sub.CurrentPeriodEnd))
+	uniqueKey := fmt.Sprintf("%s-%d-%d-%s-%d-%d-%s", sub.SubscriptionId, sub.PlanId, sub.Quantity, sub.AddonData, sub.CurrentPeriodStart, sub.CurrentPeriodEnd, source)
+	uniqueId := util.Md5(uniqueKey)
 	one := query.GetSubscriptionTimeLineByUniqueId(ctx, uniqueId)
 	if one == nil {
 		var periodStart = sub.CurrentPeriodStart
@@ -33,6 +34,7 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 			SubscriptionId:  sub.SubscriptionId,
 			InvoiceId:       "", // todo mark
 			UniqueId:        uniqueId,
+			UniqueKey:       uniqueKey,
 			Currency:        sub.Currency,
 			PlanId:          sub.PlanId,
 			Quantity:        sub.Quantity,

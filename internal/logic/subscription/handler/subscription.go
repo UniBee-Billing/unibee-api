@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -108,7 +109,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 
 func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	// 先创建 SubscriptionTimeLine 在做 Sub 更新
-	err := CreateOrUpdateSubscriptionTimeline(ctx, sub)
+	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 	}
@@ -164,7 +165,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			}
 		}
 		if !byUpdate {
-			err := CreateOrUpdateSubscriptionTimeline(ctx, sub)
+			err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", req.Payment.PaymentId))
 			if err != nil {
 				g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 			}

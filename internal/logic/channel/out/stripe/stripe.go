@@ -1295,6 +1295,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		Product: stripe.String(planChannel.ChannelProductId),
 		Metadata: map[string]string{
 			"PlanId": strconv.FormatUint(targetPlan.Id, 10),
+			"Type":   strconv.Itoa(targetPlan.Type),
 		},
 		//ProductData: &stripe.PriceProductDataParams{
 		//	ID:   stripe.String(planChannel.ChannelProductId),

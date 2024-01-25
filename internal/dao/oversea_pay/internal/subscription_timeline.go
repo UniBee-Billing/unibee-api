@@ -28,16 +28,17 @@ type SubscriptionTimelineColumns struct {
 	PeriodEnd       string // period_end
 	PeriodStartTime string //
 	PeriodEndTime   string //
+	GmtCreate       string // 创建时间
 	InvoiceId       string // 发票ID（内部编号）
-	UniqueId        string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	UniqueId        string // 唯一键
 	Currency        string // 货币
 	PlanId          string // 计划ID
 	Quantity        string // quantity
 	AddonData       string // plan addon json data
 	ChannelId       string // 支付渠道Id
-	GmtCreate       string // 创建时间
 	GmtModify       string // 修改时间
 	IsDeleted       string //
+	UniqueKey       string //
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.
@@ -50,6 +51,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	PeriodEnd:       "period_end",
 	PeriodStartTime: "period_start_time",
 	PeriodEndTime:   "period_end_time",
+	GmtCreate:       "gmt_create",
 	InvoiceId:       "invoice_id",
 	UniqueId:        "unique_id",
 	Currency:        "currency",
@@ -57,9 +59,9 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	Quantity:        "quantity",
 	AddonData:       "addon_data",
 	ChannelId:       "channel_id",
-	GmtCreate:       "gmt_create",
 	GmtModify:       "gmt_modify",
 	IsDeleted:       "is_deleted",
+	UniqueKey:       "unique_key",
 }
 
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.

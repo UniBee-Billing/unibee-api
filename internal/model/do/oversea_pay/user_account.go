@@ -51,7 +51,7 @@ type UserAccount struct {
 	CountryName        interface{} // country_name
 	SubscriptionName   interface{} //
 	SubscriptionId     interface{} //
-	SubscriptionStatus interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
+	SubscriptionStatus interface{} // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    interface{} //
 	BillingType        interface{} // 1-recurring,2-one-time
 }
