@@ -35,6 +35,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale))
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
+			TaxScale:               req.TaxScale,
 			Amount:                 amountExcludingTax + tax,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
@@ -74,6 +75,8 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
+	one.Lines = utility.MarshalToJsonString(invoiceItems)
+
 	return &invoice.NewInvoiceCreateRes{Invoice: one}, nil
 }
 
@@ -100,6 +103,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale))
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
+			TaxScale:               req.TaxScale,
 			Amount:                 amountExcludingTax + tax,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
@@ -135,7 +139,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.Currency = req.Currency
 	one.TaxScale = req.TaxScale
 	one.ChannelId = req.ChannelId
-	one.Lines = utility.MarshalToJsonString(req.Lines)
+	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	return &invoice.NewInvoiceEditRes{Invoice: one}, nil
 }
 

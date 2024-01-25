@@ -291,6 +291,7 @@ type ChannelDetailInvoiceItem struct {
 	Amount                 int64  `json:"amount"`
 	AmountExcludingTax     int64  `json:"amountExcludingTax"`
 	Tax                    int64  `json:"tax"`
+	TaxScale               int64  `json:"taxScale"                  description:"Tax税率，万分位，1000 表示 10%"` // Tax税率，万分位，1000 表示 10%
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
 	Description            string `json:"description"`
 	Proration              bool   `json:"proration"`
