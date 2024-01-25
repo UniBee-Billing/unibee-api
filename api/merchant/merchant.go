@@ -69,6 +69,7 @@ type IMerchantPlan interface {
 
 type IMerchantProfile interface {
 	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 }
 
 type IMerchantSubscription interface {
@@ -88,7 +89,6 @@ type IMerchantSubscription interface {
 }
 
 type IMerchantUser interface {
-	Logout(ctx context.Context, req *user.LogoutReq) (res *user.LogoutRes, err error)
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
 	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
 }

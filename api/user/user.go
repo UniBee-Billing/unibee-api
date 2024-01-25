@@ -13,7 +13,6 @@ import (
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
-	"go-oversea-pay/api/user/user"
 	"go-oversea-pay/api/user/vat"
 )
 
@@ -39,6 +38,7 @@ type IUserPlan interface {
 
 type IUserProfile interface {
 	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 	ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error)
 }
 
@@ -56,10 +56,6 @@ type IUserSubscription interface {
 	SubscriptionSuspend(ctx context.Context, req *subscription.SubscriptionSuspendReq) (res *subscription.SubscriptionSuspendRes, err error)
 	SubscriptionResume(ctx context.Context, req *subscription.SubscriptionResumeReq) (res *subscription.SubscriptionResumeRes, err error)
 	SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error)
-}
-
-type IUserUser interface {
-	Logout(ctx context.Context, req *user.LogoutReq) (res *user.LogoutRes, err error)
 }
 
 type IUserVat interface {

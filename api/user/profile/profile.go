@@ -18,6 +18,13 @@ type ProfileRes struct {
 	// Token string `p:"token" dc:"token string"`
 }
 
+type LogoutReq struct {
+	g.Meta `path:"/user_logout" tags:"User-Profile-Controller" method:"post" summary:"User Logout"`
+}
+
+type LogoutRes struct {
+}
+
 type ProfileUpdateReq struct {
 	g.Meta          `path:"/profile" tags:"User-Profile-Controller" method:"post" summary:"Update User Profile"`
 	Id              uint64 `p:"id" dc:"User Id" v:"required"`

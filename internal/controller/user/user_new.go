@@ -1,5 +1,5 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package user
@@ -49,10 +49,3 @@ type ControllerPayment struct{}
 func NewPayment() user.IUserPayment {
 	return &ControllerPayment{}
 }
-
-type ControllerUser struct{}
-
-func NewUser() user.IUserUser {
-	return &ControllerUser{}
-}
-

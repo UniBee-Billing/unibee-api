@@ -6,12 +6,12 @@ import (
 	"go-oversea-pay/internal/logic/auth"
 	"go-oversea-pay/utility"
 
-	"go-oversea-pay/api/user/user"
+	"go-oversea-pay/api/user/profile"
 )
 
-func (c *ControllerUser) Logout(ctx context.Context, req *user.LogoutReq) (res *user.LogoutRes, err error) {
+func (c *ControllerProfile) Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error) {
 	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "User Not Found")
 	utility.Assert(len(_interface.BizCtx().Get(ctx).User.Token) > 0, "Token Not Found")
 	auth.DelAuthToken(ctx, _interface.BizCtx().Get(ctx).User.Token)
-	return &user.LogoutRes{}, nil
+	return &profile.LogoutRes{}, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type ProfileReq struct {
-	g.Meta `path:"/profile" tags:"User-Profile-Controller" method:"get" summary:"get merchant user profile"`
+	g.Meta `path:"/profile" tags:"Merchant-User-Profile-Controller" method:"get" summary:"get merchant user profile"`
 	// Email string `p:"email" dc:"email" v:"required"`
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
@@ -16,4 +16,11 @@ type ProfileReq struct {
 type ProfileRes struct {
 	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"merchant user"`
 	// Token string `p:"token" dc:"token string"`
+}
+
+type LogoutReq struct {
+	g.Meta `path:"/user_logout" tags:"Merchant-User-Profile-Controller" method:"post" summary:"User Logout"`
+}
+
+type LogoutRes struct {
 }
