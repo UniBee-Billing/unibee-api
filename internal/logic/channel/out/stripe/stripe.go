@@ -29,7 +29,6 @@ import (
 	"go-oversea-pay/internal/logic/channel/out/log"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/channel/util"
-	handler3 "go-oversea-pay/internal/logic/invoice/handler"
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -44,176 +43,6 @@ import (
 type Stripe struct {
 }
 
-func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
-	var channelPaymentId string
-	if item.PaymentIntent != nil {
-		channelPaymentId = item.PaymentIntent.ID
-	}
-	var status = consts.REFUND_ING
-	if strings.Compare(string(item.Status), "succeeded") == 0 {
-		status = consts.REFUND_SUCCESS
-	} else if strings.Compare(string(item.Status), "canceled") == 0 || strings.Compare(string(item.Status), "failed") == 0 {
-		status = consts.REFUND_FAILED
-	}
-	return &ro.OutPayRefundRo{
-		MerchantId:       "",
-		ChannelRefundId:  item.ID,
-		ChannelPaymentId: channelPaymentId,
-		Status:           status,
-		Reason:           string(item.Reason),
-		RefundFee:        item.Amount,
-		Currency:         strings.ToUpper(string(item.Currency)),
-		RefundTime:       gtime.NewFromTimeStamp(item.Created),
-	}
-}
-
-func parseStripePayment(item *stripe.PaymentIntent) *ro.ChannelPaymentRo {
-	var channelInvoiceId string
-	if item.Invoice != nil {
-		channelInvoiceId = item.Invoice.ID
-	}
-	var channelUserId string
-	if item.Customer != nil {
-		channelUserId = item.Customer.ID
-	}
-	var status = consts.TO_BE_PAID
-	if strings.Compare(string(item.Status), "succeeded") == 0 {
-		status = consts.PAY_SUCCESS
-	} else if strings.Compare(string(item.Status), "canceled") == 0 {
-		status = consts.PAY_FAILED
-	}
-	var captureStatus = consts.WAITING_AUTHORIZED
-	if strings.Compare(string(item.Status), "requires_capture") == 0 {
-		captureStatus = consts.AUTHORIZED
-	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
-		captureStatus = consts.CAPTURE_REQUEST
-	}
-	return &ro.ChannelPaymentRo{
-		ChannelInvoiceId: channelInvoiceId,
-		ChannelUserId:    channelUserId,
-		ChannelPaymentId: item.ID,
-		Status:           status,
-		CaptureStatus:    captureStatus,
-		TotalAmount:      item.Amount,
-		PaymentAmount:    item.AmountReceived,
-		Currency:         strings.ToUpper(string(item.Currency)),
-		PayTime:          gtime.NewFromTimeStamp(item.Created),
-		CreateTime:       gtime.NewFromTimeStamp(item.Created),
-		CancelTime:       gtime.NewFromTimeStamp(item.CanceledAt),
-		CancelReason:     string(item.CancellationReason),
-	}
-}
-
-func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
-	//https://stripe.com/docs/billing/subscriptions/overview
-	/**
-	trialing	订阅目前处于试用期，可以安全地为您的客户配置您的产品。订阅会自动转换到active首次付款时。
-	active	订阅信誉良好，最近一次付款成功。为您的客户配置您的产品是安全的。
-	incomplete	需要在23小时内成功付款才能激活订阅。或者付款需要采取行动，例如客户身份验证。incomplete如果有待付款并且 PaymentIntent 状态为 ，则订阅也可以为processing。
-	incomplete_expired	订阅的首次付款失败，并且在创建订阅后 23 小时内未成功付款。这些订阅不会向客户收取费用。存在此状态是为了让您可以跟踪未能激活订阅的客户。
-	past_due	最新最终发票的付款失败或未尝试。订阅将继续创建发票。您的订阅设置决定了订阅的下一个状态。如果在尝试所有智能重试后发票仍未支付，您可以将订阅配置为移至canceled、unpaid，或保留为past_due。要将订阅转移到active，请在到期日之前支付最新的发票。
-	canceled	订阅已被取消。取消期间，将禁用所有未付发票的自动收取 ( auto_advance=false)。这是无法更新的最终状态。
-	unpaid	最新的发票尚未支付，但订阅仍然有效。最新发票仍处于打开状态，并且继续生成发票，但不会尝试付款。您应该在订阅时撤销对产品的访问权限，unpaid因为已尝试付款并在订阅时重试past_due。要将订阅转移到active，请在到期日之前支付最新的发票。
-	paused	订阅已结束试用期，没有默认付款方式，并且trial_settings.end_behavior.missing_payment_method设置为pause。将不再为订阅创建发票。为客户附加默认付款方式后，您可以恢复订阅。
-	*/
-	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
-	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
-		strings.Compare(string(subscription.Status), "active") == 0 {
-		status = consts.SubStatusActive
-	} else if strings.Compare(string(subscription.Status), "unpaid") == 0 {
-		status = consts.SubStatusCreate
-	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
-		status = consts.SubStatusExpired
-	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
-		strings.Compare(string(subscription.Status), "pass_due") == 0 {
-		status = consts.SubStatusIncomplete
-	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
-		status = consts.SubStatusSuspended
-	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
-		status = consts.SubStatusCancelled
-	}
-	var latestChannelPaymentId = ""
-	if subscription.LatestInvoice != nil && subscription.LatestInvoice.PaymentIntent != nil {
-		latestChannelPaymentId = subscription.LatestInvoice.PaymentIntent.ID
-	}
-
-	return &ro.ChannelDetailSubscriptionInternalResp{
-		Status:                 status,
-		ChannelSubscriptionId:  subscription.ID,
-		ChannelStatus:          string(subscription.Status),
-		Data:                   utility.FormatToJsonString(subscription),
-		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
-		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
-		ChannelLatestPaymentId: latestChannelPaymentId,
-		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
-		CurrentPeriodStart:     subscription.CurrentPeriodStart,
-		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
-		BillingCycleAnchor:     subscription.BillingCycleAnchor,
-		TrialEnd:               subscription.TrialEnd,
-	}
-}
-
-func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
-	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
-	if strings.Compare(string(detail.Status), "draft") == 0 {
-		status = consts.InvoiceStatusPending
-	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		status = consts.InvoiceStatusProcessing
-	} else if strings.Compare(string(detail.Status), "paid") == 0 {
-		status = consts.InvoiceStatusPaid
-	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		status = consts.InvoiceStatusFailed
-	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		status = consts.InvoiceStatusCancelled
-	}
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
-	for _, line := range detail.Lines.Data {
-		var start int64 = 0
-		var end int64 = 0
-		if line.Period != nil {
-			start = line.Period.Start
-			end = line.Period.End
-		}
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
-			Currency:               strings.ToUpper(string(line.Currency)),
-			Amount:                 line.Amount,
-			AmountExcludingTax:     line.AmountExcludingTax,
-			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
-			Description:            line.Description,
-			Proration:              line.Proration,
-			Quantity:               line.Quantity,
-			PeriodStart:            start,
-			PeriodEnd:              end,
-		})
-	}
-
-	var channelPaymentId string
-	if detail.PaymentIntent != nil {
-		channelPaymentId = detail.PaymentIntent.ID
-	}
-
-	return &ro.ChannelDetailInvoiceInternalResp{
-		ChannelSubscriptionId:          detail.Subscription.ID,
-		TotalAmount:                    detail.Total,
-		TotalAmountExcludingTax:        detail.TotalExcludingTax,
-		TaxAmount:                      detail.Tax,
-		SubscriptionAmount:             detail.Subtotal,
-		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
-		Currency:                       strings.ToUpper(string(detail.Currency)),
-		Lines:                          invoiceItems,
-		ChannelId:                      channelId,
-		Status:                         status,
-		ChannelUserId:                  detail.Customer.ID,
-		Link:                           detail.HostedInvoiceURL,
-		ChannelStatus:                  string(detail.Status),
-		ChannelInvoiceId:               detail.ID,
-		ChannelInvoicePdf:              detail.InvoicePDF,
-		PeriodStart:                    detail.PeriodStart,
-		PeriodEnd:                      detail.PeriodEnd,
-		ChannelPaymentId:               channelPaymentId,
-	}
-}
-
 func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
@@ -226,7 +55,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
 	var list []*ro.ChannelPaymentRo
 	for _, item := range paymentList.PaymentIntentList().Data {
-		list = append(list, parseStripePayment(item))
+		list = append(list, parseStripePayment(item, payChannel))
 	}
 
 	return list, nil
@@ -261,7 +90,7 @@ func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *en
 		return nil, err
 	}
 
-	return parseStripePayment(response), nil
+	return parseStripePayment(response, payChannel), nil
 }
 
 func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
@@ -1315,53 +1144,99 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	}, nil
 }
 
-func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, payment stripe.PaymentIntent, payChannel *entity.OverseaPayChannel) error {
-	details, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, payment.ID)
+//
+//func (s Stripe) processPaymentWebhook(ctx context.Context, eventType string, payment stripe.PaymentIntent, payChannel *entity.OverseaPayChannel) error {
+//	details, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, payment.ID)
+//	if err != nil {
+//		return err
+//	}
+//	details.ChannelId = int64(payChannel.Id)
+//	utility.Assert(len(details.ChannelUserId) > 0, "invalid channelUserId")
+//	if payment.Invoice != nil {
+//		//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 ChannelSubscriptionUpdateId
+//		invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
+//		if err != nil {
+//			return err
+//		}
+//		details.ChannelInvoiceDetail = invoiceDetails
+//		details.ChannelInvoiceId = payment.Invoice.ID
+//		details.ChannelSubscriptionUpdateId = invoiceDetails.ChannelInvoiceId
+//		oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+//		if oneSub != nil {
+//			plan := query.GetPlanById(ctx, oneSub.PlanId)
+//			planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
+//			subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
+//			if err != nil {
+//				return err
+//			}
+//			details.ChannelSubscriptionDetail = subDetails
+//		}
+//	}
+//	details.UniqueId = details.ChannelPaymentId
+//	err = handler2.HandlePaymentWebhookEvent(ctx, details)
+//	if err != nil {
+//		return err
+//	}
+//	return nil
+//}
+
+func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.OverseaPayChannel) error {
+	invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
 	if err != nil {
 		return err
 	}
-	details.ChannelId = int64(payChannel.Id)
-	utility.Assert(len(details.ChannelUserId) > 0, "invalid channelUserId")
-	details.ChannelUser = query.GetUserChannelByChannelUserId(ctx, details.ChannelUserId, details.ChannelId)
-	utility.Assert(details.ChannelUser != nil, "channelUser not found")
-	if payment.Invoice != nil {
-		//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 ChannelUpdateId
-		invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
-		if err != nil {
-			return err
-		}
-		details.ChannelInvoiceDetail = invoiceDetails
-		details.ChannelInvoiceId = payment.Invoice.ID
-		details.ChannelUpdateId = invoiceDetails.ChannelInvoiceId
+	// require_action status not deal here, use subscription_update webhook
+	if strings.Compare("invoice.payment_action_required", eventType) == 0 {
+		return gerror.New("require_action status not deal processInvoiceWebhook, use processSubscriptionWebhook webhook")
+	}
+
+	var status = consts.TO_BE_PAID
+	var captureStatus = consts.AUTHORIZED
+	if invoiceDetails.Status == consts.InvoiceStatusPaid {
+		status = consts.PAY_SUCCESS
+		captureStatus = consts.CAPTURE_REQUEST
+	} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
+		status = consts.PAY_FAILED
+	}
+
+	var channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp
+	if len(invoiceDetails.ChannelSubscriptionId) > 0 {
 		oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
 		if oneSub != nil {
 			plan := query.GetPlanById(ctx, oneSub.PlanId)
 			planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
-			subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
-			if err != nil {
-				return err
-			}
-			details.ChannelSubscriptionDetail = subDetails
-			details.Subscription = oneSub
+			channelSubscriptionDetail, err = s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
 		}
 	}
-	details.UniqueId = details.ChannelPaymentId
-	err = handler2.HandlePaymentWebhookEvent(ctx, eventType, details)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
-func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.OverseaPayChannel) error {
-	details, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
+	err = handler2.HandlePaymentWebhookEvent(ctx, &ro.ChannelPaymentRo{
+		MerchantId:                  payChannel.MerchantId,
+		Status:                      status,
+		CaptureStatus:               captureStatus,
+		Currency:                    invoiceDetails.Currency,
+		TotalAmount:                 invoiceDetails.TotalAmount,
+		PaymentAmount:               invoiceDetails.PaymentAmount,
+		BalanceAmount:               invoiceDetails.BalanceAmount,
+		BalanceStart:                invoiceDetails.BalanceStart,
+		BalanceEnd:                  invoiceDetails.BalanceEnd,
+		Reason:                      invoiceDetails.Reason,
+		UniqueId:                    invoiceDetails.ChannelInvoiceId,
+		PayTime:                     gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
+		CreateTime:                  gtime.NewFromTimeStamp(invoiceDetails.CreateTime),
+		CancelTime:                  gtime.NewFromTimeStamp(invoiceDetails.CancelTime),
+		ChannelId:                   int64(payChannel.Id),
+		ChannelUserId:               invoiceDetails.ChannelUserId,
+		ChannelPaymentId:            invoiceDetails.ChannelPaymentId,
+		ChannelInvoiceId:            invoiceDetails.ChannelInvoiceId,
+		ChannelSubscriptionId:       invoiceDetails.ChannelSubscriptionId,
+		ChannelSubscriptionUpdateId: invoiceDetails.ChannelInvoiceId,
+		ChannelInvoiceDetail:        invoiceDetails,
+		ChannelSubscriptionDetail:   channelSubscriptionDetail,
+	})
 	if err != nil {
 		return err
 	}
-	err = handler3.HandleInvoiceWebhookEvent(ctx, eventType, details)
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
@@ -1385,24 +1260,48 @@ func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string
 		if err != nil {
 			return err
 		}
-		if details.Status == consts.SubStatusIncomplete && len(details.ChannelLatestPaymentId) > 0 {
-			//处理支付失败事件
-			paymentDetails, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, details.ChannelLatestPaymentId)
+		if details.Status == consts.SubStatusIncomplete && len(details.ChannelLatestInvoiceId) > 0 {
+			//处理支付需要授权事件
+			invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, details.ChannelLatestInvoiceId)
 			if err != nil {
 				return err
 			}
-			if paymentDetails.Status != consts.PAY_SUCCESS {
-				//有支付失败
-				paymentDetails.ChannelSubscriptionDetail = details
-				paymentDetails.ChannelInvoiceId = details.ChannelLatestInvoiceId
-				paymentDetails.ChannelUpdateId = details.ChannelLatestInvoiceId
-				invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, details.ChannelLatestInvoiceId)
-				if err != nil {
-					return err
+			if invoiceDetails.Status != consts.InvoiceStatusPaid {
+				//有支付授权 todo mark
+				var channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp
+				if len(invoiceDetails.ChannelSubscriptionId) > 0 {
+					oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+					if oneSub != nil {
+						plan := query.GetPlanById(ctx, oneSub.PlanId)
+						planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
+						channelSubscriptionDetail, err = s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
+					}
 				}
-				paymentDetails.ChannelInvoiceDetail = invoiceDetails
-				paymentDetails.UniqueId = paymentDetails.ChannelPaymentId
-				err = handler2.HandlePaymentWebhookEvent(ctx, "payment_intent.failure.mock", paymentDetails)
+
+				err = handler2.HandlePaymentWebhookEvent(ctx, &ro.ChannelPaymentRo{
+					MerchantId:                  payChannel.MerchantId,
+					Status:                      consts.TO_BE_PAID,
+					CaptureStatus:               consts.WAITING_AUTHORIZED,
+					Currency:                    invoiceDetails.Currency,
+					TotalAmount:                 invoiceDetails.TotalAmount,
+					PaymentAmount:               invoiceDetails.PaymentAmount,
+					BalanceAmount:               invoiceDetails.BalanceAmount,
+					BalanceStart:                invoiceDetails.BalanceStart,
+					BalanceEnd:                  invoiceDetails.BalanceEnd,
+					Reason:                      invoiceDetails.Reason,
+					UniqueId:                    invoiceDetails.ChannelInvoiceId,
+					PayTime:                     gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
+					CreateTime:                  gtime.NewFromTimeStamp(invoiceDetails.CreateTime),
+					CancelTime:                  gtime.NewFromTimeStamp(invoiceDetails.CancelTime),
+					ChannelId:                   int64(payChannel.Id),
+					ChannelUserId:               invoiceDetails.ChannelUserId,
+					ChannelPaymentId:            invoiceDetails.ChannelPaymentId,
+					ChannelInvoiceId:            invoiceDetails.ChannelInvoiceId,
+					ChannelSubscriptionId:       invoiceDetails.ChannelSubscriptionId,
+					ChannelSubscriptionUpdateId: invoiceDetails.ChannelInvoiceId,
+					ChannelInvoiceDetail:        invoiceDetails,
+					ChannelSubscriptionDetail:   channelSubscriptionDetail,
+				})
 				if err != nil {
 					return err
 				}
@@ -1475,12 +1374,13 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %s\n", payChannel.Channel, string(event.Type), stripePayment.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
-			err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			}
+
+			//err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
+			//if err != nil {
+			//	g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+			//	r.Response.WriteHeader(http.StatusBadRequest)
+			//	responseBack = http.StatusBadRequest
+			//}
 		}
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
@@ -1597,4 +1497,198 @@ func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 		ChannelRefundId: result.ID,
 		Status:          consts.REFUND_ING,
 	}, nil
+}
+
+func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
+	var channelPaymentId string
+	if item.PaymentIntent != nil {
+		channelPaymentId = item.PaymentIntent.ID
+	}
+	var status = consts.REFUND_ING
+	if strings.Compare(string(item.Status), "succeeded") == 0 {
+		status = consts.REFUND_SUCCESS
+	} else if strings.Compare(string(item.Status), "canceled") == 0 || strings.Compare(string(item.Status), "failed") == 0 {
+		status = consts.REFUND_FAILED
+	}
+	return &ro.OutPayRefundRo{
+		MerchantId:       "",
+		ChannelRefundId:  item.ID,
+		ChannelPaymentId: channelPaymentId,
+		Status:           status,
+		Reason:           string(item.Reason),
+		RefundFee:        item.Amount,
+		Currency:         strings.ToUpper(string(item.Currency)),
+		RefundTime:       gtime.NewFromTimeStamp(item.Created),
+	}
+}
+
+func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.OverseaPayChannel) *ro.ChannelPaymentRo {
+	var channelInvoiceId string
+	if item.Invoice != nil {
+		channelInvoiceId = item.Invoice.ID
+	}
+	var channelUserId string
+	if item.Customer != nil {
+		channelUserId = item.Customer.ID
+	}
+	var status = consts.TO_BE_PAID
+	if strings.Compare(string(item.Status), "succeeded") == 0 {
+		status = consts.PAY_SUCCESS
+	} else if strings.Compare(string(item.Status), "canceled") == 0 {
+		status = consts.PAY_FAILED
+	}
+	var captureStatus = consts.WAITING_AUTHORIZED
+	if strings.Compare(string(item.Status), "requires_capture") == 0 {
+		captureStatus = consts.AUTHORIZED
+	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
+		captureStatus = consts.CAPTURE_REQUEST
+	}
+	return &ro.ChannelPaymentRo{
+		ChannelId:        int64(payChannel.Id),
+		MerchantId:       payChannel.MerchantId,
+		ChannelInvoiceId: channelInvoiceId,
+		ChannelUserId:    channelUserId,
+		ChannelPaymentId: item.ID,
+		Status:           status,
+		CaptureStatus:    captureStatus,
+		TotalAmount:      item.Amount,
+		PaymentAmount:    item.AmountReceived,
+		Currency:         strings.ToUpper(string(item.Currency)),
+		PayTime:          gtime.NewFromTimeStamp(item.Created),
+		CreateTime:       gtime.NewFromTimeStamp(item.Created),
+		CancelTime:       gtime.NewFromTimeStamp(item.CanceledAt),
+		CancelReason:     string(item.CancellationReason),
+	}
+}
+
+func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetailSubscriptionInternalResp {
+	//https://stripe.com/docs/billing/subscriptions/overview
+	/**
+	trialing	订阅目前处于试用期，可以安全地为您的客户配置您的产品。订阅会自动转换到active首次付款时。
+	active	订阅信誉良好，最近一次付款成功。为您的客户配置您的产品是安全的。
+	incomplete	需要在23小时内成功付款才能激活订阅。或者付款需要采取行动，例如客户身份验证。incomplete如果有待付款并且 PaymentIntent 状态为 ，则订阅也可以为processing。
+	incomplete_expired	订阅的首次付款失败，并且在创建订阅后 23 小时内未成功付款。这些订阅不会向客户收取费用。存在此状态是为了让您可以跟踪未能激活订阅的客户。
+	past_due	最新最终发票的付款失败或未尝试。订阅将继续创建发票。您的订阅设置决定了订阅的下一个状态。如果在尝试所有智能重试后发票仍未支付，您可以将订阅配置为移至canceled、unpaid，或保留为past_due。要将订阅转移到active，请在到期日之前支付最新的发票。
+	canceled	订阅已被取消。取消期间，将禁用所有未付发票的自动收取 ( auto_advance=false)。这是无法更新的最终状态。
+	unpaid	最新的发票尚未支付，但订阅仍然有效。最新发票仍处于打开状态，并且继续生成发票，但不会尝试付款。您应该在订阅时撤销对产品的访问权限，unpaid因为已尝试付款并在订阅时重试past_due。要将订阅转移到active，请在到期日之前支付最新的发票。
+	paused	订阅已结束试用期，没有默认付款方式，并且trial_settings.end_behavior.missing_payment_method设置为pause。将不再为订阅创建发票。为客户附加默认付款方式后，您可以恢复订阅。
+	*/
+	var status consts.SubscriptionStatusEnum = consts.SubStatusSuspended
+	if strings.Compare(string(subscription.Status), "trialing") == 0 ||
+		strings.Compare(string(subscription.Status), "active") == 0 {
+		status = consts.SubStatusActive
+	} else if strings.Compare(string(subscription.Status), "unpaid") == 0 {
+		status = consts.SubStatusCreate
+	} else if strings.Compare(string(subscription.Status), "incomplete_expired") == 0 {
+		status = consts.SubStatusExpired
+	} else if strings.Compare(string(subscription.Status), "incomplete") == 0 ||
+		strings.Compare(string(subscription.Status), "pass_due") == 0 {
+		status = consts.SubStatusIncomplete
+	} else if strings.Compare(string(subscription.Status), "paused") == 0 {
+		status = consts.SubStatusSuspended
+	} else if strings.Compare(string(subscription.Status), "canceled") == 0 {
+		status = consts.SubStatusCancelled
+	}
+	var latestChannelPaymentId = ""
+	if subscription.LatestInvoice != nil && subscription.LatestInvoice.PaymentIntent != nil {
+		latestChannelPaymentId = subscription.LatestInvoice.PaymentIntent.ID
+	}
+
+	return &ro.ChannelDetailSubscriptionInternalResp{
+		Status:                 status,
+		ChannelSubscriptionId:  subscription.ID,
+		ChannelStatus:          string(subscription.Status),
+		Data:                   utility.FormatToJsonString(subscription),
+		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
+		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
+		ChannelLatestPaymentId: latestChannelPaymentId,
+		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
+		CurrentPeriodStart:     subscription.CurrentPeriodStart,
+		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
+		BillingCycleAnchor:     subscription.BillingCycleAnchor,
+		TrialEnd:               subscription.TrialEnd,
+	}
+}
+
+func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDetailInvoiceInternalResp {
+	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	if strings.Compare(string(detail.Status), "draft") == 0 {
+		status = consts.InvoiceStatusPending
+	} else if strings.Compare(string(detail.Status), "open") == 0 {
+		status = consts.InvoiceStatusProcessing
+	} else if strings.Compare(string(detail.Status), "paid") == 0 {
+		status = consts.InvoiceStatusPaid
+	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
+		status = consts.InvoiceStatusFailed
+	} else if strings.Compare(string(detail.Status), "void") == 0 {
+		status = consts.InvoiceStatusCancelled
+	}
+	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	for _, line := range detail.Lines.Data {
+		var start int64 = 0
+		var end int64 = 0
+		if line.Period != nil {
+			start = line.Period.Start
+			end = line.Period.End
+		}
+		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+			Currency:               strings.ToUpper(string(line.Currency)),
+			Amount:                 line.Amount,
+			AmountExcludingTax:     line.AmountExcludingTax,
+			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+			Description:            line.Description,
+			Proration:              line.Proration,
+			Quantity:               line.Quantity,
+			PeriodStart:            start,
+			PeriodEnd:              end,
+		})
+	}
+
+	var channelPaymentId string
+	if detail.PaymentIntent != nil {
+		channelPaymentId = detail.PaymentIntent.ID
+	}
+	var channelSubscriptionId string
+	if detail.Subscription != nil {
+		channelSubscriptionId = detail.Subscription.ID
+	}
+	var channelUserId string
+	if detail.Customer != nil {
+		channelUserId = detail.Customer.ID
+	}
+	var paymentTime int64
+	var cancelTime int64
+	if detail.StatusTransitions != nil {
+		paymentTime = detail.StatusTransitions.PaidAt
+		cancelTime = detail.StatusTransitions.VoidedAt
+	}
+
+	return &ro.ChannelDetailInvoiceInternalResp{
+		TotalAmount:                    detail.Total,
+		PaymentAmount:                  detail.AmountPaid,
+		BalanceAmount:                  -(detail.StartingBalance) - -(detail.EndingBalance),
+		BalanceStart:                   -detail.StartingBalance,
+		BalanceEnd:                     -detail.EndingBalance,
+		TotalAmountExcludingTax:        detail.TotalExcludingTax,
+		TaxAmount:                      detail.Tax,
+		SubscriptionAmount:             detail.Subtotal,
+		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		Lines:                          invoiceItems,
+		ChannelId:                      channelId,
+		Status:                         status,
+		Link:                           detail.HostedInvoiceURL,
+		ChannelStatus:                  string(detail.Status),
+		ChannelInvoicePdf:              detail.InvoicePDF,
+		PeriodStart:                    detail.PeriodStart,
+		PeriodEnd:                      detail.PeriodEnd,
+		ChannelInvoiceId:               detail.ID,
+		ChannelUserId:                  channelUserId,
+		ChannelSubscriptionId:          channelSubscriptionId,
+		ChannelPaymentId:               channelPaymentId,
+		PaymentTime:                    paymentTime,
+		Reason:                         string(detail.BillingReason),
+		CreateTime:                     detail.Created,
+		CancelTime:                     cancelTime,
+	}
 }

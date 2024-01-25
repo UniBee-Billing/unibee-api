@@ -13,6 +13,7 @@ import (
 type OverseaPayChannel struct {
 	g.Meta           `orm:"table:oversea_pay_channel, do:true"`
 	Id               interface{} // 主键id
+	MerchantId       interface{} //
 	EnumKey          interface{} // 支付渠道枚举（内部定义）
 	ChannelType      interface{} // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
 	Channel          interface{} // 支付方式枚举（渠道定义）

@@ -11,6 +11,7 @@ import (
 // OverseaPayChannel is the golang structure for table oversea_pay_channel.
 type OverseaPayChannel struct {
 	Id               uint64      `json:"id"               description:"主键id"`                                          // 主键id
+	MerchantId       int64       `json:"merchantId"       description:""`                                              //
 	EnumKey          int64       `json:"enumKey"          description:"支付渠道枚举（内部定义）"`                                  // 支付渠道枚举（内部定义）
 	ChannelType      int         `json:"channelType"      description:"支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型"` // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
 	Channel          string      `json:"channel"          description:"支付方式枚举（渠道定义）"`                                  // 支付方式枚举（渠道定义）

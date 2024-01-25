@@ -90,21 +90,21 @@ func UpdateSubWithPayment(ctx context.Context, subscription *entity.Subscription
 }
 
 type SubscriptionPaymentSuccessWebHookReq struct {
-	Payment                   *entity.Payment                           `json:"payment" `
-	ChannelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
-	ChannelInvoiceDetail      *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
-	ChannelPaymentId          string                                    `json:"channelPaymentId" `
-	ChannelSubscriptionId     string                                    `json:"channelSubscriptionId" `
-	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
-	ChannelUpdateId           string                                    `json:"channelUpdateId"`
-	Status                    consts.SubscriptionStatusEnum             `json:"status"`
-	ChannelStatus             string                                    `json:"channelStatus"                  `
-	Data                      string                                    `json:"data"`
-	ChannelItemData           string                                    `json:"channelItemData"`
-	CancelAtPeriodEnd         bool                                      `json:"cancelAtPeriodEnd"`
-	CurrentPeriodEnd          int64                                     `json:"currentPeriodEnd"`
-	CurrentPeriodStart        int64                                     `json:"currentPeriodStart"`
-	TrialEnd                  int64                                     `json:"trialEnd"`
+	Payment                     *entity.Payment                           `json:"payment" `
+	ChannelSubscriptionDetail   *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelInvoiceDetail        *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
+	ChannelPaymentId            string                                    `json:"channelPaymentId" `
+	ChannelInvoiceId            string                                    `json:"channelInvoiceId"`
+	ChannelSubscriptionId       string                                    `json:"channelSubscriptionId" `
+	ChannelSubscriptionUpdateId string                                    `json:"channelSubscriptionUpdateId"`
+	Status                      consts.SubscriptionStatusEnum             `json:"status"`
+	ChannelStatus               string                                    `json:"channelStatus"                  `
+	Data                        string                                    `json:"data"`
+	ChannelItemData             string                                    `json:"channelItemData"`
+	CancelAtPeriodEnd           bool                                      `json:"cancelAtPeriodEnd"`
+	CurrentPeriodEnd            int64                                     `json:"currentPeriodEnd"`
+	CurrentPeriodStart          int64                                     `json:"currentPeriodStart"`
+	TrialEnd                    int64                                     `json:"trialEnd"`
 }
 
 func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
@@ -143,7 +143,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	if sub == nil {
 		return gerror.Newf("HandleSubscriptionPaymentSuccess sub not found %s", req.ChannelSubscriptionId)
 	}
-	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
 	if eiPendingSubUpdate != nil {
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
 		_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
@@ -201,22 +201,22 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 }
 
 type SubscriptionPaymentFailureWebHookReq struct {
-	Payment                   *entity.Payment                           `json:"payment" `
-	ChannelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
-	ChannelInvoiceDetail      *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
-	ChannelPaymentId          string                                    `json:"channelPaymentId" `
-	ChannelSubscriptionId     string                                    `json:"channelSubscriptionId" `
-	ChannelInvoiceId          string                                    `json:"channelInvoiceId"`
-	ChannelUpdateId           string                                    `json:"channelUpdateId"`
+	Payment                     *entity.Payment                           `json:"payment" `
+	ChannelSubscriptionDetail   *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelInvoiceDetail        *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
+	ChannelPaymentId            string                                    `json:"channelPaymentId" `
+	ChannelSubscriptionId       string                                    `json:"channelSubscriptionId" `
+	ChannelInvoiceId            string                                    `json:"channelInvoiceId"`
+	ChannelSubscriptionUpdateId string                                    `json:"channelUpdateId"`
 }
 
-func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
+func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
 	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 	if sub == nil {
-		return gerror.Newf("HandleSubscriptionPaymentFailure sub not found %s", req.ChannelSubscriptionId)
+		return gerror.Newf("HandleSubscriptionPaymentWaitAuthorized sub not found %s", req.ChannelSubscriptionId)
 	}
 
-	//eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelUpdateId)
+	//eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
 	//if eiPendingSubUpdate != nil {
 	//	//更新单支付失败, EffectImmediate=true 需要用户 3DS 验证等场景
 	//	//金额一致

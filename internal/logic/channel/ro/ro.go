@@ -86,32 +86,30 @@ type ChannelPaymentListReq struct {
 
 // ChannelPaymentRo is the golang structure for table oversea_pay.
 type ChannelPaymentRo struct {
-	MerchantId                string                                 `json:"merchantId"         `
-	ChannelId                 int64                                  `json:"channelId"         `
-	Status                    int                                    `json:"status"`
-	ChannelUserId             string                                 `json:"channelUserId"         `
-	CaptureStatus             int                                    `json:"captureStatus"`
-	Currency                  string                                 `json:"currency"              `
-	TotalAmount               int64                                  `json:"totalAmount"              `
-	PaymentAmount             int64                                  `json:"paymentAmount"              `
-	BalanceAmount             int64                                  `json:"balanceAmount"              `
-	RefundAmount              int64                                  `json:"refundAmount"              `
-	BalanceStart              int64                                  `json:"balanceStart"              `
-	BalanceEnd                int64                                  `json:"balanceEnd"              `
-	Reason                    string                                 `json:"reason"              `
-	UniqueId                  string                                 `json:"uniqueId"              `
-	PayTime                   *gtime.Time                            `json:"payTime" `
-	CreateTime                *gtime.Time                            `json:"createTime" `
-	CancelTime                *gtime.Time                            `json:"cancelTime" `
-	CancelReason              string                                 `json:"cancelReason" `
-	ChannelPaymentId          string                                 `json:"channelPaymentId"              `
-	ChannelInvoiceId          string                                 `json:"channelInvoiceId"         `
-	ChannelSubscriptionId     string                                 `json:"channelSubscriptionId"         `
-	ChannelUpdateId           string                                 `json:"channelUpdateId" `
-	Subscription              *entity.Subscription                   `json:"subscription" `
-	ChannelUser               *entity.SubscriptionUserChannel        `json:"channelUser" `
-	ChannelInvoiceDetail      *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"  `
-	ChannelSubscriptionDetail *ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"              `
+	MerchantId                  int64                                  `json:"merchantId"         `
+	Status                      int                                    `json:"status"`
+	CaptureStatus               int                                    `json:"captureStatus"`
+	Currency                    string                                 `json:"currency"              `
+	TotalAmount                 int64                                  `json:"totalAmount"              `
+	PaymentAmount               int64                                  `json:"paymentAmount"              `
+	BalanceAmount               int64                                  `json:"balanceAmount"              `
+	RefundAmount                int64                                  `json:"refundAmount"              `
+	BalanceStart                int64                                  `json:"balanceStart"              `
+	BalanceEnd                  int64                                  `json:"balanceEnd"              `
+	Reason                      string                                 `json:"reason"              `
+	UniqueId                    string                                 `json:"uniqueId"              `
+	PayTime                     *gtime.Time                            `json:"payTime" `
+	CreateTime                  *gtime.Time                            `json:"createTime" `
+	CancelTime                  *gtime.Time                            `json:"cancelTime" `
+	CancelReason                string                                 `json:"cancelReason" `
+	ChannelId                   int64                                  `json:"channelId"         `
+	ChannelUserId               string                                 `json:"channelUserId"         `
+	ChannelPaymentId            string                                 `json:"channelPaymentId"              `
+	ChannelInvoiceId            string                                 `json:"channelInvoiceId"         `
+	ChannelSubscriptionId       string                                 `json:"channelSubscriptionId"         `
+	ChannelSubscriptionUpdateId string                                 `json:"channelSubscriptionUpdateId" `
+	ChannelInvoiceDetail        *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"  `
+	ChannelSubscriptionDetail   *ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"              `
 }
 
 type OutChannelRo struct {
@@ -262,6 +260,10 @@ type ChannelCancelInvoiceInternalReq struct {
 type ChannelDetailInvoiceInternalResp struct {
 	ChannelSubscriptionId          string                      `json:"channelSubscriptionId"           `
 	TotalAmount                    int64                       `json:"totalAmount"        `
+	PaymentAmount                  int64                       `json:"paymentAmount"              `
+	BalanceAmount                  int64                       `json:"balanceAmount"              `
+	BalanceStart                   int64                       `json:"balanceStart"              `
+	BalanceEnd                     int64                       `json:"balanceEnd"              `
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        `
 	TaxAmount                      int64                       `json:"taxAmount"          `             // Tax金额,单位：分
 	SubscriptionAmount             int64                       `json:"subscriptionAmount" `             // Sub金额,单位：分
@@ -270,6 +272,7 @@ type ChannelDetailInvoiceInternalResp struct {
 	Lines                          []*ChannelDetailInvoiceItem `json:"lines"              `        // lines json data
 	ChannelId                      int64                       `json:"channelId"          `        // 支付渠道Id
 	Status                         consts.InvoiceStatusEnum    `json:"status"             `        // 订阅单状态，0-Init | 1-Pending ｜2-Processing｜3-paid | 4-failed | 5-cancelled
+	Reason                         string                      `json:"reason"             `        // reason
 	ChannelUserId                  string                      `json:"channelUserId"             ` // channelUserId
 	Link                           string                      `json:"link"               `        //
 	ChannelStatus                  string                      `json:"channelStatus"      `        // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -278,6 +281,9 @@ type ChannelDetailInvoiceInternalResp struct {
 	PeriodEnd                      int64                       `json:"periodEnd"`
 	PeriodStart                    int64                       `json:"periodStart"`
 	ChannelPaymentId               string                      `json:"channelPaymentId"`
+	PaymentTime                    int64                       `json:"paymentTime"        `
+	CreateTime                     int64                       `json:"createTime"        `
+	CancelTime                     int64                       `json:"cancelTime"        `
 }
 
 type ChannelDetailInvoiceRo struct {

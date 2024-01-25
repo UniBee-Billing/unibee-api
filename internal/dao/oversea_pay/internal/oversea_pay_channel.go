@@ -21,6 +21,7 @@ type OverseaPayChannelDao struct {
 // OverseaPayChannelColumns defines and stores column names for table oversea_pay_channel.
 type OverseaPayChannelColumns struct {
 	Id               string // 主键id
+	MerchantId       string //
 	EnumKey          string // 支付渠道枚举（内部定义）
 	ChannelType      string // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
 	Channel          string // 支付方式枚举（渠道定义）
@@ -44,6 +45,7 @@ type OverseaPayChannelColumns struct {
 // overseaPayChannelColumns holds the columns for table oversea_pay_channel.
 var overseaPayChannelColumns = OverseaPayChannelColumns{
 	Id:               "id",
+	MerchantId:       "merchant_id",
 	EnumKey:          "enum_key",
 	ChannelType:      "channel_type",
 	Channel:          "channel",
