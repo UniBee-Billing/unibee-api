@@ -110,6 +110,7 @@ func ToMap(in interface{}) (map[string]interface{}, error) {
 	return out, nil
 }
 
+// SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(ctx context.Context, mailTo string, templateName string, templateVariables *TemplateVariable, pdfFilePath string) error {
 	template := query.GetEmailTemplateByTemplateName(ctx, templateName)
 	utility.Assert(template != nil, "template not found")
