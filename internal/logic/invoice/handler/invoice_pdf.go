@@ -43,12 +43,12 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	})
 
 	doc.SetHeader(&generator2.HeaderFooter{
-		Text:       "<center>Unibee Billing</center>",
+		Text:       "<center>UniBee Billing</center>",
 		Pagination: true,
 	})
 
 	doc.SetFooter(&generator2.HeaderFooter{
-		Text:       "<center>Unibee Billing</center>",
+		Text:       "<center>UniBee Billing</center>",
 		Pagination: true,
 	})
 

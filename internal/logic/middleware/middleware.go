@@ -192,7 +192,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	}
 
 	u := parseAccessToken(tokenString)
-	g.Log().Infof(r.Context(), "Parsed User Token: %s, Email: %s, userId: %s", tokenString, u.Email, u.ID)
+	g.Log().Infof(r.Context(), "Parsed User Token: %s, Email: %s, UserId: %s URL: %s", tokenString, u.Email, u.ID, r.GetUrl())
 
 	userAccount := query.GetUserAccountById(r.Context(), u.Id)
 	if userAccount == nil {

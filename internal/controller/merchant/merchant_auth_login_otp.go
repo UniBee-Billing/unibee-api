@@ -25,6 +25,6 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from Unibee", verificationCode)
+	email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from UniBee", verificationCode)
 	return &auth.LoginOtpRes{}, nil
 }

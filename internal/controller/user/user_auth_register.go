@@ -89,7 +89,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	email.SendEmailToUser(req.Email, "Verification Code from Unibee", verificationCode)
+	email.SendEmailToUser(req.Email, "Verification Code from UniBee", verificationCode)
 
 	return &auth.RegisterRes{}, nil
 
