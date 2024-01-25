@@ -7,7 +7,7 @@ import (
 )
 
 type LoginReq struct {
-	g.Meta   `path:"/sso/login" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Login"`
+	g.Meta   `path:"/sso/login" tags:"Merchant-Auth-Controller" method:"post" summary:"Login"`
 	Email    string `p:"email" dc:"Email" v:"required"`
 	Password string `p:"password" dc:"Password" v:"required"`
 }
@@ -18,7 +18,7 @@ type LoginRes struct {
 }
 
 type LoginOtpReq struct {
-	g.Meta `path:"/sso/loginOTP" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Login OTP"`
+	g.Meta `path:"/sso/loginOTP" tags:"Merchant-Auth-Controller" method:"post" summary:"Login OTP"`
 	Email  string `p:"email" dc:"Email" v:"required"`
 }
 
@@ -26,7 +26,7 @@ type LoginOtpRes struct {
 }
 
 type LoginOtpVerifyReq struct {
-	g.Meta           `path:"/sso/loginOTPVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User OTP Login Verify Code"`
+	g.Meta           `path:"/sso/loginOTPVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"User OTP Login Verify Code"`
 	Email            string `p:"email" dc:"Email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }
@@ -36,15 +36,8 @@ type LoginOtpVerifyRes struct {
 	Token        string                      `p:"token" dc:"Token"`
 }
 
-type LogoutReq struct {
-	g.Meta `path:"/sso/logout" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User Logout"`
-}
-
-type LogoutRes struct {
-}
-
 type RegisterReq struct {
-	g.Meta     `path:"/sso/register" tags:"MerchantUser-Auth-Controller" method:"post" summary:"User Register"`
+	g.Meta     `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"User Register"`
 	FirstName  string `p:"firstName" dc:"First Name" v:"required"`
 	LastName   string `p:"lastName" dc:"Last Name" v:"required"`
 	Email      string `p:"email" dc:"Email" v:"required"`
@@ -59,7 +52,7 @@ type RegisterRes struct {
 }
 
 type RegisterVerifyReq struct {
-	g.Meta           `path:"/sso/registerVerify" tags:"MerchantUser-Auth-Controller" method:"post" summary:"Verify Email"`
+	g.Meta           `path:"/sso/registerVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"Verify Email"`
 	Email            string `p:"email" dc:"Email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }

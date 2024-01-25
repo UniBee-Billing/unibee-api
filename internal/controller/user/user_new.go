@@ -50,3 +50,9 @@ func NewPayment() user.IUserPayment {
 	return &ControllerPayment{}
 }
 
+type ControllerUser struct{}
+
+func NewUser() user.IUserUser {
+	return &ControllerUser{}
+}
+

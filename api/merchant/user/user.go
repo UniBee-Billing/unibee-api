@@ -5,6 +5,13 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
+type LogoutReq struct {
+	g.Meta `path:"/user_logout" tags:"Merchant-User-Controller" method:"post" summary:"User Logout"`
+}
+
+type LogoutRes struct {
+}
+
 type ListReq struct {
 	g.Meta             `path:"/user_list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
 	MerchantId         int64  `p:"merchantId" dc:"MerchantId" v:"required"`

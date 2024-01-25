@@ -13,6 +13,7 @@ import (
 	"go-oversea-pay/api/user/plan"
 	"go-oversea-pay/api/user/profile"
 	"go-oversea-pay/api/user/subscription"
+	"go-oversea-pay/api/user/user"
 	"go-oversea-pay/api/user/vat"
 )
 
@@ -20,7 +21,6 @@ type IUserAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
-	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
 }
@@ -56,6 +56,10 @@ type IUserSubscription interface {
 	SubscriptionSuspend(ctx context.Context, req *subscription.SubscriptionSuspendReq) (res *subscription.SubscriptionSuspendRes, err error)
 	SubscriptionResume(ctx context.Context, req *subscription.SubscriptionResumeReq) (res *subscription.SubscriptionResumeRes, err error)
 	SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error)
+}
+
+type IUserUser interface {
+	Logout(ctx context.Context, req *user.LogoutReq) (res *user.LogoutRes, err error)
 }
 
 type IUserVat interface {

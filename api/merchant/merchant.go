@@ -24,7 +24,6 @@ type IMerchantAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
-	Logout(ctx context.Context, req *auth.LogoutReq) (res *auth.LogoutRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
 }
@@ -89,6 +88,7 @@ type IMerchantSubscription interface {
 }
 
 type IMerchantUser interface {
+	Logout(ctx context.Context, req *user.LogoutReq) (res *user.LogoutRes, err error)
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
 	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
 }

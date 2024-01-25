@@ -36,13 +36,6 @@ type LoginOtpVerifyRes struct {
 	Token string              `p:"token" dc:"token"`
 }
 
-type LogoutReq struct {
-	g.Meta `path:"/sso/logout" tags:"User-Auth-Controller" method:"post" summary:"User Logout"`
-}
-
-type LogoutRes struct {
-}
-
 type RegisterReq struct {
 	g.Meta      `path:"/sso/register" tags:"User-Auth-Controller" method:"post" summary:"User Register"`
 	FirstName   string `p:"firstName" dc:"First Name" v:"required"`
