@@ -74,7 +74,7 @@ type SubscriptionCreateReq struct {
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ReturnUrl          string                             `p:"returnUrl"  dc:"ReturnUrl"  `
-	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName" v:"required"`
+	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                             `p:"vatNumber" dc:"VatNumber" `
 }
 type SubscriptionCreateRes struct {
