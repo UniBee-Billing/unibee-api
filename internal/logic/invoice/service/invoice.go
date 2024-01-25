@@ -60,7 +60,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		SubscriptionAmount:             totalAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Currency:                       strings.ToUpper(req.Currency),
-		Lines:                          utility.MarshalToJsonString(req.Lines),
+		Lines:                          utility.MarshalToJsonString(invoiceItems),
 		ChannelId:                      req.ChannelId,
 		Status:                         consts.InvoiceStatusPending,
 		SendStatus:                     0,
@@ -126,7 +126,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		dao.Invoice.Columns().Currency:                       req.Currency,
 		dao.Invoice.Columns().TaxScale:                       req.TaxScale,
 		dao.Invoice.Columns().ChannelId:                      req.ChannelId,
-		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(req.Lines),
+		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(invoiceItems),
 		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
