@@ -1391,8 +1391,8 @@ func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 
 func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	params, err := r.GetJson()
-	g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err.Error())
 	if err != nil {
+		g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err.Error())
 		r.Response.Writeln(err)
 		return
 	}
