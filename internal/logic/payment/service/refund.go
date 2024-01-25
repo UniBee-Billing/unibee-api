@@ -23,7 +23,7 @@ import (
 func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
-	utility.Assert(payment.PaymentAmount > 0, "payment fee error")
+	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
 
@@ -31,7 +31,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
-	utility.Assert(req.Amount.Value <= payment.PaymentAmount, "refund value should <= PaymentFee value")
+	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= PaymentFee value")
 
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.Reference)
 	isDuplicatedInvoke := false
@@ -129,7 +129,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,
-			Fee:       payment.PaymentAmount,
+			Fee:       payment.TotalAmount,
 			EventType: event.SentForRefund.Type,
 			Event:     event.SentForRefund.Desc,
 			OpenApiId: one.OpenApiId,

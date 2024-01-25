@@ -565,7 +565,7 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
+func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -586,7 +586,7 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
+func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -607,7 +607,7 @@ func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChan
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
+func (p PayChannelProxy) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {

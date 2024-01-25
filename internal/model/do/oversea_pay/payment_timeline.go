@@ -19,7 +19,7 @@ type PaymentTimeline struct {
 	InvoiceId      interface{} // 发票ID（内部编号）
 	UniqueId       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	Currency       interface{} // 货币
-	Amount         interface{} // 金额,单位：分
+	TotalAmount    interface{} // 金额,单位：分
 	ChannelId      interface{} // 支付渠道Id
 	GmtCreate      *gtime.Time // 创建时间
 	GmtModify      *gtime.Time // 修改时间

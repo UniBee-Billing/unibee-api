@@ -107,7 +107,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     createPayContext.Pay.PaymentId,
-			Fee:       createPayContext.Pay.PaymentAmount,
+			Fee:       createPayContext.Pay.TotalAmount,
 			EventType: event.SentForSettle.Type,
 			Event:     event.SentForSettle.Desc,
 			OpenApiId: createPayContext.OpenApiId,

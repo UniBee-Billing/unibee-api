@@ -31,7 +31,7 @@ type PaymentColumns struct {
 	BizId                  string // 业务id-即商户订单号
 	Currency               string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              string // 内部支付编号（系统生成唯一）
-	PaymentAmount          string // 支付金额
+	TotalAmount            string // 总计金额
 	RefundAmount           string // 总共已退款金额
 	ReceiveAmount          string // receive_amount
 	Status                 string // 支付状态。10-支付中，20-支付成功，30-支付取消
@@ -72,7 +72,7 @@ var paymentColumns = PaymentColumns{
 	BizId:                  "biz_id",
 	Currency:               "currency",
 	PaymentId:              "payment_id",
-	PaymentAmount:          "payment_amount",
+	TotalAmount:            "total_amount",
 	RefundAmount:           "refund_amount",
 	ReceiveAmount:          "receive_amount",
 	Status:                 "status",

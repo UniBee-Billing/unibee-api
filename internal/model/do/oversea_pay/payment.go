@@ -23,7 +23,7 @@ type Payment struct {
 	BizId                  interface{} // 业务id-即商户订单号
 	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              interface{} // 内部支付编号（系统生成唯一）
-	PaymentAmount          interface{} // 支付金额
+	TotalAmount            interface{} // 总计金额
 	RefundAmount           interface{} // 总共已退款金额
 	ReceiveAmount          interface{} // receive_amount
 	Status                 interface{} // 支付状态。10-支付中，20-支付成功，30-支付取消

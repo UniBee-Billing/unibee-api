@@ -45,7 +45,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 			BizId:             req.Reference,
 			BizType:           consts.PAYMENT_BIZ_TYPE_ORDER,
 			ChannelId:         int64(payChannel.Id),
-			PaymentAmount:     req.Amount.Value,
+			TotalAmount:       req.Amount.Value,
 			Currency:          req.Amount.Currency,
 			CountryCode:       req.CountryCode,
 			MerchantId:        merchantInfo.Id,

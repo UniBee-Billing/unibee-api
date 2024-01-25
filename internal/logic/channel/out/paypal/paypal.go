@@ -45,7 +45,7 @@ func (p Paypal) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
+func (p Paypal) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -55,7 +55,7 @@ func (p Paypal) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
+func (p Paypal) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -709,7 +709,7 @@ func (p Paypal) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
+func (p Paypal) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -39,7 +39,7 @@ func (e Evonet) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
+func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -49,7 +49,7 @@ func (e Evonet) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
+func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -192,7 +192,7 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil && transAmount != nil &&
-			one.PaymentAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
+			one.TotalAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			one.ChannelPaymentId = channelPaymentId
 			err := handler.HandlePayAuthorized(r.Context(), one)
@@ -308,14 +308,14 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			transAmount != nil &&
 			len(transAmount.Get("value").String()) > 0 &&
 			utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) > 0 &&
-			one.PaymentAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
+			one.TotalAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			receiveFee := utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String())
 			req := &handler.HandlePayReq{
 				PaymentId:      merchantTradeNo,
 				ChannelTradeNo: channelTradeNo,
 				PayStatusEnum:  consts.PAY_SUCCESS,
-				PayFee:         one.PaymentAmount,
+				PayFee:         one.TotalAmount,
 				ReceiveFee:     receiveFee,
 				PaidTime:       gtime.Now(),
 			}
@@ -483,7 +483,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 
 	//其他渠道所需参数校验
 	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
-	utility.Assert(createPayContext.Pay.PaymentAmount > 0, "PaymentAmount is nil")
+	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(len(createPayContext.Pay.PaymentId) > 0, "paymentId is nil")
 	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
@@ -502,7 +502,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		},
 		"transAmount": map[string]interface{}{
 			"currency": createPayContext.Pay.Currency,
-			"value":    utility.ConvertCentToDollarStr(createPayContext.Pay.PaymentAmount, createPayContext.Pay.Currency),
+			"value":    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 		},
 		"paymentMethod": map[string]interface{}{
 			"recurringProcessingModel": createPayContext.RecurringProcessingModel,
@@ -656,7 +656,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
+func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
@@ -684,9 +684,9 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.P
 	merchantPspReference := payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.Channel)
 	utility.Assert(strings.Compare(merchantPspReference, pay.PaymentId) == 0, "merchantPspReference not match")
-	res = &ro.ChannelPayRo{
-		PaymentAmount: pay.PaymentAmount,
-		Status:        consts.TO_BE_PAID,
+	res = &ro.ChannelPaymentRo{
+		TotalAmount: pay.TotalAmount,
+		Status:      consts.TO_BE_PAID,
 	}
 	if strings.Compare(status, "Failed") == 0 || strings.Compare(status, "Cancelled") == 0 {
 		res.Status = consts.PAY_FAILED

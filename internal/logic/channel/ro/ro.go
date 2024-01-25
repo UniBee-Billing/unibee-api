@@ -84,17 +84,18 @@ type ChannelPaymentListReq struct {
 	ChannelUserId string `json:"channelUserId"         `
 }
 
-// ChannelPayRo is the golang structure for table oversea_pay.
-type ChannelPayRo struct {
+// ChannelPaymentRo is the golang structure for table oversea_pay.
+type ChannelPaymentRo struct {
 	MerchantId                string                                 `json:"merchantId"         `
 	ChannelId                 int64                                  `json:"channelId"         `
 	Status                    int                                    `json:"status"`
 	ChannelUserId             string                                 `json:"channelUserId"         `
 	CaptureStatus             int                                    `json:"captureStatus"`
 	Currency                  string                                 `json:"currency"              `
-	PaymentAmount             int64                                  `json:"paymentAmount"              `
+	TotalAmount               int64                                  `json:"totalAmount"              `
 	ReceiveAmount             int64                                  `json:"receiveAmount"              `
 	BalanceAmount             int64                                  `json:"balanceAmount"              `
+	RefundAmount              int64                                  `json:"refundAmount"              `
 	BalanceStart              int64                                  `json:"balanceStart"              `
 	BalanceEnd                int64                                  `json:"balanceEnd"              `
 	Reason                    string                                 `json:"reason"              `
@@ -103,7 +104,6 @@ type ChannelPayRo struct {
 	CreateTime                *gtime.Time                            `json:"createTime" `
 	CancelTime                *gtime.Time                            `json:"cancelTime" `
 	CancelReason              string                                 `json:"cancelReason" `
-	TotalRefundFee            int64                                  `json:"totalRefundFee"              `
 	ChannelPaymentId          string                                 `json:"channelPaymentId"              `
 	ChannelInvoiceId          string                                 `json:"channelInvoiceId"         `
 	ChannelSubscriptionId     string                                 `json:"channelSubscriptionId"         `

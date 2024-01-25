@@ -15,7 +15,7 @@ func (a AutoTest) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan 
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
+func (a AutoTest) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -25,7 +25,7 @@ func (a AutoTest) DoRemoteChannelRefundList(ctx context.Context, payChannel *ent
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
+func (a AutoTest) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -155,7 +155,7 @@ func (a AutoTest) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
+func (a AutoTest) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

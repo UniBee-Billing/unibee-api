@@ -67,7 +67,7 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	}
 }
 
-func parseStripePayment(item *stripe.PaymentIntent) *ro.ChannelPayRo {
+func parseStripePayment(item *stripe.PaymentIntent) *ro.ChannelPaymentRo {
 	var channelInvoiceId string
 	if item.Invoice != nil {
 		channelInvoiceId = item.Invoice.ID
@@ -88,13 +88,13 @@ func parseStripePayment(item *stripe.PaymentIntent) *ro.ChannelPayRo {
 	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
 		captureStatus = consts.CAPTURE_REQUEST
 	}
-	return &ro.ChannelPayRo{
+	return &ro.ChannelPaymentRo{
 		ChannelInvoiceId: channelInvoiceId,
 		ChannelUserId:    channelUserId,
 		ChannelPaymentId: item.ID,
 		Status:           status,
 		CaptureStatus:    captureStatus,
-		PaymentAmount:    item.Amount,
+		TotalAmount:      item.Amount,
 		ReceiveAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
 		PayTime:          gtime.NewFromTimeStamp(item.Created),
@@ -214,7 +214,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	}
 }
 
-func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
+func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
@@ -224,7 +224,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	params.Limit = stripe.Int64(200)
 	paymentList := paymentintent.List(params)
 	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
-	var list []*ro.ChannelPayRo
+	var list []*ro.ChannelPaymentRo
 	for _, item := range paymentList.PaymentIntentList().Data {
 		list = append(list, parseStripePayment(item))
 	}
@@ -250,7 +250,7 @@ func (s Stripe) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 	return list, nil
 }
 
-func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
+func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
@@ -1571,7 +1571,7 @@ func (s Stripe) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
+func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

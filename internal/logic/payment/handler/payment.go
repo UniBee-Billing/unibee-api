@@ -44,7 +44,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
-		Fee:       pay.PaymentAmount,
+		Fee:       pay.TotalAmount,
 		EventType: event.Expird.Type,
 		Event:     event.Expird.Desc,
 		OpenApiId: pay.OpenApiId,
@@ -120,7 +120,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
-			Fee:       pay.PaymentAmount,
+			Fee:       pay.TotalAmount,
 			EventType: event.Authorised.Type,
 			Event:     event.Authorised.Desc,
 			OpenApiId: pay.OpenApiId,
@@ -153,7 +153,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	var refundFee int64 = 0
 	if pay.AuthorizeStatus != consts.WAITING_AUTHORIZED {
-		refundFee = pay.PaymentAmount
+		refundFee = pay.TotalAmount
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -231,7 +231,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().ChannelPaymentIntentId: req.ChannelPayId,
 				dao.Payment.Columns().ChannelPaymentId:       req.ChannelTradeNo,
 				dao.Payment.Columns().ReceiveAmount:          req.ReceiveFee,
-				dao.Payment.Columns().RefundAmount:           pay.PaymentAmount - req.ReceiveFee},
+				dao.Payment.Columns().RefundAmount:           pay.TotalAmount - req.ReceiveFee},
 				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -293,7 +293,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	return err
 }
 
-func HandlePaymentWebhookEvent(ctx context.Context, eventType string, channelPayRo *ro.ChannelPayRo) error {
+func HandlePaymentWebhookEvent(ctx context.Context, eventType string, channelPayRo *ro.ChannelPaymentRo) error {
 	//先保存 Payment 信息
 	payment, err := CreateOrUpdatePaymentByDetail(ctx, channelPayRo)
 	if err != nil {
@@ -338,7 +338,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, channelPay
 	return nil
 }
 
-func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.ChannelPayRo) (*entity.Payment, error) {
+func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
 	var subscriptionId string
 	var merchantId int64
@@ -371,8 +371,8 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 			CountryCode:            countryCode,
 			PaymentId:              utility.CreatePaymentId(),
 			Currency:               channelPayRo.Currency,
-			PaymentAmount:          channelPayRo.PaymentAmount,
-			RefundAmount:           channelPayRo.TotalRefundFee,
+			TotalAmount:            channelPayRo.TotalAmount,
+			RefundAmount:           channelPayRo.RefundAmount,
 			ReceiveAmount:          channelPayRo.ReceiveAmount,
 			Status:                 channelPayRo.Status,
 			AuthorizeStatus:        channelPayRo.CaptureStatus,
@@ -401,8 +401,8 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 			dao.Payment.Columns().UserId:                 channelPayRo.ChannelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,
 			dao.Payment.Columns().Currency:               channelPayRo.Currency,
-			dao.Payment.Columns().PaymentAmount:          channelPayRo.PaymentAmount,
-			dao.Payment.Columns().RefundAmount:           channelPayRo.TotalRefundFee,
+			dao.Payment.Columns().TotalAmount:            channelPayRo.TotalAmount,
+			dao.Payment.Columns().RefundAmount:           channelPayRo.RefundAmount,
 			dao.Payment.Columns().ReceiveAmount:          channelPayRo.ReceiveAmount,
 			dao.Payment.Columns().Status:                 channelPayRo.Status,
 			dao.Payment.Columns().AuthorizeStatus:        channelPayRo.CaptureStatus,
@@ -437,9 +437,9 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		status = 2
 	}
 	var timeLineType = 0
-	if payment.PaymentAmount > 0 {
+	if payment.TotalAmount > 0 {
 		timeLineType = 0
-	} else if payment.PaymentAmount < 0 {
+	} else if payment.TotalAmount < 0 {
 		timeLineType = 1
 	}
 	if one == nil {
@@ -451,7 +451,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			InvoiceId:      payment.InvoiceId,
 			UniqueId:       uniqueId,
 			Currency:       payment.Currency,
-			Amount:         payment.PaymentAmount,
+			TotalAmount:    payment.TotalAmount,
 			ChannelId:      payment.ChannelId,
 			PaymentId:      payment.PaymentId,
 			Status:         status,
@@ -473,7 +473,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
 			dao.PaymentTimeline.Columns().InvoiceId:      payment.InvoiceId,
 			dao.PaymentTimeline.Columns().Currency:       payment.Currency,
-			dao.PaymentTimeline.Columns().Amount:         payment.PaymentAmount,
+			dao.PaymentTimeline.Columns().TotalAmount:    payment.TotalAmount,
 			dao.PaymentTimeline.Columns().ChannelId:      payment.ChannelId,
 			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),

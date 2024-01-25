@@ -16,7 +16,7 @@ func DoChannelCapture(ctx context.Context, payment *entity.Payment) (err error) 
 	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
 	utility.Assert(payment.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
 	utility.Assert(payment.ReceiveAmount > 0, "capture value should > 0")
-	utility.Assert(payment.ReceiveAmount <= payment.PaymentAmount, "capture value should <= authorized value")
+	utility.Assert(payment.ReceiveAmount <= payment.TotalAmount, "capture value should <= authorized value")
 
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//事务处理 channel capture
