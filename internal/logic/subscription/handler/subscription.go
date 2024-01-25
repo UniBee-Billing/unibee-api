@@ -210,6 +210,14 @@ type SubscriptionPaymentFailureWebHookReq struct {
 	ChannelSubscriptionUpdateId string                                    `json:"channelUpdateId"`
 }
 
+func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
+	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	if sub == nil {
+		return gerror.Newf("HandleSubscriptionPaymentFailure sub not found %s", req.ChannelSubscriptionId)
+	}
+	return nil
+}
+
 func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
 	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 	if sub == nil {
