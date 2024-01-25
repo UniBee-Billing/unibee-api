@@ -311,6 +311,7 @@ type InvoiceDetailRo struct {
 	UniqueId                       string                      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      description:"创建时间"`                                                   // 创建时间
 	TotalAmount                    int64                       `json:"totalAmount"                    description:"金额,单位：分"`
+	DiscountAmount                 int64                       `json:"discountAmount"                    description:"优惠金额,单位：分"`
 	TaxAmount                      int64                       `json:"taxAmount"                      description:"Tax金额,单位：分"` // Tax金额,单位：分
 	SubscriptionAmount             int64                       `json:"subscriptionAmount"             description:"Sub金额,单位：分"` // Sub金额,单位：分
 	Currency                       string                      `json:"currency"                       description:"货币"`

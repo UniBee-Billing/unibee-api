@@ -106,6 +106,7 @@ func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
 		TaxScale:                       invoice.TaxScale,
 		SendNote:                       invoice.SendNote,
 		SendTerms:                      invoice.SendTerms,
+		DiscountAmount:                 0,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
