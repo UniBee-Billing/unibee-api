@@ -53,7 +53,7 @@ func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFil
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
-	htmlContent := "<strong>" + body + " </strong>"
+	htmlContent := "<div>" + body + " </div>"
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
 	attach := mail.NewAttachment()
 	dat, err := os.ReadFile(pdfFilePath)
@@ -139,14 +139,15 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tem
 	for key, value := range variableMap {
 		mapKey := "{" + key + "}"
 		mapKey = strings.Replace(mapKey, " ", "&nbsp;", 10)
+		mapValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), 1)
+			title = strings.Replace(title, mapKey, mapValue, 1)
 		}
 		if len(content) > 0 {
-			content = strings.Replace(content, mapKey, value.(string), 1)
+			content = strings.Replace(content, mapKey, mapValue, 1)
 		}
 		if len(attachName) > 0 {
-			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
+			attachName = strings.Replace(attachName, mapKey, mapValue, 1)
 		}
 	}
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
