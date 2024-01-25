@@ -27,7 +27,7 @@ type HandlePayReq struct {
 	PayFee         int64
 	PayStatusEnum  consts.PayStatusEnum
 	PaidTime       *gtime.Time
-	ReceiptFee     int64
+	ReceiveFee     int64
 	CaptureFee     int64
 	Reason         string
 	PaymentMethod  string
@@ -44,7 +44,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
-		Fee:       pay.PaymentFee,
+		Fee:       pay.PaymentAmount,
 		EventType: event.Expird.Type,
 		Event:     event.Expird.Desc,
 		OpenApiId: pay.OpenApiId,
@@ -120,7 +120,7 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
-			Fee:       pay.PaymentFee,
+			Fee:       pay.PaymentAmount,
 			EventType: event.Authorised.Type,
 			Event:     event.Authorised.Desc,
 			OpenApiId: pay.OpenApiId,
@@ -153,11 +153,11 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	var refundFee int64 = 0
 	if pay.AuthorizeStatus != consts.WAITING_AUTHORIZED {
-		refundFee = pay.PaymentFee
+		refundFee = pay.PaymentAmount
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().RefundFee: refundFee},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().RefundAmount: refundFee},
 				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -230,8 +230,8 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().PaidTime:               req.PaidTime,
 				dao.Payment.Columns().ChannelPaymentIntentId: req.ChannelPayId,
 				dao.Payment.Columns().ChannelPaymentId:       req.ChannelTradeNo,
-				dao.Payment.Columns().ReceiptFee:             req.ReceiptFee,
-				dao.Payment.Columns().RefundFee:              pay.PaymentFee - req.ReceiptFee},
+				dao.Payment.Columns().ReceiveAmount:          req.ReceiveFee,
+				dao.Payment.Columns().RefundAmount:           pay.PaymentAmount - req.ReceiveFee},
 				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -262,7 +262,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
-			Fee:       req.ReceiptFee,
+			Fee:       req.ReceiveFee,
 			EventType: event.Settled.Type,
 			Event:     event.Settled.Desc,
 			OpenApiId: pay.OpenApiId,
@@ -322,7 +322,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *r
 		if err != nil {
 			return err
 		}
-	} else if details.ChannelInvoiceDetail != nil && details.Status != consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
+	} else if details.ChannelInvoiceDetail != nil && details.Status != consts.TO_BE_PAID && details.ChannelSubscriptionDetail != nil {
 		//Subscription Payment Failure
 		err = handler.HandleSubscriptionPaymentFailure(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
 			Payment:                   payment,
@@ -371,19 +371,17 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			CountryCode:            countryCode,
 			PaymentId:              utility.CreatePaymentId(),
 			Currency:               details.Currency,
-			PaymentFee:             details.PayFee,
-			RefundFee:              details.TotalRefundFee,
-			ReceiptFee:             details.PayFee,
+			PaymentAmount:          details.PaymentAmount,
+			RefundAmount:           details.TotalRefundFee,
+			ReceiveAmount:          details.ReceiveAmount,
 			Status:                 details.Status,
 			AuthorizeStatus:        details.CaptureStatus,
 			ChannelId:              details.ChannelId,
-			ChannelPaymentFee:      details.PayFee,
 			ChannelPaymentIntentId: details.ChannelPaymentId,
 			ChannelPaymentId:       details.ChannelPaymentId,
 			CreateTime:             details.CreateTime,
 			CancelTime:             details.CancelTime,
 			PaidTime:               details.PayTime,
-			ChannelInvoiceId:       details.ChannelInvoiceId,
 			PaymentData:            details.CancelReason,
 			UniqueId:               uniqueId,
 			SubscriptionId:         subscriptionId,
@@ -403,13 +401,12 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 			dao.Payment.Columns().UserId:                 details.ChannelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,
 			dao.Payment.Columns().Currency:               details.Currency,
-			dao.Payment.Columns().PaymentFee:             details.PayFee,
-			dao.Payment.Columns().RefundFee:              details.TotalRefundFee,
-			dao.Payment.Columns().ReceiptFee:             details.PayFee,
+			dao.Payment.Columns().PaymentAmount:          details.PaymentAmount,
+			dao.Payment.Columns().RefundAmount:           details.TotalRefundFee,
+			dao.Payment.Columns().ReceiveAmount:          details.ReceiveAmount,
 			dao.Payment.Columns().Status:                 details.Status,
 			dao.Payment.Columns().AuthorizeStatus:        details.CaptureStatus,
 			dao.Payment.Columns().ChannelId:              details.ChannelId,
-			dao.Payment.Columns().ChannelPaymentFee:      details.PayFee,
 			dao.Payment.Columns().ChannelPaymentIntentId: details.ChannelPaymentId,
 			dao.Payment.Columns().CreateTime:             details.CreateTime,
 			dao.Payment.Columns().CancelTime:             details.CancelTime,
@@ -440,9 +437,9 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		status = 2
 	}
 	var timeLineType = 0
-	if payment.PaymentFee > 0 {
+	if payment.PaymentAmount > 0 {
 		timeLineType = 0
-	} else if payment.PaymentFee < 0 {
+	} else if payment.PaymentAmount < 0 {
 		timeLineType = 1
 	}
 	if one == nil {
@@ -454,7 +451,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			InvoiceId:      payment.InvoiceId,
 			UniqueId:       uniqueId,
 			Currency:       payment.Currency,
-			Amount:         payment.PaymentFee,
+			Amount:         payment.PaymentAmount,
 			ChannelId:      payment.ChannelId,
 			PaymentId:      payment.PaymentId,
 			Status:         status,
@@ -476,7 +473,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
 			dao.PaymentTimeline.Columns().InvoiceId:      payment.InvoiceId,
 			dao.PaymentTimeline.Columns().Currency:       payment.Currency,
-			dao.PaymentTimeline.Columns().Amount:         payment.PaymentFee,
+			dao.PaymentTimeline.Columns().Amount:         payment.PaymentAmount,
 			dao.PaymentTimeline.Columns().ChannelId:      payment.ChannelId,
 			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),

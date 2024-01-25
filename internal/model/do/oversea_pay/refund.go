@@ -24,7 +24,7 @@ type Refund struct {
 	Currency             interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId            interface{} // 支付单号(内部生成，支付单号）
 	RefundId             interface{} // 退款单号。可以唯一代表一笔退款（内部生成，退款单号）
-	RefundFee            interface{} // 退款金额。单位：分
+	RefundAmount         interface{} // 退款金额。单位：分
 	RefundComment        interface{} // 退款备注
 	Status               interface{} // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           *gtime.Time // 退款成功时间

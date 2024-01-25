@@ -32,7 +32,7 @@ type RefundColumns struct {
 	Currency             string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId            string // 支付单号(内部生成，支付单号）
 	RefundId             string // 退款单号。可以唯一代表一笔退款（内部生成，退款单号）
-	RefundFee            string // 退款金额。单位：分
+	RefundAmount         string // 退款金额。单位：分
 	RefundComment        string // 退款备注
 	Status               string // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           string // 退款成功时间
@@ -61,7 +61,7 @@ var refundColumns = RefundColumns{
 	Currency:             "currency",
 	PaymentId:            "payment_id",
 	RefundId:             "refund_id",
-	RefundFee:            "refund_fee",
+	RefundAmount:         "refund_amount",
 	RefundComment:        "refund_comment",
 	Status:               "status",
 	RefundTime:           "refund_time",

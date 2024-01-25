@@ -17,28 +17,27 @@ type Payment struct {
 	MerchantId             interface{} // 商户ID
 	OpenApiId              interface{} // 使用的开放平台配置Id
 	UserId                 interface{} // user_id
+	SubscriptionId         interface{} // 订阅id（内部编号）
+	GmtCreate              *gtime.Time // 创建时间
 	BizType                interface{} // 业务类型。1-single payment, 3-invoice
 	BizId                  interface{} // 业务id-即商户订单号
-	TerminalIp             interface{} // 实时交易终端IP
-	CountryCode            interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
 	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              interface{} // 内部支付编号（系统生成唯一）
-	PaymentFee             interface{} // 支付金额
-	RefundFee              interface{} // 总共已退款金额
-	ReceiptFee             interface{} // 商户捕获金额（分）
+	PaymentAmount          interface{} // 支付金额
+	RefundAmount           interface{} // 总共已退款金额
+	ReceiveAmount          interface{} // receive_amount
 	Status                 interface{} // 支付状态。10-支付中，20-支付成功，30-支付取消
+	TerminalIp             interface{} // 实时交易终端IP
+	CountryCode            interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
 	AuthorizeStatus        interface{} // 用户授权状态，0-未授权，1-已授权，2-已发起捕获
 	ChannelId              interface{} // 支付方式id,表oversea_pay_channel的id
-	ChannelPaymentFee      interface{} // 买家实付金额
 	ChannelPaymentIntentId interface{} // 第三方支付平台支付预订单ID，支付接口返回
 	ChannelPaymentId       interface{} // 外部支付渠道订单号，支付成功回调返回
 	CaptureDelayHours      interface{} // 延迟Capture时间
 	CreateTime             *gtime.Time // 支付单创建时间
 	CancelTime             *gtime.Time // 支付单取消时间
 	PaidTime               *gtime.Time // 付款成功时间
-	ChannelInvoiceId       interface{} // 渠道发票号
 	InvoiceId              interface{} // 发票号
-	GmtCreate              *gtime.Time // 创建时间
 	GmtModify              *gtime.Time // 更新时间
 	AppId                  interface{} // 支付使用的APPID
 	ReturnUrl              interface{} // 支付成功回调Url
@@ -50,5 +49,4 @@ type Payment struct {
 	AdditionalData         interface{} // 额外信息，JSON结构
 	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
-	SubscriptionId         interface{} // 订阅id（内部编号）
 }

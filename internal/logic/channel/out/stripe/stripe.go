@@ -94,8 +94,8 @@ func parseStripePayment(item *stripe.PaymentIntent) *ro.OutPayRo {
 		ChannelPaymentId: item.ID,
 		Status:           status,
 		CaptureStatus:    captureStatus,
-		PayFee:           item.Amount,
-		ReceiptFee:       item.AmountReceived,
+		PaymentAmount:    item.Amount,
+		ReceiveAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
 		PayTime:          gtime.NewFromTimeStamp(item.Created),
 		CreateTime:       gtime.NewFromTimeStamp(item.Created),
@@ -1585,7 +1585,7 @@ func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
 	params := &stripe.RefundParams{PaymentIntent: stripe.String(pay.ChannelPaymentId)}
 	params.Reason = stripe.String(one.RefundComment)
-	params.Amount = stripe.Int64(one.RefundFee)
+	params.Amount = stripe.Int64(one.RefundAmount)
 	params.Currency = stripe.String(strings.ToLower(one.Currency))
 	result, err := refund.New(params)
 	log.SaveChannelHttpLog("DoRemoteChannelRefund", params, result, err, "refund", nil, channelEntity)

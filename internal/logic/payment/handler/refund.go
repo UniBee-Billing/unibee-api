@@ -77,7 +77,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
-			Fee:       one.RefundFee,
+			Fee:       one.RefundAmount,
 			EventType: event.RefundFailed.Type,
 			Event:     event.RefundFailed.Desc,
 			OpenApiId: one.OpenApiId,
@@ -143,7 +143,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.Payment.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundFee, pay.Id, one.RefundFee, one.RefundFee)
+			update, err := transaction.Update(dao.Payment.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -168,7 +168,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     pay.PaymentId,
-			Fee:       one.RefundFee,
+			Fee:       one.RefundAmount,
 			EventType: event.Refunded.Type,
 			Event:     event.Refunded.Desc,
 			OpenApiId: one.OpenApiId,
@@ -218,7 +218,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     pay.PaymentId,
-		Fee:       one.RefundFee,
+		Fee:       one.RefundAmount,
 		EventType: event.RefundedReversed.Type,
 		Event:     event.RefundedReversed.Desc,
 		OpenApiId: one.OpenApiId,
@@ -251,7 +251,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			Currency:             details.Currency,
 			PaymentId:            payment.PaymentId,
 			RefundId:             utility.CreateRefundId(),
-			RefundFee:            details.RefundFee,
+			RefundAmount:         details.RefundFee,
 			RefundComment:        details.Reason,
 			Status:               details.Status,
 			RefundTime:           details.RefundTime,
@@ -280,7 +280,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().CountryCode:          payment.CountryCode,
 			dao.Refund.Columns().Currency:             details.Currency,
 			dao.Refund.Columns().PaymentId:            payment.PaymentId,
-			dao.Refund.Columns().RefundFee:            details.RefundFee,
+			dao.Refund.Columns().RefundAmount:         details.RefundFee,
 			dao.Refund.Columns().RefundComment:        details.Reason,
 			dao.Refund.Columns().Status:               details.Status,
 			dao.Refund.Columns().RefundTime:           details.RefundTime,
@@ -321,7 +321,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			//InvoiceId:      refund.InvoiceId,
 			UniqueId:     uniqueId,
 			Currency:     refund.Currency,
-			Amount:       refund.RefundFee,
+			Amount:       refund.RefundAmount,
 			ChannelId:    refund.ChannelId,
 			Status:       status,
 			TimelineType: 1,
@@ -342,7 +342,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			dao.PaymentTimeline.Columns().SubscriptionId: refund.SubscriptionId,
 			//dao.PaymentTimeline.Columns().InvoiceId:      refund.InvoiceId,
 			dao.PaymentTimeline.Columns().Currency:  refund.Currency,
-			dao.PaymentTimeline.Columns().Amount:    refund.RefundFee,
+			dao.PaymentTimeline.Columns().Amount:    refund.RefundAmount,
 			dao.PaymentTimeline.Columns().ChannelId: refund.ChannelId,
 			//dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:    gtime.Now(),

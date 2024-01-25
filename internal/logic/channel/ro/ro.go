@@ -93,8 +93,8 @@ type OutPayRo struct {
 	Status                    int                                    `json:"status"`
 	CaptureStatus             int                                    `json:"captureStatus"`
 	Reason                    string                                 `json:"reason"              `
-	PayFee                    int64                                  `json:"PayFee"              `
-	ReceiptFee                int64                                  `json:"receiptFee"              `
+	PaymentAmount             int64                                  `json:"PaymentAmount"              `
+	ReceiveAmount             int64                                  `json:"receiptFee"              `
 	Currency                  string                                 `json:"currency"              `
 	PayTime                   *gtime.Time                            `json:"payTime" `
 	CreateTime                *gtime.Time                            `json:"createTime" `

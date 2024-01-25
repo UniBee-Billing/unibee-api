@@ -22,7 +22,7 @@ type Refund struct {
 	Currency             string      `json:"currency"             description:"货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码"` // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId            string      `json:"paymentId"            description:"支付单号(内部生成，支付单号）"`                                                 // 支付单号(内部生成，支付单号）
 	RefundId             string      `json:"refundId"             description:"退款单号。可以唯一代表一笔退款（内部生成，退款单号）"`                                      // 退款单号。可以唯一代表一笔退款（内部生成，退款单号）
-	RefundFee            int64       `json:"refundFee"            description:"退款金额。单位：分"`                                                       // 退款金额。单位：分
+	RefundAmount         int64       `json:"refundAmount"         description:"退款金额。单位：分"`                                                       // 退款金额。单位：分
 	RefundComment        string      `json:"refundComment"        description:"退款备注"`                                                            // 退款备注
 	Status               int         `json:"status"               description:"退款状态。10-退款中，20-退款成功，30-退款失败"`                                     // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           *gtime.Time `json:"refundTime"           description:"退款成功时间"`                                                          // 退款成功时间

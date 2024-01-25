@@ -24,7 +24,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "支付单号为空")
 	utility.Assert(createPayContext.Pay.ChannelId > 0, "pay channelId is nil")
-	utility.Assert(createPayContext.Pay.PaymentFee > 0, "支付金额为空")
+	utility.Assert(createPayContext.Pay.ReceiveAmount > 0, "支付金额为空")
 	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "contryCode为空")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId为空")
@@ -107,7 +107,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     createPayContext.Pay.PaymentId,
-			Fee:       createPayContext.Pay.PaymentFee,
+			Fee:       createPayContext.Pay.PaymentAmount,
 			EventType: event.SentForSettle.Type,
 			Event:     event.SentForSettle.Desc,
 			OpenApiId: createPayContext.OpenApiId,

@@ -135,6 +135,7 @@ func CreateInvoiceFromSubscriptionPaymentFailure(ctx context.Context, subscripti
 
 type CreateInvoiceInternalReq struct {
 	Payment                          *entity.Payment                      `json:"payment"`
+	ChannelInvoiceId                 string                               `json:"channelInvoiceId"`
 	Currency                         string                               `json:"currency"`
 	PlanId                           int64                                `json:"planId"`
 	Quantity                         int64                                `json:"quantity"`
@@ -196,7 +197,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 			SendStatus:                     0,
 			SendEmail:                      sendEmail,
 			ChannelUserId:                  channelUserId,
-			ChannelInvoiceId:               req.Payment.ChannelInvoiceId,
+			ChannelInvoiceId:               req.ChannelInvoiceId,
 			ChannelPaymentId:               req.Payment.ChannelPaymentId,
 			UniqueId:                       req.Payment.PaymentId,
 			TotalAmount:                    invoice.TotalAmount,
@@ -232,7 +233,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 			//dao.Invoice.Columns().PeriodEndTime:                  gtime.NewFromTimeStamp(req.PeriodEnd),
 			dao.Invoice.Columns().Currency:                       req.Currency,
 			dao.Invoice.Columns().Status:                         req.InvoiceStatus,
-			dao.Invoice.Columns().ChannelInvoiceId:               req.Payment.ChannelInvoiceId,
+			dao.Invoice.Columns().ChannelInvoiceId:               req.ChannelInvoiceId,
 			dao.Invoice.Columns().ChannelUserId:                  channelUserId,
 			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
