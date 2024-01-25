@@ -127,7 +127,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
 	var vatCountryCode = req.VatCountryCode
-	var standardTaxPercentage int64 = 0
+	var standardTaxScale int64 = 0
 	var vatCountryName = ""
 	var vatCountryRate *ro.VatCountryRate
 	var vatNumberValidate *ro.ValidResult
@@ -147,7 +147,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vat not found for countryCode:%v", vatCountryCode))
 		vatCountryName = vatCountryRate.CountryName
 		if vatNumberValidate == nil || !vatNumberValidate.Valid {
-			standardTaxPercentage = vatCountryRate.StandardTaxPercentage
+			standardTaxScale = vatCountryRate.StandardTaxPercentage
 		}
 	}
 
@@ -174,9 +174,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 		Currency:               currency,
-		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
+		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
-		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
+		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
 		Quantity:               req.Quantity,
@@ -184,15 +184,15 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
-			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage)),
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
 			Quantity:               addon.Quantity,
 		})
 	}
-	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(standardTaxPercentage))
+	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale))
 	var totalAmount = TotalAmountExcludingTax + taxAmount
 
 	invoice := &ro.ChannelDetailInvoiceRo{
@@ -220,7 +220,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		VatNumber:             req.VatNumber,
 		VatNumberValidate:     vatNumberValidate,
 		VatVerifyData:         utility.FormatToJsonString(vatNumberValidate),
-		StandardTaxPercentage: standardTaxPercentage,
+		StandardTaxPercentage: standardTaxScale,
 		UserId:                req.UserId,
 		Email:                 email,
 		Invoice:               invoice,

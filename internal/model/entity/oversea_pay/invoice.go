@@ -36,7 +36,7 @@ type Invoice struct {
 	ChannelPaymentId               string      `json:"channelPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
 	ChannelUserId                  string      `json:"channelUserId"                  description:"渠道用户 Id"`                                                               // 渠道用户 Id
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
-	TaxPercentage                  int64       `json:"taxPercentage"                  description:"Tax税率，万分位，1000 表示 10%"`                                                 // Tax税率，万分位，1000 表示 10%
+	TaxScale                       int64       `json:"taxScale"                       description:"Tax税率，万分位，1000 表示 10%"`                                                 // Tax税率，万分位，1000 表示 10%
 	SendNote                       string      `json:"sendNote"                       description:"send_note"`                                                             // send_note
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                            // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        description:"金额(不含税）,单位：分"`                                                          // 金额(不含税）,单位：分

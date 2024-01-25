@@ -32,7 +32,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
-		tax := amountExcludingTax * req.TaxScale // 精度损失问题 todo mark
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale))
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
 			Amount:                 amountExcludingTax + tax,
@@ -55,6 +55,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		TaxAmount:                      totalTax,
+		TaxScale:                       req.TaxScale,
 		SubscriptionAmount:             totalAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Currency:                       strings.ToUpper(req.Currency),
@@ -119,7 +120,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		dao.Invoice.Columns().SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		dao.Invoice.Columns().Currency:                       strings.ToUpper(req.Currency),
 		dao.Invoice.Columns().Currency:                       req.Currency,
-		dao.Invoice.Columns().TaxPercentage:                  req.TaxScale,
+		dao.Invoice.Columns().TaxScale:                       req.TaxScale,
 		dao.Invoice.Columns().ChannelId:                      req.ChannelId,
 		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(req.Lines),
 		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
@@ -132,7 +133,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	//	return nil, gerror.Newf("EditInvoice update err:%s", update)
 	//}
 	one.Currency = req.Currency
-	one.TaxPercentage = req.TaxScale
+	one.TaxScale = req.TaxScale
 	one.ChannelId = req.ChannelId
 	one.Lines = utility.MarshalToJsonString(req.Lines)
 	return &invoice.NewInvoiceEditRes{Invoice: one}, nil

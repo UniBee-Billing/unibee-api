@@ -99,7 +99,7 @@ func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
 		ChannelStatus:                  invoice.ChannelStatus,
 		ChannelInvoiceId:               invoice.ChannelInvoiceId,
 		ChannelInvoicePdf:              invoice.ChannelInvoicePdf,
-		TaxPercentage:                  invoice.TaxPercentage,
+		TaxScale:                       invoice.TaxScale,
 		SendNote:                       invoice.SendNote,
 		SendTerms:                      invoice.SendTerms,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,

@@ -46,7 +46,7 @@ type InvoiceColumns struct {
 	ChannelPaymentId               string // 关联渠道 PaymentId
 	ChannelUserId                  string // 渠道用户 Id
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
-	TaxPercentage                  string // Tax税率，万分位，1000 表示 10%
+	TaxScale                       string // Tax税率，万分位，1000 表示 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
@@ -88,7 +88,7 @@ var invoiceColumns = InvoiceColumns{
 	ChannelPaymentId:               "channel_payment_id",
 	ChannelUserId:                  "channel_user_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
-	TaxPercentage:                  "tax_percentage",
+	TaxScale:                       "tax_scale",
 	SendNote:                       "send_note",
 	SendTerms:                      "send_terms",
 	TotalAmountExcludingTax:        "total_amount_excluding_tax",

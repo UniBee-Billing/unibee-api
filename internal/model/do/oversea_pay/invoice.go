@@ -38,7 +38,7 @@ type Invoice struct {
 	ChannelPaymentId               interface{} // 关联渠道 PaymentId
 	ChannelUserId                  interface{} // 渠道用户 Id
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
-	TaxPercentage                  interface{} // Tax税率，万分位，1000 表示 10%
+	TaxScale                       interface{} // Tax税率，万分位，1000 表示 10%
 	SendNote                       interface{} // send_note
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} // 金额(不含税）,单位：分
