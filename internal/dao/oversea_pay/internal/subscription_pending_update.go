@@ -26,8 +26,9 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdateSubscriptionId string // 升级单ID（内部编号）
 	ChannelUpdateId      string // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
 	GmtCreate            string // 创建时间
-	Amount               string // 金额,单位：分
+	Amount               string // 本周期金额,单位：分
 	Status               string // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	ProrationAmount      string // 下周期金额,单位：分
 	UpdateAmount         string // 升级到金额,单位：分
 	Currency             string // 货币
 	UpdateCurrency       string // 升级到货币
@@ -62,6 +63,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	GmtCreate:            "gmt_create",
 	Amount:               "amount",
 	Status:               "status",
+	ProrationAmount:      "proration_amount",
 	UpdateAmount:         "update_amount",
 	Currency:             "currency",
 	UpdateCurrency:       "update_currency",

@@ -18,8 +18,9 @@ type SubscriptionPendingUpdate struct {
 	UpdateSubscriptionId interface{} // 升级单ID（内部编号）
 	ChannelUpdateId      interface{} // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
 	GmtCreate            *gtime.Time // 创建时间
-	Amount               interface{} // 金额,单位：分
+	Amount               interface{} // 本周期金额,单位：分
 	Status               interface{} // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	ProrationAmount      interface{} // 下周期金额,单位：分
 	UpdateAmount         interface{} // 升级到金额,单位：分
 	Currency             interface{} // 货币
 	UpdateCurrency       interface{} // 升级到货币
