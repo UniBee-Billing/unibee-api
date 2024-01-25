@@ -20,9 +20,11 @@ import (
 )
 
 const (
-	TemplateInvoiceAutomaticPaid       = "InvoiceAutomaticPaid"
-	TemplateUserRegistrationCodeVerify = "UserRegistrationCodeVerify"
-	TemplateUserOTPLogin               = "UserOTPLogin"
+	TemplateInvoiceAutomaticPaid                            = "InvoiceAutomaticPaid"
+	TemplateUserRegistrationCodeVerify                      = "UserRegistrationCodeVerify"
+	TemplateUserOTPLogin                                    = "UserOTPLogin"
+	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
+	TemplateSubscriptionCancelledAtPeriodEndByUser          = "SubscriptionCancelledAtPeriodEndByUser"
 )
 
 const SG_KEY = "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"
@@ -89,6 +91,7 @@ type TemplateVariable struct {
 	TokenExpireMinute   string `json:"TokenExpireMinute"`
 	CodeExpireMinute    string `json:"CodeExpireMinute"`
 	Code                string `json:"Code"`
+	PeriodEnd           string `json:"PeriodEnd"`
 }
 
 func ToMap(in interface{}) (map[string]interface{}, error) {

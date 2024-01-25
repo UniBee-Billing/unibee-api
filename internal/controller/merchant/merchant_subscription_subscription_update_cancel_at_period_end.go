@@ -17,7 +17,7 @@ func (c *ControllerSubscription) SubscriptionUpdateCancelAtPeriodEnd(ctx context
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 
-	err = service.SubscriptionCancelAtPeriodEnd(ctx, req.SubscriptionId, false)
+	err = service.SubscriptionCancelAtPeriodEnd(ctx, req.SubscriptionId, false, int64(_interface.BizCtx().Get(ctx).MerchantUser.Id))
 	if err != nil {
 		return nil, err
 	}

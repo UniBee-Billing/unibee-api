@@ -16,7 +16,7 @@ func (c *ControllerSubscription) SubscriptionUpdateCancelAtPeriodEnd(ctx context
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 		//utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match") // todo mark
 	}
-	err = service.SubscriptionCancelAtPeriodEnd(ctx, req.SubscriptionId, false)
+	err = service.SubscriptionCancelAtPeriodEnd(ctx, req.SubscriptionId, false, 0)
 	if err != nil {
 		return nil, err
 	}

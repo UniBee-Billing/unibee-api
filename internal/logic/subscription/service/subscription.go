@@ -13,6 +13,7 @@ import (
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/channel"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -775,7 +776,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 }
 
 // todo mark 在版本2018-02-28之前，发送到更新订阅 API 的任何参数都会停止挂起的取消，需验证
-func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool) error {
+func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool, merchantUserId int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -803,10 +804,34 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionCancel subscription err:%s", update)
-	//}
+
+	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	// SendEmail
+	if merchantUserId > 0 {
+		//merchant Cancel
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
+			UserName:            user.UserName,
+			MerchantProductName: plan.ChannelProductName,
+			MerchantCustomEmail: merchant.Email,
+			MerchantName:        merchant.Name,
+			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+		})
+		if err != nil {
+			fmt.Printf("SendTemplateEmail err:%s", err.Error())
+		}
+	} else {
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
+			UserName:            user.UserName,
+			MerchantProductName: plan.ChannelProductName,
+			MerchantCustomEmail: merchant.Email,
+			MerchantName:        merchant.Name,
+			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+		})
+		if err != nil {
+			fmt.Printf("SendTemplateEmail err:%s", err.Error())
+		}
+	}
 	return nil
 }
 
