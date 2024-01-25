@@ -84,29 +84,33 @@ type ChannelPaymentListReq struct {
 	ChannelUserId string `json:"channelUserId"         `
 }
 
-// OutPayRo is the golang structure for table oversea_pay.
-type OutPayRo struct {
+// ChannelPayRo is the golang structure for table oversea_pay.
+type ChannelPayRo struct {
 	MerchantId                string                                 `json:"merchantId"         `
 	ChannelId                 int64                                  `json:"channelId"         `
-	ChannelPaymentId          string                                 `json:"channelPaymentId"              ` // 业务id-即渠道支付单号
-	ChannelUserId             string                                 `json:"channelUserId"         `
 	Status                    int                                    `json:"status"`
+	ChannelUserId             string                                 `json:"channelUserId"         `
 	CaptureStatus             int                                    `json:"captureStatus"`
-	Reason                    string                                 `json:"reason"              `
-	PaymentAmount             int64                                  `json:"PaymentAmount"              `
-	ReceiveAmount             int64                                  `json:"receiptFee"              `
 	Currency                  string                                 `json:"currency"              `
+	PaymentAmount             int64                                  `json:"paymentAmount"              `
+	ReceiveAmount             int64                                  `json:"receiveAmount"              `
+	BalanceAmount             int64                                  `json:"balanceAmount"              `
+	BalanceStart              int64                                  `json:"balanceStart"              `
+	BalanceEnd                int64                                  `json:"balanceEnd"              `
+	Reason                    string                                 `json:"reason"              `
+	UniqueId                  string                                 `json:"uniqueId"              `
 	PayTime                   *gtime.Time                            `json:"payTime" `
 	CreateTime                *gtime.Time                            `json:"createTime" `
 	CancelTime                *gtime.Time                            `json:"cancelTime" `
 	CancelReason              string                                 `json:"cancelReason" `
 	TotalRefundFee            int64                                  `json:"totalRefundFee"              `
+	ChannelPaymentId          string                                 `json:"channelPaymentId"              `
 	ChannelInvoiceId          string                                 `json:"channelInvoiceId"         `
 	ChannelSubscriptionId     string                                 `json:"channelSubscriptionId"         `
-	ChannelUpdateId           string                                 `json:"channelUpdateId"`
-	Subscription              *entity.Subscription                   `json:"subscription"         `
-	ChannelUser               *entity.SubscriptionUserChannel        `json:"channelUser"         `
-	ChannelInvoiceDetail      *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"              `
+	ChannelUpdateId           string                                 `json:"channelUpdateId" `
+	Subscription              *entity.Subscription                   `json:"subscription" `
+	ChannelUser               *entity.SubscriptionUserChannel        `json:"channelUser" `
+	ChannelInvoiceDetail      *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"  `
 	ChannelSubscriptionDetail *ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"              `
 }
 

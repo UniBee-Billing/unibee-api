@@ -2,7 +2,9 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"go-oversea-pay/api/user/auth"
+	auth2 "go-oversea-pay/internal/logic/auth"
 	"go-oversea-pay/utility"
 
 	// "github.com/gogf/gf/v2/errors/gcode"
@@ -39,6 +41,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
+	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", newOne.Id)), "Cache Error")
 
 	return &auth.LoginOtpVerifyRes{User: newOne, Token: token}, nil
 }

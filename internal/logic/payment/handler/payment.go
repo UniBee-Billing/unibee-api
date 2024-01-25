@@ -293,97 +293,97 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	return err
 }
 
-func HandlePaymentWebhookEvent(ctx context.Context, eventType string, details *ro.OutPayRo) error {
+func HandlePaymentWebhookEvent(ctx context.Context, eventType string, channelPayRo *ro.ChannelPayRo) error {
 	//先保存 Payment 信息
-	payment, err := CreateOrUpdatePaymentByDetail(ctx, details, details.ChannelPaymentId)
+	payment, err := CreateOrUpdatePaymentByDetail(ctx, channelPayRo)
 	if err != nil {
 		return err
 	}
 
-	if details.ChannelInvoiceDetail != nil && details.Status == consts.PAY_SUCCESS && details.ChannelSubscriptionDetail != nil {
+	if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status == consts.PAY_SUCCESS && channelPayRo.ChannelSubscriptionDetail != nil {
 		//Subscription Payment Success
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
 			Payment:                   payment,
-			ChannelInvoiceDetail:      details.ChannelInvoiceDetail,
-			ChannelSubscriptionDetail: details.ChannelSubscriptionDetail,
-			ChannelPaymentId:          details.ChannelPaymentId,
-			ChannelSubscriptionId:     details.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelInvoiceId:          details.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelUpdateId:           details.ChannelUpdateId,
-			Status:                    details.ChannelSubscriptionDetail.Status,
-			ChannelStatus:             details.ChannelInvoiceDetail.ChannelStatus,
-			Data:                      details.ChannelSubscriptionDetail.Data,
-			ChannelItemData:           details.ChannelSubscriptionDetail.ChannelItemData,
-			CancelAtPeriodEnd:         details.ChannelSubscriptionDetail.CancelAtPeriodEnd,
-			CurrentPeriodEnd:          details.ChannelSubscriptionDetail.CurrentPeriodEnd,
-			CurrentPeriodStart:        details.ChannelSubscriptionDetail.CurrentPeriodStart,
-			TrialEnd:                  details.ChannelSubscriptionDetail.TrialEnd,
+			ChannelInvoiceDetail:      channelPayRo.ChannelInvoiceDetail,
+			ChannelSubscriptionDetail: channelPayRo.ChannelSubscriptionDetail,
+			ChannelPaymentId:          channelPayRo.ChannelPaymentId,
+			ChannelSubscriptionId:     channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
+			ChannelInvoiceId:          channelPayRo.ChannelInvoiceDetail.ChannelInvoiceId,
+			ChannelUpdateId:           channelPayRo.ChannelUpdateId,
+			Status:                    channelPayRo.ChannelSubscriptionDetail.Status,
+			ChannelStatus:             channelPayRo.ChannelInvoiceDetail.ChannelStatus,
+			Data:                      channelPayRo.ChannelSubscriptionDetail.Data,
+			ChannelItemData:           channelPayRo.ChannelSubscriptionDetail.ChannelItemData,
+			CancelAtPeriodEnd:         channelPayRo.ChannelSubscriptionDetail.CancelAtPeriodEnd,
+			CurrentPeriodEnd:          channelPayRo.ChannelSubscriptionDetail.CurrentPeriodEnd,
+			CurrentPeriodStart:        channelPayRo.ChannelSubscriptionDetail.CurrentPeriodStart,
+			TrialEnd:                  channelPayRo.ChannelSubscriptionDetail.TrialEnd,
 		})
 		if err != nil {
 			return err
 		}
-	} else if details.ChannelInvoiceDetail != nil && details.Status != consts.TO_BE_PAID && details.ChannelSubscriptionDetail != nil {
+	} else if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status != consts.TO_BE_PAID && channelPayRo.ChannelSubscriptionDetail != nil {
 		//Subscription Payment Failure
 		err = handler.HandleSubscriptionPaymentFailure(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
 			Payment:                   payment,
-			ChannelInvoiceDetail:      details.ChannelInvoiceDetail,
-			ChannelSubscriptionDetail: details.ChannelSubscriptionDetail,
-			ChannelPaymentId:          details.ChannelPaymentId,
-			ChannelSubscriptionId:     details.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelInvoiceId:          details.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelUpdateId:           details.ChannelUpdateId,
+			ChannelInvoiceDetail:      channelPayRo.ChannelInvoiceDetail,
+			ChannelSubscriptionDetail: channelPayRo.ChannelSubscriptionDetail,
+			ChannelPaymentId:          channelPayRo.ChannelPaymentId,
+			ChannelSubscriptionId:     channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
+			ChannelInvoiceId:          channelPayRo.ChannelInvoiceDetail.ChannelInvoiceId,
+			ChannelUpdateId:           channelPayRo.ChannelUpdateId,
 		})
 	}
 
 	return nil
 }
 
-func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, uniqueId string) (*entity.Payment, error) {
-	utility.Assert(len(details.ChannelInvoiceId) > 0, "invoice id is null")
+func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.ChannelPayRo) (*entity.Payment, error) {
+	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
 	var subscriptionId string
 	var merchantId int64
 	var invoiceId string
 	var countryCode string
-	if details.ChannelSubscriptionDetail != nil {
+	if channelPayRo.ChannelSubscriptionDetail != nil {
 		//From Sub Create Pay or Sub Update Pay
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, details.ChannelSubscriptionDetail.ChannelSubscriptionId)
+		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, channelPayRo.ChannelSubscriptionDetail.ChannelSubscriptionId)
 		if sub != nil {
 			subscriptionId = sub.SubscriptionId
 			countryCode = sub.CountryCode
 			merchantId = sub.MerchantId
 		}
 	}
-	if details.ChannelInvoiceDetail != nil {
+	if channelPayRo.ChannelInvoiceDetail != nil {
 		//From Invoice Pay
-		invoice := query.GetInvoiceByChannelInvoiceId(ctx, details.ChannelInvoiceId)
+		invoice := query.GetInvoiceByChannelInvoiceId(ctx, channelPayRo.ChannelInvoiceId)
 		if invoice != nil {
 			merchantId = invoice.MerchantId
 			invoiceId = invoice.InvoiceId
 		}
 	}
-	one := query.GetPaymentByChannelPaymentId(ctx, details.ChannelPaymentId)
+	one := query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId)
 
 	if one == nil {
 		//创建
 		one = &entity.Payment{
 			MerchantId:             merchantId,
-			UserId:                 details.ChannelUser.UserId,
+			UserId:                 channelPayRo.ChannelUser.UserId,
 			CountryCode:            countryCode,
 			PaymentId:              utility.CreatePaymentId(),
-			Currency:               details.Currency,
-			PaymentAmount:          details.PaymentAmount,
-			RefundAmount:           details.TotalRefundFee,
-			ReceiveAmount:          details.ReceiveAmount,
-			Status:                 details.Status,
-			AuthorizeStatus:        details.CaptureStatus,
-			ChannelId:              details.ChannelId,
-			ChannelPaymentIntentId: details.ChannelPaymentId,
-			ChannelPaymentId:       details.ChannelPaymentId,
-			CreateTime:             details.CreateTime,
-			CancelTime:             details.CancelTime,
-			PaidTime:               details.PayTime,
-			PaymentData:            details.CancelReason,
-			UniqueId:               uniqueId,
+			Currency:               channelPayRo.Currency,
+			PaymentAmount:          channelPayRo.PaymentAmount,
+			RefundAmount:           channelPayRo.TotalRefundFee,
+			ReceiveAmount:          channelPayRo.ReceiveAmount,
+			Status:                 channelPayRo.Status,
+			AuthorizeStatus:        channelPayRo.CaptureStatus,
+			ChannelId:              channelPayRo.ChannelId,
+			ChannelPaymentIntentId: channelPayRo.ChannelPaymentId,
+			ChannelPaymentId:       channelPayRo.ChannelPaymentId,
+			CreateTime:             channelPayRo.CreateTime,
+			CancelTime:             channelPayRo.CancelTime,
+			PaidTime:               channelPayRo.PayTime,
+			PaymentData:            channelPayRo.CancelReason,
+			UniqueId:               channelPayRo.UniqueId,
 			SubscriptionId:         subscriptionId,
 			InvoiceId:              invoiceId,
 		}
@@ -398,20 +398,20 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, details *ro.OutPayRo, un
 		//更新
 		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
 			dao.Payment.Columns().MerchantId:             merchantId,
-			dao.Payment.Columns().UserId:                 details.ChannelUser.UserId,
+			dao.Payment.Columns().UserId:                 channelPayRo.ChannelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,
-			dao.Payment.Columns().Currency:               details.Currency,
-			dao.Payment.Columns().PaymentAmount:          details.PaymentAmount,
-			dao.Payment.Columns().RefundAmount:           details.TotalRefundFee,
-			dao.Payment.Columns().ReceiveAmount:          details.ReceiveAmount,
-			dao.Payment.Columns().Status:                 details.Status,
-			dao.Payment.Columns().AuthorizeStatus:        details.CaptureStatus,
-			dao.Payment.Columns().ChannelId:              details.ChannelId,
-			dao.Payment.Columns().ChannelPaymentIntentId: details.ChannelPaymentId,
-			dao.Payment.Columns().CreateTime:             details.CreateTime,
-			dao.Payment.Columns().CancelTime:             details.CancelTime,
-			dao.Payment.Columns().PaidTime:               details.PayTime,
-			dao.Payment.Columns().PaymentData:            details.CancelReason,
+			dao.Payment.Columns().Currency:               channelPayRo.Currency,
+			dao.Payment.Columns().PaymentAmount:          channelPayRo.PaymentAmount,
+			dao.Payment.Columns().RefundAmount:           channelPayRo.TotalRefundFee,
+			dao.Payment.Columns().ReceiveAmount:          channelPayRo.ReceiveAmount,
+			dao.Payment.Columns().Status:                 channelPayRo.Status,
+			dao.Payment.Columns().AuthorizeStatus:        channelPayRo.CaptureStatus,
+			dao.Payment.Columns().ChannelId:              channelPayRo.ChannelId,
+			dao.Payment.Columns().ChannelPaymentIntentId: channelPayRo.ChannelPaymentId,
+			dao.Payment.Columns().CreateTime:             channelPayRo.CreateTime,
+			dao.Payment.Columns().CancelTime:             channelPayRo.CancelTime,
+			dao.Payment.Columns().PaidTime:               channelPayRo.PayTime,
+			dao.Payment.Columns().PaymentData:            channelPayRo.CancelReason,
 			dao.Payment.Columns().SubscriptionId:         subscriptionId,
 			dao.Payment.Columns().InvoiceId:              invoiceId,
 			dao.Invoice.Columns().GmtModify:              gtime.Now(),

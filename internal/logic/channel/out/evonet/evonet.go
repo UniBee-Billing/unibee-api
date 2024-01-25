@@ -39,7 +39,7 @@ func (e Evonet) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *e
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -49,7 +49,7 @@ func (e Evonet) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -656,7 +656,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.OutPayRo, err error) {
+func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
 	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
@@ -684,7 +684,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.P
 	merchantPspReference := payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.Channel)
 	utility.Assert(strings.Compare(merchantPspReference, pay.PaymentId) == 0, "merchantPspReference not match")
-	res = &ro.OutPayRo{
+	res = &ro.ChannelPayRo{
 		PaymentAmount: pay.PaymentAmount,
 		Status:        consts.TO_BE_PAID,
 	}

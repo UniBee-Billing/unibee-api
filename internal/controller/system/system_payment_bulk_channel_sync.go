@@ -50,8 +50,9 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
 				utility.Assert(payChannel != nil, "invalid planChannel")
 				details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.ChannelPaymentId)
+				details.UniqueId = details.ChannelPaymentId
 				if err == nil {
-					pay, err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
+					pay, err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details)
 					if err != nil {
 						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail ChannelPaymentId:%s error%s\n", details.ChannelPaymentId, err.Error())
 						return

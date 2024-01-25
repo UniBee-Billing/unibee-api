@@ -14,7 +14,7 @@ func (i Invalid) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.OutPayRo, err error) {
+func (i Invalid) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -24,7 +24,7 @@ func (i Invalid) DoRemoteChannelRefundList(ctx context.Context, payChannel *enti
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.OutPayRo, err error) {
+func (i Invalid) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.OverseaPayChannel, channelPaymentId string) (res *ro.ChannelPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -149,7 +149,7 @@ func (i Invalid) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment)
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.OutPayRo, err error) {
+func (i Invalid) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPayRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
