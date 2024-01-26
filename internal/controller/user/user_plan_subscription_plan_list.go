@@ -39,11 +39,12 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		Page:       0,
 		Count:      1,
 	})
-	if len(subs) > 0 {
+	if len(subs) > 0 && subs[0].Plan.PublishStatus != 2 {
 		userPlan, _ := service.SubscriptionPlanDetail(ctx, subs[0].Subscription.PlanId)
 		if userPlan != nil {
 			publishPlans = append(publishPlans, userPlan.Plan)
 		}
+
 	}
 	return &plan.SubscriptionPlanListRes{Plans: publishPlans}, nil
 }
