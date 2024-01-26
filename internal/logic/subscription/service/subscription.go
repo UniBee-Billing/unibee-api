@@ -126,7 +126,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, "user not found")
-	// User Only One Usb Check
 
 	var err error
 	var onlyOneSub *entity.Subscription
@@ -138,6 +137,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	if err != nil {
 		return nil, err
 	}
+	// User Only One Usb Check, todo mark sub with create status may in pendingactive
 	utility.Assert(onlyOneSub == nil, "another active subscription find, only one subscription can create")
 
 	//vat
