@@ -21,7 +21,7 @@ import (
 //
 //func HandleInvoiceWebhookEvent(ctx context.Context, eventType string, details *ro.ChannelDetailInvoiceInternalResp) error {
 //	//return CreateOrUpdateInvoiceByChannelDetail(ctx, details, details.ChannelInvoiceId)
-//	// 不再由 Invoice Hook 触发产生发票，改由 Payment Hook 自行生成发票
+//	// Not Generate Invoice Hook From Invoice Hook，Do it UniBee Self
 //	return nil
 //}
 
@@ -34,7 +34,7 @@ import (
 //	var invoiceId string
 //	var change = false
 //	if one == nil {
-//		//创建
+//		//Create
 //		one = &entity.Invoice{
 //			MerchantId:                     sub.MerchantId,
 //			SubscriptionId:                 sub.SubscriptionId,
@@ -75,7 +75,7 @@ import (
 //		invoiceId = one.InvoiceId
 //		change = true
 //	} else {
-//		//更新
+//		//Update
 //		if one.Status != int(details.Status) {
 //			change = true
 //		}
@@ -116,14 +116,14 @@ import (
 //	}
 //
 //	if change {
-//		//脱离草稿状态每次变化都生成并发送邮件
+//		// Send Email Any State Change After Stage
 //		//  1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
-//		// 发送 Invoice  Email 节点
-//		// 1、Invoice 状态从 Pending->Processing 等待用户支付
-//		// 2、Invoice 状态从 Pending->Paid (自动支付）
-//		// 3、Invoice 状态从 Processing->Paid（手动支付）
-//		// 4、Invoice 状态从 Processing->Cancelled（手动取消）
-//		// 5、Invoice 状态从 Processing->Failed (支付超时->支付失败）
+//		// Send Invoice Email
+//		// 1、Invoice Change Pending->Processing WaitingForPay
+//		// 2、Invoice Change Pending->Paid (Automatic）
+//		// 3、Invoice Change Processing->Paid（Manual）
+//		// 4、Invoice Change Processing->Cancelled（Cancel Manual）
+//		// 5、Invoice Change Processing->Failed (Payment Failure）
 //		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId, true)
 //	}
 //

@@ -126,6 +126,19 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, "user not found")
+	// User Only One Usb Check
+
+	var err error
+	var onlyOneSub *entity.Subscription
+	err = dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().MerchantId, merchantInfo.Id).
+		Where(dao.Subscription.Columns().UserId, req.UserId).
+		Where(dao.Subscription.Columns().Status, consts.SubStatusActive).
+		OmitEmpty().Scan(&onlyOneSub)
+	if err != nil {
+		return nil, err
+	}
+	utility.Assert(onlyOneSub == nil, "another active subscription find")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
@@ -134,7 +147,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var vatCountryName = ""
 	var vatCountryRate *ro.VatCountryRate
 	var vatNumberValidate *ro.ValidResult
-	var err error
+
 	if len(req.VatNumber) > 0 {
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
 		if err != nil {
