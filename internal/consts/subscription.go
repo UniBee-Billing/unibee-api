@@ -53,9 +53,11 @@ const (
 type SubscriptionPlanStatusEnum int
 
 const (
-	PlanStatusEditable = 1
-	PlanStatusActive   = 2
-	PlanStatusExpired  = 3
+	PlanStatusEditable           = 1
+	PlanStatusActive             = 2
+	PlanStatusExpired            = 3
+	PlanPublishStatusPublished   = 2
+	PlanPublishStatusUnPublished = 1
 )
 
 func (status SubscriptionPlanStatusEnum) Description() string {

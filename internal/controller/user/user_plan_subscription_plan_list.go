@@ -22,14 +22,13 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		MerchantId:    req.MerchantId,
 		Type:          req.Type,
 		Status:        consts.PlanStatusActive,
-		PublishStatus: 2,
+		PublishStatus: consts.PlanPublishStatusPublished,
 		Currency:      req.Currency,
-		SortField:     req.SortField,
-		SortType:      req.SortType,
-		Page:          0,
-		Count:         10,
+		//SortField:     req.SortField,
+		//SortType:      req.SortType,
+		Page:  0,
+		Count: 10,
 	})
-	// hard code
 	subs := service2.SubscriptionList(ctx, &service2.SubscriptionListInternalReq{
 		MerchantId: req.MerchantId,
 		UserId:     int64(_interface.BizCtx().Get(ctx).User.Id),
@@ -39,7 +38,7 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		Page:       0,
 		Count:      1,
 	})
-	if len(subs) > 0 && subs[0].Plan.PublishStatus != 2 {
+	if len(subs) > 0 && subs[0].Plan.PublishStatus != consts.PlanPublishStatusPublished {
 		userPlan, _ := service.SubscriptionPlanDetail(ctx, subs[0].Subscription.PlanId)
 		if userPlan != nil {
 			publishPlans = append(publishPlans, userPlan.Plan)

@@ -23,7 +23,7 @@ func SubscriptionPlanPublish(ctx context.Context, planId int64) (err error) {
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
 	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PublishStatus: 2,
+		dao.SubscriptionPlan.Columns().PublishStatus: consts.PlanPublishStatusPublished,
 		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
 	if err != nil {
@@ -37,7 +37,7 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId int64) (err error) {
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
 	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PublishStatus: 1,
+		dao.SubscriptionPlan.Columns().PublishStatus: consts.PlanPublishStatusUnPublished,
 		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
 	if err != nil {
