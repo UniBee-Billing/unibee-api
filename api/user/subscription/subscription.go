@@ -60,6 +60,7 @@ type SubscriptionCreatePreviewRes struct {
 	Email             string                             `json:"email" `
 	VatCountryCode    string                             `json:"vatCountryCode"              `
 	VatCountryName    string                             `json:"vatCountryName"              `
+	TaxScale          int64                              `json:"taxScale"              `
 	VatNumber         string                             `json:"vatNumber"              `
 	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
 }

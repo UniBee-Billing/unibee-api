@@ -55,7 +55,7 @@ type SubscriptionColumns struct {
 	CancelReason           string //
 	CountryCode            string //
 	VatNumber              string //
-	TaxPercentage          string // Tax税率，万分位，1000 表示 10%
+	TaxScale               string // Tax税率，万分位，1000 表示 10%
 	VatVerifyData          string //
 	Data                   string // 渠道额外参数，JSON格式
 	ResponseData           string // 渠道返回参数，JSON格式
@@ -99,7 +99,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CancelReason:           "cancel_reason",
 	CountryCode:            "country_code",
 	VatNumber:              "vat_number",
-	TaxPercentage:          "tax_percentage",
+	TaxScale:               "tax_scale",
 	VatVerifyData:          "vat_verify_data",
 	Data:                   "data",
 	ResponseData:           "response_data",

@@ -562,8 +562,8 @@ func (p Paypal) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *
 			PaymentFailureThreshold: 0,
 		},
 		Taxes: &paypal.Taxes{
-			Percentage: strconv.Itoa(plan.TaxPercentage),
-			Inclusive:  taxInclusive, //传递 false 表示由 paypal 帮助计算税率并加到价格上，true 反之
+			Percentage: strconv.Itoa(plan.TaxScale), // todo mark
+			Inclusive:  taxInclusive,                //传递 false 表示由 paypal 帮助计算税率并加到价格上，true 反之
 		},
 		QuantitySupported: false,
 	}

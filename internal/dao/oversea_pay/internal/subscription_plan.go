@@ -36,7 +36,7 @@ type SubscriptionPlanColumns struct {
 	HomeUrl                   string // home_url
 	ChannelProductName        string // 支付渠道product_name
 	ChannelProductDescription string // 支付渠道product_description
-	TaxPercentage             string // 税费比例： 1 =1%
+	TaxScale                  string // 税费比例： 1 =1%
 	TaxInclusive              string // 税费是否包含，1-包含，0-不包含
 	Type                      string // 类型，1-main plan，2-addon plan
 	Status                    string // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
@@ -62,7 +62,7 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	HomeUrl:                   "home_url",
 	ChannelProductName:        "channel_product_name",
 	ChannelProductDescription: "channel_product_description",
-	TaxPercentage:             "tax_percentage",
+	TaxScale:                  "tax_scale",
 	TaxInclusive:              "tax_inclusive",
 	Type:                      "type",
 	Status:                    "status",

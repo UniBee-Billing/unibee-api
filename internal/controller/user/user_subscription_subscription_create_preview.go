@@ -25,6 +25,7 @@ func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, 
 		VatNumberValidate: prepare.VatNumberValidate,
 		VatCountryCode:    prepare.VatCountryCode,
 		VatCountryName:    prepare.VatCountryName,
+		TaxScale:          prepare.TaxScale,
 		Invoice: &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    prepare.Invoice.TotalAmount,
 			TotalAmountExcludingTax:        prepare.Invoice.TotalAmountExcludingTax,

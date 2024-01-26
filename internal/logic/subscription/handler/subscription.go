@@ -184,7 +184,7 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 		PlanId:                           sub.PlanId,
 		Quantity:                         sub.Quantity,
 		AddonJsonData:                    sub.AddonData,
-		TaxScale:                         sub.TaxPercentage,
+		TaxScale:                         sub.TaxScale,
 		UserId:                           sub.UserId,
 		MerchantId:                       sub.MerchantId,
 		SubscriptionId:                   sub.SubscriptionId,

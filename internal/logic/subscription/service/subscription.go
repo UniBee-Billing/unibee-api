@@ -23,25 +23,25 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan                  *entity.SubscriptionPlan           `json:"planId"`
-	Quantity              int64                              `json:"quantity"`
-	PlanChannel           *entity.SubscriptionPlanChannel    `json:"planChannel"`
-	PayChannel            *entity.OverseaPayChannel          `json:"payChannel"`
-	MerchantInfo          *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams           []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons                []*ro.SubscriptionPlanAddonRo      `json:"addons"`
-	TotalAmount           int64                              `json:"totalAmount"                `
-	Currency              string                             `json:"currency"              `
-	VatCountryCode        string                             `json:"vatCountryCode"              `
-	VatCountryName        string                             `json:"vatCountryName"              `
-	VatNumber             string                             `json:"vatNumber"              `
-	VatNumberValidate     *ro.ValidResult                    `json:"vatNumberValidate"              `
-	StandardTaxPercentage int64                              `json:"standardTaxPercentage"              `
-	VatVerifyData         string                             `json:"vatVerifyData"              `
-	Invoice               *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	UserId                int64                              `json:"userId" `
-	Email                 string                             `json:"email" `
-	VatCountryRate        *ro.VatCountryRate                 `json:"vatCountryRate" `
+	Plan              *entity.SubscriptionPlan           `json:"planId"`
+	Quantity          int64                              `json:"quantity"`
+	PlanChannel       *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PayChannel        *entity.OverseaPayChannel          `json:"payChannel"`
+	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	TotalAmount       int64                              `json:"totalAmount"                `
+	Currency          string                             `json:"currency"              `
+	VatCountryCode    string                             `json:"vatCountryCode"              `
+	VatCountryName    string                             `json:"vatCountryName"              `
+	VatNumber         string                             `json:"vatNumber"              `
+	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
+	TaxScale          int64                              `json:"taxScale"              `
+	VatVerifyData     string                             `json:"vatVerifyData"              `
+	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	UserId            int64                              `json:"userId" `
+	Email             string                             `json:"email" `
+	VatCountryRate    *ro.VatCountryRate                 `json:"vatCountryRate" `
 }
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
@@ -228,25 +228,25 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	return &SubscriptionCreatePrepareInternalRes{
-		Plan:                  plan,
-		Quantity:              req.Quantity,
-		PlanChannel:           planChannel,
-		PayChannel:            payChannel,
-		MerchantInfo:          merchantInfo,
-		AddonParams:           req.AddonParams,
-		Addons:                addons,
-		TotalAmount:           totalAmount,
-		Currency:              currency,
-		VatCountryCode:        vatCountryCode,
-		VatCountryName:        vatCountryName,
-		VatNumber:             req.VatNumber,
-		VatNumberValidate:     vatNumberValidate,
-		VatVerifyData:         utility.FormatToJsonString(vatNumberValidate),
-		StandardTaxPercentage: standardTaxScale,
-		UserId:                req.UserId,
-		Email:                 email,
-		Invoice:               invoice,
-		VatCountryRate:        vatCountryRate,
+		Plan:              plan,
+		Quantity:          req.Quantity,
+		PlanChannel:       planChannel,
+		PayChannel:        payChannel,
+		MerchantInfo:      merchantInfo,
+		AddonParams:       req.AddonParams,
+		Addons:            addons,
+		TotalAmount:       totalAmount,
+		Currency:          currency,
+		VatCountryCode:    vatCountryCode,
+		VatCountryName:    vatCountryName,
+		VatNumber:         req.VatNumber,
+		VatNumberValidate: vatNumberValidate,
+		VatVerifyData:     utility.FormatToJsonString(vatNumberValidate),
+		TaxScale:          standardTaxScale,
+		UserId:            req.UserId,
+		Email:             email,
+		Invoice:           invoice,
+		VatCountryRate:    vatCountryRate,
 	}, nil
 }
 
@@ -294,7 +294,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		VatNumber:      prepare.VatNumber,
 		VatVerifyData:  prepare.VatVerifyData,
 		CountryCode:    prepare.VatCountryCode,
-		TaxPercentage:  prepare.StandardTaxPercentage,
+		TaxScale:       prepare.TaxScale,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -565,9 +565,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		var nextPeriodInvoiceItems []*ro.ChannelDetailInvoiceItem
 		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
 			AmountExcludingTax:     req.Quantity * plan.Amount,
-			Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+			Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
 			UnitAmountExcludingTax: plan.Amount,
 			Description:            plan.PlanName,
 			Quantity:               req.Quantity,
@@ -575,15 +575,15 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		for _, addon := range addons {
 			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 				Currency:               currency,
-				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
-				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage)),
+				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
+				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
 				AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 				UnitAmountExcludingTax: addon.AddonPlan.Amount,
 				Description:            addon.AddonPlan.PlanName,
 				Quantity:               addon.Quantity,
 			})
 		}
-		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxPercentage))
+		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale))
 		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
 			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
