@@ -44,7 +44,6 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		if userPlan != nil {
 			publishPlans = append(publishPlans, userPlan.Plan)
 		}
-
 	}
 	return &plan.SubscriptionPlanListRes{Plans: publishPlans}, nil
 }
