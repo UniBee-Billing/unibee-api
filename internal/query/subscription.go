@@ -17,14 +17,14 @@ import (
 //	return
 //}
 
-func GetLatestSubscriptionByUserId(ctx context.Context, userId int64, merchantId int64) (one *entity.Subscription) {
+func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId int64) (one *entity.Subscription) {
 	err := dao.Subscription.Ctx(ctx).
 		Where(entity.Subscription{UserId: userId}).
 		Where(entity.Subscription{MerchantId: merchantId}).
 		Where(entity.Subscription{IsDeleted: 0}).
-		Where(entity.Subscription{Status: consts.SubStatusActive}).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusCreate, consts.SubStatusActive}).
 		OrderDesc(dao.Subscription.Columns().GmtModify).
-		OmitEmpty().Scan(&one) // todo 限制每个用户同时只有一个有效订阅
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

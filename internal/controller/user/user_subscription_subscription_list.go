@@ -4,7 +4,9 @@ import (
 	"context"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/subscription/service"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 
 	"go-oversea-pay/api/user/subscription"
@@ -19,13 +21,31 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
 	}
 	// return one latest user subscription list as unique subscription
-	return &subscription.SubscriptionListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
-		MerchantId: req.MerchantId,
-		UserId:     req.UserId,
-		Status:     consts.SubStatusActive,
-		SortField:  "gmt_create",
-		SortType:   "desc",
-		Page:       0,
-		Count:      1,
-	})}, nil
+	var subDetails []*ro.SubscriptionDetailRo
+	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), req.MerchantId)
+	if sub != nil {
+		subDetailRes, err := service.SubscriptionDetail(ctx, sub.SubscriptionId)
+		if err == nil {
+			var addonParams []*ro.SubscriptionPlanAddonParamRo
+			_ = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
+			subDetails = append(subDetails, &ro.SubscriptionDetailRo{
+				User:         subDetailRes.User,
+				Subscription: subDetailRes.Subscription,
+				Plan:         subDetailRes.Plan,
+				Channel:      subDetailRes.Channel,
+				AddonParams:  addonParams,
+				Addons:       subDetailRes.Addons,
+			})
+		}
+	}
+	return &subscription.SubscriptionListRes{Subscriptions: subDetails}, nil
+	//return &subscription.SubscriptionListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
+	//	MerchantId: req.MerchantId,
+	//	UserId:     req.UserId,
+	//	Status:     consts.SubStatusActive,
+	//	SortField:  "gmt_create",
+	//	SortType:   "desc",
+	//	Page:       0,
+	//	Count:      1,
+	//})}, nil
 }

@@ -128,17 +128,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(user != nil, "user not found")
 
 	var err error
-	var onlyOneSub *entity.Subscription
-	err = dao.Subscription.Ctx(ctx).
-		Where(dao.Subscription.Columns().MerchantId, merchantInfo.Id).
-		Where(dao.Subscription.Columns().UserId, req.UserId).
-		Where(dao.Subscription.Columns().Status, consts.SubStatusActive).
-		OmitEmpty().Scan(&onlyOneSub)
-	if err != nil {
-		return nil, err
-	}
-	// User Only One Usb Check, todo mark sub with create status may in pendingactive
-	utility.Assert(onlyOneSub == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")

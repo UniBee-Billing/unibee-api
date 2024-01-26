@@ -6,7 +6,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/plan/service"
-	service2 "go-oversea-pay/internal/logic/subscription/service"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 )
 
@@ -29,19 +29,14 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		Page:  0,
 		Count: 10,
 	})
-	subs := service2.SubscriptionList(ctx, &service2.SubscriptionListInternalReq{
-		MerchantId: req.MerchantId,
-		UserId:     int64(_interface.BizCtx().Get(ctx).User.Id),
-		Status:     consts.SubStatusActive,
-		SortField:  "gmt_create",
-		SortType:   "desc",
-		Page:       0,
-		Count:      1,
-	})
-	if len(subs) > 0 && subs[0].Plan.PublishStatus != consts.PlanPublishStatusPublished {
-		userPlan, _ := service.SubscriptionPlanDetail(ctx, subs[0].Subscription.PlanId)
-		if userPlan != nil {
-			publishPlans = append(publishPlans, userPlan.Plan)
+	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), req.MerchantId)
+	if sub != nil {
+		subPlan := query.GetPlanById(ctx, sub.PlanId)
+		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {
+			userPlan, _ := service.SubscriptionPlanDetail(ctx, int64(subPlan.Id))
+			if userPlan != nil {
+				publishPlans = append(publishPlans, userPlan.Plan)
+			}
 		}
 	}
 	return &plan.SubscriptionPlanListRes{Plans: publishPlans}, nil

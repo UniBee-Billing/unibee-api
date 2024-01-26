@@ -22,7 +22,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 	if user != nil {
 		user.Password = ""
 	}
-	one := query.GetLatestSubscriptionByUserId(ctx, req.UserId, req.MerchantId)
+	one := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, req.UserId, req.MerchantId)
 	if one != nil {
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err == nil {
