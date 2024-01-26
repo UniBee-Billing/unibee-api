@@ -30,14 +30,14 @@ func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 	return cents
 }
 
-func ConvertTaxPercentageToPercentageString(taxPercentage int64) string {
+func ConvertTaxScaleToPercentageString(taxPercentage int64) string {
 	return fmt.Sprintf("%f", float64(taxPercentage)/100)
 }
 
-func ConvertTaxPercentageToPercentageFloat(taxPercentage int64) float64 {
+func ConvertTaxScaleToPercentageFloat(taxPercentage int64) float64 {
 	return float64(taxPercentage) / 100
 }
 
-func ConvertTaxPercentageToInternalFloat(taxPercentage int64) float64 {
+func ConvertTaxScaleToInternalFloat(taxPercentage int64) float64 {
 	return float64(taxPercentage) / 10000
 }

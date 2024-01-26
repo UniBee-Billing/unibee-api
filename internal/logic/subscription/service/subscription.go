@@ -196,9 +196,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 		Currency:               currency,
-		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
+		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
-		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
+		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
 		Quantity:               req.Quantity,
@@ -206,15 +206,15 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
-			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale)),
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
 			Quantity:               addon.Quantity,
 		})
 	}
-	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(standardTaxScale))
+	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(standardTaxScale))
 	var totalAmount = TotalAmountExcludingTax + taxAmount
 
 	invoice := &ro.ChannelDetailInvoiceRo{
@@ -565,9 +565,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		var nextPeriodInvoiceItems []*ro.ChannelDetailInvoiceItem
 		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               currency,
-			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
+			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
 			AmountExcludingTax:     req.Quantity * plan.Amount,
-			Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
+			Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
 			UnitAmountExcludingTax: plan.Amount,
 			Description:            plan.PlanName,
 			Quantity:               req.Quantity,
@@ -575,15 +575,15 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		for _, addon := range addons {
 			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
 				Currency:               currency,
-				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
-				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale)),
+				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
+				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
 				AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 				UnitAmountExcludingTax: addon.AddonPlan.Amount,
 				Description:            addon.AddonPlan.PlanName,
 				Quantity:               addon.Quantity,
 			})
 		}
-		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(sub.TaxScale))
+		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale))
 		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
 			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
 			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,

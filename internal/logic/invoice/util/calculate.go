@@ -26,9 +26,9 @@ func CalculateInternalInvoiceRo(ctx context.Context, req *CalculateInvoiceReq) *
 	var invoiceItems []*ro.ChannelDetailInvoiceItem
 	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 		Currency:               req.Currency,
-		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxPercentageToInternalFloat(req.TaxScale)),
+		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
-		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale)),
+		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
 		Quantity:               req.Quantity,
@@ -36,15 +36,15 @@ func CalculateInternalInvoiceRo(ctx context.Context, req *CalculateInvoiceReq) *
 	for _, addon := range addons {
 		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
 			Currency:               req.Currency,
-			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxPercentageToInternalFloat(req.TaxScale)),
-			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale)),
+			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
 			Quantity:               addon.Quantity,
 		})
 	}
-	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxScale))
+	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
 	return &ro.ChannelDetailInvoiceRo{
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,

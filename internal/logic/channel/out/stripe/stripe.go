@@ -430,7 +430,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			params := &stripe.TaxRateParams{
 				DisplayName: stripe.String("VAT"),
 				Description: stripe.String(subscriptionRo.VatCountryRate.CountryName),
-				Percentage:  stripe.Float64(utility.ConvertTaxPercentageToPercentageFloat(subscriptionRo.VatCountryRate.StandardTaxPercentage)),
+				Percentage:  stripe.Float64(utility.ConvertTaxScaleToPercentageFloat(subscriptionRo.VatCountryRate.StandardTaxPercentage)),
 				Country:     stripe.String(subscriptionRo.VatCountryRate.CountryCode),
 				Active:      stripe.Bool(true),
 				//Jurisdiction: stripe.String("DE"),

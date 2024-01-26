@@ -116,7 +116,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 			UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 			Quantity:    strconv.FormatInt(line.Quantity, 10),
 			Tax: &generator2.Tax{
-				Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxScale),
+				Percent: utility.ConvertTaxScaleToPercentageString(unibInvoice.TaxScale),
 			},
 			Discount: &generator2.Discount{
 				Percent: "0",
@@ -126,7 +126,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	}
 
 	doc.SetDefaultTax(&generator2.Tax{
-		Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxScale),
+		Percent: utility.ConvertTaxScaleToPercentageString(unibInvoice.TaxScale),
 	})
 
 	// doc.SetDiscount(&generator.Discount{
