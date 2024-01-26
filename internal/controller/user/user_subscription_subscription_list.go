@@ -22,7 +22,7 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 	return &subscription.SubscriptionListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
 		MerchantId: req.MerchantId,
 		UserId:     req.UserId,
-		Status:     req.Status,
+		Status:     consts.SubStatusActive,
 		SortField:  "gmt_create",
 		SortType:   "desc",
 		Page:       0,

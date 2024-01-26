@@ -117,10 +117,10 @@ type SubscriptionUpdateRes struct {
 }
 
 type SubscriptionListReq struct {
-	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest One)"`
+	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest Active One)"`
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int64 `p:"userId" dc:"UserId" v:"required|length:4,30" `
-	Status     int   `p:"status" dc:"Filter Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	//Status     int   `p:"status" dc:"Filter Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	//SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	//SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	//Page       int    `p:"page"  dc:"Page, Start WIth 0" `

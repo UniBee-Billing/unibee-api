@@ -32,6 +32,7 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 	subs := service2.SubscriptionList(ctx, &service2.SubscriptionListInternalReq{
 		MerchantId: req.MerchantId,
 		UserId:     int64(_interface.BizCtx().Get(ctx).User.Id),
+		Status:     consts.SubStatusActive,
 		SortField:  "gmt_create",
 		SortType:   "desc",
 		Page:       0,
