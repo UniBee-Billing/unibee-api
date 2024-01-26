@@ -10,7 +10,7 @@ import (
 	"go-oversea-pay/api/user/subscription"
 )
 
-// SubscriptionList todo mark return only one user sub by gmt_create desc
+// SubscriptionList todo mark demo requirement, return only one user sub by gmt_create desc
 func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error) {
 	// service 层不做用户校验
 	if !consts.GetConfigInstance().IsLocal() {
