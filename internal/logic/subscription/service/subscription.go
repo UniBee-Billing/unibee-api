@@ -138,7 +138,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	if err != nil {
 		return nil, err
 	}
-	utility.Assert(onlyOneSub == nil, "another active subscription find")
+	utility.Assert(onlyOneSub == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
