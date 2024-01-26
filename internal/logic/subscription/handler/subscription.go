@@ -28,6 +28,15 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
 		firstPayTime = gtime.Now()
 	}
+	var gmtModify = subscription.GmtModify
+	if subscription.Status != int(details.Status) ||
+		subscription.CancelAtPeriodEnd != cancelAtPeriodEnd ||
+		subscription.BillingCycleAnchor != details.BillingCycleAnchor ||
+		subscription.TrialEnd != details.TrialEnd ||
+		subscription.FirstPayTime != firstPayTime {
+		gmtModify = gtime.Now()
+	}
+
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 details.Status,
 		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
@@ -41,7 +50,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		//dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),
 		//dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(details.CurrentPeriodEnd),
 		dao.Subscription.Columns().TrialEnd:     details.TrialEnd,
-		dao.Subscription.Columns().GmtModify:    gtime.Now(),
+		dao.Subscription.Columns().GmtModify:    gmtModify,
 		dao.Subscription.Columns().FirstPayTime: firstPayTime,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
 	if err != nil {
