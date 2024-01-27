@@ -300,6 +300,10 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 		return err
 	}
 
+	if len(channelPayRo.ChannelSubscriptionId) > 0 && channelPayRo.ChannelSubscriptionDetail == nil {
+		return gerror.Newf("payment hook may too fast, ChannelSubscriptionDetail is nil for ChannelSubscriptionId:%s", channelPayRo.ChannelSubscriptionId)
+	}
+
 	if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status == consts.PAY_SUCCESS && channelPayRo.ChannelSubscriptionDetail != nil {
 		//Subscription Payment Success
 		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
