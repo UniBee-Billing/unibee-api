@@ -1208,11 +1208,23 @@ func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, inv
 
 	var channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp
 	if len(invoiceDetails.ChannelSubscriptionId) > 0 {
-		oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
-		if oneSub != nil {
-			plan := query.GetPlanById(ctx, oneSub.PlanId)
-			planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
-			channelSubscriptionDetail, err = s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
+		unibeeSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+		var subNeedUpdate = false
+		if unibeeSub == nil && len(invoiceDetails.SubscriptionId) > 0 {
+			unibeeSub = query.GetSubscriptionBySubscriptionId(ctx, invoiceDetails.SubscriptionId)
+			unibeeSub.ChannelSubscriptionId = invoiceDetails.ChannelSubscriptionId
+			subNeedUpdate = true
+		}
+		if unibeeSub != nil {
+			plan := query.GetPlanById(ctx, unibeeSub.PlanId)
+			planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.ChannelId)
+			channelSubscriptionDetail, err = s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibeeSub)
+			if subNeedUpdate {
+				err = handler.HandleSubscriptionWebhookEvent(ctx, unibeeSub, eventType, channelSubscriptionDetail)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
@@ -1248,22 +1260,22 @@ func (s Stripe) processInvoiceWebhook(ctx context.Context, eventType string, inv
 }
 
 func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription, payChannel *entity.OverseaPayChannel) error {
-	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
-	if unibSub == nil {
+	unibeeSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
+	if unibeeSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
-			unibSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
-			unibSub.ChannelSubscriptionId = subscription.ID
+			unibeeSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
+			unibeeSub.ChannelSubscriptionId = subscription.ID
 		}
 	}
-	if unibSub != nil {
-		plan := query.GetPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
-		details, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+	if unibeeSub != nil {
+		plan := query.GetPlanById(ctx, unibeeSub.PlanId)
+		planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.ChannelId)
+		details, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibeeSub)
 		if err != nil {
 			return err
 		}
 
-		err = handler.HandleSubscriptionWebhookEvent(ctx, unibSub, eventType, details)
+		err = handler.HandleSubscriptionWebhookEvent(ctx, unibeeSub, eventType, details)
 		if err != nil {
 			return err
 		}
@@ -1683,6 +1695,10 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	if detail.Subscription != nil {
 		channelSubscriptionId = detail.Subscription.ID
 	}
+	var subscriptionId string
+	if detail.SubscriptionDetails != nil {
+		subscriptionId = detail.Subscription.Metadata["SubId"]
+	}
 	var channelUserId string
 	if detail.Customer != nil {
 		channelUserId = detail.Customer.ID
@@ -1716,6 +1732,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		ChannelInvoiceId:               detail.ID,
 		ChannelUserId:                  channelUserId,
 		ChannelSubscriptionId:          channelSubscriptionId,
+		SubscriptionId:                 subscriptionId,
 		ChannelPaymentId:               channelPaymentId,
 		PaymentTime:                    paymentTime,
 		Reason:                         string(detail.BillingReason),
