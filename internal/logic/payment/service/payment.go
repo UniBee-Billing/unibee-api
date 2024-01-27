@@ -12,6 +12,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/redismq"
@@ -96,7 +97,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		}
 	})
 
-	// create new invoice
+	// create new invoice, ignore errors
+	_ = handler.CreateOrUpdateInvoiceForPayment(ctx, createPayContext.Invoice, createPayContext.Pay, nil)
 
 	if err != nil {
 		return nil, err

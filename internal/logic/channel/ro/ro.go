@@ -307,6 +307,8 @@ type InvoiceDetailSimplify struct {
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"`
 	SubscriptionAmountExcludingTax int64                  `json:"subscriptionAmountExcludingTax"`
 	Lines                          []*InvoiceItemDetailRo `json:"lines"`
+	PeriodEnd                      int64                  `json:"periodEnd"`
+	PeriodStart                    int64                  `json:"periodStart"`
 }
 
 type InvoiceDetailRo struct {
