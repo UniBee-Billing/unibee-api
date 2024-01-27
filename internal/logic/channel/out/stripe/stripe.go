@@ -1323,12 +1323,23 @@ func (s Stripe) processSubscriptionWebhook(ctx context.Context, eventType string
 func (s Stripe) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
 	endpointSecret := payChannel.WebhookSecret
 	signatureHeader := r.Header.Get("Stripe-Signature")
-	event, err := webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
-	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %s\n", payChannel.Channel, err.Error())
-		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-		return
+	var event stripe.Event
+	var err error
+	if !consts.GetConfigInstance().IsServerDev() {
+		event, err = webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %s\n", payChannel.Channel, err.Error())
+			r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+			return
+		}
+	} else {
+		if err := json.Unmarshal(r.GetBody(), &event); err != nil {
+			g.Log().Errorf(r.Context(), "Failed to parse webhook body json: %s", err.Error())
+			r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+			return
+		}
 	}
+
 	data, _ := gjson.Marshal(event)
 	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", payChannel.Channel, " hook:", string(data))
 
