@@ -259,6 +259,7 @@ type ChannelCancelInvoiceInternalReq struct {
 
 type ChannelDetailInvoiceInternalResp struct {
 	ChannelSubscriptionId          string                      `json:"channelSubscriptionId"           `
+	SubscriptionId                 string                      `json:"subscriptionId"           `
 	TotalAmount                    int64                       `json:"totalAmount"        `
 	PaymentAmount                  int64                       `json:"paymentAmount"              `
 	BalanceAmount                  int64                       `json:"balanceAmount"              `
