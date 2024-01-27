@@ -12,6 +12,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
+	handler2 "go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -295,7 +296,8 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) error {
 	//先保存 Payment 信息
-	payment, err := CreateOrUpdatePaymentByDetail(ctx, channelPayRo)
+	payment, err := CreateOrUpdatePaymentFromChannel(ctx, channelPayRo)
+	// payment not first generate from system
 	if err != nil {
 		return err
 	}
@@ -326,6 +328,8 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 		if err != nil {
 			return err
 		}
+		// todo mark 生成 InvoiceSimplify
+		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
 	} else if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status != consts.TO_BE_PAID && channelPayRo.CaptureStatus == consts.WAITING_AUTHORIZED && channelPayRo.ChannelSubscriptionDetail != nil {
 		//Subscription Payment WAITING_AUTHORIZED
 		err = handler.HandleSubscriptionPaymentWaitAuthorized(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
@@ -337,6 +341,8 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			ChannelSubscriptionId:       channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
 			ChannelSubscriptionUpdateId: channelPayRo.ChannelSubscriptionUpdateId,
 		})
+		// todo mark 生成 InvoiceSimplify
+		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
 	} else if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status != consts.PAY_FAILED && channelPayRo.ChannelSubscriptionDetail != nil {
 		//Subscription Payment Failure
 		err = handler.HandleSubscriptionPaymentFailure(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
@@ -348,12 +354,14 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			ChannelSubscriptionId:       channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
 			ChannelSubscriptionUpdateId: channelPayRo.ChannelSubscriptionUpdateId,
 		})
+		// todo mark 生成 InvoiceSimplify
+		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
 	}
 
 	return nil
 }
 
-func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
+func CreateOrUpdatePaymentFromChannel(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
 	channelUser := query.GetUserChannelByChannelUserId(ctx, channelPayRo.ChannelUserId, channelPayRo.ChannelId)
 	utility.Assert(channelUser != nil, "channelUser not found")
@@ -409,7 +417,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 		}
 		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdatePaymentByDetail record insert failure %s`, err.Error())
+			err = gerror.Newf(`CreateOrUpdatePaymentFromChannel record insert failure %s`, err.Error())
 			return nil, err
 		}
 		id, _ := result.LastInsertId()
@@ -447,7 +455,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 	if err != nil {
 		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 	}
-	return one, nil
+	return query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId), nil
 }
 
 func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment, uniqueId string) error {

@@ -9,7 +9,6 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/invoice/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 )
@@ -173,7 +172,8 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 				byUpdate = true
 			}
 		}
-		if !byUpdate {
+		if !byUpdate && req.Payment.TotalAmount == sub.Amount {
+			// billing-cycle
 			err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", req.Payment.PaymentId))
 			if err != nil {
 				g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
@@ -186,23 +186,25 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 	}
 	//重新获取
 	sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	err = handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
-		Payment:                          req.Payment,
-		ChannelInvoiceId:                 req.ChannelInvoiceId,
-		Currency:                         sub.Currency,
-		PlanId:                           sub.PlanId,
-		Quantity:                         sub.Quantity,
-		AddonJsonData:                    sub.AddonData,
-		TaxScale:                         sub.TaxScale,
-		UserId:                           sub.UserId,
-		MerchantId:                       sub.MerchantId,
-		SubscriptionId:                   sub.SubscriptionId,
-		ChannelId:                        sub.ChannelId,
-		InvoiceStatus:                    consts.InvoiceStatusPaid,
-		ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
-		PeriodStart:                      sub.CurrentPeriodStart,
-		PeriodEnd:                        sub.CurrentPeriodEnd,
-	})
+	// todo generate InvoiceSimplify and update payment
+
+	//err = handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
+	//	Payment:                          req.Payment,
+	//	ChannelInvoiceId:                 req.ChannelInvoiceId,
+	//	Currency:                         sub.Currency,
+	//	PlanId:                           sub.PlanId,
+	//	Quantity:                         sub.Quantity,
+	//	AddonJsonData:                    sub.AddonData,
+	//	TaxScale:                         sub.TaxScale,
+	//	UserId:                           sub.UserId,
+	//	MerchantId:                       sub.MerchantId,
+	//	SubscriptionId:                   sub.SubscriptionId,
+	//	ChannelId:                        sub.ChannelId,
+	//	InvoiceStatus:                    consts.InvoiceStatusPaid,
+	//	ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
+	//	PeriodStart:                      sub.CurrentPeriodStart,
+	//	PeriodEnd:                        sub.CurrentPeriodEnd,
+	//})
 	if err != nil {
 		return err
 	}

@@ -774,6 +774,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		InvoiceNow:   invoiceNow,
 		Prorate:      proration,
 	})
+	// cancel will generate proration invoice need compute todo mark
 	if err != nil {
 		return err
 	}

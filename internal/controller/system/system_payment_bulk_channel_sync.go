@@ -52,9 +52,9 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				details, err := out.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.ChannelPaymentId)
 				details.UniqueId = details.ChannelPaymentId
 				if err == nil {
-					pay, err := handler2.CreateOrUpdatePaymentByDetail(backgroundCtx, details)
+					pay, err := handler2.CreateOrUpdatePaymentFromChannel(backgroundCtx, details)
 					if err != nil {
-						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentByDetail ChannelPaymentId:%s error%s\n", details.ChannelPaymentId, err.Error())
+						fmt.Printf("BulkChannelSync Background CreateOrUpdatePaymentFromChannel ChannelPaymentId:%s error%s\n", details.ChannelPaymentId, err.Error())
 						return
 					}
 					_, _ = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{

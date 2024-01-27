@@ -98,7 +98,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	})
 
 	// create new invoice, ignore errors
-	_ = handler.CreateOrUpdateInvoiceForPayment(ctx, createPayContext.Invoice, createPayContext.Pay, nil)
+	_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, createPayContext.Invoice, createPayContext.Pay, nil)
 
 	if err != nil {
 		return nil, err
