@@ -1,5 +1,11 @@
 package consts
 
+const (
+	UsePendingUpdate                              = true
+	DownGradeUsePendingUpdate                     = true
+	PendingSubUpdateEffectImmediateWithOutChannel = false
+)
+
 type InvoiceStatusEnum int
 
 const (

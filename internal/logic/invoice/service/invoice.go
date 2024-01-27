@@ -6,19 +6,38 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/google/uuid"
 	"go-oversea-pay/api/merchant/invoice"
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/invoice/util"
 	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 )
+
+func checkInvoice(one *ro.InvoiceDetailRo) {
+	var totalAmountExcludingTax int64 = 0
+	var totalTax int64 = 0
+	for _, line := range one.Lines {
+		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(one.TaxScale))
+		utility.Assert(line.AmountExcludingTax == amountExcludingTax, "line amountExcludingTax mistake")
+		utility.Assert(strings.Compare(line.Currency, one.Currency) == 0, "line currency not match invoice currency")
+		utility.Assert(line.Amount == amountExcludingTax+tax, "line amount mistake")
+		//utility.Assert(line.TaxScale == one.TaxScale, "line taxScale mistake")
+		totalTax = totalTax + tax
+		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
+	}
+	var totalAmount = totalTax + totalAmountExcludingTax
+	utility.Assert(one.TaxAmount == totalTax, "invoice taxAmount mistake")
+	utility.Assert(one.TotalAmountExcludingTax == totalAmountExcludingTax, "invoice totalAmountExcludingTax mistake")
+	utility.Assert(one.TotalAmount == totalAmount, "line totalAmount mistake")
+}
 
 func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error) {
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
@@ -27,13 +46,13 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var invoiceItems []*ro.InvoiceItemDetailRo
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
 			Tax:                    tax,
@@ -51,6 +70,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	//创建
 	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
+		BizType:                        consts.BIZ_TYPE_SUBSCRIPTION,
 		MerchantId:                     req.MerchantId,
 		InvoiceId:                      invoiceId,
 		InvoiceName:                    req.Name,
@@ -79,7 +99,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 
-	return &invoice.NewInvoiceCreateRes{Invoice: one}, nil
+	return &invoice.NewInvoiceCreateRes{Invoice: util.ConvertInvoiceToRo(one)}, nil
 }
 
 func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
@@ -97,13 +117,13 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		req.Currency = one.Currency
 	}
 
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var invoiceItems []*ro.InvoiceItemDetailRo
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
 			Tax:                    tax,
@@ -120,6 +140,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().BizType:                        consts.BIZ_TYPE_SUBSCRIPTION,
 		dao.Invoice.Columns().InvoiceName:                    req.Name,
 		dao.Invoice.Columns().TotalAmount:                    totalAmount,
 		dao.Invoice.Columns().TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -144,7 +165,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.TaxScale = req.TaxScale
 	one.ChannelId = req.ChannelId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
-	return &invoice.NewInvoiceEditRes{Invoice: one}, nil
+	return &invoice.NewInvoiceEditRes{Invoice: util.ConvertInvoiceToRo(one)}, nil
 }
 
 func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
@@ -162,10 +183,6 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 		if err != nil {
 			return err
 		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return gerror.Newf("EditInvoice update err:%s", update)
-		//}
 		return nil
 	}
 }
@@ -213,11 +230,12 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
-	var lines []*ro.NewInvoiceItem
+	var lines []*ro.InvoiceItemDetailRo
 	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
 	if err != nil {
 		return nil, err
 	}
+	checkInvoice(util.ConvertInvoiceToRo(one))
 	createRes, err := channel.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
 		Invoice:      one,
 		InvoiceLines: lines,
@@ -259,11 +277,13 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.TotalAmount > req.RefundAmount, "not enough amount to refund")
-	refund, err := service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_INVOICE, &v1.RefundsReq{
-		PaymentId:  one.PaymentId,
-		MerchantId: one.MerchantId,
-		Reference:  uuid.New().String(), //todo make internal refund reference
-		Reason:     req.Reason,
+	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	refund, err := service.DoChannelRefund(ctx, payment.BizType, &v1.RefundsReq{
+		PaymentId:        one.PaymentId,
+		MerchantId:       one.MerchantId,
+		MerchantRefundId: one.InvoiceId,
+		Reason:           req.Reason,
 		Amount: &v1.PayAmountVo{
 			Currency: one.Currency,
 			Value:    req.RefundAmount,

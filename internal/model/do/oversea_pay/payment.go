@@ -19,7 +19,7 @@ type Payment struct {
 	UserId                 interface{} // user_id
 	SubscriptionId         interface{} // 订阅id（内部编号）
 	GmtCreate              *gtime.Time // 创建时间
-	BizType                interface{} // 业务类型。1-single payment, 3-invoice
+	BizType                interface{} // 业务类型。1-single payment, 3-subscription
 	BizId                  interface{} // 业务id-即商户订单号
 	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	PaymentId              interface{} // 内部支付编号（系统生成唯一）
@@ -52,4 +52,5 @@ type Payment struct {
 	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
 	BalanceStart           interface{} // balance_start
 	BalanceEnd             interface{} // balance_end
+	InvoiceData            interface{} //
 }

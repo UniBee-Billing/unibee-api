@@ -55,7 +55,7 @@ type SubscriptionCreatePreviewRes struct {
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
 	Currency          string                             `json:"currency"              `
-	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
 	UserId            int64                              `json:"userId" `
 	Email             string                             `json:"email" `
 	VatCountryCode    string                             `json:"vatCountryCode"              `
@@ -74,7 +74,7 @@ type SubscriptionCreateReq struct {
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                             `p:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ReturnUrl          string                             `p:"returnUrl"  dc:"ReturnUrl"  `
+	ReturnUrl          string                             `p:"returnUrl"  dc:"RedirectUrl"  `
 	VatCountryCode     string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                             `p:"vatNumber" dc:"VatNumber" `
 }
@@ -93,11 +93,11 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount       int64                      `json:"totalAmount"                `
-	Currency          string                     `json:"currency"              `
-	Invoice           *ro.ChannelDetailInvoiceRo `json:"invoice"`
-	NextPeriodInvoice *ro.ChannelDetailInvoiceRo `json:"nextPeriodInvoice"`
-	ProrationDate     int64                      `json:"prorationDate"`
+	TotalAmount       int64                     `json:"totalAmount"                `
+	Currency          string                    `json:"currency"              `
+	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
+	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
+	ProrationDate     int64                     `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {

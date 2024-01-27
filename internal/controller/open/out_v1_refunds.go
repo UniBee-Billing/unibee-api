@@ -18,15 +18,15 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 	//参数有效性校验 todo mark
 	openApiConfig, _ := merchantCheck(ctx, req.MerchantId)
 
-	resp, err := service.DoChannelRefund(ctx, consts.PAYMENT_BIZ_TYPE_ORDER, req, int64(openApiConfig.Id))
+	resp, err := service.DoChannelRefund(ctx, consts.BIZ_TYPE_ORDER, req, int64(openApiConfig.Id))
 	if err != nil {
 		return nil, err
 	}
 	res = &payment.RefundsRes{
-		Status:    "SentForRefund",
-		RefundId:  resp.RefundId,
-		Reference: req.Reference,
-		PaymentId: resp.PaymentId,
+		Status:           "SentForRefund",
+		RefundId:         resp.RefundId,
+		MerchantRefundId: req.MerchantRefundId,
+		PaymentId:        resp.PaymentId,
 	}
 	return res, nil
 }

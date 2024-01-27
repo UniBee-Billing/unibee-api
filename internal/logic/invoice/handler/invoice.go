@@ -153,9 +153,13 @@ type CreateInvoiceInternalReq struct {
 	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`                                      // period_end
 }
 
+func CreateInvoiceForStartPayment(simplify *ro.InvoiceDetailSimplify, payment *entity.Payment) error {
+	return nil
+}
+
 func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req *CreateInvoiceInternalReq) error {
 	one := query.GetInvoiceByChannelUniqueId(ctx, req.Payment.PaymentId)
-	invoice := util.CalculateInternalInvoiceRo(ctx, &util.CalculateInvoiceReq{
+	invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
 		Currency:      req.Currency,
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
@@ -185,6 +189,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 	if one == nil {
 		//创建
 		one = &entity.Invoice{
+			BizType:                        req.Payment.BizType,
 			UserId:                         req.UserId,
 			MerchantId:                     req.MerchantId,
 			SubscriptionId:                 req.SubscriptionId,
@@ -225,6 +230,7 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 	} else {
 		//更新
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().BizType:        req.Payment.BizType,
 			dao.Invoice.Columns().MerchantId:     req.MerchantId,
 			dao.Invoice.Columns().UserId:         req.UserId,
 			dao.Invoice.Columns().SubscriptionId: req.SubscriptionId,

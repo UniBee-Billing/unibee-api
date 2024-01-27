@@ -87,11 +87,11 @@ type SubscriptionUpdatePreviewReq struct {
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
-	TotalAmount       int64                      `json:"totalAmount"                `
-	Currency          string                     `json:"currency"              `
-	Invoice           *ro.ChannelDetailInvoiceRo `json:"invoice"`
-	NextPeriodInvoice *ro.ChannelDetailInvoiceRo `json:"nextPeriodInvoice"`
-	ProrationDate     int64                      `json:"prorationDate"`
+	TotalAmount       int64                     `json:"totalAmount"                `
+	Currency          string                    `json:"currency"              `
+	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
+	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
+	ProrationDate     int64                     `json:"prorationDate"`
 }
 
 type SubscriptionUpdateReq struct {

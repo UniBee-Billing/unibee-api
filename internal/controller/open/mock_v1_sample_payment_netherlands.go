@@ -15,9 +15,9 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, req.MerchantId)
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
 	outPayVo := &v12.PaymentsReq{
-		MerchantId: req.MerchantId,
-		Reference:  uuid.New().String(),
-		Amount: &v12.PayAmountVo{
+		MerchantId:        req.MerchantId,
+		MerchantPaymentId: uuid.New().String(),
+		TotalAmount: &v12.PayAmountVo{
 			Currency: req.Currency,
 			Value:    req.Amount,
 		},
@@ -25,21 +25,16 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 			TokenId: "",
 			Channel: req.Channel,
 		},
-		PaymentBrandAddition: nil,
-		StorePaymentMethod:   false,
-		ReturnUrl:            req.ReturnUrl,
-		CountryCode:          "NL",
-		TelephoneNumber:      "+31689124321",
-		ShopperEmail:         "customer@email.nl",
-		ShopperReference:     uuid.New().String(),
-		Channel:              "WEB",
+		RedirectUrl:      req.ReturnUrl,
+		CountryCode:      "NL",
+		TelephoneNumber:  "+31689124321",
+		ShopperEmail:     "customer@email.nl",
+		ShopperReference: uuid.New().String(),
+		Platform:         "WEB",
 		LineItems: []*v12.OutLineItem{{
-			AmountExcludingTax: 22,
-			AmountIncludingTax: 11,
-			Description:        uuid.New().String(),
-			Id:                 uuid.New().String(),
-			Quantity:           1,
-			TaxAmount:          11,
+			UnitAmountExcludingTax: 22,
+			Description:            uuid.New().String(),
+			Quantity:               1,
 		}},
 		ShopperName: &v12.OutShopperName{
 			FirstName: "Test",

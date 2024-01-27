@@ -2,9 +2,9 @@ package service
 
 import (
 	"context"
-	"fmt"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/invoice/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"strings"
@@ -62,54 +62,8 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	}
 	var resultList []*ro.InvoiceDetailRo
 	for _, invoice := range mainList {
-		resultList = append(resultList, ConvertInvoiceToRo(invoice))
+		resultList = append(resultList, util.ConvertInvoiceToRo(invoice))
 	}
 
 	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil
-}
-
-func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
-	var lines []*ro.ChannelDetailInvoiceItem
-	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
-	for _, line := range lines {
-		line.Currency = invoice.Currency
-		line.TaxScale = invoice.TaxScale
-	}
-	if err != nil {
-		fmt.Printf("ConvertInvoiceLines err:%s", err)
-	}
-	return &ro.InvoiceDetailRo{
-		Id:                             invoice.Id,
-		MerchantId:                     invoice.MerchantId,
-		SubscriptionId:                 invoice.SubscriptionId,
-		InvoiceId:                      invoice.InvoiceId,
-		InvoiceName:                    invoice.InvoiceName,
-		GmtCreate:                      invoice.GmtCreate,
-		TotalAmount:                    invoice.TotalAmount,
-		TaxAmount:                      invoice.TaxAmount,
-		SubscriptionAmount:             invoice.SubscriptionAmount,
-		Currency:                       invoice.Currency,
-		Lines:                          lines,
-		ChannelId:                      invoice.ChannelId,
-		Status:                         invoice.Status,
-		SendStatus:                     invoice.SendStatus,
-		SendEmail:                      invoice.SendEmail,
-		SendPdf:                        invoice.SendPdf,
-		UserId:                         invoice.UserId,
-		Data:                           invoice.Data,
-		GmtModify:                      invoice.GmtModify,
-		IsDeleted:                      invoice.IsDeleted,
-		Link:                           invoice.Link,
-		ChannelStatus:                  invoice.ChannelStatus,
-		ChannelInvoiceId:               invoice.ChannelInvoiceId,
-		ChannelInvoicePdf:              invoice.ChannelInvoicePdf,
-		TaxScale:                       invoice.TaxScale,
-		SendNote:                       invoice.SendNote,
-		SendTerms:                      invoice.SendTerms,
-		DiscountAmount:                 0,
-		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-		PeriodStart:                    invoice.PeriodStart,
-		PeriodEnd:                      invoice.PeriodEnd,
-	}
 }

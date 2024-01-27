@@ -58,6 +58,7 @@ type InvoiceColumns struct {
 	PaymentId                      string // PaymentId
 	RefundId                       string // refundId
 	Data                           string // 渠道额外参数，JSON格式
+	BizType                        string // 业务类型。1-single payment, 3-subscription
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -100,6 +101,7 @@ var invoiceColumns = InvoiceColumns{
 	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
 	Data:                           "data",
+	BizType:                        "biz_type",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

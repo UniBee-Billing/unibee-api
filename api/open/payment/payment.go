@@ -6,23 +6,21 @@ import (
 )
 
 type PaymentsReq struct {
-	g.Meta                   `path:"/payments" tags:"Open-Payment-Controller" method:"post" summary:"1.1 用于接收商户段的请求（包括 token 请求）"`
+	g.Meta                   `path:"/create_payment" tags:"Open-Payment-Controller" method:"post" summary:"用于接收商户段的请求（包括 token 请求）"`
 	MerchantId               int64              `p:"merchantId" dc:"商户号" v:"required长度为:{min}到:{max}位"`
-	Reference                string             `p:"reference" dc:"取消单号" v:"required"`
-	Amount                   *PayAmountVo       `json:"amount"   in:"query" dc:"具体金额" v:"required"`
+	MerchantPaymentId        string             `p:"merchantPaymentId" dc:"merchantPaymentId" v:"required"`
+	TotalAmount              *PayAmountVo       `json:"totalAmount" dc:"具体金额" v:"required"`
 	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"支付方式" v:"required"`
-	PaymentBrandAddition     *gjson.Json        `p:"paymentBrandAddition" dc:"支付方式补充(Json结构）" v:"required"`
-	StorePaymentMethod       bool               `p:"storePaymentMethod" dc:"是否创建令牌" v:"required"`
-	ReturnUrl                string             `p:"returnUrl" dc:"支付完成跳转地址" v:"required"`
+	RedirectUrl              string             `p:"redirectUrl" dc:"支付完成跳转地址" v:"required"`
+	CountryCode              string             `p:"countryCode" dc:"CountryCode" v:"required"`
 	ShopperLocale            string             `p:"shopperLocale" dc:"语言en_US" v:"required"`
-	CountryCode              string             `p:"countryCode" dc:"国家代码" v:"required"`
-	TelephoneNumber          string             `p:"telephoneNumber" dc:"手机号" v:"required"`
 	ShopperEmail             string             `p:"shopperEmail" dc:"用户邮箱" v:"required"`
 	ShopperReference         string             `p:"shopperReference" dc:"shopper唯一Id" v:"required"`
-	Channel                  string             `p:"channel" dc:"设备类型（WEB，WAP，APP, MINI, INWALLET）" v:"required"`
-	LineItems                []*OutLineItem     `p:"lineItems" dc:"订单物品" v:"required"`
-	DeviceType               string             `p:"deviceType" dc:"手机类型（Android、iOS）" v:"required"`
-	ShopperIP                string             `p:"shopperIP" dc:"用户ip（v4，v6）" v:"required"`
+	LineItems                []*OutLineItem     `p:"lineItems" dc:"LineItems" v:"required"`
+	DeviceType               string             `p:"deviceType" dc:"DeviceType,Android|iOS|Web"`
+	Platform                 string             `p:"platform" dc:"Platform（WEB，WAP，APP, MINI, WALLET）"`
+	ShopperIP                string             `p:"shopperIP" dc:"用户ip（v4，v6）"`
+	TelephoneNumber          string             `p:"telephoneNumber" dc:"TelephoneNumber"`
 	BrowserInfo              string             `p:"browserInfo" dc:"browserInfo" v:""`
 	ShopperInteraction       string             `p:"shopperInteraction" dc:"交易类型" v:""`
 	RecurringProcessingModel string             `p:"recurringProcessingModel" dc:"令牌类型" v:""`
@@ -59,22 +57,19 @@ type OutPayAddress struct {
 }
 
 type OutLineItem struct {
-	AmountExcludingTax int64  `p:"amountExcludingTax" dc:"amountExcludingTax" v:""`
-	AmountIncludingTax int64  `p:"amountIncludingTax" dc:"amountIncludingTax" v:""`
-	Description        string `p:"description" dc:"description" v:""`
-	Id                 string `p:"id" dc:"id" v:"required"`
-	Quantity           int64  `p:"quantity" dc:"quantity" v:"required"`
-	TaxAmount          int64  `p:"taxAmount" dc:"taxAmount" v:"required"`
-	TaxPercentage      int64  `p:"taxPercentage" dc:"taxPercentage" v:""`
-	ProductUrl         string `p:"productUrl" dc:"productUrl" v:""`
-	ImageUrl           string `p:"imageUrl" dc:"imageUrl" v:""`
+	UnitAmountExcludingTax int64  `p:"unitAmountExcludingTax" dc:"UnitAmountExcludingTax" v:"required"`
+	Quantity               int64  `p:"quantity" dc:"Quantity" v:"required"`
+	Description            string `p:"description" dc:"Description" v:""`
+	TaxScale               int64  `p:"taxScale" dc:"TaxScale" v:"required"`
+	ProductUrl             string `p:"productUrl" dc:"ProductUrl"`
+	ImageUrl               string `p:"imageUrl" dc:"ImageUrl"`
+	// todo mark discount need
 }
 
 type PaymentMethodsReq struct {
-	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"1.0 根据配置⽀付⽅式的信息，通过请求字段筛选可以返回的⽀付⽅式(Klarna、Evonet支持）"`
-	TokenId string                   `p:"tokenId" dc:"令牌id，如果有绑定过" v:""`
-	Channel string                   `p:"type" dc:"支付方式类型" v:"required"`
-	Issuer  []*OutPaymentMethodIssur `p:"issuer" dc:"银行信息" v:""`
+	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"根据配置⽀付⽅式的信息，通过请求字段筛选可以返回的⽀付⽅式(Klarna、Evonet支持）"`
+	TokenId string `p:"tokenId" dc:"令牌id，如果有绑定过" v:""`
+	Channel string `p:"type" dc:"支付方式类型" v:"required"`
 }
 type PaymentMethodsRes struct {
 }
@@ -86,7 +81,7 @@ type OutPaymentMethodIssur struct {
 }
 
 type PaymentDetailsReq struct {
-	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"1.5 查询当前交易状态及详情"`
+	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"查询当前交易状态及详情"`
 	PaymentId string `in:"path" dc:"平台支付单号" v:"required|length:4,30#请输入平台支付单号长度为:{min}到:{max}位"`
 }
 type PaymentDetailsRes struct {

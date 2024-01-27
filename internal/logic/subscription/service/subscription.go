@@ -38,7 +38,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
 	TaxScale          int64                              `json:"taxScale"              `
 	VatVerifyData     string                             `json:"vatVerifyData"              `
-	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
+	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
 	UserId            int64                              `json:"userId" `
 	Email             string                             `json:"email" `
 	VatCountryRate    *ro.VatCountryRate                 `json:"vatCountryRate" `
@@ -183,8 +183,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	//生成临时账单
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
-	invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+	var invoiceItems []*ro.InvoiceItemDetailRo
+	invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 		Currency:               currency,
 		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
@@ -194,7 +194,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		Quantity:               req.Quantity,
 	})
 	for _, addon := range addons {
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               currency,
 			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
 			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(standardTaxScale)),
@@ -207,7 +207,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var taxAmount = int64(float64(TotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(standardTaxScale))
 	var totalAmount = TotalAmountExcludingTax + taxAmount
 
-	invoice := &ro.ChannelDetailInvoiceRo{
+	invoice := &ro.InvoiceDetailSimplify{
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        TotalAmountExcludingTax,
 		Currency:                       currency,
@@ -356,8 +356,8 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	UserId            int64                              `json:"userId" `
 	OldPlan           *entity.SubscriptionPlan           `json:"oldPlan"`
 	OldPlanChannel    *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
-	Invoice           *ro.ChannelDetailInvoiceRo         `json:"invoice"`
-	NextPeriodInvoice *ro.ChannelDetailInvoiceRo         `json:"nextPeriodInvoice"`
+	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
+	NextPeriodInvoice *ro.InvoiceDetailSimplify          `json:"nextPeriodInvoice"`
 	ProrationDate     int64                              `json:"prorationDate"`
 	EffectImmediate   bool                               `json:"EffectImmediate"`
 }
@@ -495,55 +495,59 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	var totalAmount int64
-	var invoice *ro.ChannelDetailInvoiceRo
+	var invoice *ro.InvoiceDetailSimplify
 	//var nextPeriodTotalAmount int64
-	var nextPeriodInvoice *ro.ChannelDetailInvoiceRo
+	var nextPeriodInvoice *ro.InvoiceDetailSimplify
 	if effectImmediate {
-		updatePreviewRes, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-			Plan:            plan,
-			Quantity:        req.Quantity,
-			OldPlan:         oldPlan,
-			AddonPlans:      addons,
-			PlanChannel:     planChannel,
-			OldPlanChannel:  oldPlanChannel,
-			Subscription:    sub,
-			ProrationDate:   prorationDate,
-			EffectImmediate: effectImmediate,
-		})
-		if err != nil {
-			return nil, err
-		}
-		utility.Assert(strings.Compare(updatePreviewRes.Currency, currency) == 0, fmt.Sprintf("preview currency not match for subscriptionId:%v preview currency:%s", sub.SubscriptionId, updatePreviewRes.Currency))
+		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+			// Generate Proration Invoice Preview
+		} else {
+			updatePreviewRes, err := channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+				Plan:            plan,
+				Quantity:        req.Quantity,
+				OldPlan:         oldPlan,
+				AddonPlans:      addons,
+				PlanChannel:     planChannel,
+				OldPlanChannel:  oldPlanChannel,
+				Subscription:    sub,
+				ProrationDate:   prorationDate,
+				EffectImmediate: effectImmediate,
+			})
+			if err != nil {
+				return nil, err
+			}
+			utility.Assert(strings.Compare(updatePreviewRes.Currency, currency) == 0, fmt.Sprintf("preview currency not match for subscriptionId:%v preview currency:%s", sub.SubscriptionId, updatePreviewRes.Currency))
 
-		prorationDate = updatePreviewRes.ProrationDate
-		totalAmount = updatePreviewRes.TotalAmount
-		if updatePreviewRes.Invoice.Lines == nil {
-			updatePreviewRes.Invoice.Lines = make([]*ro.ChannelDetailInvoiceItem, 0)
-		}
-		invoice = &ro.ChannelDetailInvoiceRo{
-			TotalAmount:                    updatePreviewRes.Invoice.TotalAmount,
-			TotalAmountExcludingTax:        updatePreviewRes.Invoice.TotalAmountExcludingTax,
-			Currency:                       updatePreviewRes.Invoice.Currency,
-			TaxAmount:                      updatePreviewRes.Invoice.TaxAmount,
-			SubscriptionAmount:             updatePreviewRes.Invoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
-			Lines:                          updatePreviewRes.Invoice.Lines,
-		}
+			prorationDate = updatePreviewRes.ProrationDate
+			totalAmount = updatePreviewRes.TotalAmount
+			if updatePreviewRes.Invoice.Lines == nil {
+				updatePreviewRes.Invoice.Lines = make([]*ro.InvoiceItemDetailRo, 0)
+			}
+			invoice = &ro.InvoiceDetailSimplify{
+				TotalAmount:                    updatePreviewRes.Invoice.TotalAmount,
+				TotalAmountExcludingTax:        updatePreviewRes.Invoice.TotalAmountExcludingTax,
+				Currency:                       updatePreviewRes.Invoice.Currency,
+				TaxAmount:                      updatePreviewRes.Invoice.TaxAmount,
+				SubscriptionAmount:             updatePreviewRes.Invoice.SubscriptionAmount,
+				SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
+				Lines:                          updatePreviewRes.Invoice.Lines,
+			}
 
-		utility.Assert(updatePreviewRes.NextPeriodInvoice.Lines != nil, "internal error, next_period_line is blank")
+			utility.Assert(updatePreviewRes.NextPeriodInvoice.Lines != nil, "internal error, next_period_line is blank")
 
-		//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
-		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
-			TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
-			TotalAmountExcludingTax:        updatePreviewRes.NextPeriodInvoice.TotalAmountExcludingTax,
-			Currency:                       updatePreviewRes.NextPeriodInvoice.Currency,
-			TaxAmount:                      updatePreviewRes.NextPeriodInvoice.TaxAmount,
-			SubscriptionAmount:             updatePreviewRes.NextPeriodInvoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: updatePreviewRes.NextPeriodInvoice.SubscriptionAmountExcludingTax,
-			Lines:                          updatePreviewRes.NextPeriodInvoice.Lines,
+			//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
+			nextPeriodInvoice = &ro.InvoiceDetailSimplify{
+				TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
+				TotalAmountExcludingTax:        updatePreviewRes.NextPeriodInvoice.TotalAmountExcludingTax,
+				Currency:                       updatePreviewRes.NextPeriodInvoice.Currency,
+				TaxAmount:                      updatePreviewRes.NextPeriodInvoice.TaxAmount,
+				SubscriptionAmount:             updatePreviewRes.NextPeriodInvoice.SubscriptionAmount,
+				SubscriptionAmountExcludingTax: updatePreviewRes.NextPeriodInvoice.SubscriptionAmountExcludingTax,
+				Lines:                          updatePreviewRes.NextPeriodInvoice.Lines,
+			}
 		}
 	} else {
-		//下周期生效,输出Preview账单
+		//Effect Next Period, Generate Invoice Preview
 		var nextPeriodTotalAmountExcludingTax = plan.Amount * req.Quantity
 		for _, addon := range addons {
 			utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
@@ -552,8 +556,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			nextPeriodTotalAmountExcludingTax = nextPeriodTotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 		}
 
-		var nextPeriodInvoiceItems []*ro.ChannelDetailInvoiceItem
-		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
+		var nextPeriodInvoiceItems []*ro.InvoiceItemDetailRo
+		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               currency,
 			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
 			AmountExcludingTax:     req.Quantity * plan.Amount,
@@ -563,7 +567,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			Quantity:               req.Quantity,
 		})
 		for _, addon := range addons {
-			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.ChannelDetailInvoiceItem{
+			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.InvoiceItemDetailRo{
 				Currency:               currency,
 				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
 				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
@@ -574,7 +578,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			})
 		}
 		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale))
-		nextPeriodInvoice = &ro.ChannelDetailInvoiceRo{
+		nextPeriodInvoice = &ro.InvoiceDetailSimplify{
 			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
 			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
 			Currency:                       currency,
@@ -583,14 +587,14 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: nextPeriodTotalAmountExcludingTax,                       // 在没有 discount 之前，保持于 Total 一致
 			Lines:                          nextPeriodInvoiceItems,
 		}
-		invoice = &ro.ChannelDetailInvoiceRo{
+		invoice = &ro.InvoiceDetailSimplify{
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
 			Currency:                       currency,
 			TaxAmount:                      0,
 			SubscriptionAmount:             0,
 			SubscriptionAmountExcludingTax: 0,
-			Lines:                          make([]*ro.ChannelDetailInvoiceItem, 0),
+			Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
 		}
 		//nextPeriodTotalAmount = nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount
 		prorationDate = sub.CurrentPeriodEnd
@@ -674,18 +678,40 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
+	if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+		subUpdateRes, err = channel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			Plan:            prepare.Plan,
+			Quantity:        prepare.Quantity,
+			OldPlan:         prepare.OldPlan,
+			AddonPlans:      prepare.Addons,
+			PlanChannel:     prepare.PlanChannel,
+			OldPlanChannel:  prepare.OldPlanChannel,
+			Subscription:    prepare.Subscription,
+			ProrationDate:   req.ProrationDate,
+			EffectImmediate: false,
+		})
+		subUpdateRes.Paid = false
+		subUpdateRes.Link = ""
+		if prepare.EffectImmediate {
+			// Generate Proration Payment todo mark
+			// Upgrade
+			subUpdateRes.ChannelUpdateId = "" // todo mark 需要补全更新单ID
 
-	updateRes, err := channel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-		Plan:            prepare.Plan,
-		Quantity:        prepare.Quantity,
-		OldPlan:         prepare.OldPlan,
-		AddonPlans:      prepare.Addons,
-		PlanChannel:     prepare.PlanChannel,
-		OldPlanChannel:  prepare.OldPlanChannel,
-		Subscription:    prepare.Subscription,
-		ProrationDate:   req.ProrationDate,
-		EffectImmediate: prepare.EffectImmediate,
-	})
+		}
+	} else {
+		subUpdateRes, err = channel.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			Plan:            prepare.Plan,
+			Quantity:        prepare.Quantity,
+			OldPlan:         prepare.OldPlan,
+			AddonPlans:      prepare.Addons,
+			PlanChannel:     prepare.PlanChannel,
+			OldPlanChannel:  prepare.OldPlanChannel,
+			Subscription:    prepare.Subscription,
+			ProrationDate:   req.ProrationDate,
+			EffectImmediate: prepare.EffectImmediate,
+		})
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -709,25 +735,25 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	var PaidInt = 0
-	if updateRes.Paid {
+	if subUpdateRes.Paid {
 		PaidInt = 1
 	}
 
-	one.Link = updateRes.Link
+	one.Link = subUpdateRes.Link
 	one.Status = consts.PendingSubStatusCreate
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
-		dao.SubscriptionPendingUpdate.Columns().ResponseData:    updateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData:    subUpdateRes.Data,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
 		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
-		dao.SubscriptionPendingUpdate.Columns().Link:            updateRes.Link,
-		dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId: updateRes.ChannelUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId: subUpdateRes.ChannelUpdateId,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
 
-	if prepare.EffectImmediate && updateRes.Paid {
+	if prepare.EffectImmediate && subUpdateRes.Paid {
 		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		one.Status = consts.PendingSubStatusFinished
 		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one)
@@ -738,8 +764,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
-		Paid:                      updateRes.Paid,
-		Link:                      updateRes.Link,
+		Paid:                      subUpdateRes.Paid,
+		Link:                      subUpdateRes.Link,
 	}, nil
 }
 

@@ -39,30 +39,36 @@ type SubscriptionInvoiceListRes struct {
 
 type NewInvoiceCreateReq struct {
 	g.Meta     `path:"/new_invoice_create" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
-	MerchantId int64                `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int64                `p:"userId" dc:"UserId" v:"required"`
-	TaxScale   int64                `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
-	ChannelId  int64                `p:"channelId" dc:"Gateway ChannelId"   v:"required" `
-	Currency   string               `p:"currency"   dc:"Currency" v:"required" `
-	Name       string               `p:"name"   dc:"Name" `
-	Lines      []*ro.NewInvoiceItem `p:"lines"              `
+	MerchantId int64                  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int64                  `p:"userId" dc:"UserId" v:"required"`
+	TaxScale   int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
+	ChannelId  int64                  `p:"channelId" dc:"Gateway ChannelId"   v:"required" `
+	Currency   string                 `p:"currency"   dc:"Currency" v:"required" `
+	Name       string                 `p:"name"   dc:"Name" `
+	Lines      []*NewInvoiceItemParam `p:"lines"              `
+}
+
+type NewInvoiceItemParam struct {
+	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
+	Description            string `json:"description"`
+	Quantity               int64  `json:"quantity"`
 }
 
 type NewInvoiceCreateRes struct {
-	Invoice *entity.Invoice `json:"invoice" `
+	Invoice *ro.InvoiceDetailRo `json:"invoice" `
 }
 
 type NewInvoiceEditReq struct {
 	g.Meta    `path:"/new_invoice_edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
-	InvoiceId string               `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
-	TaxScale  int64                `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
-	ChannelId int64                `p:"channelId" dc:"Gateway ChannelId" `
-	Currency  string               `p:"currency"   dc:"Currency" `
-	Name      string               `p:"name"   dc:"Name" `
-	Lines     []*ro.NewInvoiceItem `p:"lines"              `
+	InvoiceId string                 `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
+	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
+	ChannelId int64                  `p:"channelId" dc:"Gateway ChannelId" `
+	Currency  string                 `p:"currency"   dc:"Currency" `
+	Name      string                 `p:"name"   dc:"Name" `
+	Lines     []*NewInvoiceItemParam `p:"lines"              `
 }
 type NewInvoiceEditRes struct {
-	Invoice *entity.Invoice `json:"invoice" `
+	Invoice *ro.InvoiceDetailRo `json:"invoice" `
 }
 
 type DeletePendingInvoiceReq struct {

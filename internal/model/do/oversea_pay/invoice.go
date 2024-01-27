@@ -50,4 +50,5 @@ type Invoice struct {
 	PaymentId                      interface{} // PaymentId
 	RefundId                       interface{} // refundId
 	Data                           interface{} // 渠道额外参数，JSON格式
+	BizType                        interface{} // 业务类型。1-single payment, 3-subscription
 }

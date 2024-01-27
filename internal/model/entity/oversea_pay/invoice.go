@@ -48,4 +48,5 @@ type Invoice struct {
 	PaymentId                      string      `json:"paymentId"                      description:"PaymentId"`                                                             // PaymentId
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                              // refundId
 	Data                           string      `json:"data"                           description:"渠道额外参数，JSON格式"`                                                         // 渠道额外参数，JSON格式
+	BizType                        int         `json:"bizType"                        description:"业务类型。1-single payment, 3-subscription"`                                 // 业务类型。1-single payment, 3-subscription
 }

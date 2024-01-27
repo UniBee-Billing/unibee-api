@@ -35,6 +35,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	//createPayContext.Pay.AdditionalData = todo mark
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
+	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
 	//toSave.setServiceRate(iMerchantInfoService.getServiceDeductPoint(toSave.getMerchantId(),toSave.getChannelId()));//记录当下的服务费率
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
 	isDuplicatedInvoke := false
@@ -57,12 +58,10 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			id, err := insert.LastInsertId()
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			createPayContext.Pay.Id = id
@@ -70,7 +69,6 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
 			channelInternalPayResult, err = channel.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			channelInternalPayResult.ChannelId = createPayContext.Pay.ChannelId
@@ -83,12 +81,10 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().PaymentData: createPayContext.Pay.PaymentData},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -99,6 +95,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			return redismq.RollbackTransaction, err
 		}
 	})
+
+	// create new invoice
 
 	if err != nil {
 		return nil, err

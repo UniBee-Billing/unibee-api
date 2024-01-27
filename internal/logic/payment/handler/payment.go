@@ -372,10 +372,14 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 		}
 	}
 	one := query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId)
-
+	var bizType = consts.BIZ_TYPE_ORDER
+	if len(channelPayRo.ChannelSubscriptionId) > 0 {
+		bizType = consts.BIZ_TYPE_SUBSCRIPTION
+	}
 	if one == nil {
 		//创建
 		one = &entity.Payment{
+			BizType:                bizType,
 			MerchantId:             channelPayRo.MerchantId,
 			UserId:                 channelUser.UserId,
 			CountryCode:            countryCode,
@@ -409,6 +413,7 @@ func CreateOrUpdatePaymentByDetail(ctx context.Context, channelPayRo *ro.Channel
 	} else {
 		//更新
 		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
+			dao.Payment.Columns().BizType:                bizType,
 			dao.Payment.Columns().MerchantId:             channelPayRo.MerchantId,
 			dao.Payment.Columns().UserId:                 channelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,

@@ -275,7 +275,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
 		status = consts.InvoiceStatusCancelled
 	}
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var invoiceItems []*ro.InvoiceItemDetailRo
 	for _, line := range detail.Lines.Data {
 		var start int64 = 0
 		var end int64 = 0
@@ -283,7 +283,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 			start = line.Period.Start
 			end = line.Period.End
 		}
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               strings.ToUpper(string(line.Currency)),
 			Amount:                 line.Amount,
 			AmountExcludingTax:     line.AmountExcludingTax,
@@ -679,9 +679,6 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx conte
 	return &ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp{}, nil
 }
 
-var usePendingUpdate = true
-var downGradeUsePendingUpdate = true
-
 func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
@@ -690,7 +687,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	s.setUnibeeAppInfo()
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
-	if downGradeUsePendingUpdate && !subscriptionRo.EffectImmediate {
+	if consts.DownGradeUsePendingUpdate && !subscriptionRo.EffectImmediate {
 		updateUnixTime = subscriptionRo.Subscription.CurrentPeriodEnd
 	}
 	if subscriptionRo.ProrationDate > 0 {
@@ -714,15 +711,15 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	}
 
 	// 拆开 invoice Proration into invoice,nextPeriodInvoice
-	var currentInvoiceItems []*ro.ChannelDetailInvoiceItem
-	var nextInvoiceItems []*ro.ChannelDetailInvoiceItem
+	var currentInvoiceItems []*ro.InvoiceItemDetailRo
+	var nextInvoiceItems []*ro.InvoiceItemDetailRo
 	var currentSubAmount int64 = 0
 	var currentSubAmountExcludingTax int64 = 0
 	var nextSubAmount int64 = 0
 	var nextSubAmountExcludingTax int64 = 0
 	for _, line := range detail.Lines.Data {
 		if line.Proration {
-			currentInvoiceItems = append(currentInvoiceItems, &ro.ChannelDetailInvoiceItem{
+			currentInvoiceItems = append(currentInvoiceItems, &ro.InvoiceItemDetailRo{
 				Amount:                 line.Amount,
 				AmountExcludingTax:     line.AmountExcludingTax,
 				UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
@@ -734,7 +731,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 			currentSubAmount = currentSubAmount + line.Amount
 			currentSubAmountExcludingTax = currentSubAmountExcludingTax + line.AmountExcludingTax
 		} else {
-			nextInvoiceItems = append(nextInvoiceItems, &ro.ChannelDetailInvoiceItem{
+			nextInvoiceItems = append(nextInvoiceItems, &ro.InvoiceItemDetailRo{
 				Amount:                 line.Amount,
 				AmountExcludingTax:     line.AmountExcludingTax,
 				UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
@@ -790,7 +787,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	var items []*stripe.SubscriptionItemsParams
 
 	var stripeSubscriptionItems []*stripe.SubscriptionItem
-	if !subscriptionRo.EffectImmediate && !downGradeUsePendingUpdate {
+	if !subscriptionRo.EffectImmediate && !consts.DownGradeUsePendingUpdate {
 		if len(subscriptionRo.Subscription.ChannelItemData) > 0 {
 			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.ChannelItemData, &stripeSubscriptionItems)
 			if err != nil {
@@ -901,7 +898,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 	} else {
-		if downGradeUsePendingUpdate {
+		if consts.DownGradeUsePendingUpdate {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
 			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
@@ -915,7 +912,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		return nil, err
 	}
 
-	if subscriptionRo.EffectImmediate {
+	if subscriptionRo.EffectImmediate && !consts.PendingSubUpdateEffectImmediateWithOutChannel {
 		queryParams := &stripe.InvoiceParams{}
 		newInvoice, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, channelEntity)
@@ -1467,6 +1464,19 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 }
 
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+	//utility.Assert(createPayContext.PayChannel != nil, "支付渠道异常")
+	//utility.Assert(createPayContext.PayChannel.Id > 0, "支付渠道异常")
+	//channelEntity := createPayContext.PayChannel
+	//utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	//stripe.Key = channelEntity.ChannelSecret
+	//s.setUnibeeAppInfo()
+	//
+	//params := &stripe.PaymentIntentParams{
+	//	Amount:           stripe.Int64(1099),
+	//	Currency:         stripe.String(string(stripe.CurrencyAED)),
+	//	SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
+	//}
+	//intent, err := paymentintent.New(params)
 	//TODO implement me
 	panic("implement me")
 }
@@ -1633,7 +1643,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
 		status = consts.InvoiceStatusCancelled
 	}
-	var invoiceItems []*ro.ChannelDetailInvoiceItem
+	var invoiceItems []*ro.InvoiceItemDetailRo
 	for _, line := range detail.Lines.Data {
 		var start int64 = 0
 		var end int64 = 0
@@ -1641,7 +1651,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 			start = line.Period.Start
 			end = line.Period.End
 		}
-		invoiceItems = append(invoiceItems, &ro.ChannelDetailInvoiceItem{
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 			Currency:               strings.ToUpper(string(line.Currency)),
 			Amount:                 line.Amount,
 			AmountExcludingTax:     line.AmountExcludingTax,

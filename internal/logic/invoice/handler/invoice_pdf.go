@@ -103,7 +103,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		},
 	})
 
-	var lines []*ro.ChannelDetailInvoiceItem
+	var lines []*ro.InvoiceItemDetailRo
 	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
 
@@ -204,7 +204,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 //		Email:   user.Email,
 //	})
 //
-//	var lines []*ro.ChannelDetailInvoiceItem
+//	var lines []*ro.InvoiceItemDetailRo
 //	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
 //	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
 //

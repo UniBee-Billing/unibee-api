@@ -33,7 +33,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= TotalAmount value")
 
-	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.Reference)
+	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.MerchantRefundId)
 	isDuplicatedInvoke := false
 
 	//- 退款并发调用严重，加上Redis排它锁, todo mark 使用数据库锁
@@ -45,7 +45,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
-		return nil, gerror.Newf(`too fast duplicate call %s`, req.Reference)
+		return nil, gerror.Newf(`too fast duplicate call %s`, req.MerchantRefundId)
 	}
 
 	var (
@@ -53,7 +53,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	)
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
 		PaymentId: req.PaymentId,
-		BizId:     req.Reference,
+		BizId:     req.MerchantRefundId,
 		BizType:   bizType,
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "duplicate reference call")
@@ -61,7 +61,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	one = &entity.Refund{
 		CompanyId:     payment.CompanyId,
 		MerchantId:    payment.MerchantId,
-		BizId:         req.Reference,
+		BizId:         req.MerchantRefundId,
 		BizType:       bizType,
 		PaymentId:     payment.PaymentId,
 		RefundId:      utility.CreateRefundId(),

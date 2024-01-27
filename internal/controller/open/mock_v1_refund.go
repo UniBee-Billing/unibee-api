@@ -17,9 +17,9 @@ func (c *ControllerMock) Refund(ctx context.Context, req *mock.RefundReq) (res *
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 	refundsReq := &v12.RefundsReq{
-		PaymentId:  req.PaymentId,
-		MerchantId: req.MerchantId,
-		Reference:  uuid.New().String(),
+		PaymentId:        req.PaymentId,
+		MerchantId:       req.MerchantId,
+		MerchantRefundId: uuid.New().String(),
 		Amount: &v12.PayAmountVo{
 			Currency: req.Currency,
 			Value:    req.Amount,
