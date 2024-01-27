@@ -1,4 +1,4 @@
-package paypal
+package out
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/out/log"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/channel/util"
@@ -38,6 +37,11 @@ import (
 //APIBaseLive = "https://api-m.paypal.com"
 
 type Paypal struct {
+}
+
+func (p Paypal) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p Paypal) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
@@ -75,7 +79,7 @@ func (p Paypal) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (p Paypal) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -371,7 +375,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 	if len(result.Webhooks) == 0 {
 		//创建
 		param := &paypal.CreateWebhookRequest{
-			URL: out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+			URL: GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
 			EventTypes: []paypal.WebhookEventType{
 				{Name: "BILLING.SUBSCRIPTION.CREATED"},
 				{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
@@ -424,7 +428,7 @@ func (p Paypal) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 			{
 				Operation: "replace",
 				Path:      "/url",
-				Value:     strings.Replace(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
+				Value:     strings.Replace(GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)

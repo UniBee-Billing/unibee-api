@@ -10,6 +10,11 @@ import (
 type Blank struct {
 }
 
+func (b Blank) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -45,7 +50,7 @@ func (b Blank) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *ent
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (b Blank) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

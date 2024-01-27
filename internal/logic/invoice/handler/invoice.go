@@ -153,7 +153,9 @@ type CreateInvoiceInternalReq struct {
 	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`                                      // period_end
 }
 
-func CreateInvoiceForStartPayment(simplify *ro.InvoiceDetailSimplify, payment *entity.Payment) error {
+func CreateInvoiceForNewPayment(ctx context.Context, simplify *ro.InvoiceDetailSimplify, payment *entity.Payment) error {
+	//one := query.GetInvoiceByChannelUniqueId(ctx, payment.PaymentId)
+
 	return nil
 }
 
@@ -169,16 +171,12 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 	var channelInvoicePdf = ""
 	var channelInvoiceStatus = ""
 	var channelLink = ""
-	var channelUserId = ""
+	//var channelUserId = ""
 	var sendEmail = ""
 	if req.ChannelDetailInvoiceInternalResp != nil {
 		channelInvoicePdf = req.ChannelDetailInvoiceInternalResp.ChannelInvoicePdf
 		channelInvoiceStatus = req.ChannelDetailInvoiceInternalResp.ChannelStatus
 		channelLink = req.ChannelDetailInvoiceInternalResp.Link
-	}
-	userChannel := query.GetUserChannel(ctx, req.UserId, req.ChannelId)
-	if userChannel != nil {
-		channelUserId = userChannel.ChannelUserId
 	}
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	if user != nil {
@@ -189,21 +187,21 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 	if one == nil {
 		//创建
 		one = &entity.Invoice{
-			BizType:                        req.Payment.BizType,
-			UserId:                         req.UserId,
-			MerchantId:                     req.MerchantId,
-			SubscriptionId:                 req.SubscriptionId,
-			InvoiceId:                      utility.CreateInvoiceId(),
-			PeriodStart:                    req.PeriodStart,
-			PeriodEnd:                      req.PeriodEnd,
-			PeriodStartTime:                gtime.NewFromTimeStamp(req.PeriodStart),
-			PeriodEndTime:                  gtime.NewFromTimeStamp(req.PeriodEnd),
-			Currency:                       req.Currency,
-			ChannelId:                      req.ChannelId,
-			Status:                         req.InvoiceStatus,
-			SendStatus:                     0,
-			SendEmail:                      sendEmail,
-			ChannelUserId:                  channelUserId,
+			BizType:         req.Payment.BizType,
+			UserId:          req.UserId,
+			MerchantId:      req.MerchantId,
+			SubscriptionId:  req.SubscriptionId,
+			InvoiceId:       utility.CreateInvoiceId(),
+			PeriodStart:     req.PeriodStart,
+			PeriodEnd:       req.PeriodEnd,
+			PeriodStartTime: gtime.NewFromTimeStamp(req.PeriodStart),
+			PeriodEndTime:   gtime.NewFromTimeStamp(req.PeriodEnd),
+			Currency:        req.Currency,
+			ChannelId:       req.ChannelId,
+			Status:          req.InvoiceStatus,
+			SendStatus:      0,
+			SendEmail:       sendEmail,
+			//ChannelUserId:                  channelUserId,
 			ChannelInvoiceId:               req.ChannelInvoiceId,
 			ChannelPaymentId:               req.Payment.ChannelPaymentId,
 			UniqueId:                       req.Payment.PaymentId,
@@ -239,10 +237,10 @@ func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req
 			//dao.Invoice.Columns().PeriodEnd:                      req.PeriodEnd,
 			//dao.Invoice.Columns().PeriodStartTime:                gtime.NewFromTimeStamp(req.PeriodStart),
 			//dao.Invoice.Columns().PeriodEndTime:                  gtime.NewFromTimeStamp(req.PeriodEnd),
-			dao.Invoice.Columns().Currency:                       req.Currency,
-			dao.Invoice.Columns().Status:                         req.InvoiceStatus,
-			dao.Invoice.Columns().ChannelInvoiceId:               req.ChannelInvoiceId,
-			dao.Invoice.Columns().ChannelUserId:                  channelUserId,
+			dao.Invoice.Columns().Currency:         req.Currency,
+			dao.Invoice.Columns().Status:           req.InvoiceStatus,
+			dao.Invoice.Columns().ChannelInvoiceId: req.ChannelInvoiceId,
+			//dao.Invoice.Columns().ChannelUserId:                  channelUserId,
 			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().ChannelPaymentId:               req.Payment.ChannelPaymentId,

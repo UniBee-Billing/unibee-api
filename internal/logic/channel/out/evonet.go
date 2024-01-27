@@ -1,4 +1,4 @@
-package evonet
+package out
 
 import (
 	"bytes"
@@ -13,7 +13,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/channel/log"
-	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/channel/util"
 	"go-oversea-pay/internal/logic/payment/handler"
@@ -33,6 +32,11 @@ import (
 //const PROD_ENDPOINT = "https://hkg-online.everonet.com"
 
 type Evonet struct{}
+
+func (e Evonet) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (e Evonet) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
@@ -69,7 +73,7 @@ func (e Evonet) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (e Evonet) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -523,8 +527,8 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			"tradeType":     "Sale of goods",
 			"totalQuantity": fmt.Sprintf("%d", len(createPayContext.Invoice.Lines)),
 		},
-		"returnURL": out.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
-		"webhook":   out.GetPaymentWebhookEntranceUrl(createPayContext.Pay.ChannelId),
+		"returnURL": GetPaymentRedirectEntranceUrl(createPayContext.Pay),
+		"webhook":   GetPaymentWebhookEntranceUrl(createPayContext.Pay.ChannelId),
 	}
 
 	if len(createPayContext.PayChannel.BrandData) > 0 {
@@ -596,7 +600,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment)
 			"currency": pay.Currency,
 			"value":    utility.ConvertCentToDollarStr(pay.PaymentAmount, pay.Currency),
 		},
-		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
+		"webhook": GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -631,7 +635,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) 
 			"merchantTransID":   utility.CreatePaymentId(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
-		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
+		"webhook": GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -713,7 +717,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, 
 			"currency": pay.Currency,
 			"value":    utility.ConvertCentToDollarStr(refund.RefundAmount, pay.Currency),
 		},
-		"webhook": out.GetPaymentWebhookEntranceUrl(pay.ChannelId),
+		"webhook": GetPaymentWebhookEntranceUrl(pay.ChannelId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))

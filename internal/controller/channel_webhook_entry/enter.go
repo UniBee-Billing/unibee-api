@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/util"
 	"go-oversea-pay/utility"
 	"strconv"
@@ -19,7 +19,7 @@ func ChannelPaymentWebhookEntrance(r *ghttp.Request) {
 		return
 	}
 	payChannel := util.GetOverseaPayChannel(r.Context(), int64(channelIdInt))
-	channel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelWebhook(r, payChannel)
+	out.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelWebhook(r, payChannel)
 }
 
 func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
@@ -30,7 +30,7 @@ func ChannelPaymentRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	payChannel := util.GetOverseaPayChannel(r.Context(), int64(channelIdInt))
-	redirect, err := channel.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
+	redirect, err := out.GetPayChannelServiceProvider(r.Context(), int64(channelIdInt)).DoRemoteChannelRedirect(r, payChannel)
 	if err != nil {
 		r.Response.Writeln(fmt.Sprintf("%v", err))
 		return

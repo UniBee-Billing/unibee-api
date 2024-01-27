@@ -1,4 +1,4 @@
-package channel
+package out
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 
 func GetPayChannelServiceProvider(ctx context.Context, channelId int64) (channelService _interface.RemotePayChannelInterface) {
 	proxy := &PayChannelProxy{}
-	proxy.channel = query.GetPayChannelById(ctx, channelId)
-	utility.Assert(proxy.channel != nil, fmt.Sprintf("channel not found %d", channelId))
+	proxy.PaymentChannel = query.GetPayChannelById(ctx, channelId)
+	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("channel not found %d", channelId))
 	return proxy
 }
 

@@ -10,7 +10,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/out"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -61,7 +61,7 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	err = channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanActive(ctx, plan, planChannel)
+	err = out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanActive(ctx, plan, planChannel)
 	if err != nil {
 		return
 	}
@@ -96,7 +96,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	err = channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
+	err = out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
 	if err != nil {
 		return
 	}

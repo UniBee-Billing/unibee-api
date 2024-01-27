@@ -9,7 +9,7 @@ import (
 	"go-oversea-pay/api/system/subscription"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -52,7 +52,7 @@ func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subsc
 				utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 				planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
 				utility.Assert(planChannel != nil, "invalid planChannel")
-				details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
+				details, err := out.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 				if err == nil {
 					err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
 					if err != nil {

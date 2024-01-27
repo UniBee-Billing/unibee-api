@@ -1,4 +1,4 @@
-package stripe
+package out
 
 import (
 	"context"
@@ -25,7 +25,6 @@ import (
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/out/log"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/channel/util"
@@ -41,6 +40,25 @@ import (
 )
 
 type Stripe struct {
+}
+
+func (s Stripe) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.CustomerParams{
+		//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
+		Email: stripe.String(user.Email),
+	}
+
+	createCustomResult, err := customer.New(params)
+	log.SaveChannelHttpLog("DoRemoteChannelUserCreate", params, createCustomResult, err, "", nil, payChannel)
+	if err != nil {
+		g.Log().Printf(ctx, "customer.New: %v", err.Error())
+		return nil, err
+	}
+	return &ro.ChannelUserCreateInternalResp{ChannelUserId: createCustomResult.ID}, nil
+
 }
 
 func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.OverseaPayChannel, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
@@ -145,13 +163,13 @@ func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payCha
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(customerId, params)
+	response, err := customer.Get(queryAndCreateChannelUserId(ctx, payChannel, userId), params)
 	if err != nil {
 		return nil, err
 	}
@@ -202,19 +220,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	if len(createInvoiceInternalReq.Invoice.ChannelUserId) == 0 {
-		params := &stripe.CustomerParams{
-			//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
-			Email: stripe.String(createInvoiceInternalReq.Invoice.SendEmail),
-		}
-
-		createCustomResult, err := customer.New(params)
-		if err != nil {
-			g.Log().Printf(ctx, "customer.New: %v", err.Error())
-			return nil, err
-		}
-		createInvoiceInternalReq.Invoice.ChannelUserId = createCustomResult.ID
-	}
+	createInvoiceInternalReq.Invoice.ChannelUserId = queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
@@ -410,19 +416,20 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	{
-		if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
-			params := &stripe.CustomerParams{
-				//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
-				Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
-			}
-
-			createCustomResult, err := customer.New(params)
-			if err != nil {
-				g.Log().Printf(ctx, "customer.New: %v", err.Error())
-				return nil, err
-			}
-			subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
-		}
+		//if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
+		//	params := &stripe.CustomerParams{
+		//		//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
+		//		Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
+		//	}
+		//
+		//	createCustomResult, err := customer.New(params)
+		//	if err != nil {
+		//		g.Log().Printf(ctx, "customer.New: %v", err.Error())
+		//		return nil, err
+		//	}
+		//	subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
+		//}
+		subscriptionRo.Subscription.ChannelUserId = queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
 		//税率创建并处理
 
 		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
@@ -483,8 +490,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 					Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
 				},
 				Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
-				SuccessURL: stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
-				CancelURL:  stripe.String(out.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, false)),
+				SuccessURL: stripe.String(GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
+				CancelURL:  stripe.String(GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, false)),
 				SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
 					Metadata: map[string]string{
 						"SubId": subscriptionRo.Subscription.SubscriptionId,
@@ -994,7 +1001,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
 			},
-			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
+			URL: stripe.String(GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.New(params)
 		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", params, result, err, "", nil, payChannel)
@@ -1030,7 +1037,7 @@ func (s Stripe) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChan
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
 			},
-			URL: stripe.String(out.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
+			URL: stripe.String(GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
 		}
 		result, err := webhookendpoint.Update(webhook.ID, params)
 		log.SaveChannelHttpLog("DoRemoteChannelCheckAndSetupWebhook", params, result, err, webhook.ID, nil, payChannel)

@@ -212,6 +212,10 @@ type ChannelBalance struct {
 	Currency string `json:"currency"`
 }
 
+type ChannelUserCreateInternalResp struct {
+	ChannelUserId string `json:"channelUserId"`
+}
+
 type ChannelUserBalanceQueryInternalResp struct {
 	Balance              *ChannelBalance   `json:"balance"`
 	CashBalance          []*ChannelBalance `json:"cashBalance"`
@@ -253,7 +257,7 @@ type ChannelCancelInvoiceInternalReq struct {
 
 type ChannelDetailInvoiceInternalResp struct {
 	ChannelSubscriptionId          string                   `json:"channelSubscriptionId"           `
-	SubscriptionId                 string                      `json:"subscriptionId"           `
+	SubscriptionId                 string                   `json:"subscriptionId"           `
 	TotalAmount                    int64                    `json:"totalAmount"        `
 	PaymentAmount                  int64                    `json:"paymentAmount"              `
 	BalanceAmount                  int64                    `json:"balanceAmount"              `

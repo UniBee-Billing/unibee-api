@@ -1,4 +1,4 @@
-package channel
+package out
 
 import (
 	"context"
@@ -8,10 +8,6 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	_interface "go-oversea-pay/internal/interface"
-	out2 "go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/out/evonet"
-	"go-oversea-pay/internal/logic/channel/out/paypal"
-	"go-oversea-pay/internal/logic/channel/out/stripe"
 	"go-oversea-pay/internal/logic/channel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
@@ -24,34 +20,57 @@ type PayChannelKeyEnum struct {
 }
 
 var (
-	Invalid  = PayChannelKeyEnum{-1, "无效支付"}
-	Grab     = PayChannelKeyEnum{0, "Grab支付"}
-	Klarna   = PayChannelKeyEnum{1, "Klarna支付"}
-	Evonet   = PayChannelKeyEnum{2, "Evonet支付"}
-	Paypal   = PayChannelKeyEnum{3, "Paypal支付"}
-	Stripe   = PayChannelKeyEnum{4, "Stripe支付"}
-	Blank    = PayChannelKeyEnum{50, "0金额支付专用"}
-	AutoTest = PayChannelKeyEnum{500, "自动化测试支付专用"}
+	ChannelInvalid  = PayChannelKeyEnum{-1, "无效支付"}
+	ChannelGrab     = PayChannelKeyEnum{0, "Grab支付"}
+	ChannelKlarna   = PayChannelKeyEnum{1, "Klarna支付"}
+	ChannelEvonet   = PayChannelKeyEnum{2, "Evonet支付"}
+	ChannelPaypal   = PayChannelKeyEnum{3, "Paypal支付"}
+	ChannelStripe   = PayChannelKeyEnum{4, "Stripe支付"}
+	ChannelBlank    = PayChannelKeyEnum{50, "0金额支付专用"}
+	ChannelAutoTest = PayChannelKeyEnum{500, "自动化测试支付专用"}
 )
 
 type PayChannelProxy struct {
-	channel *entity.OverseaPayChannel
+	PaymentChannel *entity.OverseaPayChannel
+}
+
+func (p PayChannelProxy) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+
+	res, err = p.getRemoteChannel().DoRemoteChannelUserCreate(ctx, payChannel, user)
+
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserCreate cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
 }
 
 func (p PayChannelProxy) getRemoteChannel() (channelService _interface.RemotePayChannelInterface) {
-	utility.Assert(p.channel != nil, "channel is not set")
-	if p.channel.EnumKey == Evonet.Code {
-		return &evonet.Evonet{}
-	} else if p.channel.EnumKey == Paypal.Code {
-		return &paypal.Paypal{}
-	} else if p.channel.EnumKey == Stripe.Code {
-		return &stripe.Stripe{}
-	} else if p.channel.EnumKey == Blank.Code {
-		return &out2.Blank{}
-	} else if p.channel.EnumKey == AutoTest.Code {
-		return &out2.AutoTest{}
+	utility.Assert(p.PaymentChannel != nil, "channel is not set")
+	if p.PaymentChannel.EnumKey == ChannelEvonet.Code {
+		return &Evonet{}
+	} else if p.PaymentChannel.EnumKey == ChannelPaypal.Code {
+		return &Paypal{}
+	} else if p.PaymentChannel.EnumKey == ChannelStripe.Code {
+		return &Stripe{}
+	} else if p.PaymentChannel.EnumKey == ChannelBlank.Code {
+		return &Blank{}
+	} else if p.PaymentChannel.EnumKey == ChannelAutoTest.Code {
+		return &AutoTest{}
 	} else {
-		return &out2.Invalid{}
+		return &Invalid{}
 	}
 }
 
@@ -88,7 +107,7 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, customerId string) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -101,7 +120,7 @@ func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, p
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, customerId)
+	res, err = p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, userId)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserBalancesQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())

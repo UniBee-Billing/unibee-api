@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/out"
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -49,7 +49,7 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 			for _, one := range mainList {
 				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
 				utility.Assert(payChannel != nil, "invalid planChannel")
-				details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.ChannelPaymentId)
+				details, err := out.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.ChannelPaymentId)
 				if err == nil {
 					for _, detail := range details {
 						err := handler2.CreateOrUpdateRefundByDetail(backgroundCtx, one, detail, detail.ChannelRefundId)

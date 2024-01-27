@@ -10,7 +10,7 @@ import (
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel"
+	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/util"
 	"go-oversea-pay/internal/logic/payment/service"
@@ -200,7 +200,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	} else {
 		payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 		utility.Assert(payChannel != nil, "payChannel not found")
-		_, err := channel.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCancel(ctx, payChannel, &ro.ChannelCancelInvoiceInternalReq{
+		_, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCancel(ctx, payChannel, &ro.ChannelCancelInvoiceInternalReq{
 			ChannelInvoiceId: one.ChannelInvoiceId,
 		})
 		if err != nil {
@@ -236,7 +236,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		return nil, err
 	}
 	checkInvoice(util.ConvertInvoiceToRo(one))
-	createRes, err := channel.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
+	createRes, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
 		Invoice:      one,
 		InvoiceLines: lines,
 		PayMethod:    req.PayMethod,
