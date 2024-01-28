@@ -9,6 +9,8 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/invoice/handler"
+	"go-oversea-pay/internal/logic/invoice/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 )
@@ -64,7 +66,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	return nil
 }
 
-func UpdateSubWithPayment(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
+func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	var cancelAtPeriodEnd = 0
 	if details.CancelAtPeriodEnd {
 		cancelAtPeriodEnd = 1
@@ -116,6 +118,9 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 }
 
 func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	if one.Status == consts.PendingSubStatusFinished {
+		return true, nil
+	}
 	// 先创建 SubscriptionTimeLine 在做 Sub 更新
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))
 	if err != nil {
@@ -146,17 +151,29 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	return true, nil
 }
 
-func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
+func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment, channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp) error {
+	// billing-cycle
+	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
+	if err != nil {
+		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
+	}
+	err = UpdateSubscriptionBillingCycleWithPayment(ctx, sub, channelSubscriptionDetail)
+	return err
+}
+
+func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
 	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 	if sub == nil {
-		return gerror.Newf("HandleSubscriptionPaymentSuccess sub not found %s", req.ChannelSubscriptionId)
+		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.ChannelSubscriptionId)
 	}
 	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
 	if eiPendingSubUpdate != nil {
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
-		_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
-		if err != nil {
-			return err
+		if req.Payment.Status == consts.PAY_SUCCESS {
+			_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		var byUpdate = false
@@ -164,49 +181,55 @@ func HandleSubscriptionPaymentSuccess(ctx context.Context, req *SubscriptionPaym
 			//有 pending 的更新单存在，检查支付是否对应更新单
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpdate.UpdateAmount == req.Payment.TotalAmount {
-				//金额一致
-				_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
-				if err != nil {
-					return err
+				// compensate next pending update billing cycle invoice
+				one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
+				if one == nil {
+					sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+
+					invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
+						Currency:      pendingSubUpdate.UpdateCurrency,
+						PlanId:        pendingSubUpdate.UpdateAmount,
+						Quantity:      pendingSubUpdate.UpdateQuantity,
+						AddonJsonData: pendingSubUpdate.UpdateAddonData,
+						TaxScale:      sub.TaxScale,
+					})
+					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
+				}
+
+				if req.Payment.Status == consts.PAY_SUCCESS {
+					_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
+					if err != nil {
+						return err
+					}
 				}
 				byUpdate = true
 			}
 		}
 		if !byUpdate && req.Payment.TotalAmount == sub.Amount {
-			// billing-cycle
-			err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", req.Payment.PaymentId))
-			if err != nil {
-				g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
-			}
-		}
-	}
-	err := UpdateSubWithPayment(ctx, sub, req.ChannelSubscriptionDetail)
-	if err != nil {
-		return err
-	}
-	//重新获取
-	sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	// todo generate InvoiceSimplify and update payment
+			// compensate billing cycle invoice
+			one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
+			if one == nil {
+				sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
-	//err = handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
-	//	Payment:                          req.Payment,
-	//	ChannelInvoiceId:                 req.ChannelInvoiceId,
-	//	Currency:                         sub.Currency,
-	//	PlanId:                           sub.PlanId,
-	//	Quantity:                         sub.Quantity,
-	//	AddonJsonData:                    sub.AddonData,
-	//	TaxScale:                         sub.TaxScale,
-	//	UserId:                           sub.UserId,
-	//	MerchantId:                       sub.MerchantId,
-	//	SubscriptionId:                   sub.SubscriptionId,
-	//	ChannelId:                        sub.ChannelId,
-	//	InvoiceStatus:                    consts.InvoiceStatusPaid,
-	//	ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
-	//	PeriodStart:                      sub.CurrentPeriodStart,
-	//	PeriodEnd:                        sub.CurrentPeriodEnd,
-	//})
-	if err != nil {
-		return err
+				invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
+					Currency:      sub.Currency,
+					PlanId:        sub.PlanId,
+					Quantity:      sub.Quantity,
+					AddonJsonData: sub.AddonData,
+					TaxScale:      sub.TaxScale,
+				})
+				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
+			}
+			if req.Payment.Status == consts.PAY_SUCCESS {
+				err := FinishNextBillingCycleForSubscription(ctx, sub, req.Payment, req.ChannelSubscriptionDetail)
+				if err != nil {
+					return err
+				}
+			}
+		} else if !byUpdate {
+			// other situation payment need implementation todo mark
+
+		}
 	}
 	return nil
 }
@@ -239,7 +262,7 @@ func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *Subscript
 	//if eiPendingSubUpdate != nil {
 	//	//更新单支付失败, EffectImmediate=true 需要用户 3DS 验证等场景
 	//	//金额一致
-	//	err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
+	//	err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
 	//		Payment:                          req.Payment,
 	//		Currency:                         eiPendingSubUpdate.UpdateCurrency,
 	//		PlanId:                           eiPendingSubUpdate.UpdatePlanId,
@@ -265,7 +288,7 @@ func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *Subscript
 	//		pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 	//		if pendingSubUpdate.UpdateAmount == req.Payment.TotalAmount {
 	//			//金额一致
-	//			err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
+	//			err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
 	//				Payment:                          req.Payment,
 	//				Currency:                         pendingSubUpdate.UpdateCurrency,
 	//				PlanId:                           pendingSubUpdate.UpdatePlanId,
@@ -289,7 +312,7 @@ func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *Subscript
 	//	}
 	//	if !byUpdate {
 	//		//没有匹配到更新单
-	//		err := handler.CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx, &handler.CreateInvoiceInternalReq{
+	//		err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
 	//			Payment:                          req.Payment,
 	//			Currency:                         sub.Currency,
 	//			PlanId:                           sub.PlanId,

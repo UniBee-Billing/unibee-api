@@ -253,10 +253,10 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
 		if one != nil {
 			req := &handler.HandlePayReq{
-				PaymentId:      merchantTradeNo,
-				ChannelTradeNo: channelTradeNo,
-				PayStatusEnum:  consts.PAY_FAILED,
-				Reason:         reason,
+				PaymentId:        merchantTradeNo,
+				ChannelPaymentId: channelTradeNo,
+				PayStatusEnum:    consts.PAY_FAILED,
+				Reason:           reason,
 			}
 			err := handler.HandlePayFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
@@ -316,12 +316,12 @@ func (e Evonet) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.Over
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			receiveFee := utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String())
 			req := &handler.HandlePayReq{
-				PaymentId:      merchantTradeNo,
-				ChannelTradeNo: channelTradeNo,
-				PayStatusEnum:  consts.PAY_SUCCESS,
-				PayFee:         one.TotalAmount,
-				ReceiveFee:     receiveFee,
-				PaidTime:       gtime.Now(),
+				PaymentId:        merchantTradeNo,
+				ChannelPaymentId: channelTradeNo,
+				PayStatusEnum:    consts.PAY_SUCCESS,
+				TotalAmount:      one.TotalAmount,
+				PaymentAmount:    receiveFee,
+				PaidTime:         gtime.Now(),
 			}
 			err := handler.HandlePaySuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")

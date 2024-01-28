@@ -238,7 +238,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	if err != nil {
 		return nil, err
 	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", params, result, err, "New", nil, payChannel)
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", params, result, err, "New", nil, payChannel)
 
 	for _, line := range createInvoiceInternalReq.InvoiceLines {
 		ItemParams := &stripe.InvoiceItemParams{
@@ -268,7 +268,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	if err != nil {
 		return nil, err
 	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, payChannel)
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, payChannel)
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
 		status = consts.InvoiceStatusPending
@@ -1186,7 +1186,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 //			details.ChannelSubscriptionDetail = subDetails
 //		}
 //	}
-//	details.UniqueId = details.ChannelPaymentId
+//	details.UniqueId = details.ChannelPaymentIntentId
 //	err = handler2.HandlePaymentWebhookEvent(ctx, details)
 //	if err != nil {
 //		return err

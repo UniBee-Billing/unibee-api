@@ -22,37 +22,43 @@ import (
 )
 
 type HandlePayReq struct {
-	PaymentId      string
-	ChannelPayId   string
-	ChannelTradeNo string
-	PayFee         int64
-	PayStatusEnum  consts.PayStatusEnum
-	PaidTime       *gtime.Time
-	ReceiveFee     int64
-	CaptureFee     int64
-	Reason         string
-	PaymentMethod  string
+	PaymentId                        string
+	ChannelPaymentIntentId           string
+	ChannelPaymentId                 string
+	TotalAmount                      int64
+	PayStatusEnum                    consts.PayStatusEnum
+	PaidTime                         *gtime.Time
+	PaymentAmount                    int64
+	CaptureAmount                    int64
+	Reason                           string
+	PaymentMethod                    string
+	ChannelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
-	pay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
-	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil, paymentId=%s", req.PaymentId)
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
 	}
 
 	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
-		BizId:     pay.PaymentId,
-		Fee:       pay.TotalAmount,
+		BizId:     payment.PaymentId,
+		Fee:       payment.TotalAmount,
 		EventType: event.Expird.Type,
 		Event:     event.Expird.Desc,
-		OpenApiId: pay.OpenApiId,
-		UniqueNo:  fmt.Sprintf("%s_%s", pay.PaymentId, "Expird"),
+		OpenApiId: payment.OpenApiId,
+		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expird"),
 	})
 
-	err = CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+	err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+	if err != nil {
+		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+	}
+
+	err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 	if err != nil {
 		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 	}
@@ -66,39 +72,43 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 
 func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
-	pay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
-	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil, paymentId=%s", req.PaymentId)
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
+	}
+	err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+	if err != nil {
+		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
 	//交易事件记录
 	event.SaveTimeLine(ctx, entity.PaymentEvent{
 		BizType:   0,
-		BizId:     pay.PaymentId,
-		Fee:       req.CaptureFee,
+		BizId:     payment.PaymentId,
+		Fee:       req.CaptureAmount,
 		EventType: event.CaptureFailed.Type,
 		Event:     event.CaptureFailed.Desc,
-		OpenApiId: pay.OpenApiId,
-		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "CaptureFailed", req.ChannelPayId),
+		OpenApiId: payment.OpenApiId,
+		UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "CaptureFailed", req.ChannelPaymentIntentId),
 		Message:   req.Reason,
 	})
 	return nil
 }
 
-func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
-	g.Log().Infof(ctx, "HandlePayAuthorized, pay=%s", pay)
-	if pay == nil {
-		g.Log().Infof(ctx, "pay is nil")
+func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err error) {
+	g.Log().Infof(ctx, "HandlePayAuthorized, payment=%s", payment)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment is nil")
 		return errors.New("支付不存在")
 	}
-	if pay.AuthorizeStatus == consts.AUTHORIZED {
+	if payment.AuthorizeStatus == consts.AUTHORIZED {
 		return nil
 	}
 
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.Payment.Columns().ChannelPaymentId: pay.ChannelPaymentId},
-				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -118,16 +128,19 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
-			BizId:     pay.PaymentId,
-			Fee:       pay.TotalAmount,
+			BizId:     payment.PaymentId,
+			Fee:       payment.TotalAmount,
 			EventType: event.Authorised.Type,
 			Event:     event.Authorised.Desc,
-			OpenApiId: pay.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", pay.ChannelPaymentId, "Authorised"),
+			OpenApiId: payment.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.ChannelPaymentId, "Authorised"),
 		})
-
 	}
 
 	return err
@@ -136,30 +149,30 @@ func HandlePayAuthorized(ctx context.Context, pay *entity.Payment) (err error) {
 
 func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "handlePayFailure, req=%s", req)
-	pay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
-	if pay == nil {
-		g.Log().Infof(ctx, "pay null, paymentId=%s", req.PaymentId)
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
 	}
-	if pay.Status == consts.PAY_FAILED {
+	if payment.Status == consts.PAY_FAILED {
 		g.Log().Infof(ctx, "already failure")
 		return nil
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	if pay.Status == consts.PAY_SUCCESS {
+	if payment.Status == consts.PAY_SUCCESS {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")
 	}
 
 	var refundFee int64 = 0
-	if pay.AuthorizeStatus != consts.WAITING_AUTHORIZED {
-		refundFee = pay.TotalAmount
+	if payment.AuthorizeStatus != consts.WAITING_AUTHORIZED {
+		refundFee = payment.TotalAmount
 	}
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().RefundAmount: refundFee},
-				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -183,18 +196,22 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
 		//交易事件记录
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
-			BizId:     pay.PaymentId,
+			BizId:     payment.PaymentId,
 			Fee:       0,
 			EventType: event.Cancelled.Type,
 			Event:     event.Cancelled.Desc,
-			OpenApiId: pay.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", pay.PaymentId, "Cancelled"),
+			OpenApiId: payment.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Cancelled"),
 			Message:   req.Reason,
 		})
-		err := CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 		}
@@ -211,29 +228,29 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if len(req.PaymentId) == 0 {
 		return errors.New("invalid param PaymentId is nil")
 	}
-	pay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 
-	if pay == nil {
-		g.Log().Infof(ctx, "pay not found, paymentId=%s", req.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment not found, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	if pay.Status == consts.PAY_SUCCESS {
+	if payment.Status == consts.PAY_SUCCESS {
 		g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
 		return nil
 	}
 
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, pay.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().Status:                 consts.PAY_SUCCESS,
 				dao.Payment.Columns().PaidTime:               req.PaidTime,
-				dao.Payment.Columns().ChannelPaymentIntentId: req.ChannelPayId,
-				dao.Payment.Columns().ChannelPaymentId:       req.ChannelTradeNo,
-				dao.Payment.Columns().PaymentAmount:          req.ReceiveFee,
-				dao.Payment.Columns().RefundAmount:           pay.TotalAmount - req.ReceiveFee},
-				g.Map{dao.Payment.Columns().Id: pay.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+				dao.Payment.Columns().ChannelPaymentIntentId: req.ChannelPaymentIntentId,
+				dao.Payment.Columns().ChannelPaymentId:       req.ChannelPaymentId,
+				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
+				dao.Payment.Columns().RefundAmount:           payment.RefundAmount},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -258,35 +275,39 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
 		//try {
 		//交易事件记录
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
-			BizId:     pay.PaymentId,
-			Fee:       req.ReceiveFee,
+			BizId:     payment.PaymentId,
+			Fee:       req.PaymentAmount,
 			EventType: event.Settled.Type,
 			Event:     event.Settled.Desc,
-			OpenApiId: pay.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", pay.PaymentId, "Settled"),
+			OpenApiId: payment.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Settled"),
 			Message:   req.Reason,
 		})
 		//} catch (Exception e) {
 		//	e.printStackTrace();
 		//	log.info("save_event exception:{}",e.toString());
 		//}
-		////            mqUtil.addToMq(MqTopicEnum.PaySuccess,pay.getId());
+		////            mqUtil.addToMq(MqTopicEnum.PaySuccess,payment.getId());
 		//// 为提高支付结果反馈速度，同步处理业务订单支付成功
-		//OverseaPay queryPay = overseaPayMapper.selectById(pay.getId());
+		//OverseaPay queryPay = overseaPayMapper.selectById(payment.getId());
 		//if (queryPay == null) {
-		//	pay.setPayStatus(PayStatusEnum.PAY_SUCCESS.getCode());
-		//	pay.setPaidTime(Instant.ofEpochMilli(req.getPaidTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
-		//	pay.setChannelPayId(req.getChannelPayId());
-		//	pay.setChannelTradeNo(req.getChannelTradeNo());
-		//	pay.setReceiptFee(req.getReceiptFee());
-		//	queryPay = pay;
+		//	payment.setPayStatus(PayStatusEnum.PAY_SUCCESS.getCode());
+		//	payment.setPaidTime(Instant.ofEpochMilli(req.getPaidTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
+		//	payment.setChannelPayId(req.getChannelPayId());
+		//	payment.setChannelTradeNo(req.getChannelTradeNo());
+		//	payment.setReceiptFee(req.getReceiptFee());
+		//	queryPay = payment;
 		//}
 		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryPay.getBizType()).paySuccessCallback(queryPay,req.getPaidTime());
-		err := CreateOrUpdatePaymentTimeline(ctx, pay, pay.PaymentId)
+		err := CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 		}
@@ -295,20 +316,20 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) error {
-	//先保存 Payment 信息
-	payment, err := CreateOrUpdatePaymentFromChannel(ctx, channelPayRo)
-	// payment not first generate from system
-	if err != nil {
-		return err
-	}
+	one := query.GetPaymentByChannelPaymentId(ctx, channelPayRo.ChannelPaymentId)
+	if channelPayRo.ChannelSubscriptionDetail != nil && channelPayRo.ChannelInvoiceDetail != nil {
+		//payment for subscription
+		payment, err := CreateOrUpdateSubscriptionPaymentFromChannel(ctx, channelPayRo)
+		// payment not first generate from system
+		if err != nil {
+			return err
+		}
 
-	if len(channelPayRo.ChannelSubscriptionId) > 0 && channelPayRo.ChannelSubscriptionDetail == nil {
-		return gerror.Newf("payment hook may too fast, ChannelSubscriptionDetail is nil for ChannelSubscriptionId:%s", channelPayRo.ChannelSubscriptionId)
-	}
-
-	if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status == consts.PAY_SUCCESS && channelPayRo.ChannelSubscriptionDetail != nil {
+		if len(channelPayRo.ChannelSubscriptionId) > 0 && channelPayRo.ChannelSubscriptionDetail == nil {
+			return gerror.Newf("payment hook may too fast, ChannelSubscriptionDetail is nil for ChannelSubscriptionId:%s", channelPayRo.ChannelSubscriptionId)
+		}
 		//Subscription Payment Success
-		err = handler.HandleSubscriptionPaymentSuccess(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
+		err = handler.HandleSubscriptionPaymentUpdate(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
 			Payment:                     payment,
 			ChannelInvoiceDetail:        channelPayRo.ChannelInvoiceDetail,
 			ChannelSubscriptionDetail:   channelPayRo.ChannelSubscriptionDetail,
@@ -325,43 +346,66 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			CurrentPeriodStart:          channelPayRo.ChannelSubscriptionDetail.CurrentPeriodStart,
 			TrialEnd:                    channelPayRo.ChannelSubscriptionDetail.TrialEnd,
 		})
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment, channelPayRo.ChannelInvoiceDetail)
 		if err != nil {
-			return err
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
-		// todo mark 生成 InvoiceSimplify
-		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
-	} else if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status != consts.TO_BE_PAID && channelPayRo.CaptureStatus == consts.WAITING_AUTHORIZED && channelPayRo.ChannelSubscriptionDetail != nil {
-		//Subscription Payment WAITING_AUTHORIZED
-		err = handler.HandleSubscriptionPaymentWaitAuthorized(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
-			Payment:                     payment,
-			ChannelInvoiceDetail:        channelPayRo.ChannelInvoiceDetail,
-			ChannelSubscriptionDetail:   channelPayRo.ChannelSubscriptionDetail,
-			ChannelPaymentId:            channelPayRo.ChannelPaymentId,
-			ChannelInvoiceId:            channelPayRo.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelSubscriptionId:       channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelSubscriptionUpdateId: channelPayRo.ChannelSubscriptionUpdateId,
-		})
-		// todo mark 生成 InvoiceSimplify
-		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
-	} else if channelPayRo.ChannelInvoiceDetail != nil && channelPayRo.Status != consts.PAY_FAILED && channelPayRo.ChannelSubscriptionDetail != nil {
-		//Subscription Payment Failure
-		err = handler.HandleSubscriptionPaymentFailure(ctx, &handler.SubscriptionPaymentFailureWebHookReq{
-			Payment:                     payment,
-			ChannelInvoiceDetail:        channelPayRo.ChannelInvoiceDetail,
-			ChannelSubscriptionDetail:   channelPayRo.ChannelSubscriptionDetail,
-			ChannelPaymentId:            channelPayRo.ChannelPaymentId,
-			ChannelInvoiceId:            channelPayRo.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelSubscriptionId:       channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelSubscriptionUpdateId: channelPayRo.ChannelSubscriptionUpdateId,
-		})
-		// todo mark 生成 InvoiceSimplify
-		handler2.CreateOrUpdateInvoiceFromPayment(ctx, nil, payment, channelPayRo.ChannelInvoiceDetail)
+	} else if one != nil {
+		// one-time payment
+		if channelPayRo.Status == consts.PAY_SUCCESS {
+			err := HandlePaySuccess(ctx, &HandlePayReq{
+				PaymentId:                        one.PaymentId,
+				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
+				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				TotalAmount:                      channelPayRo.TotalAmount,
+				PayStatusEnum:                    consts.PAY_SUCCESS,
+				PaidTime:                         channelPayRo.PayTime,
+				PaymentAmount:                    channelPayRo.PaymentAmount,
+				CaptureAmount:                    0,
+				Reason:                           channelPayRo.Reason,
+				PaymentMethod:                    "",
+				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+			})
+			if err != nil {
+				return err
+			}
+		} else if channelPayRo.Status == consts.PAY_FAILED {
+			err := HandlePayFailure(ctx, &HandlePayReq{
+				PaymentId:                        one.PaymentId,
+				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
+				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				TotalAmount:                      channelPayRo.TotalAmount,
+				PayStatusEnum:                    consts.PAY_FAILED,
+				PaidTime:                         channelPayRo.PayTime,
+				PaymentAmount:                    channelPayRo.PaymentAmount,
+				CaptureAmount:                    0,
+				Reason:                           channelPayRo.Reason,
+				PaymentMethod:                    "",
+				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		return gerror.Newf("invalid payment type")
 	}
 
 	return nil
 }
 
-func CreateOrUpdatePaymentFromChannel(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
+func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId string) error {
+	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
+		dao.Payment.Columns().InvoiceId: invoiceId,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Payment.Columns().PaymentId, paymentId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
 	channelUser := query.GetUserChannelByChannelUserId(ctx, channelPayRo.ChannelUserId, channelPayRo.ChannelId)
 	utility.Assert(channelUser != nil, "channelUser not found")
@@ -417,7 +461,7 @@ func CreateOrUpdatePaymentFromChannel(ctx context.Context, channelPayRo *ro.Chan
 		}
 		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdatePaymentFromChannel record insert failure %s`, err.Error())
+			err = gerror.Newf(`CreateOrUpdateSubscriptionPaymentFromChannel record insert failure %s`, err.Error())
 			return nil, err
 		}
 		id, _ := result.LastInsertId()

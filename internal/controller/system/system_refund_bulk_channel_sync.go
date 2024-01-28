@@ -60,7 +60,7 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 						fmt.Printf("BulkChannelSync Background Fetch ChannelRefundId:%s success\n", detail.ChannelRefundId)
 					}
 				} else {
-					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentId:%s error%s\n", one.ChannelPaymentId, err.Error())
+					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentIntentId:%s error%s\n", one.ChannelPaymentId, err.Error())
 				}
 			}
 			if len(mainList) == 0 {

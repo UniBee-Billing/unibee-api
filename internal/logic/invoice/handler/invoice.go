@@ -11,6 +11,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
+	"go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -60,7 +61,7 @@ import (
 //			ChannelStatus:                  details.ChannelStatus,
 //			ChannelInvoiceId:               details.ChannelInvoiceId,
 //			ChannelInvoicePdf:              details.ChannelInvoicePdf,
-//			ChannelPaymentId:               details.ChannelPaymentId,
+//			ChannelPaymentIntentId:               details.ChannelPaymentIntentId,
 //			UniqueId:                       uniqueId,
 //		}
 //
@@ -102,7 +103,7 @@ import (
 //			dao.Invoice.Columns().SendEmail:                      sub.CustomerEmail,
 //			dao.Invoice.Columns().Data:                           utility.FormatToJsonString(details),
 //			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-//			dao.Invoice.Columns().ChannelPaymentId:               details.ChannelPaymentId,
+//			dao.Invoice.Columns().ChannelPaymentIntentId:               details.ChannelPaymentIntentId,
 //		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 //		if err != nil {
 //			return err
@@ -152,16 +153,63 @@ type CreateInvoiceInternalReq struct {
 	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`                                      // period_end
 }
 
+func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
+	utility.Assert(payment != nil, "payment data is nil")
+	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId)
+	var status = consts.InvoiceStatusProcessing
+	if payment.Status == consts.PAY_SUCCESS {
+		status = consts.InvoiceStatusPaid
+	} else if payment.Status == consts.PAY_FAILED {
+		status = consts.InvoiceStatusFailed
+	}
+	var channelInvoicePdf = ""
+	var channelInvoiceStatus = ""
+	var channelLink = ""
+	var channelInvoiceId = ""
+	if channelDetailInvoiceInternalResp != nil {
+		channelInvoiceId = channelDetailInvoiceInternalResp.ChannelInvoiceId
+		channelInvoicePdf = channelDetailInvoiceInternalResp.ChannelInvoicePdf
+		channelInvoiceStatus = channelDetailInvoiceInternalResp.ChannelStatus
+		channelLink = channelDetailInvoiceInternalResp.Link
+	} else {
+		channelInvoiceId = one.ChannelInvoiceId
+		channelInvoicePdf = one.ChannelInvoicePdf
+		channelInvoiceStatus = one.ChannelStatus
+		channelLink = one.Link
+	}
+	utility.Assert(one != nil, "invoice not found")
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().Status:            status,
+		dao.Invoice.Columns().ChannelInvoiceId:  channelInvoiceId,
+		dao.Invoice.Columns().GmtModify:         gtime.Now(),
+		dao.Invoice.Columns().ChannelPaymentId:  payment.ChannelPaymentId,
+		dao.Invoice.Columns().Link:              channelLink,
+		dao.Invoice.Columns().ChannelStatus:     channelInvoiceStatus,
+		dao.Invoice.Columns().ChannelInvoicePdf: channelInvoicePdf,
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	if one.Status != status {
+		//更新状态发送邮件
+		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	}
+	return nil
+}
+
 func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceDetailSimplify, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByChannelUniqueId(ctx, payment.PaymentId)
+	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
 	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
 	var channelInvoicePdf = ""
+	var channelInvoiceId = ""
 	var channelInvoiceStatus = ""
 	var channelLink = ""
 	var sendEmail = ""
 	if channelDetailInvoiceInternalResp != nil {
+		channelInvoiceId = channelDetailInvoiceInternalResp.ChannelInvoiceId
 		channelInvoicePdf = channelDetailInvoiceInternalResp.ChannelInvoicePdf
 		channelInvoiceStatus = channelDetailInvoiceInternalResp.ChannelStatus
 		channelLink = channelDetailInvoiceInternalResp.Link
@@ -194,9 +242,10 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			Status:                         status,
 			SendStatus:                     0,
 			SendEmail:                      sendEmail,
-			ChannelInvoiceId:               channelDetailInvoiceInternalResp.ChannelInvoiceId,
+			ChannelInvoiceId:               channelInvoiceId,
 			ChannelPaymentId:               payment.ChannelPaymentId,
 			UniqueId:                       payment.PaymentId,
+			PaymentId:                      payment.PaymentId,
 			TotalAmount:                    simplify.TotalAmount,
 			TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 			TaxAmount:                      simplify.TaxAmount,
@@ -217,6 +266,10 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 		one.Id = uint64(uint(id))
 		//新建 Invoice 发送邮件
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		err = handler.UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
+		if err != nil {
+			return err
+		}
 	} else {
 		//更新
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -225,9 +278,11 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			dao.Invoice.Columns().UserId:                         payment.UserId,
 			dao.Invoice.Columns().SubscriptionId:                 payment.SubscriptionId,
 			dao.Invoice.Columns().ChannelId:                      payment.ChannelId,
+			dao.Invoice.Columns().PaymentId:                      payment.PaymentId,
+			dao.Invoice.Columns().UniqueId:                       payment.PaymentId,
 			dao.Invoice.Columns().Currency:                       payment.Currency,
 			dao.Invoice.Columns().Status:                         status,
-			dao.Invoice.Columns().ChannelInvoiceId:               channelDetailInvoiceInternalResp.ChannelInvoiceId,
+			dao.Invoice.Columns().ChannelInvoiceId:               channelInvoiceId,
 			dao.Invoice.Columns().SendEmail:                      sendEmail,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().ChannelPaymentId:               payment.ChannelPaymentId,
@@ -252,8 +307,8 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 	return nil
 }
 
-//func CreateOrUpdateInvoiceForSubscriptionPaymentSuccess(ctx context.Context, req *CreateInvoiceInternalReq) error {
-//	one := query.GetInvoiceByChannelUniqueId(ctx, req.Payment.PaymentId)
+//func CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx context.Context, req *CreateInvoiceInternalReq) error {
+//	one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 //	invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
 //		Currency:      req.Currency,
 //		PlanId:        req.PlanId,
@@ -294,8 +349,8 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 //			SendStatus:                     0,
 //			SendEmail:                      sendEmail,
 //			ChannelInvoiceId:               req.ChannelInvoiceId,
-//			ChannelPaymentId:               req.Payment.ChannelPaymentId,
 //			UniqueId:                       req.Payment.PaymentId,
+//			PaymentId:                      req.Payment.PaymentId,
 //			TotalAmount:                    invoice.TotalAmount,
 //			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 //			TaxAmount:                      invoice.TaxAmount,
@@ -316,41 +371,6 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 //		one.Id = uint64(uint(id))
 //		//新建 Invoice 发送邮件
 //		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-//	} else {
-//		//更新
-//		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-//			dao.Invoice.Columns().BizType:        req.Payment.BizType,
-//			dao.Invoice.Columns().MerchantId:     req.MerchantId,
-//			dao.Invoice.Columns().UserId:         req.UserId,
-//			dao.Invoice.Columns().SubscriptionId: req.SubscriptionId,
-//			dao.Invoice.Columns().ChannelId:      req.ChannelId,
-//			//dao.Invoice.Columns().PeriodStart:                    req.PeriodStart,
-//			//dao.Invoice.Columns().PeriodEnd:                      req.PeriodEnd,
-//			//dao.Invoice.Columns().PeriodStartTime:                gtime.NewFromTimeStamp(req.PeriodStart),
-//			//dao.Invoice.Columns().PeriodEndTime:                  gtime.NewFromTimeStamp(req.PeriodEnd),
-//			dao.Invoice.Columns().Currency:                       req.Currency,
-//			dao.Invoice.Columns().Status:                         req.InvoiceStatus,
-//			dao.Invoice.Columns().ChannelInvoiceId:               req.ChannelInvoiceId,
-//			dao.Invoice.Columns().SendEmail:                      sendEmail,
-//			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-//			dao.Invoice.Columns().ChannelPaymentId:               req.Payment.ChannelPaymentId,
-//			dao.Invoice.Columns().TotalAmount:                    invoice.TotalAmount,
-//			dao.Invoice.Columns().TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-//			dao.Invoice.Columns().TaxAmount:                      invoice.TaxAmount,
-//			dao.Invoice.Columns().SubscriptionAmount:             invoice.SubscriptionAmount,
-//			dao.Invoice.Columns().SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-//			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(invoice.Lines),
-//			dao.Invoice.Columns().Link:                           channelLink,
-//			dao.Invoice.Columns().ChannelStatus:                  channelInvoiceStatus,
-//			dao.Invoice.Columns().ChannelInvoicePdf:              channelInvoicePdf,
-//		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-//		if err != nil {
-//			return err
-//		}
-//		if one.Status != req.InvoiceStatus {
-//			//更新状态发送邮件
-//			_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-//		}
 //	}
 //	return nil
 //}

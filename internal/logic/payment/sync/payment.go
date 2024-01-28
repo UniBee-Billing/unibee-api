@@ -24,7 +24,7 @@ package sync
 //		payChannel := query.GetPayChannelById(backgroundCtx, channelId)
 //		details, err := channel.GetPayChannelServiceProvider(backgroundCtx, channelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, channelPaymentId)
 //		if err == nil {
-//			err := handler.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentId)
+//			err := handler.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentIntentId)
 //			if err != nil {
 //				fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
 //				return
