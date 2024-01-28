@@ -12,7 +12,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/invoice/util"
+	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -99,7 +99,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 
-	return &invoice.NewInvoiceCreateRes{Invoice: util.ConvertInvoiceToRo(one)}, nil
+	return &invoice.NewInvoiceCreateRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
 }
 
 func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
@@ -165,7 +165,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.TaxScale = req.TaxScale
 	one.ChannelId = req.ChannelId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
-	return &invoice.NewInvoiceEditRes{Invoice: util.ConvertInvoiceToRo(one)}, nil
+	return &invoice.NewInvoiceEditRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
 }
 
 func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
@@ -235,7 +235,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	if err != nil {
 		return nil, err
 	}
-	checkInvoice(util.ConvertInvoiceToRo(one))
+	checkInvoice(invoice_compute.ConvertInvoiceToRo(one))
 	createRes, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
 		Invoice:      one,
 		InvoiceLines: lines,

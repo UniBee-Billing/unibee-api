@@ -34,7 +34,7 @@ type Invoice struct {
 	ChannelStatus                  string      `json:"channelStatus"                  description:"渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object"`             // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	ChannelPaymentId               string      `json:"channelPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
-	ChannelUserId                  string      `json:"channelUserId"                  description:"渠道用户 Id"`                                                               // 渠道用户 Id
+	ChannelUserId                  string      `json:"channelUserId"                  description:"渠道用户 Id-废弃"`                                                            // 渠道用户 Id-废弃
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
 	TaxScale                       int64       `json:"taxScale"                       description:"Tax税率，万分位，1000 表示 10%"`                                                 // Tax税率，万分位，1000 表示 10%
 	SendNote                       string      `json:"sendNote"                       description:"send_note"`                                                             // send_note

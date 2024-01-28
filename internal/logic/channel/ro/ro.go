@@ -153,7 +153,6 @@ type ChannelUpdateSubscriptionInternalReq struct {
 	OldPlan         *entity.SubscriptionPlan        `json:"oldPlan"`
 	AddonPlans      []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel     *entity.SubscriptionPlanChannel `json:"planChannel"`
-	OldPlanChannel  *entity.SubscriptionPlanChannel `json:"oldPlanChannel"`
 	Subscription    *entity.Subscription            `json:"subscription"`
 	ProrationDate   int64                           `json:"prorationDate"`
 	EffectImmediate bool                            `json:"EffectImmediate"`

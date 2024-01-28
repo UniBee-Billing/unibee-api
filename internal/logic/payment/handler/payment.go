@@ -394,17 +394,6 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 	return nil
 }
 
-func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId string) error {
-	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
-		dao.Payment.Columns().InvoiceId: invoiceId,
-		dao.Invoice.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Payment.Columns().PaymentId, paymentId).OmitNil().Update()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
 	channelUser := query.GetUserChannelByChannelUserId(ctx, channelPayRo.ChannelUserId, channelPayRo.ChannelId)

@@ -11,7 +11,6 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -198,6 +197,17 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment, chan
 	return nil
 }
 
+func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId string) error {
+	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
+		dao.Payment.Columns().InvoiceId: invoiceId,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Payment.Columns().PaymentId, paymentId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceDetailSimplify, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
@@ -266,7 +276,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 		one.Id = uint64(uint(id))
 		//新建 Invoice 发送邮件
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		err = handler.UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
+		err = UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
 		if err != nil {
 			return err
 		}
@@ -309,7 +319,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 
 //func CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx context.Context, req *CreateInvoiceInternalReq) error {
 //	one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
-//	invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
+//	invoice := invoice_compute.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &invoice_compute.CalculateInvoiceReq{
 //		Currency:      req.Currency,
 //		PlanId:        req.PlanId,
 //		Quantity:      req.Quantity,

@@ -4,7 +4,7 @@ import (
 	"context"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/invoice/util"
+	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"strings"
@@ -62,7 +62,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	}
 	var resultList []*ro.InvoiceDetailRo
 	for _, invoice := range mainList {
-		resultList = append(resultList, util.ConvertInvoiceToRo(invoice))
+		resultList = append(resultList, invoice_compute.ConvertInvoiceToRo(invoice))
 	}
 
 	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil

@@ -10,7 +10,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/internal/logic/invoice/util"
+	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 )
@@ -186,7 +186,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				if one == nil {
 					sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
-					invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
+					invoice := invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
 						PlanId:        pendingSubUpdate.UpdateAmount,
 						Quantity:      pendingSubUpdate.UpdateQuantity,
@@ -211,7 +211,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			if one == nil {
 				sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
-				invoice := util.ConvertInvoiceDetailSimplifyFromPlanAddons(ctx, &util.CalculateInvoiceReq{
+				invoice := invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 					Currency:      sub.Currency,
 					PlanId:        sub.PlanId,
 					Quantity:      sub.Quantity,

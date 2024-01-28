@@ -43,4 +43,5 @@ type SubscriptionPendingUpdate struct {
 	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
 	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
 	AdminNote            interface{} // Admin 修改备注
+	ProrationDate        interface{} // merchant_user_id
 }

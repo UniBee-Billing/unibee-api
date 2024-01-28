@@ -51,6 +51,7 @@ type SubscriptionPendingUpdateColumns struct {
 	EffectImmediate      string // 是否马上生效，0-否，1-是
 	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
 	AdminNote            string // Admin 修改备注
+	ProrationDate        string // merchant_user_id
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -86,6 +87,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	EffectImmediate:      "effect_immediate",
 	EffectTime:           "effect_time",
 	AdminNote:            "admin_note",
+	ProrationDate:        "proration_date",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.

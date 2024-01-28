@@ -41,4 +41,5 @@ type SubscriptionPendingUpdate struct {
 	EffectImmediate      int         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                                                                                                                                         // 是否马上生效，0-否，1-是
 	EffectTime           int64       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`                                                                                                                   // effect_immediate=0, 预计生效时间 unit_time
 	AdminNote            string      `json:"adminNote"            description:"Admin 修改备注"`                                                                                                                                             // Admin 修改备注
+	ProrationDate        int64       `json:"prorationDate"        description:"merchant_user_id"`                                                                                                                                       // merchant_user_id
 }
