@@ -901,9 +901,13 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Items: items,
 	}
 	if subscriptionRo.EffectImmediate {
-		params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
-		params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
-		params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
+		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
+		} else {
+			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
+			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
+		}
 	} else {
 		if consts.DownGradeUsePendingUpdate {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
