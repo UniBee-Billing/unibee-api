@@ -376,8 +376,9 @@ func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan
 	s.setUnibeeAppInfo()
 
 	params := &stripe.SubscriptionParams{
-		TrialEnd:          stripe.Int64(newTrialEnd),
-		ProrationBehavior: stripe.String("none"),
+		//TrialEnd:          stripe.Int64(newTrialEnd),
+		BillingCycleAnchor: stripe.Int64(newTrialEnd), // todo mark test for use anchor
+		ProrationBehavior:  stripe.String("none"),
 	}
 	_, err = sub.Update(subscription.ChannelSubscriptionId, params)
 	if err != nil {
