@@ -212,6 +212,9 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	if one == nil && len(simplify.InvoiceId) > 0 {
+		one = query.GetInvoiceByInvoiceId(ctx, simplify.InvoiceId)
+	}
 	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
 	var channelInvoicePdf = ""
 	var channelInvoiceId = ""
@@ -400,8 +403,8 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 		}()
 		backgroundCtx := context.Background()
 		one := query.GetInvoiceByInvoiceId(backgroundCtx, invoiceId)
-		if one.BizType != consts.BIZ_TYPE_SUBSCRIPTION && len(one.Lines) == 0 {
-			// invoice with subscription type and valid lines will send emails
+		if one.BizType == consts.BIZ_TYPE_ONE_TIME || len(one.Lines) == 0 {
+			// invoice not one time type and valid lines will send emails
 			return
 		}
 		utility.Assert(one != nil, "invoice not found")

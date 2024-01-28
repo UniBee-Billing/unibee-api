@@ -491,7 +491,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(len(createPayContext.Pay.PaymentId) > 0, "paymentId is nil")
 	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
-	utility.Assert(len(createPayContext.UserId) > 0, "shopperReference is nil")
+	utility.Assert(len(createPayContext.ShopperUserId) > 0, "shopperUserId is nil")
 	utility.Assert(createPayContext.Invoice.Lines != nil, "lineItems is nil")
 	urlPath := "/g2/auth/payment/mer/" + createPayContext.PayChannel.ChannelAccountId + "/evo.e-commerce.payment"
 	channelType := createPayContext.PayChannel.SubChannel
@@ -514,7 +514,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		},
 		"userinfo": map[string]interface{}{
 			"email":     createPayContext.ShopperEmail,
-			"reference": createPayContext.UserId,
+			"reference": createPayContext.ShopperUserId,
 		},
 		"transInitiator": map[string]interface{}{
 			"browserInfo": map[string]interface{}{
@@ -580,7 +580,9 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	pspReference := paymentJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payments", responseJson.String(), "支付", pspReference, createPayContext.PayChannel.Channel)
 	res = &ro.CreatePayInternalResp{
+		Status:         consts.TO_BE_PAID,
 		Action:         responseJson.GetJson("action"),
+		Link:           responseJson.GetJson("action").Get("url").String(),
 		AdditionalData: responseJson.GetJson("paymentMethod"),
 	}
 	return res, nil

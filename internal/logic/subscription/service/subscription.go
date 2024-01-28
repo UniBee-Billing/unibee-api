@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/api/user/vat"
 	"go-oversea-pay/internal/consts"
@@ -15,11 +16,13 @@ import (
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
+	"go-oversea-pay/internal/logic/payment/service"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strconv"
 	"strings"
 )
 
@@ -508,7 +511,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			updatePreviewRes, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 				Plan:            plan,
 				Quantity:        req.Quantity,
-				OldPlan:         oldPlan,
 				AddonPlans:      addons,
 				PlanChannel:     planChannel,
 				Subscription:    sub,
@@ -682,31 +684,66 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Id = uint64(id)
 	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
 	if consts.PendingSubUpdateEffectImmediateWithOutChannel {
-		//createAndPayNewProrationInvoice
-
-		subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-			Plan:            prepare.Plan,
-			Quantity:        prepare.Quantity,
-			OldPlan:         prepare.OldPlan,
-			AddonPlans:      prepare.Addons,
-			PlanChannel:     prepare.PlanChannel,
-			Subscription:    prepare.Subscription,
-			ProrationDate:   req.ProrationDate,
-			EffectImmediate: false,
-		})
-		subUpdateRes.Paid = false
-		subUpdateRes.Link = ""
 		if prepare.EffectImmediate {
-			// Generate Proration Payment todo mark
-			// Upgrade
-			subUpdateRes.ChannelUpdateId = "" // todo mark 需要补全更新单ID
+			// createAndPayNewProrationInvoice
+			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
+			user := query.GetUserAccountById(ctx, uint64(one.UserId))
+			payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 
+			createPayContext := &ro.CreatePayContext{
+				PayChannel: payChannel,
+				Pay: &entity.Payment{
+					BizId:       one.UpdateSubscriptionId,
+					BizType:     consts.BIZ_TYPE_SUBSCRIPTION,
+					UserId:      one.UserId,
+					ChannelId:   int64(payChannel.Id),
+					TotalAmount: prepare.Invoice.TotalAmount,
+					Currency:    one.Currency,
+					CountryCode: user.CountryCode,
+					MerchantId:  one.MerchantId,
+					CompanyId:   merchantInfo.CompanyId,
+				},
+				Platform:      "WEB",
+				DeviceType:    "Web",
+				ShopperUserId: strconv.FormatInt(one.UserId, 10),
+				ShopperEmail:  user.Email,
+				ShopperLocale: "en",
+				Mobile:        user.Mobile,
+				Invoice:       prepare.Invoice,
+				ShopperName: &v1.OutShopperName{
+					FirstName: user.FirstName,
+					LastName:  user.LastName,
+					Gender:    user.Gender,
+				},
+				MerchantOrderReference: one.UpdateSubscriptionId,
+				PayMethod:              1, //automatic
+				DaysUtilDue:            1, //one day expire
+			}
+
+			createRes, err := service.DoChannelPay(ctx, createPayContext)
+			if err != nil {
+				return nil, err
+			}
+			// Upgrade
+			subUpdateRes.ChannelUpdateId = createRes.ChannelInvoiceId
+			subUpdateRes.Paid = createRes.AlreadyPaid
+			subUpdateRes.Link = createRes.Link
+			subUpdateRes.Data = utility.MarshalToJsonString(createRes)
+		} else {
+			subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+				Plan:            prepare.Plan,
+				Quantity:        prepare.Quantity,
+				AddonPlans:      prepare.Addons,
+				PlanChannel:     prepare.PlanChannel,
+				Subscription:    prepare.Subscription,
+				ProrationDate:   req.ProrationDate,
+				EffectImmediate: false,
+			})
 		}
 	} else {
 		subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            prepare.Plan,
 			Quantity:        prepare.Quantity,
-			OldPlan:         prepare.OldPlan,
 			AddonPlans:      prepare.Addons,
 			PlanChannel:     prepare.PlanChannel,
 			Subscription:    prepare.Subscription,

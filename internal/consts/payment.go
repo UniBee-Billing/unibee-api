@@ -1,7 +1,8 @@
 package consts
 
 const (
-	BIZ_TYPE_ORDER        = 1 //支付交易上游订单类型-
+	BIZ_TYPE_ONE_TIME     = 1
+	BIZ_TYPE_INVOICE      = 2
 	BIZ_TYPE_SUBSCRIPTION = 3
 
 	WAITING_AUTHORIZED = 0 //待授权

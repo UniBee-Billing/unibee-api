@@ -17,6 +17,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strconv"
 	"strings"
 )
 
@@ -236,21 +237,68 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		return nil, err
 	}
 	checkInvoice(invoice_compute.ConvertInvoiceToRo(one))
-	createRes, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
-		Invoice:      one,
-		InvoiceLines: lines,
-		PayMethod:    req.PayMethod,
-		DaysUtilDue:  req.DaysUtilDue,
-	})
+
+	merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
+	user := query.GetUserAccountById(ctx, uint64(one.UserId))
+
+	createPayContext := &ro.CreatePayContext{
+		PayChannel: payChannel,
+		Pay: &entity.Payment{
+			BizId:       one.InvoiceId,
+			BizType:     consts.BIZ_TYPE_INVOICE,
+			UserId:      one.UserId,
+			ChannelId:   int64(payChannel.Id),
+			TotalAmount: one.TotalAmount,
+			Currency:    one.Currency,
+			CountryCode: user.CountryCode,
+			MerchantId:  one.MerchantId,
+			CompanyId:   merchantInfo.CompanyId,
+		},
+		Platform:      "WEB",
+		DeviceType:    "Web",
+		ShopperUserId: strconv.FormatInt(one.UserId, 10),
+		ShopperEmail:  user.Email,
+		ShopperLocale: "en",
+		Mobile:        user.Mobile,
+		Invoice: &ro.InvoiceDetailSimplify{
+			InvoiceId:                      one.InvoiceId,
+			TotalAmount:                    one.TotalAmount,
+			TotalAmountExcludingTax:        one.TotalAmountExcludingTax,
+			Currency:                       one.Currency,
+			TaxAmount:                      one.TaxAmount,
+			SubscriptionAmount:             one.SubscriptionAmount,
+			SubscriptionAmountExcludingTax: one.SubscriptionAmountExcludingTax,
+			Lines:                          lines,
+			PeriodEnd:                      one.PeriodEnd,
+			PeriodStart:                    one.PeriodStart,
+		},
+		ShopperName: &v1.OutShopperName{
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Gender:    user.Gender,
+		},
+		MerchantOrderReference: one.InvoiceId,
+		PayMethod:              1, //automatic
+		DaysUtilDue:            1, //one day expire
+	}
+
+	createRes, err := service.DoChannelPay(ctx, createPayContext)
+
+	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
+	//	Invoice:      one,
+	//	InvoiceLines: lines,
+	//	PayMethod:    req.PayMethod,
+	//	DaysUtilDue:  req.DaysUtilDue,
+	//})
+
 	if err != nil {
 		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
 	}
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().ChannelUserId:     createRes.ChannelUserId,
 		dao.Invoice.Columns().ChannelInvoiceId:  createRes.ChannelInvoiceId,
 		dao.Invoice.Columns().ChannelInvoicePdf: createRes.ChannelInvoicePdf,
-		dao.Invoice.Columns().Status:            int(createRes.Status),
+		dao.Invoice.Columns().Status:            createRes.InvoiceStatus,
 		dao.Invoice.Columns().Link:              createRes.Link,
 		dao.Invoice.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
@@ -261,11 +309,8 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	//if rowAffected != 1 {
 	//	return nil, gerror.Newf("FinishInvoice update err:%s", update)
 	//}
-	one.Status = int(createRes.Status)
+	one.Status = int(createRes.InvoiceStatus)
 	one.Link = createRes.Link
-	one.ChannelUserId = createRes.ChannelUserId
-	// todo mark 下面的流程
-	// todo mark 生成 pdf 并发送邮件
 
 	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil
 }

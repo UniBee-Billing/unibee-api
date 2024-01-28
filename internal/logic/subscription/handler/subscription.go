@@ -8,11 +8,13 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
+	"go-oversea-pay/utility"
 )
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
@@ -117,10 +119,73 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	TrialEnd                    int64                                     `json:"trialEnd"`
 }
 
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
+	var addons []*ro.SubscriptionPlanAddonRo
+	var totalAddonIds []int64
+	if len(addonParams) > 0 {
+		for _, s := range addonParams {
+			totalAddonIds = append(totalAddonIds, s.AddonPlanId) // 添加到整数列表中
+		}
+	}
+	var allAddonList []*entity.SubscriptionPlan
+	if len(totalAddonIds) > 0 {
+		//查询所有 Plan
+		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).Scan(&allAddonList)
+		if err == nil {
+			//整合进列表
+			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			for _, pair := range allAddonList {
+				key := int64(pair.Id)
+				value := pair
+				mapPlans[key] = value
+			}
+			for _, param := range addonParams {
+				//所有 Addon 项目必须要能查到
+				//类型是 Addon
+				//未删除
+				//数量大于 0
+				utility.Assert(mapPlans[param.AddonPlanId] != nil, fmt.Sprintf("AddonPlanId not found:%v", param.AddonPlanId))
+				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
+				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
+				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
+				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 channelId 合并查询
+				utility.Assert(len(planChannel.ChannelPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanId invalid", param.AddonPlanId, channelId))
+				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
+				addons = append(addons, &ro.SubscriptionPlanAddonRo{
+					Quantity:         param.Quantity,
+					AddonPlan:        mapPlans[param.AddonPlanId],
+					AddonPlanChannel: planChannel,
+				})
+			}
+		}
+	}
+	return addons
+}
+
 func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
+	if consts.PendingSubUpdateEffectImmediateWithOutChannel && one.EffectImmediate == 1 {
+		var addonParams []*ro.SubscriptionPlanAddonParamRo
+		err := utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
+		if err != nil {
+			return false, err
+		}
+		_, err = out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			Plan:            query.GetPlanById(ctx, one.UpdatePlanId),
+			Quantity:        one.UpdateQuantity,
+			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.ChannelId),
+			PlanChannel:     query.GetPlanChannel(ctx, one.UpdatePlanId, one.ChannelId),
+			Subscription:    query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId),
+			ProrationDate:   one.ProrationDate,
+			EffectImmediate: false,
+		})
+		if err != nil {
+			return false, err
+		}
+	}
+
 	// 先创建 SubscriptionTimeLine 在做 Sub 更新
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))
 	if err != nil {

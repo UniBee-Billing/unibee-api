@@ -25,7 +25,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	utility.Assert(req.PaymentMethod != nil, "paymentmethod is nil")
 	utility.Assert(len(req.PaymentMethod.Channel) > 0, "paymentmethod type is nil")
 	utility.Assert(len(req.MerchantPaymentId) > 0, "MerchantPaymentId is nil")
-	utility.Assert(len(req.ShopperReference) > 0, "shopperReference type is nil")
+	utility.Assert(len(req.ShopperUserId) > 0, "shopperReference type is nil")
 	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
 
@@ -71,7 +71,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		PayChannel: payChannel,
 		Pay: &entity.Payment{
 			BizId:             req.MerchantPaymentId,
-			BizType:           consts.BIZ_TYPE_ORDER,
+			BizType:           consts.BIZ_TYPE_ONE_TIME,
 			ChannelId:         int64(payChannel.Id),
 			TotalAmount:       req.TotalAmount.Value,
 			Currency:          req.TotalAmount.Currency,
@@ -81,21 +81,20 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 			ReturnUrl:         req.RedirectUrl,
 			CaptureDelayHours: req.CaptureDelayHours,
 		},
-		Platform:                 req.Platform,
-		DeviceType:               req.DeviceType,
-		UserId:                   req.ShopperReference,
-		ShopperEmail:             req.ShopperEmail,
-		ShopperLocale:            req.ShopperLocale,
-		Mobile:                   req.TelephoneNumber,
-		MediaInfo:                req.Metadata,
-		Invoice:                  invoice,
-		BillingDetails:           req.BillingAddress,
-		ShippingDetails:          req.DetailAddress,
+		Platform:      req.Platform,
+		DeviceType:    req.DeviceType,
+		ShopperUserId: req.ShopperUserId,
+		ShopperEmail:  req.ShopperEmail,
+		ShopperLocale: req.ShopperLocale,
+		Mobile:        req.TelephoneNumber,
+		MediaInfo:     req.Metadata,
+		Invoice:       invoice,
+		//BillingDetails:           req.BillingAddress,
+		//ShippingDetails:          req.DetailAddress,
 		ShopperName:              req.ShopperName,
 		ShopperInteraction:       req.ShopperInteraction,
 		RecurringProcessingModel: req.RecurringProcessingModel,
 		TokenId:                  req.PaymentMethod.TokenId,
-		DeviceFingerprint:        req.DeviceFingerprint,
 		MerchantOrderReference:   req.MerchantOrderReference,
 		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
 		PayMethod:                1, //automatic

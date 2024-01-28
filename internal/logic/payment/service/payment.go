@@ -68,18 +68,25 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			createPayContext.Pay.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
+
 			channelInternalPayResult, err = out.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}
-			channelInternalPayResult.ChannelId = createPayContext.Pay.ChannelId
-			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			jsonData, err := gjson.Marshal(channelInternalPayResult)
 			if err != nil {
 				return err
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().PaymentData: createPayContext.Pay.PaymentData},
+			createPayContext.Pay.Status = int(channelInternalPayResult.Status)
+			createPayContext.Pay.ChannelPaymentId = channelInternalPayResult.ChannelPaymentId
+			createPayContext.Pay.ChannelPaymentIntentId = channelInternalPayResult.ChannelPaymentIntentId
+			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{
+				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
+				dao.Payment.Columns().PaymentData:            createPayContext.Pay.PaymentData,
+				dao.Payment.Columns().ChannelPaymentId:       createPayContext.Pay.ChannelPaymentId,
+				dao.Payment.Columns().ChannelPaymentIntentId: createPayContext.Pay.ChannelPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				return err
@@ -88,6 +95,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			if err != nil || affected != 1 {
 				return err
 			}
+
 			return nil
 		})
 		if err == nil {

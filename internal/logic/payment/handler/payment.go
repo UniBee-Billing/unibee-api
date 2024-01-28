@@ -318,7 +318,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) error {
 	one := query.GetPaymentByChannelPaymentId(ctx, channelPayRo.ChannelPaymentId)
 	if channelPayRo.ChannelSubscriptionDetail != nil && channelPayRo.ChannelInvoiceDetail != nil {
-		//payment for subscription
+		// payment for subscription
 		payment, err := CreateOrUpdateSubscriptionPaymentFromChannel(ctx, channelPayRo)
 		// payment not first generate from system
 		if err != nil {
@@ -417,14 +417,10 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 		}
 	}
 	one := query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId)
-	var bizType = consts.BIZ_TYPE_ORDER
-	if len(channelPayRo.ChannelSubscriptionId) > 0 {
-		bizType = consts.BIZ_TYPE_SUBSCRIPTION
-	}
 	if one == nil {
 		//创建
 		one = &entity.Payment{
-			BizType:                bizType,
+			BizType:                consts.BIZ_TYPE_SUBSCRIPTION,
 			MerchantId:             channelPayRo.MerchantId,
 			UserId:                 channelUser.UserId,
 			CountryCode:            countryCode,
@@ -458,7 +454,7 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 	} else {
 		//更新
 		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
-			dao.Payment.Columns().BizType:                bizType,
+			dao.Payment.Columns().BizType:                consts.BIZ_TYPE_SUBSCRIPTION,
 			dao.Payment.Columns().MerchantId:             channelPayRo.MerchantId,
 			dao.Payment.Columns().UserId:                 channelUser.UserId,
 			dao.Payment.Columns().CountryCode:            countryCode,

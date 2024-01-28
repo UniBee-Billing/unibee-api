@@ -9,45 +9,45 @@ import (
 )
 
 type CreatePayContext struct {
-	OpenApiId                int64                     `json:"openApiId"`
-	AppId                    string                    `json:"appId"`
-	Desc                     string                    `json:"desc"`
-	Pay                      *entity.Payment           `json:"pay"`
-	PayChannel               *entity.OverseaPayChannel `json:"payChannel"`
-	TerminalIp               string                    `json:"terminalIp"`
-	UserId                   string                    `json:"userId"`
-	ShopperEmail             string                    `json:"shopperEmail"`
-	ShopperLocale            string                    `json:"shopperLocale"`
-	Mobile                   string                    `json:"mobile"`
-	MediaInfo                *gjson.Json               `json:"mediaInfo"`
-	Invoice                  *InvoiceDetailSimplify    `json:"invoice"`
-	BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
-	ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`
-	ShopperName              *v1.OutShopperName        `json:"shopperName"`
-	ShopperInteraction       string                    `json:"shopperInteraction"`
-	RecurringProcessingModel string                    `json:"recurringProcessingModel"`
-	TokenId                  string                    `json:"tokenId"`
-	DeviceFingerprint        string                    `json:"deviceFingerprint"`
-	MerchantOrderReference   string                    `json:"merchantOrderReference"`
-	DateOfBirth              *gtime.Time               `json:"dateOfBirth"`
-	Platform                 string                    `json:"platform"`
-	DeviceType               string                    `json:"deviceType"`
-	PayMethod                int                       `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
-	DaysUtilDue              int                       `json:"daysUtilDue"`
+	OpenApiId     int64                     `json:"openApiId"`
+	AppId         string                    `json:"appId"`
+	Desc          string                    `json:"desc"`
+	Pay           *entity.Payment           `json:"pay"`
+	PayChannel    *entity.OverseaPayChannel `json:"payChannel"`
+	TerminalIp    string                    `json:"terminalIp"`
+	ShopperUserId string                    `json:"merchantUserId"`
+	ShopperEmail  string                    `json:"shopperEmail"`
+	ShopperLocale string                    `json:"shopperLocale"`
+	Mobile        string                    `json:"mobile"`
+	MediaInfo     *gjson.Json               `json:"mediaInfo"`
+	Invoice       *InvoiceDetailSimplify    `json:"invoice"`
+	//BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
+	//ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`
+	ShopperName              *v1.OutShopperName `json:"shopperName"`
+	ShopperInteraction       string             `json:"shopperInteraction"`
+	RecurringProcessingModel string             `json:"recurringProcessingModel"`
+	TokenId                  string             `json:"tokenId"`
+	MerchantOrderReference   string             `json:"merchantOrderReference"`
+	DateOfBirth              *gtime.Time        `json:"dateOfBirth"`
+	Platform                 string             `json:"platform"`
+	DeviceType               string             `json:"deviceType"`
+	PayMethod                int                `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
+	DaysUtilDue              int                `json:"daysUtilDue"`
 }
 
 type CreatePayInternalResp struct {
-	AlipayOrderNo  string      `json:"alipayOrderNo"`
-	PaymentId      string      `json:"payOrderNo"`
-	AlreadyPaid    bool        `json:"alreadyPaid"`
-	OrderString    string      `json:"orderString"`
-	Message        string      `json:"message"`
-	TppOrderNo     string      `json:"tppOrderNo"`
-	TppPayId       string      `json:"tppPayId"`
-	ChannelId      int64       `json:"payChannel"`
-	PayChannelType string      `json:"payChannelType"`
-	Action         *gjson.Json `json:"action"`
-	AdditionalData *gjson.Json `json:"additionalData"`
+	PaymentId              string                   `json:"payOrderNo"`
+	AlreadyPaid            bool                     `json:"alreadyPaid"`
+	Status                 consts.PayStatusEnum     `json:"status"`
+	InvoiceStatus          consts.InvoiceStatusEnum `json:"invoiceStatus"`
+	OrderString            string                   `json:"orderString"`
+	ChannelPaymentId       string                   `json:"channelPaymentId"`
+	ChannelPaymentIntentId string                   `json:"channelPaymentIntentId"`
+	Link                   string                   `json:"link"`
+	ChannelInvoiceId       string                   `json:"channelInvoiceId"`
+	ChannelInvoicePdf      string                   `json:"channelInvoicePdf"`
+	Action                 *gjson.Json              `json:"action"`
+	AdditionalData         *gjson.Json              `json:"additionalData"`
 }
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
@@ -150,7 +150,6 @@ type ChannelCreateSubscriptionInternalReq struct {
 type ChannelUpdateSubscriptionInternalReq struct {
 	Plan            *entity.SubscriptionPlan        `json:"plan"`
 	Quantity        int64                           `json:"quantity" dc:"数量" `
-	OldPlan         *entity.SubscriptionPlan        `json:"oldPlan"`
 	AddonPlans      []*SubscriptionPlanAddonRo      `json:"addonPlans"`
 	PlanChannel     *entity.SubscriptionPlanChannel `json:"planChannel"`
 	Subscription    *entity.Subscription            `json:"subscription"`
@@ -299,6 +298,7 @@ type InvoiceItemDetailRo struct {
 }
 
 type InvoiceDetailSimplify struct {
+	InvoiceId                      string                 `json:"invoiceId"`
 	TotalAmount                    int64                  `json:"totalAmount"`
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
 	Currency                       string                 `json:"currency"`

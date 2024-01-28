@@ -15,7 +15,7 @@ type PaymentsReq struct {
 	CountryCode              string             `p:"countryCode" dc:"CountryCode" v:"required"`
 	ShopperLocale            string             `p:"shopperLocale" dc:"语言en_US" v:"required"`
 	ShopperEmail             string             `p:"shopperEmail" dc:"用户邮箱" v:"required"`
-	ShopperReference         string             `p:"shopperReference" dc:"shopper唯一Id" v:"required"`
+	ShopperUserId            string             `p:"shopperUserId" dc:"shopper唯一Id" v:"required"`
 	LineItems                []*OutLineItem     `p:"lineItems" dc:"LineItems" v:"required"`
 	DeviceType               string             `p:"deviceType" dc:"DeviceType,Android|iOS|Web"`
 	Platform                 string             `p:"platform" dc:"Platform（WEB，WAP，APP, MINI, WALLET）"`
@@ -25,14 +25,13 @@ type PaymentsReq struct {
 	ShopperInteraction       string             `p:"shopperInteraction" dc:"交易类型" v:""`
 	RecurringProcessingModel string             `p:"recurringProcessingModel" dc:"令牌类型" v:""`
 	ShopperName              *OutShopperName    `p:"shopperName" dc:"shopperName" v:""`
-	BillingAddress           *OutPayAddress     `p:"billingAddress" dc:"账单地址" v:""`
-	DetailAddress            *OutPayAddress     `p:"detailAddress" dc:"邮寄地址" v:""`
-	Capture                  bool               `p:"capture" dc:"是否立即请款" v:""`
-	CaptureDelayHours        int                `p:"captureDelayHours" dc:"请款延迟执⾏时间" v:""`
-	DeviceFingerprint        string             `p:"deviceFingerprint" dc:"设备指纹信息" v:""`
-	MerchantOrderReference   string             `p:"merchantOrderReference" dc:"订单关联子交易码" v:""`
-	Metadata                 *gjson.Json        `p:"reference" dc:"预留字段，JSON结构" v:""`
-	DateOfBrith              string             `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
+	//BillingAddress           *OutPayAddress     `p:"billingAddress" dc:"账单地址" v:""`
+	//DetailAddress            *OutPayAddress     `p:"detailAddress" dc:"邮寄地址" v:""`
+	Capture                bool        `p:"capture" dc:"是否立即请款" v:""`
+	CaptureDelayHours      int         `p:"captureDelayHours" dc:"请款延迟执⾏时间" v:""`
+	MerchantOrderReference string      `p:"merchantOrderReference" dc:"订单关联子交易码" v:""`
+	Metadata               *gjson.Json `p:"reference" dc:"预留字段，JSON结构" v:""`
+	DateOfBrith            string      `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
 }
 type PaymentsRes struct {
 	Status    string      `p:"status" dc:"交易状态"`

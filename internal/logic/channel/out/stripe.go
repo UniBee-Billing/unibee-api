@@ -220,11 +220,11 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	createInvoiceInternalReq.Invoice.ChannelUserId = queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
+	channelUserId := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Customer: stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
+		Customer: stripe.String(channelUserId)}
 	if createInvoiceInternalReq.PayMethod == 1 {
 		params.CollectionMethod = stripe.String("charge_automatically")
 	} else {
@@ -247,7 +247,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 			UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
 			Description: stripe.String(line.Description),
 			Quantity:    stripe.Int64(line.Quantity),
-			Customer:    stripe.String(createInvoiceInternalReq.Invoice.ChannelUserId)}
+			Customer:    stripe.String(channelUserId)}
 		// todo mark tax 设置
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
@@ -939,7 +939,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票
 		return &ro.ChannelUpdateSubscriptionInternalResp{
 			Data: utility.FormatToJsonString(updateSubscription),
-			Paid: true,
+			Paid: false,
 		}, nil
 	}
 }
@@ -1498,21 +1498,109 @@ func (s Stripe) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.Ove
 }
 
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
-	//utility.Assert(createPayContext.PayChannel != nil, "支付渠道异常")
-	//utility.Assert(createPayContext.PayChannel.Id > 0, "支付渠道异常")
-	//channelEntity := createPayContext.PayChannel
-	//utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
-	//stripe.Key = channelEntity.ChannelSecret
-	//s.setUnibeeAppInfo()
-	//
-	//params := &stripe.PaymentIntentParams{
-	//	Amount:           stripe.Int64(1099),
-	//	Currency:         stripe.String(string(stripe.CurrencyAED)),
-	//	SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
-	//}
-	//intent, err := paymentintent.New(params)
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(createPayContext.PayChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = createPayContext.PayChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	channelUserId := queryAndCreateChannelUserId(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
+
+	params := &stripe.InvoiceParams{
+		Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)), //小写
+		Customer: stripe.String(channelUserId)}
+	if createPayContext.PayMethod == 1 {
+		params.CollectionMethod = stripe.String("charge_automatically")
+	} else {
+		params.CollectionMethod = stripe.String("send_invoice")
+		if createPayContext.DaysUtilDue > 0 {
+			params.DaysUntilDue = stripe.Int64(int64(createPayContext.DaysUtilDue))
+		}
+		// todo mark tax 设置
+	}
+	result, err := invoice.New(params)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", params, result, err, "New", nil, createPayContext.PayChannel)
+
+	for _, line := range createPayContext.Invoice.Lines {
+		ItemParams := &stripe.InvoiceItemParams{
+			Invoice:     stripe.String(result.ID),
+			Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
+			UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Description: stripe.String(line.Description),
+			Quantity:    stripe.Int64(line.Quantity),
+			Customer:    stripe.String(channelUserId)}
+		// todo mark tax 设置
+		_, err = invoiceitem.New(ItemParams)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
+	if createPayContext.PayMethod == 1 {
+		finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
+	} else {
+		finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
+	}
+
+	// todo mark 总价格验证
+
+	detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, createPayContext.PayChannel)
+	var invoiceStatus consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	var status consts.PayStatusEnum = consts.TO_BE_PAID
+	if strings.Compare(string(detail.Status), "draft") == 0 {
+		invoiceStatus = consts.InvoiceStatusPending
+	} else if strings.Compare(string(detail.Status), "open") == 0 {
+		invoiceStatus = consts.InvoiceStatusProcessing
+	} else if strings.Compare(string(detail.Status), "paid") == 0 {
+		invoiceStatus = consts.InvoiceStatusPaid
+		status = consts.PAY_SUCCESS
+	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
+		invoiceStatus = consts.InvoiceStatusFailed
+		status = consts.PAY_FAILED
+	} else if strings.Compare(string(detail.Status), "void") == 0 {
+		invoiceStatus = consts.InvoiceStatusCancelled
+		status = consts.PAY_FAILED
+	}
+	var invoiceItems []*ro.InvoiceItemDetailRo
+	for _, line := range detail.Lines.Data {
+		var start int64 = 0
+		var end int64 = 0
+		if line.Period != nil {
+			start = line.Period.Start
+			end = line.Period.End
+		}
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+			Currency:               strings.ToUpper(string(line.Currency)),
+			Amount:                 line.Amount,
+			AmountExcludingTax:     line.AmountExcludingTax,
+			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+			Description:            line.Description,
+			Proration:              line.Proration,
+			Quantity:               line.Quantity,
+			PeriodStart:            start,
+			PeriodEnd:              end,
+		})
+	}
+	var channelPaymentId string
+	if detail.PaymentIntent != nil {
+		channelPaymentId = detail.PaymentIntent.ID
+	}
+	return &ro.CreatePayInternalResp{
+		Status:                 status,
+		ChannelPaymentId:       channelPaymentId,
+		ChannelPaymentIntentId: channelPaymentId,
+		AlreadyPaid:            invoiceStatus == consts.InvoiceStatusPaid,
+		InvoiceStatus:          invoiceStatus,
+		Link:                   detail.HostedInvoiceURL,
+		ChannelInvoiceId:       detail.ID,
+		ChannelInvoicePdf:      detail.InvoicePDF,
+	}, nil
 }
 
 func (s Stripe) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
