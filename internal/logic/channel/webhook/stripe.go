@@ -179,7 +179,6 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %s\n", payChannel.Channel, string(event.Type), stripeInvoice.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
-			// handleSubscriptionTrialWillEnd(subscription)
 			err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %s\n", payChannel.Channel, err.Error())
@@ -196,6 +195,24 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			responseBack = http.StatusBadRequest
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %s\n", payChannel.Channel, string(event.Type), stripePayment.ID)
+			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+
+			//err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
+			//if err != nil {
+			//	g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+			//	r.Response.WriteHeader(http.StatusBadRequest)
+			//	responseBack = http.StatusBadRequest
+			//}
+		}
+	case "charge.refund.updated":
+		var stripeRefund stripe.Refund
+		err = json.Unmarshal(event.Data.Raw, &stripeRefund)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.Channel, string(event.Type), stripeRefund.ID)
 			// Then define and call a func to handle the successful attachment of a PaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 
@@ -278,6 +295,42 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 		ReturnUrl: returnUrl,
 		QueryPath: r.URL.RawQuery,
 	}, nil
+}
+
+func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType string, refund stripe.Refund, payChannel *entity.OverseaPayChannel) error {
+	refundDetail, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelRefundDetail(ctx, payChannel, refund.ID)
+	if err != nil {
+		return err
+	}
+	//details.ChannelId = int64(payChannel.Id)
+	//utility.Assert(len(details.ChannelUserId) > 0, "invalid channelUserId")
+	//if payment.Invoice != nil {
+	//	//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 ChannelSubscriptionUpdateId
+	//	invoiceDetails, err := s.DoRemoteChannelInvoiceDetails(ctx, payChannel, payment.Invoice.ID)
+	//	if err != nil {
+	//		return err
+	//	}
+	//	details.ChannelInvoiceDetail = invoiceDetails
+	//	details.ChannelInvoiceId = payment.Invoice.ID
+	//	details.ChannelSubscriptionUpdateId = invoiceDetails.ChannelInvoiceId
+	//	oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
+	//	if oneSub != nil {
+	//		plan := query.GetPlanById(ctx, oneSub.PlanId)
+	//		planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
+	//		subDetails, err := s.DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
+	//		if err != nil {
+	//			return err
+	//		}
+	//		details.ChannelSubscriptionDetail = subDetails
+	//	}
+	//}
+	//details.UniqueId = details.ChannelPaymentIntentId
+	err = handler2.HandleRefundWebhookEvent(ctx, refundDetail)
+	if err != nil {
+		return err
+	}
+	
+	return nil
 }
 
 //

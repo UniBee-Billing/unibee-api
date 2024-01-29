@@ -1227,11 +1227,13 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	if item.PaymentIntent != nil {
 		channelPaymentId = item.PaymentIntent.ID
 	}
-	var status = consts.REFUND_ING
+	var status consts.RefundStatusEnum = consts.REFUND_ING
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
 		status = consts.REFUND_SUCCESS
-	} else if strings.Compare(string(item.Status), "canceled") == 0 || strings.Compare(string(item.Status), "failed") == 0 {
+	} else if strings.Compare(string(item.Status), "failed") == 0 {
 		status = consts.REFUND_FAILED
+	} else if strings.Compare(string(item.Status), "canceled") == 0 {
+		status = consts.REFUND_REVERSE
 	}
 	return &ro.OutPayRefundRo{
 		MerchantId:       "",

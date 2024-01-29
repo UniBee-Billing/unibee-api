@@ -20,7 +20,7 @@ import (
 
 type HandleRefundReq struct {
 	RefundId         string
-	ChannelRefundNo  string
+	ChannelRefundId  string
 	RefundFee        int64
 	RefundStatusEnum consts.RefundStatusEnum
 	RefundTime       *gtime.Time
@@ -143,7 +143,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.Payment.Table(), "refund_fee = refund_fee + ?", "id = ? AND ? >= 0 AND payment_fee - refund_fee >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
+			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND payment_amount - refund_amount >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -205,8 +205,8 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
 		return gerror.New("退款记录不存在")
 	}
-	if one.Status == consts.REFUND_FAILED {
-		g.Log().Infof(ctx, "already failure")
+	if one.Status != consts.REFUND_ING {
+		g.Log().Infof(ctx, "Refund is success or failure")
 		return nil
 	}
 	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
@@ -233,6 +233,50 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	return nil
 }
 
+func HandleRefundWebhookEvent(ctx context.Context, channelRefundRo *ro.OutPayRefundRo) error {
+	utility.Assert(len(channelRefundRo.ChannelRefundId) > 0, "channelRefundId not found")
+	one := query.GetRefundByChannelRefundId(ctx, channelRefundRo.ChannelRefundId)
+	utility.Assert(one != nil, "refund not found")
+	if channelRefundRo.Status == consts.REFUND_SUCCESS {
+		err := HandleRefundSuccess(ctx, &HandleRefundReq{
+			RefundId:         one.RefundId,
+			ChannelRefundId:  channelRefundRo.ChannelRefundId,
+			RefundFee:        channelRefundRo.RefundFee,
+			RefundStatusEnum: channelRefundRo.Status,
+			RefundTime:       channelRefundRo.RefundTime,
+			Reason:           channelRefundRo.Reason,
+		})
+		if err != nil {
+			return err
+		}
+	} else if channelRefundRo.Status == consts.REFUND_FAILED {
+		err := HandleRefundFailure(ctx, &HandleRefundReq{
+			RefundId:         one.RefundId,
+			ChannelRefundId:  channelRefundRo.ChannelRefundId,
+			RefundFee:        channelRefundRo.RefundFee,
+			RefundStatusEnum: channelRefundRo.Status,
+			RefundTime:       channelRefundRo.RefundTime,
+			Reason:           channelRefundRo.Reason,
+		})
+		if err != nil {
+			return err
+		}
+	} else if channelRefundRo.Status == consts.REFUND_REVERSE {
+		err := HandleRefundReversed(ctx, &HandleRefundReq{
+			RefundId:         one.RefundId,
+			ChannelRefundId:  channelRefundRo.ChannelRefundId,
+			RefundFee:        channelRefundRo.RefundFee,
+			RefundStatusEnum: channelRefundRo.Status,
+			RefundTime:       channelRefundRo.RefundTime,
+			Reason:           channelRefundRo.Reason,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, details *ro.OutPayRefundRo, uniqueId string) error {
 	utility.Assert(len(details.ChannelPaymentId) > 0, "paymentId is null")
 	utility.Assert(payment != nil, "payment is null")
@@ -253,7 +297,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			RefundId:             utility.CreateRefundId(),
 			RefundAmount:         details.RefundFee,
 			RefundComment:        details.Reason,
-			Status:               details.Status,
+			Status:               int(details.Status),
 			RefundTime:           details.RefundTime,
 			ChannelRefundId:      details.ChannelRefundId,
 			RefundCommentExplain: details.Reason,
@@ -310,6 +354,8 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 		status = 1
 	} else if refund.Status == consts.REFUND_FAILED {
 		status = 2
+	} else if refund.Status == consts.REFUND_REVERSE {
+		status = 3
 	}
 
 	if one == nil {

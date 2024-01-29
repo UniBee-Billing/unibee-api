@@ -38,6 +38,7 @@ const (
 	REFUND_ING     = 10 //退款中
 	REFUND_SUCCESS = 20 //退款成功
 	REFUND_FAILED  = 30 //退款失败
+	REFUND_REVERSE = 40 //退款失败
 )
 
 func (action RefundStatusEnum) Description() string {

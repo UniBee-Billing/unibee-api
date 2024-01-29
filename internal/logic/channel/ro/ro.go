@@ -69,15 +69,14 @@ type OutPayCancelRo struct {
 
 // OutPayRefundRo is the golang structure for table oversea_pay.
 type OutPayRefundRo struct {
-	MerchantId       string      `json:"merchantId"         ` // 商户ID
-	RefundId         string      `json:"refundId"              `
-	ChannelRefundId  string      `json:"channelRefundId"            `  // 渠道退款订单
-	ChannelPaymentId string      `json:"channelPaymentId"            ` // 渠道支付订单
-	Status           int         `json:"status"`
-	Reason           string      `json:"reason"              `    // 业务id-即商户订单号
-	RefundFee        int64       `json:"refundFee"              ` // 业务id-即商户订单号
-	Currency         string      `json:"currency"              `
-	RefundTime       *gtime.Time `json:"refundTime" `
+	MerchantId       string                  `json:"merchantId"         `          // 商户ID
+	ChannelRefundId  string                  `json:"channelRefundId"            `  // 渠道退款订单
+	ChannelPaymentId string                  `json:"channelPaymentId"            ` // 渠道支付订单
+	Status           consts.RefundStatusEnum `json:"status"`
+	Reason           string                  `json:"reason"              `    // 业务id-即商户订单号
+	RefundFee        int64                   `json:"refundFee"              ` // 业务id-即商户订单号
+	Currency         string                  `json:"currency"              `
+	RefundTime       *gtime.Time             `json:"refundTime" `
 }
 
 type ChannelPaymentListReq struct {
