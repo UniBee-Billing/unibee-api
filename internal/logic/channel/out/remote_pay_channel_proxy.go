@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/logic/channel/ro"
@@ -401,27 +400,6 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
-	defer func() {
-		if exception := recover(); exception != nil {
-			if v, ok := exception.(error); ok && gerror.HasStack(v) {
-				err = v
-			} else {
-				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-			}
-			printChannelPanic(ctx, err)
-			return
-		}
-	}()
-	startTime := time.Now()
-	err = p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
-	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
-	}
-	return err
-}
-
 func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -500,21 +478,6 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
 	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanCreateAndActivate cost：%s \n", time.Now().Sub(startTime))
-	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
-	}
-	return res, err
-}
-
-func (p PayChannelProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	startTime := time.Now()
-	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
-	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelWebhook cost：%s \n", time.Now().Sub(startTime))
-}
-func (p PayChannelProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
-	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
-	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelRedirect cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}

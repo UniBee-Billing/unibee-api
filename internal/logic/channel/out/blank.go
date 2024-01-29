@@ -2,7 +2,6 @@ package out
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"go-oversea-pay/internal/logic/channel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
@@ -110,11 +109,6 @@ func (b Blank) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *ent
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (b Blank) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (err error) {
 	//TODO implement me
 	panic("implement me")
@@ -131,16 +125,6 @@ func (b Blank) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.Su
 }
 
 func (b Blank) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel) (res *ro.ChannelCreatePlanInternalResp, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b Blank) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b Blank) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
