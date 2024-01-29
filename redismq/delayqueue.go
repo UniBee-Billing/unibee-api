@@ -107,7 +107,7 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 	}(client)
 	messageJson, err := gjson.Marshal(message)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err, message))
+		return false, errors.New(fmt.Sprintf("SendDelay exception:%s message:%v\n", err.Error(), message))
 	}
 	jsonString := string(messageJson)
 	score := utility.CurrentTimeMillis() + delay
@@ -116,7 +116,7 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 		Member: jsonString,
 	}).Result()
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err, message))
+		return false, errors.New(fmt.Sprintf("SendDelay exception:%s message:%v\n", err.Error(), message))
 	}
 	fmt.Printf("redismq 向延时队列投放任务,队列名称[%s],任务[%s],score[%d],result[%v]\n", MQ_DELAY_QUEUE_NAME, messageJson, score, result)
 	return true, nil

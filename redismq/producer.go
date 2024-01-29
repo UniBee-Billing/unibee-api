@@ -99,7 +99,7 @@ func sendTransactionPrepareMessage(message *Message) (bool, error) {
 
 	jsonString := string(messageJson)
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err, message))
+		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err.Error(), message))
 	}
 	// 执行事务
 	_, err = client.TxPipelined(context.Background(), func(pipe redis.Pipeliner) error {
@@ -112,7 +112,7 @@ func sendTransactionPrepareMessage(message *Message) (bool, error) {
 	})
 
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err, message))
+		return false, errors.New(fmt.Sprintf("发送MQ事务半消息异常 exception:%s message:%v\n", err.Error(), message))
 	}
 	return true, nil
 }
