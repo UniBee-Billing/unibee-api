@@ -9,6 +9,7 @@ import (
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strconv"
+	"time"
 )
 
 func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
@@ -79,6 +80,7 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 		Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 		AmountExcludingTax:     req.Quantity * plan.Amount,
 		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+		TaxScale:               req.TaxScale,
 		UnitAmountExcludingTax: plan.Amount,
 		Description:            plan.PlanName,
 		Quantity:               req.Quantity,
@@ -88,6 +90,7 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 			Currency:               req.Currency,
 			Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 			Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+			TaxScale:               req.TaxScale,
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Description:            addon.AddonPlan.PlanName,
@@ -100,6 +103,7 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		Currency:                       req.Currency,
 		TaxAmount:                      taxAmount,
+		TaxScale:                       req.TaxScale,
 		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
 		Lines:                          invoiceItems,
@@ -129,12 +133,16 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 		req.NewProrationPlans = make([]*ProrationPlanParam, 0)
 	}
 	newMap := make(map[int64]*ProrationPlanParam)
-	oldMap := make(map[int64]*ProrationPlanParam)
-	for _, planSub := range req.OldProrationPlans {
-		oldMap[planSub.PlanId] = planSub
-	}
-	for _, planSub := range req.OldProrationPlans {
+	//oldMap := make(map[int64]*ProrationPlanParam)
+	//for _, planSub := range req.OldProrationPlans {
+	//	oldMap[planSub.PlanId] = planSub
+	//}
+	for _, planSub := range req.NewProrationPlans {
 		newMap[planSub.PlanId] = planSub
+	}
+
+	if req.ProrationDate == 0 {
+		req.ProrationDate = time.Now().Unix()
 	}
 
 	timeScale := int64((float64(req.PeriodEnd-req.ProrationDate) / float64(req.PeriodEnd-req.PeriodStart)) * 10000)
@@ -154,6 +162,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 					Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 					AmountExcludingTax:     quantityDiff * unitAmountExcludingTax,
 					Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+					TaxScale:               req.TaxScale,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
 					Description:            fmt.Sprintf("Remaining Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.ProrationDate).Layout("2006-01-02")),
 					Quantity:               quantityDiff,
@@ -166,6 +175,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 					Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 					AmountExcludingTax:     quantityDiff * unitAmountExcludingTax,
 					Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+					TaxScale:               req.TaxScale,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
 					Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 					Quantity:               -quantityDiff,
@@ -181,6 +191,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 				Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 				AmountExcludingTax:     quantityDiff * unitAmountExcludingTax,
 				Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+				TaxScale:               req.TaxScale,
 				UnitAmountExcludingTax: unitAmountExcludingTax,
 				Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 				Quantity:               -quantityDiff,
@@ -198,6 +209,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 			Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 			AmountExcludingTax:     quantityDiff * unitAmountExcludingTax,
 			Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
+			TaxScale:               req.TaxScale,
 			UnitAmountExcludingTax: unitAmountExcludingTax,
 			Description:            fmt.Sprintf("Remaining Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.ProrationDate).Layout("2006-01-02")),
 			Quantity:               quantityDiff,
@@ -211,8 +223,11 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		Currency:                       req.Currency,
 		TaxAmount:                      taxAmount,
+		TaxScale:                       req.TaxScale,
 		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
 		Lines:                          invoiceItems,
+		ProrationDate:                  req.ProrationDate,
+		ProrationScale:                 timeScale,
 	}
 }

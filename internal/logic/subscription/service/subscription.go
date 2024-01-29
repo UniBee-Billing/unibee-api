@@ -492,7 +492,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				Quantity: req.Quantity,
 			})
 			for _, addonParam := range req.AddonParams {
-				oldProrationPlanParams = append(oldProrationPlanParams, &invoice_compute.ProrationPlanParam{
+				newProrationPlanParams = append(newProrationPlanParams, &invoice_compute.ProrationPlanParam{
 					PlanId:   addonParam.AddonPlanId,
 					Quantity: addonParam.Quantity,
 				})
@@ -506,6 +506,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				OldProrationPlans: oldProrationPlanParams,
 				NewProrationPlans: newProrationPlanParams,
 			})
+			prorationDate = prorationInvoice.ProrationDate
 			totalAmount = prorationInvoice.TotalAmount
 		} else {
 			updatePreviewRes, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{

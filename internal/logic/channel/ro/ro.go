@@ -302,11 +302,14 @@ type InvoiceDetailSimplify struct {
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
 	Currency                       string                 `json:"currency"`
 	TaxAmount                      int64                  `json:"taxAmount"`
+	TaxScale                       int64                  `json:"taxScale"                  description:"Tax税率，万分位，1000 表示 10%"` // Tax税率，万分位，1000 表示 10%
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"`
 	SubscriptionAmountExcludingTax int64                  `json:"subscriptionAmountExcludingTax"`
 	Lines                          []*InvoiceItemDetailRo `json:"lines"`
 	PeriodEnd                      int64                  `json:"periodEnd"`
 	PeriodStart                    int64                  `json:"periodStart"`
+	ProrationDate                  int64                  `json:"prorationDate"`
+	ProrationScale                 int64                  `json:"prorationScale"`
 }
 
 type InvoiceDetailRo struct {

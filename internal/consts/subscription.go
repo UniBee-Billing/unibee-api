@@ -3,7 +3,7 @@ package consts
 const (
 	UsePendingUpdate                              = true
 	DownGradeUsePendingUpdate                     = true
-	PendingSubUpdateEffectImmediateWithOutChannel = false
+	PendingSubUpdateEffectImmediateWithOutChannel = true
 )
 
 type InvoiceStatusEnum int
