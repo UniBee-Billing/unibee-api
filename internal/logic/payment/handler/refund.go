@@ -28,7 +28,7 @@ type HandleRefundReq struct {
 }
 
 func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) {
-	g.Log().Infof(ctx, "HandleRefundFailure, req=%s", req)
+	g.Log().Infof(ctx, "HandleRefundFailure, req=%s", utility.MarshalToJsonString(req))
 	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
@@ -94,7 +94,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 }
 
 func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) {
-	g.Log().Infof(ctx, "HandleRefundSuccess, req=%s", req)
+	g.Log().Infof(ctx, "HandleRefundSuccess, req=%s", utility.MarshalToJsonString(req))
 	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
@@ -196,7 +196,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 }
 
 func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error) {
-	g.Log().Infof(ctx, "HandleRefundReversed, req=%s", req)
+	g.Log().Infof(ctx, "HandleRefundReversed, req=%s", utility.MarshalToJsonString(req))
 	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}

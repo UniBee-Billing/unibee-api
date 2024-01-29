@@ -36,7 +36,7 @@ type HandlePayReq struct {
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
+	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
@@ -71,7 +71,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "HandlePayExpired, req=%s", req)
+	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
@@ -96,7 +96,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err error) {
-	g.Log().Infof(ctx, "HandlePayAuthorized, payment=%s", payment)
+	g.Log().Infof(ctx, "HandlePayAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil")
 		return errors.New("支付不存在")
@@ -148,7 +148,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 }
 
 func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "handlePayFailure, req=%s", req)
+	g.Log().Infof(ctx, "handlePayFailure, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
@@ -220,7 +220,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "handlePaySuccess, req=%s", req)
+	g.Log().Infof(ctx, "handlePaySuccess, req=%s", utility.MarshalToJsonString(req))
 
 	if req.PaidTime == nil {
 		return errors.New("invalid param PaidTime is nil")
