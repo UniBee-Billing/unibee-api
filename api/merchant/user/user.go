@@ -35,3 +35,33 @@ type SearchReq struct {
 type SearchRes struct {
 	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
 }
+
+type UserProfileUpdateReq struct {
+	g.Meta          `path:"/update_user_profile" tags:"Merchant-User-Controller" method:"post" summary:"Update User Profile"`
+	UserId          uint64 `p:"userId" dc:"User Id" v:"required"`
+	FirstName       string `p:"firstName" dc:"First name" v:"required"`
+	LastName        string `p:"lastName" dc:"Last Name" v:"required"`
+	Email           string `p:"email" dc:"Email" v:"required"`
+	Address         string `p:"address" dc:"Billing Address" v:"required"`
+	CompanyName     string `p:"companyName" dc:"Company Name"`
+	VATNumber       string `p:"vATNumber" dc:"VAT Number"`
+	Phone           string `p:"phone" dc:"Phone"`
+	Telegram        string `p:"telegram" dc:"Telegram"`
+	WhatsApp        string `p:"WhatsApp" dc:"WhatsApp"`
+	WeChat          string `p:"WeChat" dc:"WeChat"`
+	LinkedIn        string `p:"LinkedIn" dc:"LinkedIn"`
+	Facebook        string `p:"facebook" dc:"Facebook"`
+	TikTok          string `p:"tiktok" dc:"Tiktok"`
+	OtherSocialInfo string `p:"otherSocialInfo" dc:"Other Social Info"`
+	PaymentMethod   string `p:"paymentMethod" dc:"Payment Method"`
+	CountryCode     string `p:"countryCode" dc:"Country Code" v:"required"`
+	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
+	// Email string `p:"email" dc:"email" v:"required"`
+	// Password  string `p:"password" dc:"password" v:"required"`
+}
+
+// with token to be implemented in the future
+type UserProfileUpdateRes struct {
+	//User *entity.UserAccount `p:"user" dc:"User"`
+	// Token string `p:"token" dc:"token string"`
+}
