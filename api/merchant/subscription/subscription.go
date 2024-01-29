@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/logic/channel/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
@@ -154,4 +155,36 @@ type SubscriptionMerchantPendingUpdateListReq struct {
 
 type SubscriptionMerchantPendingUpdateListRes struct {
 	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+}
+
+type SubscriptionNewAdminNoteReq struct {
+	g.Meta         `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-AdminNote-Controller" method:"post" summary:"Merchant New Subscription Note"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	MerchantUserId int64  `p:"merchantUserId" dc:"MerchantUserId" v:"required"`
+	Note           string `p:"note" dc:"note" v:"required"`
+}
+
+type SubscriptionNewAdminNoteRes struct {
+}
+
+type SubscriptionAdminNoteRo struct {
+	GmtCreate      *gtime.Time `json:"gmtCreate"  description:"创建时间"`               // 创建时间
+	GmtModify      *gtime.Time `json:"gmtModify"  description:"修改时间"`               // 修改时间
+	SubscriptionId string      `json:"subscriptionId" description:"SubscriptionId"` // 用户ID
+	UserName       string      `json:"userName"   description:"用户名"`                // 用户名
+	Mobile         string      `json:"mobile"     description:"手机号"`                // 手机号
+	Email          string      `json:"email"      description:"邮箱"`                 // 邮箱
+	FirstName      string      `json:"firstName"  description:""`                   //
+	LastName       string      `json:"lastName"   description:""`                   //
+}
+
+type SubscriptionAdminNoteListReq struct {
+	g.Meta         `path:"/subscription_admin_note_list" tags:"Merchant-Subscription-AdminNote-Controller" method:"post" summary:"Merchant Subscription Note List"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
+	Count          int    `p:"count" dc:"Count Of Page" `
+}
+
+type SubscriptionAdminNoteListRes struct {
+	NoteLists []*SubscriptionAdminNoteRo `json:"noteLists"   description:""`
 }
