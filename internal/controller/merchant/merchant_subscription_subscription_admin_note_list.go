@@ -29,16 +29,18 @@ func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, 
 	var resultList []*subscription.SubscriptionAdminNoteRo
 	for _, note := range mainList {
 		merchantUser := query.GetMerchantAccountById(ctx, uint64(note.MerchantUserId))
-		resultList = append(resultList, &subscription.SubscriptionAdminNoteRo{
-			GmtCreate:      note.GmtCreate,
-			GmtModify:      note.GmtModify,
-			SubscriptionId: note.SubscriptionId,
-			UserName:       merchantUser.UserName,
-			Mobile:         merchantUser.Mobile,
-			Email:          merchantUser.Email,
-			FirstName:      merchantUser.FirstName,
-			LastName:       merchantUser.LastName,
-		})
+		if merchantUser != nil {
+			resultList = append(resultList, &subscription.SubscriptionAdminNoteRo{
+				GmtCreate:      note.GmtCreate,
+				GmtModify:      note.GmtModify,
+				SubscriptionId: note.SubscriptionId,
+				UserName:       merchantUser.UserName,
+				Mobile:         merchantUser.Mobile,
+				Email:          merchantUser.Email,
+				FirstName:      merchantUser.FirstName,
+				LastName:       merchantUser.LastName,
+			})
+		}
 	}
 	return &subscription.SubscriptionAdminNoteListRes{NoteLists: resultList}, nil
 }
