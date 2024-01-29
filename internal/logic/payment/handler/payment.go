@@ -388,7 +388,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			}
 		}
 	} else {
-		return gerror.Newf("invalid payment type:%s", channelPayRo.ChannelPaymentId)
+		return gerror.Newf("Invalid Payment Type ChannelPaymentId:%s ChannelInvoiceId:%s ChannelSubscriptionId:%s", channelPayRo.ChannelPaymentId, channelPayRo.ChannelInvoiceId, channelPayRo.ChannelSubscriptionId)
 	}
 
 	return nil
