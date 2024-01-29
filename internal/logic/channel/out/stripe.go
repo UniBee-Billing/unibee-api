@@ -1379,7 +1379,7 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 	}
 	var subscriptionId string
 	if detail.SubscriptionDetails != nil {
-		subscriptionId = detail.Subscription.Metadata["SubId"]
+		subscriptionId = detail.SubscriptionDetails.Metadata["SubId"]
 	}
 	var channelUserId string
 	if detail.Customer != nil {
