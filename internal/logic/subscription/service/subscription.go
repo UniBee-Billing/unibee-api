@@ -822,7 +822,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
-		Paid:                      subUpdateRes.Paid,
+		Paid:                      len(subUpdateRes.Link) == 0,
 		Link:                      subUpdateRes.Link,
 	}, nil
 }
