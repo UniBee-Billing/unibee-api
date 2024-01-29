@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
 	sub "github.com/stripe/stripe-go/v76/subscription"
+	"go-oversea-pay/utility"
 	"testing"
 )
 
@@ -25,6 +26,15 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	}
 	fmt.Printf("detail current cycle:%d-%d\n", detailResponse.CurrentPeriodStart, detailResponse.CurrentPeriodEnd)
 	fmt.Printf("detail TrialEnd:%d\n", detailResponse.TrialEnd)
+
+	// Cancelled Without Proration
+	params := &stripe.SubscriptionCancelParams{}
+	params.InvoiceNow = stripe.Bool(false)
+	params.Prorate = stripe.Bool(false)
+	response, err := sub.Cancel("sub_1OV191Hhgikz9ijMPTz8X9Wh", params)
+	fmt.Printf("updateResponse:%s\n", utility.MarshalToJsonString(response))
+	fmt.Printf("detail current cycle:%d-%d\n", response.CurrentPeriodStart, response.CurrentPeriodEnd)
+	fmt.Printf("detail Status:%s\n", response.Status)
 
 	//updateResponse, err := sub.Update("sub_1OV191Hhgikz9ijMPTz8X9Wh", &stripe.SubscriptionParams{
 	//	//TrialEnd:          stripe.Int64(1706746815),

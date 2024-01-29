@@ -822,7 +822,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if !consts.GetConfigInstance().IsServerDev() || !consts.GetConfigInstance().IsLocal() {
 		// only local env can cancel immediately invoice_compute proration invoice implemented
-		utility.Assert(invoiceNow == false, "cancel subscription immediate not support for this environment")
+		utility.Assert(invoiceNow == false && proration == false, "cancel subscription with proration invoice immediate not support for this version")
 	}
 	_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
 		Plan:         plan,
