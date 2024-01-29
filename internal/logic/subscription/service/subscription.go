@@ -744,10 +744,16 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				return nil, err
 			}
 			// Upgrade
-			subUpdateRes.ChannelUpdateId = createRes.ChannelInvoiceId
-			subUpdateRes.Paid = createRes.AlreadyPaid
-			subUpdateRes.Link = createRes.Link
-			subUpdateRes.Data = utility.MarshalToJsonString(createRes)
+			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
+				ChannelUpdateId: createRes.ChannelInvoiceId,
+				Data:            utility.MarshalToJsonString(createRes),
+				Link:            createRes.Link,
+				Paid:            createRes.AlreadyPaid,
+			}
+			//subUpdateRes.ChannelUpdateId = createRes.ChannelInvoiceId
+			//subUpdateRes.Paid = createRes.AlreadyPaid
+			//subUpdateRes.Link = createRes.Link
+			//subUpdateRes.Data = utility.MarshalToJsonString(createRes)
 		} else {
 			subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 				Plan:            prepare.Plan,
