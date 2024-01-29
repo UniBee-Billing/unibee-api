@@ -369,15 +369,17 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			if err != nil {
 				return err
 			}
-			// better use redis mq to trace payment
-			if len(channelPayRo.ChannelSubscriptionUpdateId) > 0 {
-				eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, channelPayRo.ChannelSubscriptionUpdateId)
-				if eiPendingSubUpdate != nil {
-					//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
-					sub := query.GetSubscriptionBySubscriptionId(ctx, eiPendingSubUpdate.SubscriptionId)
-					_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
-					if err != nil {
-						return err
+			if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+				// better use redis mq to trace payment
+				if len(channelPayRo.ChannelSubscriptionUpdateId) > 0 {
+					eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, channelPayRo.ChannelSubscriptionUpdateId)
+					if eiPendingSubUpdate != nil {
+						//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
+						sub := query.GetSubscriptionBySubscriptionId(ctx, eiPendingSubUpdate.SubscriptionId)
+						_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
+						if err != nil {
+							return err
+						}
 					}
 				}
 			}
