@@ -196,150 +196,6 @@ func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.OverseaPayChannel, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
-	stripe.Key = payChannel.ChannelSecret
-	s.setUnibeeAppInfo()
-	params := &stripe.InvoiceMarkUncollectibleParams{}
-	response, err := invoice.MarkUncollectible(cancelInvoiceInternalReq.ChannelInvoiceId, params)
-	if err != nil {
-		return nil, err
-	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", params, response, err, "", nil, payChannel)
-	return parseStripeInvoice(response, int64(payChannel.Id)), nil
-}
-
-func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
-	stripe.Key = payChannel.ChannelSecret
-	s.setUnibeeAppInfo()
-
-	channelUserId := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
-
-	params := &stripe.InvoiceParams{
-		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Customer: stripe.String(channelUserId)}
-	if createInvoiceInternalReq.PayMethod == 1 {
-		params.CollectionMethod = stripe.String("charge_automatically")
-	} else {
-		params.CollectionMethod = stripe.String("send_invoice")
-		if createInvoiceInternalReq.DaysUtilDue > 0 {
-			params.DaysUntilDue = stripe.Int64(int64(createInvoiceInternalReq.DaysUtilDue))
-		}
-	}
-	//params.DefaultTaxRates
-	result, err := invoice.New(params)
-	if err != nil {
-		return nil, err
-	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", params, result, err, "New", nil, payChannel)
-
-	for _, line := range createInvoiceInternalReq.InvoiceLines {
-		ItemParams := &stripe.InvoiceItemParams{
-			Invoice:  stripe.String(result.ID),
-			Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-			//UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
-			Amount:      stripe.Int64(line.Amount),
-			Description: stripe.String(line.Description),
-			//Quantity:    stripe.Int64(line.Quantity),
-			Customer: stripe.String(channelUserId)}
-		_, err = invoiceitem.New(ItemParams)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
-	if createInvoiceInternalReq.PayMethod == 1 {
-		finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
-	} else {
-		finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
-	}
-
-	// todo mark 总价格验证
-
-	detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
-	if err != nil {
-		return nil, err
-	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, payChannel)
-	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
-	if strings.Compare(string(detail.Status), "draft") == 0 {
-		status = consts.InvoiceStatusPending
-	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		status = consts.InvoiceStatusProcessing
-	} else if strings.Compare(string(detail.Status), "paid") == 0 {
-		status = consts.InvoiceStatusPaid
-	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		status = consts.InvoiceStatusFailed
-	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		status = consts.InvoiceStatusCancelled
-	}
-	var invoiceItems []*ro.InvoiceItemDetailRo
-	for _, line := range detail.Lines.Data {
-		var start int64 = 0
-		var end int64 = 0
-		if line.Period != nil {
-			start = line.Period.Start
-			end = line.Period.End
-		}
-		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
-			Currency:               strings.ToUpper(string(line.Currency)),
-			Amount:                 line.Amount,
-			AmountExcludingTax:     line.AmountExcludingTax,
-			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
-			Description:            line.Description,
-			Proration:              line.Proration,
-			Quantity:               line.Quantity,
-			PeriodStart:            start,
-			PeriodEnd:              end,
-		})
-	}
-
-	return &ro.ChannelDetailInvoiceInternalResp{
-		TotalAmount:                    detail.Total,
-		TotalAmountExcludingTax:        detail.TotalExcludingTax,
-		TaxAmount:                      detail.Tax,
-		SubscriptionAmount:             detail.Subtotal,
-		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
-		Currency:                       strings.ToUpper(string(detail.Currency)),
-		Lines:                          invoiceItems,
-		ChannelId:                      int64(payChannel.Id),
-		Status:                         status,
-		ChannelUserId:                  detail.Customer.ID,
-		Link:                           detail.HostedInvoiceURL,
-		ChannelStatus:                  string(detail.Status),
-		ChannelInvoiceId:               detail.ID,
-		ChannelInvoicePdf:              detail.InvoicePDF,
-		PeriodStart:                    detail.PeriodStart,
-		PeriodEnd:                      detail.PeriodEnd,
-	}, nil
-}
-
-func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
-	stripe.Key = payChannel.ChannelSecret
-	s.setUnibeeAppInfo()
-	params := &stripe.InvoicePayParams{}
-	response, err := invoice.Pay(payInvoiceInternalReq.ChannelInvoiceId, params)
-	log.SaveChannelHttpLog("DoRemoteChannelInvoicePay", params, response, err, "", nil, payChannel)
-	return parseStripeInvoice(response, int64(payChannel.Id)), nil
-}
-
-func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
-	stripe.Key = payChannel.ChannelSecret
-	s.setUnibeeAppInfo()
-
-	params := &stripe.InvoiceParams{}
-	detail, err := invoice.Get(channelInvoiceId, params)
-	if err != nil {
-		return nil, err
-	}
-	log.SaveChannelHttpLog("DoRemoteChannelInvoiceDetails", params, detail, err, "", nil, payChannel)
-	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
-}
-
 func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.SubscriptionPlanChannel, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
@@ -1078,6 +934,148 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 	}, nil
 }
 
+func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.OverseaPayChannel, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.InvoiceMarkUncollectibleParams{}
+	response, err := invoice.MarkUncollectible(cancelInvoiceInternalReq.ChannelInvoiceId, params)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCancel", params, response, err, "", nil, payChannel)
+	return parseStripeInvoice(response, int64(payChannel.Id)), nil
+}
+
+func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	channelUserId := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
+
+	params := &stripe.InvoiceParams{
+		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
+		Customer: stripe.String(channelUserId)}
+	if createInvoiceInternalReq.PayMethod == 1 {
+		params.CollectionMethod = stripe.String("charge_automatically")
+	} else {
+		params.CollectionMethod = stripe.String("send_invoice")
+		if createInvoiceInternalReq.DaysUtilDue > 0 {
+			params.DaysUntilDue = stripe.Int64(int64(createInvoiceInternalReq.DaysUtilDue))
+		}
+	}
+	//params.DefaultTaxRates
+	result, err := invoice.New(params)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", params, result, err, "New", nil, payChannel)
+
+	for _, line := range createInvoiceInternalReq.InvoiceLines {
+		ItemParams := &stripe.InvoiceItemParams{
+			Invoice:  stripe.String(result.ID),
+			Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
+			//UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Amount:      stripe.Int64(line.Amount),
+			Description: stripe.String(line.Description),
+			//Quantity:    stripe.Int64(line.Quantity),
+			Customer: stripe.String(channelUserId)}
+		_, err = invoiceitem.New(ItemParams)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
+	if createInvoiceInternalReq.PayMethod == 1 {
+		finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
+	} else {
+		finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
+	}
+
+	detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, payChannel)
+	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	if strings.Compare(string(detail.Status), "draft") == 0 {
+		status = consts.InvoiceStatusPending
+	} else if strings.Compare(string(detail.Status), "open") == 0 {
+		status = consts.InvoiceStatusProcessing
+	} else if strings.Compare(string(detail.Status), "paid") == 0 {
+		status = consts.InvoiceStatusPaid
+	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
+		status = consts.InvoiceStatusFailed
+	} else if strings.Compare(string(detail.Status), "void") == 0 {
+		status = consts.InvoiceStatusCancelled
+	}
+	var invoiceItems []*ro.InvoiceItemDetailRo
+	for _, line := range detail.Lines.Data {
+		var start int64 = 0
+		var end int64 = 0
+		if line.Period != nil {
+			start = line.Period.Start
+			end = line.Period.End
+		}
+		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+			Currency:               strings.ToUpper(string(line.Currency)),
+			Amount:                 line.Amount,
+			AmountExcludingTax:     line.AmountExcludingTax,
+			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
+			Description:            line.Description,
+			Proration:              line.Proration,
+			Quantity:               line.Quantity,
+			PeriodStart:            start,
+			PeriodEnd:              end,
+		})
+	}
+
+	return &ro.ChannelDetailInvoiceInternalResp{
+		TotalAmount:                    detail.Total,
+		TotalAmountExcludingTax:        detail.TotalExcludingTax,
+		TaxAmount:                      detail.Tax,
+		SubscriptionAmount:             detail.Subtotal,
+		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
+		Currency:                       strings.ToUpper(string(detail.Currency)),
+		Lines:                          invoiceItems,
+		ChannelId:                      int64(payChannel.Id),
+		Status:                         status,
+		ChannelUserId:                  detail.Customer.ID,
+		Link:                           detail.HostedInvoiceURL,
+		ChannelStatus:                  string(detail.Status),
+		ChannelInvoiceId:               detail.ID,
+		ChannelInvoicePdf:              detail.InvoicePDF,
+		PeriodStart:                    detail.PeriodStart,
+		PeriodEnd:                      detail.PeriodEnd,
+	}, nil
+}
+
+func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.OverseaPayChannel, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	params := &stripe.InvoicePayParams{}
+	response, err := invoice.Pay(payInvoiceInternalReq.ChannelInvoiceId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelInvoicePay", params, response, err, "", nil, payChannel)
+	return parseStripeInvoice(response, int64(payChannel.Id)), nil
+}
+
+func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.OverseaPayChannel, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.InvoiceParams{}
+	detail, err := invoice.Get(channelInvoiceId, params)
+	if err != nil {
+		return nil, err
+	}
+	log.SaveChannelHttpLog("DoRemoteChannelInvoiceDetails", params, detail, err, "", nil, payChannel)
+	return parseStripeInvoice(detail, int64(payChannel.Id)), nil
+}
+
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.PayChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = createPayContext.PayChannel.ChannelSecret
@@ -1089,13 +1087,13 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)), //小写
 		Customer: stripe.String(channelUserId)}
 	if createPayContext.PayMethod == 1 {
+		// Default Payment Method Sync todo mark
 		params.CollectionMethod = stripe.String("charge_automatically")
 	} else {
 		params.CollectionMethod = stripe.String("send_invoice")
 		if createPayContext.DaysUtilDue > 0 {
 			params.DaysUntilDue = stripe.Int64(int64(createPayContext.DaysUtilDue))
 		}
-		// todo mark tax 设置
 	}
 	result, err := invoice.New(params)
 	if err != nil {
@@ -1112,7 +1110,6 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			Description: stripe.String(line.Description),
 			//Quantity:    stripe.Int64(line.Quantity),
 			Customer: stripe.String(channelUserId)}
-		// todo mark tax 设置
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1125,8 +1122,6 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	} else {
 		finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
 	}
-
-	// todo mark 总价格验证
 
 	detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
 	if err != nil {
