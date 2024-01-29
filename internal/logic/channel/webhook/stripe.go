@@ -225,9 +225,11 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		}
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
+		r.Response.WriteHeader(http.StatusBadRequest)
+		responseBack = http.StatusBadRequest
 	}
 	log.SaveChannelHttpLog("DoRemoteChannelWebhook", event, responseBack, err, string(event.Type), nil, payChannel)
-	r.Response.WriteHeader(http.StatusOK)
+	r.Response.WriteHeader(responseBack)
 }
 
 func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
@@ -329,7 +331,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 	if err != nil {
 		return err
 	}
-	
+
 	return nil
 }
 
