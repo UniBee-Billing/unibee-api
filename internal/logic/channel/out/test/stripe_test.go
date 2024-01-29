@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
-	sub "github.com/stripe/stripe-go/v76/subscription"
+	"github.com/stripe/stripe-go/v76/invoice"
 	"go-oversea-pay/utility"
 	"testing"
 )
@@ -20,21 +20,36 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 		URL:     "https://unibee.dev",
 	})
 
-	detailResponse, err := sub.Get("sub_1OV191Hhgikz9ijMPTz8X9Wh", &stripe.SubscriptionParams{})
+	//detailResponse, err := sub.Get("sub_1OV191Hhgikz9ijMPTz8X9Wh", &stripe.SubscriptionParams{})
+	//if err != nil {
+	//	fmt.Printf("err:%s\n", err.Error())
+	//}
+	//fmt.Printf("detail current cycle:%d-%d\n", detailResponse.CurrentPeriodStart, detailResponse.CurrentPeriodEnd)
+	//fmt.Printf("detail TrialEnd:%d\n", detailResponse.TrialEnd)
+
+	// Cancelled Without Proration
+	//params := &stripe.SubscriptionCancelParams{}
+	//params.InvoiceNow = stripe.Bool(false)
+	//params.Prorate = stripe.Bool(false)
+	//response, err := sub.Cancel("sub_1OV191Hhgikz9ijMPTz8X9Wh", params)
+	//fmt.Printf("updateResponse:%s\n", utility.MarshalToJsonString(response))
+	//fmt.Printf("detail current cycle:%d-%d\n", response.CurrentPeriodStart, response.CurrentPeriodEnd)
+	//fmt.Printf("detail Status:%s\n", response.Status)
+
+	//params := &stripe.CustomerListPaymentMethodsParams{
+	//	Customer: stripe.String("cus_PSLAUvKi75bM2e"),
+	//}
+	//params.Limit = stripe.Int64(3)
+	//result := customer.ListPaymentMethods(params)
+	//fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.List()))
+
+	params := &stripe.InvoicePayParams{}
+	params.PaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")
+	response, err := invoice.Pay("in_1OdziFHhgikz9ijMM0zrMlTf", params)
+	fmt.Printf("response:%s\n", utility.MarshalToJsonString(response))
 	if err != nil {
 		fmt.Printf("err:%s\n", err.Error())
 	}
-	fmt.Printf("detail current cycle:%d-%d\n", detailResponse.CurrentPeriodStart, detailResponse.CurrentPeriodEnd)
-	fmt.Printf("detail TrialEnd:%d\n", detailResponse.TrialEnd)
-
-	// Cancelled Without Proration
-	params := &stripe.SubscriptionCancelParams{}
-	params.InvoiceNow = stripe.Bool(false)
-	params.Prorate = stripe.Bool(false)
-	response, err := sub.Cancel("sub_1OV191Hhgikz9ijMPTz8X9Wh", params)
-	fmt.Printf("updateResponse:%s\n", utility.MarshalToJsonString(response))
-	fmt.Printf("detail current cycle:%d-%d\n", response.CurrentPeriodStart, response.CurrentPeriodEnd)
-	fmt.Printf("detail Status:%s\n", response.Status)
 
 	//updateResponse, err := sub.Update("sub_1OV191Hhgikz9ijMPTz8X9Wh", &stripe.SubscriptionParams{
 	//	//TrialEnd:          stripe.Int64(1706746815),

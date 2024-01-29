@@ -226,8 +226,8 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 		if createInvoiceInternalReq.DaysUtilDue > 0 {
 			params.DaysUntilDue = stripe.Int64(int64(createInvoiceInternalReq.DaysUtilDue))
 		}
-		// todo mark tax 设置
 	}
+	//params.DefaultTaxRates
 	result, err := invoice.New(params)
 	if err != nil {
 		return nil, err
@@ -236,13 +236,13 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 
 	for _, line := range createInvoiceInternalReq.InvoiceLines {
 		ItemParams := &stripe.InvoiceItemParams{
-			Invoice:     stripe.String(result.ID),
-			Currency:    stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-			UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Invoice:  stripe.String(result.ID),
+			Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
+			//UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
-			Quantity:    stripe.Int64(line.Quantity),
-			Customer:    stripe.String(channelUserId)}
-		// todo mark tax 设置
+			//Quantity:    stripe.Int64(line.Quantity),
+			Customer: stripe.String(channelUserId)}
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1105,12 +1105,13 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 
 	for _, line := range createPayContext.Invoice.Lines {
 		ItemParams := &stripe.InvoiceItemParams{
-			Invoice:     stripe.String(result.ID),
-			Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-			UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Invoice:  stripe.String(result.ID),
+			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
+			//UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
-			Quantity:    stripe.Int64(line.Quantity),
-			Customer:    stripe.String(channelUserId)}
+			//Quantity:    stripe.Int64(line.Quantity),
+			Customer: stripe.String(channelUserId)}
 		// todo mark tax 设置
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
