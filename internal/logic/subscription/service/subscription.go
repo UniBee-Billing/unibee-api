@@ -452,11 +452,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
-	if merchantUserId > 0 && sub.TrialEnd > gtime.Now().Timestamp() {
-		//试用期内，Merchant Portal 所有变更马上生效 todo mark 讨论
-		effectImmediate = true
-	}
-
 	var totalAmount int64
 	var prorationInvoice *ro.InvoiceDetailSimplify
 	//var nextPeriodTotalAmount int64
