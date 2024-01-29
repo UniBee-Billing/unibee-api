@@ -35,10 +35,10 @@ type SubscriptionListRes struct {
 }
 
 type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription"`
+	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	InvoiceNow     bool   `p:"invoiceNow" dc:"Default false"`
-	Prorate        bool   `p:"prorate" dc:"Prorate Generate Invoice，Default false"`
+	InvoiceNow     bool   `p:"invoiceNow" dc:"Default false"  deprecated:"true"`
+	Prorate        bool   `p:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
 }
 type SubscriptionCancelRes struct {
 }

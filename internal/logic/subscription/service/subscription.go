@@ -821,6 +821,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if !consts.GetConfigInstance().IsServerDev() || !consts.GetConfigInstance().IsLocal() {
+		// todo mark will support proration invoiceNow later
+		invoiceNow = false
+		proration = false
+		// todo mark will support proration invoiceNow later
 		// only local env can cancel immediately invoice_compute proration invoice
 		utility.Assert(invoiceNow == false && proration == false, "cancel subscription with proration invoice immediate not support for this version")
 	}
