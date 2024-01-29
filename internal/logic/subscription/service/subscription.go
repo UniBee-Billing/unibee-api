@@ -889,17 +889,18 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	details, err := channel.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
 	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
 	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
+	sub = query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
 	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
-	newTrialEnd := details.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
+	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 	_, err = channel.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 	if err != nil {
 		return err
 	}
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
-		dao.Subscription.Columns().GmtModify: gtime.Now(), // todo 存在并发调用问题
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
