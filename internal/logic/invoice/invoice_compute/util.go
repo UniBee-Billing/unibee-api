@@ -64,14 +64,21 @@ type CalculateInvoiceReq struct {
 	Quantity      int64  `json:"quantity"`
 	AddonJsonData string `json:"addonJsonData"`
 	TaxScale      int64  `json:"taxScale"`
+	PeriodStart   int64  `json:"periodStart"`
+	PeriodEnd     int64  `json:"periodEnd"`
 }
 
-func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *ro.InvoiceDetailSimplify {
+func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *ro.InvoiceDetailSimplify {
 	plan := query.GetPlanById(ctx, req.PlanId)
 	addons := query.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
 	var totalAmountExcludingTax = plan.Amount * req.Quantity
 	for _, addon := range addons {
 		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
+	}
+
+	var period = ""
+	if req.PeriodStart > 0 && req.PeriodEnd > req.PeriodStart {
+		period = fmt.Sprintf("(%s-%s)", gtime.NewFromTimeStamp(req.PeriodStart).Layout("2006-01-02"), gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02"))
 	}
 
 	var invoiceItems []*ro.InvoiceItemDetailRo
@@ -82,7 +89,7 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 		Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 		TaxScale:               req.TaxScale,
 		UnitAmountExcludingTax: plan.Amount,
-		Description:            plan.PlanName,
+		Description:            fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period),
 		Quantity:               req.Quantity,
 	})
 	for _, addon := range addons {
@@ -93,7 +100,7 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 			TaxScale:               req.TaxScale,
 			AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
-			Description:            addon.AddonPlan.PlanName,
+			Description:            fmt.Sprintf("%d * %s %s", addon.Quantity, addon.AddonPlan.PlanName, period),
 			Quantity:               addon.Quantity,
 		})
 	}
@@ -107,6 +114,8 @@ func ComputeInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq)
 		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
 		Lines:                          invoiceItems,
+		PeriodStart:                    req.PeriodStart,
+		PeriodEnd:                      req.PeriodEnd,
 	}
 }
 
@@ -125,7 +134,7 @@ type CalculateProrationInvoiceReq struct {
 	NewProrationPlans []*ProrationPlanParam `json:"newPlans"`
 }
 
-func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *ro.InvoiceDetailSimplify {
+func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *ro.InvoiceDetailSimplify {
 	if req.OldProrationPlans == nil {
 		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
 	}
@@ -177,7 +186,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 					Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 					TaxScale:               req.TaxScale,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
-					Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
+					Description:            fmt.Sprintf("Unused Time On %d * %s After %s", -quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 					Quantity:               -quantityDiff,
 				})
 				totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
@@ -193,7 +202,7 @@ func ComputeProrationInvoiceDetailSimplify(ctx context.Context, req *CalculatePr
 				Tax:                    int64(float64(quantityDiff*unitAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
 				TaxScale:               req.TaxScale,
 				UnitAmountExcludingTax: unitAmountExcludingTax,
-				Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
+				Description:            fmt.Sprintf("Unused Time On %d * %s After %s", -quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 				Quantity:               -quantityDiff,
 			})
 			totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)

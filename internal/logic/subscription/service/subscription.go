@@ -186,7 +186,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 	}
 
-	invoice := invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+	invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 		Currency:      currency,
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
@@ -452,19 +452,27 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
+	var nextPeriodStart = sub.CurrentPeriodEnd
+	if sub.TrialEnd > sub.CurrentPeriodEnd {
+		nextPeriodStart = sub.TrialEnd
+	}
+	var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+
 	var totalAmount int64
 	var prorationInvoice *ro.InvoiceDetailSimplify
 	//var nextPeriodTotalAmount int64
 	var nextPeriodInvoice *ro.InvoiceDetailSimplify
 	if effectImmediate {
 		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
-			// Generate Proration Invoice Preview
-			nextPeriodInvoice = invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			// Generate Proration Invoice Previe
+			nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				Currency:      sub.Currency,
 				PlanId:        req.NewPlanId,
 				Quantity:      req.Quantity,
 				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
 				TaxScale:      sub.TaxScale,
+				PeriodStart:   nextPeriodStart,
+				PeriodEnd:     nextPeriodEnd,
 			})
 
 			var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
@@ -492,7 +500,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 					Quantity: addonParam.Quantity,
 				})
 			}
-			prorationInvoice = invoice_compute.ComputeProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
+			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 				Currency:          sub.Currency,
 				TaxScale:          sub.TaxScale,
 				ProrationDate:     prorationDate,
@@ -587,6 +595,21 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmountExcludingTax: nextPeriodTotalAmountExcludingTax,                       // 在没有 discount 之前，保持于 Total 一致
 			Lines:                          nextPeriodInvoiceItems,
 		}
+
+		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+			selfComputeNextPeriodInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+				Currency:      sub.Currency,
+				PlanId:        req.NewPlanId,
+				Quantity:      req.Quantity,
+				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+				TaxScale:      sub.TaxScale,
+				PeriodStart:   nextPeriodStart,
+				PeriodEnd:     nextPeriodEnd,
+			})
+			utility.Assert(selfComputeNextPeriodInvoice.TotalAmount == nextPeriodInvoice.TotalAmount, "System Error, Compute Error")
+			nextPeriodInvoice = selfComputeNextPeriodInvoice
+		}
+
 		prorationInvoice = &ro.InvoiceDetailSimplify{
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,

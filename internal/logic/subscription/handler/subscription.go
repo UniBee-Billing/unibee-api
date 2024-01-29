@@ -220,7 +220,7 @@ func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subs
 	// billing-cycle
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
 	if err != nil {
-		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
+		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
 	}
 	err = UpdateSubscriptionBillingCycleWithPayment(ctx, sub, channelSubscriptionDetail)
 	return err
@@ -251,18 +251,31 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				if one == nil {
 					sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
-					invoice := invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+					var nextPeriodStart = sub.CurrentPeriodEnd
+					if sub.TrialEnd > sub.CurrentPeriodEnd {
+						nextPeriodStart = sub.TrialEnd
+					}
+					var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+
+					invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
 						PlanId:        pendingSubUpdate.UpdateAmount,
 						Quantity:      pendingSubUpdate.UpdateQuantity,
 						AddonJsonData: pendingSubUpdate.UpdateAddonData,
 						TaxScale:      sub.TaxScale,
+						PeriodStart:   nextPeriodStart,
+						PeriodEnd:     nextPeriodEnd,
 					})
 					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
 				}
 
 				if req.Payment.Status == consts.PAY_SUCCESS {
 					_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
+					if err != nil {
+						return err
+					}
+
+					err = FinishNextBillingCycleForSubscription(ctx, sub, req.Payment, req.ChannelSubscriptionDetail)
 					if err != nil {
 						return err
 					}
@@ -276,12 +289,20 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			if one == nil {
 				sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
-				invoice := invoice_compute.ComputeInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+				var nextPeriodStart = sub.CurrentPeriodEnd
+				if sub.TrialEnd > sub.CurrentPeriodEnd {
+					nextPeriodStart = sub.TrialEnd
+				}
+				var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+
+				invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 					Currency:      sub.Currency,
 					PlanId:        sub.PlanId,
 					Quantity:      sub.Quantity,
 					AddonJsonData: sub.AddonData,
 					TaxScale:      sub.TaxScale,
+					PeriodStart:   nextPeriodStart,
+					PeriodEnd:     nextPeriodEnd,
 				})
 				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
 			}
