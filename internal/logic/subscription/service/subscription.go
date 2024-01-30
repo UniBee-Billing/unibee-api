@@ -787,6 +787,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			//subUpdateRes.Link = createRes.Link
 			//subUpdateRes.Data = utility.MarshalToJsonString(createRes)
 		} else {
+			prepare.EffectImmediate = false
 			subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 				Plan:            prepare.Plan,
 				Quantity:        prepare.Quantity,
