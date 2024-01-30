@@ -233,8 +233,8 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		Currency:                       req.Currency,
 		TaxAmount:                      taxAmount,
 		TaxScale:                       req.TaxScale,
-		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
+		SubscriptionAmount:             totalAmountExcludingTax + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Lines:                          invoiceItems,
 		ProrationDate:                  req.ProrationDate,
 		ProrationScale:                 timeScale,

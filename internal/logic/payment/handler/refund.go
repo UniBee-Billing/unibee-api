@@ -35,7 +35,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
-		return gerror.New("退款记录不存在")
+		return gerror.New("refund not found")
 	}
 	if one.Status == consts.REFUND_FAILED {
 		g.Log().Infof(ctx, "already failure")
@@ -48,7 +48,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	pay := query.GetPaymentByPaymentId(ctx, one.RefundId)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, refundId=%s", one.RefundId)
-		return gerror.New("支付记录不存在")
+		return gerror.New("payment not found")
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -104,7 +104,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, refundId=%s", req.RefundId)
-		return gerror.New("退款记录不存在")
+		return gerror.New("refund not found")
 	}
 	if one.Status == consts.REFUND_SUCCESS {
 		g.Log().Infof(ctx, "refund already success")
@@ -113,7 +113,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
-		return gerror.New("支付记录不存在")
+		return gerror.New("payment not found")
 	}
 	//if (refund.getRefundComment().equals("手动触发重复支付单退款")) {
 	//	int updateCount = overseaRefundMapper.update(new OverseaRefund(),
@@ -203,7 +203,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	one := query.GetRefundByRefundId(ctx, req.RefundId)
 	if one == nil {
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
-		return gerror.New("退款记录不存在")
+		return gerror.New("refund not found")
 	}
 	if one.Status != consts.REFUND_ING {
 		g.Log().Infof(ctx, "Refund is success or failure")
@@ -212,7 +212,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if pay == nil {
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
-		return gerror.New("支付记录不存在")
+		return gerror.New("payment not found")
 	}
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
 	event.SaveTimeLine(ctx, entity.PaymentEvent{

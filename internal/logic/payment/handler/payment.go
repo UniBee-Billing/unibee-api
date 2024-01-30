@@ -47,10 +47,10 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		BizType:   0,
 		BizId:     payment.PaymentId,
 		Fee:       payment.TotalAmount,
-		EventType: event.Expird.Type,
-		Event:     event.Expird.Desc,
+		EventType: event.Expired.Type,
+		Event:     event.Expired.Desc,
 		OpenApiId: payment.OpenApiId,
-		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expird"),
+		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expired"),
 	})
 
 	err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
@@ -152,7 +152,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
-		return errors.New("支付不存在")
+		return errors.New("payment not found")
 	}
 	if payment.Status == consts.PAY_FAILED {
 		g.Log().Infof(ctx, "already failure")
@@ -232,7 +232,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if payment == nil {
 		g.Log().Infof(ctx, "payment not found, paymentId=%s", req.PaymentId)
-		return errors.New("支付不存在")
+		return errors.New("payment not found")
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api

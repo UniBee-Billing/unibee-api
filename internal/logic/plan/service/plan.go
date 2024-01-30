@@ -315,11 +315,11 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlan
 		addonIdsList = req.AddonIds
 	} else if req.Action == 1 {
 		//添加
-		utility.Assert(len(req.AddonIds) > 0, "action add, addonids is empty")
+		utility.Assert(len(req.AddonIds) > 0, "action add, addon ids is empty")
 		addonIdsList = mergeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	} else if req.Action == 2 {
 		//删除
-		utility.Assert(len(req.AddonIds) > 0, "action delete, addonids is empty")
+		utility.Assert(len(req.AddonIds) > 0, "action delete, addon ids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds) // 添加到整数列表中
 	}
 

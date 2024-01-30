@@ -17,21 +17,21 @@ import (
 	"strings"
 )
 
-// FileUploadInput 上传文件输入参数
+// FileUploadInput
 type FileUploadInput struct {
-	File       *ghttp.UploadFile // 上传文件对象
-	Path       string            // 上传目录
-	Name       string            // 自定义文件名称
+	File       *ghttp.UploadFile //
+	Path       string            //
+	Name       string            //
 	UserId     string            // UserId
-	RandomName bool              // 是否随机命名文件
+	RandomName bool              //
 }
 
-// FileUploadOutput 上传文件返回参数
+// FileUploadOutput
 type FileUploadOutput struct {
-	Id   uint   // 数据表ID
-	Name string // 文件名称
-	Path string // 本地路径
-	Url  string // 访问URL，可能只是URI
+	Id   uint   //
+	Name string //
+	Path string //
+	Url  string //
 }
 
 func Upload(ctx context.Context, in FileUploadInput) (*FileUploadOutput, error) {

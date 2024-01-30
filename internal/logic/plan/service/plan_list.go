@@ -16,14 +16,14 @@ import (
 
 type SubscriptionPlanListInternalReq struct {
 	MerchantId    int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required"`
-	Type          int    `p:"type"  d:"1"  dc:"不填查询所有类型，,1-main plan，2-addon plan" `
-	Status        int    `p:"status" dc:"不填查询所有状态，,状态，1-编辑中，2-活跃，3-非活跃，4-过期" `
-	PublishStatus int    `p:"publishStatus" dc:"不填查询所有状态，,状态，1-未发布，2-已发布" `
-	Currency      string `p:"currency" d:"usd"  dc:"订阅计划货币"  `
-	SortField     string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify，Default gmt_modify" `
+	Type          int    `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
+	Status        int    `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
+	PublishStatus int    `p:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
+	Currency      string `p:"currency" d:"usd"  dc:"Currency"  `
+	SortField     string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
-	Count         int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	Count         int    `p:"count" d:"20"  dc:"Count Of Page" `
 }
 
 func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.SubscriptionPlanDetailRes, error) {

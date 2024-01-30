@@ -13,24 +13,24 @@ type TradeEventTypeEnum struct {
 }
 
 var (
-	Authorised         = TradeEventTypeEnum{2, "授权"}   //
-	Cancelled          = TradeEventTypeEnum{3, "取消"}   //
-	Expird             = TradeEventTypeEnum{4, "授权过期"} //
-	ChargeBack         = TradeEventTypeEnum{5, "拒付"}
-	ChargeBackReversed = TradeEventTypeEnum{6, "拒付资金退回"}
-	CaptureFailed      = TradeEventTypeEnum{7, "请款失败"} //
-	Error              = TradeEventTypeEnum{8, "异常错误"}
-	Refunded           = TradeEventTypeEnum{9, "退款成功"}    //
-	RefundFailed       = TradeEventTypeEnum{10, "退款失败"}   //
-	RefundedReversed   = TradeEventTypeEnum{11, "退款资金退回"} //
+	Authorised         = TradeEventTypeEnum{2, "Authorised"} //
+	Cancelled          = TradeEventTypeEnum{3, "Cancelled"}  //
+	Expired            = TradeEventTypeEnum{4, "Expired"}    //
+	ChargeBack         = TradeEventTypeEnum{5, "ChargeBack"}
+	ChargeBackReversed = TradeEventTypeEnum{6, "ChargeBackReversed"}
+	CaptureFailed      = TradeEventTypeEnum{7, "CaptureFailed"} //
+	Error              = TradeEventTypeEnum{8, "Error"}
+	Refunded           = TradeEventTypeEnum{9, "Refunded"}          //
+	RefundFailed       = TradeEventTypeEnum{10, "RefundFailed"}     //
+	RefundedReversed   = TradeEventTypeEnum{11, "RefundedReversed"} //
 
-	Refused = TradeEventTypeEnum{12, "授权失败"}
+	Refused = TradeEventTypeEnum{12, "Refused"}
 
-	SentForRefund = TradeEventTypeEnum{13, "退款请求成功"} //
+	SentForRefund = TradeEventTypeEnum{13, "SentForRefund"} //
 
-	SentForSettle   = TradeEventTypeEnum{14, "请款请求成功"}
-	Settled         = TradeEventTypeEnum{15, "扣款成功"}
-	SettledReversed = TradeEventTypeEnum{16, "扣款资金退回"}
+	SentForSettle   = TradeEventTypeEnum{14, "SentForSettle"}
+	Settled         = TradeEventTypeEnum{15, "Settled"}
+	SettledReversed = TradeEventTypeEnum{16, "SettledReversed"}
 )
 
 func SaveTimeLine(ctx context.Context, overseaPayEvent entity.PaymentEvent) {

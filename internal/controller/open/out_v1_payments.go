@@ -31,7 +31,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
 	payChannel := query.GetPayChannelByChannel(ctx, req.PaymentMethod.Channel)
-	utility.Assert(payChannel != nil, "找不到支付方式 type:"+req.PaymentMethod.Channel)
+	utility.Assert(payChannel != nil, "type not found:"+req.PaymentMethod.Channel)
 	//支付方式绑定校验 todo mark
 
 	var invoiceItems []*ro.InvoiceItemDetailRo

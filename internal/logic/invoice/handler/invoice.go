@@ -148,8 +148,8 @@ type CreateInvoiceInternalReq struct {
 	ChannelId                        int64                                `json:"channelId"`
 	InvoiceStatus                    int                                  `json:"invoiceStatus"`
 	ChannelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp `json:"channelDetailInvoiceInternalResp"`
-	PeriodStart                      int64                                `json:"periodStart"                    description:"period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期"` // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
-	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`                                      // period_end
+	PeriodStart                      int64                                `json:"periodStart"                    description:"period_start"` // period_start
+	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`   // period_end
 }
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment, channelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp) error {

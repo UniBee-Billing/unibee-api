@@ -11,7 +11,7 @@ import (
 type PaymentTimelineListInternalReq struct {
 	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
-	SortField  string `p:"sortField" dc:"排序字段，merchant_id|gmt_create|gmt_modify|user_id" `
+	SortField  string `p:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `
 	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
 	Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `

@@ -28,7 +28,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
 
 	payChannel := query.GetPayChannelById(ctx, payment.ChannelId)
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 
 	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= TotalAmount value")
@@ -36,7 +36,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.MerchantRefundId)
 	isDuplicatedInvoke := false
 
-	//- 退款并发调用严重，加上Redis排它锁, todo mark 使用数据库锁
+	//- 退款并发调用严重，加上Redis排它锁, todo mark use db lock
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)
@@ -80,7 +80,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//事务处理 channel refund
-			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark 需要忽略空字段
+			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark ignore nil field
 			one.UniqueId = one.RefundId
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
 			if err != nil {
