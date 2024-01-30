@@ -46,7 +46,7 @@ func (s StripeWebhook) setUnibeeAppInfo() {
 }
 
 // DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks
-func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
+func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantChannelConfig) (err error) {
 	utility.Assert(payChannel != nil, "payChannel is nil")
 	stripe.Key = payChannel.ChannelSecret
 	params := &stripe.WebhookEndpointListParams{}
@@ -126,7 +126,7 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 	return nil
 }
 
-func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) {
 	endpointSecret := payChannel.WebhookSecret
 	signatureHeader := r.Header.Get("Stripe-Signature")
 	var event stripe.Event
@@ -232,7 +232,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	r.Response.WriteHeader(responseBack)
 }
 
-func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
+func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) (res *ro.ChannelRedirectInternalResp, err error) {
 	params, err := r.GetJson()
 	if err != nil {
 		g.Log().Printf(r.Context(), "StripeNotifyController redirect params:%s err:%s", params, err.Error())
@@ -300,7 +300,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 	}, nil
 }
 
-func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType string, refund stripe.Refund, payChannel *entity.OverseaPayChannel) error {
+func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType string, refund stripe.Refund, payChannel *entity.MerchantChannelConfig) error {
 	refundDetail, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelRefundDetail(ctx, payChannel, refund.ID)
 	if err != nil {
 		return err
@@ -337,7 +337,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 }
 
 //
-//func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType string, payment stripe.PaymentIntent, payChannel *entity.OverseaPayChannel) error {
+//func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType string, payment stripe.PaymentIntent, payChannel *entity.MerchantChannelConfig) error {
 //	details, err := s.DoRemoteChannelPaymentDetail(ctx, payChannel, payment.ID)
 //	if err != nil {
 //		return err
@@ -372,7 +372,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 //	return nil
 //}
 
-func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.OverseaPayChannel) error {
+func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.MerchantChannelConfig) error {
 	invoiceDetails, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
 	if err != nil {
 		return err
@@ -444,7 +444,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	return nil
 }
 
-func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription, payChannel *entity.OverseaPayChannel) error {
+func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType string, subscription stripe.Subscription, payChannel *entity.MerchantChannelConfig) error {
 	unibeeSub := query.GetSubscriptionByChannelSubscriptionId(ctx, subscription.ID)
 	if unibeeSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {

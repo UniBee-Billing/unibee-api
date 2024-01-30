@@ -7,7 +7,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) *entity.ChannelUser {
+func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.MerchantChannelConfig, userId int64) *entity.ChannelUser {
 	// todo mark sync lock control
 	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
 	if channelUser == nil {

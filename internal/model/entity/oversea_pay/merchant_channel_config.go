@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPayChannel is the golang structure for table oversea_pay_channel.
-type OverseaPayChannel struct {
+// MerchantChannelConfig is the golang structure for table merchant_channel_config.
+type MerchantChannelConfig struct {
 	Id               uint64      `json:"id"               description:"主键id"`                                          // 主键id
 	MerchantId       int64       `json:"merchantId"       description:""`                                              //
 	EnumKey          int64       `json:"enumKey"          description:"支付渠道枚举（内部定义）"`                                  // 支付渠道枚举（内部定义）

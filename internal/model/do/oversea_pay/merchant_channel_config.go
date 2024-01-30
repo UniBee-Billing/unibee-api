@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// OverseaPayChannel is the golang structure of table oversea_pay_channel for DAO operations like Where/Data.
-type OverseaPayChannel struct {
-	g.Meta           `orm:"table:oversea_pay_channel, do:true"`
+// MerchantChannelConfig is the golang structure of table merchant_channel_config for DAO operations like Where/Data.
+type MerchantChannelConfig struct {
+	g.Meta           `orm:"table:merchant_channel_config, do:true"`
 	Id               interface{} // 主键id
 	MerchantId       interface{} //
 	EnumKey          interface{} // 支付渠道枚举（内部定义）

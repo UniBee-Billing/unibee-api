@@ -9,18 +9,18 @@ import (
 )
 
 type CreatePayContext struct {
-	OpenApiId     int64                     `json:"openApiId"`
-	AppId         string                    `json:"appId"`
-	Desc          string                    `json:"desc"`
-	Pay           *entity.Payment           `json:"pay"`
-	PayChannel    *entity.OverseaPayChannel `json:"payChannel"`
-	TerminalIp    string                    `json:"terminalIp"`
-	ShopperUserId string                    `json:"merchantUserId"`
-	ShopperEmail  string                    `json:"shopperEmail"`
-	ShopperLocale string                    `json:"shopperLocale"`
-	Mobile        string                    `json:"mobile"`
-	MediaData     map[string]string         `json:"mediaInfo"`
-	Invoice       *InvoiceDetailSimplify    `json:"invoice"`
+	OpenApiId     int64                         `json:"openApiId"`
+	AppId         string                        `json:"appId"`
+	Desc          string                        `json:"desc"`
+	Pay           *entity.Payment               `json:"pay"`
+	PayChannel    *entity.MerchantChannelConfig `json:"payChannel"`
+	TerminalIp    string                        `json:"terminalIp"`
+	ShopperUserId string                        `json:"merchantUserId"`
+	ShopperEmail  string                        `json:"shopperEmail"`
+	ShopperLocale string                        `json:"shopperLocale"`
+	Mobile        string                        `json:"mobile"`
+	MediaData     map[string]string             `json:"mediaInfo"`
+	Invoice       *InvoiceDetailSimplify        `json:"invoice"`
 	//BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
 	//ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`
 	ShopperName              *v1.OutShopperName `json:"shopperName"`

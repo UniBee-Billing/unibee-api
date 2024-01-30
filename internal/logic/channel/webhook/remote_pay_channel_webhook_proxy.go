@@ -31,7 +31,7 @@ var (
 )
 
 type PayChannelWebhookProxy struct {
-	PaymentChannel *entity.OverseaPayChannel
+	PaymentChannel *entity.MerchantChannelConfig
 }
 
 func (p PayChannelWebhookProxy) getRemoteChannel() (channelService _interface.RemotePaymentChannelWebhookInterface) {
@@ -51,7 +51,7 @@ func (p PayChannelWebhookProxy) getRemoteChannel() (channelService _interface.Re
 	}
 }
 
-func (p PayChannelWebhookProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.OverseaPayChannel) (err error) {
+func (p PayChannelWebhookProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantChannelConfig) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -72,12 +72,12 @@ func (p PayChannelWebhookProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.
 	return err
 }
 
-func (p PayChannelWebhookProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.OverseaPayChannel) {
+func (p PayChannelWebhookProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) {
 	startTime := time.Now()
 	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
 	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelWebhook cost：%s \n", time.Now().Sub(startTime))
 }
-func (p PayChannelWebhookProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.OverseaPayChannel) (res *ro.ChannelRedirectInternalResp, err error) {
+func (p PayChannelWebhookProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) (res *ro.ChannelRedirectInternalResp, err error) {
 	startTime := time.Now()
 	res, err = p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
 	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelRedirect cost：%s \n", time.Now().Sub(startTime))
