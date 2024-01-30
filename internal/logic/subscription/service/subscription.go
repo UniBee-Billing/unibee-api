@@ -464,7 +464,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//var nextPeriodTotalAmount int64
 	var nextPeriodInvoice *ro.InvoiceDetailSimplify
 	if effectImmediate {
-		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+		if consts.ProrationUsingUniBeeCompute {
 			// Generate Proration Invoice Previe
 			nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				Currency:      sub.Currency,
@@ -615,7 +615,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			Lines:                          nextPeriodInvoiceItems,
 		}
 
-		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+		if consts.ProrationUsingUniBeeCompute {
 			selfComputeNextPeriodInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				Currency:      sub.Currency,
 				PlanId:        req.NewPlanId,
@@ -721,7 +721,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
-	if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+	if consts.ProrationUsingUniBeeCompute {
 		if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)

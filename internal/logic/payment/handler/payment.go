@@ -379,7 +379,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			if err != nil {
 				return err
 			}
-			if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+			if consts.ProrationUsingUniBeeCompute {
 				// better use redis mq to trace payment
 				if len(channelPayRo.ChannelSubscriptionUpdateId) > 0 {
 					eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, channelPayRo.ChannelSubscriptionUpdateId)

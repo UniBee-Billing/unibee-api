@@ -551,7 +551,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	s.setUnibeeAppInfo()
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
-	if consts.DownGradeUsePendingUpdate && !subscriptionRo.EffectImmediate {
+	if consts.NonEffectImmediatelyUsePendingUpdate && !subscriptionRo.EffectImmediate {
 		updateUnixTime = subscriptionRo.Subscription.CurrentPeriodEnd
 	}
 	if subscriptionRo.ProrationDate > 0 {
@@ -651,7 +651,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 	var items []*stripe.SubscriptionItemsParams
 
 	var stripeSubscriptionItems []*stripe.SubscriptionItem
-	if !subscriptionRo.EffectImmediate && !consts.DownGradeUsePendingUpdate {
+	if !subscriptionRo.EffectImmediate && !consts.NonEffectImmediatelyUsePendingUpdate {
 		if len(subscriptionRo.Subscription.ChannelItemData) > 0 {
 			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.ChannelItemData, &stripeSubscriptionItems)
 			if err != nil {
@@ -758,7 +758,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		Items: items,
 	}
 	if subscriptionRo.EffectImmediate {
-		if consts.PendingSubUpdateEffectImmediateWithOutChannel {
+		if consts.ProrationUsingUniBeeCompute {
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
 		} else {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
@@ -766,7 +766,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 		}
 	} else {
-		if consts.DownGradeUsePendingUpdate {
+		if consts.NonEffectImmediatelyUsePendingUpdate {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
 			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
@@ -780,7 +780,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		return nil, err
 	}
 
-	if subscriptionRo.EffectImmediate && !consts.PendingSubUpdateEffectImmediateWithOutChannel {
+	if subscriptionRo.EffectImmediate && !consts.ProrationUsingUniBeeCompute {
 		queryParams := &stripe.InvoiceParams{}
 		newInvoice, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 		log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, channelEntity)

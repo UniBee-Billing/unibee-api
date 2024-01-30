@@ -167,7 +167,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
-	if consts.PendingSubUpdateEffectImmediateWithOutChannel && one.EffectImmediate == 1 {
+	if consts.ProrationUsingUniBeeCompute && one.EffectImmediate == 1 {
 		var addonParams []*ro.SubscriptionPlanAddonParamRo
 		err := utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
 		if err != nil {

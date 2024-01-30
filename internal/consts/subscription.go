@@ -1,9 +1,8 @@
 package consts
 
 const (
-	UsePendingUpdate                              = true
-	DownGradeUsePendingUpdate                     = true
-	PendingSubUpdateEffectImmediateWithOutChannel = true
+	NonEffectImmediatelyUsePendingUpdate = false
+	ProrationUsingUniBeeCompute          = true
 )
 
 type InvoiceStatusEnum int
