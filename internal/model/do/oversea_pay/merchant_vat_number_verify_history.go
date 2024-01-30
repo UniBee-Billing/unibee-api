@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantVatNumberValicationHistory is the golang structure of table merchant_vat_number_valication_history for DAO operations like Where/Data.
-type MerchantVatNumberValicationHistory struct {
-	g.Meta          `orm:"table:merchant_vat_number_valication_history, do:true"`
+// MerchantVatNumberVerifyHistory is the golang structure of table merchant_vat_number_verify_history for DAO operations like Where/Data.
+type MerchantVatNumberVerifyHistory struct {
+	g.Meta          `orm:"table:merchant_vat_number_verify_history, do:true"`
 	Id              interface{} // ID
 	MerchantId      interface{} // merchantId
 	VatNumber       interface{} // vat_number

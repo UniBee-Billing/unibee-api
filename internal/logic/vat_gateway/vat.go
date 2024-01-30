@@ -106,10 +106,10 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 	return nil
 }
 
-func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumber string) (res *entity.MerchantVatNumberValicationHistory) {
-	err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).
-		Where(entity.MerchantVatNumberValicationHistory{MerchantId: merchantId}).
-		Where(entity.MerchantVatNumberValicationHistory{VatNumber: vatNumber}).OmitEmpty().Scan(&res)
+func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumber string) (res *entity.MerchantVatNumberVerifyHistory) {
+	err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).
+		Where(entity.MerchantVatNumberVerifyHistory{MerchantId: merchantId}).
+		Where(entity.MerchantVatNumberVerifyHistory{VatNumber: vatNumber}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return nil
 	}
@@ -145,7 +145,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 	if result.Valid {
 		valid = 1
 	}
-	one = &entity.MerchantVatNumberValicationHistory{
+	one = &entity.MerchantVatNumberVerifyHistory{
 		MerchantId:      merchantId,
 		VatNumber:       vatNumber,
 		Valid:           int64(valid),
@@ -155,7 +155,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, va
 		CompanyAddress:  result.CompanyAddress,
 		ValidateMessage: result.ValidateMessage,
 	}
-	_, err := dao.MerchantVatNumberValicationHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
 	}

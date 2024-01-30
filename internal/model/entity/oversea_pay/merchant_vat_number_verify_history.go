@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantVatNumberValicationHistory is the golang structure for table merchant_vat_number_valication_history.
-type MerchantVatNumberValicationHistory struct {
+// MerchantVatNumberVerifyHistory is the golang structure for table merchant_vat_number_verify_history.
+type MerchantVatNumberVerifyHistory struct {
 	Id              int64       `json:"id"              description:"ID"`                    // ID
 	MerchantId      int64       `json:"merchantId"      description:"merchantId"`            // merchantId
 	VatNumber       string      `json:"vatNumber"       description:"vat_number"`            // vat_number

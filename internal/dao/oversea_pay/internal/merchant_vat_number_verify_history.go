@@ -11,15 +11,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// MerchantVatNumberValicationHistoryDao is the data access object for table merchant_vat_number_valication_history.
-type MerchantVatNumberValicationHistoryDao struct {
-	table   string                                    // table is the underlying table name of the DAO.
-	group   string                                    // group is the database configuration group name of current DAO.
-	columns MerchantVatNumberValicationHistoryColumns // columns contains all the column names of Table for convenient usage.
+// MerchantVatNumberVerifyHistoryDao is the data access object for table merchant_vat_number_verify_history.
+type MerchantVatNumberVerifyHistoryDao struct {
+	table   string                                // table is the underlying table name of the DAO.
+	group   string                                // group is the database configuration group name of current DAO.
+	columns MerchantVatNumberVerifyHistoryColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// MerchantVatNumberValicationHistoryColumns defines and stores column names for table merchant_vat_number_valication_history.
-type MerchantVatNumberValicationHistoryColumns struct {
+// MerchantVatNumberVerifyHistoryColumns defines and stores column names for table merchant_vat_number_verify_history.
+type MerchantVatNumberVerifyHistoryColumns struct {
 	Id              string // ID
 	MerchantId      string // merchantId
 	VatNumber       string // vat_number
@@ -34,8 +34,8 @@ type MerchantVatNumberValicationHistoryColumns struct {
 	ValidateMessage string // validate_message
 }
 
-// merchantVatNumberValicationHistoryColumns holds the columns for table merchant_vat_number_valication_history.
-var merchantVatNumberValicationHistoryColumns = MerchantVatNumberValicationHistoryColumns{
+// merchantVatNumberVerifyHistoryColumns holds the columns for table merchant_vat_number_verify_history.
+var merchantVatNumberVerifyHistoryColumns = MerchantVatNumberVerifyHistoryColumns{
 	Id:              "id",
 	MerchantId:      "merchant_id",
 	VatNumber:       "vat_number",
@@ -50,37 +50,37 @@ var merchantVatNumberValicationHistoryColumns = MerchantVatNumberValicationHisto
 	ValidateMessage: "validate_message",
 }
 
-// NewMerchantVatNumberValicationHistoryDao creates and returns a new DAO object for table data access.
-func NewMerchantVatNumberValicationHistoryDao() *MerchantVatNumberValicationHistoryDao {
-	return &MerchantVatNumberValicationHistoryDao{
+// NewMerchantVatNumberVerifyHistoryDao creates and returns a new DAO object for table data access.
+func NewMerchantVatNumberVerifyHistoryDao() *MerchantVatNumberVerifyHistoryDao {
+	return &MerchantVatNumberVerifyHistoryDao{
 		group:   "oversea_pay",
-		table:   "merchant_vat_number_valication_history",
-		columns: merchantVatNumberValicationHistoryColumns,
+		table:   "merchant_vat_number_verify_history",
+		columns: merchantVatNumberVerifyHistoryColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *MerchantVatNumberValicationHistoryDao) DB() gdb.DB {
+func (dao *MerchantVatNumberVerifyHistoryDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *MerchantVatNumberValicationHistoryDao) Table() string {
+func (dao *MerchantVatNumberVerifyHistoryDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *MerchantVatNumberValicationHistoryDao) Columns() MerchantVatNumberValicationHistoryColumns {
+func (dao *MerchantVatNumberVerifyHistoryDao) Columns() MerchantVatNumberVerifyHistoryColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *MerchantVatNumberValicationHistoryDao) Group() string {
+func (dao *MerchantVatNumberVerifyHistoryDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *MerchantVatNumberValicationHistoryDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *MerchantVatNumberVerifyHistoryDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -90,6 +90,6 @@ func (dao *MerchantVatNumberValicationHistoryDao) Ctx(ctx context.Context) *gdb.
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *MerchantVatNumberValicationHistoryDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *MerchantVatNumberVerifyHistoryDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

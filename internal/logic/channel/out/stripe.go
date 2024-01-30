@@ -346,36 +346,37 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 					Quantity: stripe.Int64(addon.Quantity),
 				})
 			}
-			subscriptionParams := &stripe.CheckoutSessionParams{
+			checkoutParams := &stripe.CheckoutSessionParams{
 				Customer:  stripe.String(channelUser.ChannelUserId),
 				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				LineItems: items,
 				AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
-					Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+					Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_rates
 				},
-				Mode:       stripe.String(string(stripe.CheckoutSessionModeSubscription)),
+				Metadata: map[string]string{
+					"SubId": subscriptionRo.Subscription.SubscriptionId,
+				},
 				SuccessURL: stripe.String(webhook2.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, true)),
 				CancelURL:  stripe.String(webhook2.GetSubscriptionRedirectEntranceUrl(subscriptionRo.Subscription, false)),
-				SubscriptionData: &stripe.CheckoutSessionSubscriptionDataParams{
-					Metadata: map[string]string{
-						"SubId": subscriptionRo.Subscription.SubscriptionId,
-					},
-					DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
-				},
 			}
-			createSubscription, err := session.New(subscriptionParams)
-			log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreateSession", subscriptionParams, createSubscription, err, "", nil, channelEntity)
+			checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModeSubscription))
+			checkoutParams.SubscriptionData = &stripe.CheckoutSessionSubscriptionDataParams{
+				Metadata: map[string]string{
+					"SubId": subscriptionRo.Subscription.SubscriptionId,
+				},
+				DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
+			}
+			//checkoutParams.ExpiresAt
+			createSubscription, err := session.New(checkoutParams)
+			log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCreateSession", checkoutParams, createSubscription, err, "", nil, channelEntity)
 			if err != nil {
 				return nil, err
 			}
 			return &ro.ChannelCreateSubscriptionInternalResp{
 				ChannelUserId: channelUser.ChannelUserId,
 				Link:          createSubscription.URL,
-				//ChannelSubscriptionId:     createSubscription.Subscription.ID,
-				//ChannelSubscriptionStatus: string(createSubscription.Subscription.Status),
-				Data:   utility.FormatToJsonString(createSubscription),
-				Status: 0, //todo mark
-				//Paid:                      createSubscription.Subscription.LatestInvoice.Paid,
+				Data:          utility.FormatToJsonString(createSubscription),
+				Status:        0, //todo mark
 			}, nil
 		} else {
 			items := []*stripe.SubscriptionItemsParams{
