@@ -722,7 +722,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Id = uint64(id)
 	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
 	if consts.PendingSubUpdateEffectImmediateWithOutChannel {
-		if prepare.EffectImmediate {
+		if prepare.EffectImmediate && prepare.TotalAmount > 0 {
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 			utility.Assert(merchantInfo != nil, "merchantInfo not found")
@@ -741,7 +741,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				gender = user.Gender
 			}
 
-			createPayContext := &ro.CreatePayContext{
+			createRes, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
 				PayChannel: payChannel,
 				Pay: &entity.Payment{
 					SubscriptionId: one.SubscriptionId,
@@ -771,9 +771,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				PayMethod:              1, //automatic
 				DaysUtilDue:            1, //one day expire
 				ChannelPaymentMethod:   prepare.Subscription.ChannelDefaultPaymentMethod,
-			}
-
-			createRes, err := service.DoChannelPay(ctx, createPayContext)
+			})
 			if err != nil {
 				return nil, err
 			}
