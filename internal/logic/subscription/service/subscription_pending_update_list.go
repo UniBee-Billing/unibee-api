@@ -55,6 +55,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		UpdateQuantity:       one.UpdateQuantity,
 		AddonData:            one.AddonData,
 		UpdateAddonData:      one.UpdateAddonData,
+		ProrationAmount:      one.ProrationAmount,
 		ChannelId:            one.ChannelId,
 		UserId:               one.UserId,
 		GmtModify:            one.GmtModify,
