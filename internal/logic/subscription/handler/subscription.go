@@ -23,6 +23,10 @@ func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Su
 }
 
 func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
+	if consts.SubscriptionCycleUnderUniBeeControl {
+		// not sync attribute from channel
+		return nil
+	}
 	var cancelAtPeriodEnd = 0
 	if details.CancelAtPeriodEnd {
 		cancelAtPeriodEnd = 1
@@ -320,107 +324,5 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 
 		}
 	}
-	return nil
-}
-
-type SubscriptionPaymentFailureWebHookReq struct {
-	Payment                     *entity.Payment                           `json:"payment" `
-	ChannelSubscriptionDetail   *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
-	ChannelInvoiceDetail        *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
-	ChannelPaymentId            string                                    `json:"channelPaymentId" `
-	ChannelSubscriptionId       string                                    `json:"channelSubscriptionId" `
-	ChannelInvoiceId            string                                    `json:"channelInvoiceId"`
-	ChannelSubscriptionUpdateId string                                    `json:"channelUpdateId"`
-}
-
-func HandleSubscriptionPaymentFailure(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
-	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	if sub == nil {
-		return gerror.Newf("HandleSubscriptionPaymentFailure sub not found %s", req.ChannelSubscriptionId)
-	}
-	return nil
-}
-
-func HandleSubscriptionPaymentWaitAuthorized(ctx context.Context, req *SubscriptionPaymentFailureWebHookReq) error {
-	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
-	if sub == nil {
-		return gerror.Newf("HandleSubscriptionPaymentWaitAuthorized sub not found %s", req.ChannelSubscriptionId)
-	}
-
-	//eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
-	//if eiPendingSubUpdate != nil {
-	//	//更新单支付失败, EffectImmediate=true 需要用户 3DS 验证等场景
-	//	//金额一致
-	//	err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
-	//		Payment:                          req.Payment,
-	//		Currency:                         eiPendingSubUpdate.UpdateCurrency,
-	//		PlanId:                           eiPendingSubUpdate.UpdatePlanId,
-	//		Quantity:                         eiPendingSubUpdate.UpdateQuantity,
-	//		AddonJsonData:                    eiPendingSubUpdate.UpdateAddonData,
-	//		TaxScale:                         sub.TaxScale,
-	//		UserId:                           sub.UserId,
-	//		MerchantId:                       sub.MerchantId,
-	//		SubscriptionId:                   sub.SubscriptionId,
-	//		ChannelId:                        sub.ChannelId,
-	//		InvoiceStatus:                    consts.InvoiceStatusProcessing,
-	//		ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
-	//		PeriodStart:                      sub.CurrentPeriodStart, // todo mark 周期不确定
-	//		PeriodEnd:                        sub.CurrentPeriodEnd,
-	//	})
-	//	if err != nil {
-	//		return err
-	//	}
-	//} else {
-	//	var byUpdate = false
-	//	if len(sub.PendingUpdateId) > 0 {
-	//		//有 pending 的更新单存在，检查支付是否对应更新单
-	//		pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-	//		if pendingSubUpdate.UpdateAmount == req.Payment.TotalAmount {
-	//			//金额一致
-	//			err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
-	//				Payment:                          req.Payment,
-	//				Currency:                         pendingSubUpdate.UpdateCurrency,
-	//				PlanId:                           pendingSubUpdate.UpdatePlanId,
-	//				Quantity:                         pendingSubUpdate.UpdateQuantity,
-	//				AddonJsonData:                    pendingSubUpdate.UpdateAddonData,
-	//				TaxScale:                         sub.TaxScale,
-	//				UserId:                           sub.UserId,
-	//				MerchantId:                       sub.MerchantId,
-	//				SubscriptionId:                   sub.SubscriptionId,
-	//				ChannelId:                        sub.ChannelId,
-	//				InvoiceStatus:                    consts.InvoiceStatusProcessing,
-	//				ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
-	//				PeriodStart:                      sub.CurrentPeriodStart, // todo mark 周期不确定
-	//				PeriodEnd:                        sub.CurrentPeriodEnd,
-	//			})
-	//			if err != nil {
-	//				return err
-	//			}
-	//			byUpdate = true
-	//		}
-	//	}
-	//	if !byUpdate {
-	//		//没有匹配到更新单
-	//		err := handler.CreateNewSubscriptionBillingCycleInvoiceForPayment(ctx, &handler.CreateInvoiceInternalReq{
-	//			Payment:                          req.Payment,
-	//			Currency:                         sub.Currency,
-	//			PlanId:                           sub.PlanId,
-	//			Quantity:                         sub.Quantity,
-	//			AddonJsonData:                    sub.AddonData,
-	//			TaxScale:                         sub.TaxScale,
-	//			UserId:                           sub.UserId,
-	//			MerchantId:                       sub.MerchantId,
-	//			SubscriptionId:                   sub.SubscriptionId,
-	//			ChannelId:                        sub.ChannelId,
-	//			InvoiceStatus:                    consts.InvoiceStatusProcessing,
-	//			ChannelDetailInvoiceInternalResp: req.ChannelInvoiceDetail,
-	//			PeriodStart:                      sub.CurrentPeriodEnd,
-	//			PeriodEnd:                        sub.CurrentPeriodEnd + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart), // + 1 周期 todo mark 确认
-	//		})
-	//		if err != nil {
-	//			return err
-	//		}
-	//	}
-	//}
 	return nil
 }

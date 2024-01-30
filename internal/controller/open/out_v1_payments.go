@@ -98,7 +98,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		MerchantOrderReference:   req.MerchantOrderReference,
 		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
 		PayMethod:                1, //automatic
-		DaysUtilDue:              1, //one day expire
+		DaysUtilDue:              5, //one day expire
 	}
 
 	resp, err := service.DoChannelPay(ctx, createPayContext)

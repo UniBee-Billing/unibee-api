@@ -40,14 +40,14 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 		Customer: stripe.String("cus_PJmwrgrXuesjZv"),
 	}
 	params.Limit = stripe.Int64(3)
-	_ = customer.ListPaymentMethods(params)
-	//fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.List()))
-	customerResult, err := customer.Get("cus_PJmwrgrXuesjZv", &stripe.CustomerParams{})
-	utility.AssertError(err, "queryAndCreateChannelUser")
-	//if err != nil {
-	//	fmt.Printf("queryAndCreateChannelUser:%s", err.Error())
-	//}
-	fmt.Printf("customerResult:%s\n", utility.MarshalToJsonString(customerResult))
+	result := customer.ListPaymentMethods(params)
+	fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.PaymentMethodList().Data[0].ID))
+	//customerResult, err := customer.Get("cus_PJmwrgrXuesjZv", &stripe.CustomerParams{})
+	//utility.AssertError(err, "queryAndCreateChannelUser")
+	////if err != nil {
+	////	fmt.Printf("queryAndCreateChannelUser:%s", err.Error())
+	////}
+	//fmt.Printf("customerResult:%s\n", utility.MarshalToJsonString(customerResult))
 
 	//params := &stripe.InvoicePayParams{}
 	//params.ChannelDefaultPaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")

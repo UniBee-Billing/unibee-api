@@ -9,6 +9,11 @@ import (
 type Blank struct {
 }
 
+func (b Blank) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

@@ -9,6 +9,11 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

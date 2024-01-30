@@ -81,7 +81,7 @@ type OutPayRefundRo struct {
 }
 
 type ChannelPaymentListReq struct {
-	ChannelUserId string `json:"channelUserId"         `
+	UserId int64 `json:"userId"         `
 }
 
 // ChannelPaymentRo is the golang structure for table oversea_pay.
@@ -223,6 +223,10 @@ type ChannelUserDetailQueryInternalResp struct {
 	InvoiceCreditBalance []*ChannelBalance `json:"invoiceCreditBalance"`
 	Email                string            `json:"email"`
 	Description          string            `json:"description"`
+}
+
+type ChannelUserPaymentMethodListInternalResp struct {
+	PaymentMethods []string `json:"paymentMethods"`
 }
 
 type ChannelMerchantBalanceQueryInternalResp struct {

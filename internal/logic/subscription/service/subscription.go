@@ -770,7 +770,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				MediaData:              map[string]string{"BillingReason": "SubscriptionUpdate"},
 				MerchantOrderReference: one.UpdateSubscriptionId,
 				PayMethod:              1, //automatic
-				DaysUtilDue:            1, //one day expire
+				DaysUtilDue:            5, //one day expire
 				ChannelPaymentMethod:   prepare.Subscription.ChannelDefaultPaymentMethod,
 			})
 			if err != nil {

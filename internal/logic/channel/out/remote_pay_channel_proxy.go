@@ -33,6 +33,29 @@ type PayChannelProxy struct {
 	PaymentChannel *entity.OverseaPayChannel
 }
 
+func (p PayChannelProxy) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+
+	res, err = p.getRemoteChannel().DoRemoteChannelUserPaymentMethodListQuery(ctx, payChannel, userId)
+
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
 func (p PayChannelProxy) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {

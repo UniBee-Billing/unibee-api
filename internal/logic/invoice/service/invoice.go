@@ -279,7 +279,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		},
 		MerchantOrderReference: one.InvoiceId,
 		PayMethod:              1, //automatic
-		DaysUtilDue:            1, //one day expire
+		DaysUtilDue:            5, //one day expire
 	}
 
 	createRes, err := service.DoChannelPay(ctx, createPayContext)

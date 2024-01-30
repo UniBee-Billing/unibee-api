@@ -36,6 +36,26 @@ import (
 type Stripe struct {
 }
 
+func (s Stripe) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	stripe.Key = payChannel.ChannelSecret
+	s.setUnibeeAppInfo()
+	channelUser := queryAndCreateChannelUserId(ctx, payChannel, userId)
+
+	params := &stripe.CustomerListPaymentMethodsParams{
+		Customer: stripe.String(channelUser.ChannelUserId),
+	}
+	params.Limit = stripe.Int64(10)
+	result := customer.ListPaymentMethods(params)
+	var paymentMethods = make([]string, 0)
+	for _, paymentMethod := range result.PaymentMethodList().Data {
+		paymentMethods = append(paymentMethods, paymentMethod.ID)
+	}
+	return &ro.ChannelUserPaymentMethodListInternalResp{
+		PaymentMethods: paymentMethods,
+	}, nil
+}
+
 func (s Stripe) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
@@ -59,9 +79,10 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
+	channelUser := queryAndCreateChannelUserId(ctx, payChannel, listReq.UserId)
 
 	params := &stripe.PaymentIntentListParams{}
-	params.Customer = stripe.String(listReq.ChannelUserId)
+	params.Customer = stripe.String(channelUser.ChannelUserId)
 	params.Limit = stripe.Int64(200)
 	paymentList := paymentintent.List(params)
 	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
@@ -1191,31 +1212,31 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
+func (s Stripe) DoRemoteChannelCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
+func (s Stripe) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
+func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(pay.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, pay.ChannelId)
+func (s Stripe) DoRemoteChannelRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
 	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
-	params := &stripe.RefundParams{PaymentIntent: stripe.String(pay.ChannelPaymentId)}
+	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.ChannelPaymentId)}
 	params.Reason = stripe.String(one.RefundComment)
 	params.Amount = stripe.Int64(one.RefundAmount)
 	params.Currency = stripe.String(strings.ToLower(one.Currency))
