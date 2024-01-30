@@ -8,14 +8,14 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, channelId int64) (*ro.ChannelUserBalanceQueryInternalResp, error) {
+func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, channelId int64) (*ro.ChannelUserDetailQueryInternalResp, error) {
 	user := query.GetUserAccountById(ctx, uint64(userId))
 	merchant := query.GetMerchantInfoById(ctx, merchantId)
 	payChannel := query.GetPayChannelById(ctx, channelId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(merchant != nil, "merchant not found")
 
-	queryResult, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserBalancesQuery(ctx, payChannel, userId)
+	queryResult, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
 	if err != nil {
 		return nil, err
 	}

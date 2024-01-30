@@ -33,6 +33,7 @@ type CreatePayContext struct {
 	DeviceType               string             `json:"deviceType"`
 	PayMethod                int                `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
 	DaysUtilDue              int                `json:"daysUtilDue"`
+	ChannelPaymentMethod     string             `json:"channelPaymentMethod"`
 }
 
 type CreatePayInternalResp struct {
@@ -190,18 +191,19 @@ type ChannelUpdateSubscriptionInternalResp struct {
 }
 
 type ChannelDetailSubscriptionInternalResp struct {
-	Status                 consts.SubscriptionStatusEnum `json:"status"`
-	ChannelSubscriptionId  string                        `json:"channelSubscriptionId"`
-	ChannelStatus          string                        `json:"channelStatus"                  `
-	Data                   string                        `json:"data"`
-	ChannelItemData        string                        `json:"channelItemData"`
-	ChannelLatestInvoiceId string                        `json:"channelLatestInvoiceId"`
-	ChannelLatestPaymentId string                        `json:"channelLatestPaymentId"`
-	CancelAtPeriodEnd      bool                          `json:"cancelAtPeriodEnd"`
-	CurrentPeriodEnd       int64                         `json:"currentPeriodEnd"`
-	CurrentPeriodStart     int64                         `json:"currentPeriodStart"`
-	BillingCycleAnchor     int64                         `json:"billingCycleAnchor"`
-	TrialEnd               int64                         `json:"trialEnd"`
+	Status                      consts.SubscriptionStatusEnum `json:"status"`
+	ChannelSubscriptionId       string                        `json:"channelSubscriptionId"`
+	ChannelStatus               string                        `json:"channelStatus"                  `
+	Data                        string                        `json:"data"`
+	ChannelItemData             string                        `json:"channelItemData"`
+	ChannelLatestInvoiceId      string                        `json:"channelLatestInvoiceId"`
+	ChannelLatestPaymentId      string                        `json:"channelLatestPaymentId"`
+	ChannelDefaultPaymentMethod string                        `json:"channelDefaultPaymentMethod"`
+	CancelAtPeriodEnd           bool                          `json:"cancelAtPeriodEnd"`
+	CurrentPeriodEnd            int64                         `json:"currentPeriodEnd"`
+	CurrentPeriodStart          int64                         `json:"currentPeriodStart"`
+	BillingCycleAnchor          int64                         `json:"billingCycleAnchor"`
+	TrialEnd                    int64                         `json:"trialEnd"`
 }
 
 type ChannelBalance struct {
@@ -213,7 +215,9 @@ type ChannelUserCreateInternalResp struct {
 	ChannelUserId string `json:"channelUserId"`
 }
 
-type ChannelUserBalanceQueryInternalResp struct {
+type ChannelUserDetailQueryInternalResp struct {
+	ChannelUserId        string            `json:"channelUserId"`
+	DefaultPaymentMethod string            `json:"defaultPaymentMethod"`
 	Balance              *ChannelBalance   `json:"balance"`
 	CashBalance          []*ChannelBalance `json:"cashBalance"`
 	InvoiceCreditBalance []*ChannelBalance `json:"invoiceCreditBalance"`
@@ -253,6 +257,7 @@ type ChannelCancelInvoiceInternalReq struct {
 }
 
 type ChannelDetailInvoiceInternalResp struct {
+	ChannelDefaultPaymentMethod    string                   `json:"channelDefaultPaymentMethod"`
 	ChannelSubscriptionId          string                   `json:"channelSubscriptionId"           `
 	SubscriptionId                 string                   `json:"subscriptionId"           `
 	TotalAmount                    int64                    `json:"totalAmount"        `

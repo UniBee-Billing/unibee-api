@@ -31,7 +31,7 @@ type HandlePayReq struct {
 	PaymentAmount                    int64
 	CaptureAmount                    int64
 	Reason                           string
-	PaymentMethod                    string
+	ChannelDefaultPaymentMethod      string
 	ChannelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp
 }
 
@@ -275,6 +275,16 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
+		//default payment method update
+		if len(req.ChannelDefaultPaymentMethod) > 0 {
+			_, err = dao.SubscriptionUserChannel.Ctx(ctx).Data(g.Map{
+				dao.SubscriptionUserChannel.Columns().ChannelDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
+			}).Where(dao.SubscriptionUserChannel.Columns().UserId, payment.UserId).Where(dao.SubscriptionUserChannel.Columns().ChannelId, payment.ChannelId).OmitNil().Update()
+			if err != nil {
+				g.Log().Printf(ctx, `UpdateChannelUser ChannelDefaultPaymentMethod failure %s`, err.Error())
+			}
+		}
+
 		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
@@ -363,7 +373,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				PaymentMethod:                    "",
+				ChannelDefaultPaymentMethod:      "",
 				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
 			})
 			if err != nil {
@@ -394,7 +404,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				PaymentMethod:                    "",
+				ChannelDefaultPaymentMethod:      "",
 				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
 			})
 			if err != nil {

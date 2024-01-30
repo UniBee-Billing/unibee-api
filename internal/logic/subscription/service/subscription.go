@@ -738,6 +738,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				MerchantOrderReference: one.UpdateSubscriptionId,
 				PayMethod:              1, //automatic
 				DaysUtilDue:            1, //one day expire
+				ChannelPaymentMethod:   prepare.Subscription.ChannelDefaultPaymentMethod,
 			}
 
 			createRes, err := service.DoChannelPay(ctx, createPayContext)

@@ -11,12 +11,13 @@ import (
 
 // SubscriptionUserChannel is the golang structure of table subscription_user_channel for DAO operations like Where/Data.
 type SubscriptionUserChannel struct {
-	g.Meta        `orm:"table:subscription_user_channel, do:true"`
-	Id            interface{} //
-	GmtCreate     *gtime.Time // 创建时间
-	GmtModify     *gtime.Time // 修改时间
-	UserId        interface{} // userId
-	ChannelId     interface{} // 支付渠道Id
-	ChannelUserId interface{} // 支付渠道user_Id
-	IsDeleted     interface{} //
+	g.Meta                      `orm:"table:subscription_user_channel, do:true"`
+	Id                          interface{} //
+	GmtCreate                   *gtime.Time // 创建时间
+	GmtModify                   *gtime.Time // 修改时间
+	UserId                      interface{} // userId
+	ChannelId                   interface{} // 支付渠道Id
+	ChannelUserId               interface{} // 支付渠道user_Id
+	IsDeleted                   interface{} //
+	ChannelDefaultPaymentMethod interface{} //
 }

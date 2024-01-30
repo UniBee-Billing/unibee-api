@@ -157,13 +157,13 @@ func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payCha
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(queryAndCreateChannelUserId(ctx, payChannel, userId), params)
+	response, err := customer.Get(queryAndCreateChannelUserId(ctx, payChannel, userId).ChannelUserId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -184,7 +184,13 @@ func (s Stripe) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel
 			Currency: strings.ToUpper(currency),
 		})
 	}
-	return &ro.ChannelUserBalanceQueryInternalResp{
+	var defaultPaymentMethod string
+	if response.InvoiceSettings != nil && response.InvoiceSettings.DefaultPaymentMethod != nil {
+		defaultPaymentMethod = response.InvoiceSettings.DefaultPaymentMethod.ID
+	}
+	return &ro.ChannelUserDetailQueryInternalResp{
+		ChannelUserId:        response.ID,
+		DefaultPaymentMethod: defaultPaymentMethod,
 		Balance: &ro.ChannelBalance{
 			Amount:   response.Balance,
 			Currency: strings.ToUpper(string(response.Currency)),
@@ -280,7 +286,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		//	}
 		//	subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
 		//}
-		subscriptionRo.Subscription.ChannelUserId = queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+		subscriptionRo.Subscription.ChannelUserId = queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId).ChannelUserId
 		//税率创建并处理
 
 		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
@@ -952,11 +958,11 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	channelUserId := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
+	channelUser := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Customer: stripe.String(channelUserId)}
+		Customer: stripe.String(channelUser.ChannelUserId)}
 	if createInvoiceInternalReq.PayMethod == 1 {
 		params.CollectionMethod = stripe.String("charge_automatically")
 	} else {
@@ -980,7 +986,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
 			//Quantity:    stripe.Int64(line.Quantity),
-			Customer: stripe.String(channelUserId)}
+			Customer: stripe.String(channelUser.ChannelUserId)}
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1081,14 +1087,18 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	stripe.Key = createPayContext.PayChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	channelUserId := queryAndCreateChannelUserId(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
+	channelUser := queryAndCreateChannelUserId(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)), //小写
-		Customer: stripe.String(channelUserId)}
+		Customer: stripe.String(channelUser.ChannelUserId)}
 	if createPayContext.PayMethod == 1 {
-		// Default Payment Method Sync todo mark
 		params.CollectionMethod = stripe.String("charge_automatically")
+		if len(createPayContext.ChannelPaymentMethod) > 0 {
+			params.DefaultPaymentMethod = stripe.String(createPayContext.ChannelPaymentMethod)
+		} else if len(channelUser.ChannelDefaultPaymentMethod) > 0 {
+			params.DefaultPaymentMethod = stripe.String(channelUser.ChannelDefaultPaymentMethod)
+		}
 	} else {
 		params.CollectionMethod = stripe.String("send_invoice")
 		if createPayContext.DaysUtilDue > 0 {
@@ -1109,7 +1119,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
 			//Quantity:    stripe.Int64(line.Quantity),
-			Customer: stripe.String(channelUserId)}
+			Customer: stripe.String(channelUser.ChannelUserId)}
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1314,20 +1324,25 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.ChannelDetai
 	if subscription.LatestInvoice != nil && subscription.LatestInvoice.PaymentIntent != nil {
 		latestChannelPaymentId = subscription.LatestInvoice.PaymentIntent.ID
 	}
+	var channelDefaultPaymentMethod = ""
+	if subscription.DefaultPaymentMethod != nil {
+		channelDefaultPaymentMethod = subscription.DefaultPaymentMethod.ID
+	}
 
 	return &ro.ChannelDetailSubscriptionInternalResp{
-		Status:                 status,
-		ChannelSubscriptionId:  subscription.ID,
-		ChannelStatus:          string(subscription.Status),
-		Data:                   utility.FormatToJsonString(subscription),
-		ChannelItemData:        utility.MarshalToJsonString(subscription.Items.Data),
-		ChannelLatestInvoiceId: subscription.LatestInvoice.ID,
-		ChannelLatestPaymentId: latestChannelPaymentId,
-		CancelAtPeriodEnd:      subscription.CancelAtPeriodEnd,
-		CurrentPeriodStart:     subscription.CurrentPeriodStart,
-		CurrentPeriodEnd:       subscription.CurrentPeriodEnd,
-		BillingCycleAnchor:     subscription.BillingCycleAnchor,
-		TrialEnd:               subscription.TrialEnd,
+		Status:                      status,
+		ChannelSubscriptionId:       subscription.ID,
+		ChannelStatus:               string(subscription.Status),
+		Data:                        utility.FormatToJsonString(subscription),
+		ChannelItemData:             utility.MarshalToJsonString(subscription.Items.Data),
+		ChannelLatestInvoiceId:      subscription.LatestInvoice.ID,
+		ChannelLatestPaymentId:      latestChannelPaymentId,
+		ChannelDefaultPaymentMethod: channelDefaultPaymentMethod,
+		CancelAtPeriodEnd:           subscription.CancelAtPeriodEnd,
+		CurrentPeriodStart:          subscription.CurrentPeriodStart,
+		CurrentPeriodEnd:            subscription.CurrentPeriodEnd,
+		BillingCycleAnchor:          subscription.BillingCycleAnchor,
+		TrialEnd:                    subscription.TrialEnd,
 	}
 }
 
@@ -1387,8 +1402,13 @@ func parseStripeInvoice(detail *stripe.Invoice, channelId int64) *ro.ChannelDeta
 		paymentTime = detail.StatusTransitions.PaidAt
 		cancelTime = detail.StatusTransitions.VoidedAt
 	}
+	var channelDefaultPaymentMethod = ""
+	if detail.DefaultPaymentMethod != nil {
+		channelDefaultPaymentMethod = detail.DefaultPaymentMethod.ID
+	}
 
 	return &ro.ChannelDetailInvoiceInternalResp{
+		ChannelDefaultPaymentMethod:    channelDefaultPaymentMethod,
 		TotalAmount:                    detail.Total,
 		PaymentAmount:                  detail.AmountPaid,
 		BalanceAmount:                  -(detail.StartingBalance) - -(detail.EndingBalance),

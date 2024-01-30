@@ -20,90 +20,92 @@ type SubscriptionDao struct {
 
 // SubscriptionColumns defines and stores column names for table subscription.
 type SubscriptionColumns struct {
-	Id                     string //
-	SubscriptionId         string // 订阅id（内部编号）
-	UserId                 string // userId
-	GmtCreate              string // 创建时间
-	GmtModify              string // 修改时间
-	Amount                 string // 金额,单位：分
-	Currency               string // 货币
-	MerchantId             string // 商户Id
-	PlanId                 string // 计划ID
-	Quantity               string // quantity
-	AddonData              string // plan addon json data
-	ChannelId              string // 支付渠道Id
-	Status                 string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
-	ChannelSubscriptionId  string // 支付渠道订阅id
-	ChannelUserId          string // 渠道用户 Id
-	CustomerName           string // customer_name
-	CustomerEmail          string // customer_email
-	IsDeleted              string //
-	Link                   string //
-	ChannelStatus          string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelItemData        string // channel_item_data
-	CancelAtPeriodEnd      string // 是否在周期结束时取消，0-false | 1-true
-	ChannelLatestInvoiceId string // 渠道最新发票 id
-	LastUpdateTime         string //
-	CurrentPeriodStart     string // current_period_start
-	CurrentPeriodEnd       string // current_period_end
-	CurrentPeriodStartTime string //
-	CurrentPeriodEndTime   string //
-	BillingCycleAnchor     string // billing_cycle_anchor
-	TrialEnd               string // trial_end
-	ReturnUrl              string //
-	FirstPayTime           string // 首次支付时间
-	CancelReason           string //
-	CountryCode            string //
-	VatNumber              string //
-	TaxScale               string // Tax税率，万分位，1000 表示 10%
-	VatVerifyData          string //
-	Data                   string // 渠道额外参数，JSON格式
-	ResponseData           string // 渠道返回参数，JSON格式
-	PendingUpdateId        string //
+	Id                          string //
+	SubscriptionId              string // 订阅id（内部编号）
+	UserId                      string // userId
+	GmtCreate                   string // 创建时间
+	GmtModify                   string // 修改时间
+	Amount                      string // 金额,单位：分
+	Currency                    string // 货币
+	MerchantId                  string // 商户Id
+	PlanId                      string // 计划ID
+	Quantity                    string // quantity
+	AddonData                   string // plan addon json data
+	ChannelId                   string // 支付渠道Id
+	Status                      string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
+	ChannelSubscriptionId       string // 支付渠道订阅id
+	ChannelUserId               string // 渠道用户 Id
+	CustomerName                string // customer_name
+	CustomerEmail               string // customer_email
+	IsDeleted                   string //
+	Link                        string //
+	ChannelStatus               string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelItemData             string // channel_item_data
+	CancelAtPeriodEnd           string // 是否在周期结束时取消，0-false | 1-true
+	ChannelLatestInvoiceId      string // 渠道最新发票 id
+	LastUpdateTime              string //
+	CurrentPeriodStart          string // current_period_start
+	CurrentPeriodEnd            string // current_period_end
+	CurrentPeriodStartTime      string //
+	CurrentPeriodEndTime        string //
+	BillingCycleAnchor          string // billing_cycle_anchor
+	TrialEnd                    string // trial_end
+	ReturnUrl                   string //
+	FirstPayTime                string // 首次支付时间
+	CancelReason                string //
+	CountryCode                 string //
+	VatNumber                   string //
+	TaxScale                    string // Tax税率，万分位，1000 表示 10%
+	VatVerifyData               string //
+	Data                        string // 渠道额外参数，JSON格式
+	ResponseData                string // 渠道返回参数，JSON格式
+	PendingUpdateId             string //
+	ChannelDefaultPaymentMethod string //
 }
 
 // subscriptionColumns holds the columns for table subscription.
 var subscriptionColumns = SubscriptionColumns{
-	Id:                     "id",
-	SubscriptionId:         "subscription_id",
-	UserId:                 "user_id",
-	GmtCreate:              "gmt_create",
-	GmtModify:              "gmt_modify",
-	Amount:                 "amount",
-	Currency:               "currency",
-	MerchantId:             "merchant_id",
-	PlanId:                 "plan_id",
-	Quantity:               "quantity",
-	AddonData:              "addon_data",
-	ChannelId:              "channel_id",
-	Status:                 "status",
-	ChannelSubscriptionId:  "channel_subscription_id",
-	ChannelUserId:          "channel_user_id",
-	CustomerName:           "customer_name",
-	CustomerEmail:          "customer_email",
-	IsDeleted:              "is_deleted",
-	Link:                   "link",
-	ChannelStatus:          "channel_status",
-	ChannelItemData:        "channel_item_data",
-	CancelAtPeriodEnd:      "cancel_at_period_end",
-	ChannelLatestInvoiceId: "channel_latest_invoice_id",
-	LastUpdateTime:         "last_update_time",
-	CurrentPeriodStart:     "current_period_start",
-	CurrentPeriodEnd:       "current_period_end",
-	CurrentPeriodStartTime: "current_period_start_time",
-	CurrentPeriodEndTime:   "current_period_end_time",
-	BillingCycleAnchor:     "billing_cycle_anchor",
-	TrialEnd:               "trial_end",
-	ReturnUrl:              "return_url",
-	FirstPayTime:           "first_pay_time",
-	CancelReason:           "cancel_reason",
-	CountryCode:            "country_code",
-	VatNumber:              "vat_number",
-	TaxScale:               "tax_scale",
-	VatVerifyData:          "vat_verify_data",
-	Data:                   "data",
-	ResponseData:           "response_data",
-	PendingUpdateId:        "pendingUpdateId",
+	Id:                          "id",
+	SubscriptionId:              "subscription_id",
+	UserId:                      "user_id",
+	GmtCreate:                   "gmt_create",
+	GmtModify:                   "gmt_modify",
+	Amount:                      "amount",
+	Currency:                    "currency",
+	MerchantId:                  "merchant_id",
+	PlanId:                      "plan_id",
+	Quantity:                    "quantity",
+	AddonData:                   "addon_data",
+	ChannelId:                   "channel_id",
+	Status:                      "status",
+	ChannelSubscriptionId:       "channel_subscription_id",
+	ChannelUserId:               "channel_user_id",
+	CustomerName:                "customer_name",
+	CustomerEmail:               "customer_email",
+	IsDeleted:                   "is_deleted",
+	Link:                        "link",
+	ChannelStatus:               "channel_status",
+	ChannelItemData:             "channel_item_data",
+	CancelAtPeriodEnd:           "cancel_at_period_end",
+	ChannelLatestInvoiceId:      "channel_latest_invoice_id",
+	LastUpdateTime:              "last_update_time",
+	CurrentPeriodStart:          "current_period_start",
+	CurrentPeriodEnd:            "current_period_end",
+	CurrentPeriodStartTime:      "current_period_start_time",
+	CurrentPeriodEndTime:        "current_period_end_time",
+	BillingCycleAnchor:          "billing_cycle_anchor",
+	TrialEnd:                    "trial_end",
+	ReturnUrl:                   "return_url",
+	FirstPayTime:                "first_pay_time",
+	CancelReason:                "cancel_reason",
+	CountryCode:                 "country_code",
+	VatNumber:                   "vat_number",
+	TaxScale:                    "tax_scale",
+	VatVerifyData:               "vat_verify_data",
+	Data:                        "data",
+	ResponseData:                "response_data",
+	PendingUpdateId:             "pendingUpdateId",
+	ChannelDefaultPaymentMethod: "channel_default_payment_method",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

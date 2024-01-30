@@ -70,7 +70,7 @@ func (e Evonet) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (e Evonet) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

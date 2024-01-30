@@ -201,7 +201,7 @@ func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 				responseBack = http.StatusBadRequest
 			} else {
 				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, resource.Get("id").String())
-				// Then define and call a func to handle the successful attachment of a PaymentMethod.
+				// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
@@ -218,7 +218,7 @@ func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 				responseBack = http.StatusBadRequest
 			} else {
 				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, resource.Get("id").String())
-				// Then define and call a func to handle the successful attachment of a PaymentMethod.
+				// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {

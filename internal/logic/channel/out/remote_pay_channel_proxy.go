@@ -106,7 +106,7 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (p PayChannelProxy) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -119,8 +119,8 @@ func (p PayChannelProxy) DoRemoteChannelUserBalancesQuery(ctx context.Context, p
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelUserBalancesQuery(ctx, payChannel, userId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
+	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserDetailQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}

@@ -49,7 +49,7 @@ func (b Blank) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *ent
 	panic("implement me")
 }
 
-func (b Blank) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (b Blank) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -7,7 +7,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) string {
+func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) *entity.SubscriptionUserChannel {
 	// todo mark sync lock control
 	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
 	if channelUser == nil {
@@ -16,10 +16,10 @@ func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.Oversea
 		utility.Assert(len(user.Email) > 0, "invalid user email")
 		create, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserCreate(ctx, payChannel, user)
 		utility.Assert(err == nil, "queryAndCreateChannelUser:"+err.Error())
-		_, err = query.SaveUserChannel(ctx, userId, int64(payChannel.Id), create.ChannelUserId)
+		channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), create.ChannelUserId, "")
 		utility.Assert(err == nil, "queryAndCreateChannelUser:"+err.Error())
-		return create.ChannelUserId
+		return channelUser
 	} else {
-		return channelUser.ChannelUserId
+		return channelUser
 	}
 }

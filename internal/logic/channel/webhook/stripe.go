@@ -160,7 +160,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			responseBack = http.StatusBadRequest
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Sub %s\n", payChannel.Channel, string(event.Type), subscription.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription, payChannel)
 			if err != nil {
@@ -178,7 +178,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			responseBack = http.StatusBadRequest
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %s\n", payChannel.Channel, string(event.Type), stripeInvoice.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %s\n", payChannel.Channel, err.Error())
@@ -195,7 +195,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			responseBack = http.StatusBadRequest
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %s\n", payChannel.Channel, string(event.Type), stripePayment.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 
 			//err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
 			//if err != nil {
@@ -213,7 +213,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			responseBack = http.StatusBadRequest
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.Channel, string(event.Type), stripeRefund.ID)
-			// Then define and call a func to handle the successful attachment of a PaymentMethod.
+			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 
 			//err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)

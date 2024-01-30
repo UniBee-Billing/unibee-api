@@ -48,7 +48,7 @@ func (i Invalid) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *e
 	panic("implement me")
 }
 
-func (i Invalid) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (i Invalid) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

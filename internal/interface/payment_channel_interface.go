@@ -11,7 +11,7 @@ type RemotePayChannelInterface interface {
 	//ChannelUser
 	DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.OverseaPayChannel, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error)
 	//Balance 余额接口
-	DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error)
+	DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error)
 	DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error)
 	//Invoice 发票接口
 	DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.OverseaPayChannel, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error)

@@ -75,7 +75,7 @@ func (p Paypal) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 	panic("implement me")
 }
 
-func (p Paypal) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (p Paypal) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

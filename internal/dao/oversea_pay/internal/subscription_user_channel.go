@@ -20,24 +20,26 @@ type SubscriptionUserChannelDao struct {
 
 // SubscriptionUserChannelColumns defines and stores column names for table subscription_user_channel.
 type SubscriptionUserChannelColumns struct {
-	Id            string //
-	GmtCreate     string // 创建时间
-	GmtModify     string // 修改时间
-	UserId        string // userId
-	ChannelId     string // 支付渠道Id
-	ChannelUserId string // 支付渠道user_Id
-	IsDeleted     string //
+	Id                          string //
+	GmtCreate                   string // 创建时间
+	GmtModify                   string // 修改时间
+	UserId                      string // userId
+	ChannelId                   string // 支付渠道Id
+	ChannelUserId               string // 支付渠道user_Id
+	IsDeleted                   string //
+	ChannelDefaultPaymentMethod string //
 }
 
 // subscriptionUserChannelColumns holds the columns for table subscription_user_channel.
 var subscriptionUserChannelColumns = SubscriptionUserChannelColumns{
-	Id:            "id",
-	GmtCreate:     "gmt_create",
-	GmtModify:     "gmt_modify",
-	UserId:        "user_id",
-	ChannelId:     "channel_id",
-	ChannelUserId: "channel_user_id",
-	IsDeleted:     "is_deleted",
+	Id:                          "id",
+	GmtCreate:                   "gmt_create",
+	GmtModify:                   "gmt_modify",
+	UserId:                      "user_id",
+	ChannelId:                   "channel_id",
+	ChannelUserId:               "channel_user_id",
+	IsDeleted:                   "is_deleted",
+	ChannelDefaultPaymentMethod: "channel_default_payment_method",
 }
 
 // NewSubscriptionUserChannelDao creates and returns a new DAO object for table data access.

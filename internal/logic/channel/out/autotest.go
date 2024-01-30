@@ -49,7 +49,7 @@ func (a AutoTest) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *
 	panic("implement me")
 }
 
-func (a AutoTest) DoRemoteChannelUserBalancesQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserBalanceQueryInternalResp, err error) {
+func (a AutoTest) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.OverseaPayChannel, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

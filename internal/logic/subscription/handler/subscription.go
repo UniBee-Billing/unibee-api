@@ -41,13 +41,14 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	}
 
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:                 details.Status,
-		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
-		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
-		dao.Subscription.Columns().ChannelItemData:        details.ChannelItemData,
-		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
-		dao.Subscription.Columns().BillingCycleAnchor:     details.BillingCycleAnchor,
-		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().Status:                      details.Status,
+		dao.Subscription.Columns().ChannelSubscriptionId:       details.ChannelSubscriptionId,
+		dao.Subscription.Columns().ChannelStatus:               details.ChannelStatus,
+		dao.Subscription.Columns().ChannelItemData:             details.ChannelItemData,
+		dao.Subscription.Columns().CancelAtPeriodEnd:           cancelAtPeriodEnd,
+		dao.Subscription.Columns().BillingCycleAnchor:          details.BillingCycleAnchor,
+		dao.Subscription.Columns().ChannelLatestInvoiceId:      details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().ChannelDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
 		//dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
 		//dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
 		//dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),

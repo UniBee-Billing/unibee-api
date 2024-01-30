@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/invoice"
+	sub "github.com/stripe/stripe-go/v76/subscription"
 	"go-oversea-pay/utility"
 	"testing"
 )
@@ -43,9 +43,15 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	//result := customer.ListPaymentMethods(params)
 	//fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.List()))
 
-	params := &stripe.InvoicePayParams{}
-	params.PaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")
-	response, err := invoice.Pay("in_1OdziFHhgikz9ijMM0zrMlTf", params)
+	//params := &stripe.InvoicePayParams{}
+	//params.ChannelDefaultPaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")
+	//response, err := invoice.Pay("in_1OdziFHhgikz9ijMM0zrMlTf", params)
+	//fmt.Printf("response:%s\n", utility.MarshalToJsonString(response))
+	//if err != nil {
+	//	fmt.Printf("err:%s\n", err.Error())
+	//}
+
+	response, err := sub.Get("sub_1OdQUOHhgikz9ijMWA7qzh3u", &stripe.SubscriptionParams{})
 	fmt.Printf("response:%s\n", utility.MarshalToJsonString(response))
 	if err != nil {
 		fmt.Printf("err:%s\n", err.Error())
