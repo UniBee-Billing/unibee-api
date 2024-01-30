@@ -24,6 +24,7 @@ import (
 	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
@@ -501,7 +502,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				})
 			}
 
-			if sub.CurrentPeriodEnd < gtime.Now().Timestamp() {
+			if prorationDate == 0 {
+				prorationDate = time.Now().Unix()
+			}
+			if prorationDate > sub.CurrentPeriodEnd || prorationDate < sub.CurrentPeriodStart {
 				// after period end before trial end, also or sub data not sync todo mark
 				prorationInvoice = &ro.InvoiceDetailSimplify{
 					TotalAmount:                    0,
@@ -511,7 +515,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 					SubscriptionAmount:             0,
 					SubscriptionAmountExcludingTax: 0,
 					Lines:                          nil,
-					ProrationDate:                  gtime.Now().Timestamp(),
+					ProrationDate:                  prorationDate,
 				}
 			} else {
 				prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{

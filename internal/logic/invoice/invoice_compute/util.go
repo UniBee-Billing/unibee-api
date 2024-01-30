@@ -9,7 +9,6 @@ import (
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strconv"
-	"time"
 )
 
 func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
@@ -150,11 +149,8 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		newMap[planSub.PlanId] = planSub
 	}
 
-	if req.ProrationDate == 0 {
-		req.ProrationDate = time.Now().Unix()
-	}
-
-	utility.Assert(req.ProrationDate >= req.PeriodEnd, "System Error, Subscription Need Update")
+	utility.Assert(req.ProrationDate > 0, "Invalid ProrationDate")
+	utility.Assert(req.PeriodStart <= req.ProrationDate && req.ProrationDate <= req.PeriodEnd, "System Error, Subscription Need Update")
 
 	timeScale := int64((float64(req.PeriodEnd-req.ProrationDate) / float64(req.PeriodEnd-req.PeriodStart)) * 10000)
 	var invoiceItems []*ro.InvoiceItemDetailRo
