@@ -208,7 +208,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		VatCountryName:    vatCountryName,
 		VatNumber:         req.VatNumber,
 		VatNumberValidate: vatNumberValidate,
-		VatVerifyData:     utility.FormatToJsonString(vatNumberValidate),
+		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
 		UserId:            req.UserId,
 		Email:             email,
@@ -706,8 +706,21 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		if prepare.EffectImmediate {
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
+			utility.Assert(merchantInfo != nil, "merchantInfo not found")
 			user := query.GetUserAccountById(ctx, uint64(one.UserId))
+			//utility.Assert(user != nil, "user not found")
 			payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
+			utility.Assert(payChannel != nil, "payChannel not found")
+			var mobile = ""
+			var firstName = ""
+			var lastName = ""
+			var gender = ""
+			if user != nil {
+				mobile = user.Mobile
+				firstName = user.FirstName
+				lastName = user.LastName
+				gender = user.Gender
+			}
 
 			createPayContext := &ro.CreatePayContext{
 				PayChannel: payChannel,
@@ -719,21 +732,21 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 					ChannelId:      int64(payChannel.Id),
 					TotalAmount:    prepare.Invoice.TotalAmount,
 					Currency:       one.Currency,
-					CountryCode:    user.CountryCode,
+					CountryCode:    prepare.Subscription.CountryCode,
 					MerchantId:     one.MerchantId,
 					CompanyId:      merchantInfo.CompanyId,
 				},
 				Platform:      "WEB",
 				DeviceType:    "Web",
 				ShopperUserId: strconv.FormatInt(one.UserId, 10),
-				ShopperEmail:  user.Email,
+				ShopperEmail:  prepare.Subscription.CustomerEmail,
 				ShopperLocale: "en",
-				Mobile:        user.Mobile,
+				Mobile:        mobile,
 				Invoice:       prepare.Invoice,
 				ShopperName: &v1.OutShopperName{
-					FirstName: user.FirstName,
-					LastName:  user.LastName,
-					Gender:    user.Gender,
+					FirstName: firstName,
+					LastName:  lastName,
+					Gender:    gender,
 				},
 				MerchantOrderReference: one.UpdateSubscriptionId,
 				PayMethod:              1, //automatic
