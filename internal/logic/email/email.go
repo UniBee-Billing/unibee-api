@@ -49,6 +49,26 @@ func SendEmailToUser(mailTo string, subject string, body string) error {
 	return nil
 }
 
+func SendTemplateEmailToUser(mailTo string, subject string, body string) error {
+	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
+	subject = subject
+	to := mail.NewEmail(mailTo, mailTo)
+	plainTextContent := body
+	htmlContent := "<div>" + body + " </div>"
+	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
+	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	client := sendgrid.NewSendClient(SG_KEY)
+	response, err := client.Send(message)
+	if err != nil {
+		log.Println(err)
+	} else {
+		fmt.Println(response.StatusCode)
+		fmt.Println(response.Body)
+		fmt.Println(response.Headers)
+	}
+	return nil
+}
+
 func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) error {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
@@ -156,6 +176,6 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tem
 	if len(pdfFilePath) > 0 {
 		return SendPdfAttachEmailToUser(mailTo, title, content, pdfFilePath, attachName+".pdf")
 	} else {
-		return SendEmailToUser(mailTo, title, content)
+		return SendTemplateEmailToUser(mailTo, title, content)
 	}
 }
