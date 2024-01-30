@@ -250,13 +250,12 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		SubscriptionId: utility.CreateSubscriptionId(),
 		Status:         consts.SubStatusCreate,
 		CustomerEmail:  prepare.Email,
-		//ChannelUserId:  channelUserId,
-		ReturnUrl:     req.ReturnUrl,
-		Data:          "", //额外参数配置
-		VatNumber:     prepare.VatNumber,
-		VatVerifyData: prepare.VatVerifyData,
-		CountryCode:   prepare.VatCountryCode,
-		TaxScale:      prepare.TaxScale,
+		ReturnUrl:      req.ReturnUrl,
+		Data:           "", //额外参数配置
+		VatNumber:      prepare.VatNumber,
+		VatVerifyData:  prepare.VatVerifyData,
+		CountryCode:    prepare.VatCountryCode,
+		TaxScale:       prepare.TaxScale,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
