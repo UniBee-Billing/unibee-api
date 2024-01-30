@@ -30,7 +30,7 @@ type MerchantOperationLogColumns struct {
 	OptTarget          string // 操作对象
 	OptContent         string // 操作内容
 	OptCreate          string // 操作发生时间
-	IsDelete           string // 是否删除 1-删除，0-未删除
+	IsDelete           string // 0-UnDeleted，1-Deleted
 	GmtCreate          string // 创建时间
 	GmtModify          string // 修改时间
 	QueryportRequestId string // queryport请求Id，可在request_security_log查询请求信息

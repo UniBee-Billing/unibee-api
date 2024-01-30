@@ -31,7 +31,7 @@ type SubscriptionPlanColumns struct {
 	IntervalUnit              string // 周期-全小写存放,day|month|year|week
 	IntervalCount             string // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               string //
-	IsDeleted                 string //
+	IsDeleted                 string // 0-UnDeleted，1-Deleted
 	ImageUrl                  string // image_url
 	HomeUrl                   string // home_url
 	ChannelProductName        string // 支付渠道product_name

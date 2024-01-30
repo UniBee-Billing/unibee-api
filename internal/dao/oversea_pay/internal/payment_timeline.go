@@ -31,7 +31,7 @@ type PaymentTimelineColumns struct {
 	ChannelId      string // 支付渠道Id
 	GmtCreate      string // 创建时间
 	GmtModify      string // 修改时间
-	IsDeleted      string //
+	IsDeleted      string // 0-UnDeleted，1-Deleted
 	PaymentId      string // PaymentId
 	Status         string // 0-pending, 1-success, 2-failure
 	TimelineType   string // 0-pay, 1-refund

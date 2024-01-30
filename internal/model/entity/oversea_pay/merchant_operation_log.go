@@ -20,7 +20,7 @@ type MerchantOperationLog struct {
 	OptTarget          string      `json:"optTarget"          description:"操作对象"`                                                              // 操作对象
 	OptContent         string      `json:"optContent"         description:"操作内容"`                                                              // 操作内容
 	OptCreate          *gtime.Time `json:"optCreate"          description:"操作发生时间"`                                                            // 操作发生时间
-	IsDelete           int         `json:"isDelete"           description:"是否删除 1-删除，0-未删除"`                                                   // 是否删除 1-删除，0-未删除
+	IsDelete           int         `json:"isDelete"           description:"0-UnDeleted，1-Deleted"`                                             // 0-UnDeleted，1-Deleted
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"创建时间"`                                                              // 创建时间
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"修改时间"`                                                              // 修改时间
 	QueryportRequestId string      `json:"queryportRequestId" description:"queryport请求Id，可在request_security_log查询请求信息"`                        // queryport请求Id，可在request_security_log查询请求信息

@@ -277,12 +277,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if err == nil {
 		//default payment method update
 		if len(req.ChannelDefaultPaymentMethod) > 0 {
-			_, err = dao.SubscriptionUserChannel.Ctx(ctx).Data(g.Map{
-				dao.SubscriptionUserChannel.Columns().ChannelDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
-			}).Where(dao.SubscriptionUserChannel.Columns().UserId, payment.UserId).Where(dao.SubscriptionUserChannel.Columns().ChannelId, payment.ChannelId).OmitNil().Update()
-			if err != nil {
-				g.Log().Printf(ctx, `UpdateChannelUser ChannelDefaultPaymentMethod failure %s`, err.Error())
-			}
+			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 		}
 
 		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
@@ -321,6 +316,16 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 		}
+	}
+	return err
+}
+
+func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq, err error, payment *entity.Payment) error {
+	_, err = dao.ChannelUser.Ctx(ctx).Data(g.Map{
+		dao.ChannelUser.Columns().ChannelDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
+	}).Where(dao.ChannelUser.Columns().UserId, payment.UserId).Where(dao.ChannelUser.Columns().ChannelId, payment.ChannelId).OmitNil().Update()
+	if err != nil {
+		g.Log().Printf(ctx, `SaveChannelUserDefaultPaymentMethod ChannelDefaultPaymentMethod failure %s`, err.Error())
 	}
 	return err
 }

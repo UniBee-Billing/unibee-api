@@ -25,7 +25,7 @@ type MerchantPayChannelMappingColumns struct {
 	GmtModify  string // 修改时间
 	MerchantId string // 商户Id
 	ChannelId  string // oversea_pay_channel表的id
-	IsDeleted  string //
+	IsDeleted  string // 0-UnDeleted，1-Deleted
 }
 
 // merchantPayChannelMappingColumns holds the columns for table merchant_pay_channel_mapping.

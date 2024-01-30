@@ -23,7 +23,7 @@ type UserAccountColumns struct {
 	Id                 string // userId
 	GmtCreate          string // 创建时间
 	GmtModify          string // 修改时间
-	IsDeleted          string // 逻辑删除
+	IsDeleted          string // 0-UnDeleted，1-Deleted
 	Password           string // 密码，加密存储
 	UserName           string // 用户名
 	Mobile             string // 手机号

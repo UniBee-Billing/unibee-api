@@ -27,6 +27,6 @@ type SubscriptionTimeline struct {
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`                            // plan addon json data
 	ChannelId       int64       `json:"channelId"       description:"支付渠道Id"`                                          // 支付渠道Id
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"修改时间"`                                            // 修改时间
-	IsDeleted       int         `json:"isDeleted"       description:""`                                                //
+	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`                           // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:""`                                                //
 }

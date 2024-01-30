@@ -29,7 +29,7 @@ type OpenApiConfigColumns struct {
 	Callback        string // 回调Url
 	ApiKey          string // 开放平台Key
 	Token           string // 开放平台token
-	IsDeleted       string //
+	IsDeleted       string // 0-UnDeleted，1-Deleted
 	Validips        string //
 	ChannelCallback string // 渠道支付原信息回调地址
 	CompanyId       string // 公司ID

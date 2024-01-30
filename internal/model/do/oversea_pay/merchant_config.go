@@ -18,5 +18,5 @@ type MerchantConfig struct {
 	ConfigValue interface{} // config_value
 	GmtCreate   *gtime.Time // 创建时间
 	GmtModify   *gtime.Time // 修改时间
-	IsDeleted   interface{} // 是否删除，0-未删除，1-删除
+	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
 }

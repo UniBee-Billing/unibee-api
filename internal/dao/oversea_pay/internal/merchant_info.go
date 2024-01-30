@@ -33,7 +33,7 @@ type MerchantInfoColumns struct {
 	Address     string // 详细地址
 	GmtCreate   string // 创建时间
 	GmtModify   string // 修改时间
-	IsDeleted   string // 是否删除，0-未删除，1-删除
+	IsDeleted   string // 0-UnDeleted，1-Deleted
 	CompanyLogo string // 账号头像
 	HomeUrl     string //
 	FirstName   string //

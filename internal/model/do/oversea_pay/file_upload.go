@@ -19,5 +19,5 @@ type FileUpload struct {
 	Tag       interface{} //
 	GmtCreate *gtime.Time //
 	GmtModify *gtime.Time //
-	IsDeleted interface{} // 是否删除，0-未删除，1-删除
+	IsDeleted interface{} // 0-UnDeleted，1-Deleted
 }

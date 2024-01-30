@@ -37,7 +37,7 @@ type SubscriptionTimelineColumns struct {
 	AddonData       string // plan addon json data
 	ChannelId       string // 支付渠道Id
 	GmtModify       string // 修改时间
-	IsDeleted       string //
+	IsDeleted       string // 0-UnDeleted，1-Deleted
 	UniqueKey       string //
 }
 

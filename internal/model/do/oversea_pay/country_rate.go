@@ -18,15 +18,15 @@ type CountryRate struct {
 	CountryName           interface{} // country_name
 	Latitude              interface{} // latitude
 	Longitude             interface{} // longitude
-	Vat                   interface{} // 是否有 vat，1-有，2-没有
-	Eu                    interface{} // 是否欧盟成员国, 1-是，2-不是
-	StandardTaxPercentage interface{} // Standard Tax 万分比，1000 表示 10%
-	Other                 interface{} // other rates(json格式)
+	Vat                   interface{} // vat contains，1-yes，2-no
+	Eu                    interface{} // is eu member state, 1-yes, 2-no
+	StandardTaxPercentage interface{} // Standard Tax Scale，1000 = 10%
+	Other                 interface{} // other rates(json)
 	StandardDescription   interface{} // standard_description
-	StandardTypes         interface{} // standard_typs 限定
+	StandardTypes         interface{} // standard_typs
 	Provinces             interface{} // Whether the country has provinces with provincial sales tax
-	Mamo                  interface{} // 备注
-	GmtCreate             *gtime.Time // 创建时间
-	GmtModify             *gtime.Time // 更新时间
-	IsDeleted             interface{} // 是否删除，0-未删除，1-删除
+	Mamo                  interface{} // mamo
+	GmtCreate             *gtime.Time // create time
+	GmtModify             *gtime.Time // update time
+	IsDeleted             interface{} // 0-UnDeleted，1-Deleted
 }

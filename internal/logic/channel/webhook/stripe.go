@@ -252,8 +252,8 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 			stripe.Key = payChannel.ChannelSecret
 			s.setUnibeeAppInfo()
 			unibSub := query.GetSubscriptionBySubscriptionId(r.Context(), SubIdStr)
-			if unibSub == nil || len(unibSub.ChannelUserId) == 0 {
-				response = "subId invalid or customId empty"
+			if unibSub == nil {
+				response = "subId invalid"
 			} else if len(unibSub.ChannelSubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
 				returnUrl = unibSub.ReturnUrl
 				response = "active"
@@ -267,9 +267,10 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 					},
 				}
 				result := sub.Search(params)
-				if result.SubscriptionSearchResult().Data != nil && len(result.SubscriptionSearchResult().Data) == 1 {
+				channelUser := query.GetUserChannel(r.Context(), unibSub.UserId, int64(payChannel.Id))
+				if channelUser != nil && result.SubscriptionSearchResult().Data != nil && len(result.SubscriptionSearchResult().Data) == 1 {
 					//找到
-					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, unibSub.ChannelUserId) != 0 {
+					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, channelUser.ChannelUserId) != 0 {
 						response = "customId not match"
 					} else {
 						detail := parseStripeSubscription(result.SubscriptionSearchResult().Data[0])

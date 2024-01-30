@@ -33,7 +33,7 @@ type SubscriptionPendingUpdate struct {
 	ChannelId            interface{} // 支付渠道Id
 	UserId               interface{} // userId
 	GmtModify            *gtime.Time // 修改时间
-	IsDeleted            interface{} //
+	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
 	Paid                 interface{} // 是否已支付，0-否，1-是
 	Link                 interface{} // 支付链接
 	ChannelStatus        interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get

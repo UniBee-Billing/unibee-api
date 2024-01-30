@@ -25,7 +25,7 @@ type MerchantInfo struct {
 	Address     interface{} // 详细地址
 	GmtCreate   *gtime.Time // 创建时间
 	GmtModify   *gtime.Time // 修改时间
-	IsDeleted   interface{} // 是否删除，0-未删除，1-删除
+	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
 	CompanyLogo interface{} // 账号头像
 	HomeUrl     interface{} //
 	FirstName   interface{} //

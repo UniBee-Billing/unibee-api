@@ -26,7 +26,7 @@ type SubscriptionVatRateChannelColumns struct {
 	VatRateId        string // vat_rate_id
 	ChannelId        string // 支付渠道Id
 	ChannelVatRateId string // 支付渠道vat_rate_Id
-	IsDeleted        string //
+	IsDeleted        string // 0-UnDeleted，1-Deleted
 }
 
 // subscriptionVatRateChannelColumns holds the columns for table subscription_vat_rate_channel.

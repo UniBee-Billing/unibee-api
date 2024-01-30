@@ -41,7 +41,7 @@ type SubscriptionPendingUpdateColumns struct {
 	ChannelId            string // 支付渠道Id
 	UserId               string // userId
 	GmtModify            string // 修改时间
-	IsDeleted            string //
+	IsDeleted            string // 0-UnDeleted，1-Deleted
 	Paid                 string // 是否已支付，0-否，1-是
 	Link                 string // 支付链接
 	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get

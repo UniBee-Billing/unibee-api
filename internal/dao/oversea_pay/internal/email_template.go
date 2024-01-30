@@ -28,7 +28,7 @@ type EmailTemplateColumns struct {
 	TemplateAttachName string //
 	GmtCreate          string //
 	GmtModify          string //
-	IsDeleted          string // 是否删除，0-未删除，1-删除
+	IsDeleted          string // 0-UnDeleted，1-Deleted
 }
 
 // emailTemplateColumns holds the columns for table email_template.

@@ -17,5 +17,5 @@ type MerchantPayChannelMapping struct {
 	GmtModify  *gtime.Time // 修改时间
 	MerchantId interface{} // 商户Id
 	ChannelId  interface{} // oversea_pay_channel表的id
-	IsDeleted  interface{} //
+	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
 }

@@ -22,6 +22,6 @@ type MerchantVatNumberValicationHistory struct {
 	CompanyAddress  interface{} // company_address
 	GmtCreate       *gtime.Time // 创建时间
 	GmtModify       *gtime.Time // 修改时间
-	IsDeleted       interface{} // 是否删除，0-未删除，1-删除
+	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	ValidateMessage interface{} // validate_message
 }

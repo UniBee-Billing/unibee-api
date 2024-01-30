@@ -29,12 +29,11 @@ type Invoice struct {
 	SendEmail                      string      `json:"sendEmail"                      description:"email 发送地址，取自 UserAccount 表 email"`                                     // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string      `json:"sendPdf"                        description:"pdf 文件地址"`                                                              // pdf 文件地址
 	GmtModify                      *gtime.Time `json:"gmtModify"                      description:"修改时间"`                                                                  // 修改时间
-	IsDeleted                      int         `json:"isDeleted"                      description:""`                                                                      //
+	IsDeleted                      int         `json:"isDeleted"                      description:"0-UnDeleted，1-Deleted"`                                                 // 0-UnDeleted，1-Deleted
 	Link                           string      `json:"link"                           description:"invoice 链接（可用于支付）"`                                                     // invoice 链接（可用于支付）
 	ChannelStatus                  string      `json:"channelStatus"                  description:"渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object"`             // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                                             // 关联渠道发票 Id
 	ChannelPaymentId               string      `json:"channelPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
-	ChannelUserId                  string      `json:"channelUserId"                  description:"渠道用户 Id-废弃"`                                                            // 渠道用户 Id-废弃
 	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
 	TaxScale                       int64       `json:"taxScale"                       description:"Tax税率，万分位，1000 表示 10%"`                                                 // Tax税率，万分位，1000 表示 10%
 	SendNote                       string      `json:"sendNote"                       description:"send_note"`                                                             // send_note

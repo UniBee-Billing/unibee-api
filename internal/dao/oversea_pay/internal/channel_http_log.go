@@ -21,14 +21,14 @@ type ChannelHttpLogDao struct {
 // ChannelHttpLogColumns defines and stores column names for table channel_http_log.
 type ChannelHttpLogColumns struct {
 	Id        string // id
-	Url       string // 请求url
-	Request   string // 请求body参数(json格式)
-	Response  string // 请求返回结果(json格式)
+	Url       string // request url
+	Request   string // request body(json)
+	Response  string // response(json)
 	RequestId string // reuqest_id
-	Mamo      string // 备注
+	Mamo      string // mamo
 	ChannelId string // channel_id
-	GmtCreate string // 创建时间
-	GmtModify string // 更新时间
+	GmtCreate string // create time
+	GmtModify string // update time
 }
 
 // channelHttpLogColumns holds the columns for table channel_http_log.

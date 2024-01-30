@@ -26,17 +26,17 @@ type CountryRateColumns struct {
 	CountryName           string // country_name
 	Latitude              string // latitude
 	Longitude             string // longitude
-	Vat                   string // 是否有 vat，1-有，2-没有
-	Eu                    string // 是否欧盟成员国, 1-是，2-不是
-	StandardTaxPercentage string // Standard Tax 万分比，1000 表示 10%
-	Other                 string // other rates(json格式)
+	Vat                   string // vat contains，1-yes，2-no
+	Eu                    string // is eu member state, 1-yes, 2-no
+	StandardTaxPercentage string // Standard Tax Scale，1000 = 10%
+	Other                 string // other rates(json)
 	StandardDescription   string // standard_description
-	StandardTypes         string // standard_typs 限定
+	StandardTypes         string // standard_typs
 	Provinces             string // Whether the country has provinces with provincial sales tax
-	Mamo                  string // 备注
-	GmtCreate             string // 创建时间
-	GmtModify             string // 更新时间
-	IsDeleted             string // 是否删除，0-未删除，1-删除
+	Mamo                  string // mamo
+	GmtCreate             string // create time
+	GmtModify             string // update time
+	IsDeleted             string // 0-UnDeleted，1-Deleted
 }
 
 // countryRateColumns holds the columns for table country_rate.

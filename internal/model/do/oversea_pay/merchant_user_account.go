@@ -16,7 +16,7 @@ type MerchantUserAccount struct {
 	GmtCreate  *gtime.Time // 创建时间
 	GmtModify  *gtime.Time // 修改时间
 	MerchantId interface{} // 用户ID
-	IsDeleted  interface{} // 逻辑删除
+	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
 	Password   interface{} // 密码，加密存储
 	UserName   interface{} // 用户名
 	Mobile     interface{} // 手机号

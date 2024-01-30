@@ -39,12 +39,11 @@ type InvoiceColumns struct {
 	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        string // pdf 文件地址
 	GmtModify                      string // 修改时间
-	IsDeleted                      string //
+	IsDeleted                      string // 0-UnDeleted，1-Deleted
 	Link                           string // invoice 链接（可用于支付）
 	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               string // 关联渠道发票 Id
 	ChannelPaymentId               string // 关联渠道 PaymentId
-	ChannelUserId                  string // 渠道用户 Id-废弃
 	ChannelInvoicePdf              string // 关联渠道发票 pdf
 	TaxScale                       string // Tax税率，万分位，1000 表示 10%
 	SendNote                       string // send_note
@@ -87,7 +86,6 @@ var invoiceColumns = InvoiceColumns{
 	ChannelStatus:                  "channel_status",
 	ChannelInvoiceId:               "channel_invoice_id",
 	ChannelPaymentId:               "channel_payment_id",
-	ChannelUserId:                  "channel_user_id",
 	ChannelInvoicePdf:              "channel_invoice_pdf",
 	TaxScale:                       "tax_scale",
 	SendNote:                       "send_note",

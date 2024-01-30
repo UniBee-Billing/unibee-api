@@ -294,21 +294,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	{
-		//if len(subscriptionRo.Subscription.ChannelUserId) == 0 {
-		//	params := &stripe.CustomerParams{
-		//		//Name:  stripe.String(subscriptionRo.Subscription.CustomerName),
-		//		Email: stripe.String(subscriptionRo.Subscription.CustomerEmail),
-		//	}
-		//
-		//	createCustomResult, err := customer.New(params)
-		//	if err != nil {
-		//		g.Log().Printf(ctx, "customer.New: %v", err.Error())
-		//		return nil, err
-		//	}
-		//	subscriptionRo.Subscription.ChannelUserId = createCustomResult.ID
-		//}
-		subscriptionRo.Subscription.ChannelUserId = queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId).ChannelUserId
-		//税率创建并处理
+		channelUser := queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
 
 		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
 		if channelVatRate == nil {
@@ -361,7 +347,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				})
 			}
 			subscriptionParams := &stripe.CheckoutSessionParams{
-				Customer:  stripe.String(subscriptionRo.Subscription.ChannelUserId),
+				Customer:  stripe.String(channelUser.ChannelUserId),
 				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				LineItems: items,
 				AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
@@ -383,7 +369,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				return nil, err
 			}
 			return &ro.ChannelCreateSubscriptionInternalResp{
-				ChannelUserId: subscriptionRo.Subscription.ChannelUserId,
+				ChannelUserId: channelUser.ChannelUserId,
 				Link:          createSubscription.URL,
 				//ChannelSubscriptionId:     createSubscription.Subscription.ID,
 				//ChannelSubscriptionStatus: string(createSubscription.Subscription.Status),
@@ -413,7 +399,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				})
 			}
 			subscriptionParams := &stripe.SubscriptionParams{
-				Customer: stripe.String(subscriptionRo.Subscription.ChannelUserId),
+				Customer: stripe.String(channelUser.ChannelUserId),
 				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				Items:    items,
 				AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
@@ -434,7 +420,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 
 			return &ro.ChannelCreateSubscriptionInternalResp{
-				ChannelUserId:             subscriptionRo.Subscription.ChannelUserId,
+				ChannelUserId:             channelUser.ChannelUserId,
 				Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
 				ChannelSubscriptionId:     createSubscription.ID,
 				ChannelSubscriptionStatus: string(createSubscription.Status),
@@ -570,6 +556,9 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
+
+	channelUser := queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
 	if consts.NonEffectImmediatelyUsePendingUpdate && !subscriptionRo.EffectImmediate {
@@ -583,7 +572,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:          stripe.String(subscriptionRo.Subscription.ChannelUserId),
+		Customer:          stripe.String(channelUser.ChannelUserId),
 		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
 		SubscriptionItems: items,
 		//SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),// 设置了就只会输出 Proration 账单

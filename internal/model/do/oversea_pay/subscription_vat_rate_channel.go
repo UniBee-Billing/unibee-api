@@ -18,5 +18,5 @@ type SubscriptionVatRateChannel struct {
 	VatRateId        interface{} // vat_rate_id
 	ChannelId        interface{} // 支付渠道Id
 	ChannelVatRateId interface{} // 支付渠道vat_rate_Id
-	IsDeleted        interface{} //
+	IsDeleted        interface{} // 0-UnDeleted，1-Deleted
 }

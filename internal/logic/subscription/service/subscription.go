@@ -279,7 +279,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 	//更新 Subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().ChannelUserId:         createRes.ChannelUserId,
 		dao.Subscription.Columns().ChannelSubscriptionId: createRes.ChannelSubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
 		dao.Subscription.Columns().Link:                  createRes.Link,
@@ -296,7 +295,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
 	one.Status = consts.PlanChannelStatusCreate
 	one.Link = createRes.Link
-	one.ChannelUserId = createRes.ChannelUserId
 
 	return &subscription.SubscriptionCreateRes{
 		Subscription: one,

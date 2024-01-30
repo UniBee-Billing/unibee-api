@@ -31,12 +31,11 @@ type Invoice struct {
 	SendEmail                      interface{} // email 发送地址，取自 UserAccount 表 email
 	SendPdf                        interface{} // pdf 文件地址
 	GmtModify                      *gtime.Time // 修改时间
-	IsDeleted                      interface{} //
+	IsDeleted                      interface{} // 0-UnDeleted，1-Deleted
 	Link                           interface{} // invoice 链接（可用于支付）
 	ChannelStatus                  interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
 	ChannelInvoiceId               interface{} // 关联渠道发票 Id
 	ChannelPaymentId               interface{} // 关联渠道 PaymentId
-	ChannelUserId                  interface{} // 渠道用户 Id-废弃
 	ChannelInvoicePdf              interface{} // 关联渠道发票 pdf
 	TaxScale                       interface{} // Tax税率，万分位，1000 表示 10%
 	SendNote                       interface{} // send_note

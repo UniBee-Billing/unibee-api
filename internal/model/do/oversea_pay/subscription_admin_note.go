@@ -18,5 +18,5 @@ type SubscriptionAdminNote struct {
 	SubscriptionId interface{} // subscription_id
 	MerchantUserId interface{} // merchant_user_id
 	Note           interface{} // note
-	IsDeleted      interface{} //
+	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
 }

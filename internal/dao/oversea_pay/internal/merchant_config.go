@@ -26,7 +26,7 @@ type MerchantConfigColumns struct {
 	ConfigValue string // config_value
 	GmtCreate   string // 创建时间
 	GmtModify   string // 修改时间
-	IsDeleted   string // 是否删除，0-未删除，1-删除
+	IsDeleted   string // 0-UnDeleted，1-Deleted
 }
 
 // merchantConfigColumns holds the columns for table merchant_config.

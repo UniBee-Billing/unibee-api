@@ -30,7 +30,7 @@ type SubscriptionPlanChannelColumns struct {
 	ChannelProductId     string // 支付渠道product_Id
 	ChannelPlanStatus    string // channel_plan_status
 	ChannelProductStatus string // channel_product_status
-	IsDeleted            string //
+	IsDeleted            string // 0-UnDeleted，1-Deleted
 	Data                 string // 渠道额外参数，JSON格式
 }
 

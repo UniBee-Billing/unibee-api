@@ -21,7 +21,7 @@ type PaymentTimeline struct {
 	ChannelId      int64       `json:"channelId"      description:"支付渠道Id"`                                                 // 支付渠道Id
 	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"创建时间"`                                                   // 创建时间
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"修改时间"`                                                   // 修改时间
-	IsDeleted      int         `json:"isDeleted"      description:""`                                                       //
+	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`                                  // 0-UnDeleted，1-Deleted
 	PaymentId      string      `json:"paymentId"      description:"PaymentId"`                                              // PaymentId
 	Status         int         `json:"status"         description:"0-pending, 1-success, 2-failure"`                        // 0-pending, 1-success, 2-failure
 	TimelineType   int         `json:"timelineType"   description:"0-pay, 1-refund"`                                        // 0-pay, 1-refund

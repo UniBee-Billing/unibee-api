@@ -13,12 +13,12 @@ import (
 type ChannelHttpLog struct {
 	g.Meta    `orm:"table:channel_http_log, do:true"`
 	Id        interface{} // id
-	Url       interface{} // 请求url
-	Request   interface{} // 请求body参数(json格式)
-	Response  interface{} // 请求返回结果(json格式)
+	Url       interface{} // request url
+	Request   interface{} // request body(json)
+	Response  interface{} // response(json)
 	RequestId interface{} // reuqest_id
-	Mamo      interface{} // 备注
+	Mamo      interface{} // mamo
 	ChannelId interface{} // channel_id
-	GmtCreate *gtime.Time // 创建时间
-	GmtModify *gtime.Time // 更新时间
+	GmtCreate *gtime.Time // create time
+	GmtModify *gtime.Time // update time
 }

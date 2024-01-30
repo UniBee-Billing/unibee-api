@@ -9,15 +9,15 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionUserChannel is the golang structure of table subscription_user_channel for DAO operations like Where/Data.
-type SubscriptionUserChannel struct {
-	g.Meta                      `orm:"table:subscription_user_channel, do:true"`
+// ChannelUser is the golang structure of table channel_user for DAO operations like Where/Data.
+type ChannelUser struct {
+	g.Meta                      `orm:"table:channel_user, do:true"`
 	Id                          interface{} //
 	GmtCreate                   *gtime.Time // 创建时间
 	GmtModify                   *gtime.Time // 修改时间
 	UserId                      interface{} // userId
 	ChannelId                   interface{} // 支付渠道Id
 	ChannelUserId               interface{} // 支付渠道user_Id
-	IsDeleted                   interface{} //
+	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
 	ChannelDefaultPaymentMethod interface{} //
 }

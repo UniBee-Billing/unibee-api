@@ -26,7 +26,7 @@ type SubscriptionAdminNoteColumns struct {
 	SubscriptionId string // subscription_id
 	MerchantUserId string // merchant_user_id
 	Note           string // note
-	IsDeleted      string //
+	IsDeleted      string // 0-UnDeleted，1-Deleted
 }
 
 // subscriptionAdminNoteColumns holds the columns for table subscription_admin_note.

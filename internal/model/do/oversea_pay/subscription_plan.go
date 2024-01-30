@@ -23,7 +23,7 @@ type SubscriptionPlan struct {
 	IntervalUnit              interface{} // 周期-全小写存放,day|month|year|week
 	IntervalCount             interface{} // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               interface{} //
-	IsDeleted                 interface{} //
+	IsDeleted                 interface{} // 0-UnDeleted，1-Deleted
 	ImageUrl                  interface{} // image_url
 	HomeUrl                   interface{} // home_url
 	ChannelProductName        interface{} // 支付渠道product_name

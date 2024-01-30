@@ -26,10 +26,9 @@ type Subscription struct {
 	ChannelId                   interface{} // 支付渠道Id
 	Status                      interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	ChannelSubscriptionId       interface{} // 支付渠道订阅id
-	ChannelUserId               interface{} // 渠道用户 Id
 	CustomerName                interface{} // customer_name
 	CustomerEmail               interface{} // customer_email
-	IsDeleted                   interface{} //
+	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
 	Link                        interface{} //
 	ChannelStatus               interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             interface{} // channel_item_data

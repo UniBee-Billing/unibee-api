@@ -22,7 +22,7 @@ type MerchantOperationLog struct {
 	OptTarget          interface{} // 操作对象
 	OptContent         interface{} // 操作内容
 	OptCreate          *gtime.Time // 操作发生时间
-	IsDelete           interface{} // 是否删除 1-删除，0-未删除
+	IsDelete           interface{} // 0-UnDeleted，1-Deleted
 	GmtCreate          *gtime.Time // 创建时间
 	GmtModify          *gtime.Time // 修改时间
 	QueryportRequestId interface{} // queryport请求Id，可在request_security_log查询请求信息

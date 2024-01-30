@@ -29,6 +29,6 @@ type SubscriptionTimeline struct {
 	AddonData       interface{} // plan addon json data
 	ChannelId       interface{} // 支付渠道Id
 	GmtModify       *gtime.Time // 修改时间
-	IsDeleted       interface{} //
+	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} //
 }

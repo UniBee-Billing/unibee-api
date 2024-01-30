@@ -21,7 +21,7 @@ type OpenApiConfig struct {
 	Callback        interface{} // 回调Url
 	ApiKey          interface{} // 开放平台Key
 	Token           interface{} // 开放平台token
-	IsDeleted       interface{} //
+	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	Validips        interface{} //
 	ChannelCallback interface{} // 渠道支付原信息回调地址
 	CompanyId       interface{} // 公司ID

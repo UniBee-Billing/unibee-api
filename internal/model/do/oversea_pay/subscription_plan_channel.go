@@ -22,6 +22,6 @@ type SubscriptionPlanChannel struct {
 	ChannelProductId     interface{} // 支付渠道product_Id
 	ChannelPlanStatus    interface{} // channel_plan_status
 	ChannelProductStatus interface{} // channel_product_status
-	IsDeleted            interface{} //
+	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
 	Data                 interface{} // 渠道额外参数，JSON格式
 }

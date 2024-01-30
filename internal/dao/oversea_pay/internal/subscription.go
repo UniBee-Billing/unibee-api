@@ -34,10 +34,9 @@ type SubscriptionColumns struct {
 	ChannelId                   string // 支付渠道Id
 	Status                      string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	ChannelSubscriptionId       string // 支付渠道订阅id
-	ChannelUserId               string // 渠道用户 Id
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email
-	IsDeleted                   string //
+	IsDeleted                   string // 0-UnDeleted，1-Deleted
 	Link                        string //
 	ChannelStatus               string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             string // channel_item_data
@@ -79,7 +78,6 @@ var subscriptionColumns = SubscriptionColumns{
 	ChannelId:                   "channel_id",
 	Status:                      "status",
 	ChannelSubscriptionId:       "channel_subscription_id",
-	ChannelUserId:               "channel_user_id",
 	CustomerName:                "customer_name",
 	CustomerEmail:               "customer_email",
 	IsDeleted:                   "is_deleted",

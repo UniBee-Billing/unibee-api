@@ -13,7 +13,7 @@ type UserAccount struct {
 	Id                 uint64      `json:"id"                 description:"userId"`                                                                                                   // userId
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"创建时间"`                                                                                                     // 创建时间
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"修改时间"`                                                                                                     // 修改时间
-	IsDeleted          int         `json:"isDeleted"          description:"逻辑删除"`                                                                                                     // 逻辑删除
+	IsDeleted          int         `json:"isDeleted"          description:"0-UnDeleted，1-Deleted"`                                                                                    // 0-UnDeleted，1-Deleted
 	Password           string      `json:"password"           description:"密码，加密存储"`                                                                                                  // 密码，加密存储
 	UserName           string      `json:"userName"           description:"用户名"`                                                                                                      // 用户名
 	Mobile             string      `json:"mobile"             description:"手机号"`                                                                                                      // 手机号

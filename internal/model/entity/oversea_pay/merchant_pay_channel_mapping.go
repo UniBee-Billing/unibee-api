@@ -15,5 +15,5 @@ type MerchantPayChannelMapping struct {
 	GmtModify  *gtime.Time `json:"gmtModify"  description:"修改时间"`                    // 修改时间
 	MerchantId int64       `json:"merchantId" description:"商户Id"`                    // 商户Id
 	ChannelId  string      `json:"channelId"  description:"oversea_pay_channel表的id"` // oversea_pay_channel表的id
-	IsDeleted  int         `json:"isDeleted"  description:""`                        //
+	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 }
