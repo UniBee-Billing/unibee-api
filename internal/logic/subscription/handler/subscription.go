@@ -234,6 +234,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 	}
 	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
 	if eiPendingSubUpdate != nil {
+		// subscription_update
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
 		if req.Payment.Status == consts.PAY_SUCCESS {
 			_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
@@ -242,6 +243,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			}
 		}
 	} else {
+		// subscription_cycle
 		var byUpdate = false
 		if len(sub.PendingUpdateId) > 0 {
 			//有 pending 的更新单存在，检查支付是否对应更新单

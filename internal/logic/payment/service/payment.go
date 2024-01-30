@@ -17,6 +17,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
+	"strconv"
 )
 
 func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
@@ -37,6 +38,11 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
+	if createPayContext.MediaData == nil {
+		createPayContext.MediaData = make(map[string]string)
+	}
+	createPayContext.MediaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
+	createPayContext.MediaData["PaymentId"] = createPayContext.Pay.PaymentId
 	//toSave.setServiceRate(iMerchantInfoService.getServiceDeductPoint(toSave.getMerchantId(),toSave.getChannelId()));//记录当下的服务费率
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
 	isDuplicatedInvoke := false
@@ -67,7 +73,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			}
 			createPayContext.Pay.Id = id
 
-			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
+			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
 			channelInternalPayResult, err = out.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {

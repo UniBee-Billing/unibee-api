@@ -1090,6 +1090,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	channelUser := queryAndCreateChannelUserId(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
 
 	params := &stripe.InvoiceParams{
+		Metadata: createPayContext.MediaData,
 		Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)), //小写
 		Customer: stripe.String(channelUser.ChannelUserId)}
 	if createPayContext.PayMethod == 1 {

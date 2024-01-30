@@ -767,6 +767,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 					LastName:  lastName,
 					Gender:    gender,
 				},
+				MediaData:              map[string]string{"BillingReason": "SubscriptionUpdate"},
 				MerchantOrderReference: one.UpdateSubscriptionId,
 				PayMethod:              1, //automatic
 				DaysUtilDue:            1, //one day expire

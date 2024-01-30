@@ -87,7 +87,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		ShopperEmail:  req.ShopperEmail,
 		ShopperLocale: req.ShopperLocale,
 		Mobile:        req.TelephoneNumber,
-		MediaInfo:     req.Metadata,
+		MediaData:     req.Metadata,
 		Invoice:       invoice,
 		//BillingDetails:           req.BillingAddress,
 		//ShippingDetails:          req.DetailAddress,

@@ -19,7 +19,7 @@ type CreatePayContext struct {
 	ShopperEmail  string                    `json:"shopperEmail"`
 	ShopperLocale string                    `json:"shopperLocale"`
 	Mobile        string                    `json:"mobile"`
-	MediaInfo     *gjson.Json               `json:"mediaInfo"`
+	MediaData     map[string]string         `json:"mediaInfo"`
 	Invoice       *InvoiceDetailSimplify    `json:"invoice"`
 	//BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
 	//ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`

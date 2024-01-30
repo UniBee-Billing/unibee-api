@@ -27,11 +27,11 @@ type PaymentsReq struct {
 	ShopperName              *OutShopperName    `p:"shopperName" dc:"shopperName" v:""`
 	//BillingAddress           *OutPayAddress     `p:"billingAddress" dc:"账单地址" v:""`
 	//DetailAddress            *OutPayAddress     `p:"detailAddress" dc:"邮寄地址" v:""`
-	Capture                bool        `p:"capture" dc:"是否立即请款" v:""`
-	CaptureDelayHours      int         `p:"captureDelayHours" dc:"请款延迟执⾏时间" v:""`
-	MerchantOrderReference string      `p:"merchantOrderReference" dc:"订单关联子交易码" v:""`
-	Metadata               *gjson.Json `p:"reference" dc:"预留字段，JSON结构" v:""`
-	DateOfBrith            string      `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
+	Capture                bool              `p:"capture" dc:"是否立即请款" v:""`
+	CaptureDelayHours      int               `p:"captureDelayHours" dc:"请款延迟执⾏时间" v:""`
+	MerchantOrderReference string            `p:"merchantOrderReference" dc:"订单关联子交易码" v:""`
+	Metadata               map[string]string `p:"reference" dc:"预留字段，JSON结构" v:""`
+	DateOfBrith            string            `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
 }
 type PaymentsRes struct {
 	Status    string      `p:"status" dc:"交易状态"`
