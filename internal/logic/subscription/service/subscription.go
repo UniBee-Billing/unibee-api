@@ -722,7 +722,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Id = uint64(id)
 	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
 	if consts.PendingSubUpdateEffectImmediateWithOutChannel {
-		if prepare.EffectImmediate && prepare.TotalAmount > 0 {
+		if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 			utility.Assert(merchantInfo != nil, "merchantInfo not found")
