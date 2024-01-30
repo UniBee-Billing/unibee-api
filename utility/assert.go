@@ -1,5 +1,7 @@
 package utility
 
+import "fmt"
+
 const (
 	SystemAssertPrefix = "system_assert: "
 )
@@ -7,6 +9,12 @@ const (
 func Assert(check bool, message string) {
 	if !check {
 		panic(SystemAssertPrefix + message)
+	}
+}
+
+func AssertError(err error, message string) {
+	if err != nil {
+		panic(fmt.Sprintf(SystemAssertPrefix+message+" error:%s", err.Error()))
 	}
 }
 

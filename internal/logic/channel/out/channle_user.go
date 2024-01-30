@@ -15,9 +15,9 @@ func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.Oversea
 		utility.Assert(user != nil, "user not found")
 		utility.Assert(len(user.Email) > 0, "invalid user email")
 		create, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserCreate(ctx, payChannel, user)
-		utility.Assert(err == nil, "queryAndCreateChannelUser:"+err.Error())
+		utility.AssertError(err, "queryAndCreateChannelUser")
 		channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), create.ChannelUserId, "")
-		utility.Assert(err == nil, "queryAndCreateChannelUser:"+err.Error())
+		utility.AssertError(err, "queryAndCreateChannelUser")
 		return channelUser
 	} else {
 		return channelUser
