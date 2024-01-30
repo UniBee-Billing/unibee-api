@@ -23,13 +23,13 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
 	utility.Assert(createPayContext.PayChannel != nil, "pay channel is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
-	utility.Assert(len(createPayContext.Pay.BizId) > 0, "支付单号为空")
+	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
 	utility.Assert(createPayContext.Pay.ChannelId > 0, "pay channelId is nil")
-	utility.Assert(createPayContext.Pay.TotalAmount > 0, "支付金额为空")
-	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "contryCode为空")
+	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
+	//utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
-	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId为空")
-	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId为空")
+	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
+	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId Invalid")
 	// 查询并处理所有待支付订单 todo mark
 
 	createPayContext.Pay.Status = consts.TO_BE_PAID
