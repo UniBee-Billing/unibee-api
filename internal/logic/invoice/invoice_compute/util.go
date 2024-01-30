@@ -154,6 +154,8 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		req.ProrationDate = time.Now().Unix()
 	}
 
+	utility.Assert(req.ProrationDate >= req.PeriodEnd, "System Error, Subscription Need Update")
+
 	timeScale := int64((float64(req.PeriodEnd-req.ProrationDate) / float64(req.PeriodEnd-req.PeriodStart)) * 10000)
 	var invoiceItems []*ro.InvoiceItemDetailRo
 	var totalAmountExcludingTax int64

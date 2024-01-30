@@ -500,15 +500,30 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 					Quantity: addonParam.Quantity,
 				})
 			}
-			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
-				Currency:          sub.Currency,
-				TaxScale:          sub.TaxScale,
-				ProrationDate:     prorationDate,
-				PeriodStart:       sub.CurrentPeriodStart,
-				PeriodEnd:         sub.CurrentPeriodEnd,
-				OldProrationPlans: oldProrationPlanParams,
-				NewProrationPlans: newProrationPlanParams,
-			})
+
+			if sub.CurrentPeriodEnd < gtime.Now().Timestamp() {
+				// after period end before trial end, also or sub data not sync todo mark
+				prorationInvoice = &ro.InvoiceDetailSimplify{
+					TotalAmount:                    0,
+					TotalAmountExcludingTax:        0,
+					Currency:                       sub.Currency,
+					TaxAmount:                      0,
+					SubscriptionAmount:             0,
+					SubscriptionAmountExcludingTax: 0,
+					Lines:                          nil,
+					ProrationDate:                  gtime.Now().Timestamp(),
+				}
+			} else {
+				prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
+					Currency:          sub.Currency,
+					TaxScale:          sub.TaxScale,
+					ProrationDate:     prorationDate,
+					PeriodStart:       sub.CurrentPeriodStart,
+					PeriodEnd:         sub.CurrentPeriodEnd,
+					OldProrationPlans: oldProrationPlanParams,
+					NewProrationPlans: newProrationPlanParams,
+				})
+			}
 			prorationDate = prorationInvoice.ProrationDate
 			totalAmount = prorationInvoice.TotalAmount
 		} else {
