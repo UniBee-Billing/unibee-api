@@ -20,15 +20,15 @@ func queryAndCreateChannelUserId(ctx context.Context, payChannel *entity.Merchan
 		utility.AssertError(err, "CreateOrUpdateChannelUser")
 		return channelUser
 	} else {
-		if len(channelUser.ChannelDefaultPaymentMethod) == 0 {
-			//no default payment method, query it
-			detailQuery, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, channelUser.UserId)
-			utility.AssertError(err, "DoRemoteChannelUserDetailQuery")
-			if len(detailQuery.DefaultPaymentMethod) > 0 {
-				channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), channelUser.ChannelUserId, detailQuery.DefaultPaymentMethod)
-				channelUser.ChannelDefaultPaymentMethod = detailQuery.DefaultPaymentMethod
-			}
-		}
+		//if len(channelUser.ChannelDefaultPaymentMethod) == 0 {
+		//	//no default payment method, query it
+		//	detailQuery, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, channelUser.UserId)
+		//	utility.AssertError(err, "DoRemoteChannelUserDetailQuery")
+		//	if len(detailQuery.DefaultPaymentMethod) > 0 {
+		//		channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), channelUser.ChannelUserId, detailQuery.DefaultPaymentMethod)
+		//		channelUser.ChannelDefaultPaymentMethod = detailQuery.DefaultPaymentMethod
+		//	}
+		//}
 		return channelUser
 	}
 }
