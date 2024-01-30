@@ -514,7 +514,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 					TaxAmount:                      0,
 					SubscriptionAmount:             0,
 					SubscriptionAmountExcludingTax: 0,
-					Lines:                          nil,
+					Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
 					ProrationDate:                  prorationDate,
 				}
 			} else {
