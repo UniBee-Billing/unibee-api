@@ -11,15 +11,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// SubscriptionVatRateChannelDao is the data access object for table subscription_vat_rate_channel.
-type SubscriptionVatRateChannelDao struct {
-	table   string                            // table is the underlying table name of the DAO.
-	group   string                            // group is the database configuration group name of current DAO.
-	columns SubscriptionVatRateChannelColumns // columns contains all the column names of Table for convenient usage.
+// ChannelVatRateDao is the data access object for table channel_vat_rate.
+type ChannelVatRateDao struct {
+	table   string                // table is the underlying table name of the DAO.
+	group   string                // group is the database configuration group name of current DAO.
+	columns ChannelVatRateColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// SubscriptionVatRateChannelColumns defines and stores column names for table subscription_vat_rate_channel.
-type SubscriptionVatRateChannelColumns struct {
+// ChannelVatRateColumns defines and stores column names for table channel_vat_rate.
+type ChannelVatRateColumns struct {
 	Id               string //
 	GmtCreate        string // 创建时间
 	GmtModify        string // 修改时间
@@ -29,8 +29,8 @@ type SubscriptionVatRateChannelColumns struct {
 	IsDeleted        string // 0-UnDeleted，1-Deleted
 }
 
-// subscriptionVatRateChannelColumns holds the columns for table subscription_vat_rate_channel.
-var subscriptionVatRateChannelColumns = SubscriptionVatRateChannelColumns{
+// channelVatRateColumns holds the columns for table channel_vat_rate.
+var channelVatRateColumns = ChannelVatRateColumns{
 	Id:               "id",
 	GmtCreate:        "gmt_create",
 	GmtModify:        "gmt_modify",
@@ -40,37 +40,37 @@ var subscriptionVatRateChannelColumns = SubscriptionVatRateChannelColumns{
 	IsDeleted:        "is_deleted",
 }
 
-// NewSubscriptionVatRateChannelDao creates and returns a new DAO object for table data access.
-func NewSubscriptionVatRateChannelDao() *SubscriptionVatRateChannelDao {
-	return &SubscriptionVatRateChannelDao{
+// NewChannelVatRateDao creates and returns a new DAO object for table data access.
+func NewChannelVatRateDao() *ChannelVatRateDao {
+	return &ChannelVatRateDao{
 		group:   "oversea_pay",
-		table:   "subscription_vat_rate_channel",
-		columns: subscriptionVatRateChannelColumns,
+		table:   "channel_vat_rate",
+		columns: channelVatRateColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *SubscriptionVatRateChannelDao) DB() gdb.DB {
+func (dao *ChannelVatRateDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *SubscriptionVatRateChannelDao) Table() string {
+func (dao *ChannelVatRateDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *SubscriptionVatRateChannelDao) Columns() SubscriptionVatRateChannelColumns {
+func (dao *ChannelVatRateDao) Columns() ChannelVatRateColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *SubscriptionVatRateChannelDao) Group() string {
+func (dao *ChannelVatRateDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *SubscriptionVatRateChannelDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *ChannelVatRateDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -80,6 +80,6 @@ func (dao *SubscriptionVatRateChannelDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *SubscriptionVatRateChannelDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *ChannelVatRateDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

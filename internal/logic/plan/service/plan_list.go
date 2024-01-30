@@ -128,8 +128,8 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 	}
 	//添加 Channel 信息
-	var allPlanChannelList []*entity.SubscriptionPlanChannel
-	err = dao.SubscriptionPlanChannel.Ctx(ctx).WhereIn(dao.SubscriptionPlanChannel.Columns().PlanId, totalPlanIds).Scan(&allPlanChannelList)
+	var allPlanChannelList []*entity.ChannelPlan
+	err = dao.ChannelPlan.Ctx(ctx).WhereIn(dao.ChannelPlan.Columns().PlanId, totalPlanIds).Scan(&allPlanChannelList)
 	if err == nil {
 		for _, planChannel := range allPlanChannelList {
 			for _, planRo := range list {

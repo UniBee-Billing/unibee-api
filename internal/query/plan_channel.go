@@ -8,24 +8,24 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetPlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.SubscriptionPlanChannel) {
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, ChannelId: channelId}).OmitEmpty().Scan(&one)
+func GetPlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.ChannelPlan) {
+	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, ChannelId: channelId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetActivePlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.SubscriptionPlanChannel) {
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, ChannelId: channelId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&one)
+func GetActivePlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.ChannelPlan) {
+	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, ChannelId: channelId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entity.SubscriptionPlanChannel) {
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
+func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entity.ChannelPlan) {
+	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		list = nil
 	}
@@ -33,8 +33,8 @@ func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entit
 }
 
 func GetListActiveOutChannelRos(ctx context.Context, planId int64) []*ro.OutChannelRo {
-	var list []*entity.SubscriptionPlanChannel
-	err := dao.SubscriptionPlanChannel.Ctx(ctx).Where(entity.SubscriptionPlanChannel{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
+	var list []*entity.ChannelPlan
+	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		return nil
 	}

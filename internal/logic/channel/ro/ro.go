@@ -140,29 +140,29 @@ type ChannelCreateSubscriptionInternalResp struct {
 }
 
 type ChannelCreateSubscriptionInternalReq struct {
-	Plan           *entity.SubscriptionPlan        `json:"plan"`
-	AddonPlans     []*SubscriptionPlanAddonRo      `json:"addonPlans"`
-	PlanChannel    *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription   *entity.Subscription            `json:"subscription"`
-	VatCountryRate *VatCountryRate                 `json:"vatCountryRate"`
+	Plan           *entity.SubscriptionPlan   `json:"plan"`
+	AddonPlans     []*SubscriptionPlanAddonRo `json:"addonPlans"`
+	PlanChannel    *entity.ChannelPlan        `json:"planChannel"`
+	Subscription   *entity.Subscription       `json:"subscription"`
+	VatCountryRate *VatCountryRate            `json:"vatCountryRate"`
 }
 
 type ChannelUpdateSubscriptionInternalReq struct {
-	Plan            *entity.SubscriptionPlan        `json:"plan"`
-	Quantity        int64                           `json:"quantity" dc:"数量" `
-	AddonPlans      []*SubscriptionPlanAddonRo      `json:"addonPlans"`
-	PlanChannel     *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription    *entity.Subscription            `json:"subscription"`
-	ProrationDate   int64                           `json:"prorationDate"`
-	EffectImmediate bool                            `json:"EffectImmediate"`
+	Plan            *entity.SubscriptionPlan   `json:"plan"`
+	Quantity        int64                      `json:"quantity" dc:"数量" `
+	AddonPlans      []*SubscriptionPlanAddonRo `json:"addonPlans"`
+	PlanChannel     *entity.ChannelPlan        `json:"planChannel"`
+	Subscription    *entity.Subscription       `json:"subscription"`
+	ProrationDate   int64                      `json:"prorationDate"`
+	EffectImmediate bool                       `json:"EffectImmediate"`
 }
 
 type ChannelCancelSubscriptionInternalReq struct {
-	Plan         *entity.SubscriptionPlan        `json:"plan"`
-	PlanChannel  *entity.SubscriptionPlanChannel `json:"planChannel"`
-	Subscription *entity.Subscription            `json:"subscription"`
-	InvoiceNow   bool                            `json:"invoiceNow"`
-	Prorate      bool                            `json:"prorate"`
+	Plan         *entity.SubscriptionPlan `json:"plan"`
+	PlanChannel  *entity.ChannelPlan      `json:"planChannel"`
+	Subscription *entity.Subscription     `json:"subscription"`
+	InvoiceNow   bool                     `json:"invoiceNow"`
+	Prorate      bool                     `json:"prorate"`
 }
 
 type ChannelCancelSubscriptionInternalResp struct {
@@ -374,9 +374,9 @@ type SubscriptionPlanAddonParamRo struct {
 }
 
 type SubscriptionPlanAddonRo struct {
-	Quantity         int64                           `p:"quantity"  json:"quantity" dc:"数量" `
-	AddonPlan        *entity.SubscriptionPlan        `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
-	AddonPlanChannel *entity.SubscriptionPlanChannel `p:"addonPlanChannel"   json:"addonPlanChannel" dc:"addonPlanChannel" `
+	Quantity         int64                    `p:"quantity"  json:"quantity" dc:"数量" `
+	AddonPlan        *entity.SubscriptionPlan `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
+	AddonPlanChannel *entity.ChannelPlan      `p:"addonPlanChannel"   json:"addonPlanChannel" dc:"addonPlanChannel" `
 }
 
 type SubscriptionDetailRo struct {

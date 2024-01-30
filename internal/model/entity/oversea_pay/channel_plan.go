@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionPlanChannel is the golang structure for table subscription_plan_channel.
-type SubscriptionPlanChannel struct {
+// ChannelPlan is the golang structure for table channel_plan.
+type ChannelPlan struct {
 	Id                   uint64      `json:"id"                   description:""`                                             //
 	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"创建时间"`                                         // 创建时间
 	GmtModify            *gtime.Time `json:"gmtModify"            description:"修改时间"`                                         // 修改时间

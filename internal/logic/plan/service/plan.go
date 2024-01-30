@@ -65,11 +65,11 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	if err != nil {
 		return
 	}
-	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanChannelStatusActive,
+	_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
+		dao.ChannelPlan.Columns().Status: consts.PlanChannelStatusActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusActive,// todo mark
-		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).Update()
+		dao.ChannelPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
@@ -100,11 +100,11 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	if err != nil {
 		return
 	}
-	_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlanChannel.Columns().Status: consts.PlanChannelStatusInActive,
+	_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
+		dao.ChannelPlan.Columns().Status: consts.PlanChannelStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusInActive,// todo mark
-		dao.SubscriptionPlanChannel.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
+		dao.ChannelPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}

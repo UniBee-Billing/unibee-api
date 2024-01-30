@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionVatRateChannel is the golang structure of table subscription_vat_rate_channel for DAO operations like Where/Data.
-type SubscriptionVatRateChannel struct {
-	g.Meta           `orm:"table:subscription_vat_rate_channel, do:true"`
+// ChannelVatRate is the golang structure of table channel_vat_rate for DAO operations like Where/Data.
+type ChannelVatRate struct {
+	g.Meta           `orm:"table:channel_vat_rate, do:true"`
 	Id               interface{} //
 	GmtCreate        *gtime.Time // 创建时间
 	GmtModify        *gtime.Time // 修改时间

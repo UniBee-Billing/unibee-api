@@ -11,15 +11,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// SubscriptionPlanChannelDao is the data access object for table subscription_plan_channel.
-type SubscriptionPlanChannelDao struct {
-	table   string                         // table is the underlying table name of the DAO.
-	group   string                         // group is the database configuration group name of current DAO.
-	columns SubscriptionPlanChannelColumns // columns contains all the column names of Table for convenient usage.
+// ChannelPlanDao is the data access object for table channel_plan.
+type ChannelPlanDao struct {
+	table   string             // table is the underlying table name of the DAO.
+	group   string             // group is the database configuration group name of current DAO.
+	columns ChannelPlanColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// SubscriptionPlanChannelColumns defines and stores column names for table subscription_plan_channel.
-type SubscriptionPlanChannelColumns struct {
+// ChannelPlanColumns defines and stores column names for table channel_plan.
+type ChannelPlanColumns struct {
 	Id                   string //
 	GmtCreate            string // 创建时间
 	GmtModify            string // 修改时间
@@ -34,8 +34,8 @@ type SubscriptionPlanChannelColumns struct {
 	Data                 string // 渠道额外参数，JSON格式
 }
 
-// subscriptionPlanChannelColumns holds the columns for table subscription_plan_channel.
-var subscriptionPlanChannelColumns = SubscriptionPlanChannelColumns{
+// channelPlanColumns holds the columns for table channel_plan.
+var channelPlanColumns = ChannelPlanColumns{
 	Id:                   "id",
 	GmtCreate:            "gmt_create",
 	GmtModify:            "gmt_modify",
@@ -50,37 +50,37 @@ var subscriptionPlanChannelColumns = SubscriptionPlanChannelColumns{
 	Data:                 "data",
 }
 
-// NewSubscriptionPlanChannelDao creates and returns a new DAO object for table data access.
-func NewSubscriptionPlanChannelDao() *SubscriptionPlanChannelDao {
-	return &SubscriptionPlanChannelDao{
+// NewChannelPlanDao creates and returns a new DAO object for table data access.
+func NewChannelPlanDao() *ChannelPlanDao {
+	return &ChannelPlanDao{
 		group:   "oversea_pay",
-		table:   "subscription_plan_channel",
-		columns: subscriptionPlanChannelColumns,
+		table:   "channel_plan",
+		columns: channelPlanColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *SubscriptionPlanChannelDao) DB() gdb.DB {
+func (dao *ChannelPlanDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *SubscriptionPlanChannelDao) Table() string {
+func (dao *ChannelPlanDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *SubscriptionPlanChannelDao) Columns() SubscriptionPlanChannelColumns {
+func (dao *ChannelPlanDao) Columns() ChannelPlanColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *SubscriptionPlanChannelDao) Group() string {
+func (dao *ChannelPlanDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *SubscriptionPlanChannelDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *ChannelPlanDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -90,6 +90,6 @@ func (dao *SubscriptionPlanChannelDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *SubscriptionPlanChannelDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *ChannelPlanDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

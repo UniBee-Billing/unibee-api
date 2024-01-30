@@ -30,7 +30,7 @@ import (
 type SubscriptionCreatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
 	Quantity          int64                              `json:"quantity"`
-	PlanChannel       *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PlanChannel       *entity.ChannelPlan                `json:"planChannel"`
 	PayChannel        *entity.OverseaPayChannel          `json:"payChannel"`
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
@@ -307,7 +307,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Subscription *entity.Subscription               `json:"subscription"`
 	Plan         *entity.SubscriptionPlan           `json:"planId"`
 	Quantity     int64                              `json:"quantity"`
-	PlanChannel  *entity.SubscriptionPlanChannel    `json:"planChannel"`
+	PlanChannel  *entity.ChannelPlan                `json:"planChannel"`
 	PayChannel   *entity.OverseaPayChannel          `json:"payChannel"`
 	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
@@ -316,7 +316,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Currency     string                             `json:"currency"              `
 	UserId       int64                              `json:"userId" `
 	OldPlan      *entity.SubscriptionPlan           `json:"oldPlan"`
-	//OldPlanChannel    *entity.SubscriptionPlanChannel    `json:"oldPlanChannel"`
+	//OldPlanChannel    *entity.ChannelPlan    `json:"oldPlanChannel"`
 	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
 	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
 	ProrationDate     int64                     `json:"prorationDate"`

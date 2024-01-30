@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionPlanChannel is the golang structure of table subscription_plan_channel for DAO operations like Where/Data.
-type SubscriptionPlanChannel struct {
-	g.Meta               `orm:"table:subscription_plan_channel, do:true"`
+// ChannelPlan is the golang structure of table channel_plan for DAO operations like Where/Data.
+type ChannelPlan struct {
+	g.Meta               `orm:"table:channel_plan, do:true"`
 	Id                   interface{} //
 	GmtCreate            *gtime.Time // 创建时间
 	GmtModify            *gtime.Time // 修改时间

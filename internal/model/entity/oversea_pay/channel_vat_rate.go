@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionVatRateChannel is the golang structure for table subscription_vat_rate_channel.
-type SubscriptionVatRateChannel struct {
+// ChannelVatRate is the golang structure for table channel_vat_rate.
+type ChannelVatRate struct {
 	Id               uint64      `json:"id"               description:""`                      //
 	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"创建时间"`                  // 创建时间
 	GmtModify        *gtime.Time `json:"gmtModify"        description:"修改时间"`                  // 修改时间

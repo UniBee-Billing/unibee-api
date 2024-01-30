@@ -58,13 +58,13 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	utility.Assert(payChannel != nil, "payChannel not found")
 	planChannel := query.GetPlanChannel(ctx, planId, channelId)
 	if planChannel == nil {
-		planChannel = &entity.SubscriptionPlanChannel{
+		planChannel = &entity.ChannelPlan{
 			PlanId:    planId,
 			ChannelId: channelId,
 			Status:    consts.PlanChannelStatusInit,
 		}
 		//保存planChannel
-		result, err := dao.SubscriptionPlanChannel.Ctx(ctx).Data(planChannel).OmitNil().Insert(planChannel)
+		result, err := dao.ChannelPlan.Ctx(ctx).Data(planChannel).OmitNil().Insert(planChannel)
 		if err != nil {
 			err = gerror.Newf(`SubscriptionPlanChannelTransferAndActivate record insert failure %s`, err)
 			planChannel = nil
@@ -90,10 +90,10 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			return err
 		}
 		//更新 planChannel
-		_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPlanChannel.Columns().ChannelProductId:     res.ChannelProductId,
-			dao.SubscriptionPlanChannel.Columns().ChannelProductStatus: res.ChannelProductStatus,
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
+		_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
+			dao.ChannelPlan.Columns().ChannelProductId:     res.ChannelProductId,
+			dao.ChannelPlan.Columns().ChannelProductStatus: res.ChannelProductStatus,
+		}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -110,12 +110,12 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if err != nil {
 			return err
 		}
-		_, err = dao.SubscriptionPlanChannel.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPlanChannel.Columns().ChannelPlanId:     res.ChannelPlanId,
-			dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
-			dao.SubscriptionPlanChannel.Columns().Data:              res.Data,
-			dao.SubscriptionPlanChannel.Columns().Status:            int(res.Status),
-		}).Where(dao.SubscriptionPlanChannel.Columns().Id, planChannel.Id).OmitNil().Update()
+		_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
+			dao.ChannelPlan.Columns().ChannelPlanId:     res.ChannelPlanId,
+			dao.ChannelPlan.Columns().ChannelPlanStatus: res.ChannelPlanStatus,
+			dao.ChannelPlan.Columns().Data:              res.Data,
+			dao.ChannelPlan.Columns().Status:            int(res.Status),
+		}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
