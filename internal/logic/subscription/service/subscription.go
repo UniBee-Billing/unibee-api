@@ -17,6 +17,7 @@ import (
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	"go-oversea-pay/internal/logic/payment/service"
+	subscription2 "go-oversea-pay/internal/logic/subscription"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -245,16 +246,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 	var billingCycleAnchor = gtime.Now()
 	var currentTimeStart = billingCycleAnchor
-	var currentTimeEnd = billingCycleAnchor
-	if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "day") == 0 {
-		currentTimeEnd = currentTimeEnd.AddDate(0, 0, prepare.Plan.IntervalCount)
-	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "week") == 0 {
-		currentTimeEnd = currentTimeEnd.AddDate(0, 0, 7*prepare.Plan.IntervalCount)
-	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "month") == 0 {
-		currentTimeEnd = currentTimeEnd.AddDate(0, prepare.Plan.IntervalCount, 0)
-	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "year") == 0 {
-		currentTimeEnd = currentTimeEnd.AddDate(prepare.Plan.IntervalCount, 0, 0)
-	}
+	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), prepare.Plan.Id)
 
 	one := &entity.Subscription{
 		MerchantId:         prepare.MerchantInfo.Id,
@@ -276,7 +268,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		CountryCode:        prepare.VatCountryCode,
 		TaxScale:           prepare.TaxScale,
 		CurrentPeriodStart: currentTimeStart.Timestamp(),
-		CurrentPeriodEnd:   currentTimeEnd.Timestamp(),
+		CurrentPeriodEnd:   currentTimeEnd,
 		BillingCycleAnchor: billingCycleAnchor.Timestamp(),
 	}
 

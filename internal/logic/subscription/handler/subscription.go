@@ -12,10 +12,10 @@ import (
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
+	subscription2 "go-oversea-pay/internal/logic/subscription"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
-	"strings"
 )
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
@@ -269,16 +269,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 					if sub.TrialEnd > sub.CurrentPeriodEnd {
 						nextPeriodStart = sub.TrialEnd
 					}
-					var nextPeriodEnd = gtime.NewFromTimeStamp(nextPeriodStart)
-					if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
-						nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, plan.IntervalCount)
-					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
-						nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, 7*plan.IntervalCount)
-					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
-						nextPeriodEnd = nextPeriodEnd.AddDate(0, plan.IntervalCount, 0)
-					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
-						nextPeriodEnd = nextPeriodEnd.AddDate(plan.IntervalCount, 0, 0)
-					}
+					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
 
 					invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
@@ -287,7 +278,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 						AddonJsonData: pendingSubUpdate.UpdateAddonData,
 						TaxScale:      sub.TaxScale,
 						PeriodStart:   nextPeriodStart,
-						PeriodEnd:     nextPeriodEnd.Timestamp(),
+						PeriodEnd:     nextPeriodEnd,
 					})
 					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 				}
@@ -317,16 +308,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				if sub.TrialEnd > sub.CurrentPeriodEnd {
 					nextPeriodStart = sub.TrialEnd
 				}
-				var nextPeriodEnd = gtime.NewFromTimeStamp(nextPeriodStart)
-				if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
-					nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, plan.IntervalCount)
-				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
-					nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, 7*plan.IntervalCount)
-				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
-					nextPeriodEnd = nextPeriodEnd.AddDate(0, plan.IntervalCount, 0)
-				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
-					nextPeriodEnd = nextPeriodEnd.AddDate(plan.IntervalCount, 0, 0)
-				}
+				var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
 
 				invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 					Currency:      sub.Currency,
@@ -335,7 +317,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 					AddonJsonData: sub.AddonData,
 					TaxScale:      sub.TaxScale,
 					PeriodStart:   nextPeriodStart,
-					PeriodEnd:     nextPeriodEnd.Timestamp(),
+					PeriodEnd:     nextPeriodEnd,
 				})
 				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 			}
