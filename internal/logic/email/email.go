@@ -21,6 +21,8 @@ import (
 
 const (
 	TemplateInvoiceAutomaticPaid                            = "InvoiceAutomaticPaid"
+	TemplateNewProcessingInvoice                            = "NewProcessingInvoice "
+	TemplateInvoiceCancel                                   = "InvoiceCancel "
 	TemplateUserRegistrationCodeVerify                      = "UserRegistrationCodeVerify"
 	TemplateUserOTPLogin                                    = "UserOTPLogin"
 	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
@@ -112,6 +114,7 @@ type TemplateVariable struct {
 	CodeExpireMinute    string `json:"CodeExpireMinute"`
 	Code                string `json:"Code"`
 	PeriodEnd           string `json:"PeriodEnd"`
+	Link                string `json:"Link"`
 }
 
 func ToMap(in interface{}) (map[string]interface{}, error) {

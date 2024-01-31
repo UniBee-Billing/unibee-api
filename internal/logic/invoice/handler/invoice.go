@@ -347,16 +347,29 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	if one.Status > consts.InvoiceStatusPending {
 		pdfFileName := utility.DownloadFile(one.SendPdf)
 		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
+		var link = one.Link
+		if len(link) == 0 {
+			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+			link = payment.Link
+		}
+		var template = email.TemplateNewProcessingInvoice
+		if one.Status == consts.InvoiceStatusPaid {
+			template = email.TemplateInvoiceAutomaticPaid
+		} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
+			template = email.TemplateInvoiceCancel
+		}
 		//err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName, fmt.Sprintf("%s.pdf", one.InvoiceId))
-		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, email.TemplateInvoiceAutomaticPaid, pdfFileName, &email.TemplateVariable{
+		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, template, pdfFileName, &email.TemplateVariable{
 			InvoiceId:           one.InvoiceId,
 			UserName:            user.UserName,
 			MerchantProductName: merchantProductName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
 			DateNow:             gtime.Now().Layout(`2006-01-02`),
+			PeriodEnd:           gtime.Now().AddDate(0, 0, 5).Layout(`2006-01-02`), //todo mark
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
 			TokenExpireMinute:   strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
+			Link:                "<a href=\"" + link + "\">Link</a>",
 		})
 		if err != nil {
 			return err
