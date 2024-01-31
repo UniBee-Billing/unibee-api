@@ -243,25 +243,41 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		subType = consts.SubTypeUniBeeControl
 	}
 
+	var billingCycleAnchor = gtime.Now()
+	var currentTimeStart = billingCycleAnchor
+	var currentTimeEnd = billingCycleAnchor
+	if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "day") == 0 {
+		currentTimeEnd = currentTimeEnd.AddDate(0, 0, prepare.Plan.IntervalCount)
+	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "week") == 0 {
+		currentTimeEnd = currentTimeEnd.AddDate(0, 0, 7*prepare.Plan.IntervalCount)
+	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "month") == 0 {
+		currentTimeEnd = currentTimeEnd.AddDate(0, prepare.Plan.IntervalCount, 0)
+	} else if strings.Compare(strings.ToLower(prepare.Plan.IntervalUnit), "year") == 0 {
+		currentTimeEnd = currentTimeEnd.AddDate(prepare.Plan.IntervalCount, 0, 0)
+	}
+
 	one := &entity.Subscription{
-		MerchantId:     prepare.MerchantInfo.Id,
-		Type:           subType,
-		PlanId:         int64(prepare.Plan.Id),
-		ChannelId:      prepare.PlanChannel.ChannelId,
-		UserId:         prepare.UserId,
-		Quantity:       prepare.Quantity,
-		Amount:         prepare.TotalAmount,
-		Currency:       prepare.Currency,
-		AddonData:      utility.MarshalToJsonString(prepare.AddonParams),
-		SubscriptionId: utility.CreateSubscriptionId(),
-		Status:         consts.SubStatusCreate,
-		CustomerEmail:  prepare.Email,
-		ReturnUrl:      req.ReturnUrl,
-		Data:           "", //额外参数配置
-		VatNumber:      prepare.VatNumber,
-		VatVerifyData:  prepare.VatVerifyData,
-		CountryCode:    prepare.VatCountryCode,
-		TaxScale:       prepare.TaxScale,
+		MerchantId:         prepare.MerchantInfo.Id,
+		Type:               subType,
+		PlanId:             int64(prepare.Plan.Id),
+		ChannelId:          prepare.PlanChannel.ChannelId,
+		UserId:             prepare.UserId,
+		Quantity:           prepare.Quantity,
+		Amount:             prepare.TotalAmount,
+		Currency:           prepare.Currency,
+		AddonData:          utility.MarshalToJsonString(prepare.AddonParams),
+		SubscriptionId:     utility.CreateSubscriptionId(),
+		Status:             consts.SubStatusCreate,
+		CustomerEmail:      prepare.Email,
+		ReturnUrl:          req.ReturnUrl,
+		Data:               "", //额外参数配置
+		VatNumber:          prepare.VatNumber,
+		VatVerifyData:      prepare.VatVerifyData,
+		CountryCode:        prepare.VatCountryCode,
+		TaxScale:           prepare.TaxScale,
+		CurrentPeriodStart: currentTimeStart.Timestamp(),
+		CurrentPeriodEnd:   currentTimeEnd.Timestamp(),
+		BillingCycleAnchor: billingCycleAnchor.Timestamp(),
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
