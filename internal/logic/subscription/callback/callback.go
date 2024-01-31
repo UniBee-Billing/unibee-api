@@ -69,7 +69,7 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}
 			}
-			// billing cycle use cronjob check active status
+			// billing cycle use cronjob check active status as contain other processing payment
 		}
 	}
 }
