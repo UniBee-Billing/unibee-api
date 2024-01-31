@@ -3,8 +3,8 @@ package test
 import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/checkout/session"
-	"strings"
+	"github.com/stripe/stripe-go/v76/invoice"
+	"go-oversea-pay/utility"
 	"testing"
 )
 
@@ -78,41 +78,7 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 
 	//}()
 
-	items := []*stripe.CheckoutSessionLineItemParams{
-		{
-			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-				Currency: stripe.String(strings.ToLower("USD")),
-				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-					Name: stripe.String("testCheckout"),
-				},
-				UnitAmount: stripe.Int64(200),
-			},
-			Quantity: stripe.Int64(1),
-		},
-	}
-
-	checkoutParams := &stripe.CheckoutSessionParams{
-		Customer:  stripe.String("cus_PJmwrgrXuesjZv"),
-		Currency:  stripe.String(strings.ToLower("USD")), //小写
-		LineItems: items,
-		AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
-			Enabled: stripe.Bool(false), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_rates
-		},
-		SuccessURL: stripe.String("http://unibee.top"),
-	}
-	checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
-	checkoutParams.Metadata = map[string]string{
-		"Test": "Test",
-	}
-	//checkoutParams.ExpiresAt
-	createResponse, err := session.New(checkoutParams)
-	if err != nil {
-		fmt.Printf("err:%s\n", err.Error())
-	}
-	//result := &ro.ChannelCreateSubscriptionInternalResp{
-	//	Link:   createResponse.URL,
-	//	Data:   utility.FormatToJsonString(createResponse),
-	//	Status: 0, //todo mark
-	//}
-	fmt.Println(createResponse)
+	params := &stripe.InvoicePayParams{}
+	response, err := invoice.Pay("in_1OeiQeHhgikz9ijM6KmUtKTj", params)
+	fmt.Printf("detail current cycle:%s error:%s\n", utility.MarshalToJsonString(response), err)
 }

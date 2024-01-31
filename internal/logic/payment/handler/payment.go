@@ -194,6 +194,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayCancel sendResult err=%s", err)
 	if err == nil {
+		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
@@ -265,6 +266,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
+		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
@@ -332,6 +334,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				//_ = transaction.Rollback()
 				return err
 			}
+			payment.Status = consts.PAY_SUCCESS
 			return nil
 		})
 		if err == nil {
@@ -347,6 +350,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
+		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())

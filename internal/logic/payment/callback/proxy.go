@@ -25,28 +25,7 @@ func printChannelPanic(ctx context.Context, err error) {
 
 func (p proxy) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	go func() {
-		defer func() {
-			var err error
-			if exception := recover(); exception != nil {
-				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					err = v
-				} else {
-					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-				}
-				printChannelPanic(ctx, err)
-				return
-			}
-		}()
-		startTime := time.Now()
-
-		p.GetCallbackImpl().PaymentCreateCallback(ctx, payment, invoice)
-
-		glog.Infof(ctx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
-	}()
-}
-
-func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
-	go func() {
+		backgroundCtx := context.Background()
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -55,15 +34,38 @@ func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payme
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				printChannelPanic(ctx, err)
+				printChannelPanic(backgroundCtx, err)
 				return
 			}
 		}()
 		startTime := time.Now()
 
-		p.GetCallbackImpl().PaymentSuccessCallback(ctx, payment, invoice)
+		p.GetCallbackImpl().PaymentCreateCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(ctx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+	}()
+}
+
+func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	go func() {
+		var err error
+		backgroundCtx := context.Background()
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(backgroundCtx, err)
+				return
+			}
+		}()
+		startTime := time.Now()
+
+		p.GetCallbackImpl().PaymentSuccessCallback(backgroundCtx, payment, invoice)
+
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 
 	return
@@ -71,45 +73,47 @@ func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payme
 
 func (p proxy) PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	go func() {
+		backgroundCtx := context.Background()
+		var err error
 		defer func() {
-			var err error
 			if exception := recover(); exception != nil {
 				if v, ok := exception.(error); ok && gerror.HasStack(v) {
 					err = v
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				printChannelPanic(ctx, err)
+				printChannelPanic(backgroundCtx, err)
 				return
 			}
 		}()
 		startTime := time.Now()
 
-		p.GetCallbackImpl().PaymentFailureCallback(ctx, payment, invoice)
+		p.GetCallbackImpl().PaymentFailureCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(ctx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 }
 
 func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	go func() {
+		var err error
+		backgroundCtx := context.Background()
 		defer func() {
-			var err error
 			if exception := recover(); exception != nil {
 				if v, ok := exception.(error); ok && gerror.HasStack(v) {
 					err = v
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				printChannelPanic(ctx, err)
+				printChannelPanic(backgroundCtx, err)
 				return
 			}
 		}()
 		startTime := time.Now()
 
-		p.GetCallbackImpl().PaymentCancelCallback(ctx, payment, invoice)
+		p.GetCallbackImpl().PaymentCancelCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(ctx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 }
 
