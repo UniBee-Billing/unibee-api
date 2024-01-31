@@ -26,6 +26,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentSuccessCallback")
 				}
 			}
+			// billing cycle payment
 		}
 	}
 }
