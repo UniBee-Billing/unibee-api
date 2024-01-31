@@ -105,6 +105,7 @@ type ChannelPaymentRo struct {
 	ChannelId                   int64                                  `json:"channelId"         `
 	ChannelUserId               string                                 `json:"channelUserId"         `
 	ChannelPaymentId            string                                 `json:"channelPaymentId"              `
+	ChannelPaymentMethod        string                                 `json:"channelPaymentMethod"              `
 	ChannelInvoiceId            string                                 `json:"channelInvoiceId"         `
 	ChannelSubscriptionId       string                                 `json:"channelSubscriptionId"         `
 	ChannelSubscriptionUpdateId string                                 `json:"channelSubscriptionUpdateId" `

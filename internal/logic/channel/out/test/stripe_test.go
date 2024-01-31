@@ -3,8 +3,10 @@ package test
 import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/checkout/session"
+	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/utility"
+	"strings"
 	"testing"
 )
 
@@ -36,12 +38,13 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	//fmt.Printf("detail current cycle:%d-%d\n", response.CurrentPeriodStart, response.CurrentPeriodEnd)
 	//fmt.Printf("detail Status:%s\n", response.Status)
 
-	params := &stripe.CustomerListPaymentMethodsParams{
-		Customer: stripe.String("cus_PJmwrgrXuesjZv"),
-	}
-	params.Limit = stripe.Int64(3)
-	result := customer.ListPaymentMethods(params)
-	fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.PaymentMethodList().Data[0].ID))
+	//params := &stripe.CustomerListPaymentMethodsParams{
+	//	Customer: stripe.String("cus_PJmwrgrXuesjZv"),
+	//}
+	//params.Limit = stripe.Int64(3)
+	//result := customer.ListPaymentMethods(params)
+	//fmt.Printf("result:%s\n", utility.MarshalToJsonString(result.PaymentMethodList().Data[0].ID))
+	//
 	//customerResult, err := customer.Get("cus_PJmwrgrXuesjZv", &stripe.CustomerParams{})
 	//utility.AssertError(err, "queryAndCreateChannelUser")
 	////if err != nil {
@@ -76,5 +79,44 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	//fmt.Printf("detail TrialEnd:%d\n", detailResponse.TrialEnd)
 
 	//}()
+
+	items := []*stripe.CheckoutSessionLineItemParams{
+		{
+			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+				Currency: stripe.String(strings.ToLower("USD")),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+					Description: stripe.String("testCheckout"),
+					Name:        stripe.String("testCheckout"),
+				},
+				UnitAmount: stripe.Int64(200),
+			},
+			Quantity: stripe.Int64(1),
+		},
+	}
+
+	checkoutParams := &stripe.CheckoutSessionParams{
+		Customer:  stripe.String("cus_PJmwrgrXuesjZv"),
+		Currency:  stripe.String(strings.ToLower("USD")), //小写
+		LineItems: items,
+		AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
+			Enabled: stripe.Bool(false), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_rates
+		},
+		SuccessURL: stripe.String("http://unibee.top"),
+	}
+	checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
+	checkoutParams.Metadata = map[string]string{
+		"Test": "Test",
+	}
+	//checkoutParams.ExpiresAt
+	createResponse, err := session.New(checkoutParams)
+	if err != nil {
+		fmt.Printf("err:%s\n", err.Error())
+	}
+	result := &ro.ChannelCreateSubscriptionInternalResp{
+		Link:   createResponse.URL,
+		Data:   utility.FormatToJsonString(createResponse),
+		Status: 0, //todo mark
+	}
+	fmt.Println(result)
 
 }

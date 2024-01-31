@@ -378,7 +378,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				ChannelDefaultPaymentMethod:      "",
+				ChannelDefaultPaymentMethod:      channelPayRo.ChannelPaymentMethod,
 				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
 			})
 			if err != nil {
