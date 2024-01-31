@@ -118,7 +118,10 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 
 	// create new invoice, ignore errors
 	invoice, _ := handler.CreateOrUpdateInvoiceFromPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
+	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
+	if createPayContext.Pay.Status == consts.PAY_SUCCESS {
+		callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
+	}
 
 	if err != nil {
 		return nil, err

@@ -814,7 +814,8 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			}
 
 			createRes, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
-				PayChannel: payChannel,
+				PayImmediate: true,
+				PayChannel:   payChannel,
 				Pay: &entity.Payment{
 					SubscriptionId: one.SubscriptionId,
 					BizId:          one.UpdateSubscriptionId,

@@ -308,11 +308,11 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("payment not found")
 	}
 
-	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	if payment.Status == consts.PAY_SUCCESS {
-		g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
-		return nil
-	}
+	//// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
+	//if payment.Status == consts.PAY_SUCCESS {
+	//	g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
+	//	return nil
+	//}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {

@@ -35,6 +35,7 @@ type CreatePayContext struct {
 	PayMethod                int                `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
 	DaysUtilDue              int                `json:"daysUtilDue"`
 	ChannelPaymentMethod     string             `json:"channelPaymentMethod"`
+	PayImmediate             bool               `json:"payImmediate"`
 }
 
 type CreatePayInternalResp struct {
