@@ -21,11 +21,11 @@ import (
 type SubscriptionListInternalReq struct {
 	MerchantId int64  `p:"merchantId" dc:"MerchantId"`
 	UserId     int64  `p:"userId"  dc:"UserId" `
-	Status     int    `p:"status" dc:"不填查询所有状态，,订阅单状态，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	Status     int    `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page       int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
-	Count      int    `p:"count" d:"20"  dc:"订阅计划货币" dc:"每页数量" `
+	Count      int    `p:"count" d:"20" dc:"Count Of Page" `
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscription.SubscriptionDetailRes, error) {
