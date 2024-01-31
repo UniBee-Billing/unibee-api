@@ -13,6 +13,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	handler2 "go-oversea-pay/internal/logic/invoice/handler"
+	"go-oversea-pay/internal/logic/payment/callback"
 	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -196,6 +197,9 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
+
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment)
+
 		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
@@ -276,20 +280,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if err == nil {
 
-		if consts.ProrationUsingUniBeeCompute {
-			// better use redis mq to trace payment
-			if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
-				pendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
-				if pendingSubUpdate != nil {
-					//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
-					sub := query.GetSubscriptionBySubscriptionId(ctx, pendingSubUpdate.SubscriptionId)
-					_, err = handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
-					if err != nil {
-						return err
-					}
-				}
-			}
-		}
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment)
 
 		//default payment method update
 		if len(req.ChannelDefaultPaymentMethod) > 0 {

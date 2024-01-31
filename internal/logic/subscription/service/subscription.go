@@ -238,8 +238,14 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
+	var subType = consts.SubTypeDefault
+	if consts.SubscriptionCycleUnderUniBeeControl {
+		subType = consts.SubTypeUniBeeControl
+	}
+
 	one := &entity.Subscription{
 		MerchantId:     prepare.MerchantInfo.Id,
+		Type:           subType,
 		PlanId:         int64(prepare.Plan.Id),
 		ChannelId:      prepare.PlanChannel.ChannelId,
 		UserId:         prepare.UserId,
@@ -266,15 +272,70 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	createRes, err := out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
-		Plan:           prepare.Plan,
-		AddonPlans:     prepare.Addons,
-		PlanChannel:    prepare.PlanChannel,
-		VatCountryRate: prepare.VatCountryRate,
-		Subscription:   one,
-	})
-	if err != nil {
-		return nil, err
+	var createRes *ro.ChannelCreateSubscriptionInternalResp
+	if consts.SubscriptionCycleUnderUniBeeControl {
+		user := query.GetUserAccountById(ctx, uint64(one.UserId))
+		var mobile = ""
+		var firstName = ""
+		var lastName = ""
+		var gender = ""
+		if user != nil {
+			mobile = user.Mobile
+			firstName = user.FirstName
+			lastName = user.LastName
+			gender = user.Gender
+		}
+		createPaymentResult, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
+			PayChannel: prepare.PayChannel,
+			Pay: &entity.Payment{
+				SubscriptionId: one.SubscriptionId,
+				BizId:          one.SubscriptionId,
+				BizType:        consts.BIZ_TYPE_SUBSCRIPTION,
+				UserId:         prepare.UserId,
+				ChannelId:      int64(prepare.PayChannel.Id),
+				TotalAmount:    prepare.Invoice.TotalAmount,
+				Currency:       prepare.Currency,
+				CountryCode:    prepare.VatCountryCode,
+				MerchantId:     prepare.MerchantInfo.Id,
+				CompanyId:      prepare.MerchantInfo.CompanyId,
+			},
+			Platform:      "WEB",
+			DeviceType:    "Web",
+			ShopperUserId: strconv.FormatInt(one.UserId, 10),
+			ShopperEmail:  prepare.Email,
+			ShopperLocale: "en",
+			Mobile:        mobile,
+			Invoice:       prepare.Invoice,
+			ShopperName: &v1.OutShopperName{
+				FirstName: firstName,
+				LastName:  lastName,
+				Gender:    gender,
+			},
+			MediaData:              map[string]string{"BillingReason": "SubscriptionCreate"},
+			MerchantOrderReference: one.SubscriptionId,
+			PayMethod:              1, //automatic
+			DaysUtilDue:            5, //one day expire
+		})
+		if err != nil {
+			return nil, err
+		}
+		createRes = &ro.ChannelCreateSubscriptionInternalResp{
+			ChannelSubscriptionId: createPaymentResult.PaymentId,
+			Data:                  utility.MarshalToJsonString(createPaymentResult),
+			Link:                  createPaymentResult.Link,
+			Paid:                  createPaymentResult.Status == consts.PAY_SUCCESS,
+		}
+	} else {
+		createRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
+			Plan:           prepare.Plan,
+			AddonPlans:     prepare.Addons,
+			PlanChannel:    prepare.PlanChannel,
+			VatCountryRate: prepare.VatCountryRate,
+			Subscription:   one,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	//更新 Subscription
@@ -723,10 +784,10 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 			utility.Assert(merchantInfo != nil, "merchantInfo not found")
-			user := query.GetUserAccountById(ctx, uint64(one.UserId))
 			//utility.Assert(user != nil, "user not found")
 			payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 			utility.Assert(payChannel != nil, "payChannel not found")
+			user := query.GetUserAccountById(ctx, uint64(one.UserId))
 			var mobile = ""
 			var firstName = ""
 			var lastName = ""
@@ -884,32 +945,32 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		// only local env can cancel immediately invoice_compute proration invoice
 		utility.Assert(invoiceNow == false && proration == false, "cancel subscription with proration invoice immediate not support for this version")
 	}
-	_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
-		Plan:         plan,
-		PlanChannel:  planChannel,
-		Subscription: sub,
-		InvoiceNow:   invoiceNow,
-		Prorate:      proration,
-	})
-	// cancel will generate proration invoice need compute todo mark
-	if err != nil {
-		return err
+	var nextStatus = consts.SubStatusPendingInActive
+	if sub.Type == consts.SubTypeDefault {
+		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
+			Plan:         plan,
+			PlanChannel:  planChannel,
+			Subscription: sub,
+			InvoiceNow:   invoiceNow,
+			Prorate:      proration,
+		})
+		if err != nil {
+			return err
+		}
+	} else {
+		nextStatus = consts.SubStatusCancelled
 	}
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:    consts.SubStatusPendingInActive,
+	// cancel will generate proration invoice need compute todo mark
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:    nextStatus,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionCancel update subscription err:%s", update)
-	//}
 	return nil
 }
 
-// todo mark 在版本2018-02-28之前，发送到更新订阅 API 的任何参数都会停止挂起的取消，需验证
 func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool, merchantUserId int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
@@ -927,11 +988,13 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
-	if err != nil {
-		return err
+	if sub.Type == consts.SubTypeDefault {
+		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		if err != nil {
+			return err
+		}
 	}
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 1, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
@@ -986,12 +1049,15 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
-	if err != nil {
-		return err
+	if sub.Type == consts.SubTypeDefault {
+		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		if err != nil {
+			return err
+		}
 	}
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 0, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
+
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
@@ -1016,19 +1082,22 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 
-	details, err := out.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
-	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
-	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
-	sub = query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
-	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
+	if sub.Type == consts.SubTypeDefault {
+		details, err := out.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+		utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
+		err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
+		sub = query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+		utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
+	}
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
-	_, err = out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
-	if err != nil {
-		return err
+	if sub.Type == consts.SubTypeDefault {
+		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
+		if err != nil {
+			return err
+		}
 	}
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
@@ -1053,26 +1122,23 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
-
-	details, err := out.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
-	utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
-	err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
-	utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
-	//utility.Assert(newTrialEnd > details.CurrentPeriodEnd, "newTrainEnd should > subscription's currentPeriodEnd")
-	details, err = out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
-	if err != nil {
-		return err
+	var newTrialEnd = sub.TrialEnd
+	if sub.Type == consts.SubTypeDefault {
+		details, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+		if err != nil {
+			return err
+		}
+		newTrialEnd = details.TrialEnd
+	} else {
+		newTrialEnd = sub.CurrentPeriodStart - 1
 	}
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrialEnd:  details.TrialEnd,
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionAddNewTrialEnd subscription err:%s", update)
-	//}
+	// end trail may cause payment immediately todo mark
 	return nil
 }

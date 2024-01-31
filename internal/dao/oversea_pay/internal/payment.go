@@ -56,6 +56,7 @@ type PaymentColumns struct {
 	Code                   string //
 	Token                  string //
 	AdditionalData         string // 额外信息，JSON结构
+	Link                   string //
 	PaymentData            string // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               string // 唯一键，以同步为逻辑加入使用自定义唯一键
 	BalanceStart           string // balance_start
@@ -101,6 +102,7 @@ var paymentColumns = PaymentColumns{
 	Code:                   "code",
 	Token:                  "token",
 	AdditionalData:         "additional_data",
+	Link:                   "link",
 	PaymentData:            "payment_data",
 	UniqueId:               "unique_id",
 	BalanceStart:           "balance_start",

@@ -236,6 +236,9 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 	if sub == nil {
 		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.ChannelSubscriptionId)
 	}
+	if sub.Type != consts.SubTypeDefault {
+		return gerror.Newf("HandleSubscriptionPaymentUpdate not channel subscription %s", sub.SubscriptionId)
+	}
 	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.Payment.PaymentId)
 	if eiPendingSubUpdate != nil {
 		// subscription_update

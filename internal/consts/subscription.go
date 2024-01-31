@@ -20,6 +20,8 @@ const (
 type SubscriptionStatusEnum int
 
 const (
+	SubTypeDefault            = 0
+	SubTypeUniBeeControl      = 1
 	SubStatusInit             = 0 //初始化
 	SubStatusCreate           = 1 //创建-渠道状态
 	SubStatusActive           = 2 //有效-渠道状态
