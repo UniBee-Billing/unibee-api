@@ -37,7 +37,7 @@ type Stripe struct {
 }
 
 func (s Stripe) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.MerchantChannelConfig, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	channelUser := queryAndCreateChannelUser(ctx, payChannel, userId)
@@ -57,7 +57,7 @@ func (s Stripe) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, p
 }
 
 func (s Stripe) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.MerchantChannelConfig, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.CustomerParams{
@@ -76,7 +76,7 @@ func (s Stripe) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entit
 }
 
 func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.MerchantChannelConfig, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	channelUser := queryAndCreateChannelUser(ctx, payChannel, listReq.UserId)
@@ -95,7 +95,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 }
 
 func (s Stripe) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.MerchantChannelConfig, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -113,7 +113,7 @@ func (s Stripe) DoRemoteChannelRefundList(ctx context.Context, payChannel *entit
 }
 
 func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.MerchantChannelConfig, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PaymentIntentParams{}
@@ -127,7 +127,7 @@ func (s Stripe) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *en
 }
 
 func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.MerchantChannelConfig, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.RefundParams{}
@@ -140,7 +140,7 @@ func (s Stripe) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *ent
 }
 
 func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.MerchantChannelConfig) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -225,7 +225,7 @@ func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *
 
 func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -248,7 +248,7 @@ func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *e
 // DoRemoteChannelSubscriptionNewTrialEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
 func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -290,7 +290,7 @@ func (s Stripe) setUnibeeAppInfo() {
 func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	{
@@ -501,7 +501,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionCancelInternalReq.Subscription.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionCancelInternalReq.Subscription.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -520,7 +520,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscript
 func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.SubscriptionCancelParams{}
@@ -537,7 +537,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.SubscriptionCancelParams{}
@@ -554,7 +554,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx conte
 func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -756,7 +756,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 out channel not found")
+	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -816,7 +816,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionParams{}
@@ -847,7 +847,7 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
@@ -863,7 +863,7 @@ func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entit
 func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
@@ -879,7 +879,7 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (res *ro.ChannelCreateProductInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.ProductParams{
@@ -908,7 +908,7 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (res *ro.ChannelCreatePlanInternalResp, err error) {
 	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.PlanParams{
@@ -952,7 +952,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 }
 
 func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.MerchantChannelConfig, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoiceMarkUncollectibleParams{}
@@ -965,7 +965,7 @@ func (s Stripe) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *en
 }
 
 func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.MerchantChannelConfig, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -1070,7 +1070,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 }
 
 func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.MerchantChannelConfig, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoicePayParams{}
@@ -1080,7 +1080,7 @@ func (s Stripe) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entit
 }
 
 func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.MerchantChannelConfig, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -1094,7 +1094,7 @@ func (s Stripe) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *e
 }
 
 func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
-	utility.Assert(createPayContext.PayChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(createPayContext.PayChannel != nil, "channel not found")
 	stripe.Key = createPayContext.PayChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
@@ -1225,7 +1225,7 @@ func (s Stripe) DoRemoteChannelRefundStatusCheck(ctx context.Context, payment *e
 func (s Stripe) DoRemoteChannelRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
-	utility.Assert(channelEntity != nil, "支付渠道异常 channel not found")
+	utility.Assert(channelEntity != nil, "channel not found")
 	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.ChannelPaymentId)}
 	params.Reason = stripe.String(one.RefundComment)
 	params.Amount = stripe.Int64(one.RefundAmount)

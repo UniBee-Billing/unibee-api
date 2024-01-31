@@ -335,7 +335,7 @@ func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 	overseaPay := query.GetPaymentById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
 	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.ChannelId)
-	utility.Assert(channelEntity != nil, fmt.Sprintf("支付渠道异常 payId: %s", payIdStr))
+	utility.Assert(channelEntity != nil, fmt.Sprintf("payId: %s", payIdStr))
 	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
 	if len(overseaPay.ReturnUrl) > 0 {
 		r.Response.Writeln(fmt.Sprintf("<head>\n<meta http-equiv=\"refresh\" content=\"1;url=%s\">\n</head>", overseaPay.ReturnUrl))
