@@ -9,6 +9,7 @@ import (
 )
 
 type CreatePayContext struct {
+	CheckoutMode  bool                          `json:"checkoutMode"`
 	OpenApiId     int64                         `json:"openApiId"`
 	AppId         string                        `json:"appId"`
 	Desc          string                        `json:"desc"`
@@ -37,17 +38,17 @@ type CreatePayContext struct {
 }
 
 type CreatePayInternalResp struct {
-	PaymentId string `json:"paymentId"`
-	//AlreadyPaid            bool                     `json:"alreadyPaid"`
-	Status consts.PayStatusEnum `json:"status"`
+	Status                 consts.PayStatusEnum `json:"status"`
+	PaymentId              string               `json:"paymentId"`
+	ChannelPaymentId       string               `json:"channelPaymentId"`
+	ChannelPaymentIntentId string               `json:"channelPaymentIntentId"`
+	Link                   string               `json:"link"`
+	Action                 *gjson.Json          `json:"action"`
 	//InvoiceStatus          consts.InvoiceStatusEnum `json:"invoiceStatus"`
 	//OrderString            string                   `json:"orderString"`
-	ChannelPaymentId       string `json:"channelPaymentId"`
-	ChannelPaymentIntentId string `json:"channelPaymentIntentId"`
-	Link                   string `json:"link"`
+	//AlreadyPaid            bool                     `json:"alreadyPaid"`
 	//ChannelInvoiceId       string                   `json:"channelInvoiceId"`
 	//ChannelInvoicePdf      string                   `json:"channelInvoicePdf"`
-	Action *gjson.Json `json:"action"`
 	//AdditionalData         *gjson.Json              `json:"additionalData"`
 }
 

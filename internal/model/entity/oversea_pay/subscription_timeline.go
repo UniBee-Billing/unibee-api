@@ -22,7 +22,7 @@ type SubscriptionTimeline struct {
 	InvoiceId       string      `json:"invoiceId"       description:"发票ID（内部编号）"`                                      // 发票ID（内部编号）
 	UniqueId        string      `json:"uniqueId"        description:"唯一键"`                                             // 唯一键
 	Currency        string      `json:"currency"        description:"货币"`                                              // 货币
-	PlanId          int64       `json:"planId"          description:"计划ID"`                                            // 计划ID
+	PlanId          int64       `json:"planId"          description:"PlanId"`                                          // PlanId
 	Quantity        int64       `json:"quantity"        description:"quantity"`                                        // quantity
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`                            // plan addon json data
 	ChannelId       int64       `json:"channelId"       description:"支付渠道Id"`                                          // 支付渠道Id

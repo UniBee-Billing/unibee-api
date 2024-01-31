@@ -15,7 +15,11 @@ func GetPaymentWebhookEntranceUrl(channelId int64) string {
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?payId=%d", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.Id)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.PaymentId)
+}
+
+func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.PaymentId, success)
 }
 
 func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {

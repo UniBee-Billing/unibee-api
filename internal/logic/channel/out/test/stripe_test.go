@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
-	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/utility"
 	"strings"
 	"testing"
 )
@@ -85,8 +83,7 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 				Currency: stripe.String(strings.ToLower("USD")),
 				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-					Description: stripe.String("testCheckout"),
-					Name:        stripe.String("testCheckout"),
+					Name: stripe.String("testCheckout"),
 				},
 				UnitAmount: stripe.Int64(200),
 			},
@@ -112,11 +109,10 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	if err != nil {
 		fmt.Printf("err:%s\n", err.Error())
 	}
-	result := &ro.ChannelCreateSubscriptionInternalResp{
-		Link:   createResponse.URL,
-		Data:   utility.FormatToJsonString(createResponse),
-		Status: 0, //todo mark
-	}
-	fmt.Println(result)
-
+	//result := &ro.ChannelCreateSubscriptionInternalResp{
+	//	Link:   createResponse.URL,
+	//	Data:   utility.FormatToJsonString(createResponse),
+	//	Status: 0, //todo mark
+	//}
+	fmt.Println(createResponse)
 }

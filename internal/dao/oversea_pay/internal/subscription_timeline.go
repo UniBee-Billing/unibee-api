@@ -32,7 +32,7 @@ type SubscriptionTimelineColumns struct {
 	InvoiceId       string // 发票ID（内部编号）
 	UniqueId        string // 唯一键
 	Currency        string // 货币
-	PlanId          string // 计划ID
+	PlanId          string // PlanId
 	Quantity        string // quantity
 	AddonData       string // plan addon json data
 	ChannelId       string // 支付渠道Id

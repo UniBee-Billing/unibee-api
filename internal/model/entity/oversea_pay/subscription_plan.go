@@ -15,7 +15,7 @@ type SubscriptionPlan struct {
 	GmtModify                 *gtime.Time `json:"gmtModify"                 description:"修改时间"`                                                                               // 修改时间
 	CompanyId                 int64       `json:"companyId"                 description:"公司ID"`                                                                               // 公司ID
 	MerchantId                int64       `json:"merchantId"                description:"商户Id"`                                                                               // 商户Id
-	PlanName                  string      `json:"planName"                  description:"计划名称"`                                                                               // 计划名称
+	PlanName                  string      `json:"planName"                  description:"PlanName"`                                                                           // PlanName
 	Amount                    int64       `json:"amount"                    description:"金额,单位：分"`                                                                            // 金额,单位：分
 	Currency                  string      `json:"currency"                  description:"货币"`                                                                                 // 货币
 	IntervalUnit              string      `json:"intervalUnit"              description:"周期-全小写存放,day|month|year|week"`                                                       // 周期-全小写存放,day|month|year|week

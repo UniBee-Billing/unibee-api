@@ -15,9 +15,9 @@ type ChannelPlan struct {
 	Id                   interface{} //
 	GmtCreate            *gtime.Time // 创建时间
 	GmtModify            *gtime.Time // 修改时间
-	PlanId               interface{} // 计划ID
+	PlanId               interface{} // PlanId
 	ChannelId            interface{} // 支付渠道Id
-	Status               interface{} // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
+	Status               interface{} // 0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelPlanId        interface{} // 支付渠道plan_Id
 	ChannelProductId     interface{} // 支付渠道product_Id
 	ChannelPlanStatus    interface{} // channel_plan_status

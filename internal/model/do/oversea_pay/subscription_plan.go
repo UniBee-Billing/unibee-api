@@ -17,7 +17,7 @@ type SubscriptionPlan struct {
 	GmtModify                 *gtime.Time // 修改时间
 	CompanyId                 interface{} // 公司ID
 	MerchantId                interface{} // 商户Id
-	PlanName                  interface{} // 计划名称
+	PlanName                  interface{} // PlanName
 	Amount                    interface{} // 金额,单位：分
 	Currency                  interface{} // 货币
 	IntervalUnit              interface{} // 周期-全小写存放,day|month|year|week

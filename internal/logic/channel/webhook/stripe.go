@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
 	sub "github.com/stripe/stripe-go/v76/subscription"
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
@@ -74,6 +75,7 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
+				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
 			URL: stripe.String(channel.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
@@ -111,6 +113,7 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
+				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
 			URL: stripe.String(channel.GetPaymentWebhookEntranceUrl(int64(payChannel.Id))),
@@ -223,6 +226,24 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			//	responseBack = http.StatusBadRequest
 			//}
 		}
+	case "checkout.session.completed":
+		var stripeCheckoutSession stripe.CheckoutSession
+		err = json.Unmarshal(event.Data.Raw, &stripeCheckoutSession)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		} else {
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.Channel, string(event.Type), stripeCheckoutSession.ID)
+			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
+
+			err = s.processCheckoutSessionWebhook(r.Context(), string(event.Type), stripeCheckoutSession, payChannel)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			}
+		}
 	default:
 		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
 		r.Response.WriteHeader(http.StatusBadRequest)
@@ -239,15 +260,97 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 		r.Response.Writeln(err)
 		return
 	}
-	payIdStr := r.Get("payId").String()
+	payIdStr := r.Get("paymentId").String()
 	SubIdStr := r.Get("subId").String()
 	var response string
-	var status bool = false
-	var returnUrl string = ""
+	var status = false
+	var returnUrl = ""
 	if len(payIdStr) > 0 {
 		response = "not implement"
+		//Payment Redirect
+		if r.Get("success").Bool() {
+			stripe.Key = payChannel.ChannelSecret
+			s.setUnibeeAppInfo()
+			payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+			if payment == nil || len(payment.ChannelPaymentIntentId) == 0 {
+				response = "paymentId invalid"
+			} else if len(payment.ChannelPaymentId) > 0 && payment.Status == consts.PAY_SUCCESS {
+				returnUrl = payment.ReturnUrl
+				response = "success"
+				status = true
+			} else {
+				//需要去检索
+				returnUrl = payment.ReturnUrl
+				params := &stripe.CheckoutSessionParams{}
+				result, err := session.Get(
+					payment.ChannelPaymentIntentId,
+					params,
+				)
+				if err != nil {
+					response = "payment not match"
+				}
+				channelUser := query.GetUserChannel(r.Context(), payment.UserId, int64(payChannel.Id))
+				if channelUser != nil && result != nil {
+					//find
+					if strings.Compare(result.Customer.ID, channelUser.ChannelUserId) != 0 {
+						response = "user not match"
+					} else if strings.Compare(string(result.Status), "complete") == 0 && result.PaymentIntent != nil && len(result.PaymentIntent.ID) > 0 {
+						paymentIntentDetail, err := out.GetPayChannelServiceProvider(r.Context(), int64(payChannel.Id)).DoRemoteChannelPaymentDetail(r.Context(), payChannel, result.PaymentIntent.ID)
+						if err != nil {
+							response = fmt.Sprintf("%v", err)
+						} else {
+							if paymentIntentDetail.Status == consts.PAY_SUCCESS {
+								err := handler2.HandlePaySuccess(r.Context(), &handler2.HandlePayReq{
+									PaymentId:                        payment.PaymentId,
+									ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+									ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+									TotalAmount:                      paymentIntentDetail.TotalAmount,
+									PayStatusEnum:                    consts.PAY_SUCCESS,
+									PaidTime:                         paymentIntentDetail.PayTime,
+									PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+									CaptureAmount:                    0,
+									Reason:                           paymentIntentDetail.Reason,
+									ChannelDefaultPaymentMethod:      paymentIntentDetail.ChannelPaymentMethod,
+									ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+								})
+								if err != nil {
+									response = fmt.Sprintf("%v", err)
+								} else {
+									response = "payment success"
+									status = true
+								}
+							} else if paymentIntentDetail.Status == consts.PAY_FAILED {
+								err := handler2.HandlePayFailure(r.Context(), &handler2.HandlePayReq{
+									PaymentId:                        payment.PaymentId,
+									ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+									ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+									TotalAmount:                      paymentIntentDetail.TotalAmount,
+									PayStatusEnum:                    consts.PAY_FAILED,
+									PaidTime:                         paymentIntentDetail.PayTime,
+									PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+									CaptureAmount:                    0,
+									Reason:                           paymentIntentDetail.Reason,
+									ChannelDefaultPaymentMethod:      "",
+									ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+								})
+								if err != nil {
+									response = fmt.Sprintf("%v", err)
+								}
+							}
+						}
+					} else {
+						response = "not complete"
+					}
+				} else {
+					//not found
+					response = "payment not found"
+				}
+			}
+		} else {
+			response = "user cancelled"
+		}
 	} else if len(SubIdStr) > 0 {
-		//订阅回跳
+		//subscription redirect
 		if r.Get("success").Bool() {
 			stripe.Key = payChannel.ChannelSecret
 			s.setUnibeeAppInfo()
@@ -259,7 +362,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 				response = "active"
 				status = true
 			} else {
-				//需要去检索
+				//search
 				returnUrl = unibSub.ReturnUrl
 				params := &stripe.SubscriptionSearchParams{
 					SearchParams: stripe.SearchParams{
@@ -277,13 +380,15 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 						err := handler.UpdateSubWithChannelDetailBack(r.Context(), unibSub, detail)
 						if err != nil {
 							response = fmt.Sprintf("%v", err)
-						} else {
+						} else if detail.Status == consts.SubStatusActive {
 							response = "subscription active"
 							status = true
+						} else {
+							response = "not complete"
 						}
 					}
 				} else {
-					//找不到
+					//not find
 					response = "subscription not paid"
 				}
 			}
@@ -516,6 +621,58 @@ func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType
 		return nil
 	} else {
 		return gerror.New("subscription not found on channelSubId:" + subscription.ID)
+	}
+}
+
+func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event string, checkoutSession stripe.CheckoutSession, payChannel *entity.MerchantChannelConfig) error {
+	if paymentId, ok := checkoutSession.Metadata["PaymentId"]; ok {
+		payment := query.GetPaymentByPaymentId(ctx, paymentId)
+		if checkoutSession.PaymentIntent != nil {
+			paymentIntentDetail, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPaymentDetail(ctx, payChannel, checkoutSession.PaymentIntent.ID)
+			if err != nil {
+				return gerror.New(fmt.Sprintf("%s", err.Error()))
+			}
+			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
+				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
+					PaymentId:                        payment.PaymentId,
+					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+					TotalAmount:                      paymentIntentDetail.TotalAmount,
+					PayStatusEnum:                    consts.PAY_SUCCESS,
+					PaidTime:                         paymentIntentDetail.PayTime,
+					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+					CaptureAmount:                    0,
+					Reason:                           paymentIntentDetail.Reason,
+					ChannelDefaultPaymentMethod:      paymentIntentDetail.ChannelPaymentMethod,
+					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+				})
+				if err != nil {
+					return gerror.New(fmt.Sprintf("%s", err.Error()))
+				}
+			} else if paymentIntentDetail.Status == consts.PAY_FAILED {
+				err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
+					PaymentId:                        payment.PaymentId,
+					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+					TotalAmount:                      paymentIntentDetail.TotalAmount,
+					PayStatusEnum:                    consts.PAY_FAILED,
+					PaidTime:                         paymentIntentDetail.PayTime,
+					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+					CaptureAmount:                    0,
+					Reason:                           paymentIntentDetail.Reason,
+					ChannelDefaultPaymentMethod:      "",
+					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+				})
+				if err != nil {
+					return gerror.New(fmt.Sprintf("%s", err.Error()))
+				}
+			}
+			return nil
+		} else {
+			return gerror.New("no PaymentIntent")
+		}
+	} else {
+		return gerror.New("no PaymentId Metadata")
 	}
 }
 

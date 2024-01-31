@@ -24,7 +24,7 @@ type SubscriptionTimeline struct {
 	InvoiceId       interface{} // 发票ID（内部编号）
 	UniqueId        interface{} // 唯一键
 	Currency        interface{} // 货币
-	PlanId          interface{} // 计划ID
+	PlanId          interface{} // PlanId
 	Quantity        interface{} // quantity
 	AddonData       interface{} // plan addon json data
 	ChannelId       interface{} // 支付渠道Id

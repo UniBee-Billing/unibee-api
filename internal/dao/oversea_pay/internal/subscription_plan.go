@@ -25,7 +25,7 @@ type SubscriptionPlanColumns struct {
 	GmtModify                 string // 修改时间
 	CompanyId                 string // 公司ID
 	MerchantId                string // 商户Id
-	PlanName                  string // 计划名称
+	PlanName                  string // PlanName
 	Amount                    string // 金额,单位：分
 	Currency                  string // 货币
 	IntervalUnit              string // 周期-全小写存放,day|month|year|week

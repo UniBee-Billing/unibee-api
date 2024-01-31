@@ -23,9 +23,9 @@ type ChannelPlanColumns struct {
 	Id                   string //
 	GmtCreate            string // 创建时间
 	GmtModify            string // 修改时间
-	PlanId               string // 计划ID
+	PlanId               string // PlanId
 	ChannelId            string // 支付渠道Id
-	Status               string // 渠道绑定状态，0-Init | 1-Create｜2-Active｜3-Inactive
+	Status               string // 0-Init | 1-Create｜2-Active｜3-Inactive
 	ChannelPlanId        string // 支付渠道plan_Id
 	ChannelProductId     string // 支付渠道product_Id
 	ChannelPlanStatus    string // channel_plan_status

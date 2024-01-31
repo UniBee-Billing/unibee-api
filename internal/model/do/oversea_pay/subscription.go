@@ -23,6 +23,7 @@ type Subscription struct {
 	PlanId                      interface{} // 计划ID
 	Quantity                    interface{} // quantity
 	AddonData                   interface{} // plan addon json data
+	Type                        interface{} // sub type, 0-channel sub, 1-unibee sub
 	ChannelId                   interface{} // 支付渠道Id
 	Status                      interface{} // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	ChannelSubscriptionId       interface{} // 支付渠道订阅id
