@@ -217,6 +217,7 @@ func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, re
 		fmt.Printf("HandleSubscriptionExpired GetPaymentList error:%s", err.Error())
 	}
 	for _, p := range paymentList {
+		// todo mark should use DoChannelCancel
 		err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 			PaymentId:     p.PaymentId,
 			PayStatusEnum: consts.PAY_CANCEL,
