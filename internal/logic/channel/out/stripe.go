@@ -179,7 +179,7 @@ func (s Stripe) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payCha
 }
 
 func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.MerchantChannelConfig, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
-	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
+	utility.Assert(payChannel != nil, "channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
