@@ -151,6 +151,23 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 	return addons
 }
 
+func PaymentFailureForPendingUpdate(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
+	if one.Status == consts.PendingSubStatusFinished {
+		return true, nil
+	}
+	if one.Status == consts.PendingSubStatusCancelled {
+		return true, nil
+	}
+	_, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).OmitNil().Update()
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil

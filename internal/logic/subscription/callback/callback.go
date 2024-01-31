@@ -62,11 +62,14 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			//pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
-			//if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 {
-			//
-			//}
-			// payment failure subscription update todo mark
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+			if pendingSubUpdate != nil {
+				_, err := handler.PaymentFailureForPendingUpdate(ctx, pendingSubUpdate)
+				if err != nil {
+					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
+				}
+			}
+			// billing cycle use cronjob check active status
 		}
 	}
 }
