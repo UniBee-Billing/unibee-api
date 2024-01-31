@@ -54,7 +54,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expired"),
 	})
 
-	err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+	err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
@@ -78,7 +78,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
 	}
-	err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+	err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
@@ -129,7 +129,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment, nil)
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
@@ -200,7 +200,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment)
 
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
@@ -287,7 +287,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 		}
 
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment, req.ChannelDetailInvoiceInternalResp)
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
@@ -353,7 +353,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			CurrentPeriodStart:          channelPayRo.ChannelSubscriptionDetail.CurrentPeriodStart,
 			TrialEnd:                    channelPayRo.ChannelSubscriptionDetail.TrialEnd,
 		})
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment, channelPayRo.ChannelInvoiceDetail)
+		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}

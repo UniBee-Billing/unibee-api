@@ -265,7 +265,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 					if sub.TrialEnd > sub.CurrentPeriodEnd {
 						nextPeriodStart = sub.TrialEnd
 					}
-					var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+					var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart) // todo mark use gtime.add Plan Interval
 
 					invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
@@ -276,7 +276,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 					})
-					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
+					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 				}
 
 				if req.Payment.Status == consts.PAY_SUCCESS {
@@ -314,7 +314,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 					PeriodStart:   nextPeriodStart,
 					PeriodEnd:     nextPeriodEnd,
 				})
-				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment, req.ChannelInvoiceDetail)
+				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 			}
 			if req.Payment.Status == consts.PAY_SUCCESS {
 				err := FinishNextBillingCycleForSubscription(ctx, sub, req.Payment, req.ChannelSubscriptionDetail)
