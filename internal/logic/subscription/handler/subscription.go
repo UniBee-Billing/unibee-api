@@ -236,7 +236,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 	if sub == nil {
 		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.ChannelSubscriptionId)
 	}
-	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.ChannelSubscriptionUpdateId)
+	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.Payment.PaymentId)
 	if eiPendingSubUpdate != nil {
 		// subscription_update
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景

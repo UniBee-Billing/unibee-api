@@ -254,10 +254,10 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	pspReference := paymentJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payments", responseJson.String(), "支付", pspReference, createPayContext.PayChannel.Channel)
 	res = &ro.CreatePayInternalResp{
-		Status:         consts.TO_BE_PAID,
-		Action:         responseJson.GetJson("action"),
-		Link:           responseJson.GetJson("action").Get("url").String(),
-		AdditionalData: responseJson.GetJson("paymentMethod"),
+		Status: consts.TO_BE_PAID,
+		Action: responseJson.GetJson("action"),
+		Link:   responseJson.GetJson("action").Get("url").String(),
+		//AdditionalData: responseJson.GetJson("paymentMethod"),
 	}
 	return res, nil
 }

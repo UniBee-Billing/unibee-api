@@ -775,10 +775,10 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			}
 			// Upgrade
 			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
-				ChannelUpdateId: createRes.ChannelInvoiceId,
+				ChannelUpdateId: createRes.PaymentId,
 				Data:            utility.MarshalToJsonString(createRes),
 				Link:            createRes.Link,
-				Paid:            createRes.AlreadyPaid,
+				Paid:            createRes.Status == consts.PAY_SUCCESS,
 			}
 			//subUpdateRes.ChannelUpdateId = createRes.ChannelInvoiceId
 			//subUpdateRes.Paid = createRes.AlreadyPaid

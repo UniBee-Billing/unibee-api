@@ -37,18 +37,18 @@ type CreatePayContext struct {
 }
 
 type CreatePayInternalResp struct {
-	PaymentId              string                   `json:"payOrderNo"`
-	AlreadyPaid            bool                     `json:"alreadyPaid"`
-	Status                 consts.PayStatusEnum     `json:"status"`
-	InvoiceStatus          consts.InvoiceStatusEnum `json:"invoiceStatus"`
-	OrderString            string                   `json:"orderString"`
-	ChannelPaymentId       string                   `json:"channelPaymentId"`
-	ChannelPaymentIntentId string                   `json:"channelPaymentIntentId"`
-	Link                   string                   `json:"link"`
-	ChannelInvoiceId       string                   `json:"channelInvoiceId"`
-	ChannelInvoicePdf      string                   `json:"channelInvoicePdf"`
-	Action                 *gjson.Json              `json:"action"`
-	AdditionalData         *gjson.Json              `json:"additionalData"`
+	PaymentId string `json:"paymentId"`
+	//AlreadyPaid            bool                     `json:"alreadyPaid"`
+	Status consts.PayStatusEnum `json:"status"`
+	//InvoiceStatus          consts.InvoiceStatusEnum `json:"invoiceStatus"`
+	//OrderString            string                   `json:"orderString"`
+	ChannelPaymentId       string `json:"channelPaymentId"`
+	ChannelPaymentIntentId string `json:"channelPaymentIntentId"`
+	Link                   string `json:"link"`
+	//ChannelInvoiceId       string                   `json:"channelInvoiceId"`
+	//ChannelInvoicePdf      string                   `json:"channelInvoicePdf"`
+	Action *gjson.Json `json:"action"`
+	//AdditionalData         *gjson.Json              `json:"additionalData"`
 }
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.

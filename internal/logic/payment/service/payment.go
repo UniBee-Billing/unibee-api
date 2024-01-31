@@ -90,9 +90,9 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
-				dao.Payment.Columns().PaymentData:            createPayContext.Pay.PaymentData,
-				dao.Payment.Columns().ChannelPaymentId:       createPayContext.Pay.ChannelPaymentId,
-				dao.Payment.Columns().ChannelPaymentIntentId: createPayContext.Pay.ChannelPaymentIntentId},
+				dao.Payment.Columns().PaymentData:            string(jsonData),
+				dao.Payment.Columns().ChannelPaymentId:       channelInternalPayResult.ChannelPaymentId,
+				dao.Payment.Columns().ChannelPaymentIntentId: channelInternalPayResult.ChannelPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				return err

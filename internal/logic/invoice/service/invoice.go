@@ -294,13 +294,19 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	if err != nil {
 		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
 	}
+	var invoiceStatus = consts.InvoiceStatusProcessing
+	if createRes.Status == consts.PAY_SUCCESS {
+		invoiceStatus = consts.InvoiceStatusPaid
+	} else if createRes.Status == consts.PAY_FAILED {
+		invoiceStatus = consts.InvoiceStatusFailed
+	}
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().ChannelInvoiceId:  createRes.ChannelInvoiceId,
-		dao.Invoice.Columns().ChannelInvoicePdf: createRes.ChannelInvoicePdf,
-		dao.Invoice.Columns().Status:            createRes.InvoiceStatus,
-		dao.Invoice.Columns().Link:              createRes.Link,
-		dao.Invoice.Columns().GmtModify:         gtime.Now(),
+		//dao.Invoice.Columns().ChannelInvoiceId:  createRes.ChannelInvoiceId,
+		//dao.Invoice.Columns().ChannelInvoicePdf: createRes.ChannelInvoicePdf,
+		dao.Invoice.Columns().Status:    invoiceStatus,
+		dao.Invoice.Columns().Link:      createRes.Link,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
@@ -309,7 +315,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	//if rowAffected != 1 {
 	//	return nil, gerror.Newf("FinishInvoice update err:%s", update)
 	//}
-	one.Status = int(createRes.InvoiceStatus)
+	one.Status = invoiceStatus
 	one.Link = createRes.Link
 
 	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil

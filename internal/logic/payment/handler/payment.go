@@ -275,6 +275,22 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
+
+		if consts.ProrationUsingUniBeeCompute {
+			// better use redis mq to trace payment
+			if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+				pendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+				if pendingSubUpdate != nil {
+					//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
+					sub := query.GetSubscriptionBySubscriptionId(ctx, pendingSubUpdate.SubscriptionId)
+					_, err = handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
+					if err != nil {
+						return err
+					}
+				}
+			}
+		}
+
 		//default payment method update
 		if len(req.ChannelDefaultPaymentMethod) > 0 {
 			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
@@ -296,22 +312,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Settled"),
 			Message:   req.Reason,
 		})
-		//} catch (Exception e) {
-		//	e.printStackTrace();
-		//	log.info("save_event exception:{}",e.toString());
-		//}
-		////            mqUtil.addToMq(MqTopicEnum.PaySuccess,payment.getId());
-		//// 为提高支付结果反馈速度，同步处理业务订单支付成功
-		//OverseaPay queryPay = overseaPayMapper.selectById(payment.getId());
-		//if (queryPay == null) {
-		//	payment.setPayStatus(PayStatusEnum.PAY_SUCCESS.getCode());
-		//	payment.setPaidTime(Instant.ofEpochMilli(req.getPaidTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
-		//	payment.setChannelPayId(req.getChannelPayId());
-		//	payment.setChannelTradeNo(req.getChannelTradeNo());
-		//	payment.setReceiptFee(req.getReceiptFee());
-		//	queryPay = payment;
-		//}
-		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryPay.getBizType()).paySuccessCallback(queryPay,req.getPaidTime());
+
 		err := CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
@@ -383,20 +384,6 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			})
 			if err != nil {
 				return err
-			}
-			if consts.ProrationUsingUniBeeCompute {
-				// better use redis mq to trace payment
-				if len(channelPayRo.ChannelSubscriptionUpdateId) > 0 {
-					eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, channelPayRo.ChannelSubscriptionUpdateId)
-					if eiPendingSubUpdate != nil {
-						//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
-						sub := query.GetSubscriptionBySubscriptionId(ctx, eiPendingSubUpdate.SubscriptionId)
-						_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
-						if err != nil {
-							return err
-						}
-					}
-				}
 			}
 		} else if channelPayRo.Status == consts.PAY_FAILED {
 			err := HandlePayFailure(ctx, &HandlePayReq{

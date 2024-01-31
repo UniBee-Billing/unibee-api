@@ -1150,20 +1150,20 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		return nil, err
 	}
 	log.SaveChannelHttpLog("DoRemoteChannelInvoiceCreateAndPay", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, createPayContext.PayChannel)
-	var invoiceStatus consts.InvoiceStatusEnum = consts.InvoiceStatusInit
+	//var invoiceStatus consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	var status consts.PayStatusEnum = consts.TO_BE_PAID
 	if strings.Compare(string(detail.Status), "draft") == 0 {
-		invoiceStatus = consts.InvoiceStatusPending
+		//invoiceStatus = consts.InvoiceStatusPending
 	} else if strings.Compare(string(detail.Status), "open") == 0 {
-		invoiceStatus = consts.InvoiceStatusProcessing
+		//invoiceStatus = consts.InvoiceStatusProcessing
 	} else if strings.Compare(string(detail.Status), "paid") == 0 {
-		invoiceStatus = consts.InvoiceStatusPaid
+		//invoiceStatus = consts.InvoiceStatusPaid
 		status = consts.PAY_SUCCESS
 	} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-		invoiceStatus = consts.InvoiceStatusFailed
+		//invoiceStatus = consts.InvoiceStatusFailed
 		status = consts.PAY_FAILED
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
-		invoiceStatus = consts.InvoiceStatusCancelled
+		//invoiceStatus = consts.InvoiceStatusCancelled
 		status = consts.PAY_FAILED
 	}
 	var invoiceItems []*ro.InvoiceItemDetailRo
@@ -1194,11 +1194,11 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		Status:                 status,
 		ChannelPaymentId:       channelPaymentId,
 		ChannelPaymentIntentId: channelPaymentId,
-		AlreadyPaid:            invoiceStatus == consts.InvoiceStatusPaid,
-		InvoiceStatus:          invoiceStatus,
 		Link:                   detail.HostedInvoiceURL,
-		ChannelInvoiceId:       detail.ID,
-		ChannelInvoicePdf:      detail.InvoicePDF,
+		//AlreadyPaid:            invoiceStatus == consts.InvoiceStatusPaid,
+		//InvoiceStatus:          invoiceStatus,
+		//ChannelInvoiceId:       detail.ID,
+		//ChannelInvoicePdf:      detail.InvoicePDF,
 	}, nil
 }
 
