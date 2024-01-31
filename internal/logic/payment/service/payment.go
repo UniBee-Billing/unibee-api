@@ -37,6 +37,9 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	//createPayContext.Pay.AdditionalData = todo mark
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
+	if len(createPayContext.Invoice.InvoiceId) > 0 {
+		createPayContext.Pay.InvoiceId = createPayContext.Invoice.InvoiceId
+	}
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
 	if createPayContext.MediaData == nil {
 		createPayContext.MediaData = make(map[string]string)

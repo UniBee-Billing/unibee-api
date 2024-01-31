@@ -15,6 +15,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strings"
 )
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
@@ -23,7 +24,7 @@ func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Su
 }
 
 func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
-	if consts.SubscriptionCycleUnderUniBeeControl {
+	if subscription.Type != consts.SubTypeDefault {
 		// not sync attribute from channel
 		return nil
 	}
@@ -53,56 +54,39 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().BillingCycleAnchor:          details.BillingCycleAnchor,
 		dao.Subscription.Columns().ChannelLatestInvoiceId:      details.ChannelLatestInvoiceId,
 		dao.Subscription.Columns().ChannelDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
-		//dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
-		//dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
-		//dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),
-		//dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(details.CurrentPeriodEnd),
-		dao.Subscription.Columns().TrialEnd:     details.TrialEnd,
-		dao.Subscription.Columns().GmtModify:    gmtModify,
-		dao.Subscription.Columns().FirstPayTime: firstPayTime,
+		dao.Subscription.Columns().TrialEnd:                    details.TrialEnd,
+		dao.Subscription.Columns().GmtModify:                   gmtModify,
+		dao.Subscription.Columns().FirstPayTime:                firstPayTime,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("HandleSubscriptionWebhookEvent err:%s", update)
-	//}
-	//处理更新事件 todo mark
-
 	return nil
 }
 
-func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
-	var cancelAtPeriodEnd = 0
-	if details.CancelAtPeriodEnd {
-		cancelAtPeriodEnd = 1
-	}
-	var firstPayTime *gtime.Time
-	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
-		firstPayTime = gtime.Now()
+func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *entity.Payment) error {
+	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
+	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
+	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
+	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found")
+	var firstPayTime = sub.FirstPayTime
+	if sub.FirstPayTime == nil && payment.Status == consts.PAY_SUCCESS {
+		firstPayTime = payment.PaidTime
 	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:                 details.Status,
-		dao.Subscription.Columns().ChannelSubscriptionId:  details.ChannelSubscriptionId,
-		dao.Subscription.Columns().ChannelStatus:          details.ChannelStatus,
-		dao.Subscription.Columns().ChannelItemData:        details.ChannelItemData,
-		dao.Subscription.Columns().CancelAtPeriodEnd:      cancelAtPeriodEnd,
-		dao.Subscription.Columns().BillingCycleAnchor:     details.BillingCycleAnchor,
-		dao.Subscription.Columns().ChannelLatestInvoiceId: details.ChannelLatestInvoiceId,
-		dao.Subscription.Columns().CurrentPeriodStart:     details.CurrentPeriodStart,
-		dao.Subscription.Columns().CurrentPeriodEnd:       details.CurrentPeriodEnd,
-		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(details.CurrentPeriodStart),
-		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(details.CurrentPeriodEnd),
-		dao.Subscription.Columns().TrialEnd:               details.TrialEnd,
+		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
+		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().FirstPayTime:           firstPayTime,
-	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
+	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	//处理更新事件 todo mark
-
 	return nil
 }
 
@@ -153,7 +137,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 channelId 合并查询
+				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId)
 				utility.Assert(len(planChannel.ChannelPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanId invalid", param.AddonPlanId, channelId))
 				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
@@ -171,7 +155,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
-	if consts.ProrationUsingUniBeeCompute && one.EffectImmediate == 1 {
+	if consts.ProrationUsingUniBeeCompute && one.EffectImmediate == 1 && sub.Type == consts.SubTypeDefault {
 		var addonParams []*ro.SubscriptionPlanAddonParamRo
 		err := utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
 		if err != nil {
@@ -196,7 +180,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 	}
-	// todo mark 使用事务
+	// todo mark use transaction
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:          one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:        one.UpdateQuantity,
@@ -221,13 +205,13 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	return true, nil
 }
 
-func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment, channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp) error {
+func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
 	// billing-cycle
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
 	if err != nil {
 		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
 	}
-	err = UpdateSubscriptionBillingCycleWithPayment(ctx, sub, channelSubscriptionDetail)
+	err = UpdateSubscriptionBillingCycleWithPayment(ctx, payment)
 	return err
 }
 
@@ -261,11 +245,21 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				if one == nil {
 					sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
 
+					plan := query.GetPlanById(ctx, pendingSubUpdate.UpdatePlanId)
 					var nextPeriodStart = sub.CurrentPeriodEnd
 					if sub.TrialEnd > sub.CurrentPeriodEnd {
 						nextPeriodStart = sub.TrialEnd
 					}
-					var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart) // todo mark use gtime.add Plan Interval
+					var nextPeriodEnd = gtime.NewFromTimeStamp(nextPeriodStart)
+					if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
+						nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, plan.IntervalCount)
+					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
+						nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, 7*plan.IntervalCount)
+					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
+						nextPeriodEnd = nextPeriodEnd.AddDate(0, plan.IntervalCount, 0)
+					} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
+						nextPeriodEnd = nextPeriodEnd.AddDate(plan.IntervalCount, 0, 0)
+					}
 
 					invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
@@ -274,7 +268,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 						AddonJsonData: pendingSubUpdate.UpdateAddonData,
 						TaxScale:      sub.TaxScale,
 						PeriodStart:   nextPeriodStart,
-						PeriodEnd:     nextPeriodEnd,
+						PeriodEnd:     nextPeriodEnd.Timestamp(),
 					})
 					_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 				}
@@ -285,7 +279,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 						return err
 					}
 
-					err = FinishNextBillingCycleForSubscription(ctx, sub, req.Payment, req.ChannelSubscriptionDetail)
+					err = FinishNextBillingCycleForSubscription(ctx, sub, req.Payment)
 					if err != nil {
 						return err
 					}
@@ -298,12 +292,22 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 			if one == nil {
 				sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+				plan := query.GetPlanById(ctx, sub.PlanId)
 
 				var nextPeriodStart = sub.CurrentPeriodEnd
 				if sub.TrialEnd > sub.CurrentPeriodEnd {
 					nextPeriodStart = sub.TrialEnd
 				}
-				var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+				var nextPeriodEnd = gtime.NewFromTimeStamp(nextPeriodStart)
+				if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
+					nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, plan.IntervalCount)
+				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
+					nextPeriodEnd = nextPeriodEnd.AddDate(0, 0, 7*plan.IntervalCount)
+				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
+					nextPeriodEnd = nextPeriodEnd.AddDate(0, plan.IntervalCount, 0)
+				} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
+					nextPeriodEnd = nextPeriodEnd.AddDate(plan.IntervalCount, 0, 0)
+				}
 
 				invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 					Currency:      sub.Currency,
@@ -312,12 +316,12 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 					AddonJsonData: sub.AddonData,
 					TaxScale:      sub.TaxScale,
 					PeriodStart:   nextPeriodStart,
-					PeriodEnd:     nextPeriodEnd,
+					PeriodEnd:     nextPeriodEnd.Timestamp(),
 				})
 				_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, invoice, req.Payment)
 			}
 			if req.Payment.Status == consts.PAY_SUCCESS {
-				err := FinishNextBillingCycleForSubscription(ctx, sub, req.Payment, req.ChannelSubscriptionDetail)
+				err := FinishNextBillingCycleForSubscription(ctx, sub, req.Payment)
 				if err != nil {
 					return err
 				}

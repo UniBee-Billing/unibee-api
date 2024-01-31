@@ -715,7 +715,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 		//nextPeriodTotalAmount = nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount
 		prorationDate = sub.CurrentPeriodEnd
-
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
@@ -829,7 +828,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 					CountryCode:    prepare.Subscription.CountryCode,
 					MerchantId:     one.MerchantId,
 					CompanyId:      merchantInfo.CompanyId,
-					BillingReason:  "SubscriptionUpdate",
+					BillingReason:  "SubscriptionUpgrade",
 				},
 				Platform:      "WEB",
 				DeviceType:    "Web",
@@ -865,15 +864,18 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			//subUpdateRes.Data = utility.MarshalToJsonString(createRes)
 		} else {
 			prepare.EffectImmediate = false
-			subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
-				Plan:            prepare.Plan,
-				Quantity:        prepare.Quantity,
-				AddonPlans:      prepare.Addons,
-				PlanChannel:     prepare.PlanChannel,
-				Subscription:    prepare.Subscription,
-				ProrationDate:   req.ProrationDate,
-				EffectImmediate: false,
-			})
+			//subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			//	Plan:            prepare.Plan,
+			//	Quantity:        prepare.Quantity,
+			//	AddonPlans:      prepare.Addons,
+			//	PlanChannel:     prepare.PlanChannel,
+			//	Subscription:    prepare.Subscription,
+			//	ProrationDate:   req.ProrationDate,
+			//	EffectImmediate: false,
+			//})
+			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
+				Paid: false,
+			}
 		}
 	} else {
 		subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
