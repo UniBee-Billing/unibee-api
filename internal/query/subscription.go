@@ -81,6 +81,21 @@ func GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context
 	return one
 }
 
+func GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(channelUpdateId) == 0 {
+		return nil
+	}
+	var one *entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
+		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
+		OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
 func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
 	if len(channelUpdateId) == 0 {
 		return nil

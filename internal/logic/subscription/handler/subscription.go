@@ -155,6 +155,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
+	utility.Assert(one.Status == consts.PendingSubStatusCreate, "pendingUpdate not status create")
 	if consts.ProrationUsingUniBeeCompute && one.EffectImmediate == 1 && sub.Type == consts.SubTypeDefault {
 		var addonParams []*ro.SubscriptionPlanAddonParamRo
 		err := utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
@@ -181,6 +182,14 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
 	}
 	// todo mark use transaction
+	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).OmitNil().Update()
+	if err != nil {
+		return false, err
+	}
+
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PlanId:          one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:        one.UpdateQuantity,
@@ -191,13 +200,6 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().GmtModify:       gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId: "", //清除标记的更新单
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
-	if err != nil {
-		return false, err
-	}
-	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return false, err
 	}
