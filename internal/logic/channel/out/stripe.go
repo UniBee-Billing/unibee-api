@@ -40,7 +40,7 @@ func (s Stripe) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, p
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
-	channelUser := queryAndCreateChannelUserId(ctx, payChannel, userId)
+	channelUser := queryAndCreateChannelUser(ctx, payChannel, userId)
 
 	params := &stripe.CustomerListPaymentMethodsParams{
 		Customer: stripe.String(channelUser.ChannelUserId),
@@ -79,7 +79,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	utility.Assert(payChannel != nil, "支付渠道异常 channel not found")
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
-	channelUser := queryAndCreateChannelUserId(ctx, payChannel, listReq.UserId)
+	channelUser := queryAndCreateChannelUser(ctx, payChannel, listReq.UserId)
 
 	params := &stripe.PaymentIntentListParams{}
 	params.Customer = stripe.String(channelUser.ChannelUserId)
@@ -184,7 +184,7 @@ func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(queryAndCreateChannelUserId(ctx, payChannel, userId).ChannelUserId, params)
+	response, err := customer.Get(queryAndCreateChannelUserWithOutPaymentMethod(ctx, payChannel, userId).ChannelUserId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +294,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	{
-		channelUser := queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+		channelUser := queryAndCreateChannelUser(ctx, channelEntity, subscriptionRo.Subscription.UserId)
 
 		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
 		if channelVatRate == nil {
@@ -558,7 +558,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	channelUser := queryAndCreateChannelUserId(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+	channelUser := queryAndCreateChannelUser(ctx, channelEntity, subscriptionRo.Subscription.UserId)
 
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
@@ -969,7 +969,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 	stripe.Key = payChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	channelUser := queryAndCreateChannelUserId(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
+	channelUser := queryAndCreateChannelUser(ctx, payChannel, createInvoiceInternalReq.Invoice.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
@@ -1098,7 +1098,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	stripe.Key = createPayContext.PayChannel.ChannelSecret
 	s.setUnibeeAppInfo()
 
-	channelUser := queryAndCreateChannelUserId(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
+	channelUser := queryAndCreateChannelUser(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
 
 	params := &stripe.InvoiceParams{
 		Metadata: createPayContext.MediaData,
