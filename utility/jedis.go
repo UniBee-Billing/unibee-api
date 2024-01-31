@@ -7,7 +7,7 @@ import (
 
 func TryLock(ctx context.Context, redisKey string, second int64) bool {
 	result, err := g.Redis().Do(ctx, "SET", redisKey, "1", "NX", "EX", second)
-	return result != nil && err == nil
+	return result != nil && !result.IsNil() && err == nil
 }
 func ReleaseLock(ctx context.Context, redisKey string) bool {
 	_, err := g.Redis().Del(ctx, redisKey)

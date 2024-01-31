@@ -90,3 +90,21 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 		}
 	}
 }
+
+func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	if consts.ProrationUsingUniBeeCompute {
+		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
+			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
+			utility.Assert(sub != nil, "payment sub not found")
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+			if pendingSubUpdate != nil {
+				_, err := handler.PaymentFailureForPendingUpdate(ctx, pendingSubUpdate)
+				if err != nil {
+					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
+				}
+			}
+			// billing cycle use cronjob check active status as contain other processing payment
+		}
+	}
+}

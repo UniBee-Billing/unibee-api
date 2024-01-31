@@ -48,6 +48,7 @@ type Payment struct {
 	Code                   interface{} //
 	Token                  interface{} //
 	AdditionalData         interface{} // 额外信息，JSON结构
+	FailureReason          interface{} //
 	BillingReason          interface{} //
 	Link                   interface{} //
 	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构

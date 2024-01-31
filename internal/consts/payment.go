@@ -17,6 +17,7 @@ const (
 	TO_BE_PAID  = 10 //待支付
 	PAY_SUCCESS = 20 // 支付成功
 	PAY_FAILED  = 30 //支付失败
+	PAY_CANCEL  = 40 //支付取消
 )
 
 func (action PayStatusEnum) Description() string {

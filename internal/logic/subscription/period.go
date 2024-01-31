@@ -25,3 +25,35 @@ func GetPeriodEndFromStart(ctx context.Context, start int64, planId uint64) int6
 	}
 	return periodEnd.Timestamp()
 }
+
+func GetDunningTimeFromEnd(ctx context.Context, end int64, planId uint64) int64 {
+	plan := query.GetPlanById(ctx, int64(planId))
+	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
+	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
+	if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
+		return end - 60*60 // one hour
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
+		return end - 24*60*60 // 24h
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
+		return end - 3*24*60*60 // 3 day
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
+		return end - 15*24*60*60 // 15 day
+	}
+	return end - 30*60 // half hour
+}
+
+func GetDunningTimeCap(ctx context.Context, planId uint64) int64 {
+	plan := query.GetPlanById(ctx, int64(planId))
+	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
+	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
+	if strings.Compare(strings.ToLower(plan.IntervalUnit), "day") == 0 {
+		return 60 * 60 // one hour
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
+		return 24 * 60 * 60 // 24h
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
+		return 3 * 24 * 60 * 60 // 3 day
+	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
+		return 15 * 24 * 60 * 60 // 15 day
+	}
+	return 30 * 60 // half hour
+}

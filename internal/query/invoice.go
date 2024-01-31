@@ -7,6 +7,9 @@ import (
 )
 
 func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.Invoice) {
+	if len(invoiceId) == 0 {
+		return nil
+	}
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{InvoiceId: invoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

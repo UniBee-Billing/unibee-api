@@ -247,6 +247,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	var billingCycleAnchor = gtime.Now()
 	var currentTimeStart = billingCycleAnchor
 	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), prepare.Plan.Id)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, currentTimeEnd, prepare.Plan.Id)
 
 	one := &entity.Subscription{
 		MerchantId:         prepare.MerchantInfo.Id,
@@ -269,6 +270,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		TaxScale:           prepare.TaxScale,
 		CurrentPeriodStart: currentTimeStart.Timestamp(),
 		CurrentPeriodEnd:   currentTimeEnd,
+		DunningTime:        dunningTime,
 		BillingCycleAnchor: billingCycleAnchor.Timestamp(),
 	}
 
@@ -294,7 +296,8 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			gender = user.Gender
 		}
 		createPaymentResult, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
-			PayChannel: prepare.PayChannel,
+			CheckoutMode: true,
+			PayChannel:   prepare.PayChannel,
 			Pay: &entity.Payment{
 				SubscriptionId: one.SubscriptionId,
 				BizId:          one.SubscriptionId,

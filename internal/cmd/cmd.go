@@ -7,6 +7,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller"
 	"go-oversea-pay/internal/controller/channel_webhook_entry"
+	"go-oversea-pay/internal/cronjob"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/utility/liberr"
 
@@ -134,6 +135,7 @@ var (
 				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
 				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
+				cronjob.StartCronJobs()
 			}
 
 			s.Run()

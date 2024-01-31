@@ -15,7 +15,7 @@ type MerchantAccountMain struct {
 	Id          interface{} // 主键ID
 	CompanyId   interface{} //
 	MerchantId  interface{} // 商户ID
-	Currency    interface{} ，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
+	Currency    interface{} //，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
 	TotalTrade  interface{} // 交易金额总计
 	TotalRefund interface{} // 退款金额总计
 	TotalCut    interface{} // 服务扣点金额总计

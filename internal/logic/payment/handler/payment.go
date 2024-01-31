@@ -148,6 +148,77 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 
 }
 
+func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
+	g.Log().Infof(ctx, "HandlePayCancel, req=%s", utility.MarshalToJsonString(req))
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	if payment == nil {
+		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
+		return errors.New("payment not found")
+	}
+	if payment.Status == consts.PAY_CANCEL {
+		g.Log().Infof(ctx, "already cancel")
+		return nil
+	}
+
+	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
+	if payment.Status == consts.PAY_SUCCESS {
+		g.Log().Infof(ctx, "payment already success")
+		return errors.New("payment already success")
+	}
+
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelTime: gtime.Now(), dao.Payment.Columns().FailureReason: req.Reason},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+			if err != nil || result == nil {
+				//_ = transaction.Rollback()
+				return err
+			}
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				//_ = transaction.Rollback()
+				return err
+			}
+			payment.Status = consts.PAY_CANCEL
+			return nil
+		})
+		if err == nil {
+			return redismq.CommitTransaction, nil
+		} else {
+			return redismq.RollbackTransaction, err
+		}
+	})
+	if err != nil {
+		return err
+	}
+
+	g.Log().Infof(ctx, "HandlePayCancel sendResult err=%s", err)
+	if err == nil {
+		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
+
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentCancelCallback(ctx, payment, invoice)
+		//交易事件记录
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
+			BizType:   0,
+			BizId:     payment.PaymentId,
+			Fee:       0,
+			EventType: event.Cancelled.Type,
+			Event:     event.Cancelled.Desc,
+			OpenApiId: payment.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Cancelled"),
+			Message:   req.Reason,
+		})
+		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+		}
+	}
+	return err
+}
+
 func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "handlePayFailure, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
@@ -166,13 +237,9 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("payment already success")
 	}
 
-	var refundFee int64 = 0
-	if payment.AuthorizeStatus != consts.WAITING_AUTHORIZED {
-		refundFee = payment.TotalAmount
-	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancelld, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().RefundAmount: refundFee},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelTime: gtime.Now(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -183,6 +250,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 				//_ = transaction.Rollback()
 				return err
 			}
+			payment.Status = consts.PAY_FAILED
 			return nil
 		})
 		if err == nil {
@@ -211,7 +279,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 			EventType: event.Cancelled.Type,
 			Event:     event.Cancelled.Desc,
 			OpenApiId: payment.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Cancelled"),
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Failed"),
 			Message:   req.Reason,
 		})
 		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
@@ -383,6 +451,22 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
 				TotalAmount:                      channelPayRo.TotalAmount,
 				PayStatusEnum:                    consts.PAY_FAILED,
+				PaidTime:                         channelPayRo.PayTime,
+				PaymentAmount:                    channelPayRo.PaymentAmount,
+				CaptureAmount:                    0,
+				Reason:                           channelPayRo.Reason,
+				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+			})
+			if err != nil {
+				return err
+			}
+		} else if channelPayRo.Status == consts.PAY_CANCEL {
+			err := HandlePayCancel(ctx, &HandlePayReq{
+				PaymentId:                        one.PaymentId,
+				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
+				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				TotalAmount:                      channelPayRo.TotalAmount,
+				PayStatusEnum:                    consts.PAY_CANCEL,
 				PaidTime:                         channelPayRo.PayTime,
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,

@@ -91,6 +91,28 @@ func (p proxy) PaymentFailureCallback(ctx context.Context, payment *entity.Payme
 	}()
 }
 
+func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	go func() {
+		defer func() {
+			var err error
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(ctx, err)
+				return
+			}
+		}()
+		startTime := time.Now()
+
+		p.GetCallbackImpl().PaymentCancelCallback(ctx, payment, invoice)
+
+		glog.Infof(ctx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+	}()
+}
+
 func (p proxy) GetCallbackImpl() (channelService _interface.PaymentBizCallbackInterface) {
 	utility.Assert(p.BizType >= 0, "bizType is not set")
 	if p.BizType == consts.BIZ_TYPE_ONE_TIME {

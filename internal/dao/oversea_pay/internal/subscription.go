@@ -31,6 +31,7 @@ type SubscriptionColumns struct {
 	PlanId                      string // 计划ID
 	Quantity                    string // quantity
 	AddonData                   string // plan addon json data
+	TaskTime                    string // task_time
 	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-channel sub, 1-unibee sub
 	ChannelId                   string // 支付渠道Id
@@ -39,6 +40,7 @@ type SubscriptionColumns struct {
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
+	DunningTime                 string //
 	Link                        string //
 	ChannelStatus               string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             string // channel_item_data
@@ -56,7 +58,7 @@ type SubscriptionColumns struct {
 	CancelReason                string //
 	CountryCode                 string //
 	VatNumber                   string //
-	TaxScale                    string // Tax税率，万分位，1000 表示 10%
+	TaxScale                    string // Tax Scale，1000 = 10%
 	VatVerifyData               string //
 	Data                        string // 渠道额外参数，JSON格式
 	ResponseData                string // 渠道返回参数，JSON格式
@@ -77,6 +79,7 @@ var subscriptionColumns = SubscriptionColumns{
 	PlanId:                      "plan_id",
 	Quantity:                    "quantity",
 	AddonData:                   "addon_data",
+	TaskTime:                    "task_time",
 	LatestInvoiceId:             "latest_invoice_id",
 	Type:                        "type",
 	ChannelId:                   "channel_id",
@@ -85,6 +88,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CustomerName:                "customer_name",
 	CustomerEmail:               "customer_email",
 	IsDeleted:                   "is_deleted",
+	DunningTime:                 "dunning_time",
 	Link:                        "link",
 	ChannelStatus:               "channel_status",
 	ChannelItemData:             "channel_item_data",

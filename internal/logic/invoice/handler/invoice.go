@@ -161,6 +161,8 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		status = consts.InvoiceStatusPaid
 	} else if payment.Status == consts.PAY_FAILED {
 		status = consts.InvoiceStatusFailed
+	} else if payment.Status == consts.PAY_CANCEL {
+		status = consts.InvoiceStatusCancelled
 	}
 	utility.Assert(one != nil, "invoice not found")
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{

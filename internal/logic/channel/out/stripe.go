@@ -1330,7 +1330,7 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
 		status = consts.PAY_SUCCESS
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
-		status = consts.PAY_FAILED
+		status = consts.PAY_CANCEL
 	}
 	var captureStatus = consts.WAITING_AUTHORIZED
 	if strings.Compare(string(item.Status), "requires_capture") == 0 {

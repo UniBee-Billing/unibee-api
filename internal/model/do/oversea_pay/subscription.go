@@ -23,6 +23,7 @@ type Subscription struct {
 	PlanId                      interface{} // 计划ID
 	Quantity                    interface{} // quantity
 	AddonData                   interface{} // plan addon json data
+	TaskTime                    *gtime.Time // task_time
 	LatestInvoiceId             interface{} // latest_invoice_id
 	Type                        interface{} // sub type, 0-channel sub, 1-unibee sub
 	ChannelId                   interface{} // 支付渠道Id
@@ -31,6 +32,7 @@ type Subscription struct {
 	CustomerName                interface{} // customer_name
 	CustomerEmail               interface{} // customer_email
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
+	DunningTime                 interface{} //
 	Link                        interface{} //
 	ChannelStatus               interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             interface{} // channel_item_data
@@ -48,7 +50,7 @@ type Subscription struct {
 	CancelReason                interface{} //
 	CountryCode                 interface{} //
 	VatNumber                   interface{} //
-	TaxScale                    interface{} // Tax税率，万分位，1000 表示 10%
+	TaxScale                    interface{} // Tax Scale，1000 = 10%
 	VatVerifyData               interface{} //
 	Data                        interface{} // 渠道额外参数，JSON格式
 	ResponseData                interface{} // 渠道返回参数，JSON格式
