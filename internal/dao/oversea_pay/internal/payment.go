@@ -56,6 +56,7 @@ type PaymentColumns struct {
 	Code                   string //
 	Token                  string //
 	AdditionalData         string // 额外信息，JSON结构
+	Automatic              string //
 	FailureReason          string //
 	BillingReason          string //
 	Link                   string //
@@ -105,6 +106,7 @@ var paymentColumns = PaymentColumns{
 	Code:                   "code",
 	Token:                  "token",
 	AdditionalData:         "additional_data",
+	Automatic:              "automatic",
 	FailureReason:          "failure_reason",
 	BillingReason:          "billing_reason",
 	Link:                   "link",

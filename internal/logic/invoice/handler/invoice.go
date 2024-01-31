@@ -347,14 +347,18 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	if one.Status > consts.InvoiceStatusPending {
 		pdfFileName := utility.DownloadFile(one.SendPdf)
 		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 		var link = one.Link
 		if len(link) == 0 {
-			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 			link = payment.Link
 		}
 		var template = email.TemplateNewProcessingInvoice
 		if one.Status == consts.InvoiceStatusPaid {
-			template = email.TemplateInvoiceAutomaticPaid
+			if payment.Automatic == 0 {
+				template = email.TemplateInvoiceManualPaid
+			} else {
+				template = email.TemplateInvoiceAutomaticPaid
+			}
 		} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
 			template = email.TemplateInvoiceCancel
 		}
@@ -390,5 +394,4 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
 	}
 	return nil
-
 }

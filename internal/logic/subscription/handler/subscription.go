@@ -9,6 +9,7 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
@@ -260,5 +261,34 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 
 		}
 	}
+	return nil
+}
+
+func SendSubscriptionEmailToUser(ctx context.Context, subscriptionId string, template string) error {
+	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.UserId > 0, "invoice userId not found")
+	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
+	user := query.GetUserAccountById(ctx, uint64(one.UserId))
+	merchant := query.GetMerchantInfoById(ctx, one.MerchantId)
+	var merchantProductName = ""
+	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
+	if sub != nil {
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		merchantProductName = plan.PlanName
+	}
+
+	err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, template, "", &email.TemplateVariable{
+		UserName:            user.UserName,
+		MerchantProductName: merchantProductName,
+		MerchantCustomEmail: merchant.Email,
+		MerchantName:        merchant.Name,
+		DateNow:             gtime.Now().Layout(`2006-01-02`),
+		PeriodEnd:           gtime.NewFromTimeStamp(one.CurrentPeriodEnd).Layout(`2006-01-02`),
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

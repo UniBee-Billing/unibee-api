@@ -87,6 +87,10 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			if err != nil {
 				return err
 			}
+			var automatic = 0
+			if channelInternalPayResult.Status == consts.PAY_SUCCESS && createPayContext.PayImmediate {
+				automatic = 1
+			}
 			createPayContext.Pay.PaymentData = string(jsonData)
 			createPayContext.Pay.Status = int(channelInternalPayResult.Status)
 			createPayContext.Pay.ChannelPaymentId = channelInternalPayResult.ChannelPaymentId
@@ -94,6 +98,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().PaymentData:            string(jsonData),
+				dao.Payment.Columns().Automatic:              automatic,
 				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
 				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
 				dao.Payment.Columns().ChannelPaymentId:       channelInternalPayResult.ChannelPaymentId,

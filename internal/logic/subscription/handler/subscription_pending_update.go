@@ -9,6 +9,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/email"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -115,5 +116,17 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		return false, err
 	}
 
+	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
+		UserName:            user.UserName,
+		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).ChannelProductName,
+		MerchantCustomEmail: merchant.Email,
+		MerchantName:        merchant.Name,
+		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+	})
+	if err != nil {
+		fmt.Printf("SendTemplateEmail err:%s", err.Error())
+	}
 	return true, nil
 }

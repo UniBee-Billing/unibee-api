@@ -21,12 +21,16 @@ import (
 
 const (
 	TemplateInvoiceAutomaticPaid                            = "InvoiceAutomaticPaid"
+	TemplateInvoiceManualPaid                               = "InvoiceManualPaid"
 	TemplateNewProcessingInvoice                            = "NewProcessingInvoice "
 	TemplateInvoiceCancel                                   = "InvoiceCancel "
 	TemplateUserRegistrationCodeVerify                      = "UserRegistrationCodeVerify"
 	TemplateUserOTPLogin                                    = "UserOTPLogin"
 	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
 	TemplateSubscriptionCancelledAtPeriodEndByUser          = "SubscriptionCancelledAtPeriodEndByUser"
+	TemplateSubscriptionCancelLastCancelledAtPeriodEnd      = "SubscriptionCancelLastCancelledAtPeriodEnd"
+	TemplateSubscriptionImmediateCancel                     = "SubscriptionImmediateCancel"
+	TemplateSubscriptionUpdate                              = "SubscriptionUpdate"
 )
 
 const SG_KEY = "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"

@@ -41,6 +41,7 @@ type SubscriptionColumns struct {
 	CustomerEmail               string // customer_email
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
 	DunningTime                 string //
+	ChannelDefaultPaymentMethod string //
 	Link                        string //
 	ChannelStatus               string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             string // channel_item_data
@@ -63,7 +64,6 @@ type SubscriptionColumns struct {
 	Data                        string // 渠道额外参数，JSON格式
 	ResponseData                string // 渠道返回参数，JSON格式
 	PendingUpdateId             string //
-	ChannelDefaultPaymentMethod string //
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -89,6 +89,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CustomerEmail:               "customer_email",
 	IsDeleted:                   "is_deleted",
 	DunningTime:                 "dunning_time",
+	ChannelDefaultPaymentMethod: "channel_default_payment_method",
 	Link:                        "link",
 	ChannelStatus:               "channel_status",
 	ChannelItemData:             "channel_item_data",
@@ -111,7 +112,6 @@ var subscriptionColumns = SubscriptionColumns{
 	Data:                        "data",
 	ResponseData:                "response_data",
 	PendingUpdateId:             "pendingUpdateId",
-	ChannelDefaultPaymentMethod: "channel_default_payment_method",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

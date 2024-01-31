@@ -48,6 +48,7 @@ type Payment struct {
 	Code                   interface{} //
 	Token                  interface{} //
 	AdditionalData         interface{} // 额外信息，JSON结构
+	Automatic              interface{} //
 	FailureReason          interface{} //
 	BillingReason          interface{} //
 	Link                   interface{} //

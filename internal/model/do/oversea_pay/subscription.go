@@ -33,6 +33,7 @@ type Subscription struct {
 	CustomerEmail               interface{} // customer_email
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
 	DunningTime                 interface{} //
+	ChannelDefaultPaymentMethod interface{} //
 	Link                        interface{} //
 	ChannelStatus               interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             interface{} // channel_item_data
@@ -55,5 +56,4 @@ type Subscription struct {
 	Data                        interface{} // 渠道额外参数，JSON格式
 	ResponseData                interface{} // 渠道返回参数，JSON格式
 	PendingUpdateId             interface{} //
-	ChannelDefaultPaymentMethod interface{} //
 }
