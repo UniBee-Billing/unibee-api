@@ -252,6 +252,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().PaidTime:               req.PaidTime,
 				dao.Payment.Columns().ChannelPaymentIntentId: req.ChannelPaymentIntentId,
 				dao.Payment.Columns().ChannelPaymentId:       req.ChannelPaymentId,
+				dao.Payment.Columns().ChannelPaymentMethod:   req.ChannelDefaultPaymentMethod,
 				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
 				dao.Payment.Columns().RefundAmount:           payment.RefundAmount},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
@@ -387,7 +388,6 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				ChannelDefaultPaymentMethod:      "",
 				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
 			})
 			if err != nil {

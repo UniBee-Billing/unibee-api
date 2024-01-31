@@ -56,12 +56,14 @@ type PaymentColumns struct {
 	Code                   string //
 	Token                  string //
 	AdditionalData         string // 额外信息，JSON结构
+	BillingReason          string //
 	Link                   string //
 	PaymentData            string // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               string // 唯一键，以同步为逻辑加入使用自定义唯一键
 	BalanceStart           string // balance_start
 	BalanceEnd             string // balance_end
 	InvoiceData            string //
+	ChannelPaymentMethod   string //
 }
 
 // paymentColumns holds the columns for table payment.
@@ -102,12 +104,14 @@ var paymentColumns = PaymentColumns{
 	Code:                   "code",
 	Token:                  "token",
 	AdditionalData:         "additional_data",
+	BillingReason:          "billing_reason",
 	Link:                   "link",
 	PaymentData:            "payment_data",
 	UniqueId:               "unique_id",
 	BalanceStart:           "balance_start",
 	BalanceEnd:             "balance_end",
 	InvoiceData:            "invoice_data",
+	ChannelPaymentMethod:   "channel_payment_method",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

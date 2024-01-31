@@ -48,10 +48,12 @@ type Payment struct {
 	Code                   interface{} //
 	Token                  interface{} //
 	AdditionalData         interface{} // 额外信息，JSON结构
+	BillingReason          interface{} //
 	Link                   interface{} //
 	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构
 	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
 	BalanceStart           interface{} // balance_start
 	BalanceEnd             interface{} // balance_end
 	InvoiceData            interface{} //
+	ChannelPaymentMethod   interface{} //
 }

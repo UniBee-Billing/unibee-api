@@ -330,7 +330,6 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 									PaymentAmount:                    paymentIntentDetail.PaymentAmount,
 									CaptureAmount:                    0,
 									Reason:                           paymentIntentDetail.Reason,
-									ChannelDefaultPaymentMethod:      "",
 									ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
 								})
 								if err != nil {
@@ -660,7 +659,6 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
 					CaptureAmount:                    0,
 					Reason:                           paymentIntentDetail.Reason,
-					ChannelDefaultPaymentMethod:      "",
 					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
 				})
 				if err != nil {
