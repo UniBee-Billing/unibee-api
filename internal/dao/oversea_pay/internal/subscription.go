@@ -31,6 +31,7 @@ type SubscriptionColumns struct {
 	PlanId                      string // 计划ID
 	Quantity                    string // quantity
 	AddonData                   string // plan addon json data
+	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-channel sub, 1-unibee sub
 	ChannelId                   string // 支付渠道Id
 	Status                      string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
@@ -76,6 +77,7 @@ var subscriptionColumns = SubscriptionColumns{
 	PlanId:                      "plan_id",
 	Quantity:                    "quantity",
 	AddonData:                   "addon_data",
+	LatestInvoiceId:             "latest_invoice_id",
 	Type:                        "type",
 	ChannelId:                   "channel_id",
 	Status:                      "status",

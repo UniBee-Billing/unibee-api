@@ -8,8 +8,17 @@ import (
 type Invalid struct {
 }
 
-func (i Invalid) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment) {
+func (i Invalid) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (i Invalid) PaymentFailureCallback(ctx context.Context, payment *entity.Payment) {
+func (i Invalid) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i Invalid) PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	//TODO implement me
+	panic("implement me")
 }

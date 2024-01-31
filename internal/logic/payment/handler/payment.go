@@ -54,7 +54,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expired"),
 	})
 
-	err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
@@ -78,7 +78,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
 		return errors.New("支付不存在")
 	}
-	err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
@@ -129,7 +129,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
@@ -197,13 +197,12 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
-
-		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment)
-
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
+
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment, invoice)
 		//交易事件记录
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -280,18 +279,18 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
+		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
 
-		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment)
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 
 		//default payment method update
 		if len(req.ChannelDefaultPaymentMethod) > 0 {
 			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 		}
 
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
-		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
-		}
 		//try {
 		//交易事件记录
 		event.SaveTimeLine(ctx, entity.PaymentEvent{
@@ -305,7 +304,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			Message:   req.Reason,
 		})
 
-		err := CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 		}
@@ -354,7 +353,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			CurrentPeriodStart:          channelPayRo.ChannelSubscriptionDetail.CurrentPeriodStart,
 			TrialEnd:                    channelPayRo.ChannelSubscriptionDetail.TrialEnd,
 		})
-		err = handler2.UpdateInvoiceFromPayment(ctx, payment)
+		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}

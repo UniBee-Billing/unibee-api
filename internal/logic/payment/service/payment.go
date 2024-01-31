@@ -13,6 +13,7 @@ import (
 	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/handler"
+	"go-oversea-pay/internal/logic/payment/callback"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/redismq"
@@ -92,9 +93,9 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			createPayContext.Pay.ChannelPaymentIntentId = channelInternalPayResult.ChannelPaymentIntentId
 			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
-				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
 				dao.Payment.Columns().PaymentData:            string(jsonData),
+				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
+				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
 				dao.Payment.Columns().ChannelPaymentId:       channelInternalPayResult.ChannelPaymentId,
 				dao.Payment.Columns().ChannelPaymentIntentId: channelInternalPayResult.ChannelPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
@@ -116,7 +117,8 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	})
 
 	// create new invoice, ignore errors
-	_ = handler.CreateOrUpdateInvoiceFromPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	invoice, _ := handler.CreateOrUpdateInvoiceFromPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
 
 	if err != nil {
 		return nil, err

@@ -6,6 +6,7 @@ import (
 )
 
 type PaymentBizCallbackInterface interface {
-	PaymentSuccessCallback(ctx context.Context, payment *entity.Payment)
-	PaymentFailureCallback(ctx context.Context, payment *entity.Payment)
+	PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
+	PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
+	PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
 }

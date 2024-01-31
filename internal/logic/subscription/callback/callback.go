@@ -3,7 +3,9 @@ package callback
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"go-oversea-pay/internal/consts"
+	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -14,7 +16,22 @@ import (
 type SubscriptionPaymentCallback struct {
 }
 
-func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment) {
+func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	if consts.ProrationUsingUniBeeCompute {
+		// better use redis mq to trace payment
+		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
+			_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+				dao.Subscription.Columns().LatestInvoiceId: invoice.InvoiceId,
+			}).Where(dao.Subscription.Columns().SubscriptionId, payment.SubscriptionId).OmitNil().Update()
+			if err != nil {
+				utility.AssertError(err, "PaymentCreateCallback")
+			}
+		}
+	}
+}
+
+func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		// better use redis mq to trace payment
 		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
@@ -56,7 +73,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 	}
 }
 
-func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context, payment *entity.Payment) {
+func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")

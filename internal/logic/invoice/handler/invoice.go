@@ -152,7 +152,7 @@ type CreateInvoiceInternalReq struct {
 	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`   // period_end
 }
 
-func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) error {
+func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
 	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId)
@@ -170,13 +170,16 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) erro
 		dao.Invoice.Columns().Link:             payment.Link,
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if one.Status != status {
 		//更新状态发送邮件
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
-	return nil
+	one.Status = status
+	one.ChannelPaymentId = payment.ChannelPaymentId
+	one.Link = payment.Link
+	return one, nil
 }
 
 func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId string) error {
@@ -190,7 +193,7 @@ func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId str
 	return nil
 }
 
-func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceDetailSimplify, payment *entity.Payment) error {
+func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceDetailSimplify, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
@@ -242,7 +245,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdateInvoiceByChannelDetail record insert failure %s`, err.Error())
-			return err
+			return nil, err
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
@@ -250,7 +253,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		err = UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		//更新
@@ -275,14 +278,15 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			dao.Invoice.Columns().Link:                           payment.Link,
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if one.Status != status {
 			//更新状态发送邮件
 			_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		}
 	}
-	return nil
+	one = query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	return one, nil
 }
 
 func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
