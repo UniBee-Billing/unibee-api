@@ -29,12 +29,13 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 			var addonParams []*ro.SubscriptionPlanAddonParamRo
 			_ = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 			subDetails = append(subDetails, &ro.SubscriptionDetailRo{
-				User:         subDetailRes.User,
-				Subscription: subDetailRes.Subscription,
-				Plan:         subDetailRes.Plan,
-				Channel:      subDetailRes.Channel,
-				AddonParams:  addonParams,
-				Addons:       subDetailRes.Addons,
+				User:                                subDetailRes.User,
+				Subscription:                        subDetailRes.Subscription,
+				Plan:                                subDetailRes.Plan,
+				Channel:                             subDetailRes.Channel,
+				AddonParams:                         addonParams,
+				Addons:                              subDetailRes.Addons,
+				UnfinishedSubscriptionPendingUpdate: subDetailRes.UnfinishedSubscriptionPendingUpdate,
 			})
 		}
 	}
