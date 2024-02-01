@@ -1167,6 +1167,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 					AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 						Enabled: stripe.Bool(true),
 					},
+					Metadata:  createPayContext.MediaData,
 					ReturnURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 				}
 				params.PaymentMethod = stripe.String(method)
