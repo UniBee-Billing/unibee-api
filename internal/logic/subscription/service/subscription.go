@@ -188,12 +188,18 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		TotalAmountExcludingTax = TotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
 	}
 
+	var billingCycleAnchor = gtime.Now()
+	var currentTimeStart = billingCycleAnchor
+	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), uint64(req.PlanId))
+
 	invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 		Currency:      currency,
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
 		TaxScale:      standardTaxScale,
+		PeriodStart:   currentTimeStart.Timestamp(),
+		PeriodEnd:     currentTimeEnd,
 	})
 
 	return &SubscriptionCreatePrepareInternalRes{
@@ -244,10 +250,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		subType = consts.SubTypeUniBeeControl
 	}
 
-	var billingCycleAnchor = gtime.Now()
-	var currentTimeStart = billingCycleAnchor
-	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), prepare.Plan.Id)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, currentTimeEnd, prepare.Plan.Id)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, prepare.Invoice.PeriodEnd, prepare.Plan.Id)
 
 	one := &entity.Subscription{
 		MerchantId:         prepare.MerchantInfo.Id,
@@ -268,10 +271,10 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		VatVerifyData:      prepare.VatVerifyData,
 		CountryCode:        prepare.VatCountryCode,
 		TaxScale:           prepare.TaxScale,
-		CurrentPeriodStart: currentTimeStart.Timestamp(),
-		CurrentPeriodEnd:   currentTimeEnd,
+		CurrentPeriodStart: prepare.Invoice.PeriodStart,
+		CurrentPeriodEnd:   prepare.Invoice.PeriodEnd,
 		DunningTime:        dunningTime,
-		BillingCycleAnchor: billingCycleAnchor.Timestamp(),
+		BillingCycleAnchor: prepare.Invoice.PeriodStart,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -528,7 +531,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	if sub.TrialEnd > sub.CurrentPeriodEnd {
 		nextPeriodStart = sub.TrialEnd
 	}
-	var nextPeriodEnd = nextPeriodStart + (sub.CurrentPeriodEnd - sub.CurrentPeriodStart)
+	var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, uint64(req.NewPlanId))
 
 	var totalAmount int64
 	var prorationInvoice *ro.InvoiceDetailSimplify
@@ -629,11 +632,14 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				SubscriptionAmount:             updatePreviewRes.Invoice.SubscriptionAmount,
 				SubscriptionAmountExcludingTax: updatePreviewRes.Invoice.SubscriptionAmountExcludingTax,
 				Lines:                          updatePreviewRes.Invoice.Lines,
+				PeriodStart:                    prorationDate,
+				PeriodEnd:                      sub.CurrentPeriodEnd,
+				ProrationScale:                 sub.TaxScale,
+				ProrationDate:                  prorationDate,
 			}
 
 			utility.Assert(updatePreviewRes.NextPeriodInvoice.Lines != nil, "internal error, next_period_line is blank")
 
-			//nextPeriodTotalAmount = updatePreviewRes.NextPeriodInvoice.TotalAmount
 			nextPeriodInvoice = &ro.InvoiceDetailSimplify{
 				TotalAmount:                    updatePreviewRes.NextPeriodInvoice.TotalAmount,
 				TotalAmountExcludingTax:        updatePreviewRes.NextPeriodInvoice.TotalAmountExcludingTax,
@@ -642,6 +648,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				SubscriptionAmount:             updatePreviewRes.NextPeriodInvoice.SubscriptionAmount,
 				SubscriptionAmountExcludingTax: updatePreviewRes.NextPeriodInvoice.SubscriptionAmountExcludingTax,
 				Lines:                          updatePreviewRes.NextPeriodInvoice.Lines,
+				PeriodStart:                    nextPeriodStart,
+				PeriodEnd:                      nextPeriodEnd,
 			}
 		}
 	} else {

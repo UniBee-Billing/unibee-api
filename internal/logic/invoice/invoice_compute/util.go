@@ -236,5 +236,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		Lines:                          invoiceItems,
 		ProrationDate:                  req.ProrationDate,
 		ProrationScale:                 timeScale,
+		PeriodStart:                    req.ProrationDate,
+		PeriodEnd:                      req.PeriodEnd,
 	}
 }
