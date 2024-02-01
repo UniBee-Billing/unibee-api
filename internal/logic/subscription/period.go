@@ -27,6 +27,9 @@ func GetPeriodEndFromStart(ctx context.Context, start int64, planId uint64) int6
 }
 
 func GetDunningTimeFromEnd(ctx context.Context, end int64, planId uint64) int64 {
+	if end == 0 {
+		return 0
+	}
 	plan := query.GetPlanById(ctx, int64(planId))
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
 	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
