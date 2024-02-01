@@ -1100,37 +1100,6 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	channelUser := queryAndCreateChannelUser(ctx, createPayContext.PayChannel, createPayContext.Pay.UserId)
 
 	if createPayContext.CheckoutMode {
-
-		//channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, createPayContext.PayChannel.Id)
-		//if channelVatRate == nil {
-		//	params := &stripe.TaxRateParams{
-		//		DisplayName: stripe.String("VAT"),
-		//		//Description: stripe.String(createPayContext.Pay.CountryName),
-		//		Percentage: stripe.Float64(utility.ConvertTaxScaleToPercentageFloat(createPayContext.Pay.StandardTaxPercentage)),
-		//		Country:    stripe.String(createPayContext.Pay.CountryCode),
-		//		Active:     stripe.Bool(true),
-		//		//Jurisdiction: stripe.String("DE"),
-		//		Inclusive: stripe.Bool(false),
-		//	}
-		//	vatCreateResult, err := taxrate.New(params)
-		//	if err != nil {
-		//		g.Log().Printf(ctx, "taxrate.New: %v", err.Error())
-		//		return nil, err
-		//	}
-		//	channelVatRate = &entity.ChannelVatRate{
-		//		VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
-		//		ChannelId:        int64(createPayContext.PayChannel.Id),
-		//		ChannelVatRateId: vatCreateResult.ID,
-		//	}
-		//	result, err := dao.ChannelVatRate.Ctx(ctx).Data(channelVatRate).OmitNil().Insert(channelVatRate)
-		//	if err != nil {
-		//		err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err.Error())
-		//		return nil, err
-		//	}
-		//	id, _ := result.LastInsertId()
-		//	channelVatRate.Id = uint64(uint(id))
-		//}
-
 		var items []*stripe.CheckoutSessionLineItemParams
 		for _, line := range createPayContext.Invoice.Lines {
 			items = append(items, &stripe.CheckoutSessionLineItemParams{
@@ -1146,12 +1115,9 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
-			Customer:  stripe.String(channelUser.ChannelUserId),
-			Currency:  stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
-			LineItems: items,
-			//AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
-			//	Enabled: stripe.Bool(false), //Default值 false，表示不需要 stripe 计算税率，true 反之
-			//},
+			Customer:   stripe.String(channelUser.ChannelUserId),
+			Currency:   stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
+			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
 		}
@@ -1181,6 +1147,55 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			Link:                   detail.URL,
 		}, nil
 	} else {
+		if createPayContext.PayMethod == 1 && createPayContext.PayImmediate {
+			// try use payment intent
+			listQuery, err := s.DoRemoteChannelUserPaymentMethodListQuery(ctx, createPayContext.PayChannel, channelUser.UserId)
+			if err != nil {
+				return nil, err
+			}
+
+			var success = false
+			var response *stripe.PaymentIntent
+			var channelPaymentId = ""
+			var link = ""
+			for _, method := range listQuery.PaymentMethods {
+				params := &stripe.PaymentIntentParams{
+					Customer: stripe.String(channelUser.ChannelUserId),
+					Confirm:  stripe.Bool(true),
+					Amount:   stripe.Int64(createPayContext.Invoice.TotalAmount),
+					Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
+					AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+						Enabled: stripe.Bool(true),
+					},
+					ReturnURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
+				}
+				params.PaymentMethod = stripe.String(method)
+				response, err = paymentintent.New(params)
+				var status = ""
+
+				if response != nil {
+					status = string(response.Status)
+					channelPaymentId = response.ID
+					if response.Invoice != nil {
+						link = response.Invoice.HostedInvoiceURL
+					}
+				}
+				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s error:%s\n", method, channelPaymentId, status, err)
+				if err == nil && strings.Compare(string(response.Status), "succeeded") == 0 {
+					success = true
+					break
+				}
+			}
+			if success && response != nil && len(channelPaymentId) > 0 {
+				return &ro.CreatePayInternalResp{
+					Status:                 consts.PAY_SUCCESS,
+					ChannelPaymentId:       channelPaymentId,
+					ChannelPaymentIntentId: response.ID,
+					Link:                   link,
+				}, nil
+			}
+		}
+		// need payment link
 		params := &stripe.InvoiceParams{
 			Metadata: createPayContext.MediaData,
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),

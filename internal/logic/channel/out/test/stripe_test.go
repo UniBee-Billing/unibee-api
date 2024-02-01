@@ -21,11 +21,11 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	})
 
 	params := &stripe.PaymentIntentParams{
-		Customer:      stripe.String("cus_PRN8fMP3darP9R"),
-		PaymentMethod: stripe.String("pm_1OexexHhgikz9ijMN36e5Yqa"),
-		Confirm:       stripe.Bool(true),
-		Amount:        stripe.Int64(202),
-		Currency:      stripe.String(string(stripe.CurrencyUSD)),
+		Customer: stripe.String("cus_PRN8fMP3darP9R"),
+		//PaymentMethod: stripe.String("pm_1OexexHhgikz9ijMN36e5Yqa"),
+		Confirm:  stripe.Bool(true),
+		Amount:   stripe.Int64(202),
+		Currency: stripe.String(string(stripe.CurrencyUSD)),
 		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 			Enabled: stripe.Bool(true),
 		},
