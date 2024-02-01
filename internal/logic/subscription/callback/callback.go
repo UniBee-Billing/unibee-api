@@ -30,7 +30,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 				merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 				if merchant != nil {
 					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
-						UserName:            user.UserName,
+						UserName:            user.FirstName + " " + user.LastName,
 						MerchantProductName: plan.ChannelProductName,
 						MerchantCustomEmail: merchant.Email,
 						MerchantName:        merchant.Name,

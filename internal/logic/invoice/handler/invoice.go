@@ -248,7 +248,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		//err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName, fmt.Sprintf("%s.pdf", one.InvoiceId))
 		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, template, pdfFileName, &email.TemplateVariable{
 			InvoiceId:           one.InvoiceId,
-			UserName:            user.UserName,
+			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: merchantProductName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,

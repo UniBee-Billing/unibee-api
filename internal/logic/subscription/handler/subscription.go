@@ -303,7 +303,7 @@ func SendSubscriptionEmailToUser(ctx context.Context, subscriptionId string, tem
 	}
 
 	err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, template, "", &email.TemplateVariable{
-		UserName:            user.UserName,
+		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: merchantProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,

@@ -30,7 +30,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	merchantUser := query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(merchantUser != nil, "merchant user not found")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, email.TemplateUserOTPLogin, "", &email.TemplateVariable{
-		UserName:         merchantUser.UserName,
+		UserName:         merchantUser.FirstName + " " + merchantUser.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

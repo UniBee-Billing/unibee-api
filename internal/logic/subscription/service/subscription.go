@@ -1009,7 +1009,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 		if merchant != nil {
 			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
-				UserName:            user.UserName,
+				UserName:            user.FirstName + " " + user.LastName,
 				MerchantProductName: plan.ChannelProductName,
 				MerchantCustomEmail: merchant.Email,
 				MerchantName:        merchant.Name,
@@ -1061,7 +1061,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	if merchantUserId > 0 {
 		//merchant Cancel
 		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
-			UserName:            user.UserName,
+			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.ChannelProductName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
@@ -1072,7 +1072,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 		}
 	} else {
 		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
-			UserName:            user.UserName,
+			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.ChannelProductName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
@@ -1119,7 +1119,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
-		UserName:            user.UserName,
+		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: plan.ChannelProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,

@@ -95,7 +95,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
-		UserName:            user.UserName,
+		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).ChannelProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,

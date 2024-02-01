@@ -46,7 +46,7 @@ type RegisterReq struct {
 	Address     string `p:"address" dc:"Address"`
 	CountryCode string `p:"countryCode" dc:"CountryCode"`
 	CountryName string `p:"countryName" dc:"CountryName"`
-	UserName    string `p:"userName" dc:"UserName" v:"required"`
+	UserName    string `p:"userName" dc:"UserName"`
 }
 type RegisterRes struct {
 	// User *entity.UserAccount `p:"user" dc:"user"`
