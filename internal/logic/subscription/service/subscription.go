@@ -883,6 +883,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			//})
 			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
 				Paid: false,
+				Link: "",
 			}
 		}
 	} else {
@@ -948,7 +949,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
-		Paid:                      len(subUpdateRes.Link) == 0,
+		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid,
 		Link:                      subUpdateRes.Link,
 	}, nil
 }
