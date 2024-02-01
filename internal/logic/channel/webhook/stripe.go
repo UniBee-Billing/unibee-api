@@ -71,6 +71,8 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.created"),
 				stripe.String("invoice.updated"), //todo mark 并发所有发票都会产生支付，并发所有订阅更新都会产生支付，可能从贷方余额支付（需确认）或者更新会产生退款从情况，所有 invoice.paid 可能必须要接
 				stripe.String("invoice.paid"),
+				stripe.String("invoice.voided"),
+				stripe.String("invoice.will_be_due"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
@@ -113,6 +115,8 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.created"),
 				stripe.String("invoice.updated"),
 				stripe.String("invoice.paid"),
+				stripe.String("invoice.voided"),
+				stripe.String("invoice.will_be_due"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
@@ -182,7 +186,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 				responseBack = http.StatusBadRequest
 			}
 		}
-	case "invoice.upcoming", "invoice.created", "invoice.updated", "invoice.paid", "invoice.payment_failed", "invoice.payment_action_required":
+	case "invoice.upcoming", "invoice.created", "invoice.updated", "invoice.paid", "invoice.payment_failed", "invoice.payment_action_required", "invoice.voided", "invoice.will_be_due":
 		var stripeInvoice stripe.Invoice
 		err = json.Unmarshal(event.Data.Raw, &stripeInvoice)
 		if err != nil {
@@ -200,7 +204,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 				responseBack = http.StatusBadRequest
 			}
 		}
-	case "payment_intent.created", "payment_intent.succeeded", "payment_intent.canceled", "payment_intent.partially_funded", "payment_intent.requires_action":
+	case "payment_intent.created", "payment_intent.succeeded", "payment_intent.canceled", "payment_intent.partially_funded", "payment_intent.payment_failed", "payment_intent.requires_action":
 		var stripePayment stripe.PaymentIntent
 		err = json.Unmarshal(event.Data.Raw, &stripePayment)
 		if err != nil {
