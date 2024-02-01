@@ -226,7 +226,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 
 					invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingSubUpdate.UpdateCurrency,
-						PlanId:        pendingSubUpdate.UpdateAmount,
+						PlanId:        pendingSubUpdate.UpdatePlanId,
 						Quantity:      pendingSubUpdate.UpdateQuantity,
 						AddonJsonData: pendingSubUpdate.UpdateAddonData,
 						TaxScale:      sub.TaxScale,

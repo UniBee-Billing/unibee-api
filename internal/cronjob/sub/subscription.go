@@ -81,7 +81,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 						var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
 						invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 							Currency:      pendingUpdate.UpdateCurrency,
-							PlanId:        pendingUpdate.UpdateAmount,
+							PlanId:        pendingUpdate.UpdatePlanId,
 							Quantity:      pendingUpdate.UpdateQuantity,
 							AddonJsonData: pendingUpdate.UpdateAddonData,
 							TaxScale:      sub.TaxScale,
