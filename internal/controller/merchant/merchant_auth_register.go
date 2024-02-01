@@ -42,6 +42,7 @@ func hashAndSalt(pwd []byte) string {
 }
 
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
+	utility.Assert(len(req.Email) > 0, "email is needed")
 	var newOne *entity.MerchantUserAccount
 	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne == nil, "Email already existed")
