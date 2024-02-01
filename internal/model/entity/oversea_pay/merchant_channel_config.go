@@ -24,7 +24,7 @@ type MerchantChannelConfig struct {
 	ChannelKey       string      `json:"channelKey"       description:""`                                              //
 	ChannelSecret    string      `json:"channelSecret"    description:"secret"`                                        // secret
 	Custom           string      `json:"custom"           description:"custom"`                                        // custom
-	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"创建时间"`                                          // 创建时间
+	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"create time"`                                   // create time
 	GmtModify        *gtime.Time `json:"gmtModify"        description:"修改时间"`                                          // 修改时间
 	Description      string      `json:"description"      description:"支付方式描述"`                                        // 支付方式描述
 	WebhookKey       string      `json:"webhookKey"       description:"webhook_key"`                                   // webhook_key

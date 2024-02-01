@@ -14,7 +14,7 @@ type MerchantConfig struct {
 	MerchantId  int64       `json:"merchantId"  description:"merchantId"`            // merchantId
 	ConfigKey   string      `json:"configKey"   description:"config_key"`            // config_key
 	ConfigValue string      `json:"configValue" description:"config_value"`          // config_value
-	GmtCreate   *gtime.Time `json:"gmtCreate"   description:"创建时间"`                  // 创建时间
+	GmtCreate   *gtime.Time `json:"gmtCreate"   description:"create time"`           // create time
 	GmtModify   *gtime.Time `json:"gmtModify"   description:"修改时间"`                  // 修改时间
 	IsDeleted   int         `json:"isDeleted"   description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 }

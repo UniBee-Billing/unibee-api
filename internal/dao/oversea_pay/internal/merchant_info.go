@@ -31,7 +31,7 @@ type MerchantInfoColumns struct {
 	Idcard      string // 个人或法人身份证号
 	Location    string // 省市区地址
 	Address     string // 详细地址
-	GmtCreate   string // 创建时间
+	GmtCreate   string // create time
 	GmtModify   string // 修改时间
 	IsDeleted   string // 0-UnDeleted，1-Deleted
 	CompanyLogo string // 账号头像

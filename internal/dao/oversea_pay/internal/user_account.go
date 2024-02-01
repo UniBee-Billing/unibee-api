@@ -21,7 +21,7 @@ type UserAccountDao struct {
 // UserAccountColumns defines and stores column names for table user_account.
 type UserAccountColumns struct {
 	Id                 string // userId
-	GmtCreate          string // 创建时间
+	GmtCreate          string // create time
 	GmtModify          string // 修改时间
 	IsDeleted          string // 0-UnDeleted，1-Deleted
 	Password           string // 密码，加密存储

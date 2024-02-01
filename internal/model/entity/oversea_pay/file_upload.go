@@ -15,7 +15,7 @@ type FileUpload struct {
 	Url       string      `json:"url"       description:""`                      //
 	FileName  string      `json:"fileName"  description:""`                      //
 	Tag       string      `json:"tag"       description:""`                      //
-	GmtCreate *gtime.Time `json:"gmtCreate" description:""`                      //
+	GmtCreate *gtime.Time `json:"gmtCreate" description:"create time"`           // create time
 	GmtModify *gtime.Time `json:"gmtModify" description:""`                      //
 	IsDeleted int         `json:"isDeleted" description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 }

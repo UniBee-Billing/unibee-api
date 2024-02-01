@@ -22,7 +22,7 @@ type OpenApiConfigDao struct {
 type OpenApiConfigColumns struct {
 	Id              string //
 	Qps             string // 开放平台Api qps总控制
-	GmtCreate       string // 创建时间
+	GmtCreate       string // create time
 	GmtModify       string // 修改时间
 	MerchantId      string // 商户Id
 	Hmac            string // 回调加密hmac

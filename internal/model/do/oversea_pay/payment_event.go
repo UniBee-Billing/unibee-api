@@ -24,7 +24,7 @@ type PaymentEvent struct {
 	Event           interface{} // 事件
 	RelativeTradeNo interface{} // 关联单号
 	UniqueNo        interface{} // 唯一键
-	GmtCreate       *gtime.Time // 创建时间
+	GmtCreate       *gtime.Time // create time
 	GmtModify       *gtime.Time // 更新时间
 	Message         interface{} // message
 }

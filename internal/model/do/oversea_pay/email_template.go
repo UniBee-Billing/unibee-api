@@ -18,7 +18,7 @@ type EmailTemplate struct {
 	TemplateTitle      interface{} //
 	TemplateContent    interface{} //
 	TemplateAttachName interface{} //
-	GmtCreate          *gtime.Time //
-	GmtModify          *gtime.Time //
+	GmtCreate          *gtime.Time // create time
+	GmtModify          *gtime.Time // update time
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
 }

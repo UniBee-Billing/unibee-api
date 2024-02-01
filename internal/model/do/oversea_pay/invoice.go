@@ -19,7 +19,7 @@ type Invoice struct {
 	InvoiceId                      interface{} // 发票ID（内部编号）
 	InvoiceName                    interface{} // 发票名称
 	UniqueId                       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	GmtCreate                      *gtime.Time // 创建时间
+	GmtCreate                      *gtime.Time // create time
 	TotalAmount                    interface{} // 金额,单位：分
 	TaxAmount                      interface{} // Tax金额,单位：分
 	SubscriptionAmount             interface{} // Sub金额,单位：分
@@ -46,7 +46,7 @@ type Invoice struct {
 	PeriodEnd                      interface{} // period_end
 	PeriodStartTime                *gtime.Time //
 	PeriodEndTime                  *gtime.Time //
-	PaymentId                      interface{} // PaymentId
+	PaymentId                      interface{} // paymentId
 	RefundId                       interface{} // refundId
 	Data                           interface{} // 渠道额外参数，JSON格式
 	BizType                        interface{} // 业务类型。1-single payment, 3-subscription

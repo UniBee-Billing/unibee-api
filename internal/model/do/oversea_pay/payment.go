@@ -18,7 +18,7 @@ type Payment struct {
 	OpenApiId              interface{} // 使用的开放平台配置Id
 	UserId                 interface{} // user_id
 	SubscriptionId         interface{} // 订阅id（内部编号）
-	GmtCreate              *gtime.Time // 创建时间
+	GmtCreate              *gtime.Time // create time
 	BizType                interface{} // 业务类型。1-single payment, 3-subscription
 	BizId                  interface{} // 业务id-即商户订单号
 	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码

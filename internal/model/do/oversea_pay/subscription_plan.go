@@ -13,7 +13,7 @@ import (
 type SubscriptionPlan struct {
 	g.Meta                    `orm:"table:subscription_plan, do:true"`
 	Id                        interface{} //
-	GmtCreate                 *gtime.Time // 创建时间
+	GmtCreate                 *gtime.Time // create time
 	GmtModify                 *gtime.Time // 修改时间
 	CompanyId                 interface{} // 公司ID
 	MerchantId                interface{} // 商户Id

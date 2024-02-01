@@ -18,7 +18,7 @@ type MerchantVatNumberVerifyHistory struct {
 	CountryCode     string      `json:"countryCode"     description:"country_code"`          // country_code
 	CompanyName     string      `json:"companyName"     description:"company_name"`          // company_name
 	CompanyAddress  string      `json:"companyAddress"  description:"company_address"`       // company_address
-	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"创建时间"`                  // 创建时间
+	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`           // create time
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"修改时间"`                  // 修改时间
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	ValidateMessage string      `json:"validateMessage" description:"validate_message"`      // validate_message

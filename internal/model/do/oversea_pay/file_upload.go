@@ -17,7 +17,7 @@ type FileUpload struct {
 	Url       interface{} //
 	FileName  interface{} //
 	Tag       interface{} //
-	GmtCreate *gtime.Time //
+	GmtCreate *gtime.Time // create time
 	GmtModify *gtime.Time //
 	IsDeleted interface{} // 0-UnDeleted，1-Deleted
 }

@@ -16,7 +16,7 @@ type ChannelHttpLog struct {
 	Url       interface{} // request url
 	Request   interface{} // request body(json)
 	Response  interface{} // response(json)
-	RequestId interface{} // reuqest_id
+	RequestId interface{} // request_id
 	Mamo      interface{} // mamo
 	ChannelId interface{} // channel_id
 	GmtCreate *gtime.Time // create time

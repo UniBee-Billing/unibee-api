@@ -21,7 +21,7 @@ type PaymentTimeline struct {
 	Currency       interface{} // 货币
 	TotalAmount    interface{} // 金额,单位：分
 	ChannelId      interface{} // 支付渠道Id
-	GmtCreate      *gtime.Time // 创建时间
+	GmtCreate      *gtime.Time // create time
 	GmtModify      *gtime.Time // 修改时间
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
 	PaymentId      interface{} // PaymentId

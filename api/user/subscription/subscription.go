@@ -115,6 +115,7 @@ type SubscriptionUpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
 	Paid                      bool                              `json:"paid" dc:"Paid，true|false"`
 	Link                      string                            `json:"link" dc:"Pay Link"`
+	Note                      string                            `json:"note" dc:"note"`
 }
 
 type SubscriptionListReq struct {

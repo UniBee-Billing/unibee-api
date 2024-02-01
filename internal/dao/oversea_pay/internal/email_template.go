@@ -26,8 +26,8 @@ type EmailTemplateColumns struct {
 	TemplateTitle      string //
 	TemplateContent    string //
 	TemplateAttachName string //
-	GmtCreate          string //
-	GmtModify          string //
+	GmtCreate          string // create time
+	GmtModify          string // update time
 	IsDeleted          string // 0-UnDeleted，1-Deleted
 }
 

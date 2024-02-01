@@ -25,7 +25,7 @@ type FileUploadColumns struct {
 	Url       string //
 	FileName  string //
 	Tag       string //
-	GmtCreate string //
+	GmtCreate string // create time
 	GmtModify string //
 	IsDeleted string // 0-UnDeleted，1-Deleted
 }

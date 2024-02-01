@@ -24,7 +24,7 @@ type ChannelHttpLogColumns struct {
 	Url       string // request url
 	Request   string // request body(json)
 	Response  string // response(json)
-	RequestId string // reuqest_id
+	RequestId string // request_id
 	Mamo      string // mamo
 	ChannelId string // channel_id
 	GmtCreate string // create time

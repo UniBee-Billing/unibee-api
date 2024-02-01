@@ -18,7 +18,7 @@ type SubscriptionTimeline struct {
 	PeriodEnd       int64       `json:"periodEnd"       description:"period_end"`                                      // period_end
 	PeriodStartTime *gtime.Time `json:"periodStartTime" description:""`                                                //
 	PeriodEndTime   *gtime.Time `json:"periodEndTime"   description:""`                                                //
-	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"创建时间"`                                            // 创建时间
+	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`                                     // create time
 	InvoiceId       string      `json:"invoiceId"       description:"发票ID（内部编号）"`                                      // 发票ID（内部编号）
 	UniqueId        string      `json:"uniqueId"        description:"唯一键"`                                             // 唯一键
 	Currency        string      `json:"currency"        description:"货币"`                                              // 货币

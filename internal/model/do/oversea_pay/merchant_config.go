@@ -16,7 +16,7 @@ type MerchantConfig struct {
 	MerchantId  interface{} // merchantId
 	ConfigKey   interface{} // config_key
 	ConfigValue interface{} // config_value
-	GmtCreate   *gtime.Time // 创建时间
+	GmtCreate   *gtime.Time // create time
 	GmtModify   *gtime.Time // 修改时间
 	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
 }

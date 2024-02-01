@@ -23,5 +23,5 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")
 	}
-	return service.SubscriptionUpdate(ctx, req, 0, "")
+	return service.SubscriptionUpdate(ctx, req, 0)
 }

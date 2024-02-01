@@ -28,7 +28,7 @@ type Refund struct {
 	RefundComment        interface{} // 退款备注
 	Status               interface{} // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           *gtime.Time // 退款成功时间
-	GmtCreate            *gtime.Time // 创建时间
+	GmtCreate            *gtime.Time // create time
 	GmtModify            *gtime.Time // 更新时间
 	ChannelRefundId      interface{} // 外部退款单号
 	AppId                interface{} // 退款使用的APPID

@@ -26,7 +26,7 @@ type PaymentColumns struct {
 	OpenApiId              string // 使用的开放平台配置Id
 	UserId                 string // user_id
 	SubscriptionId         string // 订阅id（内部编号）
-	GmtCreate              string // 创建时间
+	GmtCreate              string // create time
 	BizType                string // 业务类型。1-single payment, 3-subscription
 	BizId                  string // 业务id-即商户订单号
 	Currency               string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码

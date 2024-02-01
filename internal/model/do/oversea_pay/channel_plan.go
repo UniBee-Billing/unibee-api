@@ -13,8 +13,8 @@ import (
 type ChannelPlan struct {
 	g.Meta               `orm:"table:channel_plan, do:true"`
 	Id                   interface{} //
-	GmtCreate            *gtime.Time // 创建时间
-	GmtModify            *gtime.Time // 修改时间
+	GmtCreate            *gtime.Time // create time
+	GmtModify            *gtime.Time // update time
 	PlanId               interface{} // PlanId
 	ChannelId            interface{} // 支付渠道Id
 	Status               interface{} // 0-Init | 1-Create｜2-Active｜3-Inactive

@@ -32,7 +32,7 @@ type PaymentEventColumns struct {
 	Event           string // 事件
 	RelativeTradeNo string // 关联单号
 	UniqueNo        string // 唯一键
-	GmtCreate       string // 创建时间
+	GmtCreate       string // create time
 	GmtModify       string // 更新时间
 	Message         string // message
 }

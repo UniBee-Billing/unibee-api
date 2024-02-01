@@ -23,7 +23,7 @@ type MerchantInfo struct {
 	Idcard      interface{} // 个人或法人身份证号
 	Location    interface{} // 省市区地址
 	Address     interface{} // 详细地址
-	GmtCreate   *gtime.Time // 创建时间
+	GmtCreate   *gtime.Time // create time
 	GmtModify   *gtime.Time // 修改时间
 	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
 	CompanyLogo interface{} // 账号头像

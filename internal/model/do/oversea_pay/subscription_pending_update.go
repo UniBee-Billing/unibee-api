@@ -17,7 +17,7 @@ type SubscriptionPendingUpdate struct {
 	SubscriptionId       interface{} // 订阅id（内部编号）
 	UpdateSubscriptionId interface{} // 升级单ID（内部编号）
 	ChannelUpdateId      interface{} // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
-	GmtCreate            *gtime.Time // 创建时间
+	GmtCreate            *gtime.Time // create time
 	Amount               interface{} // 本周期金额,单位：分
 	Status               interface{} // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	ProrationAmount      interface{} // 下周期金额,单位：分
@@ -42,6 +42,6 @@ type SubscriptionPendingUpdate struct {
 	ResponseData         interface{} // 渠道返回参数，JSON格式
 	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
 	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
-	AdminNote            interface{} // Admin 修改备注
+	Note                 interface{} // note
 	ProrationDate        interface{} // merchant_user_id
 }

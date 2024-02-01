@@ -13,7 +13,7 @@ import (
 type UserAccount struct {
 	g.Meta             `orm:"table:user_account, do:true"`
 	Id                 interface{} // userId
-	GmtCreate          *gtime.Time // 创建时间
+	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // 修改时间
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
 	Password           interface{} // 密码，加密存储

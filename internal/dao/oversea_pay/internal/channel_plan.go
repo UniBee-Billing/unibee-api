@@ -21,8 +21,8 @@ type ChannelPlanDao struct {
 // ChannelPlanColumns defines and stores column names for table channel_plan.
 type ChannelPlanColumns struct {
 	Id                   string //
-	GmtCreate            string // 创建时间
-	GmtModify            string // 修改时间
+	GmtCreate            string // create time
+	GmtModify            string // update time
 	PlanId               string // PlanId
 	ChannelId            string // 支付渠道Id
 	Status               string // 0-Init | 1-Create｜2-Active｜3-Inactive

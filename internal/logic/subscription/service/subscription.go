@@ -746,7 +746,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64, adminNote string) (*subscription.SubscriptionUpdateRes, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
@@ -767,7 +767,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	var effectImmediate = 0
 	var effectTime = prepare.Subscription.CurrentPeriodEnd
-	if prepare.EffectImmediate {
+	if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 		effectImmediate = 1
 		effectTime = gtime.Now().Timestamp()
 	}
@@ -792,7 +792,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		Status:               consts.PendingSubStatusInit,
 		Data:                 "", //额外参数配置
 		MerchantUserId:       merchantUserId,
-		AdminNote:            adminNote,
 		ProrationDate:        req.ProrationDate,
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
@@ -905,7 +904,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
-	// 标记更新单
+	// bing to subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().PendingUpdateId: one.UpdateSubscriptionId,
 		dao.Subscription.Columns().GmtModify:       gtime.Now(),
@@ -930,6 +929,12 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if subUpdateRes.Paid {
 		PaidInt = 1
 	}
+	var note = "Success"
+	if effectImmediate == 1 && !subUpdateRes.Paid {
+		note = "Payment Action Required"
+	} else {
+		note = "Will Effect At Period End"
+	}
 
 	one.Link = subUpdateRes.Link
 	one.Status = consts.PendingSubStatusCreate
@@ -940,6 +945,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
 		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
 		dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId: subUpdateRes.ChannelUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().Note:            note,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, one.UpdateSubscriptionId).OmitNil().Update()
 	if err != nil {
 		return nil, err
@@ -957,6 +963,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		SubscriptionPendingUpdate: one,
 		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
 		Link:                      subUpdateRes.Link,
+		Note:                      note,
 	}, nil
 }
 

@@ -31,7 +31,7 @@ type MerchantOperationLogColumns struct {
 	OptContent         string // 操作内容
 	OptCreate          string // 操作发生时间
 	IsDelete           string // 0-UnDeleted，1-Deleted
-	GmtCreate          string // 创建时间
+	GmtCreate          string // create time
 	GmtModify          string // 修改时间
 	QueryportRequestId string // queryport请求Id，可在request_security_log查询请求信息
 	ServerType         string // 操作终端，参看 message-api包 OperationLogServerTypeEnum的code

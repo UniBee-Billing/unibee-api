@@ -34,7 +34,7 @@ type MerchantChannelConfigColumns struct {
 	ChannelKey       string //
 	ChannelSecret    string // secret
 	Custom           string // custom
-	GmtCreate        string // 创建时间
+	GmtCreate        string // create time
 	GmtModify        string // 修改时间
 	Description      string // 支付方式描述
 	WebhookKey       string // webhook_key

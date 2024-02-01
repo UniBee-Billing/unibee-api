@@ -11,7 +11,7 @@ import (
 // SubscriptionPlan is the golang structure for table subscription_plan.
 type SubscriptionPlan struct {
 	Id                        uint64      `json:"id"                        description:""`                                                                                   //
-	GmtCreate                 *gtime.Time `json:"gmtCreate"                 description:"创建时间"`                                                                               // 创建时间
+	GmtCreate                 *gtime.Time `json:"gmtCreate"                 description:"create time"`                                                                        // create time
 	GmtModify                 *gtime.Time `json:"gmtModify"                 description:"修改时间"`                                                                               // 修改时间
 	CompanyId                 int64       `json:"companyId"                 description:"公司ID"`                                                                               // 公司ID
 	MerchantId                int64       `json:"merchantId"                description:"商户Id"`                                                                               // 商户Id

@@ -13,7 +13,7 @@ import (
 type MerchantPayChannelMapping struct {
 	g.Meta     `orm:"table:merchant_pay_channel_mapping, do:true"`
 	Id         interface{} //
-	GmtCreate  *gtime.Time // 创建时间
+	GmtCreate  *gtime.Time // create time
 	GmtModify  *gtime.Time // 修改时间
 	MerchantId interface{} // 商户Id
 	ChannelId  interface{} // oversea_pay_channel表的id

@@ -20,7 +20,7 @@ type MerchantVatNumberVerifyHistory struct {
 	CountryCode     interface{} // country_code
 	CompanyName     interface{} // company_name
 	CompanyAddress  interface{} // company_address
-	GmtCreate       *gtime.Time // 创建时间
+	GmtCreate       *gtime.Time // create time
 	GmtModify       *gtime.Time // 修改时间
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	ValidateMessage interface{} // validate_message

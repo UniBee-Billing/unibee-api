@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/invoice"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 	"go-oversea-pay/utility"
 	"testing"
 )
@@ -19,6 +19,20 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 		Version: "0.0.1",
 		URL:     "https://unibee.dev",
 	})
+
+	params := &stripe.PaymentIntentParams{
+		Customer:      stripe.String("cus_PRN8fMP3darP9R"),
+		PaymentMethod: stripe.String("pm_1OexexHhgikz9ijMN36e5Yqa"),
+		Confirm:       stripe.Bool(true),
+		Amount:        stripe.Int64(202),
+		Currency:      stripe.String(string(stripe.CurrencyUSD)),
+		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+			Enabled: stripe.Bool(true),
+		},
+		ReturnURL: stripe.String("http://unibee.top"),
+	}
+	response, err := paymentintent.New(params)
+	fmt.Printf("intent:%s error:%s\n", utility.MarshalToJsonString(response), err)
 
 	//detailResponse, err := sub.Get("sub_1OV191Hhgikz9ijMPTz8X9Wh", &stripe.SubscriptionParams{})
 	//if err != nil {
@@ -78,7 +92,8 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 
 	//}()
 
-	params := &stripe.InvoicePayParams{}
-	response, err := invoice.Pay("in_1OeiQeHhgikz9ijM6KmUtKTj", params)
-	fmt.Printf("detail current cycle:%s error:%s\n", utility.MarshalToJsonString(response), err)
+	//params := &stripe.InvoicePayParams{}
+	//response, err := invoice.Pay("in_1OeiQeHhgikz9ijM6KmUtKTj", params)
+	//fmt.Printf("detail current cycle:%s error:%s\n", utility.MarshalToJsonString(response), err)
+
 }

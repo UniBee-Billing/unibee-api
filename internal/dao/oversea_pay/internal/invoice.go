@@ -27,7 +27,7 @@ type InvoiceColumns struct {
 	InvoiceId                      string // 发票ID（内部编号）
 	InvoiceName                    string // 发票名称
 	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	GmtCreate                      string // 创建时间
+	GmtCreate                      string // create time
 	TotalAmount                    string // 金额,单位：分
 	TaxAmount                      string // Tax金额,单位：分
 	SubscriptionAmount             string // Sub金额,单位：分
@@ -54,7 +54,7 @@ type InvoiceColumns struct {
 	PeriodEnd                      string // period_end
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
-	PaymentId                      string // PaymentId
+	PaymentId                      string // paymentId
 	RefundId                       string // refundId
 	Data                           string // 渠道额外参数，JSON格式
 	BizType                        string // 业务类型。1-single payment, 3-subscription

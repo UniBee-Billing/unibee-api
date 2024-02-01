@@ -19,7 +19,7 @@ type PaymentTimeline struct {
 	Currency       string      `json:"currency"       description:"货币"`                                                     // 货币
 	TotalAmount    int64       `json:"totalAmount"    description:"金额,单位：分"`                                                // 金额,单位：分
 	ChannelId      int64       `json:"channelId"      description:"支付渠道Id"`                                                 // 支付渠道Id
-	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"创建时间"`                                                   // 创建时间
+	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"create time"`                                            // create time
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"修改时间"`                                                   // 修改时间
 	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`                                  // 0-UnDeleted，1-Deleted
 	PaymentId      string      `json:"paymentId"      description:"PaymentId"`                                              // PaymentId

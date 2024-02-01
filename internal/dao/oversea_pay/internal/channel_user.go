@@ -21,8 +21,8 @@ type ChannelUserDao struct {
 // ChannelUserColumns defines and stores column names for table channel_user.
 type ChannelUserColumns struct {
 	Id                          string //
-	GmtCreate                   string // 创建时间
-	GmtModify                   string // 修改时间
+	GmtCreate                   string // create time
+	GmtModify                   string // update time
 	UserId                      string // userId
 	ChannelId                   string // 支付渠道Id
 	ChannelUserId               string // 支付渠道user_Id

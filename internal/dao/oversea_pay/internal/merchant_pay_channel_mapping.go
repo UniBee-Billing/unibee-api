@@ -21,7 +21,7 @@ type MerchantPayChannelMappingDao struct {
 // MerchantPayChannelMappingColumns defines and stores column names for table merchant_pay_channel_mapping.
 type MerchantPayChannelMappingColumns struct {
 	Id         string //
-	GmtCreate  string // 创建时间
+	GmtCreate  string // create time
 	GmtModify  string // 修改时间
 	MerchantId string // 商户Id
 	ChannelId  string // oversea_pay_channel表的id

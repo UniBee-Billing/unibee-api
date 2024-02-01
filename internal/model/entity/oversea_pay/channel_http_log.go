@@ -14,7 +14,7 @@ type ChannelHttpLog struct {
 	Url       string      `json:"url"       description:"request url"`        // request url
 	Request   string      `json:"request"   description:"request body(json)"` // request body(json)
 	Response  string      `json:"response"  description:"response(json)"`     // response(json)
-	RequestId string      `json:"requestId" description:"reuqest_id"`         // reuqest_id
+	RequestId string      `json:"requestId" description:"request_id"`         // request_id
 	Mamo      string      `json:"mamo"      description:"mamo"`               // mamo
 	ChannelId string      `json:"channelId" description:"channel_id"`         // channel_id
 	GmtCreate *gtime.Time `json:"gmtCreate" description:"create time"`        // create time

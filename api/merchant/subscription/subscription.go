@@ -105,7 +105,6 @@ type SubscriptionUpdateReq struct {
 	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
-	AdminNote           string                             `p:"adminNote" dc:"Admin Edit Note" `
 }
 
 type SubscriptionUpdateRes struct {

@@ -26,7 +26,7 @@ type MerchantChannelConfig struct {
 	ChannelKey       interface{} //
 	ChannelSecret    interface{} // secret
 	Custom           interface{} // custom
-	GmtCreate        *gtime.Time // 创建时间
+	GmtCreate        *gtime.Time // create time
 	GmtModify        *gtime.Time // 修改时间
 	Description      interface{} // 支付方式描述
 	WebhookKey       interface{} // webhook_key

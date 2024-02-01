@@ -13,8 +13,8 @@ import (
 type ChannelUser struct {
 	g.Meta                      `orm:"table:channel_user, do:true"`
 	Id                          interface{} //
-	GmtCreate                   *gtime.Time // 创建时间
-	GmtModify                   *gtime.Time // 修改时间
+	GmtCreate                   *gtime.Time // create time
+	GmtModify                   *gtime.Time // update time
 	UserId                      interface{} // userId
 	ChannelId                   interface{} // 支付渠道Id
 	ChannelUserId               interface{} // 支付渠道user_Id

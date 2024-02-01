@@ -21,7 +21,7 @@ type MerchantInfo struct {
 	Idcard      string      `json:"idcard"      description:"个人或法人身份证号"`             // 个人或法人身份证号
 	Location    string      `json:"location"    description:"省市区地址"`                 // 省市区地址
 	Address     string      `json:"address"     description:"详细地址"`                  // 详细地址
-	GmtCreate   *gtime.Time `json:"gmtCreate"   description:"创建时间"`                  // 创建时间
+	GmtCreate   *gtime.Time `json:"gmtCreate"   description:"create time"`           // create time
 	GmtModify   *gtime.Time `json:"gmtModify"   description:"修改时间"`                  // 修改时间
 	IsDeleted   int         `json:"isDeleted"   description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	CompanyLogo string      `json:"companyLogo" description:"账号头像"`                  // 账号头像

@@ -28,7 +28,7 @@ type MerchantVatNumberVerifyHistoryColumns struct {
 	CountryCode     string // country_code
 	CompanyName     string // company_name
 	CompanyAddress  string // company_address
-	GmtCreate       string // 创建时间
+	GmtCreate       string // create time
 	GmtModify       string // 修改时间
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	ValidateMessage string // validate_message

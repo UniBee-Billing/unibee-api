@@ -28,7 +28,7 @@ type SubscriptionTimelineColumns struct {
 	PeriodEnd       string // period_end
 	PeriodStartTime string //
 	PeriodEndTime   string //
-	GmtCreate       string // 创建时间
+	GmtCreate       string // create time
 	InvoiceId       string // 发票ID（内部编号）
 	UniqueId        string // 唯一键
 	Currency        string // 货币

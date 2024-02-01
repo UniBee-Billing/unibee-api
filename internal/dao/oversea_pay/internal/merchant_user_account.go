@@ -21,7 +21,7 @@ type MerchantUserAccountDao struct {
 // MerchantUserAccountColumns defines and stores column names for table merchant_user_account.
 type MerchantUserAccountColumns struct {
 	Id         string // userId
-	GmtCreate  string // 创建时间
+	GmtCreate  string // create time
 	GmtModify  string // 修改时间
 	MerchantId string // 用户ID
 	IsDeleted  string // 0-UnDeleted，1-Deleted

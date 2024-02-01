@@ -26,7 +26,7 @@ type Refund struct {
 	RefundComment        string      `json:"refundComment"        description:"退款备注"`                                                            // 退款备注
 	Status               int         `json:"status"               description:"退款状态。10-退款中，20-退款成功，30-退款失败"`                                     // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           *gtime.Time `json:"refundTime"           description:"退款成功时间"`                                                          // 退款成功时间
-	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"创建时间"`                                                            // 创建时间
+	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"create time"`                                                     // create time
 	GmtModify            *gtime.Time `json:"gmtModify"            description:"更新时间"`                                                            // 更新时间
 	ChannelRefundId      string      `json:"channelRefundId"      description:"外部退款单号"`                                                          // 外部退款单号
 	AppId                string      `json:"appId"                description:"退款使用的APPID"`                                                      // 退款使用的APPID

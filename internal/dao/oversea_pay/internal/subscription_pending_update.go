@@ -25,7 +25,7 @@ type SubscriptionPendingUpdateColumns struct {
 	SubscriptionId       string // 订阅id（内部编号）
 	UpdateSubscriptionId string // 升级单ID（内部编号）
 	ChannelUpdateId      string // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
-	GmtCreate            string // 创建时间
+	GmtCreate            string // create time
 	Amount               string // 本周期金额,单位：分
 	Status               string // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	ProrationAmount      string // 下周期金额,单位：分
@@ -50,7 +50,7 @@ type SubscriptionPendingUpdateColumns struct {
 	ResponseData         string // 渠道返回参数，JSON格式
 	EffectImmediate      string // 是否马上生效，0-否，1-是
 	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
-	AdminNote            string // Admin 修改备注
+	Note                 string // note
 	ProrationDate        string // merchant_user_id
 }
 
@@ -86,7 +86,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	ResponseData:         "response_data",
 	EffectImmediate:      "effect_immediate",
 	EffectTime:           "effect_time",
-	AdminNote:            "admin_note",
+	Note:                 "note",
 	ProrationDate:        "proration_date",
 }
 

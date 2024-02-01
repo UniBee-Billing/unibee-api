@@ -21,8 +21,8 @@ type ChannelVatRateDao struct {
 // ChannelVatRateColumns defines and stores column names for table channel_vat_rate.
 type ChannelVatRateColumns struct {
 	Id               string //
-	GmtCreate        string // 创建时间
-	GmtModify        string // 修改时间
+	GmtCreate        string // create time
+	GmtModify        string // update time
 	VatRateId        string // vat_rate_id
 	ChannelId        string // 支付渠道Id
 	ChannelVatRateId string // 支付渠道vat_rate_Id

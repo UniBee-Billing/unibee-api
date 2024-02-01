@@ -29,7 +29,7 @@ type PaymentTimelineColumns struct {
 	Currency       string // 货币
 	TotalAmount    string // 金额,单位：分
 	ChannelId      string // 支付渠道Id
-	GmtCreate      string // 创建时间
+	GmtCreate      string // create time
 	GmtModify      string // 修改时间
 	IsDeleted      string // 0-UnDeleted，1-Deleted
 	PaymentId      string // PaymentId

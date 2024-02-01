@@ -13,8 +13,8 @@ import (
 type ChannelVatRate struct {
 	g.Meta           `orm:"table:channel_vat_rate, do:true"`
 	Id               interface{} //
-	GmtCreate        *gtime.Time // 创建时间
-	GmtModify        *gtime.Time // 修改时间
+	GmtCreate        *gtime.Time // create time
+	GmtModify        *gtime.Time // update time
 	VatRateId        interface{} // vat_rate_id
 	ChannelId        interface{} // 支付渠道Id
 	ChannelVatRateId interface{} // 支付渠道vat_rate_Id

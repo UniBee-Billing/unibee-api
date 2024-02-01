@@ -23,7 +23,7 @@ type MerchantOperationLog struct {
 	OptContent         interface{} // 操作内容
 	OptCreate          *gtime.Time // 操作发生时间
 	IsDelete           interface{} // 0-UnDeleted，1-Deleted
-	GmtCreate          *gtime.Time // 创建时间
+	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // 修改时间
 	QueryportRequestId interface{} // queryport请求Id，可在request_security_log查询请求信息
 	ServerType         interface{} // 操作终端，参看 message-api包 OperationLogServerTypeEnum的code

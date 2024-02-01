@@ -21,7 +21,7 @@ type SubscriptionPlanDao struct {
 // SubscriptionPlanColumns defines and stores column names for table subscription_plan.
 type SubscriptionPlanColumns struct {
 	Id                        string //
-	GmtCreate                 string // 创建时间
+	GmtCreate                 string // create time
 	GmtModify                 string // 修改时间
 	CompanyId                 string // 公司ID
 	MerchantId                string // 商户Id

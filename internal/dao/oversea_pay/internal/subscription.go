@@ -23,7 +23,7 @@ type SubscriptionColumns struct {
 	Id                          string //
 	SubscriptionId              string // 订阅id（内部编号）
 	UserId                      string // userId
-	GmtCreate                   string // 创建时间
+	GmtCreate                   string // create time
 	GmtModify                   string // 修改时间
 	Amount                      string // 金额,单位：分
 	Currency                    string // 货币

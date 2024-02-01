@@ -17,7 +17,7 @@ type Invoice struct {
 	InvoiceId                      string      `json:"invoiceId"                      description:"发票ID（内部编号）"`                                                            // 发票ID（内部编号）
 	InvoiceName                    string      `json:"invoiceName"                    description:"发票名称"`                                                                  // 发票名称
 	UniqueId                       string      `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"`                // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	GmtCreate                      *gtime.Time `json:"gmtCreate"                      description:"创建时间"`                                                                  // 创建时间
+	GmtCreate                      *gtime.Time `json:"gmtCreate"                      description:"create time"`                                                           // create time
 	TotalAmount                    int64       `json:"totalAmount"                    description:"金额,单位：分"`                                                               // 金额,单位：分
 	TaxAmount                      int64       `json:"taxAmount"                      description:"Tax金额,单位：分"`                                                            // Tax金额,单位：分
 	SubscriptionAmount             int64       `json:"subscriptionAmount"             description:"Sub金额,单位：分"`                                                            // Sub金额,单位：分
@@ -44,7 +44,7 @@ type Invoice struct {
 	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end"`                                                            // period_end
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                      //
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                      //
-	PaymentId                      string      `json:"paymentId"                      description:"PaymentId"`                                                             // PaymentId
+	PaymentId                      string      `json:"paymentId"                      description:"paymentId"`                                                             // paymentId
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                              // refundId
 	Data                           string      `json:"data"                           description:"渠道额外参数，JSON格式"`                                                         // 渠道额外参数，JSON格式
 	BizType                        int         `json:"bizType"                        description:"业务类型。1-single payment, 3-subscription"`                                 // 业务类型。1-single payment, 3-subscription

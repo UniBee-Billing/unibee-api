@@ -12,7 +12,7 @@ import (
 type OpenApiConfig struct {
 	Id              uint64      `json:"id"              description:""`                      //
 	Qps             int         `json:"qps"             description:"开放平台Api qps总控制"`        // 开放平台Api qps总控制
-	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"创建时间"`                  // 创建时间
+	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`           // create time
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"修改时间"`                  // 修改时间
 	MerchantId      int64       `json:"merchantId"      description:"商户Id"`                  // 商户Id
 	Hmac            string      `json:"hmac"            description:"回调加密hmac"`              // 回调加密hmac

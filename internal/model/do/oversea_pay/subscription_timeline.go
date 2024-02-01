@@ -20,7 +20,7 @@ type SubscriptionTimeline struct {
 	PeriodEnd       interface{} // period_end
 	PeriodStartTime *gtime.Time //
 	PeriodEndTime   *gtime.Time //
-	GmtCreate       *gtime.Time // 创建时间
+	GmtCreate       *gtime.Time // create time
 	InvoiceId       interface{} // 发票ID（内部编号）
 	UniqueId        interface{} // 唯一键
 	Currency        interface{} // 货币

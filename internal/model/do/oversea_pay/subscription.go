@@ -15,7 +15,7 @@ type Subscription struct {
 	Id                          interface{} //
 	SubscriptionId              interface{} // 订阅id（内部编号）
 	UserId                      interface{} // userId
-	GmtCreate                   *gtime.Time // 创建时间
+	GmtCreate                   *gtime.Time // create time
 	GmtModify                   *gtime.Time // 修改时间
 	Amount                      interface{} // 金额,单位：分
 	Currency                    interface{} // 货币

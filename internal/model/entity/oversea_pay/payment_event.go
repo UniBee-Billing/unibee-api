@@ -22,7 +22,7 @@ type PaymentEvent struct {
 	Event           string      `json:"event"           description:"事件"`                  // 事件
 	RelativeTradeNo string      `json:"relativeTradeNo" description:"关联单号"`                // 关联单号
 	UniqueNo        string      `json:"uniqueNo"        description:"唯一键"`                 // 唯一键
-	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"创建时间"`                // 创建时间
+	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`         // create time
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"更新时间"`                // 更新时间
 	Message         string      `json:"message"         description:"message"`             // message
 }

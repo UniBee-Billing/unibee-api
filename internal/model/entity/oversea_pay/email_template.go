@@ -16,7 +16,7 @@ type EmailTemplate struct {
 	TemplateTitle      string      `json:"templateTitle"      description:""`                      //
 	TemplateContent    string      `json:"templateContent"    description:""`                      //
 	TemplateAttachName string      `json:"templateAttachName" description:""`                      //
-	GmtCreate          *gtime.Time `json:"gmtCreate"          description:""`                      //
-	GmtModify          *gtime.Time `json:"gmtModify"          description:""`                      //
+	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"create time"`           // create time
+	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`           // update time
 	IsDeleted          int         `json:"isDeleted"          description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 }

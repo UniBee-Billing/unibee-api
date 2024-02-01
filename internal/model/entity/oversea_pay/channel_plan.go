@@ -11,8 +11,8 @@ import (
 // ChannelPlan is the golang structure for table channel_plan.
 type ChannelPlan struct {
 	Id                   uint64      `json:"id"                   description:""`                                      //
-	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"创建时间"`                                  // 创建时间
-	GmtModify            *gtime.Time `json:"gmtModify"            description:"修改时间"`                                  // 修改时间
+	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"create time"`                           // create time
+	GmtModify            *gtime.Time `json:"gmtModify"            description:"update time"`                           // update time
 	PlanId               int64       `json:"planId"               description:"PlanId"`                                // PlanId
 	ChannelId            int64       `json:"channelId"            description:"支付渠道Id"`                                // 支付渠道Id
 	Status               int         `json:"status"               description:"0-Init | 1-Create｜2-Active｜3-Inactive"` // 0-Init | 1-Create｜2-Active｜3-Inactive

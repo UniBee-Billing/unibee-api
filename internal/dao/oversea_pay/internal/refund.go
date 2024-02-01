@@ -36,7 +36,7 @@ type RefundColumns struct {
 	RefundComment        string // 退款备注
 	Status               string // 退款状态。10-退款中，20-退款成功，30-退款失败
 	RefundTime           string // 退款成功时间
-	GmtCreate            string // 创建时间
+	GmtCreate            string // create time
 	GmtModify            string // 更新时间
 	ChannelRefundId      string // 外部退款单号
 	AppId                string // 退款使用的APPID
