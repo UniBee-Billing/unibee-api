@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
+	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/cronjob/sub"
 )
 
@@ -13,6 +14,9 @@ func StartCronJobs() {
 		err error
 		ctx = gctx.New()
 	)
+	if !consts.GetConfigInstance().IsServerDev() {
+		return
+	}
 	var name = "SubscriptionBillingCycleDunningInvoice"
 	g.Log().Print(ctx, "CronJob Start......")
 	_, err = gcron.AddSingleton(ctx, "*/10 * * * * *", func(ctx context.Context) {
