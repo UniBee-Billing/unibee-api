@@ -1188,11 +1188,18 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 
 		if createPayContext.PayMethod == 1 {
 			params.CollectionMethod = stripe.String("charge_automatically")
-			// todo mark check the channel user contains the payment method now
-			if len(createPayContext.ChannelPaymentMethod) > 0 {
+			// check the channel user contains the payment method now
+			listQuery, err := s.DoRemoteChannelUserPaymentMethodListQuery(ctx, createPayContext.PayChannel, channelUser.UserId)
+			if err != nil {
+				return nil, err
+			}
+			if len(createPayContext.ChannelPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, createPayContext.ChannelPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(createPayContext.ChannelPaymentMethod)
-			} else if len(channelUser.ChannelDefaultPaymentMethod) > 0 {
+			} else if len(channelUser.ChannelDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, channelUser.ChannelDefaultPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(channelUser.ChannelDefaultPaymentMethod)
+			} else if len(listQuery.PaymentMethods) > 0 {
+				// todo mark use detail query
+				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0])
 			}
 		} else {
 			params.CollectionMethod = stripe.String("send_invoice")
@@ -1260,6 +1267,16 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			Link:                   detail.HostedInvoiceURL,
 		}, nil
 	}
+}
+
+// ContainString 检查字符串切片是否包含特定元素
+func ContainString(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
 }
 
 func (s Stripe) DoRemoteChannelCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
