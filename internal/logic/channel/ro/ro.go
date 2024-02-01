@@ -90,7 +90,7 @@ type ChannelPaymentListReq struct {
 type ChannelPaymentRo struct {
 	MerchantId                  int64                                  `json:"merchantId"         `
 	Status                      int                                    `json:"status"`
-	CaptureStatus               int                                    `json:"captureStatus"`
+	AuthorizeStatus             int                                    `json:"captureStatus"`
 	Currency                    string                                 `json:"currency"              `
 	TotalAmount                 int64                                  `json:"totalAmount"              `
 	PaymentAmount               int64                                  `json:"paymentAmount"              `

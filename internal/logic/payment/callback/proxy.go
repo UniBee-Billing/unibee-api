@@ -23,6 +23,29 @@ func printChannelPanic(ctx context.Context, err error) {
 	g.Log().Errorf(ctx, "CallbackException panic error:%s", err.Error())
 }
 
+func (p proxy) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	go func() {
+		backgroundCtx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(backgroundCtx, err)
+				return
+			}
+		}()
+		startTime := time.Now()
+
+		p.GetCallbackImpl().PaymentNeedAuthorisedCallback(backgroundCtx, payment, invoice)
+
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentNeedAuthorisedCallback cost：%s \n", time.Now().Sub(startTime))
+	}()
+}
+
 func (p proxy) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	go func() {
 		backgroundCtx := context.Background()

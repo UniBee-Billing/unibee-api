@@ -143,9 +143,63 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 			UniqueNo:  fmt.Sprintf("%s_%s", payment.ChannelPaymentId, "Authorised"),
 		})
 	}
-
 	return err
+}
 
+func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err error) {
+	g.Log().Infof(ctx, "HandlePayNeedAuthorized, payment=%s", utility.MarshalToJsonString(payment))
+	if payment == nil {
+		g.Log().Infof(ctx, "payment is nil")
+		return errors.New("payment not found")
+	}
+	if payment.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+		return nil
+	}
+
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED, dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED})
+			if err != nil || result == nil {
+				//_ = transaction.Rollback()
+				return err
+			}
+			affected, err := result.RowsAffected()
+			if err != nil || affected != 1 {
+				//_ = transaction.Rollback()
+				return err
+			}
+			return nil
+		})
+		if err == nil {
+			return redismq.CommitTransaction, nil
+		} else {
+			return redismq.RollbackTransaction, err
+		}
+	})
+	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
+	if err == nil {
+		payment := query.GetPaymentByPaymentId(ctx, payment.PaymentId)
+		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
+		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentNeedAuthorisedCallback(ctx, payment, invoice)
+
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		}
+		event.SaveTimeLine(ctx, entity.PaymentEvent{
+			BizType:   0,
+			BizId:     payment.PaymentId,
+			Fee:       payment.TotalAmount,
+			EventType: event.Authorised.Type,
+			Event:     event.Authorised.Desc,
+			OpenApiId: payment.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s", payment.ChannelPaymentId, "NeedAuthorised"),
+		})
+	}
+	return err
 }
 
 func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
@@ -480,6 +534,11 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			if err != nil {
 				return err
 			}
+		} else if channelPayRo.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+			err := HandlePayNeedAuthorized(ctx, one)
+			if err != nil {
+				return err
+			}
 		}
 	} else {
 		return gerror.Newf("Invalid Payment Type ChannelPaymentId:%s ChannelInvoiceId:%s ChannelSubscriptionId:%s", channelPayRo.ChannelPaymentId, channelPayRo.ChannelInvoiceId, channelPayRo.ChannelSubscriptionId)
@@ -526,7 +585,7 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			BalanceStart:           channelPayRo.BalanceStart,
 			BalanceEnd:             channelPayRo.BalanceEnd,
 			Status:                 channelPayRo.Status,
-			AuthorizeStatus:        channelPayRo.CaptureStatus,
+			AuthorizeStatus:        channelPayRo.AuthorizeStatus,
 			ChannelId:              channelPayRo.ChannelId,
 			ChannelPaymentIntentId: channelPayRo.ChannelPaymentId,
 			ChannelPaymentId:       channelPayRo.ChannelPaymentId,
@@ -559,7 +618,7 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			dao.Payment.Columns().BalanceStart:           channelPayRo.BalanceStart,
 			dao.Payment.Columns().BalanceEnd:             channelPayRo.BalanceEnd,
 			dao.Payment.Columns().Status:                 channelPayRo.Status,
-			dao.Payment.Columns().AuthorizeStatus:        channelPayRo.CaptureStatus,
+			dao.Payment.Columns().AuthorizeStatus:        channelPayRo.AuthorizeStatus,
 			dao.Payment.Columns().ChannelId:              channelPayRo.ChannelId,
 			dao.Payment.Columns().ChannelPaymentIntentId: channelPayRo.ChannelPaymentId,
 			dao.Payment.Columns().CreateTime:             channelPayRo.CreateTime,

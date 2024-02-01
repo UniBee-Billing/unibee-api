@@ -1362,9 +1362,9 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
 		status = consts.PAY_CANCEL
 	}
-	var captureStatus = consts.WAITING_AUTHORIZED
+	var captureStatus = consts.AUTHORIZED
 	if strings.Compare(string(item.Status), "requires_capture") == 0 {
-		captureStatus = consts.AUTHORIZED
+		captureStatus = consts.WAITING_AUTHORIZED
 	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
 		captureStatus = consts.CAPTURE_REQUEST
 	}
@@ -1375,7 +1375,7 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 		ChannelUserId:    channelUserId,
 		ChannelPaymentId: item.ID,
 		Status:           status,
-		CaptureStatus:    captureStatus,
+		AuthorizeStatus:  captureStatus,
 		TotalAmount:      item.Amount,
 		PaymentAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),

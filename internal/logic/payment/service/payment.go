@@ -51,7 +51,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
 	isDuplicatedInvoke := false
 
-	//- 并发调用严重，加上Redis排它锁, todo mark 使用数据库锁
+	//- 并发调用严重，加上Redis排它锁, todo mark database lock
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)

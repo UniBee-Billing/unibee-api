@@ -499,9 +499,9 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		return err
 	}
 	// require_action status not deal here, use subscription_update webhook
-	if strings.Compare("invoice.payment_action_required", eventType) == 0 {
-		return gerror.New("require_action status not deal processInvoiceWebhook, use processSubscriptionWebhook webhook")
-	}
+	//if strings.Compare("invoice.payment_action_required", eventType) == 0 {
+	//	return gerror.New("require_action status not deal processInvoiceWebhook, use processSubscriptionWebhook webhook")
+	//}
 
 	var status = consts.TO_BE_PAID
 	var captureStatus = consts.AUTHORIZED
@@ -510,6 +510,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		captureStatus = consts.CAPTURE_REQUEST
 	} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
 		status = consts.PAY_FAILED
+	} else if strings.Compare("invoice.payment_action_required", eventType) == 0 {
+		captureStatus = consts.WAITING_AUTHORIZED
 	}
 
 	var channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp
@@ -537,7 +539,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	err = handler2.HandlePaymentWebhookEvent(ctx, &ro.ChannelPaymentRo{
 		MerchantId:                  payChannel.MerchantId,
 		Status:                      status,
-		CaptureStatus:               captureStatus,
+		AuthorizeStatus:             captureStatus,
 		Currency:                    invoiceDetails.Currency,
 		TotalAmount:                 invoiceDetails.TotalAmount,
 		PaymentAmount:               invoiceDetails.PaymentAmount,
@@ -607,7 +609,7 @@ func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType
 				err = handler2.HandlePaymentWebhookEvent(ctx, &ro.ChannelPaymentRo{
 					MerchantId:                  payChannel.MerchantId,
 					Status:                      consts.TO_BE_PAID,
-					CaptureStatus:               consts.WAITING_AUTHORIZED,
+					AuthorizeStatus:             consts.WAITING_AUTHORIZED,
 					Currency:                    invoiceDetails.Currency,
 					TotalAmount:                 invoiceDetails.TotalAmount,
 					PaymentAmount:               invoiceDetails.PaymentAmount,

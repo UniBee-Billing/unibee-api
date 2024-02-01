@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -14,6 +16,35 @@ import (
 )
 
 type SubscriptionPaymentCallback struct {
+}
+
+func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	if consts.ProrationUsingUniBeeCompute {
+		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
+			utility.Assert(sub != nil, "PaymentNeedAuthorisedCallback sub not found:"+payment.PaymentId)
+			user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+			plan := query.GetPlanById(ctx, sub.PlanId)
+			utility.Assert(plan != nil, "PaymentNeedAuthorisedCallback plan not found:"+sub.SubscriptionId)
+			if user != nil {
+				merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+				if merchant != nil {
+					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
+						UserName:            user.UserName,
+						MerchantProductName: plan.ChannelProductName,
+						MerchantCustomEmail: merchant.Email,
+						MerchantName:        merchant.Name,
+						PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
+						Currency:            strings.ToUpper(invoice.Currency),
+						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+					})
+					if err != nil {
+						fmt.Printf("PaymentNeedAuthorisedCallback SendTemplateEmail err:%s", err.Error())
+					}
+				}
+			}
+		}
+	}
 }
 
 func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {

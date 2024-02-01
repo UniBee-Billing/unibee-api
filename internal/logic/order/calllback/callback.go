@@ -8,6 +8,11 @@ import (
 type MerchantOneTimePaymentCallback struct {
 }
 
+func (m MerchantOneTimePaymentCallback) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m MerchantOneTimePaymentCallback) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	//TODO implement me
 	panic("implement me")

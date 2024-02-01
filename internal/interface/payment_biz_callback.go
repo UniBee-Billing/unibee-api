@@ -10,4 +10,5 @@ type PaymentBizCallbackInterface interface {
 	PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
 	PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
 	PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
+	PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice)
 }
