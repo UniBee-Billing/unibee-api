@@ -1233,7 +1233,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		}
 		if createPayContext.PayImmediate {
 			params := &stripe.InvoicePayParams{}
-			response, err := invoice.Pay(result.ID, params)
+			response, _ := invoice.Pay(result.ID, params)
 			log.SaveChannelHttpLog("DoRemoteChannelPayment", params, response, err, "PayInvoice", nil, createPayContext.PayChannel)
 			if response != nil {
 				detail.Status = response.Status
