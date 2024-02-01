@@ -14,10 +14,10 @@ import (
 type SubscriptionPendingUpdateListInternalReq struct {
 	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	SubscriptionId string `p:"subscriptionId" `
-	SortField      string `p:"sortField" dc:"排序字段，gmt_create|gmt_modify" `
+	SortField      string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
 	SortType       string `p:"sortType" dc:"Sort Type，asc|desc" `
 	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count          int    `p:"count"  dc:"订阅计划货币" dc:"每页数量" `
+	Count          int    `p:"count"  dc:"Count Of Page"`
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {
@@ -64,7 +64,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		MerchantUser:         query.GetMerchantAccountById(ctx, uint64(one.MerchantUserId)),
 		EffectImmediate:      one.EffectImmediate,
 		EffectTime:           one.EffectTime,
-		AdminNote:            one.AdminNote,
+		Note:                 one.Note,
 		Plan:                 query.GetPlanById(ctx, one.PlanId),
 		Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
@@ -130,7 +130,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			MerchantUser:         query.GetMerchantAccountById(ctx, uint64(one.MerchantUserId)),
 			EffectImmediate:      one.EffectImmediate,
 			EffectTime:           one.EffectTime,
-			AdminNote:            one.AdminNote,
+			Note:                 one.Note,
 			Plan:                 query.GetPlanById(ctx, one.PlanId),
 			Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),

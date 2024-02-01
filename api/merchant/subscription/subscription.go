@@ -157,7 +157,7 @@ type SubscriptionMerchantPendingUpdateListRes struct {
 }
 
 type SubscriptionNewAdminNoteReq struct {
-	g.Meta         `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-AdminNote-Controller" method:"post" summary:"Merchant New Subscription Note"`
+	g.Meta         `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant New Subscription Note"`
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	MerchantUserId int64  `p:"merchantUserId" dc:"MerchantUserId" v:"required"`
 	Note           string `p:"note" dc:"note" v:"required"`
@@ -178,7 +178,7 @@ type SubscriptionAdminNoteRo struct {
 }
 
 type SubscriptionAdminNoteListReq struct {
-	g.Meta         `path:"/subscription_admin_note_list" tags:"Merchant-Subscription-AdminNote-Controller" method:"post" summary:"Merchant Subscription Note List"`
+	g.Meta         `path:"/subscription_admin_note_list" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant Subscription Note List"`
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
 	Count          int    `p:"count" dc:"Count Of Page" `
