@@ -1274,6 +1274,7 @@ func (s Stripe) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payme
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoiceVoidInvoiceParams{}
 	result, err := invoice.VoidInvoice(payment.ChannelPaymentIntentId, params)
+	log.SaveChannelHttpLog("DoRemoteChannelCancel", params, result, err, "VoidInvoice", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
