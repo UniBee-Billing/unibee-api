@@ -69,6 +69,7 @@ type CalculateInvoiceReq struct {
 
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *ro.InvoiceDetailSimplify {
 	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan != nil, fmt.Sprintf("plan not found:%d", req.PlanId))
 	addons := query.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
 	var totalAmountExcludingTax = plan.Amount * req.Quantity
 	for _, addon := range addons {
