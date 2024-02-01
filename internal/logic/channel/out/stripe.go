@@ -1181,11 +1181,11 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 						link = response.Invoice.HostedInvoiceURL
 					}
 				}
-				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s error:%s\n", method, channelPaymentId, status, err)
 				if err == nil && strings.Compare(status, "succeeded") == 0 {
 					success = true
 					break
 				}
+				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s success:%v link:%s error:%s\n", method, channelPaymentId, status, success, link, err)
 			}
 			if success && response != nil && len(channelPaymentId) > 0 {
 				return &ro.CreatePayInternalResp{
