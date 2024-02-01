@@ -19,7 +19,11 @@ func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {
 }
 
 func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.PaymentId, success)
+	if len(pay.SubscriptionId) > 0 {
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.PaymentId, pay.SubscriptionId, success)
+	} else {
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.DomainPath, pay.ChannelId, pay.PaymentId, success)
+	}
 }
 
 func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {
