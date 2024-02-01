@@ -43,7 +43,6 @@ func hashAndSalt(pwd []byte) string {
 }
 
 func IsEmailValid(email string) bool {
-	// 使用正则表达式来检查电子邮件地址的格式
 	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	validEmail := regexp.MustCompile(emailRegex)
 	return validEmail.MatchString(email)
