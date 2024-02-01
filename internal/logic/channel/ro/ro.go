@@ -417,7 +417,7 @@ type SubscriptionPendingUpdateDetail struct {
 	MerchantUser         *entity.MerchantUserAccount `json:"merchantUser"       description:"merchant_user"`                          // merchant_user_id
 	EffectImmediate      int                         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                       // 是否马上生效，0-否，1-是
 	EffectTime           int64                       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"` // effect_immediate=0, 预计生效时间 unit_time
-	Note                 string                      `json:"adminNote"            description:"Admin 修改备注"`
+	Note                 string                      `json:"note"            description:"Update Note"`
 	Plan                 *entity.SubscriptionPlan    `json:"plan" dc:"旧订阅计划"`
 	Addons               []*SubscriptionPlanAddonRo  `json:"addons" dc:"旧订阅Addon"`
 	UpdatePlan           *entity.SubscriptionPlan    `json:"updatePlan" dc:"更新订阅计划"`
