@@ -200,7 +200,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 		// subscription_update
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
 		if req.Payment.Status == consts.PAY_SUCCESS {
-			_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate)
+			_, err := FinishPendingUpdateForSubscription(ctx, sub, eiPendingSubUpdate.UpdateSubscriptionId)
 			if err != nil {
 				return err
 			}
@@ -237,7 +237,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				}
 
 				if req.Payment.Status == consts.PAY_SUCCESS {
-					_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate)
+					_, err := FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpdate.UpdateSubscriptionId)
 					if err != nil {
 						return err
 					}

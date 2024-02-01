@@ -63,7 +63,8 @@ func PaymentFailureForPendingUpdate(ctx context.Context, one *entity.Subscriptio
 	return true, nil
 }
 
-func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, one *entity.SubscriptionPendingUpdate) (bool, error) {
+func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, pendingUpdateId string) (bool, error) {
+	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}

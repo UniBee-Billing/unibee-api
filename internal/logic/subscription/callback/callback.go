@@ -44,14 +44,14 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				utility.Assert(strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0, "payment sub_id not match pendingUpdate sub_id")
 				utility.Assert(pendingSubUpgrade.Status == consts.PendingSubStatusCreate, "pendingUpdate has already finished or cancelled")
 				// Upgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpgrade)
+				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Upgrade")
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
 				utility.Assert(strings.Compare(pendingSubUpgrade.ChannelUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
 				// Downgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade)
+				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
 				}
