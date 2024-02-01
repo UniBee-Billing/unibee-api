@@ -907,7 +907,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
-	// 当前更新单渠道执行成功，需要取消其他 PendingUpdate，保证只有一个在 Create 状态 todo mark need cancel payment、 invoice and send invoice email
+	// Only One Need, Cancel Others todo mark need cancel payment、 invoice and send invoice email
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
