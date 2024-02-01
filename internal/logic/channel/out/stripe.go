@@ -1137,12 +1137,12 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(strings.ToLower(line.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(line.Description),
+						Name: stripe.String(fmt.Sprintf("%d x %s", line.Quantity, line.Description)),
 					},
-					UnitAmount: stripe.Int64(line.UnitAmountExcludingTax),
+					UnitAmount: stripe.Int64(line.Amount),
 				},
-				Quantity: stripe.Int64(line.Quantity),
-				//TaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)}, // todo mark tax add
+				Quantity: stripe.Int64(1),
+				//TaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)}, // not apply tax
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
