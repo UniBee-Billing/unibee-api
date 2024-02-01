@@ -1137,7 +1137,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(strings.ToLower(line.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(fmt.Sprintf("%d x %s", line.Quantity, line.Description)),
+						Name: stripe.String(fmt.Sprintf("%s", line.Description)),
 					},
 					UnitAmount: stripe.Int64(line.Amount),
 				},
