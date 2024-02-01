@@ -1155,9 +1155,10 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			}
 
 			var success = false
-			var response *stripe.PaymentIntent
+			var targetIntent *stripe.PaymentIntent
 			var channelPaymentId = ""
 			var link = ""
+			var cancelErr error
 			for _, method := range listQuery.PaymentMethods {
 				params := &stripe.PaymentIntentParams{
 					Customer: stripe.String(channelUser.ChannelUserId),
@@ -1171,27 +1172,29 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 					ReturnURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 				}
 				params.PaymentMethod = stripe.String(method)
-				response, err = paymentintent.New(params)
+				targetIntent, err = paymentintent.New(params)
 				var status = ""
 
-				if response != nil {
-					status = string(response.Status)
-					channelPaymentId = response.ID
-					if response.Invoice != nil {
-						link = response.Invoice.HostedInvoiceURL
+				if targetIntent != nil {
+					status = string(targetIntent.Status)
+					channelPaymentId = targetIntent.ID
+					if targetIntent.Invoice != nil {
+						link = targetIntent.Invoice.HostedInvoiceURL
 					}
 				}
 				if err == nil && strings.Compare(status, "succeeded") == 0 {
 					success = true
 					break
+				} else if targetIntent != nil {
+					_, cancelErr = paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
 				}
-				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s success:%v link:%s error:%s\n", method, channelPaymentId, status, success, link, err)
+				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, channelPaymentId, status, success, link, err, cancelErr)
 			}
-			if success && response != nil && len(channelPaymentId) > 0 {
+			if success && targetIntent != nil && len(channelPaymentId) > 0 {
 				return &ro.CreatePayInternalResp{
 					Status:                 consts.PAY_SUCCESS,
 					ChannelPaymentId:       channelPaymentId,
-					ChannelPaymentIntentId: response.ID,
+					ChannelPaymentIntentId: targetIntent.ID,
 					Link:                   link,
 				}, nil
 			}
