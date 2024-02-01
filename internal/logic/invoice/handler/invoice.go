@@ -38,7 +38,7 @@ type CreateInvoiceInternalReq struct {
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
-	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId)
+	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId+" subId:"+payment.SubscriptionId)
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PAY_SUCCESS {
 		status = consts.InvoiceStatusPaid
