@@ -722,7 +722,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	if prorationInvoice.TotalAmount <= 0 {
-		effectImmediate = false
+		effectImmediate = false // todo mark effectImmediate = true with negative proration invoice should not allowed
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
