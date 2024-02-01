@@ -721,6 +721,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		prorationDate = sub.CurrentPeriodEnd
 	}
 
+	if prorationInvoice.TotalAmount <= 0 {
+		effectImmediate = false
+	}
+
 	return &SubscriptionUpdatePrepareInternalRes{
 		Subscription:      sub,
 		Plan:              plan,
