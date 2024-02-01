@@ -18,15 +18,26 @@ func (d *Document) SetFooter(footer *HeaderFooter) *Document {
 	return d
 }
 
-// SetRef of document
-func (d *Document) SetRef(ref string) *Document {
-	d.Ref = ref
+// SetInvoiceNumber of document
+func (d *Document) SetInvoiceNumber(InvoiceNumber string) *Document {
+	d.InvoiceNumber = InvoiceNumber
 	return d
 }
 
-// SetVersion of document
-func (d *Document) SetVersion(version string) *Document {
-	d.Version = version
+func (d *Document) SetLogo(logo []byte) *Document {
+	d.Logo = logo
+	return d
+}
+
+// SetInvoiceDate of document
+func (d *Document) SetInvoiceDate(invoiceDate string) *Document {
+	d.InvoiceDate = invoiceDate
+	return d
+}
+
+// SetStatus of document
+func (d *Document) SetStatus(status string) *Document {
+	d.Status = status
 	return d
 }
 
@@ -60,9 +71,9 @@ func (d *Document) AppendItem(item *Item) *Document {
 	return d
 }
 
-// SetDate of document
-func (d *Document) SetDate(date string) *Document {
-	d.Date = date
+// SetPaidDate of document
+func (d *Document) SetPaidDate(date string) *Document {
+	d.PaidDate = date
 	return d
 }
 

@@ -16,28 +16,31 @@ type Options struct {
 	TextTypeQuotation    string `default:"QUOTATION" json:"text_type_quotation,omitempty"`
 	TextTypeDeliveryNote string `default:"DELIVERY NOTE" json:"text_type_delivery_note,omitempty"`
 
-	TextRefTitle         string `default:"Ref." json:"text_ref_title,omitempty"`
-	TextVersionTitle     string `default:"Version" json:"text_version_title,omitempty"`
-	TextDateTitle        string `default:"Date" json:"text_date_title,omitempty"`
-	TextPaymentTermTitle string `default:"Payment term" json:"text_payment_term_title,omitempty"`
+	TextInvoiceNumberTitle   string `default:"Invoice Number" json:"text_number_title,omitempty"`
+	TextInvoiceDateTitle     string `default:"Invoice Date" json:"text_data_title,omitempty"`
+	TextInvoicePaidDateTitle string `default:"Invoice Paid Date" json:"text_paid_date_title,omitempty"`
+	TextPaymentTermTitle     string `default:"Payment term" json:"text_payment_term_title,omitempty"`
 
-	TextItemsNameTitle     string `default:"Name" json:"text_items_name_title,omitempty"`
+	TextItemsNameTitle     string `default:"Description" json:"text_items_name_title,omitempty"`
 	TextItemsUnitCostTitle string `default:"Unit price" json:"text_items_unit_cost_title,omitempty"`
 	TextItemsQuantityTitle string `default:"Qty" json:"text_items_quantity_title,omitempty"`
 	TextItemsTotalHTTitle  string `default:"Total no tax" json:"text_items_total_ht_title,omitempty"`
 	TextItemsTaxTitle      string `default:"Tax" json:"text_items_tax_title,omitempty"`
 	TextItemsDiscountTitle string `default:"Discount" json:"text_items_discount_title,omitempty"`
-	TextItemsTotalTTCTitle string `default:"Total" json:"text_items_total_ttc_title,omitempty"`
+	TextItemsTotalTTCTitle string `default:"Amount" json:"text_items_total_ttc_title,omitempty"`
 
-	TextTotalTotal      string `default:"TOTAL" json:"text_total_total,omitempty"`
+	TextTotalTotal      string `default:"Sub Total" json:"text_total_total,omitempty"`
 	TextTotalDiscounted string `default:"TOTAL DISCOUNTED" json:"text_total_discounted,omitempty"`
-	TextTotalTax        string `default:"TAX" json:"text_total_tax,omitempty"`
-	TextTotalWithTax    string `default:"TOTAL WITH TAX" json:"text_total_with_tax,omitempty"`
+	TextTotalTax        string `default:"VAT" json:"text_total_tax,omitempty"`
+	TextTotalWithTax    string `default:"Total" json:"text_total_with_tax,omitempty"`
 
-	BaseTextColor []int `default:"[35,35,35]" json:"base_text_color,omitempty"`
+	BaseTextColor []int `default:"[111,111,111]" json:"base_text_color,omitempty"`
+	PaidTextColor []int `default:"[73,167,101]" json:"paid_text_color,omitempty"`
 	GreyTextColor []int `default:"[82,82,82]" json:"grey_text_color,omitempty"`
-	GreyBgColor   []int `default:"[232,232,232]" json:"grey_bg_color,omitempty"`
-	DarkBgColor   []int `default:"[212,212,212]" json:"dark_bg_color,omitempty"`
+	WhiteBgColor  []int `default:"[255,255,255]" json:"grey_bg_color,omitempty"`
+	//WhiteBgColor  []int `default:"[255,255,255]" json:"white_bg_color,omitempty"`
+	DarkBgColor []int `default:"[247,247,247]" json:"dark_bg_color,omitempty"`
+	DeepBgColor []int `default:"[200,200,200]" json:"deep_bg_color,omitempty"`
 
 	Font     string `default:"Helvetica"`
 	BoldFont string `default:"Helvetica"`

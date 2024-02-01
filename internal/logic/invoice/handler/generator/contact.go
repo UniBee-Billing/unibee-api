@@ -1,18 +1,10 @@
 package generator
 
-import (
-	"bytes"
-	b64 "encoding/base64"
-	"image"
-
-	"github.com/go-pdf/fpdf"
-)
-
 // Contact contact a company informations
 type Contact struct {
 	//Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
-	Name    string   `json:"name,omitempty"`
-	Logo    []byte   `json:"logo,omitempty"` // Logo byte array
+	Name string `json:"name,omitempty"`
+	//Logo    []byte   `json:"logo,omitempty"` // Logo byte array
 	Address *Address `json:"address,omitempty"`
 
 	// AddtionnalInfo to append after contact informations. You can use basic html here (bold, italic tags).
@@ -24,41 +16,41 @@ func (c *Contact) appendContactTODoc(
 	x float64,
 	y float64,
 	fill bool,
-	logoAlign string,
 	doc *Document,
+	title string,
 ) float64 {
 	doc.pdf.SetXY(x, y)
 
-	// Logo
-	if c.Logo != nil {
-		// Create filename
-		fileName := b64.StdEncoding.EncodeToString([]byte(c.Name))
-
-		// Create reader from logo bytes
-		ioReader := bytes.NewReader(c.Logo)
-
-		// Get image format
-		_, format, _ := image.DecodeConfig(bytes.NewReader(c.Logo))
-
-		// Register image in pdf
-		imageInfo := doc.pdf.RegisterImageOptionsReader(fileName, fpdf.ImageOptions{
-			ImageType: format,
-		}, ioReader)
-
-		if imageInfo != nil {
-			var imageOpt fpdf.ImageOptions
-			imageOpt.ImageType = format
-			doc.pdf.ImageOptions(fileName, doc.pdf.GetX(), y, 0, 30, false, imageOpt, 0, "")
-			doc.pdf.SetY(y + 30)
-		}
-	}
+	//// Logo
+	//if c.Logo != nil {
+	//	// Create filename
+	//	fileName := b64.StdEncoding.EncodeToString([]byte(c.Name))
+	//
+	//	// Create reader from logo bytes
+	//	ioReader := bytes.NewReader(c.Logo)
+	//
+	//	// Get image format
+	//	_, format, _ := image.DecodeConfig(bytes.NewReader(c.Logo))
+	//
+	//	// Register image in pdf
+	//	imageInfo := doc.pdf.RegisterImageOptionsReader(fileName, fpdf.ImageOptions{
+	//		ImageType: format,
+	//	}, ioReader)
+	//
+	//	if imageInfo != nil {
+	//		var imageOpt fpdf.ImageOptions
+	//		imageOpt.ImageType = format
+	//		doc.pdf.ImageOptions(fileName, doc.pdf.GetX(), y, 0, 30, false, imageOpt, 0, "")
+	//		doc.pdf.SetY(y + 30)
+	//	}
+	//}
 
 	// Name
 	if fill {
 		doc.pdf.SetFillColor(
-			doc.Options.GreyBgColor[0],
-			doc.Options.GreyBgColor[1],
-			doc.Options.GreyBgColor[2],
+			doc.Options.WhiteBgColor[0],
+			doc.Options.WhiteBgColor[1],
+			doc.Options.WhiteBgColor[2],
 		)
 	} else {
 		doc.pdf.SetFillColor(255, 255, 255)
@@ -72,8 +64,10 @@ func (c *Contact) appendContactTODoc(
 
 	// Set name
 	doc.pdf.SetFont(doc.Options.BoldFont, "B", 10)
-	doc.pdf.Cell(40, 8, doc.encodeString(c.Name))
+	doc.pdf.Cell(40, 8, doc.encodeString(title))
 	doc.pdf.SetFont(doc.Options.Font, "", 10)
+	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
+	doc.pdf.Cell(40, 8, doc.encodeString(c.Name))
 
 	if c.Address != nil {
 		// Address rect
@@ -91,7 +85,7 @@ func (c *Contact) appendContactTODoc(
 
 		// Set address
 		doc.pdf.SetFont(doc.Options.Font, "", 10)
-		doc.pdf.SetXY(x, doc.pdf.GetY()+10)
+		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
 		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
 	}
 
@@ -114,12 +108,12 @@ func (c *Contact) appendContactTODoc(
 }
 
 // appendCompanyContactToDoc append the company contact to the document
-func (c *Contact) appendCompanyContactToDoc(doc *Document) float64 {
-	x, y, _, _ := doc.pdf.GetMargins()
-	return c.appendContactTODoc(x, y, true, "L", doc)
+func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
+	x, _, _, _ := doc.pdf.GetMargins()
+	return c.appendContactTODoc(x, y, true, doc, "Issued By:")
 }
 
 // appendCustomerContactToDoc append the customer contact to the document
-func (c *Contact) appendCustomerContactToDoc(doc *Document) float64 {
-	return c.appendContactTODoc(130, BaseMarginTop+25, true, "R", doc)
+func (c *Contact) appendCustomerContactToDoc(doc *Document, y float64) float64 {
+	return c.appendContactTODoc(130, y, true, doc, "Invoice To:")
 }

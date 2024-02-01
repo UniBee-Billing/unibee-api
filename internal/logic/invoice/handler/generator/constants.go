@@ -26,25 +26,30 @@ const (
 // Cols offsets
 const (
 	// ItemColNameOffset ...
-	ItemColNameOffset float64 = 10
+	ItemColNameOffset float64 = 20
 
 	// ItemColUnitPriceOffset ...
-	ItemColUnitPriceOffset float64 = 80
+	//ItemColUnitPriceOffset float64 = 80
+	ItemColUnitPriceOffset float64 = ItemColTotalTTCOffset
 
 	// ItemColQuantityOffset ...
-	ItemColQuantityOffset float64 = 103
+	//ItemColQuantityOffset float64 = 103
+	ItemColQuantityOffset float64 = ItemColTotalTTCOffset
 
 	// ItemColTotalHTOffset ...
-	ItemColTotalHTOffset float64 = 113
+	//ItemColTotalHTOffset float64 = 113
+	ItemColTotalHTOffset float64 = ItemColTotalTTCOffset
 
 	// ItemColDiscountOffset ...
-	ItemColDiscountOffset float64 = 140
+	//ItemColDiscountOffset float64 = 140
+	ItemColDiscountOffset float64 = ItemColTotalTTCOffset
 
 	// ItemColTaxOffset ...
-	ItemColTaxOffset float64 = 157
+	//ItemColTaxOffset float64 = 157
+	ItemColTaxOffset float64 = ItemColTotalTTCOffset
 
 	// ItemColTotalTTCOffset ...
-	ItemColTotalTTCOffset float64 = 175
+	ItemColTotalTTCOffset float64 = 165
 )
 
 var (
@@ -58,5 +63,5 @@ var (
 	ExtraSmallTextFontSize float64 = 6
 
 	// LargeTextFontSize define the large font size for text in document
-	LargeTextFontSize float64 = 10
+	LargeTextFontSize float64 = 12
 )

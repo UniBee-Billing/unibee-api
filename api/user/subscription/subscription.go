@@ -108,7 +108,7 @@ type SubscriptionUpdateReq struct {
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDatem Date Start Proration" v:"required" `
+	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
 	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 }
 type SubscriptionUpdateRes struct {

@@ -15,6 +15,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
@@ -36,34 +37,42 @@ func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoic
 }
 
 func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchantInfo *entity.MerchantInfo, user *entity.UserAccount, savePath string) error {
+	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency))))
 	doc, _ := generator2.New(generator2.Invoice, &generator2.Options{
-		TextTypeInvoice: "INVOICE",
-		AutoPrint:       true,
-		CurrencySymbol:  fmt.Sprintf("%v", currency.Symbol(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency)))),
+		//TextTypeInvoice: "INVOICE",
+		AutoPrint:      true,
+		CurrencySymbol: symbol,
 	})
 
-	doc.SetHeader(&generator2.HeaderFooter{
-		Text:       "<center>UniBee Billing</center>",
-		Pagination: true,
-	})
-
+	//doc.SetHeader(&generator2.HeaderFooter{
+	//	Text:       "<center>UniBee Billing</center>",
+	//	Pagination: true,
+	//})
+	//
 	doc.SetFooter(&generator2.HeaderFooter{
-		Text:       "<center>UniBee Billing</center>",
+		Text:       fmt.Sprintf("PDF Generated on %s", time.Now().Format(time.RFC850)),
 		Pagination: true,
 	})
 
-	doc.SetRef("testref")
-	doc.SetVersion("1.0")
+	doc.SetInvoiceNumber(unibInvoice.InvoiceId)
+	doc.SetInvoiceDate(unibInvoice.GmtCreate.Layout("2006-01-01"))
 
-	doc.SetDescription("Subscriptions")
+	//doc.SetDescription("Subscriptions")
 	if unibInvoice.Status == consts.InvoiceStatusProcessing {
-		doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Pay Link</a>")
-	} else {
-		doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Link</a>")
+		doc.SetStatus("Processing")
+		//doc.SetNotes("<a href='" + unibInvoice.Link + "'>Processing</a>")
+	} else if unibInvoice.Status == consts.InvoiceStatusPaid {
+		doc.SetStatus("Paid")
+		//doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Link</a>")
+	} else if unibInvoice.Status == consts.InvoiceStatusCancelled {
+		doc.SetStatus("Cancelled")
+		//doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Link</a>")
+	} else if unibInvoice.Status == consts.InvoiceStatusFailed {
+		doc.SetStatus("Failed")
+		//doc.SetNotes("<a href='" + unibInvoice.Link + "'>Invoice Link</a>")
 	}
 
-	doc.SetDate(utility.FormatUnixTime(unibInvoice.PeriodStart))
-	doc.SetPaymentTerm(utility.FormatUnixTime(unibInvoice.PeriodEnd))
+	doc.SetPaidDate(unibInvoice.GmtModify.Layout("2006-01-02"))
 
 	tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
 	utility.Assert(len(tempLogoPath) > 0, "download Logo error")
@@ -72,13 +81,15 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		return err
 	}
 
+	doc.SetLogo(logoBytes)
+
 	doc.SetCompany(&generator2.Contact{
 		Name: merchantInfo.Name,
-		Logo: logoBytes,
+		//Logo: logoBytes,
 		Address: &generator2.Address{
 			Address: merchantInfo.Location + " " + merchantInfo.Address,
 			//PostalCode: "75000",
-			City: merchantInfo.Location,
+			//City: merchantInfo.Location,
 			//Country:    "France",
 			//Phone:   merchantInfo.Phone,
 			//Email:   merchantInfo.Email,
@@ -87,7 +98,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	var userName = ""
 	var userAddress = ""
 	if user != nil {
-		userName = user.UserName
+		userName = user.FirstName + " " + user.LastName
 		userAddress = user.Address
 	}
 
@@ -111,17 +122,17 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		//scale, _ := currency.Cash.Rounding(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency)))
 		//dec := fmt.Sprintf("%v", number.Decimal(float64(line.UnitAmountExcludingTax)/100.0, number.Scale(scale)))
 		doc.AppendItem(&generator2.Item{
-			Name:        fmt.Sprintf("%s #%d", line.Description, i),
-			Description: fmt.Sprintf("%s-%s", utility.FormatUnixTime(unibInvoice.PeriodStart), utility.FormatUnixTime(unibInvoice.PeriodEnd)),
-			UnitCost:    fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
-			Quantity:    strconv.FormatInt(line.Quantity, 10),
-			Tax: &generator2.Tax{
-				Percent: utility.ConvertTaxScaleToPercentageString(unibInvoice.TaxScale),
-			},
-			Discount: &generator2.Discount{
-				Percent: "0",
-				Amount:  "0",
-			},
+			Name: fmt.Sprintf("%s #%d", line.Description, i),
+			//Description: fmt.Sprintf("%s-%s", utility.FormatUnixTime(unibInvoice.PeriodStart), utility.FormatUnixTime(unibInvoice.PeriodEnd)),
+			UnitCost: fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
+			Quantity: strconv.FormatInt(line.Quantity, 10),
+			//Tax: &generator2.Tax{
+			//	Percent: utility.ConvertTaxScaleToPercentageString(unibInvoice.TaxScale),
+			//},
+			//Discount: &generator2.Discount{
+			//	Percent: "0",
+			//	Amount:  "0",
+			//},
 		})
 	}
 
@@ -132,9 +143,9 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	// doc.SetDiscount(&generator.Discount{
 	// Percent: "90",
 	// })
-	doc.SetDiscount(&generator2.Discount{
-		Amount: "0",
-	})
+	//doc.SetDiscount(&generator2.Discount{
+	//	Amount: "0",
+	//})
 
 	pdf, err := doc.Build()
 	if err != nil {
@@ -148,88 +159,6 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	}
 	return nil
 }
-
-//func createInvoice(ctx context.Context, creater *creator.Creator, unibInvoice *entity.Invoice) *creator.Invoice {
-//	// Create an instance of Logo used as a header for the invoice
-//	// If the image is not stored localy, you can use NewImageFromData to generate it from byte array
-//	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
-//	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
-//	merchantInfo := query.GetMerchantInfoById(ctx, unibInvoice.MerchantId)
-//	utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
-//	user := query.GetUserAccountById(ctx, uint64(unibInvoice.UserId))
-//
-//	tempLogoPath := downloadImage(merchantInfo.CompanyLogo)
-//	utility.Assert(len(tempLogoPath) > 0, "download Logo error")
-//	logo, err := creater.NewImageFromFile(tempLogoPath)
-//	checkErr(err)
-//
-//	// Create a new invoice
-//	invoice := creater.NewInvoice()
-//
-//	// Set invoice logo
-//	invoice.SetLogo(logo)
-//
-//	var paid string
-//	if unibInvoice.Status == consts.InvoiceStatusPaid {
-//		paid = "YES"
-//	} else {
-//		paid = "NO"
-//	}
-//
-//	// Set invoice information
-//	invoice.SetNumber(unibInvoice.InvoiceId)
-//	invoice.SetDate(FormatUnixTime(unibInvoice.PeriodStart))
-//	invoice.SetDueDate(FormatUnixTime(unibInvoice.PeriodEnd))
-//	invoice.AddInfo("Payment terms", "Due on receipt")
-//	invoice.AddInfo("Paid", paid)
-//
-//	// Set invoice addresses
-//	invoice.SetSellerAddress(&creator.InvoiceAddress{
-//		Name:    merchantInfo.Name,
-//		Street:  merchantInfo.Address,
-//		City:    merchantInfo.Location,
-//		Zip:     "",
-//		Country: "",
-//		Phone:   merchantInfo.Phone,
-//		Email:   merchantInfo.Email,
-//	})
-//
-//	invoice.SetBuyerAddress(&creator.InvoiceAddress{
-//		Name:    user.UserName,
-//		Street:  user.Address,
-//		City:    "",
-//		Zip:     "",
-//		Country: "",
-//		Phone:   user.Phone,
-//		Email:   user.Email,
-//	})
-//
-//	var lines []*ro.InvoiceItemDetailRo
-//	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
-//	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
-//
-//	// Add products to invoice
-//	for i, line := range lines {
-//		invoice.AddLine(
-//			fmt.Sprintf("%s #%d\n%s-%s", line.Description, i, FormatUnixTime(unibInvoice.PeriodStart), FormatUnixTime(unibInvoice.PeriodEnd)),
-//			strconv.FormatInt(line.Quantity, 10),
-//			MustParseCurrencySymbolValue(unibInvoice.Currency, line.UnitAmountExcludingTax),
-//			MustParseCurrencySymbolValue(unibInvoice.Currency, line.AmountExcludingTax),
-//		)
-//	}
-//
-//	// Set invoice totals
-//	invoice.SetSubtotal(MustParseCurrencySymbolValue(unibInvoice.Currency, unibInvoice.SubscriptionAmountExcludingTax))
-//	invoice.AddTotalLine(fmt.Sprintf("Tax (%d%%)", unibInvoice.TaxPencentage), MustParseCurrencySymbolValue(unibInvoice.Currency, unibInvoice.TaxAmount))
-//	invoice.AddTotalLine("Shipping", MustParseCurrencySymbolValue(unibInvoice.Currency, 0))
-//	invoice.SetTotal(MustParseCurrencySymbolValue(unibInvoice.Currency, unibInvoice.TotalAmount))
-//
-//	// Set invoice content sections
-//	invoice.SetNotes("Notes", "Thank you for your business.")
-//	invoice.SetTerms("Terms and conditions", "")
-//
-//	return invoice
-//}
 
 func MustParseCurrencySymbolValue(currencyCode string, centAmount int64) string {
 	// 将货币代码转换为 currency.Unit 类型的值
