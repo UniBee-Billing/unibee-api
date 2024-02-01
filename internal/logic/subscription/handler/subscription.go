@@ -70,7 +70,7 @@ func HandleSubscriptionCreatePaymentSuccess(ctx context.Context, sub *entity.Sub
 	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 	utility.Assert(sub != nil, "HandleSubscriptionCreatePaymentSuccess sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(invoice != nil, "HandleSubscriptionCreatePaymentSuccess invoice not found")
+	utility.Assert(invoice != nil, "HandleSubscriptionCreatePaymentSuccess invoice not found payment:"+payment.PaymentId)
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, uint64(sub.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
@@ -104,7 +104,7 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 	sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found")
+	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
 	var firstPayTime = sub.FirstPayTime
 	if sub.FirstPayTime == nil && payment.Status == consts.PAY_SUCCESS {
 		firstPayTime = payment.PaidTime
