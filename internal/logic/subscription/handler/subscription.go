@@ -64,6 +64,40 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	return nil
 }
 
+func HandleSubscriptionCreatePaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
+	utility.Assert(payment != nil, "HandleSubscriptionCreatePaymentSuccess payment is nil")
+	utility.Assert(len(payment.SubscriptionId) > 0, "HandleSubscriptionCreatePaymentSuccess payment subId is nil")
+	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
+	utility.Assert(sub != nil, "HandleSubscriptionCreatePaymentSuccess sub not found")
+	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(invoice != nil, "HandleSubscriptionCreatePaymentSuccess invoice not found")
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, uint64(sub.PlanId))
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
+		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		dao.Subscription.Columns().DunningTime:            dunningTime,
+		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+		dao.Subscription.Columns().FirstPayTime:           payment.PaidTime,
+	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
+	// billing-cycle
+	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
+	if err != nil {
+		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
+	}
+	err = UpdateSubscriptionBillingCycleWithPayment(ctx, payment)
+	return err
+}
+
 func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *entity.Payment) error {
 	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
 	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
@@ -151,16 +185,6 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 		}
 	}
 	return addons
-}
-
-func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
-	// billing-cycle
-	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
-	if err != nil {
-		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
-	}
-	err = UpdateSubscriptionBillingCycleWithPayment(ctx, payment)
-	return err
 }
 
 func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {

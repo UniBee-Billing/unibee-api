@@ -65,6 +65,12 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCycle")
 				}
+			} else if strings.Compare(payment.BillingReason, "SubscriptionCreate") == 0 {
+				// SubscriptionCycle
+				err := handler.HandleSubscriptionCreatePaymentSuccess(ctx, sub, payment)
+				if err != nil {
+					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCreate")
+				}
 			} else {
 				//todo mark
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Payment:%s", payment.PaymentId))

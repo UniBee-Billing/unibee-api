@@ -312,7 +312,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 				CountryCode:    prepare.VatCountryCode,
 				MerchantId:     prepare.MerchantInfo.Id,
 				CompanyId:      prepare.MerchantInfo.CompanyId,
-				BillingReason:  "SubscriptionCycle",
+				BillingReason:  "SubscriptionCreate",
 				ReturnUrl:      req.ReturnUrl,
 			},
 			Platform:      "WEB",
