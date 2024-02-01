@@ -32,33 +32,35 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
 
-	go func() {
-		defer func() {
-			if exception := recover(); exception != nil {
-				var err error
-				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					err = v
-				} else {
-					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+	if one.Type == consts.SubTypeDefault {
+		go func() {
+			defer func() {
+				if exception := recover(); exception != nil {
+					var err error
+					if v, ok := exception.(error); ok && gerror.HasStack(v) {
+						err = v
+					} else {
+						err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+					}
+					g.Log().Errorf(context.Background(), "SubscriptionDetail Background panic error:%s\n", err.Error())
+					return
 				}
-				g.Log().Errorf(context.Background(), "SubscriptionDetail Background panic error:%s\n", err.Error())
-				return
+			}()
+			backgroundCtx := context.Background()
+			plan := query.GetPlanById(backgroundCtx, one.PlanId)
+			utility.Assert(plan != nil, "invalid planId")
+			utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
+			planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
+			details, err := out.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
+			if err == nil {
+				err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
+				if err != nil {
+					fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
+					return
+				}
 			}
 		}()
-		backgroundCtx := context.Background()
-		plan := query.GetPlanById(backgroundCtx, one.PlanId)
-		utility.Assert(plan != nil, "invalid planId")
-		utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-		planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
-		details, err := out.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
-		if err == nil {
-			err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
-			if err != nil {
-				fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
-				return
-			}
-		}
-	}()
+	}
 	//删减返回值
 	{
 		one.Data = ""
