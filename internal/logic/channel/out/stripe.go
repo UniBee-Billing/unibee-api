@@ -1182,7 +1182,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 					}
 				}
 				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s error:%s\n", method, channelPaymentId, status, err)
-				if err == nil && strings.Compare(string(response.Status), "succeeded") == 0 {
+				if err == nil && strings.Compare(status, "succeeded") == 0 {
 					success = true
 					break
 				}
