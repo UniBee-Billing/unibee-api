@@ -88,7 +88,7 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			utility.Assert(sub != nil, "payment sub not found")
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
 			if pendingSubUpdate != nil {
-				_, err := handler.PaymentFailureForPendingUpdate(ctx, pendingSubUpdate)
+				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
 				if err != nil {
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}
@@ -106,7 +106,7 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 			utility.Assert(sub != nil, "payment sub not found")
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
 			if pendingSubUpdate != nil {
-				_, err := handler.PaymentFailureForPendingUpdate(ctx, pendingSubUpdate)
+				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
 				if err != nil {
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
@@ -15,38 +16,11 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func HandleSubscriptionPendingUpdateCancel(ctx context.Context, pendingUpdateId string, reason string) error {
+func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId string) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
-	if one != nil {
-		//if len(one.ChannelUpdateId) > 0 {
-		//	err := handler.HandlePayCancel(ctx, &handler.HandlePayReq{
-		//		PaymentId:     one.ChannelUpdateId,
-		//		PayStatusEnum: consts.PAY_CANCEL,
-		//		CaptureAmount: 0,
-		//		Reason:        reason,
-		//	})
-		//	if err != nil {
-		//		fmt.Printf("HandleSubscriptionPendingUpdateCancel HandlePayCancel error:%s", err.Error())
-		//	}
-		//}
-		if one.Status == consts.PendingSubStatusFinished {
-			return nil
-		}
-		if one.Status == consts.PendingSubStatusCancelled {
-			return nil
-		}
-		_, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-			dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
-			dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return err
-		}
+	if one == nil {
+		return false, gerror.New("FinishPendingUpdateForSubscription PendingUpdate Not Found:" + one.UpdateSubscriptionId)
 	}
-	return nil
-}
-
-func PaymentFailureForPendingUpdate(ctx context.Context, one *entity.SubscriptionPendingUpdate) (bool, error) {
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}

@@ -1255,7 +1255,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		return &ro.CreatePayInternalResp{
 			Status:                 status,
 			ChannelPaymentId:       channelPaymentId,
-			ChannelPaymentIntentId: channelPaymentId,
+			ChannelPaymentIntentId: detail.ID,
 			Link:                   detail.HostedInvoiceURL,
 		}, nil
 	}
@@ -1267,8 +1267,29 @@ func (s Stripe) DoRemoteChannelCapture(ctx context.Context, payment *entity.Paym
 }
 
 func (s Stripe) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(payment.ChannelId > 0, "invalid payment channelId")
+	utility.Assert(len(payment.ChannelPaymentIntentId) > 0, "invalid payment ChannelPaymentIntentId")
+	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
+	utility.Assert(channelEntity != nil, "channel not found")
+	s.setUnibeeAppInfo()
+	params := &stripe.InvoiceVoidInvoiceParams{}
+	result, err := invoice.VoidInvoice(payment.ChannelPaymentIntentId, params)
+	if err != nil {
+		return nil, err
+	}
+	invoiceDetails := parseStripeInvoice(result, payment.ChannelId)
+	var status = consts.TO_BE_PAID
+	if invoiceDetails.Status == consts.InvoiceStatusPaid {
+		status = consts.PAY_SUCCESS
+	} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
+		status = consts.PAY_FAILED
+	}
+	return &ro.OutPayCancelRo{
+		MerchantId:      strconv.FormatInt(payment.MerchantId, 10),
+		ChannelCancelId: result.ID,
+		Reference:       payment.PaymentId,
+		Status:          strconv.Itoa(status),
+	}, nil
 }
 
 func (s Stripe) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.ChannelPaymentRo, err error) {

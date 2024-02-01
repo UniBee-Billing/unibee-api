@@ -13,7 +13,7 @@ import (
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
 	"go-oversea-pay/internal/logic/payment/service"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
-	"go-oversea-pay/internal/logic/subscription/handler"
+	service2 "go-oversea-pay/internal/logic/subscription/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -56,9 +56,9 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
 			if sub.CurrentPeriodEnd+SubscriptionDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
-				err := HandleSubscriptionExpired(ctx, sub, "CycleExpireWithoutPay")
+				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 				if err != nil {
-					g.Log().Print(ctx, taskName, "HandleSubscriptionExpired", err.Error())
+					g.Log().Print(ctx, taskName, "SubscriptionExpire", err.Error())
 				}
 			} else {
 				latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
@@ -189,7 +189,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	g.Log().Print(ctx, taskName, "End......")
 }
 
-func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, reason string) error {
+func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason string) error {
 	//Expire SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
@@ -201,9 +201,9 @@ func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, re
 		return err
 	}
 	for _, p := range pendingUpdates {
-		err = handler.HandleSubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, reason)
+		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, reason)
 		if err != nil {
-			fmt.Printf("MakeSubscriptionExpired HandleSubscriptionPendingUpdateCancel error:%s", err.Error())
+			fmt.Printf("MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}
 	}
 	//Cancel Subscription Remaining Payment
@@ -214,7 +214,7 @@ func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, re
 		Limit(0, 100).
 		OmitEmpty().Scan(&paymentList)
 	if err != nil {
-		fmt.Printf("HandleSubscriptionExpired GetPaymentList error:%s", err.Error())
+		fmt.Printf("SubscriptionExpire GetPaymentList error:%s", err.Error())
 	}
 	for _, p := range paymentList {
 		// todo mark should use DoChannelCancel
@@ -224,7 +224,7 @@ func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, re
 			Reason:        reason,
 		})
 		if err != nil {
-			fmt.Printf("HandleSubscriptionExpired HandlePayCancel error:%s", err.Error())
+			fmt.Printf("SubscriptionExpire HandlePayCancel error:%s", err.Error())
 		}
 	}
 	//Expire Subscription UnFinished Invoice, May No Need
@@ -235,7 +235,7 @@ func HandleSubscriptionExpired(ctx context.Context, sub *entity.Subscription, re
 		dao.Subscription.Columns().GmtModify:    gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
-		fmt.Printf("HandleSubscriptionExpired error:%s", err.Error())
+		fmt.Printf("SubscriptionExpire error:%s", err.Error())
 	}
 
 	return nil

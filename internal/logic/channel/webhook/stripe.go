@@ -46,7 +46,7 @@ func (s StripeWebhook) setUnibeeAppInfo() {
 	})
 }
 
-// DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks
+// DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks  https://stripe.com/docs/api/events/types
 func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantChannelConfig) (err error) {
 	utility.Assert(payChannel != nil, "payChannel is nil")
 	stripe.Key = payChannel.ChannelSecret
@@ -75,6 +75,10 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
+				stripe.String("payment_intent.canceled"),
+				stripe.String("payment_intent.partially_funded"),
+				stripe.String("payment_intent.payment_failed"),
+				stripe.String("payment_intent.requires_action"),
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
@@ -113,6 +117,10 @@ func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 				stripe.String("invoice.payment_action_required"),
 				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
+				stripe.String("payment_intent.canceled"),
+				stripe.String("payment_intent.partially_funded"),
+				stripe.String("payment_intent.payment_failed"),
+				stripe.String("payment_intent.requires_action"),
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
@@ -189,7 +197,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 				responseBack = http.StatusBadRequest
 			}
 		}
-	case "payment_intent.created", "payment_intent.succeeded":
+	case "payment_intent.created", "payment_intent.succeeded", "payment_intent.canceled", "payment_intent.partially_funded", "payment_intent.requires_action":
 		var stripePayment stripe.PaymentIntent
 		err = json.Unmarshal(event.Data.Raw, &stripePayment)
 		if err != nil {

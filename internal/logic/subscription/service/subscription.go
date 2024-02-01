@@ -912,16 +912,18 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	if err != nil {
 		return nil, err
 	}
-	// Only One Need, Cancel Others todo mark need cancel payment、 invoice and send invoice email
-	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.SubscriptionId).
-		WhereNot(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).
-		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
-	if err != nil {
-		return nil, err
-	}
+	// Only One Need, Cancel Others
+	//_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+	//	dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
+	//	dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+	//}).Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, prepare.Subscription.SubscriptionId).
+	//	WhereNot(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).
+	//	WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).OmitNil().Update()
+	//if err != nil {
+	//	return nil, err
+	//}
+	// need cancel payment、 invoice and send invoice email
+	CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.UpdateSubscriptionId, "CancelByNewUpdate-"+one.UpdateSubscriptionId)
 
 	var PaidInt = 0
 	if subUpdateRes.Paid {
@@ -943,7 +945,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	if prepare.EffectImmediate && subUpdateRes.Paid {
-		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
 		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one.UpdateSubscriptionId)
 		if err != nil {
 			return nil, err
