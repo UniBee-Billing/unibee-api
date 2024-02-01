@@ -989,17 +989,22 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
-		UserName:            user.UserName,
-		MerchantProductName: plan.ChannelProductName,
-		MerchantCustomEmail: merchant.Email,
-		MerchantName:        merchant.Name,
-		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
-	})
-	if err != nil {
-		fmt.Printf("SendTemplateEmail err:%s", err.Error())
+	if user != nil {
+		merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+		if merchant != nil {
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
+				UserName:            user.UserName,
+				MerchantProductName: plan.ChannelProductName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        merchant.Name,
+				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+			})
+			if err != nil {
+				fmt.Printf("SendTemplateEmail err:%s", err.Error())
+			}
+		}
 	}
+
 	return nil
 }
 
