@@ -1187,6 +1187,8 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 					break
 				} else if targetIntent != nil {
 					_, cancelErr = paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
+				} else {
+					cancelErr = gerror.Newf("targetIntent is nil")
 				}
 				g.Log().Printf(ctx, "DoRemoteChannelPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, channelPaymentId, status, success, link, err, cancelErr)
 			}
