@@ -944,11 +944,11 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	if prepare.EffectImmediate && subUpdateRes.Paid {
 		//需要3DS校验的用户，在进行订阅更新，如果使用 PendingUpdate，经过验证也是需要 3DS 校验，如果不使用 PendingUpdate，下一周期再进行Invoice收款，可能面临发票自动收款失败，然后需要用户 3DS 校验的情况；使用了 PendingUpdate 提前收款只是把问题前置了
-		one.Status = consts.PendingSubStatusFinished
 		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one.UpdateSubscriptionId)
 		if err != nil {
 			return nil, err
 		}
+		one.Status = consts.PendingSubStatusFinished
 	}
 
 	return &subscription.SubscriptionUpdateRes{
