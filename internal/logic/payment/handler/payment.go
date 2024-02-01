@@ -152,14 +152,11 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err 
 		g.Log().Infof(ctx, "payment is nil")
 		return errors.New("payment not found")
 	}
-	if payment.AuthorizeStatus == consts.WAITING_AUTHORIZED {
-		return nil
-	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.Id), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED, dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED})
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -179,7 +176,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err 
 	})
 	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
 	if err == nil {
-		payment := query.GetPaymentByPaymentId(ctx, payment.PaymentId)
+		payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
