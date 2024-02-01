@@ -66,13 +66,13 @@ func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*
 	return addons
 }
 
-func GetSubscriptionUpgradePendingUpdateByPendingUpdateId(ctx context.Context, pendingUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(pendingUpdateId) == 0 {
+func GetSubscriptionUpgradePendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(channelUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)
 	if err != nil {

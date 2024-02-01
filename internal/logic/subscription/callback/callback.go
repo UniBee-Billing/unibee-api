@@ -69,7 +69,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByPendingUpdateId(ctx, payment.PaymentId)
+			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
 			pendingSubDowngrade := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpgrade != nil && strings.Compare(payment.BillingReason, "SubscriptionUpgrade") == 0 {
 				utility.Assert(strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0, "payment sub_id not match pendingUpdate sub_id")
