@@ -9,6 +9,7 @@ import (
 	"go-oversea-pay/utility"
 	"log"
 	"math/rand"
+	"regexp"
 	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -41,8 +42,16 @@ func hashAndSalt(pwd []byte) string {
 	return string(hash)
 }
 
+func IsEmailValid(email string) bool {
+	// 使用正则表达式来检查电子邮件地址的格式
+	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	validEmail := regexp.MustCompile(emailRegex)
+	return validEmail.MatchString(email)
+}
+
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
-	utility.Assert(len(req.Email) > 0, "email is needed")
+	utility.Assert(len(req.Email) > 0, "Email Needed")
+	utility.Assert(IsEmailValid(req.Email), "Invalid Email")
 	var newOne *entity.MerchantUserAccount
 	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne == nil, "Email already existed")
