@@ -949,7 +949,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 
 	return &subscription.SubscriptionUpdateRes{
 		SubscriptionPendingUpdate: one,
-		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid,
+		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
 		Link:                      subUpdateRes.Link,
 	}, nil
 }
