@@ -3,7 +3,7 @@ package consts
 const (
 	NonEffectImmediatelyUsePendingUpdate = false
 	ProrationUsingUniBeeCompute          = true
-	SubscriptionCycleUnderUniBeeControl  = false
+	SubscriptionCycleUnderUniBeeControl  = true
 )
 
 type InvoiceStatusEnum int
