@@ -1188,6 +1188,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 
 		if createPayContext.PayMethod == 1 {
 			params.CollectionMethod = stripe.String("charge_automatically")
+			// todo mark check the channel user contains the payment method now
 			if len(createPayContext.ChannelPaymentMethod) > 0 {
 				params.DefaultPaymentMethod = stripe.String(createPayContext.ChannelPaymentMethod)
 			} else if len(channelUser.ChannelDefaultPaymentMethod) > 0 {
