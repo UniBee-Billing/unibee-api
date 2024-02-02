@@ -66,7 +66,7 @@ type OutLineItem struct {
 }
 
 type PaymentMethodsReq struct {
-	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
+	g.Meta  `path:"/paymentMethods" tags:"Open-Payment-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
 	TokenId string `p:"tokenId" dc:"TokenId" v:""`
 	Channel string `p:"type" dc:"Channel" v:"required"`
 }
@@ -80,7 +80,7 @@ type OutPaymentMethodIssur struct {
 }
 
 type PaymentDetailsReq struct {
-	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"Query Payment Detail"`
+	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Open-Payment-Controller" method:"post" summary:"Query Payment Detail"`
 	PaymentId string `in:"path" dc:"PaymentId" v:"required"`
 }
 type PaymentDetailsRes struct {
