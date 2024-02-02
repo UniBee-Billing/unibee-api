@@ -206,8 +206,8 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
-	if payment.Status == consts.PAY_CANCEL {
-		g.Log().Infof(ctx, "already cancel")
+	if payment.Status == consts.PAY_CANCEL || payment.Status == consts.PAY_FAILED {
+		g.Log().Infof(ctx, "already cancel or failure")
 		return nil
 	}
 
@@ -278,8 +278,8 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
-	if payment.Status == consts.PAY_FAILED {
-		g.Log().Infof(ctx, "already failure")
+	if payment.Status == consts.PAY_CANCEL || payment.Status == consts.PAY_FAILED {
+		g.Log().Infof(ctx, "already cancel or failure")
 		return nil
 	}
 

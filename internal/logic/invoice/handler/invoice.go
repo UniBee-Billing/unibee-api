@@ -105,6 +105,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			UserId:                         payment.UserId,
 			MerchantId:                     payment.MerchantId,
 			SubscriptionId:                 payment.SubscriptionId,
+			InvoiceName:                    payment.BillingReason,
 			InvoiceId:                      utility.CreateInvoiceId(),
 			PeriodStart:                    simplify.PeriodStart,
 			PeriodEnd:                      simplify.PeriodEnd,

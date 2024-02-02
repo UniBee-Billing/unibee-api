@@ -368,8 +368,11 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *enti
 		TotalAmount: payment.TotalAmount,
 		Status:      consts.TO_BE_PAID,
 	}
-	if strings.Compare(status, "Failed") == 0 || strings.Compare(status, "Cancelled") == 0 {
+	if strings.Compare(status, "Failed") == 0 {
 		res.Status = consts.PAY_FAILED
+		res.Reason = "from_query:" + channelPayment.Get("failureReason").String()
+	} else if strings.Compare(status, "Cancelled") == 0 {
+		res.Status = consts.PAY_CANCEL
 		res.Reason = "from_query:" + channelPayment.Get("failureReason").String()
 	} else if strings.Compare(status, "Captured") == 0 {
 		res.Status = consts.PAY_SUCCESS

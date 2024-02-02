@@ -10,7 +10,6 @@ import (
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
@@ -218,31 +217,19 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
+	utility.Assert(len(one.PaymentId) > 0, "invoice payment not found")
 	if one.IsDeleted == 1 {
 		return nil
 	} else {
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+		utility.Assert(payment != nil, "payment not found")
 		payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.ChannelId)
 		utility.Assert(payChannel != nil, "payChannel not found")
-		_, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCancel(ctx, payChannel, &ro.ChannelCancelInvoiceInternalReq{
-			ChannelInvoiceId: one.ChannelInvoiceId,
-		})
+		err := service.DoChannelCancel(ctx, payment)
 		if err != nil {
-			return gerror.Newf(`FinishInvoice failure %v`, err)
+			g.Log().Errorf(ctx, `DoChannelCancel failure %s`, err.Error())
 		}
-		// todo mark 重新生成 cancel 状态的 pdf 并发送邮件
-		//更新 Subscription
-		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().Status:    consts.InvoiceStatusCancelled,
-			dao.Invoice.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return err
-		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return gerror.Newf("EditInvoice update err:%s", update)
-		//}
-		return nil
+		return err
 	}
 }
 

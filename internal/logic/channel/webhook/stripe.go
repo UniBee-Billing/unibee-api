@@ -523,8 +523,10 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	if invoiceDetails.Status == consts.InvoiceStatusPaid {
 		status = consts.PAY_SUCCESS
 		captureStatus = consts.CAPTURE_REQUEST
-	} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
+	} else if invoiceDetails.Status == consts.InvoiceStatusFailed {
 		status = consts.PAY_FAILED
+	} else if invoiceDetails.Status == consts.InvoiceStatusCancelled {
+		status = consts.PAY_CANCEL
 	} else if strings.Compare("invoice.payment_action_required", eventType) == 0 {
 		captureStatus = consts.WAITING_AUTHORIZED
 	}
