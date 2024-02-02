@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/redis/go-redis/v9"
 	"go-oversea-pay/utility"
 	"net"
@@ -97,7 +99,7 @@ func tryCreateGroup(queueName string, topic string) {
 	message := &Message{
 		Topic: topic,
 		Tag:   "blank",
-		Body:  []byte("test"),
+		Body:  "test",
 	}
 	// 发送一条测试消息到 Stream
 	_, err := client.XAdd(context.Background(), message.toStreamAddArgsValues(queueName)).Result()
@@ -165,21 +167,35 @@ func blockConsumerTopic(topic string) {
 }
 
 func loopConsumer(topic string) {
+	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
+	// 关闭连接
+	defer func(client *redis.Client) {
+		err := client.Close()
+		if err != nil {
+			fmt.Printf("Closs Redis Stream Client error:%s\n", err)
+		}
+	}(client)
 	for {
+		var err error
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("Redismq Stream loopConsumer Redis Error topic:%s panic error:%s\n", topic, exception)
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				fmt.Printf("MQ STREAM Redismq Stream loopConsumer Redis Error topic:%s panic error:%s\n", topic, err.Error())
 				return
 			}
 		}()
 		count := 0
-		message := blockReceiveConsumerMessage(topic)
+		message := blockReceiveConsumerMessage(client, topic)
 		if message != nil {
 			if consumer := getConsumer(message); consumer != nil {
 				runConsumeMessage(consumer, message)
 				//找不到本地订阅方,塞回队列，ToDo mark 实现group拉取方式应该丢弃
 			} else {
-				fmt.Printf("Redismq Stream Receive Group:{} No Comsumer Drop message::%v\n", message)
+				fmt.Printf("MQ STREAM Redismq Stream Receive Group:{} No Comsumer Drop message::%v\n", message)
 				messageAck(message)
 			}
 			count++
@@ -235,6 +251,18 @@ func getConsumer(message *Message) IMessageListener {
 }
 
 func runConsumeMessage(consumer IMessageListener, message *Message) {
+	var err error
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("MQ STREAM Redismq runConsumeMessage panic error:%s\n", err.Error())
+			return
+		}
+	}()
 	if message.isBoardCastingMessage() {
 		// todo mark 出现这种情况属于bug
 		fmt.Printf("RedisMQ_Receive Stream Message Exception Group Receive Boardcast，Drop messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
@@ -253,6 +281,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		cost = 0
 	}
 	go func() {
+		ctx := context.Background()
 		defer func() {
 			if exception := recover(); exception != nil {
 				fmt.Printf("RedisMQ_Receive Stream Message Error message:%v panic error:%s\n", message, exception)
@@ -265,7 +294,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 			}
 		}()
 		time.Sleep(2 * time.Second)
-		action := consumer.Consume(message)
+		action := consumer.Consume(ctx, message)
 		fmt.Printf("RedisMQ_Receive Stream Message messageKey:%s result:%d message:%v cost:%dms", GetMessageKey(message.Topic, message.Tag), action, message, cost)
 		if action == ReconsumeLater {
 			if pushTaskToResumeLater(consumer, message) {
@@ -280,9 +309,15 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 }
 
 func messageAck(message *Message) {
+	var err error
 	defer func() {
 		if exception := recover(); exception != nil {
-			fmt.Printf("MQStream ack message:%v panic error:%s\n", message, exception)
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("MQ STREAM Redismq MessageAck panic error:%s\n", err.Error())
 			return
 		}
 	}()
@@ -309,26 +344,31 @@ func messageAck(message *Message) {
 	fmt.Printf("MQStream ack streamMessageId:%s streamName:%s ackResult:%d", message.MessageId, streamName, ackResult)
 }
 
-func blockReceiveConsumerMessage(topic string) *Message {
-	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
-	defer func(client *redis.Client) {
-		err := client.Close()
-		if err != nil {
-			fmt.Printf("sendMessage error:%s\n", err)
+func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
+	var err error
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			fmt.Printf("MQ STREAM blockReceiveConsumerMessage topic:%s panic error:%v %v\n", topic, err.Error(), exception)
+			return
 		}
-	}(client)
+	}()
 	streamName := GetQueueName(topic)
+	//fmt.Printf("MQStream XReadGroup blockReceiveConsumerMessage streamName=%s\n", streamName)
 	result, err := client.XReadGroup(context.Background(), &redis.XReadGroupArgs{
 		Group:    GroupId,
 		Consumer: consumerName,
-		Streams:  []string{streamName},
+		Streams:  []string{streamName, ">"},
 		Count:    1,
 		Block:    60 * time.Second,
 		NoAck:    true,
 	}).Result()
 	if err != nil {
-		fmt.Printf("MQStream redis exception=%s", err)
+		fmt.Printf("MQStream blockReceiveConsumerMessage streamName=%s exception=%s\n", streamName, err)
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {

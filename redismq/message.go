@@ -12,7 +12,7 @@ type Message struct {
 	MessageId        string                 `json:"messageId" dc:"MessageId"`
 	Topic            string                 `json:"topic" dc:"Topic"`
 	Tag              string                 `json:"tag" dc:"Tag"`
-	Body             []byte                 `json:"body" dc:"Body"`
+	Body             string                 `json:"body" dc:"Body"`
 	Key              string                 `json:"key" dc:"Key"`
 	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Mills"`
 	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
@@ -28,17 +28,23 @@ type MessageMetaData struct {
 	SendTime         int64                  `json:"sendTime" dc:"SendTime"`
 }
 
-func NewRedisMQMessage(topicWrappper MQTopicEnum, body interface{}) *Message {
+func NewRedisMQMessage(topicWrappper MQTopicEnum, body string) *Message {
 	return &Message{
 		Topic:    topicWrappper.Topic,
 		Tag:      topicWrappper.Tag,
-		Body:     Serialize(body),
+		Body:     body,
 		SendTime: utility.CurrentTimeMillis(),
 	}
 }
 
 func (message *Message) getUniqueKey() string {
-	uniqueKey := message.CustomData["uniqueKey"].(string)
+	if message.CustomData == nil {
+		message.CustomData = make(map[string]interface{})
+	}
+	uniqueKey := ""
+	if value, ok := message.CustomData["uniqueKey"].(string); ok && len(value) > 0 {
+		uniqueKey = value
+	}
 	if len(uniqueKey) == 0 && len(message.MessageId) > 0 {
 		message.CustomData["uniqueKey"] = message.MessageId
 		return message.MessageId
@@ -48,7 +54,11 @@ func (message *Message) getUniqueKey() string {
 }
 
 func (message *Message) isBoardCastingMessage() bool {
-	return strings.Compare(message.CustomData["messageModel"].(string), "BROADCASTING") == 0
+	if value, ok := message.CustomData["messageModel"].(string); ok {
+		return strings.Compare(value, "BROADCASTING") == 0
+	} else {
+		return false
+	}
 }
 
 func (message *Message) getDescription() string {
@@ -64,22 +74,32 @@ func (message *Message) toStreamAddArgsValues(stream string) *redis.XAddArgs {
 		SendTime:         utility.CurrentTimeMillis(),
 	}
 	metajson, _ := gjson.Marshal(metadata)
+	var values = map[string]interface{}{
+		"topic":    message.Topic,
+		"tag":      message.Tag,
+		"body":     message.Body,
+		"metadata": string(metajson),
+	}
 	return &redis.XAddArgs{
 		Stream: stream,
-		Values: map[string]interface{}{
-			"topic":    message.Topic,
-			"tag":      message.Tag,
-			"body":     message.Body,
-			"metadata": string(metajson),
-		},
+		Values: values,
 	}
 }
 
 func (message *Message) paseStreamMessage(value map[string]interface{}) {
-	message.Topic = value["topic"].(string)
-	message.Tag = value["tag"].(string)
-	message.Body = value["body"].([]byte)
-	metadata := value["metadata"].(string)
+	if target, ok := value["topic"].(string); ok {
+		message.Topic = target
+	}
+	if target, ok := value["tag"].(string); ok {
+		message.Tag = target
+	}
+	if target, ok := value["body"].(string); ok {
+		message.Body = target
+	}
+	var metadata string
+	if target, ok := value["metadata"].(string); ok {
+		metadata = target
+	}
 	if len(metadata) > 0 {
 		json, err := gjson.LoadJson(metadata, true)
 		if err == nil {

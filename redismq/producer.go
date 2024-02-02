@@ -74,10 +74,10 @@ func sendMessage(message *Message, source string) (bool, error) {
 	// 发送消息到 Stream
 	streamMessageId, err := client.XAdd(context.Background(), message.toStreamAddArgsValues(GetQueueName(message.Topic))).Result()
 	if err != nil {
-		return false, errors.New(fmt.Sprintf("Send MQStream exception:%s message:%v\n", err, message))
+		return false, errors.New(fmt.Sprintf("MQ STREAM Send MQStream exception:%s queueName=%s message:%v\n", err, GetQueueName(message.Topic), utility.MarshalToJsonString(message)))
 	}
 	message.MessageId = streamMessageId
-	fmt.Printf("send stream success, source:%s message=%v\n", source, message)
+	fmt.Printf("MQ STREAM Send Stream Success, Source:%s QueueName=%s Message=%v\n", source, GetQueueName(message.Topic), utility.MarshalToJsonString(message))
 	return true, nil
 }
 

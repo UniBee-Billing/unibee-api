@@ -8,6 +8,7 @@ import (
 	"go-oversea-pay/internal/cmd"
 	"go-oversea-pay/internal/cmd/nacos"
 	_ "go-oversea-pay/internal/logic"
+	_ "go-oversea-pay/internal/logic/consumer"
 	"go-oversea-pay/redismq"
 	"runtime"
 )

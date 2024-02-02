@@ -1,6 +1,7 @@
 package redismq
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -8,7 +9,7 @@ import (
 type IMessageListener interface {
 	GetTopic() string
 	GetTag() string
-	Consume(message *Message) Action
+	Consume(ctx context.Context, message *Message) Action
 }
 
 var listeners map[string]IMessageListener
@@ -45,7 +46,7 @@ func RegisterListener(i IMessageListener) {
 	} else {
 		messageKey := GetMessageKey(i.GetTopic(), i.GetTag())
 		Listeners()[messageKey] = i
-		Topics = append(Topics, messageKey)
+		Topics = append(Topics, i.GetTopic())
 		fmt.Printf("Redismq Register IMessageListener:%s,Consumer:%s\n", i, messageKey)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/api/user/subscription"
 	"go-oversea-pay/api/user/vat"
+	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
@@ -22,6 +23,7 @@ import (
 	"go-oversea-pay/internal/logic/vat_gateway"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
+	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
@@ -1027,6 +1029,12 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 			}
 		}
 	}
+
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionCancel.Topic,
+		Tag:   redismq2.TopicSubscriptionCancel.Tag,
+		Body:  sub.SubscriptionId,
+	})
 
 	return nil
 }

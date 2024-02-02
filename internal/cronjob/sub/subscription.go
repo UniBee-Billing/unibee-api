@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "go-oversea-pay/api/open/payment"
+	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
@@ -16,6 +17,7 @@ import (
 	service2 "go-oversea-pay/internal/logic/subscription/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
+	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 	"strconv"
 	"time"
@@ -232,7 +234,6 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		}
 	}
 	//Expire Subscription UnFinished Invoice, May No Need
-	//Expire Subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:       consts.SubStatusExpired,
 		dao.Subscription.Columns().CancelReason: reason,
@@ -240,7 +241,14 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		fmt.Printf("SubscriptionExpire error:%s", err.Error())
+		return err
 	}
+
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionExpire.Topic,
+		Tag:   redismq2.TopicSubscriptionExpire.Tag,
+		Body:  sub.SubscriptionId,
+	})
 
 	return nil
 }

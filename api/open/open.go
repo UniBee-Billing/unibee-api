@@ -16,6 +16,7 @@ type IOpenMock interface {
 	Capture(ctx context.Context, req *mock.CaptureReq) (res *mock.CaptureRes, err error)
 	SamplePaymentNetherlands(ctx context.Context, req *mock.SamplePaymentNetherlandsReq) (res *mock.SamplePaymentNetherlandsRes, err error)
 	DetailPay(ctx context.Context, req *mock.DetailPayReq) (res *mock.DetailPayRes, err error)
+	MockMessageSend(ctx context.Context, req *mock.MockMessageSendReq) (res *mock.MockMessageSendRes, err error)
 	Refund(ctx context.Context, req *mock.RefundReq) (res *mock.RefundRes, err error)
 }
 
