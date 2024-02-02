@@ -108,7 +108,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else {
 				//todo mark
-				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Payment:%s", payment.PaymentId))
+				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
 		}
 	}
