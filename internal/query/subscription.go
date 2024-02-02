@@ -32,7 +32,10 @@ func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int
 }
 
 func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string) (one *entity.Subscription) {
-	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{SubscriptionId: subscriptionId}).Scan(&one)
+	if len(subscriptionId) == 0 {
+		return nil
+	}
+	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{SubscriptionId: subscriptionId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
