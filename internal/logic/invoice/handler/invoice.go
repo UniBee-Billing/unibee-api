@@ -223,6 +223,9 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	merchant := query.GetMerchantInfoById(ctx, one.MerchantId)
 	var merchantProductName = ""
 	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
+	if sub == nil {
+		sub = query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, one.UserId, merchant.Id)
+	}
 	if sub != nil {
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchantProductName = plan.PlanName
