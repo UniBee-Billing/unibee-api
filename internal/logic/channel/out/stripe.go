@@ -1310,6 +1310,7 @@ func (s Stripe) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payme
 	utility.Assert(len(payment.ChannelPaymentIntentId) > 0, "invalid payment ChannelPaymentIntentId")
 	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
 	utility.Assert(channelEntity != nil, "channel not found")
+	stripe.Key = channelEntity.ChannelSecret
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoiceVoidInvoiceParams{}
 	result, err := invoice.VoidInvoice(payment.ChannelPaymentIntentId, params)
@@ -1346,10 +1347,12 @@ func (s Stripe) DoRemoteChannelRefund(ctx context.Context, payment *entity.Payme
 	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
 	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
 	utility.Assert(channelEntity != nil, "channel not found")
+	stripe.Key = channelEntity.ChannelSecret
+	s.setUnibeeAppInfo()
 	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.ChannelPaymentId)}
-	params.Reason = stripe.String(one.RefundComment)
+	params.Reason = stripe.String("requested_by_customer")
 	params.Amount = stripe.Int64(one.RefundAmount)
-	params.Currency = stripe.String(strings.ToLower(one.Currency))
+	//params.Currency = stripe.String(strings.ToLower(one.Currency))
 	params.Metadata = map[string]string{"RefundId": one.RefundId}
 	result, err := refund.New(params)
 	log.SaveChannelHttpLog("DoRemoteChannelRefund", params, result, err, "refund", nil, channelEntity)
