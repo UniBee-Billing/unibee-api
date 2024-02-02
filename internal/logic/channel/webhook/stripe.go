@@ -509,6 +509,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 }
 
 func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, payChannel *entity.MerchantChannelConfig) error {
+	utility.Assert(len(invoice.ID) > 0, "processInvoiceWebhook channelInvoiceId Invalid")
 	invoiceDetails, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelInvoiceDetails(ctx, payChannel, invoice.ID)
 	if err != nil {
 		return err
