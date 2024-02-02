@@ -22,45 +22,44 @@ type UserAccountDao struct {
 type UserAccountColumns struct {
 	Id                 string // userId
 	GmtCreate          string // create time
-	GmtModify          string // 修改时间
+	GmtModify          string // update time
 	IsDeleted          string // 0-UnDeleted，1-Deleted
-	Password           string // 密码，加密存储
-	UserName           string // 用户名
-	Mobile             string // 手机号
-	Email              string // 邮箱
-	Gender             string // 性别
-	AvatarUrl          string // 头像url
-	ReMark             string // 备注
-	IsSpecial          string // 是否是特殊账号（0.否，1.是）
-	Birthday           string // 生日
-	Profession         string // 职业
-	School             string // 学校
-	Custom             string // 其他
-	NearTime           string // 最近登录时间
-	Wid                string // 盟有wid
-	IsRisk             string // 风控：0.低风险，1.中风险，2.高风险
-	Channel            string // 渠道
-	Version            string // 版本
-	Phone              string //
-	Address            string //
-	FirstName          string //
-	LastName           string //
-	CompanyName        string //
-	VATNumber          string //
-	Telegram           string //
-	WhatsAPP           string //
-	WeChat             string //
-	TikTok             string //
-	LinkedIn           string //
-	Facebook           string //
+	Password           string // password , encrypt
+	UserName           string // user name
+	Mobile             string // mobile
+	Email              string // email
+	Gender             string // gender
+	AvatarUrl          string // avator url
+	ReMark             string // note
+	IsSpecial          string // is special account（0.no，1.yes）- deperated
+	Birthday           string // brithday
+	Profession         string // profession
+	School             string // school
+	Custom             string // custom
+	NearTime           string // last login time
+	IsRisk             string // is risk account (deperated)
+	Channel            string // channel
+	Version            string // version
+	Phone              string // phone
+	Address            string // address
+	FirstName          string // first name
+	LastName           string // last name
+	CompanyName        string // company name
+	VATNumber          string // vat number
+	Telegram           string // telegram
+	WhatsAPP           string // whats app
+	WeChat             string // wechat
+	TikTok             string // tictok
+	LinkedIn           string // linkedin
+	Facebook           string // facebook
 	OtherSocialInfo    string //
 	PaymentMethod      string //
 	CountryCode        string // country_code
 	CountryName        string // country_name
-	SubscriptionName   string //
-	SubscriptionId     string //
+	SubscriptionName   string // subscription name
+	SubscriptionId     string // subscription id
 	SubscriptionStatus string // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
-	RecurringAmount    string //
+	RecurringAmount    string // total recurring amount, cent
 	BillingType        string // 1-recurring,2-one-time
 }
 
@@ -83,7 +82,6 @@ var userAccountColumns = UserAccountColumns{
 	School:             "school",
 	Custom:             "custom",
 	NearTime:           "near_time",
-	Wid:                "wid",
 	IsRisk:             "is_risk",
 	Channel:            "channel",
 	Version:            "version",

@@ -22,15 +22,15 @@ type MerchantUserAccountDao struct {
 type MerchantUserAccountColumns struct {
 	Id         string // userId
 	GmtCreate  string // create time
-	GmtModify  string // 修改时间
-	MerchantId string // 用户ID
+	GmtModify  string // update time
+	MerchantId string // merchant id
 	IsDeleted  string // 0-UnDeleted，1-Deleted
-	Password   string // 密码，加密存储
-	UserName   string // 用户名
-	Mobile     string // 手机号
-	Email      string // 邮箱
-	FirstName  string //
-	LastName   string //
+	Password   string // password
+	UserName   string // user name
+	Mobile     string // mobile
+	Email      string // email
+	FirstName  string // first name
+	LastName   string // last name
 }
 
 // merchantUserAccountColumns holds the columns for table merchant_user_account.

@@ -12,34 +12,34 @@ import (
 // SubscriptionPendingUpdate is the golang structure of table subscription_pending_update for DAO operations like Where/Data.
 type SubscriptionPendingUpdate struct {
 	g.Meta               `orm:"table:subscription_pending_update, do:true"`
-	Id                   interface{} //
-	MerchantId           interface{} // 商户Id
-	SubscriptionId       interface{} // 订阅id（内部编号）
-	UpdateSubscriptionId interface{} // 升级单ID（内部编号）
-	ChannelUpdateId      interface{} // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
+	Id                   interface{} // id
+	MerchantId           interface{} // merchant id
+	SubscriptionId       interface{} // subscription id
+	UpdateSubscriptionId interface{} // pending update unique id
+	ChannelUpdateId      interface{} // channel update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            *gtime.Time // create time
-	Amount               interface{} // 本周期金额,单位：分
-	Status               interface{} // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
-	ProrationAmount      interface{} // 下周期金额,单位：分
-	UpdateAmount         interface{} // 升级到金额,单位：分
-	Currency             interface{} // 货币
-	UpdateCurrency       interface{} // 升级到货币
-	PlanId               interface{} // 计划ID
-	UpdatePlanId         interface{} // 升级到计划ID
-	Quantity             interface{} // quantity
-	UpdateQuantity       interface{} // 升级到quantity
-	AddonData            interface{} // plan addon json data
-	UpdateAddonData      interface{} // 升级到plan addon json data
-	ChannelId            interface{} // 支付渠道Id
+	Amount               interface{} // amount of this period, cent
+	Status               interface{} // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	ProrationAmount      interface{} // proration amount of this pending update , cent
+	UpdateAmount         interface{} // the amount after update
+	Currency             interface{} // currency of this period
+	UpdateCurrency       interface{} // the currency after update
+	PlanId               interface{} // the plan id of this period
+	UpdatePlanId         interface{} // the plan id after update
+	Quantity             interface{} // quantity of this period
+	UpdateQuantity       interface{} // quantity after update
+	AddonData            interface{} // plan addon data (json) of this period
+	UpdateAddonData      interface{} // plan addon data (json) after update
+	ChannelId            interface{} // channel_id
 	UserId               interface{} // userId
-	GmtModify            *gtime.Time // 修改时间
+	GmtModify            *gtime.Time // update time
 	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
-	Paid                 interface{} // 是否已支付，0-否，1-是
-	Link                 interface{} // 支付链接
-	ChannelStatus        interface{} // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	Paid                 interface{} // paid，0-no，1-yes
+	Link                 interface{} // payment link
+	ChannelStatus        interface{} // channel status
 	MerchantUserId       interface{} // merchant_user_id
-	Data                 interface{} // 渠道额外参数，JSON格式
-	ResponseData         interface{} // 渠道返回参数，JSON格式
+	Data                 interface{} //
+	ResponseData         interface{} //
 	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
 	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
 	Note                 interface{} // note

@@ -16,8 +16,8 @@ type ChannelUser struct {
 	GmtCreate                   *gtime.Time // create time
 	GmtModify                   *gtime.Time // update time
 	UserId                      interface{} // userId
-	ChannelId                   interface{} // 支付渠道Id
-	ChannelUserId               interface{} // 支付渠道user_Id
+	ChannelId                   interface{} // channel_id
+	ChannelUserId               interface{} // channel_user_Id
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
-	ChannelDefaultPaymentMethod interface{} //
+	ChannelDefaultPaymentMethod interface{} // channel_default_payment_method
 }

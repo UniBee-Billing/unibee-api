@@ -13,16 +13,16 @@ import (
 type OpenApiConfig struct {
 	g.Meta          `orm:"table:open_api_config, do:true"`
 	Id              interface{} //
-	Qps             interface{} // 开放平台Api qps总控制
+	Qps             interface{} // total qps control
 	GmtCreate       *gtime.Time // create time
-	GmtModify       *gtime.Time // 修改时间
-	MerchantId      interface{} // 商户Id
-	Hmac            interface{} // 回调加密hmac
-	Callback        interface{} // 回调Url
-	ApiKey          interface{} // 开放平台Key
-	Token           interface{} // 开放平台token
+	GmtModify       *gtime.Time // update time
+	MerchantId      interface{} // merchant id
+	Hmac            interface{} // webhook hmac key
+	Callback        interface{} // callback url
+	ApiKey          interface{} // api key
+	Token           interface{} // api token
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	Validips        interface{} //
-	ChannelCallback interface{} // 渠道支付原信息回调地址
-	CompanyId       interface{} // 公司ID
+	ChannelCallback interface{} // callback return data
+	CompanyId       interface{} // company id
 }

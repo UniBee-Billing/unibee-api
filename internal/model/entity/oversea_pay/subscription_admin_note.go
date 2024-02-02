@@ -10,7 +10,7 @@ import (
 
 // SubscriptionAdminNote is the golang structure for table subscription_admin_note.
 type SubscriptionAdminNote struct {
-	Id             uint64      `json:"id"             description:""`                      //
+	Id             uint64      `json:"id"             description:"id"`                    // id
 	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"create_time"`           // create_time
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"modify_time"`           // modify_time
 	SubscriptionId string      `json:"subscriptionId" description:"subscription_id"`       // subscription_id

@@ -21,32 +21,32 @@ type SubscriptionDao struct {
 // SubscriptionColumns defines and stores column names for table subscription.
 type SubscriptionColumns struct {
 	Id                          string //
-	SubscriptionId              string // 订阅id（内部编号）
+	SubscriptionId              string // subscription id
 	UserId                      string // userId
 	GmtCreate                   string // create time
-	GmtModify                   string // 修改时间
-	Amount                      string // 金额,单位：分
-	Currency                    string // 货币
-	MerchantId                  string // 商户Id
-	PlanId                      string // 计划ID
+	GmtModify                   string // update time
+	Amount                      string // amount, cent
+	Currency                    string // currency
+	MerchantId                  string // merchant id
+	PlanId                      string // plan id
 	Quantity                    string // quantity
 	AddonData                   string // plan addon json data
 	TaskTime                    string // task_time
 	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-channel sub, 1-unibee sub
-	ChannelId                   string // 支付渠道Id
-	Status                      string // 订阅单状态，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
-	ChannelSubscriptionId       string // 支付渠道订阅id
+	ChannelId                   string // channel_id
+	Status                      string // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
+	ChannelSubscriptionId       string // channel subscription id
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
 	DunningTime                 string //
 	ChannelDefaultPaymentMethod string //
 	Link                        string //
-	ChannelStatus               string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	ChannelStatus               string // channel status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	ChannelItemData             string // channel_item_data
-	CancelAtPeriodEnd           string // 是否在周期结束时取消，0-false | 1-true
-	ChannelLatestInvoiceId      string // 渠道最新发票 id
+	CancelAtPeriodEnd           string // whether cancel at period end，0-false | 1-true
+	ChannelLatestInvoiceId      string // channel latest invoice id
 	LastUpdateTime              string //
 	CurrentPeriodStart          string // current_period_start
 	CurrentPeriodEnd            string // current_period_end
@@ -55,14 +55,14 @@ type SubscriptionColumns struct {
 	BillingCycleAnchor          string // billing_cycle_anchor
 	TrialEnd                    string // trial_end
 	ReturnUrl                   string //
-	FirstPayTime                string // 首次支付时间
+	FirstPayTime                string // first success payment time
 	CancelReason                string //
 	CountryCode                 string //
 	VatNumber                   string //
 	TaxScale                    string // Tax Scale，1000 = 10%
 	VatVerifyData               string //
-	Data                        string // 渠道额外参数，JSON格式
-	ResponseData                string // 渠道返回参数，JSON格式
+	Data                        string //
+	ResponseData                string //
 	PendingUpdateId             string //
 }
 

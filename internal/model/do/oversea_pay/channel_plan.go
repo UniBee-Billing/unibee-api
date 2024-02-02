@@ -16,12 +16,12 @@ type ChannelPlan struct {
 	GmtCreate            *gtime.Time // create time
 	GmtModify            *gtime.Time // update time
 	PlanId               interface{} // PlanId
-	ChannelId            interface{} // 支付渠道Id
+	ChannelId            interface{} // channel_id
 	Status               interface{} // 0-Init | 1-Create｜2-Active｜3-Inactive
-	ChannelPlanId        interface{} // 支付渠道plan_Id
-	ChannelProductId     interface{} // 支付渠道product_Id
+	ChannelPlanId        interface{} // channel_plan_Id
+	ChannelProductId     interface{} // channel_product_Id
 	ChannelPlanStatus    interface{} // channel_plan_status
 	ChannelProductStatus interface{} // channel_product_status
 	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
-	Data                 interface{} // 渠道额外参数，JSON格式
+	Data                 interface{} // data(json)
 }

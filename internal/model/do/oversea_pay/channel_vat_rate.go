@@ -16,7 +16,7 @@ type ChannelVatRate struct {
 	GmtCreate        *gtime.Time // create time
 	GmtModify        *gtime.Time // update time
 	VatRateId        interface{} // vat_rate_id
-	ChannelId        interface{} // 支付渠道Id
-	ChannelVatRateId interface{} // 支付渠道vat_rate_Id
+	ChannelId        interface{} // channel_id
+	ChannelVatRateId interface{} // channel_vat_rate_Id
 	IsDeleted        interface{} // 0-UnDeleted，1-Deleted
 }

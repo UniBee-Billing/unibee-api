@@ -24,8 +24,8 @@ type ChannelVatRateColumns struct {
 	GmtCreate        string // create time
 	GmtModify        string // update time
 	VatRateId        string // vat_rate_id
-	ChannelId        string // 支付渠道Id
-	ChannelVatRateId string // 支付渠道vat_rate_Id
+	ChannelId        string // channel_id
+	ChannelVatRateId string // channel_vat_rate_Id
 	IsDeleted        string // 0-UnDeleted，1-Deleted
 }
 

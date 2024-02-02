@@ -14,24 +14,24 @@ type SubscriptionPlan struct {
 	g.Meta                    `orm:"table:subscription_plan, do:true"`
 	Id                        interface{} //
 	GmtCreate                 *gtime.Time // create time
-	GmtModify                 *gtime.Time // 修改时间
-	CompanyId                 interface{} // 公司ID
-	MerchantId                interface{} // 商户Id
+	GmtModify                 *gtime.Time // update time
+	CompanyId                 interface{} // company id
+	MerchantId                interface{} // merchant id
 	PlanName                  interface{} // PlanName
-	Amount                    interface{} // 金额,单位：分
-	Currency                  interface{} // 货币
-	IntervalUnit              interface{} // 周期-全小写存放,day|month|year|week
-	IntervalCount             interface{} // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
-	Description               interface{} //
+	Amount                    interface{} // amount, cent, without tax
+	Currency                  interface{} // currency
+	IntervalUnit              interface{} // period unit,day|month|year|week
+	IntervalCount             interface{} // period unit count
+	Description               interface{} // description
 	ImageUrl                  interface{} // image_url
 	HomeUrl                   interface{} // home_url
-	ChannelProductName        interface{} // 支付渠道product_name
-	ChannelProductDescription interface{} // 支付渠道product_description
-	TaxScale                  interface{} // 税费比例： 1 =1%
-	TaxInclusive              interface{} // 税费是否包含，1-包含，0-不包含
-	Type                      interface{} // 类型，1-main plan，2-addon plan
-	Status                    interface{} // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
+	ChannelProductName        interface{} // channel product name
+	ChannelProductDescription interface{} // channel product description
+	TaxScale                  interface{} // tax scale 1000 = 10%
+	TaxInclusive              interface{} // deperated
+	Type                      interface{} // type，1-main plan，2-addon plan
+	Status                    interface{} // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 interface{} // 0-UnDeleted，1-Deleted
-	BindingAddonIds           interface{} // 绑定的 Addon PlanIds，以逗号隔开
+	BindingAddonIds           interface{} // binded addon planIds，split with ,
 	PublishStatus             interface{} // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
 }

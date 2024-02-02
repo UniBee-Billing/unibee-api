@@ -13,16 +13,16 @@ import (
 type PaymentTimeline struct {
 	g.Meta         `orm:"table:payment_timeline, do:true"`
 	Id             interface{} //
-	MerchantId     interface{} // 商户Id
+	MerchantId     interface{} // merchant id
 	UserId         interface{} // userId
-	SubscriptionId interface{} // 订阅id（内部编号）
-	InvoiceId      interface{} // 发票ID（内部编号）
-	UniqueId       interface{} // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	Currency       interface{} // 货币
-	TotalAmount    interface{} // 金额,单位：分
-	ChannelId      interface{} // 支付渠道Id
+	SubscriptionId interface{} // subscription id
+	InvoiceId      interface{} // invoice id
+	UniqueId       interface{} // unique id
+	Currency       interface{} // currency
+	TotalAmount    interface{} // total amount
+	ChannelId      interface{} // channel id
 	GmtCreate      *gtime.Time // create time
-	GmtModify      *gtime.Time // 修改时间
+	GmtModify      *gtime.Time // update time
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
 	PaymentId      interface{} // PaymentId
 	Status         interface{} // 0-pending, 1-success, 2-failure

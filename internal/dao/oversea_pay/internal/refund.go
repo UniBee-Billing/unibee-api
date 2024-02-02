@@ -20,31 +20,31 @@ type RefundDao struct {
 
 // RefundColumns defines and stores column names for table refund.
 type RefundColumns struct {
-	Id                   string // 主键ID
-	CompanyId            string // 公司Id
-	MerchantId           string // 商户ID
+	Id                   string // id
+	CompanyId            string // company id
+	MerchantId           string // merchant id
 	UserId               string // user_id
-	OpenApiId            string // 使用的开放平台配置Id
-	ChannelId            string // 退款渠道Id
-	BizType              string // 业务类型。同pay.biz_type
-	BizId                string // 业务ID。同pay.biz_id
-	CountryCode          string // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
-	Currency             string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
-	PaymentId            string // 支付单号(内部生成，支付单号）
-	RefundId             string // 退款单号。可以唯一代表一笔退款（内部生成，退款单号）
-	RefundAmount         string // 退款金额。单位：分
-	RefundComment        string // 退款备注
-	Status               string // 退款状态。10-退款中，20-退款成功，30-退款失败
-	RefundTime           string // 退款成功时间
+	OpenApiId            string // open api id
+	ChannelId            string // channel_id
+	BizType              string // biz type, copy from payment.biz_type
+	BizId                string // biz id,copy from payment.biz_id
+	CountryCode          string // country code
+	Currency             string // currency
+	PaymentId            string // relative payment id
+	RefundId             string // refund id (system generate)
+	RefundAmount         string // refund amount, cent
+	RefundComment        string // refund comment
+	Status               string // status。10-pending，20-success，30-failure, 40-cancel
+	RefundTime           string // refund success time
 	GmtCreate            string // create time
-	GmtModify            string // 更新时间
-	ChannelRefundId      string // 外部退款单号
-	AppId                string // 退款使用的APPID
-	RefundCommentExplain string // 退款备注说明
-	ReturnUrl            string // 退款成功回调Url
+	GmtModify            string // update time
+	ChannelRefundId      string // channel refund id
+	AppId                string // app id
+	RefundCommentExplain string // refund comment
+	ReturnUrl            string // return url after refund success
 	AdditionalData       string //
-	UniqueId             string // 唯一键，以同步为逻辑加入使用自定义唯一键
-	SubscriptionId       string // 订阅id（内部编号）
+	UniqueId             string // unique id
+	SubscriptionId       string // subscription id
 }
 
 // refundColumns holds the columns for table refund.

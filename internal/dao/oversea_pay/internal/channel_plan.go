@@ -24,14 +24,14 @@ type ChannelPlanColumns struct {
 	GmtCreate            string // create time
 	GmtModify            string // update time
 	PlanId               string // PlanId
-	ChannelId            string // 支付渠道Id
+	ChannelId            string // channel_id
 	Status               string // 0-Init | 1-Create｜2-Active｜3-Inactive
-	ChannelPlanId        string // 支付渠道plan_Id
-	ChannelProductId     string // 支付渠道product_Id
+	ChannelPlanId        string // channel_plan_Id
+	ChannelProductId     string // channel_product_Id
 	ChannelPlanStatus    string // channel_plan_status
 	ChannelProductStatus string // channel_product_status
 	IsDeleted            string // 0-UnDeleted，1-Deleted
-	Data                 string // 渠道额外参数，JSON格式
+	Data                 string // data(json)
 }
 
 // channelPlanColumns holds the columns for table channel_plan.

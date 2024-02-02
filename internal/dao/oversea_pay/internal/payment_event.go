@@ -20,20 +20,20 @@ type PaymentEventDao struct {
 
 // PaymentEventColumns defines and stores column names for table payment_event.
 type PaymentEventColumns struct {
-	Id              string // 主键id
+	Id              string // id
 	UserId          string // user_id
 	MerchantUserId  string // merchant_user_id
-	OpenApiId       string // 使用的开放平台配置Id
+	OpenApiId       string // open api id
 	TerminalIp      string // terminal_ip
 	BizType         string // biz_type=1，Payment表
 	BizId           string // biz_type=1，pay；
-	Fee             string // 金额（分）
-	EventType       string // 0-未知
-	Event           string // 事件
-	RelativeTradeNo string // 关联单号
-	UniqueNo        string // 唯一键
+	Fee             string // amount, cent
+	EventType       string // 0-unknown
+	Event           string // event
+	RelativeTradeNo string // relative trade no
+	UniqueNo        string // unique no
 	GmtCreate       string // create time
-	GmtModify       string // 更新时间
+	GmtModify       string // update time
 	Message         string // message
 }
 

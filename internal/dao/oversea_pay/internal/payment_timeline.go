@@ -21,16 +21,16 @@ type PaymentTimelineDao struct {
 // PaymentTimelineColumns defines and stores column names for table payment_timeline.
 type PaymentTimelineColumns struct {
 	Id             string //
-	MerchantId     string // 商户Id
+	MerchantId     string // merchant id
 	UserId         string // userId
-	SubscriptionId string // 订阅id（内部编号）
-	InvoiceId      string // 发票ID（内部编号）
-	UniqueId       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
-	Currency       string // 货币
-	TotalAmount    string // 金额,单位：分
-	ChannelId      string // 支付渠道Id
+	SubscriptionId string // subscription id
+	InvoiceId      string // invoice id
+	UniqueId       string // unique id
+	Currency       string // currency
+	TotalAmount    string // total amount
+	ChannelId      string // channel id
 	GmtCreate      string // create time
-	GmtModify      string // 修改时间
+	GmtModify      string // update time
 	IsDeleted      string // 0-UnDeleted，1-Deleted
 	PaymentId      string // PaymentId
 	Status         string // 0-pending, 1-success, 2-failure

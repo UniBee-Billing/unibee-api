@@ -20,22 +20,22 @@ type MerchantOperationLogDao struct {
 
 // MerchantOperationLogColumns defines and stores column names for table merchant_operation_log.
 type MerchantOperationLogColumns struct {
-	Id                 string // 主键id
-	CompanyId          string // 公司ID
-	MerchantId         string // merchantId
-	UserId             string // 操作userId，系统自动操作可能没有
-	OptAccount         string // 操作账号
-	ClientType         string // 操作渠道 0:云店后台 1:云管家app 2:Java服务 3:小程序
-	BizType            string // 操作业务 0:菜单 1:商品 2:门店 3:订单 4:账号|会员 5:优惠券转赠中 6:优惠券转赠领取成功 7:优惠券转赠自动取消
-	OptTarget          string // 操作对象
-	OptContent         string // 操作内容
-	OptCreate          string // 操作发生时间
+	Id                 string // id
+	CompanyId          string // company id
+	MerchantId         string // merchant Id
+	UserId             string // user_id
+	OptAccount         string // admin account
+	ClientType         string // client type
+	BizType            string // biz_type
+	OptTarget          string // operation target
+	OptContent         string // operation content
+	OptCreate          string // operation create time
 	IsDelete           string // 0-UnDeleted，1-Deleted
 	GmtCreate          string // create time
-	GmtModify          string // 修改时间
-	QueryportRequestId string // queryport请求Id，可在request_security_log查询请求信息
-	ServerType         string // 操作终端，参看 message-api包 OperationLogServerTypeEnum的code
-	ServerTypeDesc     string // 操作终端描述，参看 message-api包 OperationLogServerTypeEnum的desc
+	GmtModify          string // update time
+	QueryportRequestId string // queryport id
+	ServerType         string // server type
+	ServerTypeDesc     string // server type description
 }
 
 // merchantOperationLogColumns holds the columns for table merchant_operation_log.

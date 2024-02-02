@@ -15,13 +15,13 @@ type MerchantVatNumberVerifyHistory struct {
 	Id              interface{} // ID
 	MerchantId      interface{} // merchantId
 	VatNumber       interface{} // vat_number
-	Valid           interface{} // 0-无效，1-有效
+	Valid           interface{} // 0-Invalid，1-Valid
 	ValidateChannel interface{} // validate_channel
 	CountryCode     interface{} // country_code
 	CompanyName     interface{} // company_name
 	CompanyAddress  interface{} // company_address
 	GmtCreate       *gtime.Time // create time
-	GmtModify       *gtime.Time // 修改时间
+	GmtModify       *gtime.Time // update time
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	ValidateMessage interface{} // validate_message
 }

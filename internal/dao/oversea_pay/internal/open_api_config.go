@@ -21,18 +21,18 @@ type OpenApiConfigDao struct {
 // OpenApiConfigColumns defines and stores column names for table open_api_config.
 type OpenApiConfigColumns struct {
 	Id              string //
-	Qps             string // 开放平台Api qps总控制
+	Qps             string // total qps control
 	GmtCreate       string // create time
-	GmtModify       string // 修改时间
-	MerchantId      string // 商户Id
-	Hmac            string // 回调加密hmac
-	Callback        string // 回调Url
-	ApiKey          string // 开放平台Key
-	Token           string // 开放平台token
+	GmtModify       string // update time
+	MerchantId      string // merchant id
+	Hmac            string // webhook hmac key
+	Callback        string // callback url
+	ApiKey          string // api key
+	Token           string // api token
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	Validips        string //
-	ChannelCallback string // 渠道支付原信息回调地址
-	CompanyId       string // 公司ID
+	ChannelCallback string // callback return data
+	CompanyId       string // company id
 }
 
 // openApiConfigColumns holds the columns for table open_api_config.

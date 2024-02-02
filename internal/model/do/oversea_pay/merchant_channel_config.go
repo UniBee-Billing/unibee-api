@@ -12,24 +12,24 @@ import (
 // MerchantChannelConfig is the golang structure of table merchant_channel_config for DAO operations like Where/Data.
 type MerchantChannelConfig struct {
 	g.Meta           `orm:"table:merchant_channel_config, do:true"`
-	Id               interface{} // 主键id
-	MerchantId       interface{} //
-	EnumKey          interface{} // 支付渠道枚举（内部定义）
-	ChannelType      interface{} // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
-	Channel          interface{} // 支付方式枚举（渠道定义）
-	Name             interface{} // 支付方式名称
-	SubChannel       interface{} // 渠道子支付方式枚举
+	Id               interface{} // channel_id
+	MerchantId       interface{} // merchant_id
+	EnumKey          interface{} // enum key , match in channel implementation
+	ChannelType      interface{} // channel type，null or 0-Payment Type ｜ 1-Subscription Type
+	Channel          interface{} // channel name
+	Name             interface{} // name
+	SubChannel       interface{} // sub_channel_enum
 	BrandData        interface{} //
-	Logo             interface{} // 支付方式logo
+	Logo             interface{} // channel logo
 	Host             interface{} // pay host
-	ChannelAccountId interface{} // 渠道账户Id
+	ChannelAccountId interface{} // channel account id
 	ChannelKey       interface{} //
 	ChannelSecret    interface{} // secret
 	Custom           interface{} // custom
 	GmtCreate        *gtime.Time // create time
-	GmtModify        *gtime.Time // 修改时间
-	Description      interface{} // 支付方式描述
+	GmtModify        *gtime.Time // update time
+	Description      interface{} // description
 	WebhookKey       interface{} // webhook_key
 	WebhookSecret    interface{} // webhook_secret
-	UniqueProductId  interface{} // 渠道唯一 ProductId，目前仅限 Paypal 使用
+	UniqueProductId  interface{} // unique  channel productId, only stripe need
 }

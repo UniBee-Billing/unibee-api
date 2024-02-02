@@ -12,48 +12,48 @@ import (
 // Payment is the golang structure of table payment for DAO operations like Where/Data.
 type Payment struct {
 	g.Meta                 `orm:"table:payment, do:true"`
-	Id                     interface{} // 主键id
-	CompanyId              interface{} // 公司Id
-	MerchantId             interface{} // 商户ID
-	OpenApiId              interface{} // 使用的开放平台配置Id
+	Id                     interface{} // id
+	CompanyId              interface{} // company id
+	MerchantId             interface{} // merchant id
+	OpenApiId              interface{} // open api id
 	UserId                 interface{} // user_id
-	SubscriptionId         interface{} // 订阅id（内部编号）
+	SubscriptionId         interface{} // subscription id
 	GmtCreate              *gtime.Time // create time
-	BizType                interface{} // 业务类型。1-single payment, 3-subscription
-	BizId                  interface{} // 业务id-即商户订单号
-	Currency               interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
-	PaymentId              interface{} // 内部支付编号（系统生成唯一）
-	TotalAmount            interface{} // 总计金额
+	BizType                interface{} // biz_type 1-single payment, 3-subscription
+	BizId                  interface{} // biz_id
+	Currency               interface{} // currency，“SGD” “MYR” “PHP” “IDR” “THB”
+	PaymentId              interface{} // payment id
+	TotalAmount            interface{} // total amount
 	PaymentAmount          interface{} // payment_amount
 	BalanceAmount          interface{} // balance_amount
-	RefundAmount           interface{} // 总共已退款金额
-	Status                 interface{} // 支付状态。10-支付中，20-支付成功，30-支付取消
-	TerminalIp             interface{} // 实时交易终端IP
-	CountryCode            interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
-	AuthorizeStatus        interface{} // 用户授权状态，0-未授权，1-已授权，2-已发起捕获
-	ChannelId              interface{} // 支付方式id,表oversea_pay_channel的id
-	ChannelPaymentIntentId interface{} // 第三方支付平台支付预订单ID，支付接口返回
-	ChannelPaymentId       interface{} // 外部支付渠道订单号，支付成功回调返回
-	CaptureDelayHours      interface{} // 延迟Capture时间
-	CreateTime             *gtime.Time // 支付单创建时间
-	CancelTime             *gtime.Time // 支付单取消时间
-	PaidTime               *gtime.Time // 付款成功时间
-	InvoiceId              interface{} // 发票号
-	GmtModify              *gtime.Time // 更新时间
-	AppId                  interface{} // 支付使用的APPID
-	ReturnUrl              interface{} // 支付成功回调Url
-	ChannelEdition         interface{} // 支付通道版本号
-	HidePaymentMethods     interface{} // 隐藏支付方式，分号隔开;枚举： “INSTALMENT” “POSTPAID” “CARD” 在 GrabPay Checkout 流程中对用户隐藏指定的支付方式。如果未设置，GrabPay 会向用户显示所有符合条件的付款方式。但是请注意，您不能隐藏 GrabPay 钱包付款方式  注意：CARD 目前仅适用于泰国
-	Verify                 interface{} // codeVerify校验值
+	RefundAmount           interface{} // total refund amount
+	Status                 interface{} // status  10-pending，20-success，30-failure, 40-cancel
+	TerminalIp             interface{} // client ip
+	CountryCode            interface{} // country code
+	AuthorizeStatus        interface{} // authorize status，0-waiting authorize，1-authorized，2-authorized_request
+	ChannelId              interface{} // channel_id
+	ChannelPaymentIntentId interface{} // channel_payment_intent_id
+	ChannelPaymentId       interface{} // channel_payment_id
+	CaptureDelayHours      interface{} // capture_delay_hours
+	CreateTime             *gtime.Time // create time
+	CancelTime             *gtime.Time // cancel time
+	PaidTime               *gtime.Time // paid time
+	InvoiceId              interface{} // invoice id
+	GmtModify              *gtime.Time // update time
+	AppId                  interface{} // app id
+	ReturnUrl              interface{} // return url
+	ChannelEdition         interface{} // channel edition
+	HidePaymentMethods     interface{} // hide_payment_methods
+	Verify                 interface{} // codeVerify
 	Code                   interface{} //
 	Token                  interface{} //
-	AdditionalData         interface{} // 额外信息，JSON结构
+	AdditionalData         interface{} // addtional data (json)
 	Automatic              interface{} //
 	FailureReason          interface{} //
 	BillingReason          interface{} //
 	Link                   interface{} //
-	PaymentData            interface{} // 渠道支付接口返回核心参数，JSON结构
-	UniqueId               interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
+	PaymentData            interface{} // payment create data (json)
+	UniqueId               interface{} // unique id
 	BalanceStart           interface{} // balance_start
 	BalanceEnd             interface{} // balance_end
 	InvoiceData            interface{} //

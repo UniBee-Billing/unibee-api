@@ -21,43 +21,43 @@ type InvoiceDao struct {
 // InvoiceColumns defines and stores column names for table invoice.
 type InvoiceColumns struct {
 	Id                             string //
-	MerchantId                     string // 商户Id
+	MerchantId                     string // merchant_id
 	UserId                         string // userId
-	SubscriptionId                 string // 订阅id（内部编号）
-	InvoiceId                      string // 发票ID（内部编号）
-	InvoiceName                    string // 发票名称
-	UniqueId                       string // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
+	SubscriptionId                 string // subscription_id
+	InvoiceId                      string // invoice_id
+	InvoiceName                    string // invoice name
+	UniqueId                       string // unique_id
 	GmtCreate                      string // create time
-	TotalAmount                    string // 金额,单位：分
-	TaxAmount                      string // Tax金额,单位：分
-	SubscriptionAmount             string // Sub金额,单位：分
-	Currency                       string // 货币
-	Lines                          string // lines json data
-	ChannelId                      string // 支付渠道Id
-	Status                         string // 订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
-	SendStatus                     string // 邮件发送状态，0-No | 1- YES
-	SendEmail                      string // email 发送地址，取自 UserAccount 表 email
-	SendPdf                        string // pdf 文件地址
-	GmtModify                      string // 修改时间
+	TotalAmount                    string // total amount, cent
+	TaxAmount                      string // tax amount,cent
+	SubscriptionAmount             string // sub amount,cent
+	Currency                       string // currency
+	Lines                          string // lines( json)
+	ChannelId                      string // channel_id
+	Status                         string // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
+	SendStatus                     string // email send status，0-No | 1- YES
+	SendEmail                      string // email
+	SendPdf                        string // pdf link
+	GmtModify                      string // update time
 	IsDeleted                      string // 0-UnDeleted，1-Deleted
-	Link                           string // invoice 链接（可用于支付）
-	ChannelStatus                  string // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
-	ChannelInvoiceId               string // 关联渠道发票 Id
-	ChannelPaymentId               string // 关联渠道 PaymentId
-	ChannelInvoicePdf              string // 关联渠道发票 pdf
-	TaxScale                       string // Tax税率，万分位，1000 表示 10%
+	Link                           string // invoice link
+	ChannelStatus                  string //
+	ChannelInvoiceId               string //
+	ChannelPaymentId               string //
+	ChannelInvoicePdf              string //
+	TaxScale                       string // Tax scale，1000 = 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
-	TotalAmountExcludingTax        string // 金额(不含税）,单位：分
-	SubscriptionAmountExcludingTax string // Sub金额(不含税）,单位：分
-	PeriodStart                    string // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
+	TotalAmountExcludingTax        string //
+	SubscriptionAmountExcludingTax string //
+	PeriodStart                    string // period_start
 	PeriodEnd                      string // period_end
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
 	PaymentId                      string // paymentId
 	RefundId                       string // refundId
-	Data                           string // 渠道额外参数，JSON格式
-	BizType                        string // 业务类型。1-single payment, 3-subscription
+	Data                           string // data (json)
+	BizType                        string // biz type from payment 1-single payment, 3-subscription
 }
 
 // invoiceColumns holds the columns for table invoice.

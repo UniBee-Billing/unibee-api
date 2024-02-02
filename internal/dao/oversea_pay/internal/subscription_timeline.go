@@ -21,24 +21,24 @@ type SubscriptionTimelineDao struct {
 // SubscriptionTimelineColumns defines and stores column names for table subscription_timeline.
 type SubscriptionTimelineColumns struct {
 	Id              string //
-	MerchantId      string // 商户Id
+	MerchantId      string // merchant id
 	UserId          string // userId
-	SubscriptionId  string // 订阅id（内部编号）
-	PeriodStart     string // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
+	SubscriptionId  string // subscription id
+	PeriodStart     string // period_start
 	PeriodEnd       string // period_end
-	PeriodStartTime string //
-	PeriodEndTime   string //
+	PeriodStartTime string // period start (datetime)
+	PeriodEndTime   string // period end (datatime)
 	GmtCreate       string // create time
-	InvoiceId       string // 发票ID（内部编号）
-	UniqueId        string // 唯一键
-	Currency        string // 货币
+	InvoiceId       string // invoice id
+	UniqueId        string // unique id
+	Currency        string // currency
 	PlanId          string // PlanId
 	Quantity        string // quantity
 	AddonData       string // plan addon json data
-	ChannelId       string // 支付渠道Id
-	GmtModify       string // 修改时间
+	ChannelId       string // channel_id
+	GmtModify       string // update time
 	IsDeleted       string // 0-UnDeleted，1-Deleted
-	UniqueKey       string //
+	UniqueKey       string // unique key (deperated)
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.

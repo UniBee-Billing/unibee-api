@@ -12,7 +12,7 @@ import (
 // SubscriptionAdminNote is the golang structure of table subscription_admin_note for DAO operations like Where/Data.
 type SubscriptionAdminNote struct {
 	g.Meta         `orm:"table:subscription_admin_note, do:true"`
-	Id             interface{} //
+	Id             interface{} // id
 	GmtCreate      *gtime.Time // create_time
 	GmtModify      *gtime.Time // modify_time
 	SubscriptionId interface{} // subscription_id

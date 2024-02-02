@@ -23,13 +23,13 @@ type MerchantVatNumberVerifyHistoryColumns struct {
 	Id              string // ID
 	MerchantId      string // merchantId
 	VatNumber       string // vat_number
-	Valid           string // 0-无效，1-有效
+	Valid           string // 0-Invalid，1-Valid
 	ValidateChannel string // validate_channel
 	CountryCode     string // country_code
 	CompanyName     string // company_name
 	CompanyAddress  string // company_address
 	GmtCreate       string // create time
-	GmtModify       string // 修改时间
+	GmtModify       string // update time
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	ValidateMessage string // validate_message
 }

@@ -14,8 +14,8 @@ type MerchantPayChannelMapping struct {
 	g.Meta     `orm:"table:merchant_pay_channel_mapping, do:true"`
 	Id         interface{} //
 	GmtCreate  *gtime.Time // create time
-	GmtModify  *gtime.Time // 修改时间
-	MerchantId interface{} // 商户Id
+	GmtModify  *gtime.Time // update time
+	MerchantId interface{} // merchant id
 	ChannelId  interface{} // oversea_pay_channel表的id
 	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
 }

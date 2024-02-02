@@ -24,10 +24,10 @@ type ChannelUserColumns struct {
 	GmtCreate                   string // create time
 	GmtModify                   string // update time
 	UserId                      string // userId
-	ChannelId                   string // 支付渠道Id
-	ChannelUserId               string // 支付渠道user_Id
+	ChannelId                   string // channel_id
+	ChannelUserId               string // channel_user_Id
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
-	ChannelDefaultPaymentMethod string //
+	ChannelDefaultPaymentMethod string // channel_default_payment_method
 }
 
 // channelUserColumns holds the columns for table channel_user.

@@ -14,13 +14,13 @@ type MerchantUserAccount struct {
 	g.Meta     `orm:"table:merchant_user_account, do:true"`
 	Id         interface{} // userId
 	GmtCreate  *gtime.Time // create time
-	GmtModify  *gtime.Time // 修改时间
-	MerchantId interface{} // 用户ID
+	GmtModify  *gtime.Time // update time
+	MerchantId interface{} // merchant id
 	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
-	Password   interface{} // 密码，加密存储
-	UserName   interface{} // 用户名
-	Mobile     interface{} // 手机号
-	Email      interface{} // 邮箱
-	FirstName  interface{} //
-	LastName   interface{} //
+	Password   interface{} // password
+	UserName   interface{} // user name
+	Mobile     interface{} // mobile
+	Email      interface{} // email
+	FirstName  interface{} // first name
+	LastName   interface{} // last name
 }

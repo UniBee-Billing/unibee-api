@@ -12,29 +12,29 @@ import (
 // Refund is the golang structure of table refund for DAO operations like Where/Data.
 type Refund struct {
 	g.Meta               `orm:"table:refund, do:true"`
-	Id                   interface{} // 主键ID
-	CompanyId            interface{} // 公司Id
-	MerchantId           interface{} // 商户ID
+	Id                   interface{} // id
+	CompanyId            interface{} // company id
+	MerchantId           interface{} // merchant id
 	UserId               interface{} // user_id
-	OpenApiId            interface{} // 使用的开放平台配置Id
-	ChannelId            interface{} // 退款渠道Id
-	BizType              interface{} // 业务类型。同pay.biz_type
-	BizId                interface{} // 业务ID。同pay.biz_id
-	CountryCode          interface{} // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
-	Currency             interface{} // 货币，“SGD” “MYR” “PHP” “IDR” “THB” 与付款金额关联的货币。指定三个字母的ISO 4217货币代码
-	PaymentId            interface{} // 支付单号(内部生成，支付单号）
-	RefundId             interface{} // 退款单号。可以唯一代表一笔退款（内部生成，退款单号）
-	RefundAmount         interface{} // 退款金额。单位：分
-	RefundComment        interface{} // 退款备注
-	Status               interface{} // 退款状态。10-退款中，20-退款成功，30-退款失败
-	RefundTime           *gtime.Time // 退款成功时间
+	OpenApiId            interface{} // open api id
+	ChannelId            interface{} // channel_id
+	BizType              interface{} // biz type, copy from payment.biz_type
+	BizId                interface{} // biz id,copy from payment.biz_id
+	CountryCode          interface{} // country code
+	Currency             interface{} // currency
+	PaymentId            interface{} // relative payment id
+	RefundId             interface{} // refund id (system generate)
+	RefundAmount         interface{} // refund amount, cent
+	RefundComment        interface{} // refund comment
+	Status               interface{} // status。10-pending，20-success，30-failure, 40-cancel
+	RefundTime           *gtime.Time // refund success time
 	GmtCreate            *gtime.Time // create time
-	GmtModify            *gtime.Time // 更新时间
-	ChannelRefundId      interface{} // 外部退款单号
-	AppId                interface{} // 退款使用的APPID
-	RefundCommentExplain interface{} // 退款备注说明
-	ReturnUrl            interface{} // 退款成功回调Url
+	GmtModify            *gtime.Time // update time
+	ChannelRefundId      interface{} // channel refund id
+	AppId                interface{} // app id
+	RefundCommentExplain interface{} // refund comment
+	ReturnUrl            interface{} // return url after refund success
 	AdditionalData       interface{} //
-	UniqueId             interface{} // 唯一键，以同步为逻辑加入使用自定义唯一键
-	SubscriptionId       interface{} // 订阅id（内部编号）
+	UniqueId             interface{} // unique id
+	SubscriptionId       interface{} // subscription id
 }

@@ -12,19 +12,19 @@ import (
 // PaymentEvent is the golang structure of table payment_event for DAO operations like Where/Data.
 type PaymentEvent struct {
 	g.Meta          `orm:"table:payment_event, do:true"`
-	Id              interface{} // 主键id
+	Id              interface{} // id
 	UserId          interface{} // user_id
 	MerchantUserId  interface{} // merchant_user_id
-	OpenApiId       interface{} // 使用的开放平台配置Id
+	OpenApiId       interface{} // open api id
 	TerminalIp      interface{} // terminal_ip
 	BizType         interface{} // biz_type=1，Payment表
 	BizId           interface{} // biz_type=1，pay；
-	Fee             interface{} // 金额（分）
-	EventType       interface{} // 0-未知
-	Event           interface{} // 事件
-	RelativeTradeNo interface{} // 关联单号
-	UniqueNo        interface{} // 唯一键
+	Fee             interface{} // amount, cent
+	EventType       interface{} // 0-unknown
+	Event           interface{} // event
+	RelativeTradeNo interface{} // relative trade no
+	UniqueNo        interface{} // unique no
 	GmtCreate       *gtime.Time // create time
-	GmtModify       *gtime.Time // 更新时间
+	GmtModify       *gtime.Time // update time
 	Message         interface{} // message
 }

@@ -20,34 +20,34 @@ type SubscriptionPendingUpdateDao struct {
 
 // SubscriptionPendingUpdateColumns defines and stores column names for table subscription_pending_update.
 type SubscriptionPendingUpdateColumns struct {
-	Id                   string //
-	MerchantId           string // 商户Id
-	SubscriptionId       string // 订阅id（内部编号）
-	UpdateSubscriptionId string // 升级单ID（内部编号）
-	ChannelUpdateId      string // 支付渠道订阅更新单id， stripe 适用 channelInvoiceId对应
+	Id                   string // id
+	MerchantId           string // merchant id
+	SubscriptionId       string // subscription id
+	UpdateSubscriptionId string // pending update unique id
+	ChannelUpdateId      string // channel update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            string // create time
-	Amount               string // 本周期金额,单位：分
-	Status               string // 订阅单状态，0-Init | 1-Create｜2-Finished｜3-Cancelled
-	ProrationAmount      string // 下周期金额,单位：分
-	UpdateAmount         string // 升级到金额,单位：分
-	Currency             string // 货币
-	UpdateCurrency       string // 升级到货币
-	PlanId               string // 计划ID
-	UpdatePlanId         string // 升级到计划ID
-	Quantity             string // quantity
-	UpdateQuantity       string // 升级到quantity
-	AddonData            string // plan addon json data
-	UpdateAddonData      string // 升级到plan addon json data
-	ChannelId            string // 支付渠道Id
+	Amount               string // amount of this period, cent
+	Status               string // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	ProrationAmount      string // proration amount of this pending update , cent
+	UpdateAmount         string // the amount after update
+	Currency             string // currency of this period
+	UpdateCurrency       string // the currency after update
+	PlanId               string // the plan id of this period
+	UpdatePlanId         string // the plan id after update
+	Quantity             string // quantity of this period
+	UpdateQuantity       string // quantity after update
+	AddonData            string // plan addon data (json) of this period
+	UpdateAddonData      string // plan addon data (json) after update
+	ChannelId            string // channel_id
 	UserId               string // userId
-	GmtModify            string // 修改时间
+	GmtModify            string // update time
 	IsDeleted            string // 0-UnDeleted，1-Deleted
-	Paid                 string // 是否已支付，0-否，1-是
-	Link                 string // 支付链接
-	ChannelStatus        string // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	Paid                 string // paid，0-no，1-yes
+	Link                 string // payment link
+	ChannelStatus        string // channel status
 	MerchantUserId       string // merchant_user_id
-	Data                 string // 渠道额外参数，JSON格式
-	ResponseData         string // 渠道返回参数，JSON格式
+	Data                 string //
+	ResponseData         string //
 	EffectImmediate      string // 是否马上生效，0-否，1-是
 	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
 	Note                 string // note

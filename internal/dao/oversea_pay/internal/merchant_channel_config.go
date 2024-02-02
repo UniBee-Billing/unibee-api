@@ -20,26 +20,26 @@ type MerchantChannelConfigDao struct {
 
 // MerchantChannelConfigColumns defines and stores column names for table merchant_channel_config.
 type MerchantChannelConfigColumns struct {
-	Id               string // 主键id
-	MerchantId       string //
-	EnumKey          string // 支付渠道枚举（内部定义）
-	ChannelType      string // 支付渠道类型，null或者 0-Payment 类型 ｜ 1-Subscription类型
-	Channel          string // 支付方式枚举（渠道定义）
-	Name             string // 支付方式名称
-	SubChannel       string // 渠道子支付方式枚举
+	Id               string // channel_id
+	MerchantId       string // merchant_id
+	EnumKey          string // enum key , match in channel implementation
+	ChannelType      string // channel type，null or 0-Payment Type ｜ 1-Subscription Type
+	Channel          string // channel name
+	Name             string // name
+	SubChannel       string // sub_channel_enum
 	BrandData        string //
-	Logo             string // 支付方式logo
+	Logo             string // channel logo
 	Host             string // pay host
-	ChannelAccountId string // 渠道账户Id
+	ChannelAccountId string // channel account id
 	ChannelKey       string //
 	ChannelSecret    string // secret
 	Custom           string // custom
 	GmtCreate        string // create time
-	GmtModify        string // 修改时间
-	Description      string // 支付方式描述
+	GmtModify        string // update time
+	Description      string // description
 	WebhookKey       string // webhook_key
 	WebhookSecret    string // webhook_secret
-	UniqueProductId  string // 渠道唯一 ProductId，目前仅限 Paypal 使用
+	UniqueProductId  string // unique  channel productId, only stripe need
 }
 
 // merchantChannelConfigColumns holds the columns for table merchant_channel_config.

@@ -22,8 +22,8 @@ type MerchantPayChannelMappingDao struct {
 type MerchantPayChannelMappingColumns struct {
 	Id         string //
 	GmtCreate  string // create time
-	GmtModify  string // 修改时间
-	MerchantId string // 商户Id
+	GmtModify  string // update time
+	MerchantId string // merchant id
 	ChannelId  string // oversea_pay_channel表的id
 	IsDeleted  string // 0-UnDeleted，1-Deleted
 }

@@ -14,7 +14,7 @@ type ChannelVatRate struct {
 	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"create time"`           // create time
 	GmtModify        *gtime.Time `json:"gmtModify"        description:"update time"`           // update time
 	VatRateId        int64       `json:"vatRateId"        description:"vat_rate_id"`           // vat_rate_id
-	ChannelId        int64       `json:"channelId"        description:"支付渠道Id"`                // 支付渠道Id
-	ChannelVatRateId string      `json:"channelVatRateId" description:"支付渠道vat_rate_Id"`       // 支付渠道vat_rate_Id
+	ChannelId        int64       `json:"channelId"        description:"channel_id"`            // channel_id
+	ChannelVatRateId string      `json:"channelVatRateId" description:"channel_vat_rate_Id"`   // channel_vat_rate_Id
 	IsDeleted        int         `json:"isDeleted"        description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 }

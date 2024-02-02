@@ -12,8 +12,8 @@ import (
 type MerchantPayChannelMapping struct {
 	Id         uint64      `json:"id"         description:""`                        //
 	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`             // create time
-	GmtModify  *gtime.Time `json:"gmtModify"  description:"修改时间"`                    // 修改时间
-	MerchantId int64       `json:"merchantId" description:"商户Id"`                    // 商户Id
+	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`             // update time
+	MerchantId int64       `json:"merchantId" description:"merchant id"`             // merchant id
 	ChannelId  string      `json:"channelId"  description:"oversea_pay_channel表的id"` // oversea_pay_channel表的id
 	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 }

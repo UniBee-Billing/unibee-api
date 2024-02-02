@@ -13,13 +13,13 @@ type MerchantVatNumberVerifyHistory struct {
 	Id              int64       `json:"id"              description:"ID"`                    // ID
 	MerchantId      int64       `json:"merchantId"      description:"merchantId"`            // merchantId
 	VatNumber       string      `json:"vatNumber"       description:"vat_number"`            // vat_number
-	Valid           int64       `json:"valid"           description:"0-无效，1-有效"`             // 0-无效，1-有效
+	Valid           int64       `json:"valid"           description:"0-Invalid，1-Valid"`     // 0-Invalid，1-Valid
 	ValidateChannel string      `json:"validateChannel" description:"validate_channel"`      // validate_channel
 	CountryCode     string      `json:"countryCode"     description:"country_code"`          // country_code
 	CompanyName     string      `json:"companyName"     description:"company_name"`          // company_name
 	CompanyAddress  string      `json:"companyAddress"  description:"company_address"`       // company_address
 	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`           // create time
-	GmtModify       *gtime.Time `json:"gmtModify"       description:"修改时间"`                  // 修改时间
+	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`           // update time
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	ValidateMessage string      `json:"validateMessage" description:"validate_message"`      // validate_message
 }

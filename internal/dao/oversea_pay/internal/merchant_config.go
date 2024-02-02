@@ -25,7 +25,7 @@ type MerchantConfigColumns struct {
 	ConfigKey   string // config_key
 	ConfigValue string // config_value
 	GmtCreate   string // create time
-	GmtModify   string // 修改时间
+	GmtModify   string // update time
 	IsDeleted   string // 0-UnDeleted，1-Deleted
 }
 

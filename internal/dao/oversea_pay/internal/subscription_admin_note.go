@@ -20,7 +20,7 @@ type SubscriptionAdminNoteDao struct {
 
 // SubscriptionAdminNoteColumns defines and stores column names for table subscription_admin_note.
 type SubscriptionAdminNoteColumns struct {
-	Id             string //
+	Id             string // id
 	GmtCreate      string // create_time
 	GmtModify      string // modify_time
 	SubscriptionId string // subscription_id

@@ -20,48 +20,48 @@ type PaymentDao struct {
 
 // PaymentColumns defines and stores column names for table payment.
 type PaymentColumns struct {
-	Id                     string // 主键id
-	CompanyId              string // 公司Id
-	MerchantId             string // 商户ID
-	OpenApiId              string // 使用的开放平台配置Id
+	Id                     string // id
+	CompanyId              string // company id
+	MerchantId             string // merchant id
+	OpenApiId              string // open api id
 	UserId                 string // user_id
-	SubscriptionId         string // 订阅id（内部编号）
+	SubscriptionId         string // subscription id
 	GmtCreate              string // create time
-	BizType                string // 业务类型。1-single payment, 3-subscription
-	BizId                  string // 业务id-即商户订单号
-	Currency               string // 货币，“SGD” “MYR” “PHP” “IDR” “THB”\n与付款金额关联的货币。指定三个字母的ISO 4217货币代码
-	PaymentId              string // 内部支付编号（系统生成唯一）
-	TotalAmount            string // 总计金额
+	BizType                string // biz_type 1-single payment, 3-subscription
+	BizId                  string // biz_id
+	Currency               string // currency，“SGD” “MYR” “PHP” “IDR” “THB”
+	PaymentId              string // payment id
+	TotalAmount            string // total amount
 	PaymentAmount          string // payment_amount
 	BalanceAmount          string // balance_amount
-	RefundAmount           string // 总共已退款金额
-	Status                 string // 支付状态。10-支付中，20-支付成功，30-支付取消
-	TerminalIp             string // 实时交易终端IP
-	CountryCode            string // 国家代码，指定发起交易的国家的两个字母的ISO 3166国家代码。目前支持SG、MY、PH、ID和TH
-	AuthorizeStatus        string // 用户授权状态，0-未授权，1-已授权，2-已发起捕获
-	ChannelId              string // 支付方式id,表oversea_pay_channel的id
-	ChannelPaymentIntentId string // 第三方支付平台支付预订单ID，支付接口返回
-	ChannelPaymentId       string // 外部支付渠道订单号，支付成功回调返回
-	CaptureDelayHours      string // 延迟Capture时间
-	CreateTime             string // 支付单创建时间
-	CancelTime             string // 支付单取消时间
-	PaidTime               string // 付款成功时间
-	InvoiceId              string // 发票号
-	GmtModify              string // 更新时间
-	AppId                  string // 支付使用的APPID
-	ReturnUrl              string // 支付成功回调Url
-	ChannelEdition         string // 支付通道版本号
-	HidePaymentMethods     string // 隐藏支付方式，分号隔开;枚举： “INSTALMENT” “POSTPAID” “CARD”\n在 GrabPay Checkout 流程中对用户隐藏指定的支付方式。如果未设置，GrabPay 会向用户显示所有符合条件的付款方式。但是请注意，您不能隐藏 GrabPay 钱包付款方式\n\n注意：CARD 目前仅适用于泰国
-	Verify                 string // codeVerify校验值
+	RefundAmount           string // total refund amount
+	Status                 string // status  10-pending，20-success，30-failure, 40-cancel
+	TerminalIp             string // client ip
+	CountryCode            string // country code
+	AuthorizeStatus        string // authorize status，0-waiting authorize，1-authorized，2-authorized_request
+	ChannelId              string // channel_id
+	ChannelPaymentIntentId string // channel_payment_intent_id
+	ChannelPaymentId       string // channel_payment_id
+	CaptureDelayHours      string // capture_delay_hours
+	CreateTime             string // create time
+	CancelTime             string // cancel time
+	PaidTime               string // paid time
+	InvoiceId              string // invoice id
+	GmtModify              string // update time
+	AppId                  string // app id
+	ReturnUrl              string // return url
+	ChannelEdition         string // channel edition
+	HidePaymentMethods     string // hide_payment_methods
+	Verify                 string // codeVerify
 	Code                   string //
 	Token                  string //
-	AdditionalData         string // 额外信息，JSON结构
+	AdditionalData         string // addtional data (json)
 	Automatic              string //
 	FailureReason          string //
 	BillingReason          string //
 	Link                   string //
-	PaymentData            string // 渠道支付接口返回核心参数，JSON结构
-	UniqueId               string // 唯一键，以同步为逻辑加入使用自定义唯一键
+	PaymentData            string // payment create data (json)
+	UniqueId               string // unique id
 	BalanceStart           string // balance_start
 	BalanceEnd             string // balance_end
 	InvoiceData            string //

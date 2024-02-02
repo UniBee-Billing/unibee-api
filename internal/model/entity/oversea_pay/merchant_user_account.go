@@ -12,13 +12,13 @@ import (
 type MerchantUserAccount struct {
 	Id         uint64      `json:"id"         description:"userId"`                // userId
 	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`           // create time
-	GmtModify  *gtime.Time `json:"gmtModify"  description:"修改时间"`                  // 修改时间
-	MerchantId int64       `json:"merchantId" description:"用户ID"`                  // 用户ID
+	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`           // update time
+	MerchantId int64       `json:"merchantId" description:"merchant id"`           // merchant id
 	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
-	Password   string      `json:"password"   description:"密码，加密存储"`               // 密码，加密存储
-	UserName   string      `json:"userName"   description:"用户名"`                   // 用户名
-	Mobile     string      `json:"mobile"     description:"手机号"`                   // 手机号
-	Email      string      `json:"email"      description:"邮箱"`                    // 邮箱
-	FirstName  string      `json:"firstName"  description:""`                      //
-	LastName   string      `json:"lastName"   description:""`                      //
+	Password   string      `json:"password"   description:"password"`              // password
+	UserName   string      `json:"userName"   description:"user name"`             // user name
+	Mobile     string      `json:"mobile"     description:"mobile"`                // mobile
+	Email      string      `json:"email"      description:"email"`                 // email
+	FirstName  string      `json:"firstName"  description:"first name"`            // first name
+	LastName   string      `json:"lastName"   description:"last name"`             // last name
 }

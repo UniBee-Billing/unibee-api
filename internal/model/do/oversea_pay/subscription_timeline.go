@@ -13,22 +13,22 @@ import (
 type SubscriptionTimeline struct {
 	g.Meta          `orm:"table:subscription_timeline, do:true"`
 	Id              interface{} //
-	MerchantId      interface{} // 商户Id
+	MerchantId      interface{} // merchant id
 	UserId          interface{} // userId
-	SubscriptionId  interface{} // 订阅id（内部编号）
-	PeriodStart     interface{} // period_start，发票项目被添加到此发票的使用期限开始。，并非发票对应 sub 的周期
+	SubscriptionId  interface{} // subscription id
+	PeriodStart     interface{} // period_start
 	PeriodEnd       interface{} // period_end
-	PeriodStartTime *gtime.Time //
-	PeriodEndTime   *gtime.Time //
+	PeriodStartTime *gtime.Time // period start (datetime)
+	PeriodEndTime   *gtime.Time // period end (datatime)
 	GmtCreate       *gtime.Time // create time
-	InvoiceId       interface{} // 发票ID（内部编号）
-	UniqueId        interface{} // 唯一键
-	Currency        interface{} // 货币
+	InvoiceId       interface{} // invoice id
+	UniqueId        interface{} // unique id
+	Currency        interface{} // currency
 	PlanId          interface{} // PlanId
 	Quantity        interface{} // quantity
 	AddonData       interface{} // plan addon json data
-	ChannelId       interface{} // 支付渠道Id
-	GmtModify       *gtime.Time // 修改时间
+	ChannelId       interface{} // channel_id
+	GmtModify       *gtime.Time // update time
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
-	UniqueKey       interface{} //
+	UniqueKey       interface{} // unique key (deperated)
 }

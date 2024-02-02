@@ -22,25 +22,25 @@ type SubscriptionPlanDao struct {
 type SubscriptionPlanColumns struct {
 	Id                        string //
 	GmtCreate                 string // create time
-	GmtModify                 string // 修改时间
-	CompanyId                 string // 公司ID
-	MerchantId                string // 商户Id
+	GmtModify                 string // update time
+	CompanyId                 string // company id
+	MerchantId                string // merchant id
 	PlanName                  string // PlanName
-	Amount                    string // 金额,单位：分
-	Currency                  string // 货币
-	IntervalUnit              string // 周期-全小写存放,day|month|year|week
-	IntervalCount             string // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
-	Description               string //
+	Amount                    string // amount, cent, without tax
+	Currency                  string // currency
+	IntervalUnit              string // period unit,day|month|year|week
+	IntervalCount             string // period unit count
+	Description               string // description
 	ImageUrl                  string // image_url
 	HomeUrl                   string // home_url
-	ChannelProductName        string // 支付渠道product_name
-	ChannelProductDescription string // 支付渠道product_description
-	TaxScale                  string // 税费比例： 1 =1%
-	TaxInclusive              string // 税费是否包含，1-包含，0-不包含
-	Type                      string // 类型，1-main plan，2-addon plan
-	Status                    string // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
+	ChannelProductName        string // channel product name
+	ChannelProductDescription string // channel product description
+	TaxScale                  string // tax scale 1000 = 10%
+	TaxInclusive              string // deperated
+	Type                      string // type，1-main plan，2-addon plan
+	Status                    string // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 string // 0-UnDeleted，1-Deleted
-	BindingAddonIds           string // 绑定的 Addon PlanIds，以逗号隔开
+	BindingAddonIds           string // binded addon planIds，split with ,
 	PublishStatus             string // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
 }
 
