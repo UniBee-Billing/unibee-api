@@ -33,19 +33,19 @@ func RegisterListener(i IMessageListener) {
 		Topics = make([]string, 0, 100) //最多容纳 60 个 topic
 	}
 	if len(Topics) > 60 {
-		fmt.Println("工程Topic过多，请聚合Topic")
+		fmt.Println("Project Register Topic Too Much ，Merge Please")
 		return
 	}
 	if !isValidTopic(i.GetTopic()) {
-		fmt.Printf("redismq 注册Default消费者失败 无效topic:%s,已忽略\n", i.GetTopic())
+		fmt.Printf("Redismq Regist Default Consumer Invalid Topic:%s,Drop\n", i.GetTopic())
 		return
 	}
 	if Listeners()[GetMessageKey(i.GetTopic(), i.GetTag())] != nil {
-		fmt.Printf("redismq 多个消费者%s,消费同一个消息:%s,已忽略\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
+		fmt.Printf("Redismq Multi %s,Consumer On:%s,Drop\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
 	} else {
 		messageKey := GetMessageKey(i.GetTopic(), i.GetTag())
 		Listeners()[messageKey] = i
 		Topics = append(Topics, messageKey)
-		fmt.Printf("redismq 注册MQ消费者 IMessageListener:%s,消费消息:%s\n", i, messageKey)
+		fmt.Printf("Redismq Register IMessageListener:%s,Consumer:%s\n", i, messageKey)
 	}
 }

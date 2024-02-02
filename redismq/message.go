@@ -9,23 +9,23 @@ import (
 )
 
 type Message struct {
-	MessageId        string                 `json:"messageId" dc:"消息Id"`
-	Topic            string                 `json:"topic" dc:"消息Topic"`
-	Tag              string                 `json:"tag" dc:"消息Tag"`
-	Body             []byte                 `json:"body" dc:"消息Body"`
-	Key              string                 `json:"key" dc:"消息Key"`
-	StartDeliverTime int64                  `json:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
-	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
-	CustomData       map[string]interface{} `json:"customData" dc:"自定义数据"`
-	SendTime         int64                  `json:"sendTime" dc:"消息发送时间"`
+	MessageId        string                 `json:"messageId" dc:"MessageId"`
+	Topic            string                 `json:"topic" dc:"Topic"`
+	Tag              string                 `json:"tag" dc:"Tag"`
+	Body             []byte                 `json:"body" dc:"Body"`
+	Key              string                 `json:"key" dc:"Key"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Mills"`
+	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
+	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
+	SendTime         int64                  `json:"sendTime" dc:"Sent Time"`
 }
 
 type MessageMetaData struct {
-	StartDeliverTime int64                  `json:"startDeliverTime" dc:"消息发送时间,0-表示不延迟，单位毫秒"`
-	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"消息消费时, 获取消息已经被重试消费的次数"`
-	CustomData       map[string]interface{} `json:"customData" dc:"自定义数据"`
-	Key              string                 `json:"key" dc:"消息Key"`
-	SendTime         int64                  `json:"sendTime" dc:"消息发送时间"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Mills"`
+	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
+	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
+	Key              string                 `json:"key" dc:"Key"`
+	SendTime         int64                  `json:"sendTime" dc:"SendTime"`
 }
 
 func NewRedisMQMessage(topicWrappper MQTopicEnum, body interface{}) *Message {
@@ -85,7 +85,7 @@ func (message *Message) paseStreamMessage(value map[string]interface{}) {
 		if err == nil {
 			defer func() {
 				if exception := recover(); exception != nil {
-					fmt.Printf("redismq paseStreamMessage panic error:%s\n", exception)
+					fmt.Printf("Redismq paseStreamMessage panic error:%s\n", exception)
 					return
 				}
 			}()

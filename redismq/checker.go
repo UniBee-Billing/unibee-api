@@ -24,9 +24,9 @@ func RegisterChecker(i IMessageChecker) {
 		return
 	}
 	if Checkers()[GetMessageKey(i.GetTopic(), i.GetTag())] != nil {
-		fmt.Printf("redismq 多个事务观察者%s,观察同一个消息:%s,已忽略\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
+		fmt.Printf("Redismq Multi Register Transaction Consumer %s,Watch One Message:%s,Drop\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
 	} else {
 		Checkers()[GetMessageKey(i.GetTopic(), i.GetTag())] = i
-		fmt.Printf("redismq 注册MQ事务观察者 IMessageChecker:%s,观察消息:%s\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
+		fmt.Printf("Redismq Regist Consumer IMessageChecker:%s,Watch:%s\n", i, GetMessageKey(i.GetTopic(), i.GetTag()))
 	}
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	GroupId = "GID_hk_golang_overseapay"
+	GroupId = "GID_UniBee_Recurring"
 )
 
 var consumerName = ""
@@ -20,20 +20,20 @@ var consumerName = ""
 func StartRedisMqConsumer() {
 	innerSettingConsumerName()
 	if len(consumerName) == 0 {
-		fmt.Println("StartRedisMqConsumer failed while ConsumerName invalid")
+		fmt.Println("StartRedisMqConsumer Failed While ConsumerName Invalid")
 		return
 	}
 	StartDelayBackgroundThread()
-	fmt.Println("redismq 启动延迟队列后台任务！！！！！！")
+	fmt.Println("Redismq Start Delay Queue！！！！！！")
 	deathQueueName := GetDeathQueueName()
 	createStreamGroup(deathQueueName, "death_message")
-	fmt.Printf("redismq Stream 初始化死信队列 deathQueueName:%s", deathQueueName)
+	fmt.Printf("Redismq Stream Init Death Queue deathQueueName:%s", deathQueueName)
 	innerLoadTransactionChecker()
-	fmt.Println("redismq 事务checkloader汇总完毕！！！！！！")
+	fmt.Println("Redismq Finish Transaction Check Loader ！！！！！！")
 	innerLoadConsumer()
-	fmt.Println("redismq Default订阅信息汇总完毕！！！！！！")
+	fmt.Println("Redismq Finish Default MQ Subscribe！！！！！！")
 	startScheduleTrimStream()
-	fmt.Println("redismq 定时修剪长度任务完毕！！！！！！")
+	fmt.Println("Redismq Finish Queue Length Cut！！！！！！")
 }
 
 func innerSettingConsumerName() {
@@ -82,7 +82,7 @@ func createStreamGroup(queueName string, topic string) {
 func tryCreateGroup(queueName string, topic string) {
 	defer func() {
 		if exception := recover(); exception != nil {
-			fmt.Printf("redismq Stream 初始化队列 tryCreateGroup panic error:%s\n", exception)
+			fmt.Printf("Redismq Stream Init TryCreateGroup panic error:%s\n", exception)
 			return
 		}
 	}()
@@ -102,7 +102,7 @@ func tryCreateGroup(queueName string, topic string) {
 	// 发送一条测试消息到 Stream
 	_, err := client.XAdd(context.Background(), message.toStreamAddArgsValues(queueName)).Result()
 	if err != nil {
-		fmt.Printf("MQ STREAM初始化 Group失败或Group已存在 exception:%s queueName:%s group:%s\n", err, queueName, GroupId)
+		fmt.Printf("MQ STREAM初始化 Group Failure Or Group Exsit exception:%s queueName:%s group:%s\n", err, queueName, GroupId)
 	}
 	found := false
 	groups, _ := client.XInfoGroups(context.Background(), queueName).Result()
@@ -115,10 +115,10 @@ func tryCreateGroup(queueName string, topic string) {
 		//尝试创建 Group
 		// 创建消费者组
 		if err := client.XGroupCreateMkStream(context.Background(), queueName, GroupId, "$").Err(); err != nil {
-			fmt.Printf("MQ STREAM 已存在GroupId queueName:%s groupId:%s err:%s", queueName, GroupId, err)
+			fmt.Printf("MQ STREAM GroupId exsit queueName:%s groupId:%s err:%s", queueName, GroupId, err)
 			return
 		} else {
-			fmt.Printf("MQ STREAM初始化 queueName:%s groupId:%s ", queueName, GroupId)
+			fmt.Printf("MQ STREAM init queueName:%s groupId:%s ", queueName, GroupId)
 		}
 	}
 }
@@ -126,7 +126,7 @@ func tryCreateGroup(queueName string, topic string) {
 func tryCreateConsumer(queueName string, topic string) {
 	defer func() {
 		if exception := recover(); exception != nil {
-			fmt.Printf("redismq Stream 初始化队列 tryCreateConsumer panic error:%s\n", exception)
+			fmt.Printf("Redismq Stream init queue tryCreateConsumer panic error:%s\n", exception)
 			return
 		}
 	}()
@@ -139,9 +139,9 @@ func tryCreateConsumer(queueName string, topic string) {
 		}
 	}(client)
 	if _, err := client.XGroupCreateConsumer(context.Background(), queueName, GroupId, consumerName).Result(); err != nil {
-		fmt.Printf("MQ STREAM consumerName失败或consumerName已存在 queueName:%s groupId:%s consumerName:%s err:%s", queueName, GroupId, consumerName, err)
+		fmt.Printf("MQ STREAM consumerName failure or consumerName exsit queueName:%s groupId:%s consumerName:%s err:%s", queueName, GroupId, consumerName, err)
 	} else {
-		fmt.Printf("MQ STREAM初始化 queueName:%s groupId:%s consumerName:%s", queueName, GroupId, consumerName)
+		fmt.Printf("MQ STREAM init queueName:%s groupId:%s consumerName:%s", queueName, GroupId, consumerName)
 	}
 }
 
@@ -153,13 +153,13 @@ func innerLoadConsumer() {
 
 func innerLoadTransactionChecker() {
 	//checkers := checker.Checkers
-	// 废弃，不需要了
+	// Deprecated
 }
 
 func blockConsumerTopic(topic string) {
 	createStreamGroup(GetQueueName(topic), topic)
 	createStreamGroup(getBackupQueueName(topic), topic)
-	//启动协程
+	// start background
 	go loopConsumer(topic)
 	go loopTransactionChecker(topic)
 }
@@ -168,7 +168,7 @@ func loopConsumer(topic string) {
 	for {
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("redismq Stream loopConsumer 消息获取Redis异常 topic:%s panic error:%s\n", topic, exception)
+				fmt.Printf("Redismq Stream loopConsumer Redis Error topic:%s panic error:%s\n", topic, exception)
 				return
 			}
 		}()
@@ -179,7 +179,7 @@ func loopConsumer(topic string) {
 				runConsumeMessage(consumer, message)
 				//找不到本地订阅方,塞回队列，ToDo mark 实现group拉取方式应该丢弃
 			} else {
-				fmt.Printf("redismq Stream 收到当前Group:{}无消费者消息 丢弃消息 message::%v\n", message)
+				fmt.Printf("Redismq Stream Receive Group:{} No Comsumer Drop message::%v\n", message)
 				messageAck(message)
 			}
 			count++
@@ -195,7 +195,7 @@ func loopTransactionChecker(topic string) {
 	for {
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("redismq Stream MQ事务半消息获取Redis异常 loopTransactionChecker topic:%s panic error:%s\n", topic, exception)
+				fmt.Printf("Redismq Stream MQ Query Transaction Pre Redis Error loopTransactionChecker topic:%s panic error:%s\n", topic, exception)
 				return
 			}
 		}()
@@ -237,7 +237,7 @@ func getConsumer(message *Message) IMessageListener {
 func runConsumeMessage(consumer IMessageListener, message *Message) {
 	if message.isBoardCastingMessage() {
 		// todo mark 出现这种情况属于bug
-		fmt.Printf("RedisMQ_收到Stream消息 Exception Group通道收到广播消息，丢弃 messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
+		fmt.Printf("RedisMQ_Receive Stream Message Exception Group Receive Boardcast，Drop messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
 		return
 	}
 	cost := utility.CurrentTimeMillis()
@@ -246,7 +246,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		//历史消息没有过期时间
 		if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*24*3 {
 			//超过3天消息定义为过期消息，丢弃
-			fmt.Printf("RedisMQ_收到Stream消息 Exception 消息超过3天 过期丢弃 messageKey:%s message:%v\n ", GetMessageKey(message.Topic, message.Tag), message)
+			fmt.Printf("RedisMQ_Receive Stream Message Exception After 3 Days Drop Expired messageKey:%s message:%v\n ", GetMessageKey(message.Topic, message.Tag), message)
 			return
 		}
 	} else {
@@ -255,7 +255,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("RedisMQ_收到Stream消息 执行消费任务异常 message:%v panic error:%s\n", message, exception)
+				fmt.Printf("RedisMQ_Receive Stream Message Error message:%v panic error:%s\n", message, exception)
 				if pushTaskToResumeLater(consumer, message) {
 					messageAck(message)
 				} else {
@@ -266,7 +266,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		}()
 		time.Sleep(2 * time.Second)
 		action := consumer.Consume(message)
-		fmt.Printf("RedisMQ_收到Stream消息 messageKey:%s 执行结果:%d message:%v cost:%dms", GetMessageKey(message.Topic, message.Tag), action, message, cost)
+		fmt.Printf("RedisMQ_Receive Stream Message messageKey:%s result:%d message:%v cost:%dms", GetMessageKey(message.Topic, message.Tag), action, message, cost)
 		if action == ReconsumeLater {
 			if pushTaskToResumeLater(consumer, message) {
 				messageAck(message)
@@ -282,7 +282,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 func messageAck(message *Message) {
 	defer func() {
 		if exception := recover(); exception != nil {
-			fmt.Printf("MQStream消息发送ACK异常 message:%v panic error:%s\n", message, exception)
+			fmt.Printf("MQStream ack message:%v panic error:%s\n", message, exception)
 			return
 		}
 	}()
@@ -303,10 +303,10 @@ func messageAck(message *Message) {
 	streamName := GetQueueName(message.Topic)
 	ackResult, err := client.XAck(context.Background(), streamName, GroupId, message.MessageId).Result()
 	if err != nil {
-		fmt.Printf("MQStream消息发送ACK异常 message:%v panic error:%s\n", message, err)
+		fmt.Printf("MQStream ack message:%v panic error:%s\n", message, err)
 		return
 	}
-	fmt.Printf("MQStream消息发送ACK streamMessageId:%s streamName:%s ackResult:%d", message.MessageId, streamName, ackResult)
+	fmt.Printf("MQStream ack streamMessageId:%s streamName:%s ackResult:%d", message.MessageId, streamName, ackResult)
 }
 
 func blockReceiveConsumerMessage(topic string) *Message {
@@ -328,7 +328,7 @@ func blockReceiveConsumerMessage(topic string) *Message {
 		NoAck:    true,
 	}).Result()
 	if err != nil {
-		fmt.Printf("MQStream消息获取Redis异常 exception=%s", err)
+		fmt.Printf("MQStream redis exception=%s", err)
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {
@@ -367,10 +367,10 @@ func putMessageToDeathQueue(topic string, id string, message *Message) bool {
 	}(client)
 	streamMessageId, err := client.XAdd(context.Background(), message.toStreamAddArgsValues(GetDeathQueueName())).Result()
 	if err != nil {
-		fmt.Printf("MQStream消息推入死信队列异常 exception:%s messageId:%s", err, message.MessageId)
+		fmt.Printf("MQStream push message to death exception:%s messageId:%s", err, message.MessageId)
 		return false
 	}
-	fmt.Printf("MQ消息推入死信队列, message=%v deathMessageId:%s", message, streamMessageId)
+	fmt.Printf("MQ push message to death, message=%v deathMessageId:%s", message, streamMessageId)
 	return true
 }
 
@@ -380,7 +380,7 @@ func putMessageToTransactionDeathQueue(topic string, message *Message) bool {
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("MQ事务消息推入死信队列异常 error:%s\n", err)
+			fmt.Printf("MQ push transaction message to death error:%s\n", err)
 		}
 	}(client)
 
@@ -395,7 +395,7 @@ func putMessageToTransactionDeathQueue(topic string, message *Message) bool {
 	})
 
 	if err != nil {
-		fmt.Printf("事务消息推入死信队列删除不成功 exception:%s message:%v\n", err, message)
+		fmt.Printf("transaction message to death and delete exception:%s message:%v\n", err, message)
 		return false
 	}
 	return true
@@ -407,7 +407,7 @@ func fetchTransactionPrepareMessagesForChecker(topic string) []*Message {
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("MQ消息获取Redis异常 error:%s\n", err)
+			fmt.Printf("MQ redis error:%s\n", err)
 		}
 	}(client)
 
@@ -426,7 +426,7 @@ func fetchTransactionPrepareMessagesForChecker(topic string) []*Message {
 					messages = append(messages, message)
 				}
 			} else {
-				fmt.Printf("事务半消息体未找到 messageId:%s\n", messageId)
+				fmt.Printf("transaction pre message messageId:%s\n", messageId)
 			}
 		}
 	}
@@ -441,7 +441,7 @@ func startScheduleTrimStream() {
 		defer func(client *redis.Client) {
 			err := client.Close()
 			if err != nil {
-				fmt.Printf("MQ消息获取Redis异常 error:%s\n", err)
+				fmt.Printf("MQ redis error:%s\n", err)
 			}
 		}(client)
 		for {
@@ -454,17 +454,17 @@ func startScheduleTrimStream() {
 			for _, topic := range Topics {
 				queueName := GetQueueName(topic)
 				client.XTrimMaxLen(context.Background(), queueName, int64(maxLen))
-				fmt.Printf("MQ STREAM 修剪长度 maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
+				fmt.Printf("MQ STREAM Cut maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
 				consumersCheck(queueName)
 				queueName = getBackupQueueName(topic)
 				client.XTrimMaxLen(context.Background(), queueName, int64(maxLen))
-				fmt.Printf("MQ STREAM 修剪长度 maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
+				fmt.Printf("MQ STREAM Cut maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
 				consumersCheck(queueName)
 			}
 
 			queueName := GetDeathQueueName()
 			client.XTrimMaxLen(context.Background(), queueName, int64(maxLen))
-			fmt.Printf("MQ STREAM 修剪长度 maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
+			fmt.Printf("MQ STREAM Cut maxLen:%d queueName:%s group:%s consumerName:%s\n", maxLen, queueName, GroupId, consumerName)
 			consumersCheck(queueName)
 
 			time.Sleep(1000 * 60 * 10 * time.Second) //10分钟修剪一次

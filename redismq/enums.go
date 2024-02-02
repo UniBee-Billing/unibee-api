@@ -46,5 +46,5 @@ type MQTopicEnum struct {
 }
 
 var (
-	TopicBlank = MQTopicEnum{"blank", "blank", "redis 空消息"}
+	TopicBlank = MQTopicEnum{"blank", "blank", "redis blank test message"}
 )

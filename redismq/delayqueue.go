@@ -20,7 +20,7 @@ func StartDelayBackgroundThread() {
 		for {
 			defer func() {
 				if exception := recover(); exception != nil {
-					fmt.Printf("redismq polligCore 异常 panic error:%s\n", exception)
+					fmt.Printf("Redismq polligCore panic error:%s\n", exception)
 					return
 				}
 			}()
@@ -36,7 +36,7 @@ func polling() {
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("redismq run error:%s\n", err)
+			fmt.Printf("Redismq run error:%s\n", err)
 		}
 	}(client)
 
@@ -52,7 +52,7 @@ func polling() {
 func pollingCore(key string) {
 	defer func() {
 		if exception := recover(); exception != nil {
-			fmt.Printf("redismq polligCore 异常 panic error:%s\n", exception)
+			fmt.Printf("Redismq polligCore panic error:%s\n", exception)
 			return
 		}
 	}()
@@ -62,7 +62,7 @@ func pollingCore(key string) {
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("redismq polligCore error:%s\n", err)
+			fmt.Printf("Redismq polligCore error:%s\n", err)
 		}
 	}(client)
 	result, err := client.ZRangeByScore(context.Background(), key, &redis.ZRangeBy{
@@ -75,11 +75,11 @@ func pollingCore(key string) {
 		return
 	}
 	if len(result) == 0 {
-		fmt.Printf("redismq 延时队列[%s]没有过期节点\n", MQ_DELAY_QUEUE_NAME)
+		fmt.Printf("Redismq Delay Queue[%s] No Queue\n", MQ_DELAY_QUEUE_NAME)
 		return
 	}
 	for _, messageJson := range result {
-		fmt.Printf("redismq 从延时队列移除节点[%s]\n", messageJson)
+		fmt.Printf("Redismq Delete From Delay Queue[%s]\n", messageJson)
 		var message *Message
 
 		// 使用 gjson.Unmarshal 将 JSON 字符串解析成结构体
@@ -92,7 +92,7 @@ func pollingCore(key string) {
 		message.StartDeliverTime = 0
 		message.MessageId = ""
 		send, err := sendMessage(message, "DelayQueue")
-		fmt.Printf("redismq 从延时队列移除节点,并发送消息[%v], error:[%s]\n", send, err)
+		fmt.Printf("Redismq Delete From Delay Queue,And Send[%v], error:[%s]\n", send, err)
 	}
 }
 
@@ -102,7 +102,7 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("redismq SendDelay error:%s\n", err)
+			fmt.Printf("Redismq SendDelay error:%s\n", err)
 		}
 	}(client)
 	messageJson, err := gjson.Marshal(message)
@@ -118,6 +118,6 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("SendDelay exception:%s message:%v\n", err.Error(), message))
 	}
-	fmt.Printf("redismq 向延时队列投放任务,队列名称[%s],任务[%s],score[%d],result[%v]\n", MQ_DELAY_QUEUE_NAME, messageJson, score, result)
+	fmt.Printf("Redismq Push To Deplay Queue,Name[%s],Task[%s],Score[%d],Result[%v]\n", MQ_DELAY_QUEUE_NAME, messageJson, score, result)
 	return true, nil
 }

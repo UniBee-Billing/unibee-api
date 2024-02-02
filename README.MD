@@ -1,54 +1,32 @@
-# GoFrame Template For oversea-pay
+# GoFrame Template For UniBee Recurring Payment Project
 
-#### 日常开发环境地址：https://daily.hknet-inc.com/gooverseapay/swagger
+### Env Stage 
 
-##### Mock-Controller 模拟 OpenApi 测试使用
+#### Api Doc：http://unibee.top/unibee/swagger
 
-##### Open-Controller OpenApi 接口-需 token 调用
+#### Stage Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
 
-### 本地开发
+##### Mock-Controller Mock One Time Payment OpenApi (Test)
 
-#### 设置私有库： go env -w GOPRIVATE=gitlab.hknet-inc.com
+##### Open-Controller OpenApi (Token Need)
 
-#### 本地环境运行，添加 Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
+### Env Local
 
-##### go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=43.207.114.88
+#### Local Run Add Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 
-[//]: # "打包上传：gf docker -tn heiku_gooverseapay:daily -p"
+##### ex: go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 
-#### 生成 api 代码：sh generate_ctrl.sh
+#### Generate API Controller Shell：sh generate_ctrl.sh
 
-#### 生成 dao 代码：sh generale_dao.sh
+#### Generate DAO Code Shell：sh generale_dao.sh
 
-#### 打包上传：sh buildAndPush.sh
 
-#### 数据库账号
-
-#### 地址: frps.hknet-inc.com
-
-#### 端口: 7111
-
-#### 账号: gooverseapay
-
-#### 密码: 1lc3BhY2UiOiJrdWJlcm5
-
-#### create user 'gooverseapay'@'%' identified with mysql_native_password by '1lc3BhY2UiOiJrdWJlcm5';
-
-#### GRANT ALL ON gooversea_pay.\* TO 'gooverseapay'@'%';
-
-#### GRANT ALL ON xin.\* TO 'gooverseapay'@'%';
-
-#### FLUSH PRIVILEGES;
-
-#### AWS 开发环境
-
-https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
-
+### Mark
 Quick Start:
 
 - https://goframe.org/pages/viewpage.action?pageId=1114399
-- goland api 自动生成配置 https://goframe.org/pages/viewpage.action?pageId=93880327
-- gf gen dao https://goframe.org/pages/viewpage.action?pageId=3673173 因 数据库 default 配置问题 执行之前先删除根目录下 config.yaml
+- goland api generate https://goframe.org/pages/viewpage.action?pageId=93880327
+- gf gen dao https://goframe.org/pages/viewpage.action?pageId=3673173 need delete config.yaml under root dic
 
 mysql 集成
 
@@ -58,26 +36,71 @@ redis 集成
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-nacos 集成
-命令行参数
+Nacos Integration (Only In Stage-Publish Need Remove)
+Params
 --nacos-ip
 --nacos-port
 --nacos-namespace
 --nacos-group
 --nacos-data-id
-环境变量
+Env
 nacos.ip
 nacos.port
 nacos.namespace
 nacos.group
-<<<<<<< HEAD
 nacos.data.id
-日常 nacos 配置环境
-http://daily-local.wangqubi.cn/nacos/
-=======
-nacos.data.id
+Stage Nacos Web Manage
+http://43.207.114.88:30099/nacos
 
-> > > > > > > origin/main
-
-
+Next Integration
 https://openapi-generator.tech/docs/generators/
+
+Basic Directory Structure
+The basic directory structure of the GoFrame business project is as follows (using the Single Repo as an example) :
+
+/
+├── api
+├── hack
+├── internal
+│   ├── cmd
+│   ├── consts
+│   ├── controller
+│   ├── dao
+│   ├── logic
+│   ├── model
+│   |   ├── do
+│   │   └── entity
+│   └── service
+├── manifest
+├── resource
+├── utility
+├── go.mod
+└── main.go
+🔥 Important note 🔥 : The engineering catalog of the framework adopts a universal design to meet the needs of different complex business projects, but the actual project can be appropriate to increase or decrease the default catalog according to the needs of the project. For example, if no i18n/template/protobuf requirement is required, delete the corresponding directory. For example, for very simple business projects (such as verification/demonstration projects), do not consider the use of rigorous dao/logic/model directory and features, then directly delete the corresponding directory, you can directly implement the business logic in the controller. Everything can be flexibly assembled by the developer!
+
+api External interface Defines the input/output data structure of the service provided externally. Considering the need for version management, api/xxx/v1... Exists.
+hack tool scripts Store project development tools and scripts. For example, the configuration of CLI tools, various shell/bat scripts and other files.
+internal Internal logic Directory for storing service logic. Hide visibility from the outside through the Golang internal feature.
+- cmd CLI manages the directory. Multiple command lines can be managed and maintained.
+- consts
+  Constant definition
+
+All constant definitions for the project.
+
+- controller Indicates the interface layer that receives and parses user input parameters.
+- dao
+
+Data Access Data access objects, a layer of abstract objects used to interact with the underlying database, contain only the most basic CURD methods
+- logic Service encapsulation Service logic encapsulation management, specific service logic implementation and encapsulation. Is often the most complex part of a project.
+- model structure Model data structure management module, manage data entity objects, and input and output data structure definitions.
+  -do domain objects are used to transform the service model and instance model in dao data operations. They are maintained by the tool and cannot be modified by users.
+- entity Data model A data model is a one-to-one relationship between a model and a data set. It is maintained by the tool and cannot be modified by users.
+- service Service interface Indicates the interface definition layer for decoupling service modules. The specific interface implementation is injected in logic.
+  The manifest delivery list contains the files that compile, deploy, run, and configure the program. Common contents are as follows:
+- config Indicates the directory for storing configuration files.
+- docker image file Docker image related dependency files, script files, and so on.
+- deploy deployment file Specifies the deployment file. Yaml templates for clustered deployment of Kubernetes are provided by default, managed through kustomize.
+- protobuf protocol file Specifies the protocol definition file for the GRPC protocol. After the protocol file is compiled, a go file is generated and stored in the api directory.
+  resource Static resource Static resource file. These files can often be injected into a release file in the form of resource packaging/image compilation.
+  Go.mod Dependency Management A dependency description file managed using the Go Module package.
+  main.go entry file Program entry file.
