@@ -10,10 +10,12 @@ import (
 	"go-oversea-pay/api/merchant/auth"
 	"go-oversea-pay/api/merchant/balance"
 	"go-oversea-pay/api/merchant/invoice"
+	"go-oversea-pay/api/merchant/merchantinfo"
 	"go-oversea-pay/api/merchant/oss"
 	"go-oversea-pay/api/merchant/payment"
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/api/merchant/profile"
+	"go-oversea-pay/api/merchant/search"
 	"go-oversea-pay/api/merchant/subscription"
 	"go-oversea-pay/api/merchant/user"
 	"go-oversea-pay/api/merchant/vat"
@@ -45,6 +47,11 @@ type IMerchantInvoice interface {
 	NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error)
 }
 
+type IMerchantMerchantinfo interface {
+	MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error)
+	MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error)
+}
+
 type IMerchantOss interface {
 	FileUpload(ctx context.Context, req *oss.FileUploadReq) (res *oss.FileUploadRes, err error)
 }
@@ -72,6 +79,10 @@ type IMerchantProfile interface {
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 }
 
+type IMerchantSearch interface {
+	Search(ctx context.Context, req *search.SearchReq) (res *search.SearchRes, err error)
+}
+
 type IMerchantSubscription interface {
 	SubscriptionDetail(ctx context.Context, req *subscription.SubscriptionDetailReq) (res *subscription.SubscriptionDetailRes, err error)
 	SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error)
@@ -92,7 +103,7 @@ type IMerchantSubscription interface {
 
 type IMerchantUser interface {
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
-	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
+	Get(ctx context.Context, req *user.GetReq) (res *user.GetRes, err error)
 	UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error)
 }
 

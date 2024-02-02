@@ -20,25 +20,25 @@ type MerchantInfoDao struct {
 
 // MerchantInfoColumns defines and stores column names for table merchant_info.
 type MerchantInfoColumns struct {
-	Id          string // 用户的ID
-	CompanyId   string // 公司ID
-	UserId      string // 用户ID
-	Type        string // 类型，0-个人，1-企业
-	CompanyName string // 公司名称
+	Id          string // merchant_id
+	CompanyId   string // company_id
+	UserId      string // create_user_id
+	Type        string // type
+	CompanyName string // company_name
 	Email       string // email
-	BusinessNum string // 税号
-	Name        string // 个人或法人姓名
-	Idcard      string // 个人或法人身份证号
-	Location    string // 省市区地址
-	Address     string // 详细地址
+	BusinessNum string // business_num
+	Name        string // name
+	Idcard      string // idcard
+	Location    string // location
+	Address     string // address
 	GmtCreate   string // create time
-	GmtModify   string // 修改时间
+	GmtModify   string // update_time
 	IsDeleted   string // 0-UnDeleted，1-Deleted
-	CompanyLogo string // 账号头像
+	CompanyLogo string // company_logo
 	HomeUrl     string //
-	FirstName   string //
-	LastName    string //
-	Phone       string //
+	FirstName   string // first_name
+	LastName    string // last_name
+	Phone       string // phone
 }
 
 // merchantInfoColumns holds the columns for table merchant_info.

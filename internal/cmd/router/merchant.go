@@ -106,3 +106,19 @@ func MerchantUser(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantInfo(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/merchant_info", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewMerchantinfo(),
+		)
+	})
+}
+
+func MerchantSearch(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/search", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewSearch(),
+		)
+	})
+}

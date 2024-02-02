@@ -74,3 +74,15 @@ func NewUser() merchant.IMerchantUser {
 	return &ControllerUser{}
 }
 
+type ControllerSearch struct{}
+
+func NewSearch() merchant.IMerchantSearch {
+	return &ControllerSearch{}
+}
+
+type ControllerMerchantinfo struct{}
+
+func NewMerchantinfo() merchant.IMerchantMerchantinfo {
+	return &ControllerMerchantinfo{}
+}
+

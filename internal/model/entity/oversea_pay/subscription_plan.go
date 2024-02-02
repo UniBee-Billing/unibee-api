@@ -21,7 +21,6 @@ type SubscriptionPlan struct {
 	IntervalUnit              string      `json:"intervalUnit"              description:"周期-全小写存放,day|month|year|week"`                                                       // 周期-全小写存放,day|month|year|week
 	IntervalCount             int         `json:"intervalCount"             description:"订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）"` // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               string      `json:"description"               description:""`                                                                                   //
-	IsDeleted                 int         `json:"isDeleted"                 description:"0-UnDeleted，1-Deleted"`                                                              // 0-UnDeleted，1-Deleted
 	ImageUrl                  string      `json:"imageUrl"                  description:"image_url"`                                                                          // image_url
 	HomeUrl                   string      `json:"homeUrl"                   description:"home_url"`                                                                           // home_url
 	ChannelProductName        string      `json:"channelProductName"        description:"支付渠道product_name"`                                                                   // 支付渠道product_name
@@ -30,6 +29,7 @@ type SubscriptionPlan struct {
 	TaxInclusive              int         `json:"taxInclusive"              description:"税费是否包含，1-包含，0-不包含"`                                                                  // 税费是否包含，1-包含，0-不包含
 	Type                      int         `json:"type"                      description:"类型，1-main plan，2-addon plan"`                                                        // 类型，1-main plan，2-addon plan
 	Status                    int         `json:"status"                    description:"状态，1-编辑中，2-活跃，3-非活跃，4-过期"`                                                           // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
+	IsDeleted                 int         `json:"isDeleted"                 description:"0-UnDeleted，1-Deleted"`                                                              // 0-UnDeleted，1-Deleted
 	BindingAddonIds           string      `json:"bindingAddonIds"           description:"绑定的 Addon PlanIds，以逗号隔开"`                                                            // 绑定的 Addon PlanIds，以逗号隔开
 	PublishStatus             int         `json:"publishStatus"             description:"1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示"`                                       // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
 }

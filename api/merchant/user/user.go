@@ -26,14 +26,13 @@ type ListRes struct {
 	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
 }
 
-type SearchReq struct {
-	g.Meta     `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
+type GetReq struct {
+	g.Meta `path:"/get_user_profile" tags:"Merchant-User-Controller" method:"get" summary:"Get User Profile"`
+	UserId int64 `p:"userId" dc:"UserId" `
 }
 
-type SearchRes struct {
-	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
+type GetRes struct {
+	User *entity.UserAccount `p:"user" dc:"User"`
 }
 
 type UserProfileUpdateReq struct {
@@ -47,8 +46,8 @@ type UserProfileUpdateReq struct {
 	VATNumber       string `p:"vATNumber" dc:"VAT Number"`
 	Phone           string `p:"phone" dc:"Phone"`
 	Telegram        string `p:"telegram" dc:"Telegram"`
-	WhatsApp        string `p:"WhatsApp" dc:"WhatsApp"`
-	WeChat          string `p:"WeChat" dc:"WeChat"`
+	WhatsApp        string `p:"whatsApp" dc:"WhatsApp"`
+	WeChat          string `p:"weChat" dc:"WeChat"`
 	LinkedIn        string `p:"LinkedIn" dc:"LinkedIn"`
 	Facebook        string `p:"facebook" dc:"Facebook"`
 	TikTok          string `p:"tiktok" dc:"Tiktok"`
@@ -56,8 +55,6 @@ type UserProfileUpdateReq struct {
 	PaymentMethod   string `p:"paymentMethod" dc:"Payment Method"`
 	CountryCode     string `p:"countryCode" dc:"Country Code" v:"required"`
 	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
-	// Email string `p:"email" dc:"email" v:"required"`
-	// Password  string `p:"password" dc:"password" v:"required"`
 }
 
 // with token to be implemented in the future

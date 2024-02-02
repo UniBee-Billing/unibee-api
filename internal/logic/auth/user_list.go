@@ -4,7 +4,6 @@ import (
 	"context"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"strings"
 )
@@ -87,23 +86,23 @@ func SearchUser(ctx context.Context, searchKey string) (list []*entity.UserAccou
 		Order(sortKey).
 		Limit(0, 10).
 		OmitEmpty().Scan(&mainList)
-	if len(mainList) < 10 {
-		//继续查 InvoiceId 和 PaymentId
-		invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
-		if invoice != nil && invoice.UserId > 0 {
-			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
-			if user != nil {
-				mainList = append(mainList, user)
-			}
-		}
-		payment := query.GetPaymentByPaymentId(ctx, searchKey)
-		if payment != nil && payment.UserId > 0 {
-			user := query.GetUserAccountById(ctx, uint64(payment.UserId))
-			if user != nil {
-				mainList = append(mainList, user)
-			}
-		}
-	}
+	//if len(mainList) < 10 {
+	//	//继续查 InvoiceId 和 PaymentId
+	//	invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
+	//	if invoice != nil && invoice.UserId > 0 {
+	//		user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
+	//		if user != nil {
+	//			mainList = append(mainList, user)
+	//		}
+	//	}
+	//	payment := query.GetPaymentByPaymentId(ctx, searchKey)
+	//	if payment != nil && payment.UserId > 0 {
+	//		user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+	//		if user != nil {
+	//			mainList = append(mainList, user)
+	//		}
+	//	}
+	//}
 	if len(mainList) < 10 {
 		//模糊查询
 		var likeList []*entity.UserAccount

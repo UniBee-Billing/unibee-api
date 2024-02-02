@@ -31,7 +31,6 @@ type SubscriptionPlanColumns struct {
 	IntervalUnit              string // 周期-全小写存放,day|month|year|week
 	IntervalCount             string // 订阅计费之间的间隔数。例如，每 3 个月interval=month计费一次interval_count=3。允许的最长间隔为一年（1 年、12 个月或 52 周）
 	Description               string //
-	IsDeleted                 string // 0-UnDeleted，1-Deleted
 	ImageUrl                  string // image_url
 	HomeUrl                   string // home_url
 	ChannelProductName        string // 支付渠道product_name
@@ -40,6 +39,7 @@ type SubscriptionPlanColumns struct {
 	TaxInclusive              string // 税费是否包含，1-包含，0-不包含
 	Type                      string // 类型，1-main plan，2-addon plan
 	Status                    string // 状态，1-编辑中，2-活跃，3-非活跃，4-过期
+	IsDeleted                 string // 0-UnDeleted，1-Deleted
 	BindingAddonIds           string // 绑定的 Addon PlanIds，以逗号隔开
 	PublishStatus             string // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
 }
@@ -57,7 +57,6 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	IntervalUnit:              "interval_unit",
 	IntervalCount:             "interval_count",
 	Description:               "description",
-	IsDeleted:                 "is_deleted",
 	ImageUrl:                  "image_url",
 	HomeUrl:                   "home_url",
 	ChannelProductName:        "channel_product_name",
@@ -66,6 +65,7 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	TaxInclusive:              "tax_inclusive",
 	Type:                      "type",
 	Status:                    "status",
+	IsDeleted:                 "is_deleted",
 	BindingAddonIds:           "binding_addon_ids",
 	PublishStatus:             "publish_status",
 }
