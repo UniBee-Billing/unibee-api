@@ -35,6 +35,16 @@ type GetRes struct {
 	User *entity.UserAccount `p:"user" dc:"User"`
 }
 
+type SearchReq struct {
+	g.Meta     `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
+}
+
+type SearchRes struct {
+	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
+}
+
 type UserProfileUpdateReq struct {
 	g.Meta          `path:"/update_user_profile" tags:"Merchant-User-Controller" method:"post" summary:"Update User Profile"`
 	UserId          uint64 `p:"userId" dc:"User Id" v:"required"`
