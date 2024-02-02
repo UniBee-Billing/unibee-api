@@ -368,7 +368,7 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 		NoAck:    true,
 	}).Result()
 	if err != nil {
-		fmt.Printf("MQStream blockReceiveConsumerMessage streamName=%s exception=%s\n", streamName, err)
+		fmt.Printf("MQStream blockReceiveConsumerMessage streamName=%s err=%s\n", streamName, err.Error())
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {
