@@ -236,12 +236,12 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 
-			//err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
-			//if err != nil {
-			//	g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
-			//	r.Response.WriteHeader(http.StatusBadRequest)
-			//	responseBack = http.StatusBadRequest
-			//}
+			err = s.processRefundWebhook(r.Context(), string(event.Type), stripeRefund, payChannel)
+			if err != nil {
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			}
 		}
 	case "checkout.session.completed":
 		var stripeCheckoutSession stripe.CheckoutSession
