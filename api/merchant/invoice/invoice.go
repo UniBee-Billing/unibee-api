@@ -98,6 +98,7 @@ type CancelProcessingInvoiceRes struct {
 type NewInvoiceRefundReq struct {
 	g.Meta       `path:"/new_invoice_refund" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create Refund From Invoice"`
 	InvoiceId    string `p:"invoiceId" dc:"InvoiceId" v:"required"`
+	RefundNo     string `p:"refundNo" dc:"RefundNo" v:"required"`
 	RefundAmount int64  `p:"refundAmount" dc:"Refund Amount" v:"required"`
 	Reason       string `p:"reason" dc:"Refund Reason" v:"required"`
 }

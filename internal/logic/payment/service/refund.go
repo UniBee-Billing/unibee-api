@@ -56,7 +56,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		BizId:     req.MerchantRefundId,
 		BizType:   bizType,
 	}).OmitEmpty().Scan(&one)
-	utility.Assert(err == nil && one == nil, "duplicate reference call")
+	utility.Assert(err == nil && one == nil, "duplicate refundNo")
 
 	one = &entity.Refund{
 		CompanyId:     payment.CompanyId,

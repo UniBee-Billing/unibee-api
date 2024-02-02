@@ -335,7 +335,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	refund, err := service.DoChannelRefund(ctx, payment.BizType, &v1.RefundsReq{
 		PaymentId:        one.PaymentId,
 		MerchantId:       one.MerchantId,
-		MerchantRefundId: one.InvoiceId,
+		MerchantRefundId: req.RefundNo,
 		Reason:           req.Reason,
 		Amount: &v1.PayAmountVo{
 			Currency: one.Currency,
