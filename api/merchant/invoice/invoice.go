@@ -46,6 +46,7 @@ type NewInvoiceCreateReq struct {
 	Currency   string                 `p:"currency"   dc:"Currency" v:"required" `
 	Name       string                 `p:"name"   dc:"Name" `
 	Lines      []*NewInvoiceItemParam `p:"lines"              `
+	Finish     bool                   `p:"finish" `
 }
 
 type NewInvoiceItemParam struct {
@@ -66,6 +67,7 @@ type NewInvoiceEditReq struct {
 	Currency  string                 `p:"currency"   dc:"Currency" `
 	Name      string                 `p:"name"   dc:"Name" `
 	Lines     []*NewInvoiceItemParam `p:"lines"              `
+	Finish    bool                   `p:"finish" `
 }
 type NewInvoiceEditRes struct {
 	Invoice *ro.InvoiceDetailRo `json:"invoice" `

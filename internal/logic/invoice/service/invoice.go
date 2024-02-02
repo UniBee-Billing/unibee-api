@@ -99,7 +99,17 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	one.Id = uint64(uint(id))
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
-
+	if req.Finish {
+		finishRes, err := FinishInvoice(ctx, &invoice.ProcessInvoiceForPayReq{
+			InvoiceId:   one.InvoiceId,
+			PayMethod:   2,
+			DaysUtilDue: 3,
+		})
+		if err != nil {
+			return nil, err
+		}
+		one = finishRes.Invoice
+	}
 	return &invoice.NewInvoiceCreateRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
 }
 
@@ -166,6 +176,17 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.TaxScale = req.TaxScale
 	one.ChannelId = req.ChannelId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
+	if req.Finish {
+		finishRes, err := FinishInvoice(ctx, &invoice.ProcessInvoiceForPayReq{
+			InvoiceId:   one.InvoiceId,
+			PayMethod:   2,
+			DaysUtilDue: 3,
+		})
+		if err != nil {
+			return nil, err
+		}
+		one = finishRes.Invoice
+	}
 	return &invoice.NewInvoiceEditRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
 }
 
@@ -280,8 +301,8 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 			Gender:    user.Gender,
 		},
 		MerchantOrderReference: one.InvoiceId,
-		PayMethod:              1, //automatic
-		DaysUtilDue:            5, //one day expire
+		PayMethod:              req.PayMethod,   //automatic
+		DaysUtilDue:            req.DaysUtilDue, //one day expire
 	}
 
 	createRes, err := service.DoChannelPay(ctx, createPayContext)
