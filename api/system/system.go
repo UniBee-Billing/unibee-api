@@ -20,6 +20,7 @@ type ISystemInvoice interface {
 
 type ISystemPayment interface {
 	BulkChannelSync(ctx context.Context, req *payment.BulkChannelSyncReq) (res *payment.BulkChannelSyncRes, err error)
+	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
 }
 
 type ISystemRefund interface {

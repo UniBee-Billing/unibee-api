@@ -80,7 +80,10 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Upgrade")
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
-				utility.Assert(strings.Compare(pendingSubUpgrade.ChannelUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
+				if len(pendingSubDowngrade.ChannelUpdateId) > 0 {
+					utility.Assert(strings.Compare(pendingSubDowngrade.ChannelUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
+				}
+				utility.Assert(pendingSubDowngrade.UpdateAmount == payment.TotalAmount, "totalAmount not match")
 				// Downgrade
 				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId)
 				if err != nil {
@@ -92,7 +95,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
 				}
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 {
-				// SubscriptionCycle
+				// SubscriptionCycle todo mark add other filter
 				err := handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCycle")

@@ -70,6 +70,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 				}
 				if needGenerate {
 					var invoice *ro.InvoiceDetailSimplify
+					var billingReason = ""
 					pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 					if pendingUpdate != nil {
 						//generate PendingUpdate cycle invoice
@@ -88,6 +89,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 							PeriodStart:   nextPeriodStart,
 							PeriodEnd:     nextPeriodEnd,
 						})
+						billingReason = "SubscriptionDowngrade"
 					} else {
 						//generate cycle invoice from sub
 						plan := query.GetPlanById(ctx, sub.PlanId)
@@ -107,6 +109,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 							PeriodStart:   nextPeriodStart,
 							PeriodEnd:     nextPeriodEnd,
 						})
+						billingReason = "SubscriptionCycle"
 					}
 					user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 					var mobile = ""
@@ -145,7 +148,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 							CountryCode:     sub.CountryCode,
 							MerchantId:      sub.MerchantId,
 							CompanyId:       merchantInfo.CompanyId,
-							BillingReason:   "SubscriptionUpgrade",
+							BillingReason:   billingReason,
 						},
 						Platform:      "WEB",
 						DeviceType:    "Web",
@@ -159,7 +162,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 							LastName:  lastName,
 							Gender:    gender,
 						},
-						MediaData:              map[string]string{"BillingReason": "SubscriptionCycle"},
+						MediaData:              map[string]string{"BillingReason": billingReason},
 						MerchantOrderReference: sub.SubscriptionId,
 						PayMethod:              1, //automatic
 						DaysUtilDue:            5, // todo mark
