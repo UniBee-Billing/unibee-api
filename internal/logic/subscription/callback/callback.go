@@ -94,8 +94,8 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
 				}
-			} else if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 {
-				// SubscriptionCycle todo mark add other filter
+			} else if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 && sub.Amount == payment.TotalAmount && strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
+				// SubscriptionCycle
 				err := handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCycle")
