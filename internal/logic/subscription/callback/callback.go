@@ -9,6 +9,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/subscription/handler"
+	"go-oversea-pay/internal/logic/user"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -58,6 +59,7 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 			if err != nil {
 				utility.AssertError(err, "PaymentCreateCallback")
 			}
+			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
 		}
 	}
 }
@@ -110,6 +112,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				//todo mark
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
+			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
 		}
 	}
 }
