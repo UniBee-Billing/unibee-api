@@ -143,7 +143,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND payment_amount - refund_amount >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
+			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND total_amount - refund_amount >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
