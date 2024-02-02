@@ -56,17 +56,17 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			sortKey = req.SortField + " desc"
 		}
 	}
-
 	err := dao.SubscriptionPlan.Ctx(ctx).
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
 		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
 		Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
-		Where(dao.SubscriptionPlan.Columns().IsDeleted, 0).
+		WhereIn(dao.SubscriptionPlan.Columns().IsDeleted, []int{0}).
+		OmitEmpty().
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		Scan(&mainList)
 	if err != nil {
 		return nil
 	}
