@@ -56,6 +56,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			sortKey = req.SortField + " desc"
 		}
 	}
+
 	err := dao.SubscriptionPlan.Ctx(ctx).
 		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
