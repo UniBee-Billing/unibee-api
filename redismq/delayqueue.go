@@ -65,7 +65,8 @@ func pollingCore(key string) {
 			fmt.Printf("Redismq polligCore error:%s\n", err)
 		}
 	}(client)
-	result, err := client.ZRangeByScore(context.Background(), key, &redis.ZRangeBy{
+	ctx := context.Background()
+	result, err := client.ZRangeByScore(ctx, key, &redis.ZRangeBy{
 		Min:    "0",
 		Max:    strconv.FormatInt(utility.CurrentTimeMillis(), 10),
 		Offset: 0,
@@ -79,20 +80,21 @@ func pollingCore(key string) {
 		return
 	}
 	for _, messageJson := range result {
-		fmt.Printf("Redismq Delete From Delay Queue[%s]\n", messageJson)
 		var message *Message
-
 		// 使用 gjson.Unmarshal 将 JSON 字符串解析成结构体
-		err := gjson.Unmarshal([]byte(messageJson), &message) // Unmarshal todo mark 加上 &
+		err = gjson.Unmarshal([]byte(messageJson), &message) // Unmarshal todo mark 加上 &
 		if err != nil {
-			fmt.Printf("Error:%v\n", err)
-			return
+			fmt.Printf("Redismq Unmarshal Message Error:[%v]\n", err)
+			continue
 		}
-
-		message.StartDeliverTime = 0
-		message.MessageId = ""
-		send, err := sendMessage(message, "DelayQueue")
-		fmt.Printf("Redismq Delete From Delay Queue,And Send[%v], error:[%s]\n", send, err)
+		err = client.ZRem(ctx, key, messageJson).Err()
+		if err == nil {
+			fmt.Printf("Redismq Delete From Delay Queue[%s]\n", messageJson)
+			message.StartDeliverTime = 0
+			message.MessageId = ""
+			send, sendErr := sendMessage(message, "DelayQueue")
+			fmt.Printf("Redismq Delete From Delay Queue,And Send[%v], Error:[%s] SendErr:[%s]\n", send, err, sendErr)
+		}
 	}
 }
 
