@@ -6,11 +6,11 @@ import (
 )
 
 type Config struct {
-	Env           string        `yaml:"env"`
-	RedisMqConfig RedisMqConfig `yaml:"redismq"`
-	MinioConfig   MinioConfig   `yaml:"minio"`
-	Server        Server        `yaml:"server"`
-	Auth          Auth          `yaml:"auth"`
+	Env         string      `yaml:"env"`
+	RedisConfig RedisConfig `yaml:"redis"`
+	MinioConfig MinioConfig `yaml:"minio"`
+	Server      Server      `yaml:"server"`
+	Auth        Auth        `yaml:"auth"`
 }
 
 type Server struct {
@@ -19,7 +19,11 @@ type Server struct {
 	DomainPath string `yaml:"domainPath"`
 }
 
-type RedisMqConfig struct {
+type RedisConfig struct {
+	Default RedisConfigDetail `yaml:"default"`
+}
+
+type RedisConfigDetail struct {
 	Address string `yaml:"address"`
 	DB      int    `yaml:"db"`
 	Pass    string `yaml:"pass"`

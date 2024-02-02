@@ -37,14 +37,14 @@ var (
 				//)
 			})
 
-			//s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
-			//	group.Middleware(
-			//		_interface.Middleware().ResponseHandler,
-			//		// _interface.Middleware().PreOpenApiAuth,
-			//	)
-			//	router.OpenPayment(ctx, group) //开放平台接口
-			// router.OpenMocks(ctx, group) //Out本地测试用Mock接口
-			//})
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreOpenApiAuth,
+				)
+				router.OpenPayment(ctx, group) //开放平台接口
+				router.OpenMocks(ctx, group)   //Out本地测试用Mock接口
+			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
