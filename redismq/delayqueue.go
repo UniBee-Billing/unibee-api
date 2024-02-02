@@ -94,6 +94,8 @@ func pollingCore(key string) {
 			message.MessageId = ""
 			send, sendErr := sendMessage(message, "DelayQueue")
 			fmt.Printf("Redismq Delete From Delay Queue,And Send[%v], Error:[%s] SendErr:[%s]\n", send, err, sendErr)
+		} else {
+			fmt.Printf("Redismq Delete From Delay Queue[%s] Err:[%s]\n", messageJson, err)
 		}
 	}
 }
