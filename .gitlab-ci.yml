@@ -19,7 +19,6 @@ build:
   script:
     - ls -al /data/
     - go env -w GOPROXY=https://goproxy.cn,direct
-#    - go env -w GOPRIVATE='gitlab.hknet-inc.com'
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x temp/linux_amd64/main
