@@ -109,7 +109,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	if len(totalAddonIds) > 0 {
 		//主 Plan 查询 addons
 		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).Scan(&allAddonList)
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//整合进列表
 			mapPlans := make(map[int64]*entity.SubscriptionPlan)
@@ -131,7 +131,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	}
 	//添加 Channel 信息
 	var allPlanChannelList []*entity.ChannelPlan
-	err = dao.ChannelPlan.Ctx(ctx).WhereIn(dao.ChannelPlan.Columns().PlanId, totalPlanIds).Scan(&allPlanChannelList)
+	err = dao.ChannelPlan.Ctx(ctx).WhereIn(dao.ChannelPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
 	if err == nil {
 		for _, planChannel := range allPlanChannelList {
 			for _, planRo := range list {

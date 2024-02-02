@@ -21,7 +21,8 @@ func merchantCheck(ctx context.Context, merchantAccount int64) (apiconfig *entit
 	openApiConfig := _interface.BizCtx().Get(ctx).OpenApiConfig
 	utility.Assert(openApiConfig != nil, "api config not found")
 	utility.Assert(openApiConfig.MerchantId == merchantAccount, "api config not found")
-	err := dao.MerchantInfo.Ctx(ctx).Where(entity.MerchantInfo{Id: openApiConfig.MerchantId}).OmitNil().Scan(&res)
+	utility.Assert(openApiConfig.MerchantId > 0, "api config not found")
+	err := dao.MerchantInfo.Ctx(ctx).Where(entity.MerchantInfo{Id: openApiConfig.MerchantId}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return openApiConfig, res
 	}

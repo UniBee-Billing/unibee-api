@@ -140,7 +140,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if len(totalPlanIds) > 0 {
 		//查询所有 Plan
 		var allPlanList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalPlanIds).Scan(&allPlanList)
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalPlanIds).OmitEmpty().Scan(&allPlanList)
 		if err == nil {
 			//整合进列表
 			mapPlans := make(map[int64]*entity.SubscriptionPlan)

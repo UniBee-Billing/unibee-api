@@ -155,7 +155,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 	var allAddonList []*entity.SubscriptionPlan
 	if len(totalAddonIds) > 0 {
 		//查询所有 Plan
-		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).Scan(&allAddonList)
+		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//整合进列表
 			mapPlans := make(map[int64]*entity.SubscriptionPlan)

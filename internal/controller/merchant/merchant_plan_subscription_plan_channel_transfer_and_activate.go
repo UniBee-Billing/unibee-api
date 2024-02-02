@@ -60,7 +60,7 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		}
 		//检查 addonIds 类型
 		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIds).Scan(&allAddonList)
+		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
 				//发布 addonPlan
