@@ -72,6 +72,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		CountryCode:   payment.CountryCode,
 		RefundComment: req.Reason,
 		OpenApiId:     openApiId,
+		UserId:        payment.UserId,
 		//AdditionalData: req.
 		//RefundComment: payBizTypeEnum.getDesc() +"退款",
 

@@ -32,6 +32,7 @@ const (
 	TemplateSubscriptionImmediateCancel                     = "SubscriptionImmediateCancel"
 	TemplateSubscriptionUpdate                              = "SubscriptionUpdate"
 	TemplateSubscriptionNeedAuthorized                      = "SubscriptionNeedAuthorized"
+	TemplateInvoiceRefundCreated                            = "InvoiceRefundCreated"
 )
 
 const SG_KEY = "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"
@@ -115,6 +116,7 @@ type TemplateVariable struct {
 	MerchantName        string `json:"Merchant Name"`
 	DateNow             string `json:"DateNow"`
 	PaymentAmount       string `json:"Payment Amount"`
+	RefundAmount        string `json:"Refund Amount"`
 	Currency            string `json:"Currency"`
 	TokenExpireMinute   string `json:"TokenExpireMinute"`
 	CodeExpireMinute    string `json:"CodeExpireMinute"`

@@ -12,6 +12,7 @@ import (
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/out"
 	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	"go-oversea-pay/internal/logic/payment/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -367,5 +368,22 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	if err != nil {
 		return nil, err
 	}
+	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+	if user != nil {
+		merchant := query.GetMerchantInfoById(ctx, payment.MerchantId)
+		if merchant != nil {
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
+				UserName:            user.FirstName + " " + user.LastName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        merchant.Name,
+				PaymentAmount:       utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
+				Currency:            strings.ToUpper(refund.Currency),
+			})
+			if err != nil {
+				fmt.Printf("CreateInvoiceRefund SendTemplateEmail err:%s", err.Error())
+			}
+		}
+	}
+
 	return refund, nil
 }
