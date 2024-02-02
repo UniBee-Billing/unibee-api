@@ -62,6 +62,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
 		Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
+		Where(dao.SubscriptionPlan.Columns().IsDeleted, 0).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
