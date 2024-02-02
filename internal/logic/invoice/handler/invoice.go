@@ -205,14 +205,14 @@ func SubscriptionInvoicePdfGenerateAndEmailSendBackground(invoiceId string, send
 			}
 		}
 		if sendUserEmail {
-			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
+			err := SendSubscriptionInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()
 	return nil
 }
 
-func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
+func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.UserId > 0, "invoice userId not found")
@@ -270,14 +270,14 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 			dao.Invoice.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+			fmt.Printf("SendSubscriptionInvoiceEmailToUser update err:%s", err.Error())
 		}
 		//rowAffected, err := update.RowsAffected()
 		//if rowAffected != 1 {
-		//	fmt.Printf("SendInvoiceEmailToUser update err:%s", update)
+		//	fmt.Printf("SendSubscriptionInvoiceEmailToUser update err:%s", update)
 		//}
 	} else {
-		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
+		fmt.Printf("SendSubscriptionInvoiceEmailToUser invoice status is pending or init, email not send")
 	}
 	return nil
 }
