@@ -353,10 +353,11 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	utility.Assert(one.TotalAmount > req.RefundAmount, "not enough amount to refund")
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	utility.Assert(payment != nil, "payment not found")
 	refund, err := service.DoChannelRefund(ctx, payment.BizType, &v1.RefundsReq{
 		PaymentId:        one.PaymentId,
 		MerchantId:       one.MerchantId,
-		MerchantRefundId: req.RefundNo,
+		MerchantRefundId: fmt.Sprintf("%s-%S", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
 		Amount: &v1.PayAmountVo{
 			Currency: one.Currency,
