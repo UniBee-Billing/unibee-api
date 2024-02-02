@@ -71,7 +71,6 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 	for _, user := range mainList {
 		user.Password = ""
 	}
-
 	return &UserListInternalRes{UserAccounts: mainList}, nil
 }
 
