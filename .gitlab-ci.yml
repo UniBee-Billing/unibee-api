@@ -30,16 +30,9 @@ push:
   image: docker
   stage: push
   script:
-#    - apk add --no-cache curl jq python3 py3-pip
-#    - pip install awscli
     - mkdir -p temp/linux_amd64
     - cp /data/artifacts/main temp/linux_amd64/main
     - chmod +x temp/linux_amd64/main
-#    - docker rmi registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
-#    - docker build -f manifest/docker/Dockerfile -t registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily --platform linux/amd64 .
-#    - docker login --username=${ALIYUN_ACCOUNT} --password=${ALIYUN_PASSWORD} registry.cn-shenzhen.aliyuncs.com
-#    - docker push registry.cn-shenzhen.aliyuncs.com/heiku/heiku_gooverseapay:daily
-#    - docker rmi easzlab.io.local:5000/heiku/heiku_gooverseapay:daily
     - docker build -f manifest/docker/Dockerfile -t easzlab.io.local:5000/unibee/unibee-api:daily --platform linux/amd64 .
     - docker push easzlab.io.local:5000/unibee/unibee-api:daily
 
@@ -50,5 +43,3 @@ deploy:
   stage: deploy
   script:
     - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
-#    - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout status deployment/yd-unib-server-daily
-#    - kubectl --kubeconfig /data/kubeconfigs/frps_local_configs rollout restart deployment/yd-gooverseapay-daily
