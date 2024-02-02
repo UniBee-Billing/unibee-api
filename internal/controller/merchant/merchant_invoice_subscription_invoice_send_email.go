@@ -17,7 +17,7 @@ func (c *ControllerInvoice) SubscriptionInvoiceSendEmail(ctx context.Context, re
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
-	err = handler.SendInvoiceEmailToUser(ctx, req.InvoiceId)
+	err = handler.SendSubscriptionInvoiceEmailToUser(ctx, req.InvoiceId)
 	if err != nil {
 		return nil, err
 	}
