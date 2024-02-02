@@ -28,11 +28,11 @@ Quick Start:
 - goland api generate https://goframe.org/pages/viewpage.action?pageId=93880327
 - gf gen dao https://goframe.org/pages/viewpage.action?pageId=3673173 need delete config.yaml under root dic
 
-mysql 集成
+mysql Integration
 
 - \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-redis 集成
+redis Integration
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
