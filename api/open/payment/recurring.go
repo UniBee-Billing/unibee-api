@@ -3,13 +3,13 @@ package payment
 import "github.com/gogf/gf/v2/frame/g"
 
 type DisableRecurringDetailsReq struct {
-	g.Meta `path:"/disableRecurringDetails" tags:"Open-Payment-Controller" method:"post" summary:"1.7 终⽌账户绑定信息(仅Klarna支持）"`
+	g.Meta `path:"/disableRecurringDetails" tags:"Open-Payment-Controller" method:"post" summary:"Disable Recurring Details (Support Klarna）"`
 }
 type DisableRecurringDetailsRes struct {
 }
 
 type ListRecurringDetailsReq struct {
-	g.Meta `path:"/listRecurringDetails" tags:"Open-Payment-Controller" method:"post" summary:"1.6 查询绑定账户信息(仅Klarna支持）"`
+	g.Meta `path:"/listRecurringDetails" tags:"Open-Payment-Controller" method:"post" summary:"Query Recurring Detail List (Support Klarna）"`
 }
 type ListRecurringDetailsRes struct {
 }

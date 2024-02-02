@@ -17,12 +17,12 @@ func (c *ControllerMock) Capture(ctx context.Context, req *mock.CaptureReq) (res
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 	capturesReq := &v12.CapturesReq{
-		PaymentId:  req.PaymentId,
-		MerchantId: req.MerchantId,
-		Reference:  uuid.New().String(),
-		Amount: &v12.PayAmountVo{
+		PaymentId:         req.PaymentId,
+		MerchantId:        req.MerchantId,
+		MerchantCaptureId: uuid.New().String(),
+		Amount: &v12.AmountVo{
 			Currency: req.Currency,
-			Value:    req.Amount,
+			Amount:   req.Amount,
 		},
 	}
 	_, err = NewPayment().Captures(ctx, capturesReq)

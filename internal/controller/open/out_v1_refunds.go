@@ -12,7 +12,7 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 	utility.Assert(req != nil, "req should not be nil")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId should not be nil")
 	utility.Assert(req.Amount != nil, "Amount should not be nil")
-	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
+	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
 	utility.Assert(len(req.Amount.Currency) > 0, "refund currency should not be nil")
 	currencyNumberCheck(req.Amount)
 	//参数有效性校验 todo mark

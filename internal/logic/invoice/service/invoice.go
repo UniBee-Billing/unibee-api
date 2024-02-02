@@ -348,9 +348,9 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 		MerchantId:       one.MerchantId,
 		MerchantRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
-		Amount: &v1.PayAmountVo{
+		Amount: &v1.AmountVo{
 			Currency: one.Currency,
-			Value:    req.RefundAmount,
+			Amount:   req.RefundAmount,
 		},
 	}, 0)
 	if err != nil {

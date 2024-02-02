@@ -3,11 +3,11 @@ package mock
 import "github.com/gogf/gf/v2/frame/g"
 
 type CaptureReq struct {
-	g.Meta     `path:"/capture" tags:"Open-Mock-Controller" method:"post" summary:"1.3捕获支付单"`
-	PaymentId  string `p:"paymentId" dc:"平台支付单号" v:"required"`
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"商户号" v:"required长度为:{min}到:{max}位"`
-	Currency   string `p:"currency" dc:"currency 货币" d:"JPY" v:"required"`
-	Amount     int64  `p:"amount" dc:"amount 金额(需x100，对比RMB到分）" v:"required"`
+	g.Meta     `path:"/capture" tags:"Open-Mock-Controller" method:"post" summary:"Mock Capture Payment"`
+	PaymentId  string `p:"paymentId" dc:"PaymentId" v:"required"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	Currency   string `p:"currency" dc:"Currency" v:"required"`
+	Amount     int64  `p:"amount" dc:" Amount, Cent" v:"required"`
 }
 type CaptureRes struct {
 }

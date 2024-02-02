@@ -1,6 +1,6 @@
 package payment
 
-type PayAmountVo struct {
-	Currency string `json:"currency"   in:"query" dc:"币种"  v:"required"`
-	Value    int64  `json:"value"   in:"query" dc:"金额，单位分"  v:"required"`
+type AmountVo struct {
+	Currency string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Amount   int64  `json:"amount"   in:"query" dc:"Amount，Cent"  v:"required"`
 }

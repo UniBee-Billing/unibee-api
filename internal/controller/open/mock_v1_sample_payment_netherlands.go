@@ -17,9 +17,9 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 	outPayVo := &v12.PaymentsReq{
 		MerchantId:        req.MerchantId,
 		MerchantPaymentId: uuid.New().String(),
-		TotalAmount: &v12.PayAmountVo{
+		TotalAmount: &v12.AmountVo{
 			Currency: req.Currency,
-			Value:    req.Amount,
+			Amount:   req.Amount,
 		},
 		PaymentMethod: &v12.PaymentMethodsReq{
 			TokenId: "",
@@ -68,10 +68,10 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 		return nil, err
 	}
 	res = &mock.SamplePaymentNetherlandsRes{
-		Status:    payments.Status,
-		PaymentId: payments.PaymentId,
-		Reference: payments.Reference,
-		Action:    payments.Action,
+		Status:            payments.Status,
+		PaymentId:         payments.PaymentId,
+		MerchantPaymentId: payments.MerchantPaymentId,
+		Action:            payments.Action,
 	}
 	return
 }

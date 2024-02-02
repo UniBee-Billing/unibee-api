@@ -29,8 +29,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	payChannel := query.GetPayChannelById(ctx, payment.ChannelId)
 	utility.Assert(payChannel != nil, "channel not found")
 
-	utility.Assert(req.Amount.Value > 0, "refund value should > 0")
-	utility.Assert(req.Amount.Value <= payment.TotalAmount, "refund value should <= TotalAmount value")
+	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
+	utility.Assert(req.Amount.Amount <= payment.TotalAmount, "refund value should <= TotalAmount value")
 
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.MerchantRefundId)
 	isDuplicatedInvoke := false
@@ -64,7 +64,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		BizType:       bizType,
 		PaymentId:     payment.PaymentId,
 		RefundId:      utility.CreateRefundId(),
-		RefundAmount:  req.Amount.Value,
+		RefundAmount:  req.Amount.Amount,
 		Status:        consts.REFUND_ING,
 		ChannelId:     payment.ChannelId,
 		AppId:         payment.AppId,

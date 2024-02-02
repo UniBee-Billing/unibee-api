@@ -10,10 +10,10 @@ import (
 	"strings"
 )
 
-func currencyNumberCheck(amount *payment.PayAmountVo) {
+func currencyNumberCheck(amount *payment.AmountVo) {
 	utility.Assert(amount != nil, "amount is nil")
 	if strings.Compare(amount.Currency, "JPY") == 0 {
-		utility.Assert(amount.Value%100 == 0, "this currency No decimals allowed，made it divisible by 100")
+		utility.Assert(amount.Amount%100 == 0, "this currency No decimals allowed，made it divisible by 100")
 	}
 }
 

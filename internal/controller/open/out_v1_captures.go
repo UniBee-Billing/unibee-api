@@ -15,7 +15,7 @@ func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesR
 	one := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(one != nil, "payment not found")
 	utility.Assert(one.Currency == req.Amount.Currency, "Currency not match the payment")
-	one.PaymentAmount = req.Amount.Value
+	one.PaymentAmount = req.Amount.Amount
 	err = service.DoChannelCapture(ctx, one)
 	if err != nil {
 		return nil, err

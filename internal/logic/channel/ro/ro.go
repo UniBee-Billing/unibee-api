@@ -55,11 +55,11 @@ type CreatePayInternalResp struct {
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
 type OutPayCaptureRo struct {
-	MerchantId       string          `json:"merchantId"         `          // 商户ID
-	ChannelCaptureId string          `json:"channelCaptureId"            ` // 业务类型。1-订单
-	Reference        string          `json:"reference"              `      // 业务id-即商户订单号
-	Amount           *v1.PayAmountVo `json:"amount"`
-	Status           string          `json:"status"`
+	MerchantId       string       `json:"merchantId"         `          // 商户ID
+	ChannelCaptureId string       `json:"channelCaptureId"            ` // 业务类型。1-订单
+	Reference        string       `json:"reference"              `      // 业务id-即商户订单号
+	Amount           *v1.AmountVo `json:"amount"`
+	Status           string       `json:"status"`
 }
 
 // OutPayCancelRo is the golang structure for table oversea_pay.

@@ -16,7 +16,7 @@ import (
 func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsReq) (res *payment.PaymentsRes, err error) {
 	utility.Assert(req != nil, "request req is nil")
 	utility.Assert(req.TotalAmount != nil, "amount is nil")
-	utility.Assert(req.TotalAmount.Value > 0, "amount value is nil")
+	utility.Assert(req.TotalAmount.Amount > 0, "amount value is nil")
 	utility.Assert(len(req.TotalAmount.Currency) > 0, "amount currency is nil")
 	//类似日元的小数尾数必须为 0 检查
 	currencyNumberCheck(req.TotalAmount)
@@ -64,7 +64,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		Lines:                          invoiceItems,
 	}
 
-	utility.Assert(totalAmount == req.TotalAmount.Value, "totalAmount not match")
+	utility.Assert(totalAmount == req.TotalAmount.Amount, "totalAmount not match")
 
 	createPayContext := &ro.CreatePayContext{
 		OpenApiId:  int64(openApiConfig.Id),
@@ -73,7 +73,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 			BizId:             req.MerchantPaymentId,
 			BizType:           consts.BIZ_TYPE_ONE_TIME,
 			ChannelId:         int64(payChannel.Id),
-			TotalAmount:       req.TotalAmount.Value,
+			TotalAmount:       req.TotalAmount.Amount,
 			Currency:          req.TotalAmount.Currency,
 			CountryCode:       req.CountryCode,
 			MerchantId:        merchantInfo.Id,
@@ -93,7 +93,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		//ShippingDetails:          req.DetailAddress,
 		ShopperName:              req.ShopperName,
 		ShopperInteraction:       req.ShopperInteraction,
-		RecurringProcessingModel: req.RecurringProcessingModel,
+		RecurringProcessingModel: req.RecurringProcessingToken,
 		TokenId:                  req.PaymentMethod.TokenId,
 		MerchantOrderReference:   req.MerchantOrderReference,
 		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
@@ -104,10 +104,10 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	resp, err := service.DoChannelPay(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.PaymentsRes{
-		Status:    "Pending",
-		PaymentId: resp.PaymentId,
-		Reference: req.MerchantPaymentId,
-		Action:    resp.Action,
+		Status:            "Pending",
+		PaymentId:         resp.PaymentId,
+		MerchantPaymentId: req.MerchantPaymentId,
+		Action:            resp.Action,
 	}
 	return
 }

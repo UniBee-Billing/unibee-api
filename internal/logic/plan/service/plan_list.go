@@ -15,7 +15,7 @@ import (
 )
 
 type SubscriptionPlanListInternalReq struct {
-	MerchantId    int64  `p:"merchantId" d:"15621" dc:"MerchantId" v:"required"`
+	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	Type          int    `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
 	Status        int    `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int    `p:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `

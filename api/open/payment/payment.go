@@ -6,53 +6,53 @@ import (
 )
 
 type PaymentsReq struct {
-	g.Meta                   `path:"/create_payment" tags:"Open-Payment-Controller" method:"post" summary:"用于接收商户段的请求（包括 token 请求）"`
-	MerchantId               int64              `p:"merchantId" dc:"商户号" v:"required长度为:{min}到:{max}位"`
-	MerchantPaymentId        string             `p:"merchantPaymentId" dc:"merchantPaymentId" v:"required"`
-	TotalAmount              *PayAmountVo       `json:"totalAmount" dc:"具体金额" v:"required"`
-	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"支付方式" v:"required"`
-	RedirectUrl              string             `p:"redirectUrl" dc:"支付完成跳转地址" v:"required"`
+	g.Meta                   `path:"/create_payment" tags:"Open-Payment-Controller" method:"post" summary:"Payment Create"`
+	MerchantId               int64              `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantPaymentId        string             `p:"merchantPaymentId" dc:"MerchantPaymentId" v:"required"`
+	TotalAmount              *AmountVo          `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
+	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
+	RedirectUrl              string             `p:"redirectUrl" dc:"Redirect Url" v:"required"`
 	CountryCode              string             `p:"countryCode" dc:"CountryCode" v:"required"`
-	ShopperLocale            string             `p:"shopperLocale" dc:"语言en_US" v:"required"`
-	ShopperEmail             string             `p:"shopperEmail" dc:"用户邮箱" v:"required"`
-	ShopperUserId            string             `p:"shopperUserId" dc:"shopper唯一Id" v:"required"`
+	ShopperLocale            string             `p:"shopperLocale" dc:"Shopper Locale" v:"required"`
+	ShopperEmail             string             `p:"shopperEmail" dc:"Shopper Email" v:"required"`
+	ShopperUserId            string             `p:"shopperUserId" dc:"shopper Id, Unique" v:"required"`
 	LineItems                []*OutLineItem     `p:"lineItems" dc:"LineItems" v:"required"`
 	DeviceType               string             `p:"deviceType" dc:"DeviceType,Android|iOS|Web"`
 	Platform                 string             `p:"platform" dc:"Platform（WEB，WAP，APP, MINI, WALLET）"`
-	ShopperIP                string             `p:"shopperIP" dc:"用户ip（v4，v6）"`
+	ShopperIP                string             `p:"shopperIP" dc:"Shopper IP（v4，v6）"`
 	TelephoneNumber          string             `p:"telephoneNumber" dc:"TelephoneNumber"`
 	BrowserInfo              string             `p:"browserInfo" dc:"browserInfo" v:""`
-	ShopperInteraction       string             `p:"shopperInteraction" dc:"交易类型" v:""`
-	RecurringProcessingModel string             `p:"recurringProcessingModel" dc:"令牌类型" v:""`
+	ShopperInteraction       string             `p:"shopperInteraction" dc:"ShopperInteraction" v:""`
+	RecurringProcessingToken string             `p:"recurringProcessingToken" dc:"RecurringProcessingToken" v:""`
 	ShopperName              *OutShopperName    `p:"shopperName" dc:"shopperName" v:""`
 	//BillingAddress           *OutPayAddress     `p:"billingAddress" dc:"账单地址" v:""`
 	//DetailAddress            *OutPayAddress     `p:"detailAddress" dc:"邮寄地址" v:""`
-	Capture                bool              `p:"capture" dc:"是否立即请款" v:""`
-	CaptureDelayHours      int               `p:"captureDelayHours" dc:"请款延迟执⾏时间" v:""`
-	MerchantOrderReference string            `p:"merchantOrderReference" dc:"订单关联子交易码" v:""`
-	Metadata               map[string]string `p:"reference" dc:"预留字段，JSON结构" v:""`
-	DateOfBrith            string            `p:"dateOfBrith" dc:"生日，YYYY-MM-DD" v:""`
+	Capture                bool              `p:"capture" dc:"Capture Immediate" v:""`
+	CaptureDelayHours      int               `p:"captureDelayHours" dc:"Delay Capture Hours" v:""`
+	MerchantOrderReference string            `p:"merchantOrderReference" dc:"Deprecated" v:""`
+	Metadata               map[string]string `p:"reference" dc:"Metadata，Map" v:""`
+	DateOfBrith            string            `p:"dateOfBrith" dc:"DateOfBrith，Format YYYY-MM-DD" v:""`
 }
 type PaymentsRes struct {
-	Status    string      `p:"status" dc:"交易状态"`
-	PaymentId string      `p:"paymentId" dc:"系统交易唯一编码-平台订单号"`
-	Reference string      `p:"reference" dc:"商户订单号"`
-	Action    *gjson.Json `p:"action" dc:"action"`
+	Status            string      `p:"status" dc:"Status"`
+	PaymentId         string      `p:"paymentId" dc:"PaymentId"`
+	MerchantPaymentId string      `p:"merchantPaymentId" dc:"MerchantPaymentId"`
+	Action            *gjson.Json `p:"action" dc:"action"`
 }
 
 type OutShopperName struct {
-	FirstName string `p:"firstName" dc:"名" v:"required"`
-	LastName  string `p:"lastName" dc:"姓" v:"required"`
-	Gender    string `p:"gender" dc:"性别" v:"required"`
+	FirstName string `p:"firstName" dc:"First Name" v:"required"`
+	LastName  string `p:"lastName" dc:"Last Name" v:"required"`
+	Gender    string `p:"gender" dc:"Gender" v:"required"`
 }
 
 type OutPayAddress struct {
-	City              string `p:"city" dc:"城市" v:"required"`
-	Country           string `p:"country" dc:"国家代码" v:"required"`
-	HouseNumberOrName string `p:"houseNumberOrName" dc:"公寓名或门牌号" v:"required"`
-	PostalCode        string `p:"postalCode" dc:"邮编" v:"required"`
-	StateOrProvince   string `p:"stateOrProvince" dc:"洲代码" v:"required"`
-	Street            string `p:"street" dc:"街道名称" v:"required"`
+	City              string `p:"city" dc:"City" v:"required"`
+	Country           string `p:"country" dc:"Country" v:"required"`
+	HouseNumberOrName string `p:"houseNumberOrName" dc:"HouseNumberOrName" v:"required"`
+	PostalCode        string `p:"postalCode" dc:"PostalCode" v:"required"`
+	StateOrProvince   string `p:"stateOrProvince" dc:"StateOrProvince" v:"required"`
+	Street            string `p:"street" dc:"Street" v:"required"`
 }
 
 type OutLineItem struct {
@@ -66,22 +66,22 @@ type OutLineItem struct {
 }
 
 type PaymentMethodsReq struct {
-	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"根据配置⽀付⽅式的信息，通过请求字段筛选可以返回的⽀付⽅式(Klarna、Evonet支持）"`
-	TokenId string `p:"tokenId" dc:"令牌id，如果有绑定过" v:""`
-	Channel string `p:"type" dc:"支付方式类型" v:"required"`
+	g.Meta  `path:"/paymentMethods" tags:"Out-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
+	TokenId string `p:"tokenId" dc:"TokenId" v:""`
+	Channel string `p:"type" dc:"Channel" v:"required"`
 }
 type PaymentMethodsRes struct {
 }
 
 type OutPaymentMethodIssur struct {
-	Name     string `p:"name" dc:"名称" v:""`
-	Id       string `p:"id" dc:"银行对应id" v:""`
-	Disabled string `p:"disabled" dc:"如该支付方式 包含银行信息 返回：当前该银 行状态" v:""`
+	Name     string `p:"name" dc:"Name" v:""`
+	Id       string `p:"id" dc:"Method Id" v:""`
+	Disabled string `p:"disabled" dc:"" v:""`
 }
 
 type PaymentDetailsReq struct {
-	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"查询当前交易状态及详情"`
-	PaymentId string `in:"path" dc:"平台支付单号" v:"required|length:4,30#请输入平台支付单号长度为:{min}到:{max}位"`
+	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Out-Controller" method:"post" summary:"Query Payment Detail"`
+	PaymentId string `in:"path" dc:"PaymentId" v:"required"`
 }
 type PaymentDetailsRes struct {
 }

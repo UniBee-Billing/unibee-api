@@ -12,7 +12,6 @@ type ProfileReq struct {
 	// Password  string `p:"password" dc:"password" v:"required"`
 }
 
-// with token to be implemented in the future
 type ProfileRes struct {
 	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"merchant user"`
 	// Token string `p:"token" dc:"token string"`

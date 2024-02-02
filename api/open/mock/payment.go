@@ -6,25 +6,24 @@ import (
 )
 
 type SamplePaymentNetherlandsReq struct {
-	g.Meta     `path:"/quick_pay_sample_netherlands" tags:"Open-Mock-Controller" method:"post" summary:"1.1 netherlands一键创建支付单(自动填充用户） https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
-	Currency   string `p:"currency" dc:"currency 货币" d:"JPY" v:"required"`
-	Amount     int64  `p:"amount" dc:"amount 金额(需x100，对比RMB到分）" v:"required"`
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"商户号" v:"required长度为:{min}到:{max}位"`
-	Channel    string `p:"channel" d:"paypay" dc:"支付方式，klarna_paynow|klarna|klarna_account|paypay" v:"required"`
-	ReturnUrl  string `p:"returnUrl" dc:"支付之后回跳商户Url" v:""`
-	//PaymentBrandAddtion string `p:"paymentBrandAddtion" dc:"paymentBrandAddtion" v:""`
+	g.Meta     `path:"/quick_pay_sample_netherlands" tags:"Open-Mock-Controller" method:"post" summary:"Mock Netherlands Create Payment (Auto Fill) https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
+	Currency   string `p:"currency" dc:"Currency" v:"required"`
+	Amount     int64  `p:"amount" dc:" Amount, Cent" v:"required"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	Channel    string `p:"channel" dc:"Channel，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
+	ReturnUrl  string `p:"returnUrl" dc:"Return Url" v:""`
 }
 type SamplePaymentNetherlandsRes struct {
-	Status    string      `p:"status" dc:"交易状态"`
-	PaymentId string      `p:"paymentId" dc:"系统交易唯一编码-平台订单号"`
-	Reference string      `p:"reference" dc:"商户订单号"`
-	Action    *gjson.Json `p:"action" dc:"action"`
+	Status            string      `p:"status" dc:"Status"`
+	PaymentId         string      `p:"paymentId" dc:"PaymentId"`
+	MerchantPaymentId string      `p:"merchantPaymentId" dc:"MerchantPaymentId"`
+	Action            *gjson.Json `p:"action" dc:"action"`
 }
 
 type DetailPayReq struct {
-	g.Meta     `path:"/detail_pay" tags:"Open-Mock-Controller" method:"post" summary:"1.5支付单详情"`
-	PaymentId  string `p:"paymentId" dc:"平台支付单号" v:"required"`
-	MerchantId int64  `p:"merchantId" d:"15621" dc:"商户号" v:"required长度为:{min}到:{max}位"`
+	g.Meta     `path:"/detail_pay" tags:"Open-Mock-Controller" method:"post" summary:"Mock Payment Detail"`
+	PaymentId  string `p:"paymentId" dc:"PaymentId" v:"required"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type DetailPayRes struct {
 }

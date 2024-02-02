@@ -20,9 +20,9 @@ func (c *ControllerMock) Refund(ctx context.Context, req *mock.RefundReq) (res *
 		PaymentId:        req.PaymentId,
 		MerchantId:       req.MerchantId,
 		MerchantRefundId: uuid.New().String(),
-		Amount: &v12.PayAmountVo{
+		Amount: &v12.AmountVo{
 			Currency: req.Currency,
-			Value:    req.Amount,
+			Amount:   req.Amount,
 		},
 	}
 	_, err = NewPayment().Refunds(ctx, refundsReq)

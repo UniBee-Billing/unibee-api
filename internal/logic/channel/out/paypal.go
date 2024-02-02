@@ -276,7 +276,7 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 				//		InvoiceDate: 1,
 				//		FixedPrice: paypal.Money{
 				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-				//			Value:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
+				//			Amount:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
 				//		},
 				//		CreateTime: time.Now(),
 				//		UpdateTime: time.Now(),
