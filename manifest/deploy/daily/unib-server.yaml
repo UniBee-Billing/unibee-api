@@ -28,8 +28,6 @@ spec:
     spec:
       restartPolicy: Always
       securityContext: {}
-      # imagePullSecrets:
-      #   - name: heikualy
       containers:
         - name: yd-unib-server-daily
           image: easzlab.io.local:5000/unibee/unibee-api:daily
@@ -58,14 +56,14 @@ spec:
               name: dubbo
             - containerPort: 8848
               name: dubbo-nacos
-          livenessProbe:         #pod内容器健康检查的设置，详情请见http://blog.csdn.net/liyingke112/article/details/77531584
-            httpGet:             #通过httpget检查健康，返回200-399之间，则认为容器正常
-              path: /health             #URI地址
+          livenessProbe:
+            httpGet:
+              path: /health
               port: 8080
               scheme: HTTP
-            initialDelaySeconds: 30 #表明第一次检测在容器启动后多长时间后开始
-            periodSeconds: 10    #检查间隔时间
-            timeoutSeconds: 10    #检测的超时时间
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
             failureThreshold: 100
           readinessProbe:
             failureThreshold: 600
