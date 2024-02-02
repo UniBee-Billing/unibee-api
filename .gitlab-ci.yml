@@ -15,7 +15,7 @@ build:
   only:
     - main
   stage: build
-  image: golang # 利用Golang容器进行打包Golang项目
+  image: golang
   script:
     - ls -al /data/
     - go env -w GOPROXY=https://goproxy.cn,direct
