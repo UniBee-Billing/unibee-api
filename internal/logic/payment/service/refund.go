@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	v1 "go-oversea-pay/api/open/payment"
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
@@ -45,7 +44,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
-		return nil, gerror.Newf(`too fast duplicate call %s`, req.MerchantRefundId)
+		utility.Assert(true, "Submit Too Fast")
 	}
 
 	var (
@@ -56,7 +55,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 		BizId:     req.MerchantRefundId,
 		BizType:   bizType,
 	}).OmitEmpty().Scan(&one)
-	utility.Assert(err == nil && one == nil, "duplicate refundNo")
+	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
 	one = &entity.Refund{
 		CompanyId:     payment.CompanyId,
