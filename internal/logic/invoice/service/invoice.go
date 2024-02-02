@@ -200,7 +200,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 	} else {
 		//更新 Subscription
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().IsDeleted: 0,
+			dao.Invoice.Columns().IsDeleted: 1,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
