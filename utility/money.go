@@ -31,7 +31,7 @@ func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 }
 
 func ConvertTaxScaleToPercentageString(taxPercentage int64) string {
-	return fmt.Sprintf("%f", float64(taxPercentage)/100)
+	return fmt.Sprintf("%.1f", float64(taxPercentage)/100)
 }
 
 func ConvertTaxScaleToPercentageFloat(taxPercentage int64) float64 {
