@@ -1174,12 +1174,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 			return err
 		}
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), plan.Id)
-	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrialEnd:    newTrialEnd,
-		dao.Subscription.Columns().DunningTime: dunningTime,
-		dao.Subscription.Columns().GmtModify:   gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	err := handler.ChangeTrialEnd(ctx, newTrialEnd, sub.SubscriptionId)
 	if err != nil {
 		return err
 	}
@@ -1197,25 +1192,17 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
-	var newTrialEnd = sub.TrialEnd
+	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not trialed")
 	if sub.Type == consts.SubTypeDefault {
-		details, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}
-		newTrialEnd = details.TrialEnd
-	} else {
-		newTrialEnd = sub.CurrentPeriodStart - 1
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), plan.Id)
-	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrialEnd:    newTrialEnd,
-		dao.Subscription.Columns().DunningTime: dunningTime,
-		dao.Subscription.Columns().GmtModify:   gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	err := handler.EndTrialManual(ctx, sub.SubscriptionId)
 	if err != nil {
 		return err
 	}
-	// end trail may cause payment immediately todo mark
+
 	return nil
 }

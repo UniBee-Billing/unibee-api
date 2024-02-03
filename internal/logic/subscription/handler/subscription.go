@@ -100,6 +100,56 @@ func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subs
 	return err
 }
 
+func ChangeTrialEnd(ctx context.Context, newTrialEnd int64, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+
+	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	newStatus := sub.Status
+	if newTrialEnd > gtime.Now().Timestamp() {
+		//automatic change sub status to active
+		newStatus = consts.SubStatusActive
+	}
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:             newStatus,
+		dao.Subscription.Columns().TrialEnd:           newTrialEnd,
+		dao.Subscription.Columns().DunningTime:        dunningTime,
+		dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
+		dao.Subscription.Columns().GmtModify:          gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+}
+
+func EndTrialManual(ctx context.Context, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
+	newTrialEnd := sub.CurrentPeriodStart - 1
+	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	newStatus := sub.Status
+	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
+		newStatus = consts.SubStatusIncomplete
+		// end trail after currentPeriodEnd cause payment immediately todo mark
+	}
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:             newStatus,
+		dao.Subscription.Columns().TrialEnd:           newTrialEnd,
+		dao.Subscription.Columns().DunningTime:        dunningTime,
+		dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
+		dao.Subscription.Columns().GmtModify:          gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *entity.Payment) error {
 	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
 	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
