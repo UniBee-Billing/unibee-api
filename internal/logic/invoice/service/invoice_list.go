@@ -84,9 +84,9 @@ func SearchInvoice(ctx context.Context, searchKey string) (list []*entity.Invoic
 		//模糊查询
 		var likeList []*entity.Invoice
 		_ = dao.Invoice.Ctx(ctx).
-			WhereOrLike(dao.Invoice.Columns().InvoiceId, searchKey).
-			WhereOrLike(dao.Invoice.Columns().InvoiceName, searchKey).
-			WhereOrLike(dao.Invoice.Columns().SendEmail, searchKey).
+			WhereOrLike(dao.Invoice.Columns().InvoiceId, "%"+searchKey+"%").
+			WhereOrLike(dao.Invoice.Columns().InvoiceName, "%"+searchKey+"%").
+			WhereOrLike(dao.Invoice.Columns().SendEmail, "%"+searchKey+"%").
 			WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 			Order(sortKey).
 			Limit(0, 10).

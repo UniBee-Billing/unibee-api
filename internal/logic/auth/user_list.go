@@ -108,9 +108,9 @@ func SearchUser(ctx context.Context, searchKey string) (list []*entity.UserAccou
 		//模糊查询
 		var likeList []*entity.UserAccount
 		_ = dao.UserAccount.Ctx(ctx).
-			WhereOrLike(dao.UserAccount.Columns().Email, searchKey).
-			WhereOrLike(dao.UserAccount.Columns().UserName, searchKey).
-			WhereOrLike(dao.UserAccount.Columns().CompanyName, searchKey).
+			WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").
+			WhereOrLike(dao.UserAccount.Columns().UserName, "%"+searchKey+"%").
+			WhereOrLike(dao.UserAccount.Columns().CompanyName, "%"+searchKey+"%").
 			WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
 			Order(sortKey).
 			Limit(0, 10).
