@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	v1 "go-oversea-pay/api/open/payment"
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -16,6 +17,7 @@ import (
 	"go-oversea-pay/internal/logic/payment/callback"
 	"go-oversea-pay/internal/logic/payment/event"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 	"strconv"
@@ -143,4 +145,62 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 		})
 	}
 	return channelInternalPayResult, nil
+}
+
+func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
+	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	var mobile = ""
+	var firstName = ""
+	var lastName = ""
+	var gender = ""
+	var email = ""
+	if user != nil {
+		mobile = user.Mobile
+		firstName = user.FirstName
+		lastName = user.LastName
+		gender = user.Gender
+		email = user.Email
+	}
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId)
+	if payChannel == nil {
+		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice pay channel not found")
+	}
+	merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	if merchantInfo == nil {
+		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
+	}
+	return DoChannelPay(ctx, &ro.CreatePayContext{
+		PayChannel: payChannel,
+		Pay: &entity.Payment{
+			SubscriptionId:  sub.SubscriptionId,
+			BizId:           sub.SubscriptionId,
+			BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
+			AuthorizeStatus: consts.AUTHORIZED,
+			UserId:          sub.UserId,
+			ChannelId:       int64(payChannel.Id),
+			TotalAmount:     invoice.TotalAmount,
+			Currency:        invoice.Currency,
+			CountryCode:     sub.CountryCode,
+			MerchantId:      sub.MerchantId,
+			CompanyId:       merchantInfo.CompanyId,
+			BillingReason:   billingReason,
+		},
+		Platform:      "WEB",
+		DeviceType:    "Web",
+		ShopperUserId: strconv.FormatInt(sub.UserId, 10),
+		ShopperEmail:  email,
+		ShopperLocale: "en",
+		Mobile:        mobile,
+		Invoice:       invoice,
+		ShopperName: &v1.OutShopperName{
+			FirstName: firstName,
+			LastName:  lastName,
+			Gender:    gender,
+		},
+		MediaData:              map[string]string{"BillingReason": billingReason},
+		MerchantOrderReference: sub.SubscriptionId,
+		PayMethod:              1, //automatic
+		DaysUtilDue:            5, // todo mark
+		ChannelPaymentMethod:   sub.ChannelDefaultPaymentMethod,
+	})
 }

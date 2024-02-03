@@ -1199,10 +1199,72 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 			return err
 		}
 	}
-	err := handler.EndTrialManual(ctx, sub.SubscriptionId)
+	err := EndTrialManual(ctx, sub.SubscriptionId)
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func EndTrialManual(ctx context.Context, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
+	newTrialEnd := sub.CurrentPeriodStart - 1
+	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	newStatus := sub.Status
+	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
+		// todo mark has unfinished pending update
+		newStatus = consts.SubStatusIncomplete
+		// Payment Pending Enter Incomplete
+		plan := query.GetPlanById(ctx, sub.PlanId)
+
+		var nextPeriodStart = gtime.Now().Timestamp()
+		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
+		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			Currency:      sub.Currency,
+			PlanId:        sub.PlanId,
+			Quantity:      sub.Quantity,
+			AddonJsonData: sub.AddonData,
+			TaxScale:      sub.TaxScale,
+			PeriodStart:   nextPeriodStart,
+			PeriodEnd:     nextPeriodEnd,
+		})
+		createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, "SubscriptionCycle")
+		if err != nil {
+			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment err:", err.Error())
+			return err
+		}
+		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().CurrentPeriodStart: invoice.PeriodStart,
+			dao.Subscription.Columns().CurrentPeriodEnd:   invoice.PeriodEnd,
+			dao.Subscription.Columns().DunningTime:        dunningTime,
+			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
+			dao.Subscription.Columns().GmtModify:          gtime.Now(),
+		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment:", utility.MarshalToJsonString(createRes))
+		err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
+		if err != nil {
+			g.Log().Print(ctx, "EndTrialManual SubscriptionIncomplete err:", err.Error())
+			return err
+		}
+	} else {
+		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().Status:             newStatus,
+			dao.Subscription.Columns().TrialEnd:           newTrialEnd,
+			dao.Subscription.Columns().DunningTime:        dunningTime,
+			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
+			dao.Subscription.Columns().GmtModify:          gtime.Now(),
+		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

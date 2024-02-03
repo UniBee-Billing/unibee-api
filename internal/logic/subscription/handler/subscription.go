@@ -6,78 +6,17 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/open/payment"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
-	"go-oversea-pay/internal/logic/payment/service"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
-	"strconv"
 )
-
-func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	var mobile = ""
-	var firstName = ""
-	var lastName = ""
-	var gender = ""
-	var email = ""
-	if user != nil {
-		mobile = user.Mobile
-		firstName = user.FirstName
-		lastName = user.LastName
-		gender = user.Gender
-		email = user.Email
-	}
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId)
-	if payChannel == nil {
-		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice pay channel not found")
-	}
-	merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
-	if merchantInfo == nil {
-		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
-	}
-	return service.DoChannelPay(ctx, &ro.CreatePayContext{
-		PayChannel: payChannel,
-		Pay: &entity.Payment{
-			SubscriptionId:  sub.SubscriptionId,
-			BizId:           sub.SubscriptionId,
-			BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
-			AuthorizeStatus: consts.AUTHORIZED,
-			UserId:          sub.UserId,
-			ChannelId:       int64(payChannel.Id),
-			TotalAmount:     invoice.TotalAmount,
-			Currency:        invoice.Currency,
-			CountryCode:     sub.CountryCode,
-			MerchantId:      sub.MerchantId,
-			CompanyId:       merchantInfo.CompanyId,
-			BillingReason:   billingReason,
-		},
-		Platform:      "WEB",
-		DeviceType:    "Web",
-		ShopperUserId: strconv.FormatInt(sub.UserId, 10),
-		ShopperEmail:  email,
-		ShopperLocale: "en",
-		Mobile:        mobile,
-		Invoice:       invoice,
-		ShopperName: &v1.OutShopperName{
-			FirstName: firstName,
-			LastName:  lastName,
-			Gender:    gender,
-		},
-		MediaData:              map[string]string{"BillingReason": billingReason},
-		MerchantOrderReference: sub.SubscriptionId,
-		PayMethod:              1, //automatic
-		DaysUtilDue:            5, // todo mark
-		ChannelPaymentMethod:   sub.ChannelDefaultPaymentMethod,
-	})
-}
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
 	//更新 Subscription
@@ -198,68 +137,6 @@ func SubscriptionIncomplete(ctx context.Context, subscriptionId string) error {
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
-	}
-	return nil
-}
-
-func EndTrialManual(ctx context.Context, subscriptionId string) error {
-	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
-	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
-	newTrialEnd := sub.CurrentPeriodStart - 1
-	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
-	newStatus := sub.Status
-	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
-		// todo mark has unfinished pending update
-		newStatus = consts.SubStatusIncomplete
-		// Payment Pending Enter Incomplete
-		plan := query.GetPlanById(ctx, sub.PlanId)
-
-		var nextPeriodStart = gtime.Now().Timestamp()
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
-		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			Currency:      sub.Currency,
-			PlanId:        sub.PlanId,
-			Quantity:      sub.Quantity,
-			AddonJsonData: sub.AddonData,
-			TaxScale:      sub.TaxScale,
-			PeriodStart:   nextPeriodStart,
-			PeriodEnd:     nextPeriodEnd,
-		})
-		createRes, err := CreateSubInvoicePayment(ctx, sub, invoice, "SubscriptionCycle")
-		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment err:", err.Error())
-			return err
-		}
-		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-			dao.Subscription.Columns().CurrentPeriodStart: invoice.PeriodStart,
-			dao.Subscription.Columns().CurrentPeriodEnd:   invoice.PeriodEnd,
-			dao.Subscription.Columns().DunningTime:        dunningTime,
-			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
-			dao.Subscription.Columns().GmtModify:          gtime.Now(),
-		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
-		if err != nil {
-			return err
-		}
-		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment:", utility.MarshalToJsonString(createRes))
-		err = SubscriptionIncomplete(ctx, sub.SubscriptionId)
-		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual SubscriptionIncomplete err:", err.Error())
-			return err
-		}
-	} else {
-		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-			dao.Subscription.Columns().Status:             newStatus,
-			dao.Subscription.Columns().TrialEnd:           newTrialEnd,
-			dao.Subscription.Columns().DunningTime:        dunningTime,
-			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
-			dao.Subscription.Columns().GmtModify:          gtime.Now(),
-		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }

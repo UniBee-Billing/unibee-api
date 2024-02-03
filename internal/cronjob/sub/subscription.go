@@ -11,6 +11,7 @@ import (
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
+	"go-oversea-pay/internal/logic/payment/service"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	service2 "go-oversea-pay/internal/logic/subscription/service"
@@ -119,7 +120,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 						})
 						billingReason = "SubscriptionCycle"
 					}
-					createRes, err := handler.CreateSubInvoicePayment(ctx, sub, invoice, billingReason)
+					createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, billingReason)
 					if err != nil {
 						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice CreateSubInvoicePayment err:", err.Error())
 						continue
