@@ -61,7 +61,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 
 func init() {
 	redismq.RegisterListener(NewSubscriptionCreatePaymentCheckListener())
-	fmt.Println("SubscriptionCreateListener RegisterListener")
+	fmt.Println("SubscriptionCreatePaymentCheckListener RegisterListener")
 }
 
 func NewSubscriptionCreatePaymentCheckListener() *SubscriptionCreatePaymentCheckListener {
