@@ -59,7 +59,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 
 	//doc.SetDescription("Subscriptions")
 	if unibInvoice.Status == consts.InvoiceStatusProcessing {
-		doc.SetStatus("Processing")
+		doc.SetStatus("Process")
 		//doc.SetNotes("<a href='" + unibInvoice.Link + "'>Processing</a>")
 	} else if unibInvoice.Status == consts.InvoiceStatusPaid {
 		doc.SetStatus("Paid")
