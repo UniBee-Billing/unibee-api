@@ -27,14 +27,14 @@ func (t SubscriptionCreatePaymentCheckListener) GetTag() string {
 func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	fmt.Printf("SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
+	fmt.Printf("SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
 	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() > 50*60*60 {
 		//should expire sub
 		err := sub2.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 		if err != nil {
-			fmt.Printf("SubscriptionCreateListener SubscriptionExpire Error:%s", err.Error())
+			fmt.Printf("SubscriptionCreatePaymentCheckListener SubscriptionExpire Error:%s", err.Error())
 		}
 		return redismq.CommitMessage
 	}
