@@ -56,7 +56,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		key := fmt.Sprintf("SubscriptionCycle-%s", sub.SubscriptionId)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
-			// todo mark 需要考虑 trial end
+			// todo mark need consider trial end
 			if sub.CurrentPeriodEnd+SubscriptionDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
 				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
