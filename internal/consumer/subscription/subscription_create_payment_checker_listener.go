@@ -46,8 +46,8 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 			err := handler.SendSubscriptionInvoiceEmailToUser(ctx, sub.LatestInvoiceId)
 			if err != nil {
 				_, _ = redismq.SendDelay(&redismq.Message{
-					Topic: redismq2.TopicSubscriptionCreate.Topic,
-					Tag:   redismq2.TopicSubscriptionCreate.Tag,
+					Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+					Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
 					Body:  sub.SubscriptionId,
 				}, 24*60*60)
 				return redismq.CommitMessage
