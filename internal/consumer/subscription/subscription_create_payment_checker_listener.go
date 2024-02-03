@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
+	sub2 "go-oversea-pay/internal/cronjob/sub"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
@@ -29,8 +30,12 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	fmt.Printf("SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
-	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() > 2*24*60*60 {
+	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() > 50*60*60 {
 		//should expire sub
+		err := sub2.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
+		if err != nil {
+			fmt.Printf("SubscriptionCreateListener SubscriptionExpire Error:%s", err.Error())
+		}
 		return redismq.CommitMessage
 	}
 
