@@ -52,7 +52,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
 		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_exception panic url: %s params:%s code:%d error:%s", r.GetUrl(), json, err)
+		g.Log().Errorf(r.Context(), "Global_Exception Panic Url: %s Params:%s Code:%d Error:%s", r.GetUrl(), json, err)
 		return
 	})
 
