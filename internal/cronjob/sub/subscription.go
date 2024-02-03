@@ -5,21 +5,19 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/open/payment"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
-	"go-oversea-pay/internal/logic/payment/service"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
+	"go-oversea-pay/internal/logic/subscription/handler"
 	service2 "go-oversea-pay/internal/logic/subscription/service"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
-	"strconv"
 	"time"
 )
 
@@ -39,6 +37,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
 	var status = []int{consts.SubStatusActive}
+	// query sub which dunningTime expired
 	err := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
 		WhereLT(dao.Subscription.Columns().DunningTime, timeNow). //  dunning < now
@@ -56,14 +55,20 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		key := fmt.Sprintf("SubscriptionCycle-%s", sub.SubscriptionId)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
-			// todo mark need consider trial end
-			if sub.CurrentPeriodEnd+SubscriptionDelayPaymentPermissionTime < timeNow {
+			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow {
+				// sub incomplete
+				err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
+				if err != nil {
+					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionIncomplete err:", err.Error())
+				}
+			} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
 				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 				if err != nil {
-					g.Log().Print(ctx, taskName, "SubscriptionExpire", err.Error())
+					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
 				}
 			} else {
+				// generate invoice and payment ahead
 				latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 				var needGenerate = true
 				if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing || latestInvoice.Status == consts.InvoiceStatusPending) {
@@ -114,65 +119,9 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 						})
 						billingReason = "SubscriptionCycle"
 					}
-					user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-					var mobile = ""
-					var firstName = ""
-					var lastName = ""
-					var gender = ""
-					var email = ""
-					if user != nil {
-						mobile = user.Mobile
-						firstName = user.FirstName
-						lastName = user.LastName
-						gender = user.Gender
-						email = user.Email
-					}
-					payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId)
-					if payChannel == nil {
-						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice pay channel not found")
-						continue
-					}
-					merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
-					if merchantInfo == nil {
-						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice merchantInfo not found")
-						continue
-					}
-					createRes, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
-						PayChannel: payChannel,
-						Pay: &entity.Payment{
-							SubscriptionId:  sub.SubscriptionId,
-							BizId:           sub.SubscriptionId,
-							BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
-							AuthorizeStatus: consts.AUTHORIZED,
-							UserId:          sub.UserId,
-							ChannelId:       int64(payChannel.Id),
-							TotalAmount:     invoice.TotalAmount,
-							Currency:        invoice.Currency,
-							CountryCode:     sub.CountryCode,
-							MerchantId:      sub.MerchantId,
-							CompanyId:       merchantInfo.CompanyId,
-							BillingReason:   billingReason,
-						},
-						Platform:      "WEB",
-						DeviceType:    "Web",
-						ShopperUserId: strconv.FormatInt(sub.UserId, 10),
-						ShopperEmail:  email,
-						ShopperLocale: "en",
-						Mobile:        mobile,
-						Invoice:       invoice,
-						ShopperName: &v1.OutShopperName{
-							FirstName: firstName,
-							LastName:  lastName,
-							Gender:    gender,
-						},
-						MediaData:              map[string]string{"BillingReason": billingReason},
-						MerchantOrderReference: sub.SubscriptionId,
-						PayMethod:              1, //automatic
-						DaysUtilDue:            5, // todo mark
-						ChannelPaymentMethod:   sub.ChannelDefaultPaymentMethod,
-					})
+					createRes, err := handler.CreateSubInvoicePayment(ctx, sub, invoice, billingReason)
 					if err != nil {
-						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice err:", err.Error())
+						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice CreateSubInvoicePayment err:", err.Error())
 						continue
 					}
 					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice DoChannelPay:", utility.MarshalToJsonString(createRes))
