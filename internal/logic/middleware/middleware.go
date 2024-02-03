@@ -170,7 +170,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		g.Log().Errorf(r.Context(), "TokenUserAuth empty token string of auth header")
+		g.Log().Infof(r.Context(), "TokenUserAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
@@ -180,13 +180,13 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 	})
 
 	if err != nil {
-		g.Log().Errorf(r.Context(), "TokenUserAuth parse error:%s", err.Error())
+		g.Log().Infof(r.Context(), "TokenUserAuth parse error:%s", err.Error())
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
 
 	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
-		g.Log().Errorf(r.Context(), "TokenUserAuth token invalid")
+		g.Log().Infof(r.Context(), "TokenUserAuth Invalid Token:%s", tokenString)
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
@@ -196,7 +196,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 
 	userAccount := query.GetUserAccountById(r.Context(), u.Id)
 	if userAccount == nil {
-		g.Log().Errorf(r.Context(), "TokenUserAuth user not found")
+		g.Log().Infof(r.Context(), "TokenUserAuth user not found id:%s", u.Id)
 		utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
 		r.Exit()
 	}
@@ -220,7 +220,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		g.Log().Errorf(r.Context(), "TokenMerchantAuth empty token string of auth header")
+		g.Log().Infof(r.Context(), "TokenMerchantAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
@@ -229,13 +229,13 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 	})
 
 	if err != nil {
-		g.Log().Errorf(r.Context(), "TokenMerchantAuth parse error:%s", err.Error())
+		g.Log().Infof(r.Context(), "TokenMerchantAuth parse error:%s", err.Error())
 		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
 
 	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
-		g.Log().Errorf(r.Context(), "TokenMerchantAuth token invalid")
+		g.Log().Infof(r.Context(), "TokenMerchantAuth Invalid Token :%s", tokenString)
 		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
 		r.Exit()
 	}
@@ -246,7 +246,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if merchantAccount == nil {
-		g.Log().Errorf(r.Context(), "TokenMerchantAuth merchant user not found")
+		g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found id:%s", u.Id)
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()
 	}
