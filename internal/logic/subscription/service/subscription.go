@@ -1174,17 +1174,15 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 			return err
 		}
 	}
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), plan.Id)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().TrialEnd:    newTrialEnd,
+		dao.Subscription.Columns().DunningTime: dunningTime,
+		dao.Subscription.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionAddNewTrialEnd subscription err:%s", update)
-	//}
 	return nil
 }
 
@@ -1209,9 +1207,11 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	} else {
 		newTrialEnd = sub.CurrentPeriodStart - 1
 	}
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), plan.Id)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().TrialEnd:  newTrialEnd,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().TrialEnd:    newTrialEnd,
+		dao.Subscription.Columns().DunningTime: dunningTime,
+		dao.Subscription.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err

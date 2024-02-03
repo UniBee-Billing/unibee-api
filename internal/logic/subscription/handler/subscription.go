@@ -45,6 +45,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		gmtModify = gtime.Now()
 	}
 
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(details.TrialEnd, subscription.CurrentPeriodEnd), uint64(subscription.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                      details.Status,
 		dao.Subscription.Columns().ChannelSubscriptionId:       details.ChannelSubscriptionId,
@@ -55,6 +56,7 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().ChannelLatestInvoiceId:      details.ChannelLatestInvoiceId,
 		dao.Subscription.Columns().ChannelDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
 		dao.Subscription.Columns().TrialEnd:                    details.TrialEnd,
+		dao.Subscription.Columns().DunningTime:                 dunningTime,
 		dao.Subscription.Columns().GmtModify:                   gmtModify,
 		dao.Subscription.Columns().FirstPayTime:                firstPayTime,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
@@ -109,7 +111,7 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 	if sub.FirstPayTime == nil && payment.Status == consts.PAY_SUCCESS {
 		firstPayTime = payment.PaidTime
 	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, uint64(sub.PlanId))
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), uint64(sub.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
