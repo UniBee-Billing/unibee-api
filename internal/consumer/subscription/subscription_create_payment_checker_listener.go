@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/logic/invoice/handler"
@@ -28,12 +29,22 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	fmt.Printf("SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
+	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() > 2*24*60*60 {
+		//should expire sub
+		return redismq.CommitMessage
+	}
+
 	// After 3min Not Pay Send Email
 	if sub.Status == consts.SubStatusCreate && len(sub.LatestInvoiceId) > 0 {
 		invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 		if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
 			err := handler.SendSubscriptionInvoiceEmailToUser(ctx, sub.LatestInvoiceId)
 			if err != nil {
+				_, _ = redismq.SendDelay(&redismq.Message{
+					Topic: redismq2.TopicSubscriptionCreate.Topic,
+					Tag:   redismq2.TopicSubscriptionCreate.Tag,
+					Body:  sub.SubscriptionId,
+				}, 24*60*60)
 				return redismq.CommitMessage
 			} else {
 				return redismq.ReconsumeLater
