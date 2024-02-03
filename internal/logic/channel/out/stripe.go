@@ -1150,6 +1150,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		if createPayContext.PayMethod == 1 && createPayContext.PayImmediate {
 			// try use payment intent
 			listQuery, err := s.DoRemoteChannelUserPaymentMethodListQuery(ctx, createPayContext.PayChannel, channelUser.UserId)
+			log.SaveChannelHttpLog("DoRemoteChannelPayment", channelUser.UserId, listQuery, err, "DoRemoteChannelUserPaymentMethodListQuery", nil, createPayContext.PayChannel)
 			if err != nil {
 				return nil, err
 			}
@@ -1173,6 +1174,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 				}
 				params.PaymentMethod = stripe.String(method)
 				targetIntent, err = paymentintent.New(params)
+				log.SaveChannelHttpLog("DoRemoteChannelPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.PayChannel)
 				var status = ""
 
 				if targetIntent != nil {
@@ -1186,7 +1188,8 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 					success = true
 					break
 				} else if targetIntent != nil {
-					_, cancelErr = paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
+					cancelRes, cancelErr := paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
+					log.SaveChannelHttpLog("DoRemoteChannelPayment", "", cancelRes, cancelErr, "PaymentIntentCancel", nil, createPayContext.PayChannel)
 				} else {
 					cancelErr = gerror.Newf("targetIntent is nil")
 				}
