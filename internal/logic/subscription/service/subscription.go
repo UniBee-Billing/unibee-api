@@ -367,14 +367,15 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return nil, gerror.Newf("SubscriptionCreate update err:%s", update)
-	//}
 	one.ChannelSubscriptionId = createRes.ChannelSubscriptionId
 	one.Status = consts.PlanChannelStatusCreate
 	one.Link = createRes.Link
 
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionCreate.Topic,
+		Tag:   redismq2.TopicSubscriptionCreate.Tag,
+		Body:  one.SubscriptionId,
+	})
 	return &subscription.SubscriptionCreateRes{
 		Subscription: one,
 		Paid:         createRes.Paid,

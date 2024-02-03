@@ -49,10 +49,10 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 }
 
 func init() {
-	redismq.RegisterListener(New())
-	fmt.Println("TestMessageListener RegisterListener")
+	redismq.RegisterListener(NewSubscriptionCancelListener())
+	fmt.Println("SubscriptionCancelListener RegisterListener")
 }
 
-func New() *SubscriptionCancelListener {
+func NewSubscriptionCancelListener() *SubscriptionCancelListener {
 	return &SubscriptionCancelListener{}
 }

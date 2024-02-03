@@ -19,6 +19,7 @@ var (
 	TopicRefundFailed               = redismq.MQTopicEnum{"unibee_refund", "refundfailed", "refund success"}
 	TopicSubscriptionCancel         = redismq.MQTopicEnum{"unibee_subscription", "subscription_cancelled", "subscription cancelled"}
 	TopicSubscriptionExpire         = redismq.MQTopicEnum{"unibee_subscription", "subscription_expired", "subscription expired"}
+	TopicSubscriptionCreate         = redismq.MQTopicEnum{"unibee_subscription", "subscription_created", "subscription created"}
 )
 
 type SRedisMqConfig struct{}

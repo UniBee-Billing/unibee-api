@@ -1,6 +1,6 @@
 package consumer
 
 import (
-	_ "go-oversea-pay/internal/logic/consumer/mock"
-	_ "go-oversea-pay/internal/logic/consumer/subscription"
+	_ "go-oversea-pay/internal/consumer/mock"
+	_ "go-oversea-pay/internal/consumer/subscription"
 )
