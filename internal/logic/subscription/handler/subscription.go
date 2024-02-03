@@ -122,6 +122,7 @@ func ChangeTrialEnd(ctx context.Context, newTrialEnd int64, subscriptionId strin
 	if err != nil {
 		return err
 	}
+	return nil
 }
 
 func EndTrialManual(ctx context.Context, subscriptionId string) error {
