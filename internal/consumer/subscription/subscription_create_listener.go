@@ -13,11 +13,11 @@ type SubscriptionCreateListener struct {
 }
 
 func (t SubscriptionCreateListener) GetTopic() string {
-	return redismq2.TopicSubscriptionCreate.Topic
+	return redismq2.TopicSubscriptionCreatePaymentCheck.Topic
 }
 
 func (t SubscriptionCreateListener) GetTag() string {
-	return redismq2.TopicSubscriptionCreate.Tag
+	return redismq2.TopicSubscriptionCreatePaymentCheck.Tag
 }
 
 func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
@@ -26,8 +26,8 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	fmt.Printf("SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	_, _ = redismq.SendDelay(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionCreate.Topic,
-		Tag:   redismq2.TopicSubscriptionCreate.Tag,
+		Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
+		Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
 		Body:  sub.SubscriptionId,
 	}, 3*60)
 	// 3min PaymentChecker
