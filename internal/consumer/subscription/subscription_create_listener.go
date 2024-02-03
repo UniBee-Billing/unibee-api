@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
+	"go-oversea-pay/internal/query"
 	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 )
@@ -12,34 +13,24 @@ type SubscriptionCreateListener struct {
 }
 
 func (t SubscriptionCreateListener) GetTopic() string {
-	return redismq2.TopicSubscriptionCancel.Topic
+	return redismq2.TopicSubscriptionCreate.Topic
 }
 
 func (t SubscriptionCreateListener) GetTag() string {
-	return redismq2.TopicSubscriptionCancel.Tag
+	return redismq2.TopicSubscriptionCreate.Tag
 }
 
 func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	fmt.Printf("SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
-	//sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
-	//Cancelled SubscriptionPendingUpdate
-	//var pendingUpdates []*entity.SubscriptionPendingUpdate
-	//err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-	//	Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, sub.SubscriptionId).
-	//	WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
-	//	Limit(0, 100).
-	//	OmitEmpty().Scan(&pendingUpdates)
-	//if err != nil {
-	//	return redismq.ReconsumeLater
-	//}
-	//for _, p := range pendingUpdates {
-	//	err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionCancelled")
-	//	if err != nil {
-	//		fmt.Printf("MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
-	//	}
-	//}
+	fmt.Printf("SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
+	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
+	_, _ = redismq.SendDelay(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionCreate.Topic,
+		Tag:   redismq2.TopicSubscriptionCreate.Tag,
+		Body:  sub.SubscriptionId,
+	}, 3*60)
+	// 3min PaymentChecker
 	return redismq.CommitMessage
 }
 
