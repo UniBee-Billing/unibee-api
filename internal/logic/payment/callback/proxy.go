@@ -65,7 +65,7 @@ func (p proxy) PaymentCreateCallback(ctx context.Context, payment *entity.Paymen
 
 		p.GetCallbackImpl().PaymentCreateCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentCreateCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 }
 
@@ -88,7 +88,7 @@ func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payme
 
 		p.GetCallbackImpl().PaymentSuccessCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentSuccessCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 
 	return
@@ -136,7 +136,7 @@ func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Paymen
 
 		p.GetCallbackImpl().PaymentCancelCallback(backgroundCtx, payment, invoice)
 
-		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentCancelCallback cost：%s \n", time.Now().Sub(startTime))
 	}()
 }
 
