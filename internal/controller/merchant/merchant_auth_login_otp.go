@@ -15,16 +15,16 @@ import (
 
 func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {
 	redisKey := fmt.Sprintf("MerchantAuth-Login-Email:%s", req.Email)
-	isDuplicatedInvoke := false
-	defer func() {
-		if !isDuplicatedInvoke {
-			utility.ReleaseLock(ctx, redisKey)
-		}
-	}()
+	//isDuplicatedInvoke := false
+	//defer func() {
+	//	if !isDuplicatedInvoke {
+	//		utility.ReleaseLock(ctx, redisKey)
+	//	}
+	//}()
 
-	if !utility.TryLock(ctx, redisKey, 15) {
-		isDuplicatedInvoke = true
-		return nil, gerror.Newf(`click too fast`)
+	if !utility.TryLock(ctx, redisKey, 10) {
+		//isDuplicatedInvoke = true
+		utility.Assert(false, "click too fast, please wait for second")
 	}
 
 	verificationCode := generateRandomString(6)

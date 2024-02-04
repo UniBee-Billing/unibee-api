@@ -46,7 +46,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
-		utility.Assert(true, "Submit Too Fast")
+		utility.Assert(false, "Submit Too Fast")
 	}
 
 	var (

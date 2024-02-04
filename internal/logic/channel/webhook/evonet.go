@@ -103,7 +103,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		} else if strings.Compare(eventCode, "Payment") == 0 {
 			data = payment
 		} else {
-			utility.Assert(true, fmt.Sprintf("data eventCode error notificationJson:%s", notificationJson.String()))
+			utility.Assert(false, fmt.Sprintf("data eventCode error notificationJson:%s", notificationJson.String()))
 		}
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
@@ -164,7 +164,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		} else if strings.Compare(eventCode, "Payment") == 0 {
 			data = payment
 		} else {
-			utility.Assert(true, fmt.Sprintf("data eventCode error notificationJson:%s", notificationJson.String()))
+			utility.Assert(false, fmt.Sprintf("data eventCode error notificationJson:%s", notificationJson.String()))
 		}
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
