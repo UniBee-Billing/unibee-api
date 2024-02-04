@@ -25,7 +25,7 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 	utility.Assert(info != nil, "merchantInfo not found")
 	var companyLogo = info.CompanyLogo
 	if len(req.CompanyLogo) > 0 {
-		utility.Assert(strings.HasPrefix(companyLogo, "http://") || strings.HasPrefix(companyLogo, "https://"), "companyLogo Invalid, should has http:// or https:// prefix")
+		utility.Assert(strings.HasPrefix(req.CompanyLogo, "http://") || strings.HasPrefix(req.CompanyLogo, "https://"), "companyLogo Invalid, should has http:// or https:// prefix")
 		companyLogo = req.CompanyLogo
 	}
 	_, err = dao.MerchantInfo.Ctx(ctx).Data(g.Map{
