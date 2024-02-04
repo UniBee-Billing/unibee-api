@@ -347,6 +347,7 @@ func messageAck(message *Message) {
 
 func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 	var err error
+	ctx := context.Background()
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -354,11 +355,11 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("MQ STREAM blockReceiveConsumerMessage topic:%s panic error:%v %v\n", topic, err.Error(), exception)
+			g.Log().Errorf(ctx, "MQ STREAM blockReceiveConsumerMessage topic:%s panic error:%v %v\n", topic, err.Error(), exception)
 			return
 		}
 	}()
-	ctx := context.Background()
+
 	streamName := GetQueueName(topic)
 	//fmt.Printf("MQStream XReadGroup blockReceiveConsumerMessage streamName=%s\n", streamName)
 	result, err := client.XReadGroup(ctx, &redis.XReadGroupArgs{
@@ -370,7 +371,7 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 		NoAck:    true,
 	}).Result()
 	if err != nil {
-		g.Log().Infof(ctx, "MQStream blockReceiveConsumerMessage streamName=%s err=%s\n", streamName, err.Error())
+		g.Log().Debugf(ctx, "MQStream blockReceiveConsumerMessage streamName=%s err=%s\n", streamName, err.Error())
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {
