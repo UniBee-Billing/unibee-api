@@ -542,7 +542,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	var nextPeriodInvoice *ro.InvoiceDetailSimplify
 	if effectImmediate {
 		if consts.ProrationUsingUniBeeCompute {
-			// Generate Proration Invoice Previe
+			// Generate Proration Invoice Preview
 			nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				Currency:      sub.Currency,
 				PlanId:        req.NewPlanId,
