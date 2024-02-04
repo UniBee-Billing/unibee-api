@@ -118,10 +118,10 @@ func tryCreateGroup(queueName string, topic string) {
 		//尝试创建 Group
 		// 创建消费者组
 		if err := client.XGroupCreateMkStream(context.Background(), queueName, GroupId, "$").Err(); err != nil {
-			fmt.Printf("MQ STREAM GroupId exsit queueName:%s groupId:%s err:%s", queueName, GroupId, err)
+			fmt.Printf("MQ STREAM GroupId exsit queueName:%s groupId:%s err:%s \n", queueName, GroupId, err)
 			return
 		} else {
-			fmt.Printf("MQ STREAM init queueName:%s groupId:%s ", queueName, GroupId)
+			fmt.Printf("MQ STREAM init queueName:%s groupId:%s \n", queueName, GroupId)
 		}
 	}
 }
@@ -142,9 +142,9 @@ func tryCreateConsumer(queueName string, topic string) {
 		}
 	}(client)
 	if _, err := client.XGroupCreateConsumer(context.Background(), queueName, GroupId, consumerName).Result(); err != nil {
-		fmt.Printf("MQ STREAM consumerName failure or consumerName exsit queueName:%s groupId:%s consumerName:%s err:%s", queueName, GroupId, consumerName, err)
+		fmt.Printf("MQ STREAM consumerName failure or consumerName exsit queueName:%s groupId:%s consumerName:%s err:%s\n", queueName, GroupId, consumerName, err)
 	} else {
-		fmt.Printf("MQ STREAM init queueName:%s groupId:%s consumerName:%s", queueName, GroupId, consumerName)
+		fmt.Printf("MQ STREAM init queueName:%s groupId:%s consumerName:%s\n", queueName, GroupId, consumerName)
 	}
 }
 
