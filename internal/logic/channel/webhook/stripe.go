@@ -498,6 +498,27 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
 				}
+			} else if paymentIntentDetail.Status == consts.PAY_CANCEL {
+				err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
+					PaymentId:                        payment.PaymentId,
+					ChannelPaymentIntentId:           paymentIntentDetail.ChannelPaymentId,
+					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+					TotalAmount:                      paymentIntentDetail.TotalAmount,
+					PayStatusEnum:                    consts.PAY_CANCEL,
+					PaidTime:                         paymentIntentDetail.PayTime,
+					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+					CaptureAmount:                    0,
+					Reason:                           paymentIntentDetail.Reason,
+					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+				})
+				if err != nil {
+					return err
+				}
+			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+				err := handler2.HandlePayNeedAuthorized(ctx, payment)
+				if err != nil {
+					return err
+				}
 			}
 		} else {
 			return gerror.New("Payment Not Found")
