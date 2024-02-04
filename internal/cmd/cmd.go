@@ -137,6 +137,10 @@ var (
 				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
 				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
+				if !consts.GetConfigInstance().IsServerDev() && !consts.GetConfigInstance().IsLocal() {
+					//g.Log().SetLevel(glog.LEVEL_ALL ^ glog.LEVEL_DEBU) // remote debug log
+					_ = g.Log().SetLevelStr("info") // remote debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
+				}
 				cronjob.StartCronJobs()
 			}
 

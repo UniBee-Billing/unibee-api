@@ -33,7 +33,7 @@ var (
 )
 
 func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
-	g.Log().Print(ctx, taskName, "Start......")
+	g.Log().Debug(ctx, taskName, "Start......")
 	var timeNow = gtime.Now().Timestamp()
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
@@ -163,7 +163,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		}
 	}
 
-	g.Log().Print(ctx, taskName, "End......")
+	g.Log().Debug(ctx, taskName, "End......")
 }
 
 func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason string) error {
