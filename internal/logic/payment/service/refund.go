@@ -20,6 +20,8 @@ import (
 )
 
 func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
+	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
+	utility.Assert(len(req.MerchantRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")

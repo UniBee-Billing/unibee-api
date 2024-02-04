@@ -11,6 +11,7 @@ import (
 	vat "go-oversea-pay/internal/logic/vat_gateway/github"
 	"go-oversea-pay/internal/logic/vat_gateway/vatsense"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"go-oversea-pay/internal/query"
 	"strings"
 )
 
@@ -106,18 +107,8 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 	return nil
 }
 
-func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumber string) (res *entity.MerchantVatNumberVerifyHistory) {
-	err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).
-		Where(entity.MerchantVatNumberVerifyHistory{MerchantId: merchantId}).
-		Where(entity.MerchantVatNumberVerifyHistory{VatNumber: vatNumber}).OmitEmpty().Scan(&res)
-	if err != nil {
-		return nil
-	}
-	return res
-}
-
 func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
-	one := GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
+	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
 		if one.Valid == 1 {
