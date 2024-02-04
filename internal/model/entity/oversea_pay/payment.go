@@ -29,6 +29,7 @@ type Payment struct {
 	TerminalIp             string      `json:"terminalIp"             description:"client ip"`                                                              // client ip
 	CountryCode            string      `json:"countryCode"            description:"country code"`                                                           // country code
 	AuthorizeStatus        int         `json:"authorizeStatus"        description:"authorize status，0-waiting authorize，1-authorized，2-authorized_request"` // authorize status，0-waiting authorize，1-authorized，2-authorized_request
+	AuthorizeReason        string      `json:"authorizeReason"        description:""`                                                                       //
 	ChannelId              int64       `json:"channelId"              description:"channel_id"`                                                             // channel_id
 	ChannelPaymentIntentId string      `json:"channelPaymentIntentId" description:"channel_payment_intent_id"`                                              // channel_payment_intent_id
 	ChannelPaymentId       string      `json:"channelPaymentId"       description:"channel_payment_id"`                                                     // channel_payment_id

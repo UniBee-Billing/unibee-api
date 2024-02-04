@@ -31,6 +31,7 @@ type Payment struct {
 	TerminalIp             interface{} // client ip
 	CountryCode            interface{} // country code
 	AuthorizeStatus        interface{} // authorize status，0-waiting authorize，1-authorized，2-authorized_request
+	AuthorizeReason        interface{} //
 	ChannelId              interface{} // channel_id
 	ChannelPaymentIntentId interface{} // channel_payment_intent_id
 	ChannelPaymentId       interface{} // channel_payment_id

@@ -39,6 +39,7 @@ type PaymentColumns struct {
 	TerminalIp             string // client ip
 	CountryCode            string // country code
 	AuthorizeStatus        string // authorize status，0-waiting authorize，1-authorized，2-authorized_request
+	AuthorizeReason        string //
 	ChannelId              string // channel_id
 	ChannelPaymentIntentId string // channel_payment_intent_id
 	ChannelPaymentId       string // channel_payment_id
@@ -89,6 +90,7 @@ var paymentColumns = PaymentColumns{
 	TerminalIp:             "terminal_ip",
 	CountryCode:            "country_code",
 	AuthorizeStatus:        "authorize_status",
+	AuthorizeReason:        "authorize_reason",
 	ChannelId:              "channel_id",
 	ChannelPaymentIntentId: "channel_payment_intent_id",
 	ChannelPaymentId:       "channel_payment_id",

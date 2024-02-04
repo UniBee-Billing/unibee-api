@@ -146,7 +146,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	return err
 }
 
-func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err error) {
+func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string) (err error) {
 	g.Log().Infof(ctx, "HandlePayNeedAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil")
@@ -155,8 +155,12 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err 
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED, dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{
+				dao.Payment.Columns().AuthorizeStatus:  consts.WAITING_AUTHORIZED,
+				dao.Payment.Columns().AuthorizeReason:  authorizeReason,
+				dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
+				g.Map{dao.Payment.Columns().Id: payment.Id,
+					dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -532,7 +536,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				return err
 			}
 		} else if channelPayRo.AuthorizeStatus == consts.WAITING_AUTHORIZED {
-			err := HandlePayNeedAuthorized(ctx, one)
+			err := HandlePayNeedAuthorized(ctx, one, channelPayRo.AuthorizeReason)
 			if err != nil {
 				return err
 			}

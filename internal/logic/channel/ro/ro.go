@@ -91,6 +91,7 @@ type ChannelPaymentRo struct {
 	MerchantId                  int64                                  `json:"merchantId"         `
 	Status                      int                                    `json:"status"`
 	AuthorizeStatus             int                                    `json:"captureStatus"`
+	AuthorizeReason             string                                 `json:"authorizeReason" `
 	Currency                    string                                 `json:"currency"              `
 	TotalAmount                 int64                                  `json:"totalAmount"              `
 	PaymentAmount               int64                                  `json:"paymentAmount"              `

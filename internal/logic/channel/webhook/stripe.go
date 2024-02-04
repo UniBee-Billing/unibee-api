@@ -515,7 +515,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 					return err
 				}
 			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
-				err := handler2.HandlePayNeedAuthorized(ctx, payment)
+				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason)
 				if err != nil {
 					return err
 				}
@@ -541,16 +541,23 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	//}
 
 	var status = consts.TO_BE_PAID
-	var captureStatus = consts.AUTHORIZED
+	var authorizeStatus = consts.AUTHORIZED
+	var authorizeReason = ""
 	if invoiceDetails.Status == consts.InvoiceStatusPaid {
 		status = consts.PAY_SUCCESS
-		captureStatus = consts.CAPTURE_REQUEST
+		authorizeStatus = consts.CAPTURE_REQUEST
 	} else if invoiceDetails.Status == consts.InvoiceStatusFailed {
 		status = consts.PAY_FAILED
 	} else if invoiceDetails.Status == consts.InvoiceStatusCancelled {
 		status = consts.PAY_CANCEL
 	} else if strings.Compare("invoice.payment_action_required", eventType) == 0 {
-		captureStatus = consts.WAITING_AUTHORIZED
+		authorizeStatus = consts.WAITING_AUTHORIZED
+		if len(invoiceDetails.ChannelPaymentId) > 0 {
+			paymentIntentDetail, _ := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPaymentDetail(ctx, payChannel, invoiceDetails.ChannelPaymentId)
+			if paymentIntentDetail != nil {
+				authorizeReason = paymentIntentDetail.AuthorizeReason
+			}
+		}
 	}
 
 	var channelSubscriptionDetail *ro.ChannelDetailSubscriptionInternalResp
@@ -578,7 +585,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	err = handler2.HandlePaymentWebhookEvent(ctx, &ro.ChannelPaymentRo{
 		MerchantId:                  payChannel.MerchantId,
 		Status:                      status,
-		AuthorizeStatus:             captureStatus,
+		AuthorizeStatus:             authorizeStatus,
+		AuthorizeReason:             authorizeReason,
 		Currency:                    invoiceDetails.Currency,
 		TotalAmount:                 invoiceDetails.TotalAmount,
 		PaymentAmount:               invoiceDetails.PaymentAmount,
