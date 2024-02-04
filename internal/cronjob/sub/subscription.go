@@ -37,7 +37,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	var timeNow = gtime.Now().Timestamp()
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
-	var status = []int{consts.SubStatusActive, consts.SubStatusIncomplete}
+	var status = []int{consts.SubStatusCreate, consts.SubStatusActive, consts.SubStatusIncomplete}
 	// query sub which dunningTime expired
 	err := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
@@ -56,6 +56,15 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		key := fmt.Sprintf("SubscriptionCycle-%s", sub.SubscriptionId)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
+			if sub.Status == consts.SubStatusCreate {
+				if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
+					err := SubscriptionExpire(ctx, sub, "CreateExpireWithoutPay")
+					if err != nil {
+						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
+					}
+				}
+				continue
+			}
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
 				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
