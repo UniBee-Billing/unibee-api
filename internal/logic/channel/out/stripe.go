@@ -1412,6 +1412,7 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 	}
 	var captureStatus = consts.AUTHORIZED
 	var authorizeReason = ""
+	var paymentData = ""
 	if strings.Compare(string(item.Status), "requires_payment_method") == 0 {
 		captureStatus = consts.WAITING_AUTHORIZED
 		if item.LastPaymentError != nil {
@@ -1419,6 +1420,9 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 		}
 	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
 		captureStatus = consts.CAPTURE_REQUEST
+	}
+	if item.NextAction != nil {
+		paymentData = utility.MarshalToJsonString(item.NextAction)
 	}
 	return &ro.ChannelPaymentRo{
 		ChannelId:        int64(payChannel.Id),
@@ -1430,7 +1434,7 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 		AuthorizeStatus:  captureStatus,
 		AuthorizeReason:  authorizeReason,
 		CancelReason:     string(item.CancellationReason),
-		PaymentData:      utility.MarshalToJsonString(item.NextAction),
+		PaymentData:      paymentData,
 		TotalAmount:      item.Amount,
 		PaymentAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
