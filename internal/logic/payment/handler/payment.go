@@ -174,7 +174,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment) (err 
 			return redismq.RollbackTransaction, err
 		}
 	})
-	g.Log().Infof(ctx, "HandlePayAuthorized sendResult err=%s", err)
+	g.Log().Infof(ctx, "HandlePayNeedAuthorized sendResult err=%s", err)
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
