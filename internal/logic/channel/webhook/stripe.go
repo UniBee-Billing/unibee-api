@@ -465,6 +465,9 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			if err != nil {
 				return err
 			}
+			if len(paymentIntentDetail.PaymentData) == 0 && stripePayment.NextAction != nil {
+				paymentIntentDetail.PaymentData = utility.MarshalToJsonString(stripePayment.NextAction)
+			}
 			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
 				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 					PaymentId:                        payment.PaymentId,
