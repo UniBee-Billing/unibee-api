@@ -32,7 +32,6 @@ type Subscription struct {
 	CustomerName                interface{} // customer_name
 	CustomerEmail               interface{} // customer_email
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
-	DunningTime                 interface{} //
 	ChannelDefaultPaymentMethod interface{} //
 	Link                        interface{} //
 	ChannelStatus               interface{} // channel status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -45,6 +44,7 @@ type Subscription struct {
 	CurrentPeriodStartTime      *gtime.Time //
 	CurrentPeriodEndTime        *gtime.Time //
 	BillingCycleAnchor          interface{} // billing_cycle_anchor
+	DunningTime                 interface{} //
 	TrialEnd                    interface{} // trial_end
 	ReturnUrl                   interface{} //
 	FirstPayTime                *gtime.Time // first success payment time

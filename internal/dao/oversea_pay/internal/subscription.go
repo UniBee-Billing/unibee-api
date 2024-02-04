@@ -40,7 +40,6 @@ type SubscriptionColumns struct {
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
-	DunningTime                 string //
 	ChannelDefaultPaymentMethod string //
 	Link                        string //
 	ChannelStatus               string // channel status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
@@ -53,6 +52,7 @@ type SubscriptionColumns struct {
 	CurrentPeriodStartTime      string //
 	CurrentPeriodEndTime        string //
 	BillingCycleAnchor          string // billing_cycle_anchor
+	DunningTime                 string //
 	TrialEnd                    string // trial_end
 	ReturnUrl                   string //
 	FirstPayTime                string // first success payment time
@@ -88,7 +88,6 @@ var subscriptionColumns = SubscriptionColumns{
 	CustomerName:                "customer_name",
 	CustomerEmail:               "customer_email",
 	IsDeleted:                   "is_deleted",
-	DunningTime:                 "dunning_time",
 	ChannelDefaultPaymentMethod: "channel_default_payment_method",
 	Link:                        "link",
 	ChannelStatus:               "channel_status",
@@ -101,6 +100,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CurrentPeriodStartTime:      "current_period_start_time",
 	CurrentPeriodEndTime:        "current_period_end_time",
 	BillingCycleAnchor:          "billing_cycle_anchor",
+	DunningTime:                 "dunning_time",
 	TrialEnd:                    "trial_end",
 	ReturnUrl:                   "return_url",
 	FirstPayTime:                "first_pay_time",

@@ -3,6 +3,10 @@ package email
 import (
 	"context"
 	"encoding/base64"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	dao "go-oversea-pay/internal/dao/oversea_pay"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -57,7 +61,7 @@ func SendEmailToUser(mailTo string, subject string, body string) error {
 	return nil
 }
 
-func SendTemplateEmailToUser(mailTo string, subject string, body string) error {
+func SendTemplateEmailToUser(mailTo string, subject string, body string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	subject = subject
 	to := mail.NewEmail(mailTo, mailTo)
@@ -69,15 +73,16 @@ func SendTemplateEmailToUser(mailTo string, subject string, body string) error {
 	response, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
+		return "", err
 	} else {
 		fmt.Println(response.StatusCode)
 		fmt.Println(response.Body)
 		fmt.Println(response.Headers)
 	}
-	return nil
+	return utility.MarshalToJsonString(response), nil
 }
 
-func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) error {
+func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
@@ -99,13 +104,13 @@ func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFil
 	response, err := client.Send(message)
 	if err != nil {
 		fmt.Printf("SendPdfAttachEmailToUser error:%s\n", err.Error())
-		return err
+		return "", err
 	} else {
 		fmt.Println(response.StatusCode)
 		fmt.Println(response.Body)
 		fmt.Println(response.Headers)
 	}
-	return nil
+	return utility.MarshalToJsonString(response), nil
 }
 
 type TemplateVariable struct {
@@ -185,8 +190,44 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tem
 		attachName = "attach"
 	}
 	if len(pdfFilePath) > 0 {
-		return SendPdfAttachEmailToUser(mailTo, title, content, pdfFilePath, attachName+".pdf")
+		response, err := SendPdfAttachEmailToUser(mailTo, title, content, pdfFilePath, attachName+".pdf")
+		if err != nil {
+			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
+		} else {
+			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", response)
+		}
+		return err
 	} else {
-		return SendTemplateEmailToUser(mailTo, title, content)
+		response, err := SendTemplateEmailToUser(mailTo, title, content)
+		if err != nil {
+			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
+		} else {
+			SaveHistory(ctx, merchantId, mailTo, title, content, "", response)
+		}
+		return err
 	}
+}
+
+func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title string, content string, attachFilePath string, response string) {
+	var err error
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			g.Log().Errorf(ctx, "SaveEmailHistory panic error:%s", err.Error())
+			return
+		}
+	}()
+	one := &entity.EmailHistory{
+		MerchantId: merchantId,
+		Email:      mailTo,
+		Title:      title,
+		Content:    content,
+		AttachFile: attachFilePath,
+		Response:   response,
+	}
+	_, _ = dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }
