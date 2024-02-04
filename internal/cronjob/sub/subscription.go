@@ -37,7 +37,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	var timeNow = gtime.Now().Timestamp()
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
-	var status = []int{consts.SubStatusActive}
+	var status = []int{consts.SubStatusActive, consts.SubStatusIncomplete}
 	// query sub which dunningTime expired
 	err := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
@@ -56,19 +56,30 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		key := fmt.Sprintf("SubscriptionCycle-%s", sub.SubscriptionId)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
-			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow {
-				// sub incomplete
-				err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
-				if err != nil {
-					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionIncomplete err:", err.Error())
-				}
-			} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
+			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
 				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 				if err != nil {
 					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
 				}
+			} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow {
+				if sub.CancelAtPeriodEnd == 1 {
+					// Cancel At Period End
+					err = service2.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelAtPeriodEndBySystem")
+					if err != nil {
+						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionCancel err:", err.Error())
+					}
+				} else {
+					// Not Paid To Incomplete
+					err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
+					if err != nil {
+						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionIncomplete err:", err.Error())
+					}
+				}
 			} else {
+				if sub.CancelAtPeriodEnd == 1 {
+					continue
+				}
 				// generate invoice and payment ahead
 				latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 				var needGenerate = true
@@ -188,6 +199,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:       consts.SubStatusExpired,
 		dao.Subscription.Columns().CancelReason: reason,
+		dao.Subscription.Columns().TrialEnd:     sub.CurrentPeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:    gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {

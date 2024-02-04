@@ -17,7 +17,7 @@ func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *su
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 
-	err = service.SubscriptionCancel(ctx, req.SubscriptionId, req.Prorate, req.InvoiceNow)
+	err = service.SubscriptionCancel(ctx, req.SubscriptionId, req.Prorate, req.InvoiceNow, "Admin Cancel")
 	if err != nil {
 		return nil, err
 	}

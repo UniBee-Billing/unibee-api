@@ -970,7 +970,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}, nil
 }
 
-func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool, invoiceNow bool) error {
+func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bool, invoiceNow bool, reason string) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -1007,8 +1007,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 	// cancel will generate proration invoice need compute todo mark
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:    nextStatus,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().Status:       nextStatus,
+		dao.Subscription.Columns().CancelReason: reason,
+		dao.Subscription.Columns().TrialEnd:     sub.CurrentPeriodStart - 1,
+		dao.Subscription.Columns().GmtModify:    gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
