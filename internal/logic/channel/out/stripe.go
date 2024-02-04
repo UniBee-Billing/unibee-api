@@ -1120,6 +1120,9 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
+			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
+				Metadata: createPayContext.MediaData,
+			},
 		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
 		checkoutParams.Metadata = createPayContext.MediaData
