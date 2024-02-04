@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/cmd/router"
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/consts"
@@ -128,6 +129,7 @@ var (
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)
 				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "Server Time: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
 				liberr.ErrIsNil(ctx, err, "Redis write check failure")
