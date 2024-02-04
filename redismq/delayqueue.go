@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
 	"strconv"
@@ -76,7 +77,7 @@ func pollingCore(key string) {
 		return
 	}
 	if len(result) == 0 {
-		fmt.Printf("Redismq Delay Queue[%s] No Queue\n", MQ_DELAY_QUEUE_NAME)
+		g.Log().Debugf(ctx, "Redismq Delay Queue[%s] No Queue\n", MQ_DELAY_QUEUE_NAME)
 		return
 	}
 	for _, messageJson := range result {
