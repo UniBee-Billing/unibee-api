@@ -58,7 +58,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
 			if sub.Status == consts.SubStatusCreate {
 				if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
-					err := SubscriptionExpire(ctx, sub, "CreateExpireWithoutPay")
+					err := SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 					if err != nil {
 						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
 					}
