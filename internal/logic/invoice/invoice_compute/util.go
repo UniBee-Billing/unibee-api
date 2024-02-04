@@ -178,6 +178,8 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 				totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
 			} else if quantityDiff < 0 {
 				// quantity decrease
+				quantityDiff = -quantityDiff
+				unitAmountExcludingTax = -unitAmountExcludingTax
 				invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 					Currency:               req.Currency,
 					Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
@@ -186,14 +188,15 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 					TaxScale:               req.TaxScale,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
 					Description:            fmt.Sprintf("Unused Time On %d * %s After %s", -quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
-					Quantity:               -quantityDiff,
+					Quantity:               quantityDiff,
 				})
 				totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
 			}
 			delete(newMap, newPlanSub.PlanId)
 		} else {
 			//old removed
-			quantityDiff := -oldPlanSub.Quantity
+			quantityDiff := oldPlanSub.Quantity
+			unitAmountExcludingTax = -unitAmountExcludingTax
 			invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
 				Currency:               req.Currency,
 				Amount:                 quantityDiff*unitAmountExcludingTax + int64(float64(quantityDiff*unitAmountExcludingTax)*utility.ConvertTaxScaleToInternalFloat(req.TaxScale)),
@@ -202,7 +205,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 				TaxScale:               req.TaxScale,
 				UnitAmountExcludingTax: unitAmountExcludingTax,
 				Description:            fmt.Sprintf("Unused Time On %d * %s After %s", -quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
-				Quantity:               -quantityDiff,
+				Quantity:               quantityDiff,
 			})
 			totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
 		}

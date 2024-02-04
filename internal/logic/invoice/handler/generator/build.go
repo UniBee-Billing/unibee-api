@@ -407,7 +407,7 @@ func (doc *Document) appendTotal() {
 	doc.pdf.CellFormat(
 		40,
 		10,
-		doc.encodeString(doc.ac.FormatMoneyDecimal(doc.TotalWithoutTaxAndWithoutDocumentDiscount())),
+		doc.encodeString(doc.SubTotalString),
 		"0",
 		0,
 		"L",
