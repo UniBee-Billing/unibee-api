@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/redis/go-redis/v9"
 	"go-oversea-pay/utility"
 	"net"
@@ -357,9 +358,10 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 			return
 		}
 	}()
+	ctx := context.Background()
 	streamName := GetQueueName(topic)
 	//fmt.Printf("MQStream XReadGroup blockReceiveConsumerMessage streamName=%s\n", streamName)
-	result, err := client.XReadGroup(context.Background(), &redis.XReadGroupArgs{
+	result, err := client.XReadGroup(ctx, &redis.XReadGroupArgs{
 		Group:    GroupId,
 		Consumer: consumerName,
 		Streams:  []string{streamName, ">"},
@@ -368,7 +370,7 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 		NoAck:    true,
 	}).Result()
 	if err != nil {
-		fmt.Printf("MQStream blockReceiveConsumerMessage streamName=%s err=%s\n", streamName, err.Error())
+		g.Log().Infof(ctx, "MQStream blockReceiveConsumerMessage streamName=%s err=%s\n", streamName, err.Error())
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {
