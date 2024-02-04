@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
@@ -10,6 +11,9 @@ import (
 )
 
 func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+	if id <= 0 {
+		return nil
+	}
 	m := dao.MerchantChannelConfig.Ctx(ctx)
 	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil {
@@ -19,6 +23,9 @@ func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantChann
 }
 
 func GetPayChannelByChannel(ctx context.Context, channel string) (one *entity.MerchantChannelConfig) {
+	if len(channel) == 0 {
+		return nil
+	}
 	err := dao.MerchantChannelConfig.Ctx(ctx).Where(entity.MerchantChannelConfig{Channel: channel}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
@@ -38,6 +45,9 @@ func GetPayChannelsGroupByEnumKey(ctx context.Context) []*entity.MerchantChannel
 }
 
 func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+	if id <= 0 {
+		return nil
+	}
 	m := dao.MerchantChannelConfig.Ctx(ctx)
 	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id)}).
 		Where(m.Builder().
@@ -50,6 +60,9 @@ func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.Me
 }
 
 func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+	if id <= 0 {
+		return nil
+	}
 	m := dao.MerchantChannelConfig.Ctx(ctx)
 	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id), ChannelType: consts.PayChannelTypeSubscription}).
 		OmitEmpty().Scan(&one)
@@ -71,6 +84,9 @@ func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.Mer
 }
 
 func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId string) error {
+	if len(productId) == 0 || id < 0 {
+		return nil
+	}
 	_, err := dao.MerchantChannelConfig.Ctx(ctx).Data(g.Map{
 		dao.MerchantChannelConfig.Columns().UniqueProductId: productId,
 		dao.MerchantChannelConfig.Columns().GmtModify:       gtime.Now(),
@@ -86,6 +102,9 @@ func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId stri
 }
 
 func UpdatePayChannelWebhookSecret(ctx context.Context, id int64, secret string) error {
+	if id <= 0 {
+		return gerror.New("invalid id")
+	}
 	_, err := dao.MerchantChannelConfig.Ctx(ctx).Data(g.Map{
 		dao.MerchantChannelConfig.Columns().WebhookSecret: secret,
 		dao.MerchantChannelConfig.Columns().GmtModify:     gtime.Now(),

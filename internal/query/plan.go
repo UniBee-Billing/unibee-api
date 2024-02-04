@@ -10,6 +10,9 @@ import (
 )
 
 func GetPlanById(ctx context.Context, id int64) (one *entity.SubscriptionPlan) {
+	if id <= 0 {
+		return nil
+	}
 	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -18,6 +21,9 @@ func GetPlanById(ctx context.Context, id int64) (one *entity.SubscriptionPlan) {
 }
 
 func GetPlanBindingAddonsByPlanId(ctx context.Context, id int64) (list []*entity.SubscriptionPlan) {
+	if id <= 0 {
+		return nil
+	}
 	var one *entity.SubscriptionPlan
 	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil && one == nil {

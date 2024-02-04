@@ -7,6 +7,9 @@ import (
 )
 
 func GetPaymentById(ctx context.Context, payId int64) (one *entity.Payment) {
+	if payId <= 0 {
+		return nil
+	}
 	err := dao.Payment.Ctx(ctx).Where(entity.Payment{Id: payId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -15,6 +18,9 @@ func GetPaymentById(ctx context.Context, payId int64) (one *entity.Payment) {
 }
 
 func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.Payment) {
+	if len(paymentId) == 0 {
+		return nil
+	}
 	err := dao.Payment.Ctx(ctx).Where(entity.Payment{PaymentId: paymentId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -23,6 +29,9 @@ func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.P
 }
 
 func GetPaymentByChannelPaymentId(ctx context.Context, channelPaymentId string) (one *entity.Payment) {
+	if len(channelPaymentId) == 0 {
+		return nil
+	}
 	err := dao.Payment.Ctx(ctx).Where(entity.Payment{ChannelPaymentId: channelPaymentId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -31,6 +40,9 @@ func GetPaymentByChannelPaymentId(ctx context.Context, channelPaymentId string) 
 }
 
 func GetPaymentByChannelUniqueId(ctx context.Context, uniqueId string) (one *entity.Payment) {
+	if len(uniqueId) == 0 {
+		return nil
+	}
 	err := dao.Payment.Ctx(ctx).Where(entity.Payment{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -39,6 +51,9 @@ func GetPaymentByChannelUniqueId(ctx context.Context, uniqueId string) (one *ent
 }
 
 func GetPaymentTimeLineByUniqueId(ctx context.Context, uniqueId string) (one *entity.PaymentTimeline) {
+	if len(uniqueId) == 0 {
+		return nil
+	}
 	err := dao.PaymentTimeline.Ctx(ctx).Where(entity.PaymentTimeline{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

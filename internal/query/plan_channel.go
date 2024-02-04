@@ -9,6 +9,9 @@ import (
 )
 
 func GetPlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.ChannelPlan) {
+	if planId <= 0 || channelId <= 0 {
+		return nil
+	}
 	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, ChannelId: channelId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -17,6 +20,9 @@ func GetPlanChannel(ctx context.Context, planId int64, channelId int64) (one *en
 }
 
 func GetActivePlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.ChannelPlan) {
+	if planId <= 0 || channelId <= 0 {
+		return nil
+	}
 	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, ChannelId: channelId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -25,6 +31,9 @@ func GetActivePlanChannel(ctx context.Context, planId int64, channelId int64) (o
 }
 
 func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entity.ChannelPlan) {
+	if planId <= 0 {
+		return nil
+	}
 	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		list = nil
@@ -33,6 +42,9 @@ func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entit
 }
 
 func GetListActiveOutChannelRos(ctx context.Context, planId int64) []*ro.OutChannelRo {
+	if planId <= 0 {
+		return nil
+	}
 	var list []*entity.ChannelPlan
 	err := dao.ChannelPlan.Ctx(ctx).Where(entity.ChannelPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {

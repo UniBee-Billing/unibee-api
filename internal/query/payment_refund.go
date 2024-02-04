@@ -7,6 +7,9 @@ import (
 )
 
 func GetRefundByRefundId(ctx context.Context, refundId string) (one *entity.Refund) {
+	if len(refundId) == 0 {
+		return nil
+	}
 	err := dao.Refund.Ctx(ctx).Where(entity.Refund{RefundId: refundId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -15,6 +18,9 @@ func GetRefundByRefundId(ctx context.Context, refundId string) (one *entity.Refu
 }
 
 func GetRefundByChannelRefundId(ctx context.Context, channelRefundId string) (one *entity.Refund) {
+	if len(channelRefundId) == 0 {
+		return nil
+	}
 	err := dao.Refund.Ctx(ctx).Where(entity.Refund{ChannelRefundId: channelRefundId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

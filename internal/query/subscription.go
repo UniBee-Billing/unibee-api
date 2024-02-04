@@ -18,6 +18,9 @@ import (
 //}
 
 func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId int64) (one *entity.Subscription) {
+	if userId <= 0 || merchantId <= 0 {
+		return nil
+	}
 	err := dao.Subscription.Ctx(ctx).
 		Where(entity.Subscription{UserId: userId}).
 		Where(entity.Subscription{MerchantId: merchantId}).
@@ -43,6 +46,9 @@ func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string)
 }
 
 func GetSubscriptionByChannelSubscriptionId(ctx context.Context, channelSubscriptionId string) (one *entity.Subscription) {
+	if len(channelSubscriptionId) == 0 {
+		return nil
+	}
 	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{ChannelSubscriptionId: channelSubscriptionId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -160,6 +166,9 @@ func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx 
 }
 
 func GetSubscriptionTimeLineByUniqueId(ctx context.Context, uniqueId string) (one *entity.SubscriptionTimeline) {
+	if len(uniqueId) == 0 {
+		return nil
+	}
 	err := dao.SubscriptionTimeline.Ctx(ctx).Where(entity.SubscriptionTimeline{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

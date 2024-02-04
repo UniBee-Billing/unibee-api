@@ -18,6 +18,9 @@ func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.I
 }
 
 func GetInvoiceByChannelInvoiceId(ctx context.Context, channelInvoiceId string) (one *entity.Invoice) {
+	if len(channelInvoiceId) == 0 {
+		return nil
+	}
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{ChannelInvoiceId: channelInvoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -26,6 +29,9 @@ func GetInvoiceByChannelInvoiceId(ctx context.Context, channelInvoiceId string) 
 }
 
 func GetInvoiceByPaymentId(ctx context.Context, paymentId string) (one *entity.Invoice) {
+	if len(paymentId) == 0 {
+		return nil
+	}
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{PaymentId: paymentId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil

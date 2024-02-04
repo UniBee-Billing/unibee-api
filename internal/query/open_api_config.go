@@ -7,6 +7,9 @@ import (
 )
 
 func GetOpenApiConfigByKey(ctx context.Context, key string) (res *entity.OpenApiConfig) {
+	if len(key) == 0 {
+		return nil
+	}
 	err := dao.OpenApiConfig.Ctx(ctx).Where(entity.OpenApiConfig{ApiKey: key}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return nil
@@ -15,6 +18,9 @@ func GetOpenApiConfigByKey(ctx context.Context, key string) (res *entity.OpenApi
 }
 
 func GetOneOpenApiConfigByMerchant(ctx context.Context, merchantId int64) (res *entity.OpenApiConfig) {
+	if merchantId <= 0 {
+		return nil
+	}
 	err := dao.OpenApiConfig.Ctx(ctx).Where(entity.OpenApiConfig{MerchantId: merchantId}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return nil
