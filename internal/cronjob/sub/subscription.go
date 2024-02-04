@@ -29,7 +29,7 @@ func mainTask(ctx context.Context) {
 }
 
 var (
-	SubscriptionDelayPaymentPermissionTime int64 = 24 * 60 * 60 // 24h expire after
+	SubscriptionCycleDelayPaymentPermissionTime int64 = 24 * 60 * 60 // 24h expire after
 )
 
 func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
@@ -57,7 +57,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
 			if sub.Status == consts.SubStatusCreate {
-				if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
+				if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
 					err := SubscriptionExpire(ctx, sub, "CreateExpireWithoutPay")
 					if err != nil {
 						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
@@ -65,7 +65,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 				}
 				continue
 			}
-			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionDelayPaymentPermissionTime < timeNow {
+			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime < timeNow {
 				// sub out of time, need expired by system
 				err := SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 				if err != nil {
