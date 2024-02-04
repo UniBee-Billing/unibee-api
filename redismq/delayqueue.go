@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
-	"go-oversea-pay/utility"
 	"strconv"
 	"time"
 )
@@ -68,7 +68,7 @@ func pollingCore(key string) {
 	ctx := context.Background()
 	result, err := client.ZRangeByScore(ctx, key, &redis.ZRangeBy{
 		Min:    "0",
-		Max:    strconv.FormatInt(utility.CurrentTimeMillis(), 10),
+		Max:    strconv.FormatInt(gtime.Now().Timestamp(), 10),
 		Offset: 0,
 		Count:  1,
 	}).Result()
@@ -114,7 +114,7 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 		return false, errors.New(fmt.Sprintf("SendDelay exception:%s message:%v\n", err.Error(), message))
 	}
 	jsonString := string(messageJson)
-	score := utility.CurrentTimeMillis() + delay
+	score := gtime.Now().Timestamp() + delay
 	result, err := client.ZAdd(context.Background(), MQ_DELAY_QUEUE_NAME, redis.Z{
 		Score:  float64(score),
 		Member: jsonString,
