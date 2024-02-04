@@ -107,7 +107,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 	return nil
 }
 
-func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
+func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, userId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false

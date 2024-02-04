@@ -13,11 +13,11 @@ type SubscriptionCreateListener struct {
 }
 
 func (t SubscriptionCreateListener) GetTopic() string {
-	return redismq2.TopicSubscriptionCreatePaymentCheck.Topic
+	return redismq2.TopicSubscriptionCreate.Topic
 }
 
 func (t SubscriptionCreateListener) GetTag() string {
-	return redismq2.TopicSubscriptionCreatePaymentCheck.Tag
+	return redismq2.TopicSubscriptionCreate.Tag
 }
 
 func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {

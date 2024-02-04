@@ -21,6 +21,7 @@ var (
 	TopicSubscriptionExpire             = redismq.MQTopicEnum{"unibee_subscription", "subscription_expired", "subscription expired"}
 	TopicSubscriptionCreate             = redismq.MQTopicEnum{"unibee_subscription", "subscription_created", "subscription created"}
 	TopicSubscriptionCreatePaymentCheck = redismq.MQTopicEnum{"unibee_subscription", "subscription_create_payment_check", "subscription create payment check"}
+	TopicSubscriptionPaymentSuccess     = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}
 )
 
 type SRedisMqConfig struct{}

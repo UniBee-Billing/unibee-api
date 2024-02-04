@@ -95,11 +95,11 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 	return addons
 }
 
-func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.NumberValidateRes, error) {
+func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId int64) (*vat.NumberValidateRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	utility.Assert(len(req.VatNumber) > 0, "vatNumber invalid")
-	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, req.MerchantId, req.VatNumber, "")
+	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, req.MerchantId, userId, req.VatNumber, "")
 	if err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var vatNumberValidate *ro.ValidResult
 
 	if len(req.VatNumber) > 0 {
-		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.VatNumber, "")
+		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}

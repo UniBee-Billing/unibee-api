@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/logic/email"
@@ -12,6 +13,7 @@ import (
 	"go-oversea-pay/internal/logic/user"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
+	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
 	"strings"
 )
@@ -112,7 +114,11 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				//todo mark
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
-			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
+				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
+				Body:  payment.SubscriptionId,
+			})
 		}
 	}
 }
