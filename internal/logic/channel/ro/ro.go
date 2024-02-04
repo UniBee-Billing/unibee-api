@@ -105,6 +105,7 @@ type ChannelPaymentRo struct {
 	CreateTime                  *gtime.Time                            `json:"createTime" `
 	CancelTime                  *gtime.Time                            `json:"cancelTime" `
 	CancelReason                string                                 `json:"cancelReason" `
+	PaymentData                 string                                 `json:"paymentData" `
 	ChannelId                   int64                                  `json:"channelId"         `
 	ChannelUserId               string                                 `json:"channelUserId"         `
 	ChannelPaymentId            string                                 `json:"channelPaymentId"              `

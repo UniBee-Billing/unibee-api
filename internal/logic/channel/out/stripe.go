@@ -1416,8 +1416,6 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 		captureStatus = consts.WAITING_AUTHORIZED
 		if item.LastPaymentError != nil {
 			authorizeReason = item.LastPaymentError.Msg
-		} else if item.NextAction != nil {
-			authorizeReason = utility.MarshalToJsonString(item.NextAction)
 		}
 	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
 		captureStatus = consts.CAPTURE_REQUEST
@@ -1431,13 +1429,14 @@ func parseStripePayment(item *stripe.PaymentIntent, payChannel *entity.MerchantC
 		Status:           status,
 		AuthorizeStatus:  captureStatus,
 		AuthorizeReason:  authorizeReason,
+		CancelReason:     string(item.CancellationReason),
+		PaymentData:      utility.MarshalToJsonString(item.NextAction),
 		TotalAmount:      item.Amount,
 		PaymentAmount:    item.AmountReceived,
 		Currency:         strings.ToUpper(string(item.Currency)),
 		PayTime:          gtime.NewFromTimeStamp(item.Created),
 		CreateTime:       gtime.NewFromTimeStamp(item.Created),
 		CancelTime:       gtime.NewFromTimeStamp(item.CanceledAt),
-		CancelReason:     string(item.CancellationReason),
 	}
 }
 

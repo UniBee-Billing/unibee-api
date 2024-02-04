@@ -146,7 +146,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	return err
 }
 
-func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string) (err error) {
+func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string, paymentData string) (err error) {
 	g.Log().Infof(ctx, "HandlePayNeedAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil")
@@ -158,6 +158,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().AuthorizeStatus:  consts.WAITING_AUTHORIZED,
 				dao.Payment.Columns().AuthorizeReason:  authorizeReason,
+				dao.Payment.Columns().PaymentData:      paymentData,
 				dao.Payment.Columns().ChannelPaymentId: payment.ChannelPaymentId},
 				g.Map{dao.Payment.Columns().Id: payment.Id,
 					dao.Payment.Columns().Status: consts.TO_BE_PAID})
@@ -536,7 +537,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 				return err
 			}
 		} else if channelPayRo.AuthorizeStatus == consts.WAITING_AUTHORIZED {
-			err := HandlePayNeedAuthorized(ctx, one, channelPayRo.AuthorizeReason)
+			err := HandlePayNeedAuthorized(ctx, one, channelPayRo.AuthorizeReason, channelPayRo.PaymentData)
 			if err != nil {
 				return err
 			}
@@ -593,7 +594,9 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			CreateTime:             channelPayRo.CreateTime,
 			CancelTime:             channelPayRo.CancelTime,
 			PaidTime:               channelPayRo.PayTime,
-			PaymentData:            channelPayRo.CancelReason,
+			FailureReason:          channelPayRo.CancelReason,
+			PaymentData:            channelPayRo.PaymentData,
+			AuthorizeReason:        channelPayRo.AuthorizeReason,
 			UniqueId:               channelPayRo.UniqueId,
 			SubscriptionId:         subscriptionId,
 			InvoiceId:              invoiceId,
@@ -625,7 +628,9 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			dao.Payment.Columns().CreateTime:             channelPayRo.CreateTime,
 			dao.Payment.Columns().CancelTime:             channelPayRo.CancelTime,
 			dao.Payment.Columns().PaidTime:               channelPayRo.PayTime,
-			dao.Payment.Columns().PaymentData:            channelPayRo.CancelReason,
+			dao.Payment.Columns().FailureReason:          channelPayRo.CancelReason,
+			dao.Payment.Columns().PaymentData:            channelPayRo.PaymentData,
+			dao.Payment.Columns().AuthorizeReason:        channelPayRo.AuthorizeReason,
 			dao.Payment.Columns().SubscriptionId:         subscriptionId,
 			dao.Payment.Columns().InvoiceId:              invoiceId,
 			dao.Invoice.Columns().GmtModify:              gtime.Now(),

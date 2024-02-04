@@ -492,7 +492,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 					PaidTime:                         paymentIntentDetail.PayTime,
 					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
 					CaptureAmount:                    0,
-					Reason:                           paymentIntentDetail.Reason,
+					Reason:                           paymentIntentDetail.CancelReason,
 					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
 				})
 				if err != nil {
@@ -508,14 +508,14 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 					PaidTime:                         paymentIntentDetail.PayTime,
 					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
 					CaptureAmount:                    0,
-					Reason:                           paymentIntentDetail.Reason,
+					Reason:                           paymentIntentDetail.CancelReason,
 					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
 				})
 				if err != nil {
 					return err
 				}
 			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
-				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason)
+				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason, paymentIntentDetail.PaymentData)
 				if err != nil {
 					return err
 				}
@@ -543,6 +543,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	var status = consts.TO_BE_PAID
 	var authorizeStatus = consts.AUTHORIZED
 	var authorizeReason = ""
+	var cancelReason = ""
+	var paymentData = ""
 	if invoiceDetails.Status == consts.InvoiceStatusPaid {
 		status = consts.PAY_SUCCESS
 		authorizeStatus = consts.CAPTURE_REQUEST
@@ -552,11 +554,14 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		status = consts.PAY_CANCEL
 	} else if strings.Compare("invoice.payment_action_required", eventType) == 0 {
 		authorizeStatus = consts.WAITING_AUTHORIZED
-		if len(invoiceDetails.ChannelPaymentId) > 0 {
-			paymentIntentDetail, _ := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPaymentDetail(ctx, payChannel, invoiceDetails.ChannelPaymentId)
-			if paymentIntentDetail != nil {
-				authorizeReason = paymentIntentDetail.AuthorizeReason
-			}
+	}
+
+	if len(invoiceDetails.ChannelPaymentId) > 0 {
+		paymentIntentDetail, _ := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPaymentDetail(ctx, payChannel, invoiceDetails.ChannelPaymentId)
+		if paymentIntentDetail != nil {
+			authorizeReason = paymentIntentDetail.AuthorizeReason
+			cancelReason = paymentIntentDetail.CancelReason
+			paymentData = paymentIntentDetail.PaymentData
 		}
 	}
 
@@ -594,6 +599,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		BalanceStart:                invoiceDetails.BalanceStart,
 		BalanceEnd:                  invoiceDetails.BalanceEnd,
 		Reason:                      invoiceDetails.Reason,
+		CancelReason:                cancelReason,
+		PaymentData:                 paymentData,
 		UniqueId:                    invoiceDetails.ChannelInvoiceId,
 		PayTime:                     gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
 		CreateTime:                  gtime.NewFromTimeStamp(invoiceDetails.CreateTime),
@@ -729,6 +736,27 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 				})
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
+				}
+			} else if paymentIntentDetail.Status == consts.PAY_CANCEL {
+				err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
+					PaymentId:                        payment.PaymentId,
+					ChannelPaymentIntentId:           paymentIntentDetail.ChannelPaymentId,
+					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
+					TotalAmount:                      paymentIntentDetail.TotalAmount,
+					PayStatusEnum:                    consts.PAY_CANCEL,
+					PaidTime:                         paymentIntentDetail.PayTime,
+					PaymentAmount:                    paymentIntentDetail.PaymentAmount,
+					CaptureAmount:                    0,
+					Reason:                           paymentIntentDetail.CancelReason,
+					ChannelDetailInvoiceInternalResp: paymentIntentDetail.ChannelInvoiceDetail,
+				})
+				if err != nil {
+					return err
+				}
+			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason, paymentIntentDetail.PaymentData)
+				if err != nil {
+					return err
 				}
 			}
 			return nil
