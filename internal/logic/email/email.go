@@ -229,5 +229,5 @@ func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title str
 		AttachFile: attachFilePath,
 		Response:   response,
 	}
-	_, _ = dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	_, _ = dao.EmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }
