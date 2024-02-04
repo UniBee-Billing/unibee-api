@@ -12,18 +12,15 @@ import (
 )
 
 func Send(message *Message) (bool, error) {
-	if message.StartDeliverTime > 0 {
-		return false, errors.New("暂不支持延迟消息")
-	}
 	return sendMessage(message, "ProducerWrapper")
 }
 func SendTransaction(message *Message, transactionExecuter func(messageToSend *Message) (TransactionStatus, error)) (bool, error) {
 	if strings.Compare(message.Tag, "blank") == 0 {
-		return false, errors.New("blank空消息")
+		return false, errors.New("blank tag message")
 	}
 
 	if message.StartDeliverTime > 0 {
-		return false, errors.New("事务不支持发送延时消息")
+		return false, errors.New("delay message not support transaction")
 	}
 
 	send, err := sendTransactionPrepareMessage(message)
