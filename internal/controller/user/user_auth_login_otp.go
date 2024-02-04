@@ -15,6 +15,20 @@ import (
 )
 
 func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {
+
+	redisKey := fmt.Sprintf("UserAuth-Login-Email:%s", req.Email)
+	isDuplicatedInvoke := false
+	defer func() {
+		if !isDuplicatedInvoke {
+			utility.ReleaseLock(ctx, redisKey)
+		}
+	}()
+
+	if !utility.TryLock(ctx, redisKey, 15) {
+		isDuplicatedInvoke = true
+		return nil, gerror.Newf(`click too fast`)
+	}
+
 	verificationCode := generateRandomString(6)
 	fmt.Printf("verification ", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)

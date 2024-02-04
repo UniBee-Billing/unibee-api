@@ -58,6 +58,19 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	//	return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
 	//}
 
+	redisKey := fmt.Sprintf("MerchantAuth-Regist-Email:%s", req.Email)
+	isDuplicatedInvoke := false
+	defer func() {
+		if !isDuplicatedInvoke {
+			utility.ReleaseLock(ctx, redisKey)
+		}
+	}()
+
+	if !utility.TryLock(ctx, redisKey, 15) {
+		isDuplicatedInvoke = true
+		return nil, gerror.Newf(`click too fast`)
+	}
+
 	userStr, err := json.Marshal(
 		struct {
 			FirstName, LastName, Email, Password, Phone, Address, UserName string

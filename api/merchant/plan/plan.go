@@ -58,7 +58,7 @@ type SubscriptionPlanAddonsBindingRes struct {
 type SubscriptionPlanListReq struct {
 	g.Meta        `path:"/subscription_plan_list" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan List"`
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	Type          int    `p:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
+	Type          int    `p:"type"  dc:"1-main plan，2-addon plan" `
 	Status        int    `p:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
 	PublishStatus int    `p:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
 	Currency      string `p:"currency" dc:"Filter Currency"  `

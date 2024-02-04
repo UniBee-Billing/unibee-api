@@ -51,6 +51,20 @@ func IsEmailValid(email string) bool {
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
 	utility.Assert(len(req.Email) > 0, "Email Needed")
 	utility.Assert(IsEmailValid(req.Email), "Invalid Email")
+
+	redisKey := fmt.Sprintf("UserAuth-Regist-Email:%s", req.Email)
+	isDuplicatedInvoke := false
+	defer func() {
+		if !isDuplicatedInvoke {
+			utility.ReleaseLock(ctx, redisKey)
+		}
+	}()
+
+	if !utility.TryLock(ctx, redisKey, 15) {
+		isDuplicatedInvoke = true
+		return nil, gerror.Newf(`click too fast`)
+	}
+
 	var newOne *entity.UserAccount
 	newOne = query.GetUserAccountByEmail(ctx, req.Email) //Id(ctx, user.Id)
 	utility.Assert(newOne == nil, "Email already existed")
