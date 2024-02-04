@@ -37,7 +37,7 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		dao.MerchantInfo.Columns().CompanyLogo: companyLogo,
 		dao.MerchantInfo.Columns().Phone:       req.Phone,
 		dao.MerchantInfo.Columns().GmtModify:   gtime.Now(),
-	}).Where(dao.MerchantInfo.Columns().Id, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId).OmitNil().Update()
+	}).Where(dao.MerchantInfo.Columns().Id, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
