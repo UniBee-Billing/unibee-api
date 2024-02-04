@@ -9,6 +9,7 @@ import (
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
+	"strings"
 
 	"go-oversea-pay/api/merchant/merchantinfo"
 )
@@ -20,13 +21,20 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "MerchantId invalid")
 	}
+	info := query.GetMerchantInfoById(ctx, int64(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId))
+	utility.Assert(info != nil, "merchantInfo not found")
+	var companyLogo = info.CompanyLogo
+	if len(req.CompanyLogo) > 0 {
+		utility.Assert(strings.HasPrefix(companyLogo, "http"), "companyLogo Invalid, should has http prefix")
+		companyLogo = req.CompanyLogo
+	}
 	_, err = dao.MerchantInfo.Ctx(ctx).Data(g.Map{
 		dao.MerchantInfo.Columns().Email:       req.Email,
 		dao.MerchantInfo.Columns().LastName:    req.LastName,
 		dao.MerchantInfo.Columns().FirstName:   req.FirstName,
 		dao.MerchantInfo.Columns().Address:     req.Address,
 		dao.MerchantInfo.Columns().CompanyName: req.CompanyName,
-		dao.MerchantInfo.Columns().CompanyLogo: req.CompanyLogo,
+		dao.MerchantInfo.Columns().CompanyLogo: companyLogo,
 		dao.MerchantInfo.Columns().Phone:       req.Phone,
 		dao.MerchantInfo.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.MerchantInfo.Columns().Id, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId).OmitNil().Update()
