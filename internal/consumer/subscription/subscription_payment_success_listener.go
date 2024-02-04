@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/logic/user"
 	"go-oversea-pay/internal/query"
@@ -24,7 +25,7 @@ func (t SubscriptionPaymentSuccessListener) GetTag() string {
 func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	fmt.Printf("SubscriptionPaymentSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionPaymentSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		user.UpdateUserDefaultSubscription(ctx, sub.UserId, sub.SubscriptionId)

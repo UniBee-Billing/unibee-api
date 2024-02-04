@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/redismq"
 	"go-oversea-pay/utility"
@@ -22,7 +23,7 @@ func (t SubscriptionCreatePaymentCheckListener) GetTag() string {
 func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	fmt.Printf("SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
 	//sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	//
 	//if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= 2*24*60*60 {

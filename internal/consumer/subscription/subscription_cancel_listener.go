@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
@@ -27,7 +28,7 @@ func (t SubscriptionCancelListener) GetTag() string {
 func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	fmt.Printf("SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	//Cancelled SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate
