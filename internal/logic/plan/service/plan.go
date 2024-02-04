@@ -125,6 +125,8 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
+	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
+	utility.Assert(len(req.Description) > 0, "description should not blank")
 
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
@@ -205,6 +207,8 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
+	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
+	utility.Assert(len(req.Description) > 0, "description should not blank")
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 	if strings.ToLower(req.IntervalUnit) == "day" {
