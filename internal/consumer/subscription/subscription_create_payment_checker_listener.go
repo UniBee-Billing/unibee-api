@@ -52,8 +52,6 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 			}, 24*60*60) //every day send util expire
 			if err != nil {
 				return redismq.CommitMessage
-			} else {
-				return redismq.ReconsumeLater
 			}
 		}
 	}

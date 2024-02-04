@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
 	"go-oversea-pay/utility"
 	"strings"
@@ -47,7 +48,8 @@ func SendTransaction(message *Message, transactionExecuter func(messageToSend *M
 }
 
 func sendDelayMessage(message *Message) bool {
-	send, err := SendDelay(message, message.StartDeliverTime-utility.CurrentTimeMillis())
+	utility.Assert(message.StartDeliverTime-gtime.Now().Timestamp() > 0, "StartDeliverTime Invalid, should > now")
+	send, err := SendDelay(message, message.StartDeliverTime-gtime.Now().Timestamp())
 	fmt.Printf("Redismq SendDelayMessage result:%v", send)
 	if err != nil {
 		return false

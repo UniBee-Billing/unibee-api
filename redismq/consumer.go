@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
 	"go-oversea-pay/utility"
 	"net"
@@ -296,7 +297,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		}()
 		time.Sleep(2 * time.Second)
 		action := consumer.Consume(ctx, message)
-		fmt.Printf("RedisMQ_Receive Stream Message messageKey:%s result:%d message:%v cost:%dms", GetMessageKey(message.Topic, message.Tag), action, message, cost)
+		fmt.Printf("RedisMQ_Receive Stream Message messageKey:%s result:%d message:%v cost:%dms\n", GetMessageKey(message.Topic, message.Tag), action, message, cost)
 		if action == ReconsumeLater {
 			if pushTaskToResumeLater(consumer, message) {
 				messageAck(message)
@@ -394,7 +395,7 @@ func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
 	} else {
 		//延长时间重新发送消息
 		message.ReconsumeTimes = message.ReconsumeTimes + 1
-		message.StartDeliverTime = utility.CurrentTimeMillis() + (20 * 1000 * int64(message.ReconsumeTimes)) // 20 秒
+		message.StartDeliverTime = gtime.Now().Timestamp() + (20 * int64(message.ReconsumeTimes)) // 20 Second Up
 		return sendDelayMessage(message)
 	}
 }

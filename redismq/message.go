@@ -14,14 +14,14 @@ type Message struct {
 	Tag              string                 `json:"tag" dc:"Tag"`
 	Body             string                 `json:"body" dc:"Body"`
 	Key              string                 `json:"key" dc:"Key"`
-	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Mills"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Second"`
 	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
 	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
 	SendTime         int64                  `json:"sendTime" dc:"Sent Time"`
 }
 
 type MessageMetaData struct {
-	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Mills"`
+	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Second"`
 	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
 	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
 	Key              string                 `json:"key" dc:"Key"`
