@@ -100,6 +100,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().TokenUserAuth,
 				)
 				router.UserVat(ctx, group)
 			})

@@ -17,23 +17,23 @@ type VatSense struct {
 }
 
 func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
-	// 用户名和密码
+	// username and password
 	username := "user"
 	password := passwd
 
-	// 创建 HTTP 请求
+	// Create HTTP Request
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		fmt.Println("FetchVatSense Error creating request:", err)
 		return nil, err
 	}
 
-	// 添加 HTTP 基本认证头部
+	// Add HTTP Header
 	auth := username + ":" + password
 	authEncoded := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 	req.Header.Set("Authorization", authEncoded)
 
-	// 发起 HTTP 请求
+	// send HTTP
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -47,14 +47,14 @@ func fetchVatSense(url string, passwd string) (*gjson.Json, error) {
 		}
 	}(resp.Body)
 
-	// 读取响应内容
+	// read response
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("FetchVatSense Error reading response body:", err)
 		return nil, err
 	}
 
-	// 打印响应内容
+	// print response
 	fmt.Printf("FetchVatSense Response:%s\n", string(body))
 
 	return gjson.LoadJson(string(body))
