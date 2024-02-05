@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	generator2 "go-oversea-pay/internal/logic/invoice/handler/generator"
 	"go-oversea-pay/internal/logic/oss"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"

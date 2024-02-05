@@ -5,7 +5,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
+	"go-oversea-pay/internal/logic/gateway/api"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )
@@ -30,7 +30,7 @@ func DoChannelCancel(ctx context.Context, payment *entity.Payment) (err error) {
 		//}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
-		_, err = out.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelCancel(ctx, payment)
+		_, err = api.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelCancel(ctx, payment)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

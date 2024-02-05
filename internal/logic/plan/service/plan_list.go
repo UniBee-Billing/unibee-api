@@ -6,7 +6,7 @@ import (
 	"go-oversea-pay/api/merchant/plan"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	ro2 "go-oversea-pay/internal/logic/channel/ro"
+	ro2 "go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"

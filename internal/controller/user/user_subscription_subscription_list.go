@@ -4,7 +4,7 @@ import (
 	"context"
 	"go-oversea-pay/internal/consts"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/service"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"

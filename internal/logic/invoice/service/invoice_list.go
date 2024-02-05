@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"

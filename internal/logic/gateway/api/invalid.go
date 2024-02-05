@@ -1,8 +1,8 @@
-package out
+package api
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 

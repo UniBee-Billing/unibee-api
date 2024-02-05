@@ -8,7 +8,7 @@ import (
 	redismq2 "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	handler2 "go-oversea-pay/internal/logic/payment/handler"
 	"go-oversea-pay/internal/logic/payment/service"

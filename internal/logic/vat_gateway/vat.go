@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/merchant_config"
 	vat "go-oversea-pay/internal/logic/vat_gateway/github"
 	"go-oversea-pay/internal/logic/vat_gateway/vatsense"

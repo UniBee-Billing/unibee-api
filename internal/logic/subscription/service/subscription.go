@@ -13,9 +13,9 @@ import (
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
+	"go-oversea-pay/internal/logic/gateway/api"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/invoice/invoice_compute"
 	"go-oversea-pay/internal/logic/payment/service"
 	subscription2 "go-oversea-pay/internal/logic/subscription"
@@ -344,7 +344,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			Paid:                  createPaymentResult.Status == consts.PAY_SUCCESS,
 		}
 	} else {
-		createRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
+		createRes, err = api.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
 			Plan:           prepare.Plan,
 			AddonPlans:     prepare.Addons,
 			PlanChannel:    prepare.PlanChannel,
@@ -608,7 +608,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			prorationDate = prorationInvoice.ProrationDate
 			totalAmount = prorationInvoice.TotalAmount
 		} else {
-			updatePreviewRes, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			updatePreviewRes, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 				Plan:            plan,
 				Quantity:        req.Quantity,
 				AddonPlans:      addons,
@@ -894,7 +894,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			}
 		}
 	} else {
-		subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		subUpdateRes, err = api.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            prepare.Plan,
 			Quantity:        prepare.Quantity,
 			AddonPlans:      prepare.Addons,
@@ -993,7 +993,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 	var nextStatus = consts.SubStatusPendingInActive
 	if sub.Type == consts.SubTypeDefault {
-		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
+		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
 			Plan:         plan,
 			PlanChannel:  planChannel,
 			Subscription: sub,
@@ -1061,7 +1061,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}
@@ -1122,7 +1122,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}
@@ -1163,7 +1163,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(payChannel != nil, "payChannel not found")
 
 	if sub.Type == consts.SubTypeDefault {
-		details, err := out.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+		details, err := api.GetPayChannelServiceProvider(ctx, sub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
 		utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
 		err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
 		sub = query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
@@ -1172,7 +1172,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 	if sub.Type == consts.SubTypeDefault {
-		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
+		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 		if err != nil {
 			return err
 		}
@@ -1197,7 +1197,7 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	utility.Assert(payChannel != nil, "payChannel not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not trialed")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}

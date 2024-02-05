@@ -1,4 +1,4 @@
-package out
+package api
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 	"time"

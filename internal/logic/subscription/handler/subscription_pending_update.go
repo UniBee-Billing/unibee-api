@@ -8,9 +8,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/ro"
 	"go-oversea-pay/internal/logic/email"
+	"go-oversea-pay/internal/logic/gateway/api"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
@@ -50,7 +50,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		if err != nil {
 			return false, err
 		}
-		_, err = out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		_, err = api.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            query.GetPlanById(ctx, one.UpdatePlanId),
 			Quantity:        one.UpdateQuantity,
 			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.ChannelId),

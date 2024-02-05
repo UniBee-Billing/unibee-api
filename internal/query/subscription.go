@@ -4,7 +4,7 @@ import (
 	"context"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/utility"
 )

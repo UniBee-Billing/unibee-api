@@ -9,7 +9,7 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
+	"go-oversea-pay/internal/logic/gateway/api"
 	"go-oversea-pay/internal/logic/payment/event"
 	"go-oversea-pay/internal/logic/payment/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -97,7 +97,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			one.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelResult, err := out.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelRefund(ctx, payment, one)
+			channelResult, err := api.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelRefund(ctx, payment, one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err

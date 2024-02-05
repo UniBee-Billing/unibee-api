@@ -8,10 +8,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
-	"go-oversea-pay/internal/logic/channel"
-	"go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/out/log"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway"
+	"go-oversea-pay/internal/logic/gateway/api"
+	"go-oversea-pay/internal/logic/gateway/api/log"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/subscription/handler"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
@@ -60,7 +60,7 @@ func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 	if len(result.Webhooks) == 0 {
 		//创建
 		param := &paypal.CreateWebhookRequest{
-			URL: channel.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
+			URL: gateway.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)),
 			EventTypes: []paypal.WebhookEventType{
 				{Name: "BILLING.SUBSCRIPTION.CREATED"},
 				{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
@@ -113,7 +113,7 @@ func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 			{
 				Operation: "replace",
 				Path:      "/url",
-				Value:     strings.Replace(channel.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
+				Value:     strings.Replace(gateway.GetPaymentWebhookEntranceUrl(int64(payChannel.Id)), "http://", "https://", 1), //paypal 只支持 https
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
@@ -137,7 +137,7 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 	if unibSub != nil {
 		plan := query.GetPlanById(ctx, unibSub.PlanId)
 		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
-		details, err := out.GetPayChannelServiceProvider(ctx, unibSub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+		details, err := api.GetPayChannelServiceProvider(ctx, unibSub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
 		if err != nil {
 			return err
 		}

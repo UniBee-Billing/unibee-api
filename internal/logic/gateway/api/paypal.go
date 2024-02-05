@@ -1,4 +1,4 @@
-package out
+package api
 
 import (
 	"context"
@@ -6,9 +6,9 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/plutov/paypal/v4"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/channel/out/log"
-	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/channel/util"
+	"go-oversea-pay/internal/logic/gateway/api/log"
+	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/gateway/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"

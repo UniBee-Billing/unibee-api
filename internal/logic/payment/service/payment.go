@@ -11,8 +11,8 @@ import (
 	redismqcmd "go-oversea-pay/internal/cmd/redismq"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/api"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/invoice/handler"
 	"go-oversea-pay/internal/logic/payment/callback"
 	"go-oversea-pay/internal/logic/payment/event"
@@ -81,7 +81,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
-			channelInternalPayResult, err = out.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
+			channelInternalPayResult, err = api.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}

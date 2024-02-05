@@ -2,8 +2,8 @@ package balance
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/channel/out"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/api"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 )
@@ -15,7 +15,7 @@ func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64,
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(merchant != nil, "merchant not found")
 
-	queryResult, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
+	queryResult, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func MerchantBalanceDetailQuery(ctx context.Context, merchantId int64, channelId
 	payChannel := query.GetPayChannelById(ctx, channelId) // todo mark 根据 MerchantId 配置 PayChannel
 	utility.Assert(merchant != nil, "merchant not found")
 
-	queryResult, err := out.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+	queryResult, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
 	if err != nil {
 		return nil, err
 	}

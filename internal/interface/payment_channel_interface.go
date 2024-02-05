@@ -3,7 +3,7 @@ package _interface
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/logic/channel/ro"
+	"go-oversea-pay/internal/logic/gateway/ro"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 

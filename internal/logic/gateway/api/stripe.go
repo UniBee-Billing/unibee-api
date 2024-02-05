@@ -1,4 +1,4 @@
-package out
+package api
 
 import (
 	"context"
@@ -20,11 +20,11 @@ import (
 	"github.com/stripe/stripe-go/v76/taxrate"
 	"go-oversea-pay/internal/consts"
 	dao "go-oversea-pay/internal/dao/oversea_pay"
-	webhook2 "go-oversea-pay/internal/logic/channel"
-	_ "go-oversea-pay/internal/logic/channel/base"
-	"go-oversea-pay/internal/logic/channel/out/log"
-	"go-oversea-pay/internal/logic/channel/ro"
-	"go-oversea-pay/internal/logic/channel/util"
+	webhook2 "go-oversea-pay/internal/logic/gateway"
+	"go-oversea-pay/internal/logic/gateway/api/log"
+	_ "go-oversea-pay/internal/logic/gateway/base"
+	"go-oversea-pay/internal/logic/gateway/ro"
+	"go-oversea-pay/internal/logic/gateway/util"
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
