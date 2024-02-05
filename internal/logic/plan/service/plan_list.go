@@ -19,7 +19,7 @@ type SubscriptionPlanListInternalReq struct {
 	Type          int    `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
 	Status        int    `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int    `p:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
-	Currency      string `p:"currency" d:"usd"  dc:"Currency"  `
+	Currency      string `p:"currency" dc:"Currency"  `
 	SortField     string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page          int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
