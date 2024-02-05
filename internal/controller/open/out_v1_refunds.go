@@ -18,7 +18,7 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 	//参数有效性校验 todo mark
 	openApiConfig, _ := merchantCheck(ctx, req.MerchantId)
 
-	resp, err := service.DoChannelRefund(ctx, consts.BIZ_TYPE_ONE_TIME, req, int64(openApiConfig.Id))
+	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BIZ_TYPE_ONE_TIME, req, int64(openApiConfig.Id))
 	if err != nil {
 		return nil, err
 	}

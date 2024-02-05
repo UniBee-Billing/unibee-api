@@ -44,8 +44,8 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 
 	var invoiceItems []*ro.InvoiceItemDetailRo
 	var totalAmountExcludingTax int64 = 0
@@ -84,7 +84,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Currency:                       strings.ToUpper(req.Currency),
 		Lines:                          utility.MarshalToJsonString(invoiceItems),
-		GatewayId:                      req.ChannelId,
+		GatewayId:                      req.GatewayId,
 		Status:                         consts.InvoiceStatusPending,
 		SendStatus:                     0,
 		SendEmail:                      user.Email,
@@ -118,11 +118,11 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
-	if req.ChannelId > 0 {
-		payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId)
-		utility.Assert(payChannel != nil, "payChannel not found")
+	if req.GatewayId > 0 {
+		gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId)
+		utility.Assert(gateway != nil, "gateway not found")
 	} else {
-		req.ChannelId = one.GatewayId
+		req.GatewayId = one.GatewayId
 	}
 	if len(req.Currency) == 0 {
 		req.Currency = one.Currency
@@ -161,7 +161,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		dao.Invoice.Columns().Currency:                       strings.ToUpper(req.Currency),
 		dao.Invoice.Columns().Currency:                       req.Currency,
 		dao.Invoice.Columns().TaxScale:                       req.TaxScale,
-		dao.Invoice.Columns().GatewayId:                      req.ChannelId,
+		dao.Invoice.Columns().GatewayId:                      req.GatewayId,
 		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(invoiceItems),
 		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
@@ -174,7 +174,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	//}
 	one.Currency = req.Currency
 	one.TaxScale = req.TaxScale
-	one.GatewayId = req.ChannelId
+	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.ProcessInvoiceForPayReq{
@@ -223,11 +223,11 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	} else {
 		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 		utility.Assert(payment != nil, "payment not found")
-		payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.GatewayId)
-		utility.Assert(payChannel != nil, "payChannel not found")
-		err := service.DoChannelCancel(ctx, payment)
+		gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
+		utility.Assert(gateway != nil, "gateway not found")
+		err := service.PaymentGatewayCancel(ctx, payment)
 		if err != nil {
-			g.Log().Errorf(ctx, `DoChannelCancel failure %s`, err.Error())
+			g.Log().Errorf(ctx, `PaymentGatewayCancel failure %s`, err.Error())
 		}
 		return err
 	}
@@ -238,8 +238,8 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.GatewayId)
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 	var lines []*ro.InvoiceItemDetailRo
 	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
 	if err != nil {
@@ -251,13 +251,13 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
 
 	createPayContext := &ro.CreatePayContext{
-		PayChannel: payChannel,
+		Gateway: gateway,
 		Pay: &entity.Payment{
 			BizId:           one.InvoiceId,
 			BizType:         consts.BIZ_TYPE_INVOICE,
 			AuthorizeStatus: consts.AUTHORIZED,
 			UserId:          one.UserId,
-			GatewayId:       int64(payChannel.Id),
+			GatewayId:       int64(gateway.Id),
 			TotalAmount:     one.TotalAmount,
 			Currency:        one.Currency,
 			CountryCode:     user.CountryCode,
@@ -293,9 +293,9 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 		DaysUtilDue:            req.DaysUtilDue, //one day expire
 	}
 
-	createRes, err := service.DoChannelPay(ctx, createPayContext)
+	createRes, err := service.GatewayPaymentCreate(ctx, createPayContext)
 
-	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, &ro.ChannelCreateInvoiceInternalReq{
+	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.GatewayId).GatewayInvoiceCreateAndPay(ctx, gateway, &ro.GatewayCreateInvoiceInternalReq{
 	//	Invoice:      one,
 	//	InvoiceLines: lines,
 	//	PayMethod:    req.PayMethod,
@@ -313,8 +313,8 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	}
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		//dao.Invoice.Columns().ChannelInvoiceId:  createRes.ChannelInvoiceId,
-		//dao.Invoice.Columns().ChannelInvoicePdf: createRes.ChannelInvoicePdf,
+		//dao.Invoice.Columns().GatewayInvoiceId:  createRes.GatewayInvoiceId,
+		//dao.Invoice.Columns().GatewayInvoicePdf: createRes.GatewayInvoicePdf,
 		dao.Invoice.Columns().Status:    invoiceStatus,
 		dao.Invoice.Columns().Link:      createRes.Link,
 		dao.Invoice.Columns().GmtModify: gtime.Now(),
@@ -343,7 +343,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
-	refund, err := service.DoChannelRefund(ctx, payment.BizType, &v1.RefundsReq{
+	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.RefundsReq{
 		PaymentId:        one.PaymentId,
 		MerchantId:       one.MerchantId,
 		MerchantRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),

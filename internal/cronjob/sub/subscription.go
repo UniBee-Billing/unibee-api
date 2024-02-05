@@ -145,7 +145,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice CreateSubInvoicePayment err:", err.Error())
 						continue
 					}
-					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice DoChannelPay:", utility.MarshalToJsonString(createRes))
+					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice GatewayPaymentCreate:", utility.MarshalToJsonString(createRes))
 					_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 						dao.Subscription.Columns().TaskTime: gtime.Now(),
 					}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
@@ -194,7 +194,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		fmt.Printf("SubscriptionExpire GetPaymentList error:%s", err.Error())
 	}
 	for _, p := range paymentList {
-		// todo mark should use DoChannelCancel
+		// todo mark should use PaymentGatewayCancel
 		err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 			PaymentId:     p.PaymentId,
 			PayStatusEnum: consts.PAY_CANCEL,

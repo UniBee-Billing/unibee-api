@@ -12,7 +12,7 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	//go func() {
 	//ctx := context.Background()
 	//channelEntity := util.GetOverseaPayChannel(ctx, 25)
-	//utility.Assert(channelEntity != nil, "channel not found")
+	//utility.Assert(channelEntity != nil, "gateway not found")
 	stripe.Key = "sk_test_51ONBbPHhgikz9ijMYqMBiSjihBxHApWQmt9s9mtd8vgA4O9PupcHHNVQWc4Dd7JYZ2xRrg9quSrp0g1XfO64Xkbq00zOkBRIoz"
 	stripe.SetAppInfo(&stripe.AppInfo{
 		Name:    "unibee.server",
@@ -65,7 +65,7 @@ func TestChangeBillingCycleAnchor(t *testing.T) {
 	//fmt.Printf("customerResult:%s\n", utility.MarshalToJsonString(customerResult))
 
 	//params := &stripe.InvoicePayParams{}
-	//params.ChannelDefaultPaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")
+	//params.GatewayDefaultPaymentMethod = stripe.String("pm_1OdQUNHhgikz9ijMs0UgkN6I")
 	//response, err := invoice.Pay("in_1OdziFHhgikz9ijMM0zrMlTf", params)
 	//fmt.Printf("response:%s\n", utility.MarshalToJsonString(response))
 	//if err != nil {

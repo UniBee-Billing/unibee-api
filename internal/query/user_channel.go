@@ -9,41 +9,41 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func GetUserChannel(ctx context.Context, userId int64, channelId int64) (one *entity.GatewayUser) {
+func GetGatewayUser(ctx context.Context, userId int64, gatewayId int64) (one *entity.GatewayUser) {
 	utility.Assert(userId > 0, "invalid userId")
-	utility.Assert(channelId > 0, "invalid channelId")
-	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{UserId: userId, GatewayId: channelId}).OmitEmpty().Scan(&one)
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
+	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{UserId: userId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetUserChannelByChannelUserId(ctx context.Context, channelUserId string, channelId int64) (one *entity.GatewayUser) {
-	utility.Assert(len(channelUserId) > 0, "invalid channelUserId")
-	utility.Assert(channelId > 0, "invalid channelId")
-	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{GatewayUserId: channelUserId, GatewayId: channelId}).OmitEmpty().Scan(&one)
+func GetGatewayUserByGatewayUserId(ctx context.Context, gatewayUserId string, gatewayId int64) (one *entity.GatewayUser) {
+	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
+	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{GatewayUserId: gatewayUserId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func CreateOrUpdateChannelUser(ctx context.Context, userId int64, channelId int64, channelUserId string, channelDefaultPaymentMethod string) (*entity.GatewayUser, error) {
+func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId int64, gatewayUserId string, gatewayDefaultPaymentMethod string) (*entity.GatewayUser, error) {
 	utility.Assert(userId > 0, "invalid userId")
-	utility.Assert(channelId > 0, "invalid channelId")
-	utility.Assert(len(channelUserId) > 0, "invalid channelUserId")
-	one := GetUserChannel(ctx, userId, channelId)
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
+	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")
+	one := GetGatewayUser(ctx, userId, gatewayId)
 	if one == nil {
 		one = &entity.GatewayUser{
 			UserId:                      userId,
-			GatewayId:                   channelId,
-			GatewayUserId:               channelUserId,
-			GatewayDefaultPaymentMethod: channelDefaultPaymentMethod,
+			GatewayId:                   gatewayId,
+			GatewayUserId:               gatewayUserId,
+			GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
 		}
 		result, err := dao.GatewayUser.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateChannelUser record insert failure %s`, err)
+			err = gerror.Newf(`CreateOrUpdateGatewayUser record insert failure %s`, err)
 			return nil, err
 		}
 		id, err := result.LastInsertId()
@@ -52,12 +52,12 @@ func CreateOrUpdateChannelUser(ctx context.Context, userId int64, channelId int6
 		}
 		one.Id = uint64(uint(id))
 	} else {
-		one.GatewayDefaultPaymentMethod = channelDefaultPaymentMethod
+		one.GatewayDefaultPaymentMethod = gatewayDefaultPaymentMethod
 		_, err := dao.GatewayUser.Ctx(ctx).Data(g.Map{
-			dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: channelDefaultPaymentMethod,
+			dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
 		}).Where(dao.GatewayUser.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateChannelUser record insert failure %s`, err)
+			err = gerror.Newf(`CreateOrUpdateGatewayUser record insert failure %s`, err)
 			return nil, err
 		}
 	}

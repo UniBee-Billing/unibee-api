@@ -23,9 +23,9 @@ import (
 	"strconv"
 )
 
-func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
+func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
-	utility.Assert(createPayContext.PayChannel != nil, "pay channel is nil")
+	utility.Assert(createPayContext.Gateway != nil, "pay channel is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
 	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay channelId is nil")
@@ -81,7 +81,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
-			channelInternalPayResult, err = api.GetPayChannelServiceProvider(ctx, createPayContext.Pay.GatewayId).DoRemoteChannelPayment(ctx, createPayContext)
+			channelInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}
@@ -95,16 +95,16 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
 			createPayContext.Pay.Status = int(channelInternalPayResult.Status)
-			createPayContext.Pay.GatewayPaymentId = channelInternalPayResult.ChannelPaymentId
-			createPayContext.Pay.GatewayPaymentIntentId = channelInternalPayResult.ChannelPaymentIntentId
+			createPayContext.Pay.GatewayPaymentId = channelInternalPayResult.GatewayPaymentId
+			createPayContext.Pay.GatewayPaymentIntentId = channelInternalPayResult.GatewayPaymentIntentId
 			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().PaymentData:            string(jsonData),
 				dao.Payment.Columns().Automatic:              automatic,
 				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
 				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
-				dao.Payment.Columns().GatewayPaymentId:       channelInternalPayResult.ChannelPaymentId,
-				dao.Payment.Columns().GatewayPaymentIntentId: channelInternalPayResult.ChannelPaymentIntentId},
+				dao.Payment.Columns().GatewayPaymentId:       channelInternalPayResult.GatewayPaymentId,
+				dao.Payment.Columns().GatewayPaymentIntentId: channelInternalPayResult.GatewayPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				return err
@@ -161,23 +161,23 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 		gender = user.Gender
 		email = user.Email
 	}
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId)
-	if payChannel == nil {
-		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice pay channel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	if gateway == nil {
+		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
 	merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
-	return DoChannelPay(ctx, &ro.CreatePayContext{
-		PayChannel: payChannel,
+	return GatewayPaymentCreate(ctx, &ro.CreatePayContext{
+		Gateway: gateway,
 		Pay: &entity.Payment{
 			SubscriptionId:  sub.SubscriptionId,
 			BizId:           sub.SubscriptionId,
 			BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
 			AuthorizeStatus: consts.AUTHORIZED,
 			UserId:          sub.UserId,
-			GatewayId:       int64(payChannel.Id),
+			GatewayId:       int64(gateway.Id),
 			TotalAmount:     invoice.TotalAmount,
 			Currency:        invoice.Currency,
 			CountryCode:     sub.CountryCode,
@@ -201,6 +201,6 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 		MerchantOrderReference: sub.SubscriptionId,
 		PayMethod:              1, //automatic
 		DaysUtilDue:            5, // todo mark
-		ChannelPaymentMethod:   sub.GatewayDefaultPaymentMethod,
+		GatewayPaymentMethod:   sub.GatewayDefaultPaymentMethod,
 	})
 }

@@ -15,7 +15,7 @@ type SubscriptionDetailRes struct {
 	User                                *entity.UserAccount                 `json:"user" dc:"User"`
 	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
 	Plan                                *entity.SubscriptionPlan            `json:"planId" dc:"Plan"`
-	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"Channel"`
+	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
 	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
 	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
@@ -123,7 +123,7 @@ type UserSubscriptionDetailRes struct {
 	User                                *entity.UserAccount                 `json:"user" dc:"user"`
 	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
 	Plan                                *entity.SubscriptionPlan            `json:"planId" dc:"Plan"`
-	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"Channel"`
+	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
 	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
 	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }

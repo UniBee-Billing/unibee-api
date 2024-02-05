@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerBalance) UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error) {
-	balanceResult, err := balance2.UserBalanceDetailQuery(ctx, req.MerchantId, req.UserId, req.ChannelId)
+	balanceResult, err := balance2.UserBalanceDetailQuery(ctx, req.MerchantId, req.UserId, req.GatewayId)
 
 	return &balance.UserDetailQueryRes{
 		Balance:              balanceResult.Balance,

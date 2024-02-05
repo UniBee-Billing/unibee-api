@@ -9,21 +9,21 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func GetPayChannelWebhookServiceProvider(ctx context.Context, channelId int64) (channelService _interface.RemotePaymentChannelWebhookInterface) {
+func GetGatewayWebhookServiceProvider(ctx context.Context, gatewayId int64) (channelService _interface.RemotePaymentChannelWebhookInterface) {
 	proxy := &PayChannelWebhookProxy{}
-	proxy.PaymentChannel = query.GetPayChannelById(ctx, channelId)
-	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("channel not found %d", channelId))
+	proxy.PaymentChannel = query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("gateway not found %d", gatewayId))
 	return proxy
 }
 
-func CheckAndSetupPayChannelWebhooks(ctx context.Context) {
-	list := query.GetPayChannelsGroupByEnumKey(ctx)
+func CheckAndSetupGatewayWebhooks(ctx context.Context) {
+	list := query.GetGatewaysGroupByEnumKey(ctx)
 	for _, paychannel := range list {
-		err := GetPayChannelWebhookServiceProvider(ctx, int64(paychannel.Id)).DoRemoteChannelCheckAndSetupWebhook(ctx, paychannel)
+		err := GetGatewayWebhookServiceProvider(ctx, int64(paychannel.Id)).GatewayCheckAndSetupWebhook(ctx, paychannel)
 		if err != nil {
-			g.Log().Errorf(ctx, "CheckAndSetupPayChannelWebhooks GatewayName:%s Error:%s", paychannel.GatewayName, err)
+			g.Log().Errorf(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Error:%s", paychannel.GatewayName, err)
 		} else {
-			g.Log().Infof(ctx, "CheckAndSetupPayChannelWebhooks GatewayName:%s Success", paychannel.GatewayName)
+			g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", paychannel.GatewayName)
 		}
 	}
 }

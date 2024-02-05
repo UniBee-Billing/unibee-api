@@ -68,7 +68,7 @@ type OutLineItem struct {
 type PaymentMethodsReq struct {
 	g.Meta  `path:"/paymentMethods" tags:"Open-Payment-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
 	TokenId string `p:"tokenId" dc:"TokenId" v:""`
-	Channel string `p:"type" dc:"Channel" v:"required"`
+	Gateway string `p:"type" dc:"Gateway" v:"required"`
 }
 type PaymentMethodsRes struct {
 }

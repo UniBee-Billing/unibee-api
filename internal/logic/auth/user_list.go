@@ -16,7 +16,7 @@ type UserListInternalReq struct {
 	UserName           int    `p:"userName" dc:"Filter UserName, Default All" `
 	SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
 	SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
-	PaymentMethod      int    `p:"paymentMethod" dc:"Filter ChannelDefaultPaymentMethod, Default All" `
+	PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
 	BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
 	DeleteInclude      bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
 	SortField          string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `

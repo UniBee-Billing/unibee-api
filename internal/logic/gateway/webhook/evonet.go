@@ -21,13 +21,13 @@ import (
 type EvonetWebhook struct {
 }
 
-func (e EvonetWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
+func (e EvonetWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	//panic("implement me")
 	return nil
 }
 
-func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
+func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 channel_webhook_entry 结果通知:%s", r.GetBody())
 	notificationJson, err := r.GetJson()
 	if err != nil {
@@ -228,7 +228,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
-				ChannelRefundId:  channelRefundId,
+				GatewayRefundId:  channelRefundId,
 				RefundStatusEnum: consts.REFUND_SUCCESS,
 				RefundTime:       gtime.Now(),
 			}
@@ -269,7 +269,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
-				ChannelRefundId:  channelRefundId,
+				GatewayRefundId:  channelRefundId,
 				RefundStatusEnum: consts.REFUND_FAILED,
 				RefundTime:       gtime.Now(),
 				Reason:           reason,
@@ -324,7 +324,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	r.Response.Writeln("success")
 }
 
-func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantGateway) (res *ro.ChannelRedirectInternalResp, err error) {
+func (e EvonetWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
 	payIdStr := r.Get("payId").String()
 	redirectResult := r.Get("redirectResult").String()
 	g.Log().Printf(r.Context(), "EvonetNotifyController evonet_redirect payId:%s redirectResult:%s", payIdStr, redirectResult)
@@ -334,16 +334,16 @@ func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 	utility.Assert(err == nil, "参数错误，payId 需 int 类型 %s")
 	overseaPay := query.GetPaymentById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
-	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.GatewayId)
+	channelEntity := query.GetPaymentTypeGatewayById(r.Context(), overseaPay.GatewayId)
 	utility.Assert(channelEntity != nil, fmt.Sprintf("payId: %s", payIdStr))
-	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
+	g.Log().Infof(r.Context(), "GatewayRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
 	if len(overseaPay.ReturnUrl) > 0 {
 		r.Response.Writeln(fmt.Sprintf("<head>\n<meta http-equiv=\"refresh\" content=\"1;url=%s\">\n</head>", overseaPay.ReturnUrl))
 	} else {
 		//r.Response.Writeln(r.Get("channelId"))
 		r.Response.Writeln(overseaPay)
 	}
-	return &ro.ChannelRedirectInternalResp{
+	return &ro.GatewayRedirectInternalResp{
 		Status:  true,
 		Message: "",
 	}, nil

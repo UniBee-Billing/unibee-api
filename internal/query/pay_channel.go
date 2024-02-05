@@ -10,7 +10,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
+func GetGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
@@ -22,36 +22,36 @@ func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantGatew
 	return
 }
 
-func GetPayChannelByChannel(ctx context.Context, channel string) (one *entity.MerchantGateway) {
-	if len(channel) == 0 {
+func GetGatewayByGatewayName(ctx context.Context, gatewayName string) (one *entity.MerchantGateway) {
+	if len(gatewayName) == 0 {
 		return nil
 	}
-	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayName: channel}).OmitEmpty().Scan(&one)
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayName: gatewayName}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
 }
 
-func GetPayChannelsGroupByEnumKey(ctx context.Context) []*entity.MerchantGateway {
+func GetGatewaysGroupByEnumKey(ctx context.Context) []*entity.MerchantGateway {
 	var data []*entity.MerchantGateway
 	err := dao.MerchantGateway.Ctx(ctx).Group(dao.MerchantGateway.Columns().EnumKey).
 		OmitEmpty().Scan(&data)
 	if err != nil {
-		g.Log().Errorf(ctx, "GetPayChannelsGroupByEnumKey error:%s", err)
+		g.Log().Errorf(ctx, "GetGatewaysGroupByEnumKey error:%s", err)
 		return nil
 	}
 	return data
 }
 
-func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
+func GetPaymentTypeGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
 	m := dao.MerchantGateway.Ctx(ctx)
 	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).
 		Where(m.Builder().
-			Where(entity.MerchantGateway{GatewayType: consts.PayChannelTypePayment}).WhereOr("channel_type is null")).
+			Where(entity.MerchantGateway{GatewayType: consts.GatewayTypeOneTimePayment}).WhereOr("gateway_type is null")).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -59,12 +59,12 @@ func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.Me
 	return
 }
 
-func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
+func GetSubscriptionTypeGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
 	m := dao.MerchantGateway.Ctx(ctx)
-	err := m.Where(entity.MerchantGateway{Id: uint64(id), GatewayType: consts.PayChannelTypeSubscription}).
+	err := m.Where(entity.MerchantGateway{Id: uint64(id), GatewayType: consts.GatewayTypeSubscription}).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -72,18 +72,18 @@ func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *enti
 	return
 }
 
-func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.MerchantGateway) {
+func GetListSubscriptionTypeGateways(ctx context.Context) (list []*entity.MerchantGateway) {
 	var data []*entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayType: consts.PayChannelTypeSubscription}).
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayType: consts.GatewayTypeSubscription}).
 		OmitEmpty().Scan(&data)
 	if err != nil {
-		g.Log().Errorf(ctx, "GetListSubscriptionTypePayChannels error:%s", err)
+		g.Log().Errorf(ctx, "GetListSubscriptionTypeGateways error:%s", err)
 		return nil
 	}
 	return data
 }
 
-func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId string) error {
+func SaveGatewayUniqueProductId(ctx context.Context, id int64, productId string) error {
 	if len(productId) == 0 || id < 0 {
 		return nil
 	}
@@ -94,14 +94,10 @@ func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId stri
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("savePayChannelUniqueProductId update err:%s", update)
-	//}
 	return nil
 }
 
-func UpdatePayChannelWebhookSecret(ctx context.Context, id int64, secret string) error {
+func UpdateGatewayWebhookSecret(ctx context.Context, id int64, secret string) error {
 	if id <= 0 {
 		return gerror.New("invalid id")
 	}
@@ -114,7 +110,7 @@ func UpdatePayChannelWebhookSecret(ctx context.Context, id int64, secret string)
 	}
 	//rowAffected, err := update.RowsAffected()
 	//if rowAffected != 1 {
-	//	return gerror.Newf("UpdatePayChannelWebhookSecret update err:%s", update)
+	//	return gerror.Newf("UpdateGatewayWebhookSecret update err:%s", update)
 	//}
 	return nil
 }

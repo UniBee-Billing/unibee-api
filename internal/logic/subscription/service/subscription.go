@@ -33,8 +33,8 @@ import (
 type SubscriptionCreatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
 	Quantity          int64                              `json:"quantity"`
-	PlanChannel       *entity.GatewayPlan                `json:"planChannel"`
-	PayChannel        *entity.MerchantGateway            `json:"payChannel"`
+	GatewayPlan       *entity.GatewayPlan                `json:"gatewayPlan"`
+	Gateway           *entity.MerchantGateway            `json:"gateway"`
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
@@ -52,7 +52,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	VatCountryRate    *ro.VatCountryRate                 `json:"vatCountryRate" `
 }
 
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.SubscriptionPlanAddonRo {
 	var addons []*ro.SubscriptionPlanAddonRo
 	var totalAddonIds []int64
 	if len(addonParams) > 0 {
@@ -81,13 +81,13 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 channelId 合并查询
-				utility.Assert(len(planChannel.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v GatewayPlanId invalid", param.AddonPlanId, channelId))
-				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
+				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 gatewayId 合并查询
+				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
+				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
 					Quantity:         param.Quantity,
 					AddonPlan:        mapPlans[param.AddonPlanId],
-					AddonPlanChannel: planChannel,
+					AddonGatewayPlan: gatewayPlan,
 				})
 			}
 		}
@@ -114,7 +114,7 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId i
 func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.ChannelId > 0, "ConfirmChannelId invalid")
+	utility.Assert(req.GatewayId > 0, "GatewayId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	email := ""
 	if !consts.GetConfigInstance().IsLocal() {
@@ -126,10 +126,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	planChannel := query.GetPlanChannel(ctx, req.PlanId, req.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gatewayPlan := query.GetGatewayPlan(ctx, req.PlanId, req.GatewayId)
+	utility.Assert(gatewayPlan != nil && len(gatewayPlan.GatewayProductId) > 0 && len(gatewayPlan.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
@@ -179,7 +179,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var currency = plan.Currency
 	var TotalAmountExcludingTax = plan.Amount * req.Quantity
 
-	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.GatewayId)
+	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, gatewayPlan.GatewayId)
 
 	for _, addon := range addons {
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
@@ -207,8 +207,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	return &SubscriptionCreatePrepareInternalRes{
 		Plan:              plan,
 		Quantity:          req.Quantity,
-		PlanChannel:       planChannel,
-		PayChannel:        payChannel,
+		GatewayPlan:       gatewayPlan,
+		Gateway:           gateway,
 		MerchantInfo:      merchantInfo,
 		AddonParams:       req.AddonParams,
 		Addons:            addons,
@@ -232,7 +232,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
 		PlanId:         req.PlanId,
 		Quantity:       req.Quantity,
-		ChannelId:      req.ChannelId,
+		GatewayId:      req.GatewayId,
 		UserId:         req.UserId,
 		AddonParams:    req.AddonParams,
 		VatCountryCode: req.VatCountryCode,
@@ -258,7 +258,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		MerchantId:         prepare.MerchantInfo.Id,
 		Type:               subType,
 		PlanId:             int64(prepare.Plan.Id),
-		GatewayId:          prepare.PlanChannel.GatewayId,
+		GatewayId:          prepare.GatewayPlan.GatewayId,
 		UserId:             prepare.UserId,
 		Quantity:           prepare.Quantity,
 		Amount:             prepare.TotalAmount,
@@ -287,7 +287,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	var createRes *ro.ChannelCreateSubscriptionInternalResp
+	var createRes *ro.GatewayCreateSubscriptionInternalResp
 	if consts.SubscriptionCycleUnderUniBeeControl {
 		user := query.GetUserAccountById(ctx, uint64(one.UserId))
 		var mobile = ""
@@ -300,15 +300,15 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			lastName = user.LastName
 			gender = user.Gender
 		}
-		createPaymentResult, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
+		createPaymentResult, err := service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
 			CheckoutMode: true,
-			PayChannel:   prepare.PayChannel,
+			Gateway:      prepare.Gateway,
 			Pay: &entity.Payment{
 				SubscriptionId: one.SubscriptionId,
 				BizId:          one.SubscriptionId,
 				BizType:        consts.BIZ_TYPE_SUBSCRIPTION,
 				UserId:         prepare.UserId,
-				GatewayId:      int64(prepare.PayChannel.Id),
+				GatewayId:      int64(prepare.Gateway.Id),
 				TotalAmount:    prepare.Invoice.TotalAmount,
 				Currency:       prepare.Currency,
 				CountryCode:    prepare.VatCountryCode,
@@ -337,17 +337,17 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		if err != nil {
 			return nil, err
 		}
-		createRes = &ro.ChannelCreateSubscriptionInternalResp{
-			ChannelSubscriptionId: createPaymentResult.PaymentId,
+		createRes = &ro.GatewayCreateSubscriptionInternalResp{
+			GatewaySubscriptionId: createPaymentResult.PaymentId,
 			Data:                  utility.MarshalToJsonString(createPaymentResult),
 			Link:                  createPaymentResult.Link,
 			Paid:                  createPaymentResult.Status == consts.PAY_SUCCESS,
 		}
 	} else {
-		createRes, err = api.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionCreate(ctx, &ro.ChannelCreateSubscriptionInternalReq{
+		createRes, err = api.GetGatewayServiceProvider(ctx, int64(prepare.Gateway.Id)).GatewaySubscriptionCreate(ctx, &ro.GatewayCreateSubscriptionInternalReq{
 			Plan:           prepare.Plan,
 			AddonPlans:     prepare.Addons,
-			PlanChannel:    prepare.PlanChannel,
+			GatewayPlan:    prepare.GatewayPlan,
 			VatCountryRate: prepare.VatCountryRate,
 			Subscription:   one,
 		})
@@ -358,7 +358,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 	//Update Subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().GatewaySubscriptionId: createRes.ChannelSubscriptionId,
+		dao.Subscription.Columns().GatewaySubscriptionId: createRes.GatewaySubscriptionId,
 		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
 		dao.Subscription.Columns().Link:                  createRes.Link,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
@@ -367,8 +367,8 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	if err != nil {
 		return nil, err
 	}
-	one.GatewaySubscriptionId = createRes.ChannelSubscriptionId
-	one.Status = consts.PlanChannelStatusCreate
+	one.GatewaySubscriptionId = createRes.GatewaySubscriptionId
+	one.Status = consts.GatewayPlanStatusCreate
 	one.Link = createRes.Link
 
 	_, _ = redismq.Send(&redismq.Message{
@@ -388,7 +388,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Plan         *entity.SubscriptionPlan           `json:"planId"`
 	Quantity     int64                              `json:"quantity"`
 	PlanChannel  *entity.GatewayPlan                `json:"planChannel"`
-	PayChannel   *entity.MerchantGateway            `json:"payChannel"`
+	PayChannel   *entity.MerchantGateway            `json:"gateway"`
 	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
@@ -411,16 +411,16 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
-	//utility.Assert(sub.ChannelId == req.ConfirmChannelId, "channel not match")
+	//utility.Assert(sub.GatewayId == req.ConfirmChannelId, "channel not match")
 	// todo mark addon binding check
 
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	planChannel := query.GetPlanChannel(ctx, req.NewPlanId, sub.GatewayId)
+	planChannel := query.GetGatewayPlan(ctx, req.NewPlanId, sub.GatewayId)
 	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	//试用期内不允许修改计划
@@ -451,8 +451,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "newPlan must have same recurring interval to old")
 	}
 	//暂时不开放不同通道升级功能 todo mark
-	//oldPlanChannel := query.GetPlanChannel(ctx, int64(oldPlan.Id), sub.ChannelId)
-	//utility.Assert(oldPlanChannel != nil, "oldPlanChannel not found")
+	//oldPlanChannel := query.GetGatewayPlan(ctx, int64(oldPlan.Id), sub.GatewayId)
+	//utility.Assert(oldPlanChannel != nil, "oldPlangateway not found")
 
 	var effectImmediate = false
 	//升降级判断逻辑，升级设置payImmediate=true，保障马上能够生效；降级payImmediate=false,下周期生效
@@ -608,11 +608,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			prorationDate = prorationInvoice.ProrationDate
 			totalAmount = prorationInvoice.TotalAmount
 		} else {
-			updatePreviewRes, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			updatePreviewRes, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionUpdateProrationPreview(ctx, &ro.GatewayUpdateSubscriptionInternalReq{
 				Plan:            plan,
 				Quantity:        req.Quantity,
 				AddonPlans:      addons,
-				PlanChannel:     planChannel,
+				GatewayPlan:     planChannel,
 				Subscription:    sub,
 				ProrationDate:   prorationDate,
 				EffectImmediate: effectImmediate,
@@ -733,7 +733,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		Plan:              plan,
 		Quantity:          req.Quantity,
 		PlanChannel:       planChannel,
-		PayChannel:        payChannel,
+		PayChannel:        gateway,
 		MerchantInfo:      merchantInfo,
 		AddonParams:       req.AddonParams,
 		Addons:            addons,
@@ -807,15 +807,15 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	var subUpdateRes *ro.ChannelUpdateSubscriptionInternalResp
+	var subUpdateRes *ro.GatewayUpdateSubscriptionInternalResp
 	if consts.ProrationUsingUniBeeCompute {
 		if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 			// createAndPayNewProrationInvoice
 			merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 			utility.Assert(merchantInfo != nil, "merchantInfo not found")
 			//utility.Assert(user != nil, "user not found")
-			payChannel := query.GetSubscriptionTypePayChannelById(ctx, one.GatewayId)
-			utility.Assert(payChannel != nil, "payChannel not found")
+			gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
+			utility.Assert(gateway != nil, "gateway not found")
 			user := query.GetUserAccountById(ctx, uint64(one.UserId))
 			var mobile = ""
 			var firstName = ""
@@ -828,16 +828,16 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				gender = user.Gender
 			}
 
-			createRes, err := service.DoChannelPay(ctx, &ro.CreatePayContext{
+			createRes, err := service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
 				PayImmediate: true,
-				PayChannel:   payChannel,
+				Gateway:      gateway,
 				Pay: &entity.Payment{
 					SubscriptionId:  one.SubscriptionId,
 					BizId:           one.UpdateSubscriptionId,
 					BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
 					AuthorizeStatus: consts.AUTHORIZED,
 					UserId:          one.UserId,
-					GatewayId:       int64(payChannel.Id),
+					GatewayId:       int64(gateway.Id),
 					TotalAmount:     prepare.Invoice.TotalAmount,
 					Currency:        one.Currency,
 					CountryCode:     prepare.Subscription.CountryCode,
@@ -861,44 +861,44 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 				MerchantOrderReference: one.UpdateSubscriptionId,
 				PayMethod:              1, //automatic
 				DaysUtilDue:            5, //one day expire
-				ChannelPaymentMethod:   prepare.Subscription.GatewayDefaultPaymentMethod,
+				GatewayPaymentMethod:   prepare.Subscription.GatewayDefaultPaymentMethod,
 			})
 			if err != nil {
 				return nil, err
 			}
 			// Upgrade
-			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
-				ChannelUpdateId: createRes.PaymentId,
+			subUpdateRes = &ro.GatewayUpdateSubscriptionInternalResp{
+				GatewayUpdateId: createRes.PaymentId,
 				Data:            utility.MarshalToJsonString(createRes),
 				Link:            createRes.Link,
 				Paid:            createRes.Status == consts.PAY_SUCCESS,
 			}
-			//subUpdateRes.ChannelUpdateId = createRes.ChannelInvoiceId
+			//subUpdateRes.GatewayUpdateId = createRes.GatewayInvoiceId
 			//subUpdateRes.Paid = createRes.AlreadyPaid
 			//subUpdateRes.Link = createRes.Link
 			//subUpdateRes.Data = utility.MarshalToJsonString(createRes)
 		} else {
 			prepare.EffectImmediate = false
-			//subUpdateRes, err = out.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+			//subUpdateRes, err = out.GetGatewayServiceProvider(ctx, int64(prepare.Gateway.Id)).GatewaySubscriptionUpdate(ctx, &ro.GatewayUpdateSubscriptionInternalReq{
 			//	Plan:            prepare.Plan,
 			//	Quantity:        prepare.Quantity,
 			//	AddonPlans:      prepare.Addons,
-			//	PlanChannel:     prepare.PlanChannel,
+			//	GatewayPlan:     prepare.GatewayPlan,
 			//	Subscription:    prepare.Subscription,
 			//	ProrationDate:   req.ProrationDate,
 			//	EffectImmediate: false,
 			//})
-			subUpdateRes = &ro.ChannelUpdateSubscriptionInternalResp{
+			subUpdateRes = &ro.GatewayUpdateSubscriptionInternalResp{
 				Paid: false,
 				Link: "",
 			}
 		}
 	} else {
-		subUpdateRes, err = api.GetPayChannelServiceProvider(ctx, int64(prepare.PayChannel.Id)).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		subUpdateRes, err = api.GetGatewayServiceProvider(ctx, int64(prepare.PayChannel.Id)).GatewaySubscriptionUpdate(ctx, &ro.GatewayUpdateSubscriptionInternalReq{
 			Plan:            prepare.Plan,
 			Quantity:        prepare.Quantity,
 			AddonPlans:      prepare.Addons,
-			PlanChannel:     prepare.PlanChannel,
+			GatewayPlan:     prepare.PlanChannel,
 			Subscription:    prepare.Subscription,
 			ProrationDate:   req.ProrationDate,
 			EffectImmediate: prepare.EffectImmediate,
@@ -947,7 +947,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
 		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
 		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
-		dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId: subUpdateRes.ChannelUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId: subUpdateRes.GatewayUpdateId,
 		dao.SubscriptionPendingUpdate.Columns().Note:            note,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, one.UpdateSubscriptionId).OmitNil().Update()
 	if err != nil {
@@ -977,10 +977,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.GatewayId)
+	planChannel := query.GetGatewayPlan(ctx, sub.PlanId, sub.GatewayId)
 	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel transfer not complete")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payment channel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if !consts.GetConfigInstance().IsServerDev() || !consts.GetConfigInstance().IsLocal() {
@@ -993,9 +993,9 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 	var nextStatus = consts.SubStatusPendingInActive
 	if sub.Type == consts.SubTypeDefault {
-		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancel(ctx, &ro.ChannelCancelSubscriptionInternalReq{
+		_, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionCancel(ctx, &ro.GatewayCancelSubscriptionInternalReq{
 			Plan:         plan,
-			PlanChannel:  planChannel,
+			GatewayPlan:  planChannel,
 			Subscription: sub,
 			InvoiceNow:   invoiceNow,
 			Prorate:      proration,
@@ -1054,14 +1054,14 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.GatewayId)
+	planChannel := query.GetGatewayPlan(ctx, sub.PlanId, sub.GatewayId)
 	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		_, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}
@@ -1115,14 +1115,14 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.GatewayId)
+	planChannel := query.GetGatewayPlan(ctx, sub.PlanId, sub.GatewayId)
 	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
+		_, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}
@@ -1158,21 +1158,21 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.GatewayId)
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	planChannel := query.GetGatewayPlan(ctx, sub.PlanId, sub.GatewayId)
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 
 	if sub.Type == consts.SubTypeDefault {
-		details, err := api.GetPayChannelServiceProvider(ctx, sub.GatewayId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, sub)
+		details, err := api.GetGatewayServiceProvider(ctx, sub.GatewayId).GatewaySubscriptionDetails(ctx, plan, planChannel, sub)
 		utility.Assert(err == nil, fmt.Sprintf("SubscriptionDetail Fetch error%s", err))
-		err = handler.UpdateSubWithChannelDetailBack(ctx, sub, details)
+		err = handler.UpdateSubWithGatewayDetailBack(ctx, sub, details)
 		sub = query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-		utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithChannelDetailBack Fetch error%s", err))
+		utility.Assert(err == nil, fmt.Sprintf("UpdateSubWithGatewayDetailBack Fetch error%s", err))
 	}
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 	if sub.Type == consts.SubTypeDefault {
-		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
+		_, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionNewTrialEnd(ctx, plan, planChannel, sub, newTrialEnd)
 		if err != nil {
 			return err
 		}
@@ -1192,12 +1192,12 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.GatewayId)
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 PayChannel
-	utility.Assert(payChannel != nil, "payChannel not found")
+	planChannel := query.GetGatewayPlan(ctx, sub.PlanId, sub.GatewayId)
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not trialed")
 	if sub.Type == consts.SubTypeDefault {
-		_, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, sub)
+		_, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewaySubscriptionEndTrial(ctx, plan, planChannel, sub)
 		if err != nil {
 			return err
 		}

@@ -33,7 +33,7 @@ type PayChannelProxy struct {
 	PaymentChannel *entity.MerchantGateway
 }
 
-func (p PayChannelProxy) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+func (p PayChannelProxy) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -47,16 +47,16 @@ func (p PayChannelProxy) DoRemoteChannelUserPaymentMethodListQuery(ctx context.C
 	}()
 	startTime := time.Now()
 
-	res, err = p.getRemoteChannel().DoRemoteChannelUserPaymentMethodListQuery(ctx, payChannel, userId)
+	res, err = p.getRemoteChannel().GatewayUserPaymentMethodListQuery(ctx, gateway, userId)
 
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.MerchantGateway, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+func (p PayChannelProxy) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *ro.GatewayUserCreateInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -70,9 +70,9 @@ func (p PayChannelProxy) DoRemoteChannelUserCreate(ctx context.Context, payChann
 	}()
 	startTime := time.Now()
 
-	res, err = p.getRemoteChannel().DoRemoteChannelUserCreate(ctx, payChannel, user)
+	res, err = p.getRemoteChannel().GatewayUserCreate(ctx, gateway, user)
 
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserCreate cost：%s \n", time.Now().Sub(startTime))
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserCreate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
@@ -106,7 +106,7 @@ func (p PayChannelProxy) getRemoteChannel() (channelService _interface.RemotePay
 //	fmt.Printf("执行完成，耗时：%v\n", endTime.Sub(startTime))
 //}
 
-func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.MerchantGateway) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
+func (p PayChannelProxy) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -120,16 +120,16 @@ func (p PayChannelProxy) DoRemoteChannelMerchantBalancesQuery(ctx context.Contex
 	}()
 	startTime := time.Now()
 
-	res, err = p.getRemoteChannel().DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+	res, err = p.getRemoteChannel().GatewayMerchantBalancesQuery(ctx, gateway)
 
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelMerchantBalancesQuery cost：%s \n", time.Now().Sub(startTime))
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayMerchantBalancesQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
+func (p PayChannelProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserDetailQueryInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -142,15 +142,15 @@ func (p PayChannelProxy) DoRemoteChannelUserDetailQuery(ctx context.Context, pay
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelUserDetailQuery cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayUserDetailQuery(ctx, gateway, userId)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserDetailQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.MerchantGateway, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (p PayChannelProxy) GatewayInvoiceCreateAndPay(ctx context.Context, gateway *entity.MerchantGateway, createInvoiceInternalReq *ro.GatewayCreateInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -163,15 +163,15 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context,
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCreateAndPay(ctx, payChannel, createInvoiceInternalReq)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCreateAndPay cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayInvoiceCreateAndPay(ctx, gateway, createInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayInvoiceCreateAndPay cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.MerchantGateway, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (p PayChannelProxy) GatewayInvoiceCancel(ctx context.Context, gateway *entity.MerchantGateway, cancelInvoiceInternalReq *ro.GatewayCancelInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -184,15 +184,15 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceCancel(ctx context.Context, payCh
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceCancel(ctx, payChannel, cancelInvoiceInternalReq)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceCancel cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayInvoiceCancel(ctx, gateway, cancelInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayInvoiceCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.MerchantGateway, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (p PayChannelProxy) GatewayInvoicePay(ctx context.Context, gateway *entity.MerchantGateway, payInvoiceInternalReq *ro.GatewayPayInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -205,15 +205,15 @@ func (p PayChannelProxy) DoRemoteChannelInvoicePay(ctx context.Context, payChann
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelInvoicePay(ctx, payChannel, payInvoiceInternalReq)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoicePay cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayInvoicePay(ctx, gateway, payInvoiceInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayInvoicePay cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.MerchantGateway, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (p PayChannelProxy) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, channelInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -226,15 +226,15 @@ func (p PayChannelProxy) DoRemoteChannelInvoiceDetails(ctx context.Context, payC
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelInvoiceDetails(ctx, payChannel, channelInvoiceId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelInvoiceDetails cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayInvoiceDetails(ctx, gateway, channelInvoiceId)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayInvoiceDetails cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -247,15 +247,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionEndTrial(ctx context.Context
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionEndTrial(ctx, plan, planChannel, subscription)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionEndTrial(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -268,15 +268,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Cont
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionNewTrialEnd(ctx, plan, planChannel, subscription, newTrialEnd)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionNewTrialEnd(ctx, plan, planChannel, subscription, newTrialEnd)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionNewTrialEnd cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionPreviewInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -289,15 +289,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx c
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdateProrationPreview(ctx, subscriptionRo)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdateProrationPreview cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionUpdateProrationPreview(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionUpdateProrationPreview cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -310,15 +310,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCreate(ctx context.Context, 
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCreate(ctx, subscriptionRo)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCreate cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionCreate(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionCreate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.GatewayCancelSubscriptionInternalReq) (res *ro.GatewayCancelSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -331,15 +331,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancel(ctx context.Context, 
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancel(ctx, subscriptionCancelInternalReq)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancel cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionCancel(ctx, subscriptionCancelInternalReq)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -352,15 +352,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx contex
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -373,15 +373,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionCancelLastCancelAtPeriodEnd cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -394,15 +394,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionUpdate(ctx context.Context, 
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionUpdate(ctx, subscriptionRo)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionUpdate cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionUpdate(ctx, subscriptionRo)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionUpdate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (p PayChannelProxy) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -415,15 +415,15 @@ func (p PayChannelProxy) DoRemoteChannelSubscriptionDetails(ctx context.Context,
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, subscription)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelSubscriptionDetails cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewaySubscriptionDetails(ctx, plan, planChannel, subscription)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewaySubscriptionDetails cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (p PayChannelProxy) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -436,15 +436,15 @@ func (p PayChannelProxy) DoRemoteChannelPlanActive(ctx context.Context, plan *en
 		}
 	}()
 	startTime := time.Now()
-	err = p.getRemoteChannel().DoRemoteChannelPlanActive(ctx, plan, planChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanActive cost：%s \n", time.Now().Sub(startTime))
+	err = p.getRemoteChannel().GatewayPlanActive(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPlanActive cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (p PayChannelProxy) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -457,15 +457,15 @@ func (p PayChannelProxy) DoRemoteChannelPlanDeactivate(ctx context.Context, plan
 		}
 	}()
 	startTime := time.Now()
-	err = p.getRemoteChannel().DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanDeactivate cost：%s \n", time.Now().Sub(startTime))
+	err = p.getRemoteChannel().GatewayPlanDeactivate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPlanDeactivate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return err
 }
 
-func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreateProductInternalResp, err error) {
+func (p PayChannelProxy) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -478,15 +478,15 @@ func (p PayChannelProxy) DoRemoteChannelProductCreate(ctx context.Context, plan 
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelProductCreate(ctx, plan, planChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelProductCreate cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayProductCreate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayProductCreate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreatePlanInternalResp, err error) {
+func (p PayChannelProxy) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -499,15 +499,15 @@ func (p PayChannelProxy) DoRemoteChannelPlanCreateAndActivate(ctx context.Contex
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPlanCreateAndActivate cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayPlanCreateAndActivate(ctx, plan, planChannel)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPlanCreateAndActivate cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (p PayChannelProxy) GatewayPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -520,15 +520,15 @@ func (p PayChannelProxy) DoRemoteChannelPayment(ctx context.Context, createPayCo
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelPayment(ctx, createPayContext)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayment cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayPayment(ctx, createPayContext)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPayment cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
+func (p PayChannelProxy) GatewayCapture(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -541,15 +541,15 @@ func (p PayChannelProxy) DoRemoteChannelCapture(ctx context.Context, pay *entity
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelCapture(ctx, pay)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCapture cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayCapture(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayCapture cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
+func (p PayChannelProxy) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -562,15 +562,15 @@ func (p PayChannelProxy) DoRemoteChannelCancel(ctx context.Context, pay *entity.
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelCancel(ctx, pay)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCancel cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayCancel(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
+func (p PayChannelProxy) GatewayPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -583,15 +583,15 @@ func (p PayChannelProxy) DoRemoteChannelPayStatusCheck(ctx context.Context, pay 
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelPayStatusCheck(ctx, pay)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPayStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayPayStatusCheck(ctx, pay)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPayStatusCheck cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.MerchantGateway, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
+func (p PayChannelProxy) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *ro.GatewayPaymentListReq) (res []*ro.GatewayPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -604,15 +604,15 @@ func (p PayChannelProxy) DoRemoteChannelPaymentList(ctx context.Context, payChan
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelPaymentList(ctx, payChannel, listReq)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPaymentList cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayPaymentList(ctx, gateway, listReq)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPaymentList cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.MerchantGateway, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
+func (p PayChannelProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -625,15 +625,15 @@ func (p PayChannelProxy) DoRemoteChannelPaymentDetail(ctx context.Context, payCh
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelPaymentDetail(ctx, payChannel, channelPaymentId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelPaymentDetail cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayPaymentDetail(ctx, gateway, channelPaymentId)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayPaymentDetail cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (p PayChannelProxy) GatewayRefund(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -646,15 +646,15 @@ func (p PayChannelProxy) DoRemoteChannelRefund(ctx context.Context, pay *entity.
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRefund(ctx, pay, refund)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefund cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayRefund(ctx, pay, refund)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefund cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (p PayChannelProxy) GatewayRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -667,15 +667,15 @@ func (p PayChannelProxy) DoRemoteChannelRefundStatusCheck(ctx context.Context, p
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRefundStatusCheck(ctx, pay, refund)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundStatusCheck cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayRefundStatusCheck(ctx, pay, refund)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundStatusCheck cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (p PayChannelProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -688,15 +688,15 @@ func (p PayChannelProxy) DoRemoteChannelRefundDetail(ctx context.Context, payCha
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRefundDetail(ctx, payChannel, channelRefundId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundDetail cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayRefundDetail(ctx, gateway, channelRefundId)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundDetail cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
 }
 
-func (p PayChannelProxy) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (p PayChannelProxy) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -709,8 +709,8 @@ func (p PayChannelProxy) DoRemoteChannelRefundList(ctx context.Context, payChann
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRefundList(ctx, payChannel, channelPaymentId)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelRefundList cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayRefundList(ctx, gateway, channelPaymentId)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundList cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}

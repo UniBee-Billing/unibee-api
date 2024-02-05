@@ -30,134 +30,134 @@ import (
 
 type Evonet struct{}
 
-func (e Evonet) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) (res *ro.ChannelUserPaymentMethodListInternalResp, err error) {
+func (e Evonet) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelUserCreate(ctx context.Context, payChannel *entity.MerchantGateway, user *entity.UserAccount) (res *ro.ChannelUserCreateInternalResp, err error) {
+func (e Evonet) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *ro.GatewayUserCreateInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentList(ctx context.Context, payChannel *entity.MerchantGateway, listReq *ro.ChannelPaymentListReq) (res []*ro.ChannelPaymentRo, err error) {
+func (e Evonet) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *ro.GatewayPaymentListReq) (res []*ro.GatewayPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelRefundList(ctx context.Context, payChannel *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPaymentDetail(ctx context.Context, payChannel *entity.MerchantGateway, channelPaymentId string) (res *ro.ChannelPaymentRo, err error) {
+func (e Evonet) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelRefundDetail(ctx context.Context, payChannel *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelMerchantBalancesQuery(ctx context.Context, payChannel *entity.MerchantGateway) (res *ro.ChannelMerchantBalanceQueryInternalResp, err error) {
+func (e Evonet) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelInvoiceCancel(ctx context.Context, payChannel *entity.MerchantGateway, cancelInvoiceInternalReq *ro.ChannelCancelInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (e Evonet) GatewayInvoiceCancel(ctx context.Context, gateway *entity.MerchantGateway, cancelInvoiceInternalReq *ro.GatewayCancelInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) (res *ro.ChannelUserDetailQueryInternalResp, err error) {
+func (e Evonet) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserDetailQueryInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChannel *entity.MerchantGateway, createInvoiceInternalReq *ro.ChannelCreateInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (e Evonet) GatewayInvoiceCreateAndPay(ctx context.Context, gateway *entity.MerchantGateway, createInvoiceInternalReq *ro.GatewayCreateInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelInvoicePay(ctx context.Context, payChannel *entity.MerchantGateway, payInvoiceInternalReq *ro.ChannelPayInvoiceInternalReq) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (e Evonet) GatewayInvoicePay(ctx context.Context, gateway *entity.MerchantGateway, payInvoiceInternalReq *ro.GatewayPayInvoiceInternalReq) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.ChannelCancelSubscriptionInternalReq) (res *ro.ChannelCancelSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.GatewayCancelSubscriptionInternalReq) (res *ro.GatewayCancelSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelInvoiceDetails(ctx context.Context, payChannel *entity.MerchantGateway, channelInvoiceId string) (res *ro.ChannelDetailInvoiceInternalResp, err error) {
+func (e Evonet) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, channelInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionPreviewInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (e Evonet) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (e Evonet) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreateProductInternalResp, err error) {
+func (e Evonet) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreatePlanInternalResp, err error) {
+func (e Evonet) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay != nil, "payment  is nil")
-	utility.Assert(createPayContext.PayChannel != nil, "payment channel config is nil")
+	utility.Assert(createPayContext.Gateway != nil, "payment channel config is nil")
 
 	//其他渠道所需参数校验
 	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
@@ -167,10 +167,10 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	utility.Assert(len(createPayContext.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(len(createPayContext.ShopperUserId) > 0, "shopperUserId is nil")
 	utility.Assert(createPayContext.Invoice.Lines != nil, "lineItems is nil")
-	urlPath := "/g2/auth/payment/mer/" + createPayContext.PayChannel.GatewayAccountId + "/evo.e-commerce.payment"
-	channelType := createPayContext.PayChannel.SubGateway
+	urlPath := "/g2/auth/payment/mer/" + createPayContext.Gateway.GatewayAccountId + "/evo.e-commerce.payment"
+	channelType := createPayContext.Gateway.SubGateway
 	if len(channelType) == 0 {
-		channelType = createPayContext.PayChannel.GatewayName
+		channelType = createPayContext.Gateway.GatewayName
 	}
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
@@ -205,10 +205,10 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		"webhook":   gateway.GetPaymentWebhookEntranceUrl(createPayContext.Pay.GatewayId),
 	}
 
-	if len(createPayContext.PayChannel.BrandData) > 0 {
+	if len(createPayContext.Gateway.BrandData) > 0 {
 		var data map[string]interface{}
 		// 使用 json.Unmarshal 解析 JSON 字符串
-		err := json.Unmarshal([]byte(createPayContext.PayChannel.BrandData), &data)
+		err := json.Unmarshal([]byte(createPayContext.Gateway.BrandData), &data)
 		if err == nil {
 			//_, ok := data[channelType]
 			//if ok {
@@ -237,7 +237,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		param["captureAfterHours"] = createPayContext.Pay.CaptureDelayHours
 	}
 
-	data, err := sendEvonetRequest(ctx, createPayContext.PayChannel, "POST", urlPath, param)
+	data, err := sendEvonetRequest(ctx, createPayContext.Gateway, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -252,7 +252,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		fmt.Sprintf("Evonetpay字符失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	//status := paymentJson.Get("status").String()
 	pspReference := paymentJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payments", responseJson.String(), "支付", pspReference, createPayContext.PayChannel.GatewayName)
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payments", responseJson.String(), "支付", pspReference, createPayContext.Gateway.GatewayName)
 	res = &ro.CreatePayInternalResp{
 		Status: consts.TO_BE_PAID,
 		Action: responseJson.GetJson("action"),
@@ -262,10 +262,10 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
+func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "channel not found")
+	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(channelEntity != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
@@ -295,16 +295,16 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, payment *entity.Paym
 	channelCaptureId := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "capture", responseJson.String(), "支付捕获", channelCaptureId, channelEntity.GatewayName)
 	res = &ro.OutPayCaptureRo{
-		ChannelCaptureId: channelCaptureId,
+		GatewayCaptureId: channelCaptureId,
 		Status:           status,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
+func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "channel not found")
+	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(channelEntity != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
@@ -330,16 +330,16 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payme
 	channelCancelId := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "cancel", responseJson.String(), "支付取消", channelCancelId, channelEntity.GatewayName)
 	res = &ro.OutPayCancelRo{
-		ChannelCancelId: channelCancelId,
+		GatewayCancelId: channelCancelId,
 		Status:          status,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
+func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "channel not found")
+	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(channelEntity != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.payment"
 	param := map[string]interface{}{
 		"merchantTransID": payment.PaymentId,
@@ -364,7 +364,7 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *enti
 	merchantPspReference := channelPayment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.GatewayName)
 	utility.Assert(strings.Compare(merchantPspReference, payment.PaymentId) == 0, "merchantPspReference not match")
-	res = &ro.ChannelPaymentRo{
+	res = &ro.GatewayPaymentRo{
 		TotalAmount: payment.TotalAmount,
 		Status:      consts.TO_BE_PAID,
 	}
@@ -376,16 +376,16 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *enti
 		res.Reason = "from_query:" + channelPayment.Get("failureReason").String()
 	} else if strings.Compare(status, "Captured") == 0 {
 		res.Status = consts.PAY_SUCCESS
-		res.ChannelPaymentId = pspReference
+		res.GatewayPaymentId = pspReference
 		res.PayTime = gtime.Now()
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelRefund(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefund(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.GatewayId)
-	utility.Assert(channelEntity != nil, "channel not found")
+	channelEntity := util.GetGatewayById(ctx, channelPayment.GatewayId)
+	utility.Assert(channelEntity != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + channelPayment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
@@ -414,16 +414,16 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, channelPayment *entit
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund", responseJson.String(), "支付退款", pspReference, channelEntity.GatewayName)
 	res = &ro.OutPayRefundRo{
-		ChannelRefundId: pspReference,
+		GatewayRefundId: pspReference,
 		Status:          consts.REFUND_ING,
 	}
 	return res, nil
 }
 
-func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.GatewayId)
-	utility.Assert(channelEntity != nil, "channel not found")
+	channelEntity := util.GetGatewayById(ctx, channelPayment.GatewayId)
+	utility.Assert(channelEntity != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund"
 	param := map[string]interface{}{
 		"merchantTransID": refund.RefundId,
@@ -449,15 +449,15 @@ func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, channelPay
 	utility.Assert(strings.Compare(merchantPspReference, refund.RefundId) == 0, "merchantPspReference not match")
 	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund_query", responseJson.String(), "退款查询", pspReference, channelEntity.GatewayName)
 	res = &ro.OutPayRefundRo{
-		RefundFee: refund.RefundAmount,
-		Status:    consts.REFUND_ING,
+		RefundAmount: refund.RefundAmount,
+		Status:       consts.REFUND_ING,
 	}
 	if strings.Compare(status, "Failed") == 0 {
 		res.Status = consts.REFUND_FAILED
 		res.Reason = "from_query:" + refundJson.Get("failureReason").String()
 	} else if strings.Compare(status, "Success") == 0 {
 		res.Status = consts.REFUND_SUCCESS
-		res.ChannelRefundId = pspReference
+		res.GatewayRefundId = pspReference
 		res.RefundTime = gtime.Now()
 	}
 	return res, nil
@@ -474,7 +474,7 @@ func sendEvonetRequest(ctx context.Context, channelEntity *entity.MerchantGatewa
 	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, channelEntity.GatewayKey, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
-		"Content-Channel": "application/json",
+		"Content-Gateway": "application/json",
 		"Msgid":           msgId,
 		"Datetime":        datetime,
 		"Authorization":   sign("POST", urlPath, msgId, datetime, channelEntity.GatewayKey, body),

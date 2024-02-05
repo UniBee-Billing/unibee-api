@@ -6,12 +6,12 @@ import (
 )
 
 type SamplePaymentNetherlandsReq struct {
-	g.Meta     `path:"/quick_pay_sample_netherlands" tags:"Open-Mock-Controller" method:"post" summary:"Mock Netherlands Create Payment (Auto Fill) https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
-	Currency   string `p:"currency" dc:"Currency" v:"required"`
-	Amount     int64  `p:"amount" dc:" Amount, Cent" v:"required"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	Channel    string `p:"channel" dc:"Channel，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
-	ReturnUrl  string `p:"returnUrl" dc:"Return Url" v:""`
+	g.Meta      `path:"/quick_pay_sample_netherlands" tags:"Open-Mock-Controller" method:"post" summary:"Mock Netherlands Create Payment (Auto Fill) https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
+	Currency    string `p:"currency" dc:"Currency" v:"required"`
+	Amount      int64  `p:"amount" dc:" Amount, Cent" v:"required"`
+	MerchantId  int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	GatewayName string `p:"gatewayName" dc:"Gateway，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
+	ReturnUrl   string `p:"returnUrl" dc:"Return Url" v:""`
 }
 type SamplePaymentNetherlandsRes struct {
 	Status            string      `p:"status" dc:"Status"`

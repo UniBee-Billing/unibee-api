@@ -81,26 +81,26 @@ func (status SubscriptionPlanStatusEnum) Description() string {
 	}
 }
 
-type SubscriptionPlanChannelStatusEnum int
+type SubscriptionGatewayPlanStatusEnum int
 
 const (
-	PlanChannelStatusInit     = 0 //初始化
-	PlanChannelStatusCreate   = 1 //创建-渠道状态
-	PlanChannelStatusActive   = 2 //有效-渠道状态
-	PlanChannelStatusInActive = 3 //无效-渠道状态
+	GatewayPlanStatusInit     = 0
+	GatewayPlanStatusCreate   = 1
+	GatewayPlanStatusActive   = 2
+	GatewayPlanStatusInActive = 3
 )
 
-func (status SubscriptionPlanChannelStatusEnum) Description() string {
+func (status SubscriptionGatewayPlanStatusEnum) Description() string {
 	switch status {
-	case PlanChannelStatusInit:
-		return "STATUES_CREATE"
-	case PlanChannelStatusCreate:
-		return "STATUES_CREATE"
-	case PlanChannelStatusActive:
-		return "PlanChannelStatusActive"
-	case PlanChannelStatusInActive:
-		return "PlanChannelStatusInActive"
+	case GatewayPlanStatusInit:
+		return "GatewayPlanStatusInit"
+	case GatewayPlanStatusCreate:
+		return "GatewayPlanStatusCreate"
+	case GatewayPlanStatusActive:
+		return "GatewayPlanStatusActive"
+	case GatewayPlanStatusInActive:
+		return "GatewayPlanStatusInActive"
 	default:
-		return "PlanChannelStatusInit"
+		return "GatewayPlanStatusInit"
 	}
 }

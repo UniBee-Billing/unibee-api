@@ -18,14 +18,14 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.ChannelDetailSubscriptionInternalResp) error {
+func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.GatewayDetailSubscriptionInternalResp) error {
 	//更新 Subscription
-	return UpdateSubWithChannelDetailBack(ctx, subscription, details)
+	return UpdateSubWithGatewayDetailBack(ctx, subscription, details)
 }
 
-func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.ChannelDetailSubscriptionInternalResp) error {
+func UpdateSubWithGatewayDetailBack(ctx context.Context, subscription *entity.Subscription, details *ro.GatewayDetailSubscriptionInternalResp) error {
 	if subscription.Type != consts.SubTypeDefault {
-		// not sync attribute from channel
+		// not sync attribute from gateway
 		return nil
 	}
 	var cancelAtPeriodEnd = 0
@@ -48,13 +48,13 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(details.TrialEnd, subscription.CurrentPeriodEnd), uint64(subscription.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                      details.Status,
-		dao.Subscription.Columns().GatewaySubscriptionId:       details.ChannelSubscriptionId,
-		dao.Subscription.Columns().GatewayStatus:               details.ChannelStatus,
-		dao.Subscription.Columns().GatewayItemData:             details.ChannelItemData,
+		dao.Subscription.Columns().GatewaySubscriptionId:       details.GatewaySubscriptionId,
+		dao.Subscription.Columns().GatewayStatus:               details.GatewayStatus,
+		dao.Subscription.Columns().GatewayItemData:             details.GatewayItemData,
 		dao.Subscription.Columns().CancelAtPeriodEnd:           cancelAtPeriodEnd,
 		dao.Subscription.Columns().BillingCycleAnchor:          details.BillingCycleAnchor,
-		dao.Subscription.Columns().GatewayLatestInvoiceId:      details.ChannelLatestInvoiceId,
-		dao.Subscription.Columns().GatewayDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
+		dao.Subscription.Columns().GatewayLatestInvoiceId:      details.GatewayLatestInvoiceId,
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: details.GatewayDefaultPaymentMethod,
 		dao.Subscription.Columns().TrialEnd:                    details.TrialEnd,
 		dao.Subscription.Columns().DunningTime:                 dunningTime,
 		dao.Subscription.Columns().GmtModify:                   gmtModify,
@@ -171,8 +171,8 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 
 type SubscriptionPaymentSuccessWebHookReq struct {
 	Payment                     *entity.Payment                           `json:"payment" `
-	ChannelSubscriptionDetail   *ro.ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
-	ChannelInvoiceDetail        *ro.ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
+	ChannelSubscriptionDetail   *ro.GatewayDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
+	ChannelInvoiceDetail        *ro.GatewayDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
 	ChannelPaymentId            string                                    `json:"channelPaymentId" `
 	ChannelInvoiceId            string                                    `json:"channelInvoiceId"`
 	ChannelSubscriptionId       string                                    `json:"channelSubscriptionId" `
@@ -187,7 +187,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	TrialEnd                    int64                                     `json:"trialEnd"`
 }
 
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, channelId int64) []*ro.SubscriptionPlanAddonRo {
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.SubscriptionPlanAddonRo {
 	var addons []*ro.SubscriptionPlanAddonRo
 	var totalAddonIds []int64
 	if len(addonParams) > 0 {
@@ -216,13 +216,13 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId)
-				utility.Assert(len(planChannel.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v GatewayPlanId invalid", param.AddonPlanId, channelId))
-				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
+				planChannel := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId)
+				utility.Assert(len(planChannel.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
+				utility.Assert(planChannel.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v GatewayId:%v channelPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
 					Quantity:         param.Quantity,
 					AddonPlan:        mapPlans[param.AddonPlanId],
-					AddonPlanChannel: planChannel,
+					AddonGatewayPlan: planChannel,
 				})
 			}
 		}
@@ -231,14 +231,14 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 }
 
 func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
-	sub := query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+	sub := query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
 	if sub == nil {
 		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.ChannelSubscriptionId)
 	}
 	if sub.Type != consts.SubTypeDefault {
 		return gerror.Newf("HandleSubscriptionPaymentUpdate not channel subscription %s", sub.SubscriptionId)
 	}
-	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx, req.Payment.PaymentId)
+	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByGatewayUpdateId(ctx, req.Payment.PaymentId)
 	if eiPendingSubUpdate != nil {
 		// subscription_update
 		//更新单支付成功, EffectImmediate=true 需要用户 3DS 验证等场景
@@ -258,7 +258,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				// compensate next pending update billing cycle invoice
 				one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 				if one == nil {
-					sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+					sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
 
 					plan := query.GetPlanById(ctx, pendingSubUpdate.UpdatePlanId)
 					var nextPeriodStart = sub.CurrentPeriodEnd
@@ -297,7 +297,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			// compensate billing cycle invoice
 			one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 			if one == nil {
-				sub = query.GetSubscriptionByChannelSubscriptionId(ctx, req.ChannelSubscriptionId)
+				sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
 				plan := query.GetPlanById(ctx, sub.PlanId)
 
 				var nextPeriodStart = sub.CurrentPeriodEnd

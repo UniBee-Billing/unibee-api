@@ -17,7 +17,7 @@ func (c *ControllerPlan) SubscriptionPlanChannelDeactivate(ctx context.Context, 
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 
-	err = service.SubscriptionPlanChannelDeactivate(ctx, req.PlanId, req.ChannelId)
+	err = service.SubscriptionPlanChannelDeactivate(ctx, req.PlanId, req.GatewayId)
 	if err != nil {
 		return nil, err
 	}

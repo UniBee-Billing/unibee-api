@@ -8,26 +8,26 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, channelId int64) (*ro.ChannelUserDetailQueryInternalResp, error) {
+func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, gatewayId int64) (*ro.GatewayUserDetailQueryInternalResp, error) {
 	user := query.GetUserAccountById(ctx, uint64(userId))
 	merchant := query.GetMerchantInfoById(ctx, merchantId)
-	payChannel := query.GetPayChannelById(ctx, channelId)
+	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(merchant != nil, "merchant not found")
 
-	queryResult, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, userId)
+	queryResult, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayUserDetailQuery(ctx, gateway, userId)
 	if err != nil {
 		return nil, err
 	}
 	return queryResult, nil
 }
 
-func MerchantBalanceDetailQuery(ctx context.Context, merchantId int64, channelId int64) (*ro.ChannelMerchantBalanceQueryInternalResp, error) {
+func MerchantBalanceDetailQuery(ctx context.Context, merchantId int64, gatewayId int64) (*ro.GatewayMerchantBalanceQueryInternalResp, error) {
 	merchant := query.GetMerchantInfoById(ctx, merchantId)
-	payChannel := query.GetPayChannelById(ctx, channelId) // todo mark 根据 MerchantId 配置 PayChannel
+	gateway := query.GetGatewayById(ctx, gatewayId) // todo mark 根据 MerchantId 配置 Gateway
 	utility.Assert(merchant != nil, "merchant not found")
 
-	queryResult, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelMerchantBalancesQuery(ctx, payChannel)
+	queryResult, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayMerchantBalancesQuery(ctx, gateway)
 	if err != nil {
 		return nil, err
 	}

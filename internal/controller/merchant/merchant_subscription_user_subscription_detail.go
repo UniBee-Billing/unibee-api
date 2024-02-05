@@ -30,7 +30,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 				User:                                user,
 				Subscription:                        detail.Subscription,
 				Plan:                                detail.Plan,
-				Channel:                             detail.Channel,
+				Gateway:                             detail.Gateway,
 				Addons:                              detail.Addons,
 				UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
 			}, nil
@@ -41,7 +41,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		User:                                user,
 		Subscription:                        nil,
 		Plan:                                nil,
-		Channel:                             nil,
+		Gateway:                             nil,
 		Addons:                              nil,
 		UnfinishedSubscriptionPendingUpdate: nil,
 	}, nil

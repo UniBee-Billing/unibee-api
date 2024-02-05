@@ -5,22 +5,22 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func ConvertChannelToRo(channel *entity.MerchantGateway) *ro.OutChannelRo {
+func ConvertGatewayToRo(channel *entity.MerchantGateway) *ro.OutGatewayRo {
 	if channel == nil {
 		return nil
 	}
-	return &ro.OutChannelRo{
-		ChannelId:   channel.Id,
-		ChannelName: channel.Name,
+	return &ro.OutGatewayRo{
+		GatewayId:   channel.Id,
+		GatewayName: channel.Name,
 	}
 }
 
-func ConvertChannelsToRos(channels []*entity.MerchantGateway) []*ro.OutChannelRo {
-	var outChannelRos []*ro.OutChannelRo
+func ConvertChannelsToRos(channels []*entity.MerchantGateway) []*ro.OutGatewayRo {
+	var outChannelRos []*ro.OutGatewayRo
 	for _, channel := range channels {
-		outChannelRos = append(outChannelRos, &ro.OutChannelRo{
-			ChannelId:   channel.Id,
-			ChannelName: channel.Name,
+		outChannelRos = append(outChannelRos, &ro.OutGatewayRo{
+			GatewayId:   channel.Id,
+			GatewayName: channel.Name,
 		})
 	}
 	return outChannelRos

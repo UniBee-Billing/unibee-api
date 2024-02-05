@@ -8,9 +8,9 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func GetPayChannelServiceProvider(ctx context.Context, channelId int64) (channelService _interface.RemotePayChannelInterface) {
+func GetGatewayServiceProvider(ctx context.Context, gatewayId int64) (channelService _interface.RemotePayChannelInterface) {
 	proxy := &PayChannelProxy{}
-	proxy.PaymentChannel = query.GetPayChannelById(ctx, channelId)
-	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("channel not found %d", channelId))
+	proxy.PaymentChannel = query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("gateway not found %d", gatewayId))
 	return proxy
 }

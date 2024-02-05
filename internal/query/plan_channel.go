@@ -8,59 +8,59 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetPlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.GatewayPlan) {
-	if planId <= 0 || channelId <= 0 {
+func GetGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *entity.GatewayPlan) {
+	if planId <= 0 || gatewayId <= 0 {
 		return nil
 	}
-	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, GatewayId: channelId}).OmitEmpty().Scan(&one)
+	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetActivePlanChannel(ctx context.Context, planId int64, channelId int64) (one *entity.GatewayPlan) {
-	if planId <= 0 || channelId <= 0 {
+func GetActiveGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *entity.GatewayPlan) {
+	if planId <= 0 || gatewayId <= 0 {
 		return nil
 	}
-	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, GatewayId: channelId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&one)
+	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, GatewayId: gatewayId, Status: consts.GatewayPlanStatusActive}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetListActivePlanChannels(ctx context.Context, planId int64) (list []*entity.GatewayPlan) {
+func GetListActiveGatewayPlans(ctx context.Context, planId int64) (list []*entity.GatewayPlan) {
 	if planId <= 0 {
 		return nil
 	}
-	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
+	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, Status: consts.GatewayPlanStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		list = nil
 	}
 	return
 }
 
-func GetListActiveOutChannelRos(ctx context.Context, planId int64) []*ro.OutChannelRo {
+func GetListActiveOutGatewayRos(ctx context.Context, planId int64) []*ro.OutGatewayRo {
 	if planId <= 0 {
 		return nil
 	}
 	var list []*entity.GatewayPlan
-	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, Status: consts.PlanChannelStatusActive}).OmitEmpty().Scan(&list)
+	err := dao.GatewayPlan.Ctx(ctx).Where(entity.GatewayPlan{PlanId: planId, Status: consts.GatewayPlanStatusActive}).OmitEmpty().Scan(&list)
 	if err != nil {
 		return nil
 	}
-	var outChannels []*ro.OutChannelRo
-	for _, planChannel := range list {
-		if planChannel.Status == consts.PlanChannelStatusActive {
-			outChannel := GetPayChannelById(ctx, planChannel.GatewayId)
+	var gateways []*ro.OutGatewayRo
+	for _, one := range list {
+		if one.Status == consts.GatewayPlanStatusActive {
+			outChannel := GetGatewayById(ctx, one.GatewayId)
 			if outChannel != nil {
-				outChannels = append(outChannels, &ro.OutChannelRo{
-					ChannelId:   outChannel.Id,
-					ChannelName: outChannel.Name,
+				gateways = append(gateways, &ro.OutGatewayRo{
+					GatewayId:   outChannel.Id,
+					GatewayName: outChannel.Name,
 				})
 			}
 		}
 	}
-	return outChannels
+	return gateways
 }

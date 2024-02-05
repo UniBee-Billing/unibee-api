@@ -9,7 +9,7 @@ import (
 var (
 	TopicTest1                          = redismq.MQTopicEnum{"unibee", "test1", "redismq test1"}
 	TopicTest2                          = redismq.MQTopicEnum{"unibee", "test2", "redismq test2"}
-	TopicChannelPayV2WebHookReceive     = redismq.MQTopicEnum{"unibee", "channelpaywebhookreceivev2", "channelpaywebhookv2"}
+	TopicGatewayPayV2WebHookReceive     = redismq.MQTopicEnum{"unibee", "gatewaypaywebhookreceivev2", "gatewaypaywebhookv2"}
 	TopicPayCreated                     = redismq.MQTopicEnum{"unibee_pay", "paycreated", "payment created"}
 	TopicPayCancel                      = redismq.MQTopicEnum{"unibee_pay", "payCancelld", "payment cancelled"}
 	TopicPayAuthorized                  = redismq.MQTopicEnum{"unibee_pay", "payauthorized", "payment authorized"}

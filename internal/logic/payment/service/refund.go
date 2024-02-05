@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
+func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
 	utility.Assert(len(req.MerchantRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
@@ -28,8 +28,8 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
 
-	payChannel := query.GetPayChannelById(ctx, payment.GatewayId)
-	utility.Assert(payChannel != nil, "channel not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Amount <= payment.TotalAmount, "refund value should <= TotalAmount value")
@@ -81,7 +81,7 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 channel refund
+			//transaction gateway refund
 			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark ignore nil field
 			one.UniqueId = one.RefundId
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -97,14 +97,14 @@ func DoChannelRefund(ctx context.Context, bizType int, req *v1.RefundsReq, openA
 			one.Id = id
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			channelResult, err := api.GetPayChannelServiceProvider(ctx, payment.GatewayId).DoRemoteChannelRefund(ctx, payment, one)
+			gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, payment, one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
 			}
 
-			one.GatewayRefundId = channelResult.ChannelRefundId
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: channelResult.ChannelRefundId},
+			one.GatewayRefundId = gatewayResult.GatewayRefundId
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()

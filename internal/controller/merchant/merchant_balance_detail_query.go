@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerBalance) DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error) {
-	balanceResult, err := balance2.MerchantBalanceDetailQuery(ctx, req.MerchantId, req.ChannelId)
+	balanceResult, err := balance2.MerchantBalanceDetailQuery(ctx, req.MerchantId, req.GatewayId)
 
 	return &balance.DetailQueryRes{
 		AvailableBalance:       balanceResult.AvailableBalance,

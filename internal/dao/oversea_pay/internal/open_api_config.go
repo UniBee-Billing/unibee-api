@@ -31,7 +31,7 @@ type OpenApiConfigColumns struct {
 	Token                   string // api token
 	IsDeleted               string // 0-UnDeleted，1-Deleted
 	Validips                string //
-	ChannelCallbackResponse string // callback return response
+	GatewayCallbackResponse string // callback return response
 	CompanyId               string // company id
 }
 
@@ -48,7 +48,7 @@ var openApiConfigColumns = OpenApiConfigColumns{
 	Token:                   "token",
 	IsDeleted:               "is_deleted",
 	Validips:                "validips",
-	ChannelCallbackResponse: "channel_callback_response",
+	GatewayCallbackResponse: "gateway_callback_response",
 	CompanyId:               "company_id",
 }
 

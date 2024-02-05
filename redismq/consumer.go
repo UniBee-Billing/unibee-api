@@ -312,6 +312,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 
 func messageAck(message *Message) {
 	var err error
+	ctx := context.Background()
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -319,7 +320,7 @@ func messageAck(message *Message) {
 			} else {
 				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 			}
-			fmt.Printf("MQ STREAM Redismq MessageAck panic error:%s\n", err.Error())
+			g.Log().Errorf(ctx, "MQ STREAM Redismq MessageAck panic error:%s\n", err.Error())
 			return
 		}
 	}()
@@ -343,7 +344,7 @@ func messageAck(message *Message) {
 		fmt.Printf("MQStream ack message:%v panic error:%s\n", message, err)
 		return
 	}
-	fmt.Printf("MQStream ack streamMessageId:%s streamName:%s ackResult:%d", message.MessageId, streamName, ackResult)
+	g.Log().Infof(ctx, "MQStream ack streamMessageId:%s streamName:%s ackResult:%d\n", message.MessageId, streamName, ackResult)
 }
 
 func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {

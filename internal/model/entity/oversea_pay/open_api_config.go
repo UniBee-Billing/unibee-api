@@ -21,6 +21,6 @@ type OpenApiConfig struct {
 	Token                   string      `json:"token"                   description:"api token"`                // api token
 	IsDeleted               int         `json:"isDeleted"               description:"0-UnDeleted，1-Deleted"`    // 0-UnDeleted，1-Deleted
 	Validips                string      `json:"validips"                description:""`                         //
-	ChannelCallbackResponse string      `json:"channelCallbackResponse" description:"callback return response"` // callback return response
+	GatewayCallbackResponse string      `json:"gatewayCallbackResponse" description:"callback return response"` // callback return response
 	CompanyId               int64       `json:"companyId"               description:"company id"`               // company id
 }

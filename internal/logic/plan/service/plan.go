@@ -46,63 +46,63 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId int64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelId int64) (err error) {
+func SubscriptionGatewayPlanActivate(ctx context.Context, planId int64, gatewayId int64) (err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 	utility.Assert(planId > 0, "invalid planId")
-	utility.Assert(channelId > 0, "invalid channelId")
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetPlanChannel(ctx, planId, channelId)
-	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel should be transfer first")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
+	utility.Assert(gatewayPlan != nil && len(gatewayPlan.GatewayProductId) > 0 && len(gatewayPlan.GatewayPlanId) > 0, "gateway plan should be transfer first")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 
-	err = api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanActive(ctx, plan, planChannel)
+	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanActive(ctx, plan, gatewayPlan)
 	if err != nil {
 		return
 	}
 	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
-		dao.GatewayPlan.Columns().Status: consts.PlanChannelStatusActive,
-		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusActive,// todo mark
+		dao.GatewayPlan.Columns().Status: consts.GatewayPlanStatusActive,
+		//dao.SubscriptionPlanChannel.Columns().GatewayPlanStatus: consts.GatewayPlanStatusActive,// todo mark
 		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).Update()
+	}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).Update()
 	if err != nil {
 		return err
 	}
 	// todo mark update 值没变化会报错
 	//rowAffected, err := update.RowsAffected()
 	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionPlanChannelActivate update err:%s", update)
+	//	return gerror.Newf("SubscriptionGatewayPlanActivate update err:%s", update)
 	//}
 	return
 }
 
-func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channelId int64) (err error) {
+func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, gatewayId int64) (err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 	utility.Assert(planId > 0, "invalid planId")
-	utility.Assert(channelId > 0, "invalid channelId")
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetPlanChannel(ctx, planId, channelId)
+	planChannel := query.GetGatewayPlan(ctx, planId, gatewayId)
 	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel should be transfer first")
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
 
-	err = api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanDeactivate(ctx, plan, planChannel)
+	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanDeactivate(ctx, plan, planChannel)
 	if err != nil {
 		return
 	}
 	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
-		dao.GatewayPlan.Columns().Status: consts.PlanChannelStatusInActive,
-		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusInActive,// todo mark
+		dao.GatewayPlan.Columns().Status: consts.GatewayPlanStatusInActive,
+		//dao.SubscriptionPlanChannel.Columns().GatewayPlanStatus: consts.GatewayPlanStatusInActive,// todo mark
 		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).OmitNil().Update()
 	if err != nil {

@@ -1,6 +1,6 @@
 package sync
 
-//func PaymentBackgroundSync(channelId int64, channelPaymentId string) {
+//func PaymentBackgroundSync(gatewayId int64, channelPaymentId string) {
 //	if channelId <= 0 {
 //		return
 //	}
@@ -21,10 +21,10 @@ package sync
 //			}
 //		}()
 //		backgroundCtx := context.Background()
-//		payChannel := query.GetPayChannelById(backgroundCtx, channelId)
-//		details, err := channel.GetPayChannelServiceProvider(backgroundCtx, channelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, channelPaymentId)
+//		gateway := query.GetPayChannelById(backgroundCtx, channelId)
+//		details, err := channel.GetPayChannelServiceProvider(backgroundCtx, channelId).GatewayPaymentDetail(backgroundCtx, gateway, channelPaymentId)
 //		if err == nil {
-//			err := handler.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.ChannelPaymentIntentId)
+//			err := handler.CreateOrUpdatePaymentByDetail(backgroundCtx, details, details.GatewayPaymentIntentId)
 //			if err != nil {
 //				fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
 //				return

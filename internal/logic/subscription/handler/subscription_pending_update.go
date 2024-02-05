@@ -50,11 +50,11 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		if err != nil {
 			return false, err
 		}
-		_, err = api.GetPayChannelServiceProvider(ctx, one.GatewayId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		_, err = api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewaySubscriptionUpdate(ctx, &ro.GatewayUpdateSubscriptionInternalReq{
 			Plan:            query.GetPlanById(ctx, one.UpdatePlanId),
 			Quantity:        one.UpdateQuantity,
 			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.GatewayId),
-			PlanChannel:     query.GetPlanChannel(ctx, one.UpdatePlanId, one.GatewayId),
+			GatewayPlan:     query.GetGatewayPlan(ctx, one.UpdatePlanId, one.GatewayId),
 			Subscription:    query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId),
 			ProrationDate:   one.ProrationDate,
 			EffectImmediate: false,

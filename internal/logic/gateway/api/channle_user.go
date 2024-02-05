@@ -7,24 +7,24 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func queryAndCreateChannelUser(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) *entity.GatewayUser {
-	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
+func queryAndCreateChannelUser(ctx context.Context, gateway *entity.MerchantGateway, userId int64) *entity.GatewayUser {
+	channelUser := query.GetGatewayUser(ctx, userId, int64(gateway.Id))
 	if channelUser == nil {
 		user := query.GetUserAccountById(ctx, uint64(userId))
 		utility.Assert(user != nil, "user not found")
 		utility.Assert(len(user.Email) > 0, "invalid user email")
-		create, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserCreate(ctx, payChannel, user)
-		utility.AssertError(err, "DoRemoteChannelUserCreate")
-		channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), create.ChannelUserId, "")
-		utility.AssertError(err, "CreateOrUpdateChannelUser")
+		create, err := GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayUserCreate(ctx, gateway, user)
+		utility.AssertError(err, "GatewayUserCreate")
+		channelUser, err = query.CreateOrUpdateGatewayUser(ctx, userId, int64(gateway.Id), create.GatewayUserId, "")
+		utility.AssertError(err, "CreateOrUpdateGatewayUser")
 		return channelUser
 	} else {
 		if len(channelUser.GatewayDefaultPaymentMethod) == 0 {
 			//no default payment method, query it
-			detailQuery, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserDetailQuery(ctx, payChannel, channelUser.UserId)
-			utility.AssertError(err, "DoRemoteChannelUserDetailQuery")
+			detailQuery, err := GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayUserDetailQuery(ctx, gateway, channelUser.UserId)
+			utility.AssertError(err, "GatewayUserDetailQuery")
 			if len(detailQuery.DefaultPaymentMethod) > 0 {
-				channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), channelUser.GatewayUserId, detailQuery.DefaultPaymentMethod)
+				channelUser, err = query.CreateOrUpdateGatewayUser(ctx, userId, int64(gateway.Id), channelUser.GatewayUserId, detailQuery.DefaultPaymentMethod)
 				channelUser.GatewayDefaultPaymentMethod = detailQuery.DefaultPaymentMethod
 			}
 		}
@@ -32,16 +32,16 @@ func queryAndCreateChannelUser(ctx context.Context, payChannel *entity.MerchantG
 	}
 }
 
-func queryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) *entity.GatewayUser {
-	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
+func queryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64) *entity.GatewayUser {
+	channelUser := query.GetGatewayUser(ctx, userId, int64(gateway.Id))
 	if channelUser == nil {
 		user := query.GetUserAccountById(ctx, uint64(userId))
 		utility.Assert(user != nil, "user not found")
 		utility.Assert(len(user.Email) > 0, "invalid user email")
-		create, err := GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelUserCreate(ctx, payChannel, user)
-		utility.AssertError(err, "DoRemoteChannelUserCreate")
-		channelUser, err = query.CreateOrUpdateChannelUser(ctx, userId, int64(payChannel.Id), create.ChannelUserId, "")
-		utility.AssertError(err, "CreateOrUpdateChannelUser")
+		create, err := GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayUserCreate(ctx, gateway, user)
+		utility.AssertError(err, "GatewayUserCreate")
+		channelUser, err = query.CreateOrUpdateGatewayUser(ctx, userId, int64(gateway.Id), create.GatewayUserId, "")
+		utility.AssertError(err, "CreateOrUpdateGatewayUser")
 		return channelUser
 	} else {
 		return channelUser

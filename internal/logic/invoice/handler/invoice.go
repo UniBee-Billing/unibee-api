@@ -19,7 +19,7 @@ import (
 
 type CreateInvoiceInternalReq struct {
 	Payment                          *entity.Payment                      `json:"payment"`
-	ChannelInvoiceId                 string                               `json:"channelInvoiceId"`
+	GatewayInvoiceId                 string                               `json:"gatewayInvoiceId"`
 	Currency                         string                               `json:"currency"`
 	PlanId                           int64                                `json:"planId"`
 	Quantity                         int64                                `json:"quantity"`
@@ -30,7 +30,7 @@ type CreateInvoiceInternalReq struct {
 	SubscriptionId                   string                               `json:"subscriptionId"`
 	ChannelId                        int64                                `json:"channelId"`
 	InvoiceStatus                    int                                  `json:"invoiceStatus"`
-	ChannelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp `json:"channelDetailInvoiceInternalResp"`
+	ChannelDetailInvoiceInternalResp *ro.GatewayDetailInvoiceInternalResp `json:"channelDetailInvoiceInternalResp"`
 	PeriodStart                      int64                                `json:"periodStart"                    description:"period_start"` // period_start
 	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`   // period_end
 }

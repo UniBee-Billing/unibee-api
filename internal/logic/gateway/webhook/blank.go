@@ -10,17 +10,17 @@ import (
 type BlankWebhook struct {
 }
 
-func (b BlankWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
+func (b BlankWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b BlankWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
+func (b BlankWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b BlankWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantGateway) (res *ro.ChannelRedirectInternalResp, err error) {
+func (b BlankWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

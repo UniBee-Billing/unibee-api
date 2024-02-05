@@ -73,7 +73,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx, payment.PaymentId)
 			pendingSubDowngrade := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpgrade != nil && strings.Compare(payment.BillingReason, "SubscriptionUpgrade") == 0 {
 				utility.Assert(strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0, "payment sub_id not match pendingUpdate sub_id")
@@ -85,7 +85,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
 				if len(pendingSubDowngrade.GatewayUpdateId) > 0 {
-					utility.Assert(strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
+					utility.Assert(strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate GatewayUpdateId")
 				}
 				utility.Assert(pendingSubDowngrade.UpdateAmount == payment.TotalAmount, "totalAmount not match")
 				// Downgrade
@@ -129,7 +129,7 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByGatewayUpdateId(ctx, payment.PaymentId)
 			if pendingSubUpdate != nil {
 				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
 				if err != nil {
@@ -147,7 +147,7 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx, payment.PaymentId)
+			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByGatewayUpdateId(ctx, payment.PaymentId)
 			if pendingSubUpdate != nil {
 				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
 				if err != nil {

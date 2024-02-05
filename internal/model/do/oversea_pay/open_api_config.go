@@ -23,6 +23,6 @@ type OpenApiConfig struct {
 	Token                   interface{} // api token
 	IsDeleted               interface{} // 0-UnDeleted，1-Deleted
 	Validips                interface{} //
-	ChannelCallbackResponse interface{} // callback return response
+	GatewayCallbackResponse interface{} // callback return response
 	CompanyId               interface{} // company id
 }

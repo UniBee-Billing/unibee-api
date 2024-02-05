@@ -26,7 +26,7 @@ func (c *ControllerInvoice) BulkChannelSync(ctx context.Context, req *invoice.Bu
 	//		var mainList []*entity.Invoice
 	//		err := dao.Invoice.Ctx(backgroundCtx).
 	//			Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
-	//			WhereNotNull(dao.Invoice.Columns().ChannelInvoiceId).
+	//			WhereNotNull(dao.Invoice.Columns().GatewayInvoiceId).
 	//			OrderDesc("id").
 	//			Limit(page*count, count).
 	//			OmitEmpty().Scan(&mainList)
@@ -35,18 +35,18 @@ func (c *ControllerInvoice) BulkChannelSync(ctx context.Context, req *invoice.Bu
 	//			return
 	//		}
 	//		for _, one := range mainList {
-	//			payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
-	//			utility.Assert(payChannel != nil, "invalid planChannel")
-	//			details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
+	//			gateway := query.GetPayChannelById(backgroundCtx, one.GatewayId)
+	//			utility.Assert(gateway != nil, "invalid planChannel")
+	//			details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).GatewayInvoiceDetails(backgroundCtx, gateway, one.GatewayInvoiceId)
 	//			if err == nil {
-	//				err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.ChannelInvoiceId)
+	//				err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.GatewayInvoiceId)
 	//				if err != nil {
-	//					fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByChannelDetail ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
+	//					fmt.Printf("BulkChannelSync Background CreateOrUpdateInvoiceByChannelDetail GatewayInvoiceId:%s error%s\n", one.GatewayInvoiceId, err.Error())
 	//					return
 	//				}
-	//				fmt.Printf("BulkChannelSync Background Fetch ChannelInvoiceId:%s success\n", one.ChannelInvoiceId)
+	//				fmt.Printf("BulkChannelSync Background Fetch GatewayInvoiceId:%s success\n", one.GatewayInvoiceId)
 	//			} else {
-	//				fmt.Printf("BulkChannelSync Background Fetch ChannelInvoiceId:%s error%s\n", one.ChannelInvoiceId, err.Error())
+	//				fmt.Printf("BulkChannelSync Background Fetch GatewayInvoiceId:%s error%s\n", one.GatewayInvoiceId, err.Error())
 	//			}
 	//		}
 	//		if len(mainList) == 0 {

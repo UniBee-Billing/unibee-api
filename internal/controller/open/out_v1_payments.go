@@ -23,15 +23,15 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.MerchantId > 0, "merchantId is nil")
 	utility.Assert(req.PaymentMethod != nil, "payment method is nil")
-	utility.Assert(len(req.PaymentMethod.Channel) > 0, "payment method type is nil")
+	utility.Assert(len(req.PaymentMethod.Gateway) > 0, "payment method type is nil")
 	utility.Assert(len(req.MerchantPaymentId) > 0, "MerchantPaymentId is nil")
 	utility.Assert(len(req.ShopperUserId) > 0, "shopperReference type is nil")
 	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
-	payChannel := query.GetPayChannelByChannel(ctx, req.PaymentMethod.Channel)
-	utility.Assert(payChannel != nil, "type not found:"+req.PaymentMethod.Channel)
+	gateway := query.GetGatewayByGatewayName(ctx, req.PaymentMethod.Gateway)
+	utility.Assert(gateway != nil, "type not found:"+req.PaymentMethod.Gateway)
 	//支付方式绑定校验 todo mark
 
 	var invoiceItems []*ro.InvoiceItemDetailRo
@@ -67,12 +67,12 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 	utility.Assert(totalAmount == req.TotalAmount.Amount, "totalAmount not match")
 
 	createPayContext := &ro.CreatePayContext{
-		OpenApiId:  int64(openApiConfig.Id),
-		PayChannel: payChannel,
+		OpenApiId: int64(openApiConfig.Id),
+		Gateway:   gateway,
 		Pay: &entity.Payment{
 			BizId:             req.MerchantPaymentId,
 			BizType:           consts.BIZ_TYPE_ONE_TIME,
-			GatewayId:         int64(payChannel.Id),
+			GatewayId:         int64(gateway.Id),
 			TotalAmount:       req.TotalAmount.Amount,
 			Currency:          req.TotalAmount.Currency,
 			CountryCode:       req.CountryCode,
@@ -101,7 +101,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 		DaysUtilDue:              5, //one day expire
 	}
 
-	resp, err := service.DoChannelPay(ctx, createPayContext)
+	resp, err := service.GatewayPaymentCreate(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.PaymentsRes{
 		Status:            "Pending",

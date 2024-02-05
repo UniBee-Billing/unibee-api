@@ -15,7 +15,7 @@ type SubscriptionDetailRes struct {
 	User                                *entity.UserAccount                 `json:"user" dc:"user"`
 	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
 	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"Plan"`
-	Channel                             *ro.OutChannelRo                    `json:"channel" dc:"Channel"`
+	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
 	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
 	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
@@ -30,18 +30,18 @@ type SubscriptionPayCheckRes struct {
 }
 
 type SubscriptionChannelsReq struct {
-	g.Meta     `path:"/subscription_pay_channels" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway Channel"`
+	g.Meta     `path:"/subscription_pay_gateways" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway"`
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type SubscriptionChannelsRes struct {
-	Channels []*ro.OutChannelRo `json:"Channels"`
+	Gateways []*ro.OutGatewayRo `json:"Gateways"`
 }
 
 type SubscriptionCreatePreviewReq struct {
 	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription Preview"`
 	PlanId         int64                              `p:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	ChannelId      int64                              `p:"channelId" dc:"ChannelId"   v:"required" `
+	GatewayId      int64                              `p:"gatewayId" dc:"GatewayId"   v:"required" `
 	UserId         int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	VatCountryCode string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName"`
@@ -50,7 +50,7 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
 	Quantity          int64                              `json:"quantity"`
-	PayChannel        *ro.OutChannelRo                   `json:"payChannel"`
+	Gateway           *ro.OutGatewayRo                   `json:"gateway"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
@@ -69,7 +69,7 @@ type SubscriptionCreateReq struct {
 	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription"`
 	PlanId             int64                              `p:"planId" dc:"PlanId" v:"required"`
 	Quantity           int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	ChannelId          int64                              `p:"channelId" dc:"ChannelId"   v:"required" `
+	GatewayId          int64                              `p:"gatewayId" dc:"GatewayId"   v:"required" `
 	UserId             int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `

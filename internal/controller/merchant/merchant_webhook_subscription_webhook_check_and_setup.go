@@ -15,6 +15,6 @@ func (c *ControllerWebhook) SubscriptionWebhookCheckAndSetup(ctx context.Context
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
-	webhook2.CheckAndSetupPayChannelWebhooks(ctx)
+	webhook2.CheckAndSetupGatewayWebhooks(ctx)
 	return &webhook.SubscriptionWebhookCheckAndSetupRes{}, nil
 }

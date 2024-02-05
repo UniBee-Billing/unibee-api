@@ -33,7 +33,7 @@ type HandlePayReq struct {
 	CaptureAmount                    int64
 	Reason                           string
 	ChannelDefaultPaymentMethod      string
-	ChannelDetailInvoiceInternalResp *ro.ChannelDetailInvoiceInternalResp
+	ChannelDetailInvoiceInternalResp *ro.GatewayDetailInvoiceInternalResp
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
@@ -445,14 +445,14 @@ func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq,
 		dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
 	}).Where(dao.GatewayUser.Columns().UserId, payment.UserId).Where(dao.GatewayUser.Columns().GatewayId, payment.GatewayId).OmitNil().Update()
 	if err != nil {
-		g.Log().Printf(ctx, `SaveChannelUserDefaultPaymentMethod ChannelDefaultPaymentMethod failure %s`, err.Error())
+		g.Log().Printf(ctx, `SaveChannelUserDefaultPaymentMethod GatewayDefaultPaymentMethod failure %s`, err.Error())
 	}
 	return err
 }
 
-func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) error {
-	one := query.GetPaymentByChannelPaymentId(ctx, channelPayRo.ChannelPaymentId)
-	if channelPayRo.ChannelSubscriptionDetail != nil && channelPayRo.ChannelInvoiceDetail != nil {
+func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.GatewayPaymentRo) error {
+	one := query.GetPaymentByGatewayPaymentId(ctx, channelPayRo.GatewayPaymentId)
+	if channelPayRo.GatewaySubscriptionDetail != nil && channelPayRo.GatewayInvoiceDetail != nil {
 		// payment for subscription
 		payment, err := CreateOrUpdateSubscriptionPaymentFromChannel(ctx, channelPayRo)
 		// payment not first generate from system
@@ -460,26 +460,26 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			return err
 		}
 
-		if len(channelPayRo.ChannelSubscriptionId) > 0 && channelPayRo.ChannelSubscriptionDetail == nil {
-			return gerror.Newf("payment hook may too fast, ChannelSubscriptionDetail is nil for ChannelSubscriptionId:%s", channelPayRo.ChannelSubscriptionId)
+		if len(channelPayRo.GatewaySubscriptionId) > 0 && channelPayRo.GatewaySubscriptionDetail == nil {
+			return gerror.Newf("payment hook may too fast, GatewaySubscriptionDetail is nil for GatewaySubscriptionId:%s", channelPayRo.GatewaySubscriptionId)
 		}
 		//Subscription Payment Success
 		err = handler.HandleSubscriptionPaymentUpdate(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
 			Payment:                     payment,
-			ChannelInvoiceDetail:        channelPayRo.ChannelInvoiceDetail,
-			ChannelSubscriptionDetail:   channelPayRo.ChannelSubscriptionDetail,
-			ChannelPaymentId:            channelPayRo.ChannelPaymentId,
-			ChannelInvoiceId:            channelPayRo.ChannelInvoiceDetail.ChannelInvoiceId,
-			ChannelSubscriptionId:       channelPayRo.ChannelInvoiceDetail.ChannelSubscriptionId,
-			ChannelSubscriptionUpdateId: channelPayRo.ChannelSubscriptionUpdateId,
-			Status:                      channelPayRo.ChannelSubscriptionDetail.Status,
-			ChannelStatus:               channelPayRo.ChannelInvoiceDetail.ChannelStatus,
-			Data:                        channelPayRo.ChannelSubscriptionDetail.Data,
-			ChannelItemData:             channelPayRo.ChannelSubscriptionDetail.ChannelItemData,
-			CancelAtPeriodEnd:           channelPayRo.ChannelSubscriptionDetail.CancelAtPeriodEnd,
-			CurrentPeriodEnd:            channelPayRo.ChannelSubscriptionDetail.CurrentPeriodEnd,
-			CurrentPeriodStart:          channelPayRo.ChannelSubscriptionDetail.CurrentPeriodStart,
-			TrialEnd:                    channelPayRo.ChannelSubscriptionDetail.TrialEnd,
+			ChannelInvoiceDetail:        channelPayRo.GatewayInvoiceDetail,
+			ChannelSubscriptionDetail:   channelPayRo.GatewaySubscriptionDetail,
+			ChannelPaymentId:            channelPayRo.GatewayPaymentId,
+			ChannelInvoiceId:            channelPayRo.GatewayInvoiceDetail.GatewayInvoiceId,
+			ChannelSubscriptionId:       channelPayRo.GatewayInvoiceDetail.GatewaySubscriptionId,
+			ChannelSubscriptionUpdateId: channelPayRo.GatewaySubscriptionUpdateId,
+			Status:                      channelPayRo.GatewaySubscriptionDetail.Status,
+			ChannelStatus:               channelPayRo.GatewayInvoiceDetail.GatewayStatus,
+			Data:                        channelPayRo.GatewaySubscriptionDetail.Data,
+			ChannelItemData:             channelPayRo.GatewaySubscriptionDetail.GatewayItemData,
+			CancelAtPeriodEnd:           channelPayRo.GatewaySubscriptionDetail.CancelAtPeriodEnd,
+			CurrentPeriodEnd:            channelPayRo.GatewaySubscriptionDetail.CurrentPeriodEnd,
+			CurrentPeriodStart:          channelPayRo.GatewaySubscriptionDetail.CurrentPeriodStart,
+			TrialEnd:                    channelPayRo.GatewaySubscriptionDetail.TrialEnd,
 		})
 		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
@@ -490,16 +490,16 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 		if channelPayRo.Status == consts.PAY_SUCCESS {
 			err := HandlePaySuccess(ctx, &HandlePayReq{
 				PaymentId:                        one.PaymentId,
-				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
-				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				ChannelPaymentIntentId:           channelPayRo.GatewayPaymentId,
+				ChannelPaymentId:                 channelPayRo.GatewayPaymentId,
 				TotalAmount:                      channelPayRo.TotalAmount,
 				PayStatusEnum:                    consts.PAY_SUCCESS,
 				PaidTime:                         channelPayRo.PayTime,
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				ChannelDefaultPaymentMethod:      channelPayRo.ChannelPaymentMethod,
-				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+				ChannelDefaultPaymentMethod:      channelPayRo.GatewayPaymentMethod,
+				ChannelDetailInvoiceInternalResp: channelPayRo.GatewayInvoiceDetail,
 			})
 			if err != nil {
 				return err
@@ -507,15 +507,15 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 		} else if channelPayRo.Status == consts.PAY_FAILED {
 			err := HandlePayFailure(ctx, &HandlePayReq{
 				PaymentId:                        one.PaymentId,
-				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
-				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				ChannelPaymentIntentId:           channelPayRo.GatewayPaymentId,
+				ChannelPaymentId:                 channelPayRo.GatewayPaymentId,
 				TotalAmount:                      channelPayRo.TotalAmount,
 				PayStatusEnum:                    consts.PAY_FAILED,
 				PaidTime:                         channelPayRo.PayTime,
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+				ChannelDetailInvoiceInternalResp: channelPayRo.GatewayInvoiceDetail,
 			})
 			if err != nil {
 				return err
@@ -523,15 +523,15 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 		} else if channelPayRo.Status == consts.PAY_CANCEL {
 			err := HandlePayCancel(ctx, &HandlePayReq{
 				PaymentId:                        one.PaymentId,
-				ChannelPaymentIntentId:           channelPayRo.ChannelPaymentId,
-				ChannelPaymentId:                 channelPayRo.ChannelPaymentId,
+				ChannelPaymentIntentId:           channelPayRo.GatewayPaymentId,
+				ChannelPaymentId:                 channelPayRo.GatewayPaymentId,
 				TotalAmount:                      channelPayRo.TotalAmount,
 				PayStatusEnum:                    consts.PAY_CANCEL,
 				PaidTime:                         channelPayRo.PayTime,
 				PaymentAmount:                    channelPayRo.PaymentAmount,
 				CaptureAmount:                    0,
 				Reason:                           channelPayRo.Reason,
-				ChannelDetailInvoiceInternalResp: channelPayRo.ChannelInvoiceDetail,
+				ChannelDetailInvoiceInternalResp: channelPayRo.GatewayInvoiceDetail,
 			})
 			if err != nil {
 				return err
@@ -543,35 +543,35 @@ func HandlePaymentWebhookEvent(ctx context.Context, channelPayRo *ro.ChannelPaym
 			}
 		}
 	} else {
-		return gerror.Newf("Invalid Payment Type ChannelPaymentId:%s ChannelInvoiceId:%s ChannelSubscriptionId:%s", channelPayRo.ChannelPaymentId, channelPayRo.ChannelInvoiceId, channelPayRo.ChannelSubscriptionId)
+		return gerror.Newf("Invalid Payment Type GatewayPaymentId:%s GatewayInvoiceId:%s GatewaySubscriptionId:%s", channelPayRo.GatewayPaymentId, channelPayRo.GatewayInvoiceId, channelPayRo.GatewaySubscriptionId)
 	}
 
 	return nil
 }
 
-func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPayRo *ro.ChannelPaymentRo) (*entity.Payment, error) {
+func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPayRo *ro.GatewayPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(channelPayRo.UniqueId) > 0, "uniqueId invalid")
-	channelUser := query.GetUserChannelByChannelUserId(ctx, channelPayRo.ChannelUserId, channelPayRo.ChannelId)
+	channelUser := query.GetGatewayUserByGatewayUserId(ctx, channelPayRo.GatewayUserId, channelPayRo.GatewayId)
 	utility.Assert(channelUser != nil, "channelUser not found")
 	var subscriptionId string
 	var invoiceId string
 	var countryCode string
-	if channelPayRo.ChannelSubscriptionDetail != nil {
+	if channelPayRo.GatewaySubscriptionDetail != nil {
 		//From Sub Create Pay or Sub Update Pay
-		sub := query.GetSubscriptionByChannelSubscriptionId(ctx, channelPayRo.ChannelSubscriptionDetail.ChannelSubscriptionId)
+		sub := query.GetSubscriptionByGatewaySubscriptionId(ctx, channelPayRo.GatewaySubscriptionDetail.GatewaySubscriptionId)
 		if sub != nil {
 			subscriptionId = sub.SubscriptionId
 			countryCode = sub.CountryCode
 		}
 	}
-	if channelPayRo.ChannelInvoiceDetail != nil {
+	if channelPayRo.GatewayInvoiceDetail != nil {
 		//From Invoice Pay
-		invoice := query.GetInvoiceByChannelInvoiceId(ctx, channelPayRo.ChannelInvoiceId)
+		invoice := query.GetInvoiceByChannelInvoiceId(ctx, channelPayRo.GatewayInvoiceId)
 		if invoice != nil {
 			invoiceId = invoice.InvoiceId
 		}
 	}
-	one := query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId)
+	one := query.GetPaymentByGatewayUniqueId(ctx, channelPayRo.UniqueId)
 	if one == nil {
 		//创建
 		one = &entity.Payment{
@@ -588,9 +588,9 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			BalanceEnd:             channelPayRo.BalanceEnd,
 			Status:                 channelPayRo.Status,
 			AuthorizeStatus:        channelPayRo.AuthorizeStatus,
-			GatewayId:              channelPayRo.ChannelId,
-			GatewayPaymentIntentId: channelPayRo.ChannelPaymentId,
-			GatewayPaymentId:       channelPayRo.ChannelPaymentId,
+			GatewayId:              channelPayRo.GatewayId,
+			GatewayPaymentIntentId: channelPayRo.GatewayPaymentId,
+			GatewayPaymentId:       channelPayRo.GatewayPaymentId,
 			CreateTime:             channelPayRo.CreateTime,
 			CancelTime:             channelPayRo.CancelTime,
 			PaidTime:               channelPayRo.PayTime,
@@ -623,8 +623,8 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 			dao.Payment.Columns().BalanceEnd:             channelPayRo.BalanceEnd,
 			dao.Payment.Columns().Status:                 channelPayRo.Status,
 			dao.Payment.Columns().AuthorizeStatus:        channelPayRo.AuthorizeStatus,
-			dao.Payment.Columns().GatewayId:              channelPayRo.ChannelId,
-			dao.Payment.Columns().GatewayPaymentIntentId: channelPayRo.ChannelPaymentId,
+			dao.Payment.Columns().GatewayId:              channelPayRo.GatewayId,
+			dao.Payment.Columns().GatewayPaymentIntentId: channelPayRo.GatewayPaymentId,
 			dao.Payment.Columns().CreateTime:             channelPayRo.CreateTime,
 			dao.Payment.Columns().CancelTime:             channelPayRo.CancelTime,
 			dao.Payment.Columns().PaidTime:               channelPayRo.PayTime,
@@ -643,7 +643,7 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, channelPa
 	if err != nil {
 		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
 	}
-	return query.GetPaymentByChannelUniqueId(ctx, channelPayRo.UniqueId), nil
+	return query.GetPaymentByGatewayUniqueId(ctx, channelPayRo.UniqueId), nil
 }
 
 func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment, uniqueId string) error {

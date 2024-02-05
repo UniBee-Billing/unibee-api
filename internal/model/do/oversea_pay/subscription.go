@@ -25,7 +25,7 @@ type Subscription struct {
 	AddonData                   interface{} // plan addon json data
 	TaskTime                    *gtime.Time // task_time
 	LatestInvoiceId             interface{} // latest_invoice_id
-	Type                        interface{} // sub type, 0-channel sub, 1-unibee sub
+	Type                        interface{} // sub type, 0-gateway sub, 1-unibee sub
 	GatewayId                   interface{} // gateway_id
 	Status                      interface{} // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	GatewaySubscriptionId       interface{} // gateway subscription id

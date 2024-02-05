@@ -17,11 +17,11 @@ func GetRefundByRefundId(ctx context.Context, refundId string) (one *entity.Refu
 	return
 }
 
-func GetRefundByChannelRefundId(ctx context.Context, channelRefundId string) (one *entity.Refund) {
-	if len(channelRefundId) == 0 {
+func GetRefundByGatewayRefundId(ctx context.Context, gatewayRefundId string) (one *entity.Refund) {
+	if len(gatewayRefundId) == 0 {
 		return nil
 	}
-	err := dao.Refund.Ctx(ctx).Where(entity.Refund{GatewayRefundId: channelRefundId}).OmitEmpty().Scan(&one)
+	err := dao.Refund.Ctx(ctx).Where(entity.Refund{GatewayRefundId: gatewayRefundId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

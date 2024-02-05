@@ -40,7 +40,7 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 	return nil
 }
 
-func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, channelId int64) error {
+func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, gatewayId int64) error {
 	intervals := []string{"day", "month", "year", "week"}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")
@@ -54,30 +54,30 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	} else if strings.ToLower(plan.IntervalUnit) == "week" {
 		utility.Assert(plan.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 	}
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
-	utility.Assert(payChannel != nil, "payChannel not found")
-	planChannel := query.GetPlanChannel(ctx, planId, channelId)
-	if planChannel == nil {
-		planChannel = &entity.GatewayPlan{
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
+	if gatewayPlan == nil {
+		gatewayPlan = &entity.GatewayPlan{
 			PlanId:    planId,
-			GatewayId: channelId,
-			Status:    consts.PlanChannelStatusInit,
+			GatewayId: gatewayId,
+			Status:    consts.GatewayPlanStatusInit,
 		}
 		//保存planChannel
-		result, err := dao.GatewayPlan.Ctx(ctx).Data(planChannel).OmitNil().Insert(planChannel)
+		result, err := dao.GatewayPlan.Ctx(ctx).Data(gatewayPlan).OmitNil().Insert(gatewayPlan)
 		if err != nil {
-			err = gerror.Newf(`SubscriptionPlanChannelTransferAndActivate record insert failure %s`, err)
-			planChannel = nil
+			err = gerror.Newf(`SubscriptionGatewayPlanTransferAndActivate record insert failure %s`, err)
+			gatewayPlan = nil
 			return err
 		}
 		id, err := result.LastInsertId()
 		if err != nil {
-			planChannel = nil
+			gatewayPlan = nil
 			return err
 		}
-		planChannel.Id = uint64(uint(id))
+		gatewayPlan.Id = uint64(uint(id))
 	}
-	if len(planChannel.GatewayProductId) == 0 {
+	if len(gatewayPlan.GatewayProductId) == 0 {
 		//产品尚未创建
 		if len(plan.GatewayProductName) == 0 {
 			plan.GatewayProductName = plan.PlanName
@@ -85,15 +85,15 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		if len(plan.GatewayProductDescription) == 0 {
 			plan.GatewayProductDescription = plan.Description
 		}
-		res, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
+		res, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayProductCreate(ctx, plan, gatewayPlan)
 		if err != nil {
 			return err
 		}
-		//更新 planChannel
+		//更新 gatewayPlan
 		_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
 			dao.GatewayPlan.Columns().GatewayProductId:     res.GatewayProductId,
-			dao.GatewayPlan.Columns().GatewayProductStatus: res.ChannelProductStatus,
-		}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).OmitNil().Update()
+			dao.GatewayPlan.Columns().GatewayProductStatus: res.GatewayProductStatus,
+		}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -101,21 +101,21 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		//if rowAffected != 1 {
 		//	return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
 		//}
-		planChannel.GatewayProductId = res.GatewayProductId
-		planChannel.GatewayProductStatus = res.ChannelProductStatus
+		gatewayPlan.GatewayProductId = res.GatewayProductId
+		gatewayPlan.GatewayProductStatus = res.GatewayProductStatus
 	}
-	if len(planChannel.GatewayPlanId) == 0 {
+	if len(gatewayPlan.GatewayPlanId) == 0 {
 		//创建 并激活 Plan
-		res, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelPlanCreateAndActivate(ctx, plan, planChannel)
+		res, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanCreateAndActivate(ctx, plan, gatewayPlan)
 		if err != nil {
 			return err
 		}
 		_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
 			dao.GatewayPlan.Columns().GatewayPlanId:        res.GatewayPlanId,
-			dao.GatewayPlan.Columns().GatewayProductStatus: res.ChannelPlanStatus,
+			dao.GatewayPlan.Columns().GatewayProductStatus: res.GatewayPlanStatus,
 			dao.GatewayPlan.Columns().Data:                 res.Data,
 			dao.GatewayPlan.Columns().Status:               int(res.Status),
-		}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).OmitNil().Update()
+		}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -123,10 +123,10 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 		//if rowAffected != 1 {
 		//	return gerror.Newf("SubscriptionPlanChannelTransferAndActivate update err:%s", update)
 		//}
-		planChannel.GatewayPlanId = res.GatewayPlanId
-		planChannel.GatewayProductStatus = res.ChannelPlanStatus
-		planChannel.Data = res.Data
-		planChannel.Status = int(res.Status)
+		gatewayPlan.GatewayPlanId = res.GatewayPlanId
+		gatewayPlan.GatewayProductStatus = res.GatewayPlanStatus
+		gatewayPlan.Data = res.Data
+		gatewayPlan.Status = int(res.Status)
 	}
 
 	return nil

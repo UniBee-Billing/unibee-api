@@ -51,7 +51,7 @@ func (p PayChannelWebhookProxy) getRemoteChannel() (channelService _interface.Re
 	}
 }
 
-func (p PayChannelWebhookProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
+func (p PayChannelWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -64,23 +64,23 @@ func (p PayChannelWebhookProxy) DoRemoteChannelCheckAndSetupWebhook(ctx context.
 		}
 	}()
 	startTime := time.Now()
-	err = p.getRemoteChannel().DoRemoteChannelCheckAndSetupWebhook(ctx, payChannel)
-	glog.Infof(ctx, "MeasureChannelFunction:DoRemoteChannelCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
+	err = p.getRemoteChannel().GatewayCheckAndSetupWebhook(ctx, gateway)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return err
 }
 
-func (p PayChannelWebhookProxy) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
+func (p PayChannelWebhookProxy) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	startTime := time.Now()
-	p.getRemoteChannel().DoRemoteChannelWebhook(r, payChannel)
-	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelWebhook cost：%s \n", time.Now().Sub(startTime))
+	p.getRemoteChannel().GatewayWebhook(r, gateway)
+	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayWebhook cost：%s \n", time.Now().Sub(startTime))
 }
-func (p PayChannelWebhookProxy) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantGateway) (res *ro.ChannelRedirectInternalResp, err error) {
+func (p PayChannelWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().DoRemoteChannelRedirect(r, payChannel)
-	glog.Infof(r.Context(), "MeasureChannelFunction:DoRemoteChannelRedirect cost：%s \n", time.Now().Sub(startTime))
+	res, err = p.getRemoteChannel().GatewayRedirect(r, gateway)
+	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayRedirect cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}

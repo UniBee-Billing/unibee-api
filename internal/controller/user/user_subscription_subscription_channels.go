@@ -8,8 +8,8 @@ import (
 )
 
 func (c *ControllerSubscription) SubscriptionChannels(ctx context.Context, req *subscription.SubscriptionChannelsReq) (res *subscription.SubscriptionChannelsRes, err error) {
-	data := query.GetListSubscriptionTypePayChannels(ctx)
+	data := query.GetListSubscriptionTypeGateways(ctx)
 	return &subscription.SubscriptionChannelsRes{
-		Channels: service.ConvertChannelsToRos(data),
+		Gateways: service.ConvertChannelsToRos(data),
 	}, nil
 }

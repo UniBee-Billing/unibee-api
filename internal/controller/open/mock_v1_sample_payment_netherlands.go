@@ -23,7 +23,7 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 		},
 		PaymentMethod: &v12.PaymentMethodsReq{
 			TokenId: "",
-			Channel: req.Channel,
+			Gateway: req.GatewayName,
 		},
 		RedirectUrl:     req.ReturnUrl,
 		CountryCode:     "NL",

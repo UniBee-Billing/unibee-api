@@ -20,8 +20,8 @@ import (
 
 type HandleRefundReq struct {
 	RefundId         string
-	ChannelRefundId  string
-	RefundFee        int64
+	GatewayRefundId  string
+	RefundAmount     int64
 	RefundStatusEnum consts.RefundStatusEnum
 	RefundTime       *gtime.Time
 	Reason           string
@@ -98,7 +98,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if len(req.RefundId) == 0 {
 		return gerror.New("invalid param refundNo")
 	}
-	if len(req.RefundId) == 0 && req.RefundFee > 0 {
+	if len(req.RefundId) == 0 && req.RefundAmount > 0 {
 		return gerror.New("invalid param RefundAmount, should > 0")
 	}
 	one := query.GetRefundByRefundId(ctx, req.RefundId)
@@ -233,42 +233,42 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	return nil
 }
 
-func HandleRefundWebhookEvent(ctx context.Context, channelRefundRo *ro.OutPayRefundRo) error {
-	utility.Assert(len(channelRefundRo.ChannelRefundId) > 0, "channelRefundId not found")
-	one := query.GetRefundByChannelRefundId(ctx, channelRefundRo.ChannelRefundId)
+func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRefundRo) error {
+	utility.Assert(len(gatewayRefundRo.GatewayRefundId) > 0, "gatewayRefundId not found")
+	one := query.GetRefundByGatewayRefundId(ctx, gatewayRefundRo.GatewayRefundId)
 	utility.Assert(one != nil, "refund not found")
-	if channelRefundRo.Status == consts.REFUND_SUCCESS {
+	if gatewayRefundRo.Status == consts.REFUND_SUCCESS {
 		err := HandleRefundSuccess(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
-			ChannelRefundId:  channelRefundRo.ChannelRefundId,
-			RefundFee:        channelRefundRo.RefundFee,
-			RefundStatusEnum: channelRefundRo.Status,
-			RefundTime:       channelRefundRo.RefundTime,
-			Reason:           channelRefundRo.Reason,
+			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
+			RefundAmount:     gatewayRefundRo.RefundAmount,
+			RefundStatusEnum: gatewayRefundRo.Status,
+			RefundTime:       gatewayRefundRo.RefundTime,
+			Reason:           gatewayRefundRo.Reason,
 		})
 		if err != nil {
 			return err
 		}
-	} else if channelRefundRo.Status == consts.REFUND_FAILED {
+	} else if gatewayRefundRo.Status == consts.REFUND_FAILED {
 		err := HandleRefundFailure(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
-			ChannelRefundId:  channelRefundRo.ChannelRefundId,
-			RefundFee:        channelRefundRo.RefundFee,
-			RefundStatusEnum: channelRefundRo.Status,
-			RefundTime:       channelRefundRo.RefundTime,
-			Reason:           channelRefundRo.Reason,
+			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
+			RefundAmount:     gatewayRefundRo.RefundAmount,
+			RefundStatusEnum: gatewayRefundRo.Status,
+			RefundTime:       gatewayRefundRo.RefundTime,
+			Reason:           gatewayRefundRo.Reason,
 		})
 		if err != nil {
 			return err
 		}
-	} else if channelRefundRo.Status == consts.REFUND_REVERSE {
+	} else if gatewayRefundRo.Status == consts.REFUND_REVERSE {
 		err := HandleRefundReversed(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
-			ChannelRefundId:  channelRefundRo.ChannelRefundId,
-			RefundFee:        channelRefundRo.RefundFee,
-			RefundStatusEnum: channelRefundRo.Status,
-			RefundTime:       channelRefundRo.RefundTime,
-			Reason:           channelRefundRo.Reason,
+			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
+			RefundAmount:     gatewayRefundRo.RefundAmount,
+			RefundStatusEnum: gatewayRefundRo.Status,
+			RefundTime:       gatewayRefundRo.RefundTime,
+			Reason:           gatewayRefundRo.Reason,
 		})
 		if err != nil {
 			return err
@@ -278,10 +278,10 @@ func HandleRefundWebhookEvent(ctx context.Context, channelRefundRo *ro.OutPayRef
 }
 
 func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, details *ro.OutPayRefundRo, uniqueId string) error {
-	utility.Assert(len(details.ChannelPaymentId) > 0, "paymentId is null")
+	utility.Assert(len(details.GatewayRefundId) > 0, "GatewayRefundId is null")
 	utility.Assert(payment != nil, "payment is null")
 
-	one := query.GetRefundByChannelRefundId(ctx, details.ChannelRefundId)
+	one := query.GetRefundByGatewayRefundId(ctx, details.GatewayRefundId)
 
 	if one == nil {
 		//创建
@@ -295,11 +295,11 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			Currency:             details.Currency,
 			PaymentId:            payment.PaymentId,
 			RefundId:             utility.CreateRefundId(),
-			RefundAmount:         details.RefundFee,
+			RefundAmount:         details.RefundAmount,
 			RefundComment:        details.Reason,
 			Status:               int(details.Status),
 			RefundTime:           details.RefundTime,
-			GatewayRefundId:      details.ChannelRefundId,
+			GatewayRefundId:      details.GatewayRefundId,
 			RefundCommentExplain: details.Reason,
 			UniqueId:             uniqueId,
 			SubscriptionId:       payment.SubscriptionId,
@@ -324,11 +324,11 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().CountryCode:          payment.CountryCode,
 			dao.Refund.Columns().Currency:             details.Currency,
 			dao.Refund.Columns().PaymentId:            payment.PaymentId,
-			dao.Refund.Columns().RefundAmount:         details.RefundFee,
+			dao.Refund.Columns().RefundAmount:         details.RefundAmount,
 			dao.Refund.Columns().RefundComment:        details.Reason,
 			dao.Refund.Columns().Status:               details.Status,
 			dao.Refund.Columns().RefundTime:           details.RefundTime,
-			dao.Refund.Columns().GatewayRefundId:      details.ChannelRefundId,
+			dao.Refund.Columns().GatewayRefundId:      details.GatewayRefundId,
 			dao.Refund.Columns().RefundCommentExplain: details.Reason,
 			dao.Refund.Columns().UniqueId:             uniqueId,
 			dao.Refund.Columns().SubscriptionId:       payment.SubscriptionId,

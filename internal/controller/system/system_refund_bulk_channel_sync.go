@@ -47,17 +47,17 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 				return
 			}
 			for _, one := range mainList {
-				payChannel := query.GetPayChannelById(backgroundCtx, one.GatewayId)
-				utility.Assert(payChannel != nil, "invalid planChannel")
-				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.GatewayPaymentId)
+				gateway := query.GetGatewayById(backgroundCtx, one.GatewayId)
+				utility.Assert(gateway != nil, "invalid planChannel")
+				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewayRefundList(backgroundCtx, gateway, one.GatewayPaymentId)
 				if err == nil {
 					for _, detail := range details {
-						err := handler2.CreateOrUpdateRefundByDetail(backgroundCtx, one, detail, detail.ChannelRefundId)
+						err := handler2.CreateOrUpdateRefundByDetail(backgroundCtx, one, detail, detail.GatewayRefundId)
 						if err != nil {
-							fmt.Printf("BulkChannelSync Background CreateOrUpdateRefundByDetail ChannelRefundId:%s error%s\n", detail.ChannelRefundId, err.Error())
+							fmt.Printf("BulkChannelSync Background CreateOrUpdateRefundByDetail GatewayRefundId:%s error%s\n", detail.GatewayRefundId, err.Error())
 							return
 						}
-						fmt.Printf("BulkChannelSync Background Fetch ChannelRefundId:%s success\n", detail.ChannelRefundId)
+						fmt.Printf("BulkChannelSync Background Fetch GatewayRefundId:%s success\n", detail.GatewayRefundId)
 					}
 				} else {
 					fmt.Printf("BulkChannelSync Background Fetch GatewayPaymentId:%s error%s\n", one.GatewayPaymentId, err.Error())

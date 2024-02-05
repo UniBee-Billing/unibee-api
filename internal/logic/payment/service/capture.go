@@ -11,7 +11,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func DoChannelCapture(ctx context.Context, payment *entity.Payment) (err error) {
+func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err error) {
 	utility.Assert(payment != nil, "entity not found")
 	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
 	utility.Assert(payment.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
@@ -19,7 +19,7 @@ func DoChannelCapture(ctx context.Context, payment *entity.Payment) (err error) 
 	utility.Assert(payment.PaymentAmount <= payment.TotalAmount, "capture value should <= authorized value")
 
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		//事务处理 channel capture
+		//todo mark need transaction gateway capture
 		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.Payment.Columns().PaymentAmount: payment.PaymentAmount},
 			g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 		if err != nil || result == nil {
@@ -33,7 +33,7 @@ func DoChannelCapture(ctx context.Context, payment *entity.Payment) (err error) 
 		}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-		_, err = api.GetPayChannelServiceProvider(ctx, payment.GatewayId).DoRemoteChannelCapture(ctx, payment)
+		_, err = api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCapture(ctx, payment)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

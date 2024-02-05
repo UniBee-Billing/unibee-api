@@ -32,7 +32,7 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 				User:                                subDetailRes.User,
 				Subscription:                        subDetailRes.Subscription,
 				Plan:                                subDetailRes.Plan,
-				Channel:                             subDetailRes.Channel,
+				Gateway:                             subDetailRes.Gateway,
 				AddonParams:                         addonParams,
 				Addons:                              subDetailRes.Addons,
 				UnfinishedSubscriptionPendingUpdate: subDetailRes.UnfinishedSubscriptionPendingUpdate,

@@ -14,7 +14,7 @@ type CreatePayContext struct {
 	AppId         string                  `json:"appId"`
 	Desc          string                  `json:"desc"`
 	Pay           *entity.Payment         `json:"pay"`
-	PayChannel    *entity.MerchantGateway `json:"payChannel"`
+	Gateway       *entity.MerchantGateway `json:"gateway"`
 	TerminalIp    string                  `json:"terminalIp"`
 	ShopperUserId string                  `json:"merchantUserId"`
 	ShopperEmail  string                  `json:"shopperEmail"`
@@ -34,30 +34,24 @@ type CreatePayContext struct {
 	DeviceType               string             `json:"deviceType"`
 	PayMethod                int                `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
 	DaysUtilDue              int                `json:"daysUtilDue"`
-	ChannelPaymentMethod     string             `json:"channelPaymentMethod"`
+	GatewayPaymentMethod     string             `json:"gatewayPaymentMethod"`
 	PayImmediate             bool               `json:"payImmediate"`
 }
 
 type CreatePayInternalResp struct {
 	Status                 consts.PayStatusEnum `json:"status"`
 	PaymentId              string               `json:"paymentId"`
-	ChannelPaymentId       string               `json:"channelPaymentId"`
-	ChannelPaymentIntentId string               `json:"channelPaymentIntentId"`
+	GatewayPaymentId       string               `json:"gatewayPaymentId"`
+	GatewayPaymentIntentId string               `json:"gatewayPaymentIntentId"`
 	Link                   string               `json:"link"`
 	Action                 *gjson.Json          `json:"action"`
-	//InvoiceStatus          consts.InvoiceStatusEnum `json:"invoiceStatus"`
-	//OrderString            string                   `json:"orderString"`
-	//AlreadyPaid            bool                     `json:"alreadyPaid"`
-	//ChannelInvoiceId       string                   `json:"channelInvoiceId"`
-	//ChannelInvoicePdf      string                   `json:"channelInvoicePdf"`
-	//AdditionalData         *gjson.Json              `json:"additionalData"`
 }
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
 type OutPayCaptureRo struct {
-	MerchantId       string       `json:"merchantId"         `          // 商户ID
-	ChannelCaptureId string       `json:"channelCaptureId"            ` // 业务类型。1-订单
-	Reference        string       `json:"reference"              `      // 业务id-即商户订单号
+	MerchantId       string       `json:"merchantId"         `
+	GatewayCaptureId string       `json:"gatewayCaptureId"            `
+	Reference        string       `json:"reference"              `
 	Amount           *v1.AmountVo `json:"amount"`
 	Status           string       `json:"status"`
 }
@@ -65,7 +59,7 @@ type OutPayCaptureRo struct {
 // OutPayCancelRo is the golang structure for table oversea_pay.
 type OutPayCancelRo struct {
 	MerchantId      string `json:"merchantId"         `         // 商户ID
-	ChannelCancelId string `json:"channelCancelId"            ` // 业务类型。1-订单
+	GatewayCancelId string `json:"gatewayCancelId"            ` // 业务类型。1-订单
 	Reference       string `json:"reference"              `     // 业务id-即商户订单号
 	Status          string `json:"status"`
 }
@@ -73,21 +67,21 @@ type OutPayCancelRo struct {
 // OutPayRefundRo is the golang structure for table oversea_pay.
 type OutPayRefundRo struct {
 	MerchantId       string                  `json:"merchantId"         `          // 商户ID
-	ChannelRefundId  string                  `json:"channelRefundId"            `  // 渠道退款订单
-	ChannelPaymentId string                  `json:"channelPaymentId"            ` // 渠道支付订单
+	GatewayRefundId  string                  `json:"gatewayRefundId"            `  // 渠道退款订单
+	GatewayPaymentId string                  `json:"gatewayPaymentId"            ` // 渠道支付订单
 	Status           consts.RefundStatusEnum `json:"status"`
 	Reason           string                  `json:"reason"              `    // 业务id-即商户订单号
-	RefundFee        int64                   `json:"refundFee"              ` // 业务id-即商户订单号
+	RefundAmount     int64                   `json:"refundFee"              ` // 业务id-即商户订单号
 	Currency         string                  `json:"currency"              `
 	RefundTime       *gtime.Time             `json:"refundTime" `
 }
 
-type ChannelPaymentListReq struct {
+type GatewayPaymentListReq struct {
 	UserId int64 `json:"userId"         `
 }
 
-// ChannelPaymentRo is the golang structure for table oversea_pay.
-type ChannelPaymentRo struct {
+// GatewayPaymentRo is the golang structure for table oversea_pay.
+type GatewayPaymentRo struct {
 	MerchantId                  int64                                  `json:"merchantId"         `
 	Status                      int                                    `json:"status"`
 	AuthorizeStatus             int                                    `json:"captureStatus"`
@@ -106,104 +100,104 @@ type ChannelPaymentRo struct {
 	CancelTime                  *gtime.Time                            `json:"cancelTime" `
 	CancelReason                string                                 `json:"cancelReason" `
 	PaymentData                 string                                 `json:"paymentData" `
-	ChannelId                   int64                                  `json:"channelId"         `
-	ChannelUserId               string                                 `json:"channelUserId"         `
-	ChannelPaymentId            string                                 `json:"channelPaymentId"              `
-	ChannelPaymentMethod        string                                 `json:"channelPaymentMethod"              `
-	ChannelInvoiceId            string                                 `json:"channelInvoiceId"         `
-	ChannelSubscriptionId       string                                 `json:"channelSubscriptionId"         `
-	ChannelSubscriptionUpdateId string                                 `json:"channelSubscriptionUpdateId" `
-	ChannelInvoiceDetail        *ChannelDetailInvoiceInternalResp      `json:"channelInvoiceDetail"  `
-	ChannelSubscriptionDetail   *ChannelDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"              `
+	GatewayId                   int64                                  `json:"gatewayId"         `
+	GatewayUserId               string                                 `json:"gatewayUserId"         `
+	GatewayPaymentId            string                                 `json:"gatewayPaymentId"              `
+	GatewayPaymentMethod        string                                 `json:"gatewayPaymentMethod"              `
+	GatewayInvoiceId            string                                 `json:"gatewayInvoiceId"         `
+	GatewaySubscriptionId       string                                 `json:"gatewaySubscriptionId"         `
+	GatewaySubscriptionUpdateId string                                 `json:"gatewaySubscriptionUpdateId" `
+	GatewayInvoiceDetail        *GatewayDetailInvoiceInternalResp      `json:"gatewayInvoiceDetail"  `
+	GatewaySubscriptionDetail   *GatewayDetailSubscriptionInternalResp `json:"gatewaySubscriptionDetail"              `
 }
 
-type OutChannelRo struct {
-	ChannelId   uint64 `json:"channelId"`
-	ChannelName string `json:"channelName"`
+type OutGatewayRo struct {
+	GatewayId   uint64 `json:"gatewayId"`
+	GatewayName string `json:"gatewayName"`
 }
 
-type ChannelCreateProductInternalResp struct {
-	GatewayProductId     string `json:"GatewayProductId"`
-	ChannelProductStatus string `json:"channelProductStatus"`
+type GatewayCreateProductInternalResp struct {
+	GatewayProductId     string `json:"gatewayProductId"`
+	GatewayProductStatus string `json:"gatewayProductStatus"`
 }
 
-type ChannelCreatePlanInternalResp struct {
-	GatewayPlanId     string                                   `json:"GatewayPlanId"`
-	ChannelPlanStatus string                                   `json:"channelPlanStatus"`
+type GatewayCreatePlanInternalResp struct {
+	GatewayPlanId     string                                   `json:"gatewayPlanId"`
+	GatewayPlanStatus string                                   `json:"gatewayPlanStatus"`
 	Data              string                                   `json:"data"`
-	Status            consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Status            consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
 }
 
-type ChannelCreateSubscriptionInternalResp struct {
-	ChannelUserId             string                                   `json:"channelUserId"`
-	ChannelSubscriptionId     string                                   `json:"channelSubscriptionId"`
-	ChannelSubscriptionStatus string                                   `json:"channelSubscriptionStatus"`
+type GatewayCreateSubscriptionInternalResp struct {
+	GatewayUserId             string                                   `json:"gatewayUserId"`
+	GatewaySubscriptionId     string                                   `json:"gatewaySubscriptionId"`
+	GatewaySubscriptionStatus string                                   `json:"gatewaySubscriptionStatus"`
 	Data                      string                                   `json:"data"`
 	Link                      string                                   `json:"link"`
-	Status                    consts.SubscriptionPlanChannelStatusEnum `json:"status"`
+	Status                    consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
 	Paid                      bool                                     `json:"paid"`
 }
 
-type ChannelCreateSubscriptionInternalReq struct {
+type GatewayCreateSubscriptionInternalReq struct {
 	Plan           *entity.SubscriptionPlan   `json:"plan"`
 	AddonPlans     []*SubscriptionPlanAddonRo `json:"addonPlans"`
-	PlanChannel    *entity.GatewayPlan        `json:"planChannel"`
+	GatewayPlan    *entity.GatewayPlan        `json:"gatewayPlan"`
 	Subscription   *entity.Subscription       `json:"subscription"`
 	VatCountryRate *VatCountryRate            `json:"vatCountryRate"`
 }
 
-type ChannelUpdateSubscriptionInternalReq struct {
+type GatewayUpdateSubscriptionInternalReq struct {
 	Plan            *entity.SubscriptionPlan   `json:"plan"`
 	Quantity        int64                      `json:"quantity" dc:"数量" `
 	AddonPlans      []*SubscriptionPlanAddonRo `json:"addonPlans"`
-	PlanChannel     *entity.GatewayPlan        `json:"planChannel"`
+	GatewayPlan     *entity.GatewayPlan        `json:"gatewayPlan"`
 	Subscription    *entity.Subscription       `json:"subscription"`
 	ProrationDate   int64                      `json:"prorationDate"`
 	EffectImmediate bool                       `json:"EffectImmediate"`
 }
 
-type ChannelCancelSubscriptionInternalReq struct {
+type GatewayCancelSubscriptionInternalReq struct {
 	Plan         *entity.SubscriptionPlan `json:"plan"`
-	PlanChannel  *entity.GatewayPlan      `json:"planChannel"`
+	GatewayPlan  *entity.GatewayPlan      `json:"gatewayPlan"`
 	Subscription *entity.Subscription     `json:"subscription"`
 	InvoiceNow   bool                     `json:"invoiceNow"`
 	Prorate      bool                     `json:"prorate"`
 }
 
-type ChannelCancelSubscriptionInternalResp struct {
+type GatewayCancelSubscriptionInternalResp struct {
 }
 
-type ChannelCancelAtPeriodEndSubscriptionInternalResp struct {
+type GatewayCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 
-type ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
+type GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
 }
 
-type ChannelUpdateSubscriptionPreviewInternalResp struct {
+type GatewayUpdateSubscriptionPreviewInternalResp struct {
 	Data              string                            `json:"data"`
 	TotalAmount       int64                             `json:"totalAmount"`
 	Currency          string                            `json:"currency"`
-	Invoice           *ChannelDetailInvoiceInternalResp `json:"invoice"`
-	NextPeriodInvoice *ChannelDetailInvoiceInternalResp `json:"nextPeriodInvoice"`
+	Invoice           *GatewayDetailInvoiceInternalResp `json:"invoice"`
+	NextPeriodInvoice *GatewayDetailInvoiceInternalResp `json:"nextPeriodInvoice"`
 	ProrationDate     int64                             `json:"prorationDate"`
 }
 
-type ChannelUpdateSubscriptionInternalResp struct {
-	ChannelUpdateId string `json:"channelUpdateId" description:"渠道更新单Id"`
+type GatewayUpdateSubscriptionInternalResp struct {
+	GatewayUpdateId string `json:"gatewayUpdateId" description:"渠道更新单Id"`
 	Data            string `json:"data"`
 	Link            string `json:"link" description:"需要支付情况下，提供支付链接"`
 	Paid            bool   `json:"paid" description:"是否已支付，false-未支付，需要支付，true-已支付或不需要支付"`
 }
 
-type ChannelDetailSubscriptionInternalResp struct {
+type GatewayDetailSubscriptionInternalResp struct {
 	Status                      consts.SubscriptionStatusEnum `json:"status"`
-	ChannelSubscriptionId       string                        `json:"channelSubscriptionId"`
-	ChannelStatus               string                        `json:"channelStatus"                  `
+	GatewaySubscriptionId       string                        `json:"gatewaySubscriptionId"`
+	GatewayStatus               string                        `json:"gatewayStatus"                  `
 	Data                        string                        `json:"data"`
-	ChannelItemData             string                        `json:"channelItemData"`
-	ChannelLatestInvoiceId      string                        `json:"channelLatestInvoiceId"`
-	ChannelLatestPaymentId      string                        `json:"channelLatestPaymentId"`
-	ChannelDefaultPaymentMethod string                        `json:"channelDefaultPaymentMethod"`
+	GatewayItemData             string                        `json:"gatewayItemData"`
+	GatewayLatestInvoiceId      string                        `json:"gatewayLatestInvoiceId"`
+	GatewayLatestPaymentId      string                        `json:"gatewayLatestPaymentId"`
+	GatewayDefaultPaymentMethod string                        `json:"gatewayDefaultPaymentMethod"`
 	CancelAtPeriodEnd           bool                          `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd            int64                         `json:"currentPeriodEnd"`
 	CurrentPeriodStart          int64                         `json:"currentPeriodStart"`
@@ -211,63 +205,63 @@ type ChannelDetailSubscriptionInternalResp struct {
 	TrialEnd                    int64                         `json:"trialEnd"`
 }
 
-type ChannelBalance struct {
+type GatewayBalance struct {
 	Amount   int64  `json:"amount"`
 	Currency string `json:"currency"`
 }
 
-type ChannelUserCreateInternalResp struct {
-	ChannelUserId string `json:"channelUserId"`
+type GatewayUserCreateInternalResp struct {
+	GatewayUserId string `json:"gatewayUserId"`
 }
 
-type ChannelUserDetailQueryInternalResp struct {
-	ChannelUserId        string            `json:"channelUserId"`
+type GatewayUserDetailQueryInternalResp struct {
+	GatewayUserId        string            `json:"gatewayUserId"`
 	DefaultPaymentMethod string            `json:"defaultPaymentMethod"`
-	Balance              *ChannelBalance   `json:"balance"`
-	CashBalance          []*ChannelBalance `json:"cashBalance"`
-	InvoiceCreditBalance []*ChannelBalance `json:"invoiceCreditBalance"`
+	Balance              *GatewayBalance   `json:"balance"`
+	CashBalance          []*GatewayBalance `json:"cashBalance"`
+	InvoiceCreditBalance []*GatewayBalance `json:"invoiceCreditBalance"`
 	Email                string            `json:"email"`
 	Description          string            `json:"description"`
 }
 
-type ChannelUserPaymentMethodListInternalResp struct {
+type GatewayUserPaymentMethodListInternalResp struct {
 	PaymentMethods []string `json:"paymentMethods"`
 }
 
-type ChannelMerchantBalanceQueryInternalResp struct {
-	AvailableBalance       []*ChannelBalance `json:"available"`
-	ConnectReservedBalance []*ChannelBalance `json:"connectReserved"`
-	PendingBalance         []*ChannelBalance `json:"pending"`
+type GatewayMerchantBalanceQueryInternalResp struct {
+	AvailableBalance       []*GatewayBalance `json:"available"`
+	ConnectReservedBalance []*GatewayBalance `json:"connectReserved"`
+	PendingBalance         []*GatewayBalance `json:"pending"`
 }
 
-type ChannelWebhookSubscriptionInternalResp struct {
+type GatewayWebhookSubscriptionInternalResp struct {
 }
 
-type ChannelRedirectInternalResp struct {
+type GatewayRedirectInternalResp struct {
 	Status    bool   `json:"status"`
 	Message   string `json:"message"`
 	ReturnUrl string `json:"returnUrl"`
 	QueryPath string `json:"queryPath"`
 }
 
-type ChannelCreateInvoiceInternalReq struct {
+type GatewayCreateInvoiceInternalReq struct {
 	Invoice      *entity.Invoice        `json:"invoice"`
 	InvoiceLines []*InvoiceItemDetailRo `json:"invoiceLines"`
 	PayMethod    int                    `json:"payMethod"` // 1-自动支付， 2-发送邮件支付
 	DaysUtilDue  int                    `json:"daysUtilDue"`
 }
 
-type ChannelPayInvoiceInternalReq struct {
-	ChannelInvoiceId string `json:"channelInvoiceId"`
+type GatewayPayInvoiceInternalReq struct {
+	GatewayInvoiceId string `json:"gatewayInvoiceId"`
 }
 
-type ChannelCancelInvoiceInternalReq struct {
-	ChannelInvoiceId string `json:"channelInvoiceId"`
+type GatewayCancelInvoiceInternalReq struct {
+	GatewayInvoiceId string `json:"gatewayInvoiceId"`
 }
 
-type ChannelDetailInvoiceInternalResp struct {
-	ChannelDefaultPaymentMethod    string                   `json:"channelDefaultPaymentMethod"`
-	ChannelSubscriptionId          string                   `json:"channelSubscriptionId"           `
+type GatewayDetailInvoiceInternalResp struct {
+	GatewayDefaultPaymentMethod    string                   `json:"gatewayDefaultPaymentMethod"`
+	GatewaySubscriptionId          string                   `json:"gatewaySubscriptionId"           `
 	SubscriptionId                 string                   `json:"subscriptionId"           `
 	TotalAmount                    int64                    `json:"totalAmount"        `
 	PaymentAmount                  int64                    `json:"paymentAmount"              `
@@ -280,17 +274,17 @@ type ChannelDetailInvoiceInternalResp struct {
 	SubscriptionAmountExcludingTax int64                    `json:"subscriptionAmountExcludingTax" ` // Sub金额,单位：分
 	Currency                       string                   `json:"currency"           `
 	Lines                          []*InvoiceItemDetailRo   `json:"lines"              `        // lines json data
-	ChannelId                      int64                    `json:"channelId"          `        // 支付渠道Id
+	GatewayId                      int64                    `json:"gatewayId"          `        // 支付渠道Id
 	Status                         consts.InvoiceStatusEnum `json:"status"             `        // 订阅单状态，0-Init | 1-Pending ｜2-Processing｜3-paid | 4-failed | 5-cancelled
 	Reason                         string                   `json:"reason"             `        // reason
-	ChannelUserId                  string                   `json:"channelUserId"             ` // channelUserId
+	GatewayUserId                  string                   `json:"gatewayUserId"             ` // gatewayUserId
 	Link                           string                   `json:"link"               `        //
-	ChannelStatus                  string                   `json:"channelStatus"      `        // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelInvoiceId               string                   `json:"channelInvoiceId"   `        // 关联渠道发票 Id
-	ChannelInvoicePdf              string                   `json:"ChannelInvoicePdf"   `       // 关联渠道发票 Pdf
+	GatewayStatus                  string                   `json:"gatewayStatus"      `        // 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	GatewayInvoiceId               string                   `json:"gatewayInvoiceId"   `        // 关联渠道发票 Id
+	GatewayInvoicePdf              string                   `json:"GatewayInvoicePdf"   `       // 关联渠道发票 Pdf
 	PeriodEnd                      int64                    `json:"periodEnd"`
 	PeriodStart                    int64                    `json:"periodStart"`
-	ChannelPaymentId               string                   `json:"channelPaymentId"`
+	GatewayPaymentId               string                   `json:"gatewayPaymentId"`
 	PaymentTime                    int64                    `json:"paymentTime"        `
 	CreateTime                     int64                    `json:"createTime"        `
 	CancelTime                     int64                    `json:"cancelTime"        `
@@ -333,7 +327,7 @@ type InvoiceDetailRo struct {
 	SubscriptionId                 string                 `json:"subscriptionId"                 description:"订阅id（内部编号）"`                                             // 订阅id（内部编号）
 	InvoiceName                    string                 `json:"invoiceName"                    description:"发票名称"`                                                   // 发票名称
 	InvoiceId                      string                 `json:"invoiceId"                      description:"发票ID（内部编号）"`                                             // 发票ID（内部编号）
-	ChannelInvoiceId               string                 `json:"channelInvoiceId"               description:"关联渠道发票 Id"`                                              // 关联渠道发票 Id
+	GatewayInvoiceId               string                 `json:"gatewayInvoiceId"               description:"关联渠道发票 Id"`                                              // 关联渠道发票 Id
 	UniqueId                       string                 `json:"uniqueId"                       description:"唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键"` // 唯一键，stripe invoice 以同步为主，其他通道 invoice 实现方案不确定，使用自定义唯一键
 	GmtCreate                      *gtime.Time            `json:"gmtCreate"                      description:"创建时间"`                                                   // 创建时间
 	TotalAmount                    int64                  `json:"totalAmount"                    description:"金额,单位：分"`
@@ -342,7 +336,7 @@ type InvoiceDetailRo struct {
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"             description:"Sub金额,单位：分"` // Sub金额,单位：分
 	Currency                       string                 `json:"currency"                       description:"货币"`
 	Lines                          []*InvoiceItemDetailRo `json:"lines"                          description:"lines json data"`                                                       // lines json data
-	ChannelId                      int64                  `json:"channelId"                      description:"支付渠道Id"`                                                                // 支付渠道Id
+	GatewayId                      int64                  `json:"gatewayId"                      description:"支付渠道Id"`                                                                // 支付渠道Id
 	Status                         int                    `json:"status"                         description:"订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // 订阅单状态，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     int                    `json:"sendStatus"                     description:"邮件发送状态，0-No | 1- YES"`                                                  // 邮件发送状态，0-No | 1- YES
 	SendEmail                      string                 `json:"sendEmail"                      description:"email 发送地址，取自 UserAccount 表 email"`                                     // email 发送地址，取自 UserAccount 表 email
@@ -351,10 +345,10 @@ type InvoiceDetailRo struct {
 	GmtModify                      *gtime.Time            `json:"gmtModify"                      description:"修改时间"`                                                                  // 修改时间
 	IsDeleted                      int                    `json:"isDeleted"                      description:""`                                                                      //
 	Link                           string                 `json:"link"                           description:"invoice 链接（可用于支付）"`                                                     // invoice 链接（可用于支付）
-	ChannelStatus                  string                 `json:"channelStatus"                  description:"渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object"`             // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
-	ChannelPaymentId               string                 `json:"channelPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
-	ChannelUserId                  string                 `json:"channelUserId"                  description:"渠道用户 Id"`                                                               // 渠道用户 Id
-	ChannelInvoicePdf              string                 `json:"channelInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
+	GatewayStatus                  string                 `json:"gatewayStatus"                  description:"渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object"`             // 渠道最新状态，Stripe：https://stripe.com/docs/api/invoices/object
+	GatewayPaymentId               string                 `json:"gatewayPaymentId"               description:"关联渠道 PaymentId"`                                                        // 关联渠道 PaymentId
+	GatewayUserId                  string                 `json:"gatewayUserId"                  description:"渠道用户 Id"`                                                               // 渠道用户 Id
+	GatewayInvoicePdf              string                 `json:"gatewayInvoicePdf"              description:"关联渠道发票 pdf"`                                                            // 关联渠道发票 pdf
 	TaxScale                       int64                  `json:"taxScale"                  description:"Tax税率，万分位，1000 表示 10%"`                                                      // Tax税率，万分位，1000 表示 10%
 	SendNote                       string                 `json:"sendNote"                       description:"send_note"`                                                             // send_note
 	SendTerms                      string                 `json:"sendTerms"                      description:"send_terms"`                                                            // send_terms
@@ -368,7 +362,7 @@ type InvoiceDetailRo struct {
 
 type PlanDetailRo struct {
 	Plan     *entity.SubscriptionPlan   `p:"plan" json:"plan" dc:"订阅计划"`
-	Channels []*OutChannelRo            `p:"channels" json:"channels" dc:"订阅计划 Channel 开通明细"`
+	Gateways []*OutGatewayRo            `p:"gateways" json:"gateways" dc:"订阅计划 Gateway 开通明细"`
 	Addons   []*entity.SubscriptionPlan `p:"addons" json:"addons" dc:"订阅计划 Addons 明细"`
 	AddonIds []int64                    `p:"addonIds" json:"addonIds" dc:"订阅计划 Addon Ids"`
 }
@@ -379,16 +373,16 @@ type SubscriptionPlanAddonParamRo struct {
 }
 
 type SubscriptionPlanAddonRo struct {
-	Quantity         int64                    `p:"quantity"  json:"quantity" dc:"数量" `
+	Quantity         int64                    `p:"quantity"  json:"quantity" dc:"Quantity" `
 	AddonPlan        *entity.SubscriptionPlan `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
-	AddonPlanChannel *entity.GatewayPlan      `p:"addonPlanChannel"   json:"addonPlanChannel" dc:"addonPlanChannel" `
+	AddonGatewayPlan *entity.GatewayPlan      `p:"addonGatewayPlan"   json:"addonGatewayPlan" dc:"AddonGatewayPlan" `
 }
 
 type SubscriptionDetailRo struct {
 	User                                *entity.UserAccount              `json:"user" dc:"user"`
 	Subscription                        *entity.Subscription             `p:"subscription" json:"subscription" dc:"订阅"`
 	Plan                                *entity.SubscriptionPlan         `p:"plan" json:"plan" dc:"订阅计划"`
-	Channel                             *OutChannelRo                    `p:"channel" json:"channel" dc:"订阅渠道"`
+	Gateway                             *OutGatewayRo                    `p:"gateway" json:"gateway" dc:"订阅渠道"`
 	AddonParams                         []*SubscriptionPlanAddonParamRo  `p:"addonParams" json:"addonParams" dc:"订阅Addon参数"`
 	Addons                              []*SubscriptionPlanAddonRo       `p:"addons" json:"addons" dc:"订阅Addon"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
@@ -411,7 +405,7 @@ type SubscriptionPendingUpdateDetail struct {
 	UpdateQuantity       int64                       `json:"updateQuantity"       description:"升级到quantity"`                          // 升级到quantity
 	AddonData            string                      `json:"addonData"            description:"plan addon json data"`                 // plan addon json data
 	UpdateAddonData      string                      `json:"updateAddonData"     description:"升级到plan addon json data"`               // 升级到plan addon json data
-	ChannelId            int64                       `json:"channelId"            description:"支付渠道Id"`                               // 支付渠道Id
+	GatewayId            int64                       `json:"gatewayId"            description:"支付渠道Id"`                               // 支付渠道Id
 	UserId               int64                       `json:"userId"               description:"userId"`                               // userId
 	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"修改时间"`                                 // 修改时间
 	Paid                 int                         `json:"paid"                 description:"是否已支付，0-否，1-是"`                        // 是否已支付，0-否，1-是
@@ -437,7 +431,7 @@ type ValidResult struct {
 
 type VatCountryRate struct {
 	Id                    uint64 `json:"id"  dc:"TaxId"`
-	Gateway               string `json:"channel"           `                                          // channel
+	Gateway               string `json:"gateway"           `                                          // gateway
 	CountryCode           string `json:"countryCode"           `                                      // country_code
 	CountryName           string `json:"countryName"           `                                      // country_name
 	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false

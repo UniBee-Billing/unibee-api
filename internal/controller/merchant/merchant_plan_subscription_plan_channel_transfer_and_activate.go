@@ -23,14 +23,13 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 	}
 
 	utility.Assert(req.PlanId > 0, "plan should > 0")
-	//utility.Assert(req.ChannelId > 0, "ConfirmChannelId should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
 	//多个渠道Plan 创建并激活
-	list := query.GetListSubscriptionTypePayChannels(ctx) // todo mark 需改造成获取 merchantId 相关的 Channel
-	utility.Assert(len(list) > 0, "no channel found, need at least one")
-	for _, channel := range list {
-		err = service.SubscriptionPlanChannelTransferAndActivate(ctx, req.PlanId, int64(channel.Id))
+	list := query.GetListSubscriptionTypeGateways(ctx) // todo mark 需改造成获取 merchantId 相关的 Gateway
+	utility.Assert(len(list) > 0, "no gateway found, need at least one")
+	for _, gateway := range list {
+		err = service.SubscriptionPlanChannelTransferAndActivate(ctx, req.PlanId, int64(gateway.Id))
 		if err != nil {
 			return nil, err
 		}
@@ -64,8 +63,8 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
 				//发布 addonPlan
-				for _, channel := range list {
-					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(channel.Id))
+				for _, gateway := range list {
+					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(gateway.Id))
 					if err != nil {
 						return nil, err
 					}

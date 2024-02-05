@@ -33,7 +33,7 @@ type SubscriptionColumns struct {
 	AddonData                   string // plan addon json data
 	TaskTime                    string // task_time
 	LatestInvoiceId             string // latest_invoice_id
-	Type                        string // sub type, 0-channel sub, 1-unibee sub
+	Type                        string // sub type, 0-gateway sub, 1-unibee sub
 	GatewayId                   string // gateway_id
 	Status                      string // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	GatewaySubscriptionId       string // gateway subscription id

@@ -14,7 +14,7 @@ func (c *ControllerPayment) Cancels(ctx context.Context, req *payment.CancelsReq
 
 	overseaPay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(overseaPay != nil, "payment not found")
-	err = service.DoChannelCancel(ctx, overseaPay)
+	err = service.PaymentGatewayCancel(ctx, overseaPay)
 	if err != nil {
 		return nil, err
 	}

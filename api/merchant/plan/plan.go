@@ -74,23 +74,22 @@ type SubscriptionPlanListRes struct {
 type SubscriptionPlanChannelTransferAndActivateReq struct {
 	g.Meta `path:"/subscription_plan_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan Sync To Gateway And Activate"`
 	PlanId int64 `p:"planId" dc:"PlanId" v:"required"`
-	//ChannelId int64 `p:"channelId"    v:"required#请输入 ConfirmChannelId" `
 }
 type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
 type SubscriptionPlanChannelActivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan Activate "  deprecated:"true" `
+	g.Meta    `path:"/subscription_plan_gateway_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan Activate "  deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"PlanId" v:"required"`
-	ChannelId int64 `p:"channelId"    v:"required" `
+	GatewayId int64 `p:"gatewayId"    v:"required" `
 }
 type SubscriptionPlanChannelActivateRes struct {
 }
 
 type SubscriptionPlanChannelDeactivateReq struct {
-	g.Meta    `path:"/subscription_plan_channel_deactivate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan DeActivate" deprecated:"true" `
+	g.Meta    `path:"/subscription_plan_gateway_deactivate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan DeActivate" deprecated:"true" `
 	PlanId    int64 `p:"planId" dc:"PlanId" v:"required"`
-	ChannelId int64 `p:"channelId"    v:"required" `
+	GatewayId int64 `p:"gatewayId"    v:"required" `
 }
 type SubscriptionPlanChannelDeactivateRes struct {
 }

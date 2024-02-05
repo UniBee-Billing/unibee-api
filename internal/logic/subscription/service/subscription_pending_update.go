@@ -26,9 +26,9 @@ func SubscriptionPendingUpdateCancel(ctx context.Context, pendingUpdateId string
 		if len(one.GatewayUpdateId) > 0 {
 			payment := query.GetPaymentByPaymentId(ctx, one.GatewayUpdateId)
 			if payment != nil {
-				err := service.DoChannelCancel(ctx, payment)
+				err := service.PaymentGatewayCancel(ctx, payment)
 				if err != nil {
-					g.Log().Errorf(ctx, "DoChannelCancel Error:%s", err.Error())
+					g.Log().Errorf(ctx, "PaymentGatewayCancel Error:%s", err.Error())
 				}
 			}
 		}

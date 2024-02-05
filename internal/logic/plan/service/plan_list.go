@@ -32,7 +32,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro2.PlanDetailRo{
 			Plan:     one,
-			Channels: query.GetListActiveOutChannelRos(ctx, planId),
+			Gateways: query.GetListActiveOutGatewayRos(ctx, planId),
 			Addons:   query.GetPlanBindingAddonsByPlanId(ctx, planId),
 		},
 	}, nil
@@ -78,7 +78,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			//非主 Plan 不查询 addons
 			list = append(list, &ro2.PlanDetailRo{
 				Plan:     p,
-				Channels: []*ro2.OutChannelRo{},
+				Gateways: []*ro2.OutGatewayRo{},
 				Addons:   nil,
 				AddonIds: nil,
 			})
@@ -101,7 +101,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 		list = append(list, &ro2.PlanDetailRo{
 			Plan:     p,
-			Channels: []*ro2.OutChannelRo{},
+			Gateways: []*ro2.OutGatewayRo{},
 			Addons:   nil,
 			AddonIds: addonIds,
 		})
@@ -129,17 +129,17 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			}
 		}
 	}
-	//添加 Channel 信息
+	//添加 Gateway 信息
 	var allPlanChannelList []*entity.GatewayPlan
 	err = dao.GatewayPlan.Ctx(ctx).WhereIn(dao.GatewayPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
 	if err == nil {
 		for _, planChannel := range allPlanChannelList {
 			for _, planRo := range list {
-				if int64(planRo.Plan.Id) == planChannel.PlanId && planChannel.Status == consts.PlanChannelStatusActive {
-					outChannel := query.GetPayChannelById(ctx, planChannel.GatewayId)
-					planRo.Channels = append(planRo.Channels, &ro2.OutChannelRo{
-						ChannelId:   outChannel.Id,
-						ChannelName: outChannel.Name,
+				if int64(planRo.Plan.Id) == planChannel.PlanId && planChannel.Status == consts.GatewayPlanStatusActive {
+					outChannel := query.GetGatewayById(ctx, planChannel.GatewayId)
+					planRo.Gateways = append(planRo.Gateways, &ro2.OutGatewayRo{
+						GatewayId:   outChannel.Id,
+						GatewayName: outChannel.Name,
 					})
 				}
 			}

@@ -6,12 +6,12 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetPaymentWebhookEntranceUrl(channelId int64) string {
-	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().Server.DomainPath, channelId)
+func GetPaymentWebhookEntranceUrl(gatewayId int64) string {
+	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().Server.DomainPath, gatewayId)
 }
 
 //func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
-//	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.ChannelId)
+//	return fmt.Sprintf("%s/payment/channel_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.GatewayId)
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {

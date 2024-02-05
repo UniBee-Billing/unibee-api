@@ -7,7 +7,7 @@ import (
 	"go-oversea-pay/internal/cmd/swagger"
 	"go-oversea-pay/internal/consts"
 	"go-oversea-pay/internal/controller"
-	"go-oversea-pay/internal/controller/channel_webhook_entry"
+	"go-oversea-pay/internal/controller/gateway_webhook_entry"
 	"go-oversea-pay/internal/cronjob"
 	_interface "go-oversea-pay/internal/interface"
 	"go-oversea-pay/utility/liberr"
@@ -121,11 +121,11 @@ var (
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// 通道支付 Redirect 回调
-			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{channelId}/forward", channel_webhook_entry.ChannelPaymentRedirectEntrance)
+			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// 通道支付 MerchantWebhook 回调
-			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{channelId}/notifications", channel_webhook_entry.ChannelPaymentWebhookEntrance)
+			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			//// 初始化通道 MerchantWebhook 配置
-			//channel.CheckAndSetupPayChannelWebhooks(ctx)
+			//gateway.CheckAndSetupGatewayWebhooks(ctx)
 
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)

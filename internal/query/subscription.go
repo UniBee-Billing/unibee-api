@@ -45,11 +45,11 @@ func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string)
 	return
 }
 
-func GetSubscriptionByChannelSubscriptionId(ctx context.Context, channelSubscriptionId string) (one *entity.Subscription) {
-	if len(channelSubscriptionId) == 0 {
+func GetSubscriptionByGatewaySubscriptionId(ctx context.Context, gatewaySubscriptionId string) (one *entity.Subscription) {
+	if len(gatewaySubscriptionId) == 0 {
 		return nil
 	}
-	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{GatewaySubscriptionId: channelSubscriptionId}).OmitEmpty().Scan(&one)
+	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{GatewaySubscriptionId: gatewaySubscriptionId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -75,13 +75,13 @@ func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*
 	return addons
 }
 
-func GetSubscriptionUpgradePendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(channelUpdateId) == 0 {
+func GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(gatewayUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -134,13 +134,13 @@ func GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context
 	return one
 }
 
-func GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(channelUpdateId) == 0 {
+func GetUnfinishedSubscriptionPendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(gatewayUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -149,13 +149,13 @@ func GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context
 	return one
 }
 
-func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context, channelUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(channelUpdateId) == 0 {
+func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
+	if len(gatewayUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)

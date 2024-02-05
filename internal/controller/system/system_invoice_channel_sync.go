@@ -28,7 +28,7 @@ func (c *ControllerInvoice) ChannelSync(ctx context.Context, req *invoice.Channe
 	//		err := dao.Invoice.Ctx(backgroundCtx).
 	//			Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
 	//			Where(dao.Invoice.Columns().InvoiceId, req.InvoiceId).
-	//			WhereNotNull(dao.Invoice.Columns().ChannelInvoiceId).
+	//			WhereNotNull(dao.Invoice.Columns().GatewayInvoiceId).
 	//			OrderDesc("id").
 	//			Limit(page*count, count).
 	//			OmitEmpty().Scan(&mainList)
@@ -37,11 +37,11 @@ func (c *ControllerInvoice) ChannelSync(ctx context.Context, req *invoice.Channe
 	//			return
 	//		}
 	//		for _, one := range mainList {
-	//			payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
-	//			utility.Assert(payChannel != nil, "invalid planChannel")
-	//			details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelInvoiceDetails(backgroundCtx, payChannel, one.ChannelInvoiceId)
+	//			gateway := query.GetPayChannelById(backgroundCtx, one.GatewayId)
+	//			utility.Assert(gateway != nil, "invalid planChannel")
+	//			details, err := channel.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).GatewayInvoiceDetails(backgroundCtx, gateway, one.GatewayInvoiceId)
 	//			if err == nil {
-	//				err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.ChannelInvoiceId)
+	//				err := handler.CreateOrUpdateInvoiceByChannelDetail(backgroundCtx, details, details.GatewayInvoiceId)
 	//				if err != nil {
 	//					fmt.Printf("ChannelSync Background CreateOrUpdateInvoiceByChannelDetail InvoiceId:%s error%s\n", one.InvoiceId, err.Error())
 	//					return
