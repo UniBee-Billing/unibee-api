@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantChannelConfig is the golang structure for table merchant_channel_config.
-type MerchantChannelConfig struct {
+// MerchantGateway is the golang structure for table merchant_gateway.
+type MerchantGateway struct {
 	Id               uint64      `json:"id"               description:"channel_id"`                                                // channel_id
 	MerchantId       int64       `json:"merchantId"       description:"merchant_id"`                                               // merchant_id
 	EnumKey          int64       `json:"enumKey"          description:"enum key , match in channel implementation"`                // enum key , match in channel implementation

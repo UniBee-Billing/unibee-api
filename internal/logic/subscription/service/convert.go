@@ -5,7 +5,7 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func ConvertChannelToRo(channel *entity.MerchantChannelConfig) *ro.OutChannelRo {
+func ConvertChannelToRo(channel *entity.MerchantGateway) *ro.OutChannelRo {
 	if channel == nil {
 		return nil
 	}
@@ -15,7 +15,7 @@ func ConvertChannelToRo(channel *entity.MerchantChannelConfig) *ro.OutChannelRo 
 	}
 }
 
-func ConvertChannelsToRos(channels []*entity.MerchantChannelConfig) []*ro.OutChannelRo {
+func ConvertChannelsToRos(channels []*entity.MerchantGateway) []*ro.OutChannelRo {
 	var outChannelRos []*ro.OutChannelRo
 	for _, channel := range channels {
 		outChannelRos = append(outChannelRos, &ro.OutChannelRo{

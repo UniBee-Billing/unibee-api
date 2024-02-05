@@ -10,32 +10,32 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+func GetPayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
-	m := dao.MerchantChannelConfig.Ctx(ctx)
-	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	m := dao.MerchantGateway.Ctx(ctx)
+	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetPayChannelByChannel(ctx context.Context, channel string) (one *entity.MerchantChannelConfig) {
+func GetPayChannelByChannel(ctx context.Context, channel string) (one *entity.MerchantGateway) {
 	if len(channel) == 0 {
 		return nil
 	}
-	err := dao.MerchantChannelConfig.Ctx(ctx).Where(entity.MerchantChannelConfig{Channel: channel}).OmitEmpty().Scan(&one)
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{Channel: channel}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
 }
 
-func GetPayChannelsGroupByEnumKey(ctx context.Context) []*entity.MerchantChannelConfig {
-	var data []*entity.MerchantChannelConfig
-	err := dao.MerchantChannelConfig.Ctx(ctx).Group(dao.MerchantChannelConfig.Columns().EnumKey).
+func GetPayChannelsGroupByEnumKey(ctx context.Context) []*entity.MerchantGateway {
+	var data []*entity.MerchantGateway
+	err := dao.MerchantGateway.Ctx(ctx).Group(dao.MerchantGateway.Columns().EnumKey).
 		OmitEmpty().Scan(&data)
 	if err != nil {
 		g.Log().Errorf(ctx, "GetPayChannelsGroupByEnumKey error:%s", err)
@@ -44,14 +44,14 @@ func GetPayChannelsGroupByEnumKey(ctx context.Context) []*entity.MerchantChannel
 	return data
 }
 
-func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
-	m := dao.MerchantChannelConfig.Ctx(ctx)
-	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id)}).
+	m := dao.MerchantGateway.Ctx(ctx)
+	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).
 		Where(m.Builder().
-			Where(entity.MerchantChannelConfig{ChannelType: consts.PayChannelTypePayment}).WhereOr("channel_type is null")).
+			Where(entity.MerchantGateway{ChannelType: consts.PayChannelTypePayment}).WhereOr("channel_type is null")).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -59,12 +59,12 @@ func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.Me
 	return
 }
 
-func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantChannelConfig) {
+func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
-	m := dao.MerchantChannelConfig.Ctx(ctx)
-	err := m.Where(entity.MerchantChannelConfig{Id: uint64(id), ChannelType: consts.PayChannelTypeSubscription}).
+	m := dao.MerchantGateway.Ctx(ctx)
+	err := m.Where(entity.MerchantGateway{Id: uint64(id), ChannelType: consts.PayChannelTypeSubscription}).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -72,9 +72,9 @@ func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *enti
 	return
 }
 
-func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.MerchantChannelConfig) {
-	var data []*entity.MerchantChannelConfig
-	err := dao.MerchantChannelConfig.Ctx(ctx).Where(entity.MerchantChannelConfig{ChannelType: consts.PayChannelTypeSubscription}).
+func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.MerchantGateway) {
+	var data []*entity.MerchantGateway
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{ChannelType: consts.PayChannelTypeSubscription}).
 		OmitEmpty().Scan(&data)
 	if err != nil {
 		g.Log().Errorf(ctx, "GetListSubscriptionTypePayChannels error:%s", err)
@@ -87,10 +87,10 @@ func SavePayChannelUniqueProductId(ctx context.Context, id int64, productId stri
 	if len(productId) == 0 || id < 0 {
 		return nil
 	}
-	_, err := dao.MerchantChannelConfig.Ctx(ctx).Data(g.Map{
-		dao.MerchantChannelConfig.Columns().UniqueProductId: productId,
-		dao.MerchantChannelConfig.Columns().GmtModify:       gtime.Now(),
-	}).Where(dao.MerchantChannelConfig.Columns().Id, id).Update()
+	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().UniqueProductId: productId,
+		dao.MerchantGateway.Columns().GmtModify:       gtime.Now(),
+	}).Where(dao.MerchantGateway.Columns().Id, id).Update()
 	if err != nil {
 		return err
 	}
@@ -105,10 +105,10 @@ func UpdatePayChannelWebhookSecret(ctx context.Context, id int64, secret string)
 	if id <= 0 {
 		return gerror.New("invalid id")
 	}
-	_, err := dao.MerchantChannelConfig.Ctx(ctx).Data(g.Map{
-		dao.MerchantChannelConfig.Columns().WebhookSecret: secret,
-		dao.MerchantChannelConfig.Columns().GmtModify:     gtime.Now(),
-	}).Where(dao.MerchantChannelConfig.Columns().Id, id).Update()
+	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().WebhookSecret: secret,
+		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.MerchantGateway.Columns().Id, id).Update()
 	if err != nil {
 		return err
 	}

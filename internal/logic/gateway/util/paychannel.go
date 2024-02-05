@@ -6,6 +6,6 @@ import (
 	"go-oversea-pay/internal/query"
 )
 
-func GetOverseaPayChannel(ctx context.Context, id int64) (channel *entity.MerchantChannelConfig) {
+func GetOverseaPayChannel(ctx context.Context, id int64) (channel *entity.MerchantGateway) {
 	return query.GetPayChannelById(ctx, id)
 }

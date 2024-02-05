@@ -42,7 +42,7 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 }
 
 // DoRemoteChannelCheckAndSetupWebhook https://developer.paypal.com/docs/subscriptions/webhooks/
-func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantChannelConfig) (err error) {
+func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
 	utility.Assert(payChannel != nil, "payChannel is nil")
 	client, _ := NewClient(payChannel.ChannelKey, payChannel.ChannelSecret, payChannel.Host)
 	_, err = client.GetAccessToken(context.Background())
@@ -127,7 +127,7 @@ func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, 
 	return nil
 }
 
-func (p PaypalWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) (res *ro.ChannelRedirectInternalResp, err error) {
+func (p PaypalWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantGateway) (res *ro.ChannelRedirectInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -152,7 +152,7 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 	}
 }
 
-func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) {
+func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
 	jsonData, err := r.GetJson()
 	if err != nil {
 		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.Channel, err.Error())

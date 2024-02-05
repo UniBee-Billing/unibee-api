@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, channel *entity.MerchantChannelConfig) {
+func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, channel *entity.MerchantGateway) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {

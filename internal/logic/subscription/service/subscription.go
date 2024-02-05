@@ -34,7 +34,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
 	Quantity          int64                              `json:"quantity"`
 	PlanChannel       *entity.ChannelPlan                `json:"planChannel"`
-	PayChannel        *entity.MerchantChannelConfig      `json:"payChannel"`
+	PayChannel        *entity.MerchantGateway            `json:"payChannel"`
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
@@ -388,7 +388,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Plan         *entity.SubscriptionPlan           `json:"planId"`
 	Quantity     int64                              `json:"quantity"`
 	PlanChannel  *entity.ChannelPlan                `json:"planChannel"`
-	PayChannel   *entity.MerchantChannelConfig      `json:"payChannel"`
+	PayChannel   *entity.MerchantGateway            `json:"payChannel"`
 	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`

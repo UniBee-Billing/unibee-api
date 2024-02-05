@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantChannelConfig is the golang structure of table merchant_channel_config for DAO operations like Where/Data.
-type MerchantChannelConfig struct {
-	g.Meta           `orm:"table:merchant_channel_config, do:true"`
+// MerchantGateway is the golang structure of table merchant_gateway for DAO operations like Where/Data.
+type MerchantGateway struct {
+	g.Meta           `orm:"table:merchant_gateway, do:true"`
 	Id               interface{} // channel_id
 	MerchantId       interface{} // merchant_id
 	EnumKey          interface{} // enum key , match in channel implementation

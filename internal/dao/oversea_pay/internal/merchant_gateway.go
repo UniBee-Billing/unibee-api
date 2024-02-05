@@ -11,15 +11,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// MerchantChannelConfigDao is the data access object for table merchant_channel_config.
-type MerchantChannelConfigDao struct {
-	table   string                       // table is the underlying table name of the DAO.
-	group   string                       // group is the database configuration group name of current DAO.
-	columns MerchantChannelConfigColumns // columns contains all the column names of Table for convenient usage.
+// MerchantGatewayDao is the data access object for table merchant_gateway.
+type MerchantGatewayDao struct {
+	table   string                 // table is the underlying table name of the DAO.
+	group   string                 // group is the database configuration group name of current DAO.
+	columns MerchantGatewayColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// MerchantChannelConfigColumns defines and stores column names for table merchant_channel_config.
-type MerchantChannelConfigColumns struct {
+// MerchantGatewayColumns defines and stores column names for table merchant_gateway.
+type MerchantGatewayColumns struct {
 	Id               string // channel_id
 	MerchantId       string // merchant_id
 	EnumKey          string // enum key , match in channel implementation
@@ -42,8 +42,8 @@ type MerchantChannelConfigColumns struct {
 	UniqueProductId  string // unique  channel productId, only stripe need
 }
 
-// merchantChannelConfigColumns holds the columns for table merchant_channel_config.
-var merchantChannelConfigColumns = MerchantChannelConfigColumns{
+// merchantGatewayColumns holds the columns for table merchant_gateway.
+var merchantGatewayColumns = MerchantGatewayColumns{
 	Id:               "id",
 	MerchantId:       "merchant_id",
 	EnumKey:          "enum_key",
@@ -66,37 +66,37 @@ var merchantChannelConfigColumns = MerchantChannelConfigColumns{
 	UniqueProductId:  "unique_product_id",
 }
 
-// NewMerchantChannelConfigDao creates and returns a new DAO object for table data access.
-func NewMerchantChannelConfigDao() *MerchantChannelConfigDao {
-	return &MerchantChannelConfigDao{
+// NewMerchantGatewayDao creates and returns a new DAO object for table data access.
+func NewMerchantGatewayDao() *MerchantGatewayDao {
+	return &MerchantGatewayDao{
 		group:   "oversea_pay",
-		table:   "merchant_channel_config",
-		columns: merchantChannelConfigColumns,
+		table:   "merchant_gateway",
+		columns: merchantGatewayColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *MerchantChannelConfigDao) DB() gdb.DB {
+func (dao *MerchantGatewayDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *MerchantChannelConfigDao) Table() string {
+func (dao *MerchantGatewayDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *MerchantChannelConfigDao) Columns() MerchantChannelConfigColumns {
+func (dao *MerchantGatewayDao) Columns() MerchantGatewayColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *MerchantChannelConfigDao) Group() string {
+func (dao *MerchantGatewayDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *MerchantChannelConfigDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *MerchantGatewayDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -106,6 +106,6 @@ func (dao *MerchantChannelConfigDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *MerchantChannelConfigDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *MerchantGatewayDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

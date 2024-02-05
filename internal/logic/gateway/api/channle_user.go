@@ -7,7 +7,7 @@ import (
 	"go-oversea-pay/utility"
 )
 
-func queryAndCreateChannelUser(ctx context.Context, payChannel *entity.MerchantChannelConfig, userId int64) *entity.ChannelUser {
+func queryAndCreateChannelUser(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) *entity.ChannelUser {
 	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
 	if channelUser == nil {
 		user := query.GetUserAccountById(ctx, uint64(userId))
@@ -32,7 +32,7 @@ func queryAndCreateChannelUser(ctx context.Context, payChannel *entity.MerchantC
 	}
 }
 
-func queryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, payChannel *entity.MerchantChannelConfig, userId int64) *entity.ChannelUser {
+func queryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, payChannel *entity.MerchantGateway, userId int64) *entity.ChannelUser {
 	channelUser := query.GetUserChannel(ctx, userId, int64(payChannel.Id))
 	if channelUser == nil {
 		user := query.GetUserAccountById(ctx, uint64(userId))

@@ -21,13 +21,13 @@ import (
 type EvonetWebhook struct {
 }
 
-func (e EvonetWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantChannelConfig) (err error) {
+func (e EvonetWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	//panic("implement me")
 	return nil
 }
 
-func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) {
+func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
 	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 channel_webhook_entry 结果通知:%s", r.GetBody())
 	notificationJson, err := r.GetJson()
 	if err != nil {
@@ -324,7 +324,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	r.Response.Writeln("success")
 }
 
-func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantChannelConfig) (res *ro.ChannelRedirectInternalResp, err error) {
+func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *entity.MerchantGateway) (res *ro.ChannelRedirectInternalResp, err error) {
 	payIdStr := r.Get("payId").String()
 	redirectResult := r.Get("redirectResult").String()
 	g.Log().Printf(r.Context(), "EvonetNotifyController evonet_redirect payId:%s redirectResult:%s", payIdStr, redirectResult)
