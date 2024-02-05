@@ -21,9 +21,9 @@ func CheckAndSetupPayChannelWebhooks(ctx context.Context) {
 	for _, paychannel := range list {
 		err := GetPayChannelWebhookServiceProvider(ctx, int64(paychannel.Id)).DoRemoteChannelCheckAndSetupWebhook(ctx, paychannel)
 		if err != nil {
-			g.Log().Errorf(ctx, "CheckAndSetupPayChannelWebhooks channel:%s error:%s", paychannel.Channel, err)
+			g.Log().Errorf(ctx, "CheckAndSetupPayChannelWebhooks GatewayName:%s Error:%s", paychannel.GatewayName, err)
 		} else {
-			g.Log().Infof(ctx, "CheckAndSetupPayChannelWebhooks channel:%s success", paychannel.Channel)
+			g.Log().Infof(ctx, "CheckAndSetupPayChannelWebhooks GatewayName:%s Success", paychannel.GatewayName)
 		}
 	}
 }

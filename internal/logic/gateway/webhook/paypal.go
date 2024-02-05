@@ -44,7 +44,7 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 // DoRemoteChannelCheckAndSetupWebhook https://developer.paypal.com/docs/subscriptions/webhooks/
 func (p PaypalWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
 	utility.Assert(payChannel != nil, "payChannel is nil")
-	client, _ := NewClient(payChannel.ChannelKey, payChannel.ChannelSecret, payChannel.Host)
+	client, _ := NewClient(payChannel.GatewayKey, payChannel.GatewaySecret, payChannel.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return err
@@ -155,11 +155,11 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *entity.MerchantGateway) {
 	jsonData, err := r.GetJson()
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.Channel, err.Error())
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook Get Json failed. %v\n", payChannel.GatewayName, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
-	client, _ := NewClient(payChannel.ChannelKey, payChannel.ChannelSecret, payChannel.Host)
+	client, _ := NewClient(payChannel.GatewayKey, payChannel.GatewaySecret, payChannel.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
@@ -167,28 +167,28 @@ func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	}
 	signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification success\n", payChannel.Channel)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification success\n", payChannel.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
-		g.Log().Info(r.Context(), "Receive_Webhook_Channel:", payChannel.Channel, " hook:", jsonData.String())
+		g.Log().Info(r.Context(), "Receive_Webhook_Channel:", payChannel.GatewayName, " hook:", jsonData.String())
 		eventType := jsonData.Get("event_type").String()
 		var responseBack = http.StatusOK
 		switch eventType {
 		case "BILLING.SUBSCRIPTION.EXPIRED":
 			resource := jsonData.GetJson("resource")
 			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.Channel)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.GatewayName)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.Channel, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription deleted for %d.", payChannel.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the deleted subscription.
 				// handleSubscriptionCanceled(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.GatewayName, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -196,16 +196,16 @@ func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		case "BILLING.SUBSCRIPTION.UPDATED":
 			resource := jsonData.GetJson("resource")
 			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.Channel)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.GatewayName)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.Channel, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription updated for %d.", payChannel.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.GatewayName, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -213,28 +213,28 @@ func (p PaypalWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		case "BILLING.SUBSCRIPTION.CREATED":
 			resource := jsonData.GetJson("resource")
 			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.Channel)
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook resource is nil\n", payChannel.GatewayName)
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.Channel, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Channel:%s, Subscription created for %d.", payChannel.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.Channel, err.Error())
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %v\n", payChannel.GatewayName, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
 			}
 		default:
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, eventType)
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.GatewayName, eventType)
 		}
 		r.Response.WriteHeader(http.StatusOK)
 		log.SaveChannelHttpLog("DoRemoteChannelWebhook", jsonData, responseBack, err, "", nil, payChannel)
 		return
 	} else {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.Channel)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %v\n", payChannel.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}

@@ -49,7 +49,7 @@ func (s StripeWebhook) setUnibeeAppInfo() {
 // DoRemoteChannelCheckAndSetupWebhook https://stripe.com/docs/billing/subscriptions/webhooks  https://stripe.com/docs/api/events/types
 func (s StripeWebhook) DoRemoteChannelCheckAndSetupWebhook(ctx context.Context, payChannel *entity.MerchantGateway) (err error) {
 	utility.Assert(payChannel != nil, "payChannel is nil")
-	stripe.Key = payChannel.ChannelSecret
+	stripe.Key = payChannel.GatewaySecret
 	params := &stripe.WebhookEndpointListParams{}
 	params.Limit = stripe.Int64(10)
 	result := webhookendpoint.List(params)
@@ -149,7 +149,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	if !consts.GetConfigInstance().IsServerDev() {
 		event, err = webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "⚠️  Webhook Channel:%s, Webhook signature verification failed. %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 			return
 		}
@@ -162,7 +162,7 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 	}
 
 	data, _ := gjson.Marshal(event)
-	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", payChannel.Channel, " hook:", string(data))
+	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", payChannel.GatewayName, " hook:", string(data))
 
 	var responseBack = http.StatusOK
 	var requestId = ""
@@ -171,17 +171,17 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		var subscription stripe.Subscription
 		err = json.Unmarshal(event.Data.Raw, &subscription)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Sub %s\n", payChannel.Channel, string(event.Type), subscription.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Sub %s\n", payChannel.GatewayName, string(event.Type), subscription.ID)
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 			requestId = subscription.ID
 			err = s.processSubscriptionWebhook(r.Context(), string(event.Type), subscription, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleSubscriptionWebhookEvent: %s\n", payChannel.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -190,16 +190,16 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		var stripeInvoice stripe.Invoice
 		err = json.Unmarshal(event.Data.Raw, &stripeInvoice)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %s\n", payChannel.Channel, string(event.Type), stripeInvoice.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Invoice %s\n", payChannel.GatewayName, string(event.Type), stripeInvoice.ID)
 			requestId = stripeInvoice.ID
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandleInvoiceWebhookEvent: %s\n", payChannel.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -208,17 +208,17 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		var stripePayment stripe.PaymentIntent
 		err = json.Unmarshal(event.Data.Raw, &stripePayment)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %s\n", payChannel.Channel, string(event.Type), stripePayment.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Payment %s\n", payChannel.GatewayName, string(event.Type), stripePayment.ID)
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			requestId = stripePayment.ID
 
 			err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -227,18 +227,18 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		var stripeRefund stripe.Refund
 		err = json.Unmarshal(event.Data.Raw, &stripeRefund)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.Channel, string(event.Type), stripeRefund.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.GatewayName, string(event.Type), stripeRefund.ID)
 			requestId = stripeRefund.ID
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 			// handleSubscriptionTrialWillEnd(subscription)
 
 			err = s.processRefundWebhook(r.Context(), string(event.Type), stripeRefund, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -247,22 +247,22 @@ func (s StripeWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		var stripeCheckoutSession stripe.CheckoutSession
 		err = json.Unmarshal(event.Data.Raw, &stripeCheckoutSession)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.Channel, err.Error())
+			g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error parsing webhook JSON: %s\n", payChannel.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.Channel, string(event.Type), stripeCheckoutSession.ID)
+			g.Log().Infof(r.Context(), "Webhook Channel:%s, Event %s for Refund %s\n", payChannel.GatewayName, string(event.Type), stripeCheckoutSession.ID)
 			// Then define and call a func to handle the successful attachment of a ChannelDefaultPaymentMethod.
 
 			err = s.processCheckoutSessionWebhook(r.Context(), string(event.Type), stripeCheckoutSession, payChannel)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.Channel, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Channel:%s, Error HandlePaymentWebhookEvent: %s\n", payChannel.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
 		}
 	default:
-		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.Channel, event.Type)
+		g.Log().Errorf(r.Context(), "Webhook Channel:%s, Unhandled event type: %s\n", payChannel.GatewayName, event.Type)
 		r.Response.WriteHeader(http.StatusBadRequest)
 		responseBack = http.StatusBadRequest
 	}
@@ -286,7 +286,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 		response = "not implement"
 		//Payment Redirect
 		if r.Get("success").Bool() {
-			stripe.Key = payChannel.ChannelSecret
+			stripe.Key = payChannel.GatewaySecret
 			s.setUnibeeAppInfo()
 			payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 			if payment == nil || len(payment.ChannelPaymentIntentId) == 0 {
@@ -368,7 +368,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 	} else if len(SubIdStr) > 0 {
 		//subscription redirect
 		if r.Get("success").Bool() {
-			stripe.Key = payChannel.ChannelSecret
+			stripe.Key = payChannel.GatewaySecret
 			s.setUnibeeAppInfo()
 			unibSub := query.GetSubscriptionBySubscriptionId(r.Context(), SubIdStr)
 			if unibSub == nil {

@@ -26,7 +26,7 @@ func GetPayChannelByChannel(ctx context.Context, channel string) (one *entity.Me
 	if len(channel) == 0 {
 		return nil
 	}
-	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{Channel: channel}).OmitEmpty().Scan(&one)
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayName: channel}).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
@@ -51,7 +51,7 @@ func GetPaymentTypePayChannelById(ctx context.Context, id int64) (one *entity.Me
 	m := dao.MerchantGateway.Ctx(ctx)
 	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).
 		Where(m.Builder().
-			Where(entity.MerchantGateway{ChannelType: consts.PayChannelTypePayment}).WhereOr("channel_type is null")).
+			Where(entity.MerchantGateway{GatewayType: consts.PayChannelTypePayment}).WhereOr("channel_type is null")).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -64,7 +64,7 @@ func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *enti
 		return nil
 	}
 	m := dao.MerchantGateway.Ctx(ctx)
-	err := m.Where(entity.MerchantGateway{Id: uint64(id), ChannelType: consts.PayChannelTypeSubscription}).
+	err := m.Where(entity.MerchantGateway{Id: uint64(id), GatewayType: consts.PayChannelTypeSubscription}).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
@@ -74,7 +74,7 @@ func GetSubscriptionTypePayChannelById(ctx context.Context, id int64) (one *enti
 
 func GetListSubscriptionTypePayChannels(ctx context.Context) (list []*entity.MerchantGateway) {
 	var data []*entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{ChannelType: consts.PayChannelTypeSubscription}).
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayType: consts.PayChannelTypeSubscription}).
 		OmitEmpty().Scan(&data)
 	if err != nil {
 		g.Log().Errorf(ctx, "GetListSubscriptionTypePayChannels error:%s", err)

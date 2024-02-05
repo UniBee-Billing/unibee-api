@@ -20,26 +20,26 @@ type MerchantGatewayDao struct {
 
 // MerchantGatewayColumns defines and stores column names for table merchant_gateway.
 type MerchantGatewayColumns struct {
-	Id               string // channel_id
+	Id               string // gateway_id
 	MerchantId       string // merchant_id
-	EnumKey          string // enum key , match in channel implementation
-	ChannelType      string // channel type，null or 0-Payment Type ｜ 1-Subscription Type
-	Channel          string // channel name
+	EnumKey          string // enum key , match in gateway implementation
+	GatewayType      string // gateway type，null or 0-Payment Type ｜ 1-Subscription Type
+	GatewayName      string // gateway name
 	Name             string // name
-	SubChannel       string // sub_channel_enum
+	SubGateway       string // sub_gateway_enum
 	BrandData        string //
-	Logo             string // channel logo
+	Logo             string // gateway logo
 	Host             string // pay host
-	ChannelAccountId string // channel account id
-	ChannelKey       string //
-	ChannelSecret    string // secret
+	GatewayAccountId string // gateway account id
+	GatewayKey       string //
+	GatewaySecret    string // secret
 	Custom           string // custom
 	GmtCreate        string // create time
 	GmtModify        string // update time
 	Description      string // description
 	WebhookKey       string // webhook_key
 	WebhookSecret    string // webhook_secret
-	UniqueProductId  string // unique  channel productId, only stripe need
+	UniqueProductId  string // unique  gateway productId, only stripe need
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
@@ -47,16 +47,16 @@ var merchantGatewayColumns = MerchantGatewayColumns{
 	Id:               "id",
 	MerchantId:       "merchant_id",
 	EnumKey:          "enum_key",
-	ChannelType:      "channel_type",
-	Channel:          "channel",
+	GatewayType:      "gateway_type",
+	GatewayName:      "gateway_name",
 	Name:             "name",
-	SubChannel:       "sub_channel",
+	SubGateway:       "sub_gateway",
 	BrandData:        "brand_data",
 	Logo:             "logo",
 	Host:             "host",
-	ChannelAccountId: "channel_account_id",
-	ChannelKey:       "channel_key",
-	ChannelSecret:    "channel_secret",
+	GatewayAccountId: "gateway_account_id",
+	GatewayKey:       "gateway_key",
+	GatewaySecret:    "gateway_secret",
 	Custom:           "custom",
 	GmtCreate:        "gmt_create",
 	GmtModify:        "gmt_modify",
