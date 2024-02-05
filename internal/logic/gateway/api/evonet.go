@@ -11,7 +11,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/gateway"
+	_gateway "go-oversea-pay/internal/logic/gateway"
 	"go-oversea-pay/internal/logic/gateway/log"
 	"go-oversea-pay/internal/logic/gateway/ro"
 	"go-oversea-pay/internal/logic/gateway/util"
@@ -40,7 +40,7 @@ func (e Evonet) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantG
 	panic("implement me")
 }
 
-func (e Evonet) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -50,17 +50,17 @@ func (e Evonet) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	panic("implement me")
 }
 
-func (e Evonet) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res *ro.GatewayPaymentRo, err error) {
+func (e Evonet) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (e Evonet) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -95,17 +95,17 @@ func (e Evonet) GatewaySubscriptionCancel(ctx context.Context, subscriptionCance
 	panic("implement me")
 }
 
-func (e Evonet) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, channelInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
+func (e Evonet) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, gatewayInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -120,7 +120,7 @@ func (e Evonet) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 	panic("implement me")
 }
 
-func (e Evonet) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -130,34 +130,34 @@ func (e Evonet) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 	panic("implement me")
 }
 
-func (e Evonet) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+func (e Evonet) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (e Evonet) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+func (e Evonet) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
+func (e Evonet) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (e Evonet) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
+func (e Evonet) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
 func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay != nil, "payment  is nil")
-	utility.Assert(createPayContext.Gateway != nil, "payment channel config is nil")
+	utility.Assert(createPayContext.Gateway != nil, "payment gateway config is nil")
 
 	//其他渠道所需参数校验
 	utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
@@ -168,9 +168,9 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 	utility.Assert(len(createPayContext.ShopperUserId) > 0, "shopperUserId is nil")
 	utility.Assert(createPayContext.Invoice.Lines != nil, "lineItems is nil")
 	urlPath := "/g2/auth/payment/mer/" + createPayContext.Gateway.GatewayAccountId + "/evo.e-commerce.payment"
-	channelType := createPayContext.Gateway.SubGateway
-	if len(channelType) == 0 {
-		channelType = createPayContext.Gateway.GatewayName
+	subGateway := createPayContext.Gateway.SubGateway
+	if len(subGateway) == 0 {
+		subGateway = createPayContext.Gateway.GatewayName
 	}
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
@@ -184,7 +184,7 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		},
 		"paymentMethod": map[string]interface{}{
 			"recurringProcessingModel": createPayContext.RecurringProcessingModel,
-			"type":                     channelType,
+			"type":                     subGateway,
 		},
 		"userinfo": map[string]interface{}{
 			"email":     createPayContext.ShopperEmail,
@@ -201,8 +201,8 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			"tradeType":     "Sale of goods",
 			"totalQuantity": fmt.Sprintf("%d", len(createPayContext.Invoice.Lines)),
 		},
-		"returnURL": gateway.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
-		"webhook":   gateway.GetPaymentWebhookEntranceUrl(createPayContext.Pay.GatewayId),
+		"returnURL": _gateway.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
+		"webhook":   _gateway.GetPaymentWebhookEntranceUrl(createPayContext.Pay.GatewayId),
 	}
 
 	if len(createPayContext.Gateway.BrandData) > 0 {
@@ -210,7 +210,7 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		// 使用 json.Unmarshal 解析 JSON 字符串
 		err := json.Unmarshal([]byte(createPayContext.Gateway.BrandData), &data)
 		if err == nil {
-			//_, ok := data[channelType]
+			//_, ok := data[subGateway]
 			//if ok {
 			//
 			//}
@@ -264,9 +264,9 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 
 func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + payment.PaymentId
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
 			"merchantTransID":   utility.CreatePaymentId(),
@@ -276,9 +276,9 @@ func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 			"currency": payment.Currency,
 			"value":    utility.ConvertCentToDollarStr(payment.PaymentAmount, payment.Currency),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
+		"webhook": _gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
 	}
-	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
+	data, err := sendEvonetRequest(ctx, gateway, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -292,10 +292,10 @@ func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 		captureJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay捕获失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := captureJson.Get("status").String()
-	channelCaptureId := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "capture", responseJson.String(), "支付捕获", channelCaptureId, channelEntity.GatewayName)
+	gatewayCaptureId := captureJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "capture", responseJson.String(), "支付捕获", gatewayCaptureId, gateway.GatewayName)
 	res = &ro.OutPayCaptureRo{
-		GatewayCaptureId: channelCaptureId,
+		GatewayCaptureId: gatewayCaptureId,
 		Status:           status,
 	}
 	return res, nil
@@ -303,17 +303,17 @@ func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 
 func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + payment.PaymentId
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
 			"merchantTransID":   utility.CreatePaymentId(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
+		"webhook": _gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
 	}
-	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
+	data, err := sendEvonetRequest(ctx, gateway, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -327,10 +327,10 @@ func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		cancelJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	status := cancelJson.Get("status").String()
-	channelCancelId := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "cancel", responseJson.String(), "支付取消", channelCancelId, channelEntity.GatewayName)
+	gatewayCancelId := cancelJson.GetJson("evoTransInfo").Get("evoTransID").String()
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "cancel", responseJson.String(), "支付取消", gatewayCancelId, gateway.GatewayName)
 	res = &ro.OutPayCancelRo{
-		GatewayCancelId: channelCancelId,
+		GatewayCancelId: gatewayCancelId,
 		Status:          status,
 	}
 	return res, nil
@@ -338,31 +338,31 @@ func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 
 func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.payment"
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.payment"
 	param := map[string]interface{}{
 		"merchantTransID": payment.PaymentId,
 	}
-	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
+	data, err := sendEvonetRequest(ctx, gateway, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
 	utility.Assert(responseJson.Contains("result"), "Evonetpay支付查询失败 result is nil")
 	resultJson := responseJson.GetJson("result")
-	channelPayment := responseJson.GetJson("payment")
+	gatewayPayment := responseJson.GetJson("payment")
 	utility.Assert(resultJson.Contains("code") &&
 		strings.Compare(resultJson.Get("code").String(), "S0000") == 0 &&
-		channelPayment != nil &&
-		channelPayment.Contains("status") &&
-		channelPayment.Contains("evoTransInfo") &&
-		channelPayment.GetJson("evoTransInfo").Contains("evoTransID") &&
-		channelPayment.GetJson("merchantTransInfo").Contains("merchantTransID"),
+		gatewayPayment != nil &&
+		gatewayPayment.Contains("status") &&
+		gatewayPayment.Contains("evoTransInfo") &&
+		gatewayPayment.GetJson("evoTransInfo").Contains("evoTransID") &&
+		gatewayPayment.GetJson("merchantTransInfo").Contains("merchantTransID"),
 		fmt.Sprintf("Evonetpay支付查询失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
-	status := channelPayment.Get("status").String()
-	pspReference := channelPayment.GetJson("evoTransInfo").Get("evoTransID").String()
-	merchantPspReference := channelPayment.GetJson("merchantTransInfo").Get("merchantTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, channelEntity.GatewayName)
+	status := gatewayPayment.Get("status").String()
+	pspReference := gatewayPayment.GetJson("evoTransInfo").Get("evoTransID").String()
+	merchantPspReference := gatewayPayment.GetJson("merchantTransInfo").Get("merchantTransID").String()
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "payment_query", responseJson.String(), "支付查询", pspReference, gateway.GatewayName)
 	utility.Assert(strings.Compare(merchantPspReference, payment.PaymentId) == 0, "merchantPspReference not match")
 	res = &ro.GatewayPaymentRo{
 		TotalAmount: payment.TotalAmount,
@@ -370,10 +370,10 @@ func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payme
 	}
 	if strings.Compare(status, "Failed") == 0 {
 		res.Status = consts.PAY_FAILED
-		res.Reason = "from_query:" + channelPayment.Get("failureReason").String()
+		res.Reason = "from_query:" + gatewayPayment.Get("failureReason").String()
 	} else if strings.Compare(status, "Cancelled") == 0 {
 		res.Status = consts.PAY_CANCEL
-		res.Reason = "from_query:" + channelPayment.Get("failureReason").String()
+		res.Reason = "from_query:" + gatewayPayment.Get("failureReason").String()
 	} else if strings.Compare(status, "Captured") == 0 {
 		res.Status = consts.PAY_SUCCESS
 		res.GatewayPaymentId = pspReference
@@ -382,23 +382,23 @@ func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payme
 	return res, nil
 }
 
-func (e Evonet) GatewayRefund(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, channelPayment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + channelPayment.PaymentId
+func (e Evonet) GatewayRefund(ctx context.Context, gatewayPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(gatewayPayment.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPayment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + gatewayPayment.PaymentId
 	param := map[string]interface{}{
 		"merchantTransInfo": map[string]interface{}{
 			"merchantTransID":   refund.RefundId,
 			"merchantTransTime": getCurrentDateTime(),
 		},
 		"transAmount": map[string]interface{}{
-			"currency": channelPayment.Currency,
-			"value":    utility.ConvertCentToDollarStr(refund.RefundAmount, channelPayment.Currency),
+			"currency": gatewayPayment.Currency,
+			"value":    utility.ConvertCentToDollarStr(refund.RefundAmount, gatewayPayment.Currency),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(channelPayment.GatewayId),
+		"webhook": _gateway.GetPaymentWebhookEntranceUrl(gatewayPayment.GatewayId),
 	}
-	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
+	data, err := sendEvonetRequest(ctx, gateway, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -412,7 +412,7 @@ func (e Evonet) GatewayRefund(ctx context.Context, channelPayment *entity.Paymen
 		refundJson.GetJson("evoTransInfo").Contains("evoTransID"),
 		fmt.Sprintf("Evonetpay取消失败:%s-%s", resultJson.Get("code").String(), resultJson.Get("message").String()))
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund", responseJson.String(), "支付退款", pspReference, channelEntity.GatewayName)
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund", responseJson.String(), "支付退款", pspReference, gateway.GatewayName)
 	res = &ro.OutPayRefundRo{
 		GatewayRefundId: pspReference,
 		Status:          consts.REFUND_ING,
@@ -420,15 +420,15 @@ func (e Evonet) GatewayRefund(ctx context.Context, channelPayment *entity.Paymen
 	return res, nil
 }
 
-func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, channelPayment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund"
+func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, gatewayPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(gatewayPayment.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPayment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.refund"
 	param := map[string]interface{}{
 		"merchantTransID": refund.RefundId,
 	}
-	data, err := sendEvonetRequest(ctx, channelEntity, "GET", urlPath, param)
+	data, err := sendEvonetRequest(ctx, gateway, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
 	responseJson, err := gjson.LoadJson(string(data))
 	utility.Assert(err == nil, fmt.Sprintf("json parse error %s", err))
@@ -447,7 +447,7 @@ func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, channelPayment *en
 	pspReference := refundJson.GetJson("evoTransInfo").Get("evoTransID").String()
 	merchantPspReference := refundJson.GetJson("merchantTransInfo").Get("merchantTransID").String()
 	utility.Assert(strings.Compare(merchantPspReference, refund.RefundId) == 0, "merchantPspReference not match")
-	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund_query", responseJson.String(), "退款查询", pspReference, channelEntity.GatewayName)
+	log.DoSaveChannelLog(ctx, log.ConvertToStringIgnoreErr(param), "refund_query", responseJson.String(), "退款查询", pspReference, gateway.GatewayName)
 	res = &ro.OutPayRefundRo{
 		RefundAmount: refund.RefundAmount,
 		Status:       consts.REFUND_ING,
@@ -463,7 +463,7 @@ func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, channelPayment *en
 	return res, nil
 }
 
-func sendEvonetRequest(ctx context.Context, channelEntity *entity.MerchantGateway, method string, urlPath string, param map[string]interface{}) (res []byte, err error) {
+func sendEvonetRequest(ctx context.Context, gateway *entity.MerchantGateway, method string, urlPath string, param map[string]interface{}) (res []byte, err error) {
 	utility.Assert(param != nil, "param is nil")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
@@ -471,16 +471,16 @@ func sendEvonetRequest(ctx context.Context, channelEntity *entity.MerchantGatewa
 	jsonData, err := gjson.Marshal(param)
 	jsonString := string(jsonData)
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
-	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, channelEntity.GatewayKey, jsonString)
+	g.Log().Infof(ctx, "\nEvonet_Start %s %s %s %s\n", method, urlPath, gateway.GatewayKey, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Gateway": "application/json",
 		"Msgid":           msgId,
 		"Datetime":        datetime,
-		"Authorization":   sign("POST", urlPath, msgId, datetime, channelEntity.GatewayKey, body),
+		"Authorization":   sign("POST", urlPath, msgId, datetime, gateway.GatewayKey, body),
 		"Signtype":        "SHA256",
 	}
-	response, err := sendRequest(channelEntity.Host+urlPath, method, body, headers)
+	response, err := sendRequest(gateway.Host+urlPath, method, body, headers)
 	g.Log().Infof(ctx, "\nEvonet_End %s %s response: %s error %s\n", method, urlPath, response, err)
 	return response, nil
 }

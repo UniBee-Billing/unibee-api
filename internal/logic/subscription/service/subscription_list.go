@@ -50,8 +50,8 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 			plan := query.GetPlanById(backgroundCtx, one.PlanId)
 			utility.Assert(plan != nil, "invalid planId")
 			utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-			planChannel := query.GetGatewayPlan(backgroundCtx, one.PlanId, one.GatewayId)
-			details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewaySubscriptionDetails(backgroundCtx, plan, planChannel, one)
+			gatewayPlan := query.GetGatewayPlan(backgroundCtx, one.PlanId, one.GatewayId)
+			details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewaySubscriptionDetails(backgroundCtx, plan, gatewayPlan, one)
 			if err == nil {
 				err := handler.UpdateSubWithGatewayDetailBack(backgroundCtx, one, details)
 				if err != nil {

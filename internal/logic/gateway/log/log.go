@@ -9,14 +9,14 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func DoSaveChannelLog(ctx context.Context, request string, url string, response string, memo string, requestId string, channelId string) {
+func DoSaveChannelLog(ctx context.Context, request string, url string, response string, memo string, requestId string, gatewayId string) {
 	log := &entity.GatewayHttpLog{
 		Url:       url,
 		Request:   request,
 		Response:  response,
 		RequestId: requestId,
 		Mamo:      memo,
-		GatewayId: channelId,
+		GatewayId: gatewayId,
 	}
 	_, err := dao.GatewayHttpLog.Ctx(ctx).Data(log).OmitNil().Insert(log)
 	if err != nil {

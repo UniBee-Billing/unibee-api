@@ -21,7 +21,7 @@ type CountryRateDao struct {
 // CountryRateColumns defines and stores column names for table country_rate.
 type CountryRateColumns struct {
 	Id                    string // id
-	Gateway               string // vat channel name, em vatsense
+	Gateway               string // vat gateway name, em vatsense
 	CountryCode           string // country_code
 	CountryName           string // country_name
 	Latitude              string // latitude

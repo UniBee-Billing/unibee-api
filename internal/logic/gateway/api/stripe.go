@@ -40,10 +40,10 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	channelUser := queryAndCreateChannelUser(ctx, gateway, userId)
+	gatewayUser := queryAndCreateChannelUser(ctx, gateway, userId)
 
 	params := &stripe.CustomerListPaymentMethodsParams{
-		Customer: stripe.String(channelUser.GatewayUserId),
+		Customer: stripe.String(gatewayUser.GatewayUserId),
 	}
 	params.Limit = stripe.Int64(10)
 	result := customer.ListPaymentMethods(params)
@@ -79,10 +79,10 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	channelUser := queryAndCreateChannelUser(ctx, gateway, listReq.UserId)
+	gatewayUser := queryAndCreateChannelUser(ctx, gateway, listReq.UserId)
 
 	params := &stripe.PaymentIntentListParams{}
-	params.Customer = stripe.String(channelUser.GatewayUserId)
+	params.Customer = stripe.String(gatewayUser.GatewayUserId)
 	params.Limit = stripe.Int64(200)
 	paymentList := paymentintent.List(params)
 	log.SaveChannelHttpLog("GatewayPaymentList", params, paymentList, err, "", nil, gateway)
@@ -94,13 +94,13 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	return list, nil
 }
 
-func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*ro.OutPayRefundRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.RefundListParams{}
-	params.PaymentIntent = stripe.String(channelPaymentId)
+	params.PaymentIntent = stripe.String(gatewayPaymentId)
 	params.Limit = stripe.Int64(100)
 	refundList := refund.List(params)
 	log.SaveChannelHttpLog("GatewayRefundList", params, refundList, err, "", nil, gateway)
@@ -112,12 +112,12 @@ func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 	return list, nil
 }
 
-func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res *ro.GatewayPaymentRo, err error) {
+func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PaymentIntentParams{}
-	response, err := paymentintent.Get(channelPaymentId, params)
+	response, err := paymentintent.Get(gatewayPaymentId, params)
 	log.SaveChannelHttpLog("GatewayPaymentDetail", params, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
@@ -126,12 +126,12 @@ func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 	return parseStripePayment(response, gateway), nil
 }
 
-func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.RefundParams{}
-	response, err := refund.Get(channelRefundId, params)
+	response, err := refund.Get(gatewayRefundId, params)
 	log.SaveChannelHttpLog("GatewayRefundDetail", params, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
@@ -223,10 +223,10 @@ func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	}, nil
 }
 
-func (s Stripe) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.SubscriptionParams{
@@ -238,7 +238,7 @@ func (s Stripe) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.Su
 		return nil, err
 	}
 
-	details, err := s.GatewaySubscriptionDetails(ctx, plan, planChannel, subscription)
+	details, err := s.GatewaySubscriptionDetails(ctx, plan, gatewayPlan, subscription)
 	if err != nil {
 		return nil, err
 	}
@@ -246,10 +246,10 @@ func (s Stripe) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.Su
 }
 
 // GatewaySubscriptionNewTrialEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
-func (s Stripe) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.SubscriptionParams{
@@ -262,7 +262,7 @@ func (s Stripe) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity
 		return nil, err
 	}
 
-	details, err := s.GatewaySubscriptionDetails(ctx, plan, planChannel, subscription)
+	details, err := s.GatewaySubscriptionDetails(ctx, plan, gatewayPlan, subscription)
 	if err != nil {
 		return nil, err
 	}
@@ -289,15 +289,15 @@ func (s Stripe) setUnibeeAppInfo() {
 
 func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	{
-		channelUser := queryAndCreateChannelUser(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+		gatewayUser := queryAndCreateChannelUser(ctx, gateway, subscriptionRo.Subscription.UserId)
 
-		channelVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, channelEntity.Id)
-		if channelVatRate == nil {
+		gatewayVatRate := query.GetSubscriptionVatRateChannel(ctx, subscriptionRo.VatCountryRate.Id, gateway.Id)
+		if gatewayVatRate == nil {
 			params := &stripe.TaxRateParams{
 				DisplayName: stripe.String("VAT"),
 				Description: stripe.String(subscriptionRo.VatCountryRate.CountryName),
@@ -312,18 +312,18 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				g.Log().Printf(ctx, "taxrate.New: %v", err.Error())
 				return nil, err
 			}
-			channelVatRate = &entity.GatewayVatRate{
+			gatewayVatRate = &entity.GatewayVatRate{
 				VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
-				GatewayId:        int64(channelEntity.Id),
+				GatewayId:        int64(gateway.Id),
 				GatewayVatRateId: vatCreateResult.ID,
 			}
-			result, err := dao.GatewayVatRate.Ctx(ctx).Data(channelVatRate).OmitNil().Insert(channelVatRate)
+			result, err := dao.GatewayVatRate.Ctx(ctx).Data(gatewayVatRate).OmitNil().Insert(gatewayVatRate)
 			if err != nil {
 				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err.Error())
 				return nil, err
 			}
 			id, _ := result.LastInsertId()
-			channelVatRate.Id = uint64(uint(id))
+			gatewayVatRate.Id = uint64(uint(id))
 		}
 
 		//taxInclusive := true
@@ -347,7 +347,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				})
 			}
 			checkoutParams := &stripe.CheckoutSessionParams{
-				Customer:  stripe.String(channelUser.GatewayUserId),
+				Customer:  stripe.String(gatewayUser.GatewayUserId),
 				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				LineItems: items,
 				//AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
@@ -364,16 +364,16 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
-				DefaultTaxRates: []*string{stripe.String(channelVatRate.GatewayVatRateId)},
+				DefaultTaxRates: []*string{stripe.String(gatewayVatRate.GatewayVatRateId)},
 			}
 			//checkoutParams.ExpiresAt
 			createSubscription, err := session.New(checkoutParams)
-			log.SaveChannelHttpLog("GatewaySubscriptionCreateSession", checkoutParams, createSubscription, err, "", nil, channelEntity)
+			log.SaveChannelHttpLog("GatewaySubscriptionCreateSession", checkoutParams, createSubscription, err, "", nil, gateway)
 			if err != nil {
 				return nil, err
 			}
 			return &ro.GatewayCreateSubscriptionInternalResp{
-				GatewayUserId: channelUser.GatewayUserId,
+				GatewayUserId: gatewayUser.GatewayUserId,
 				Link:          createSubscription.URL,
 				Data:          utility.FormatToJsonString(createSubscription),
 				Status:        0, //todo mark
@@ -400,7 +400,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				})
 			}
 			subscriptionParams := &stripe.SubscriptionParams{
-				Customer: stripe.String(channelUser.GatewayUserId),
+				Customer: stripe.String(gatewayUser.GatewayUserId),
 				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				Items:    items,
 				//AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
@@ -411,17 +411,17 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
-				DefaultTaxRates: []*string{stripe.String(channelVatRate.GatewayVatRateId)},
+				DefaultTaxRates: []*string{stripe.String(gatewayVatRate.GatewayVatRateId)},
 			}
 			subscriptionParams.AddExpand("latest_invoice.payment_intent")
 			createSubscription, err := sub.New(subscriptionParams)
-			log.SaveChannelHttpLog("GatewaySubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, channelEntity)
+			log.SaveChannelHttpLog("GatewaySubscriptionCreate", subscriptionParams, createSubscription, err, "", nil, gateway)
 			if err != nil {
 				return nil, err
 			}
 
 			return &ro.GatewayCreateSubscriptionInternalResp{
-				GatewayUserId:             channelUser.GatewayUserId,
+				GatewayUserId:             gatewayUser.GatewayUserId,
 				Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
 				GatewaySubscriptionId:     createSubscription.ID,
 				GatewaySubscriptionStatus: string(createSubscription.Status),
@@ -500,16 +500,16 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 // GatewaySubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel?dashboard-or-api=api
 func (s Stripe) GatewaySubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.GatewayCancelSubscriptionInternalReq) (res *ro.GatewayCancelSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionCancelInternalReq.Subscription.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, subscriptionCancelInternalReq.Subscription.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, subscriptionCancelInternalReq.Subscription.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.SubscriptionCancelParams{}
 	params.InvoiceNow = stripe.Bool(subscriptionCancelInternalReq.InvoiceNow)
 	params.Prorate = stripe.Bool(subscriptionCancelInternalReq.Prorate)
 	response, err := sub.Cancel(subscriptionCancelInternalReq.Subscription.GatewaySubscriptionId, params)
-	log.SaveChannelHttpLog("GatewaySubscriptionCancel", params, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionCancel", params, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -517,34 +517,34 @@ func (s Stripe) GatewaySubscriptionCancel(ctx context.Context, subscriptionCance
 }
 
 // GatewaySubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
-func (s Stripe) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.SubscriptionCancelParams{}
 	//response, err := sub.Cancel(subscription.GatewaySubscriptionId, params)
 	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(true)} //使用更新方式取代取消接口
 	response, err := sub.Update(subscription.GatewaySubscriptionId, params)
-	log.SaveChannelHttpLog("GatewaySubscriptionCancelAtPeriodEnd", params, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionCancelAtPeriodEnd", params, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 	return &ro.GatewayCancelAtPeriodEndSubscriptionInternalResp{}, nil
 }
 
-func (s Stripe) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.SubscriptionCancelParams{}
 	//response, err := sub.Cancel(subscription.GatewaySubscriptionId, params)
 	params := &stripe.SubscriptionParams{CancelAtPeriodEnd: stripe.Bool(false)} //使用更新方式取代取消接口
 	response, err := sub.Update(subscription.GatewaySubscriptionId, params)
-	log.SaveChannelHttpLog("GatewaySubscriptionCancelLastCancelAtPeriodEnd", params, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionCancelLastCancelAtPeriodEnd", params, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -553,12 +553,12 @@ func (s Stripe) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Conte
 
 func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionPreviewInternalResp, err error) {
 	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
-	channelUser := queryAndCreateChannelUser(ctx, channelEntity, subscriptionRo.Subscription.UserId)
+	gatewayUser := queryAndCreateChannelUser(ctx, gateway, subscriptionRo.Subscription.UserId)
 
 	// Set the proration date to this moment:
 	updateUnixTime := time.Now().Unix()
@@ -573,14 +573,14 @@ func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:          stripe.String(channelUser.GatewayUserId),
+		Customer:          stripe.String(gatewayUser.GatewayUserId),
 		Subscription:      stripe.String(subscriptionRo.Subscription.GatewaySubscriptionId),
 		SubscriptionItems: items,
 		//SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),// 设置了就只会输出 Proration 账单
 	}
 	params.SubscriptionProrationDate = stripe.Int64(updateUnixTime)
 	detail, err := invoice.Upcoming(params)
-	log.SaveChannelHttpLog("GatewaySubscriptionUpdateProrationPreview", params, detail, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionUpdateProrationPreview", params, detail, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -629,7 +629,7 @@ func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 		Lines:                          currentInvoiceItems,
 		GatewaySubscriptionId:          detail.Subscription.ID,
 		Currency:                       strings.ToUpper(string(detail.Currency)),
-		GatewayId:                      int64(channelEntity.Id),
+		GatewayId:                      int64(gateway.Id),
 		GatewayUserId:                  detail.Customer.ID,
 	}
 
@@ -642,7 +642,7 @@ func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 		Lines:                          nextInvoiceItems,
 		GatewaySubscriptionId:          detail.Subscription.ID,
 		Currency:                       strings.ToUpper(string(detail.Currency)),
-		GatewayId:                      int64(channelEntity.Id),
+		GatewayId:                      int64(gateway.Id),
 		GatewayUserId:                  detail.Customer.ID,
 	}
 
@@ -652,7 +652,7 @@ func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 		Currency:      strings.ToUpper(string(detail.Currency)),
 		ProrationDate: updateUnixTime,
 		Invoice:       currentInvoice,
-		//Invoice: parseStripeInvoice(detail, int64(channelEntity.Id)),
+		//Invoice: parseStripeInvoice(detail, int64(gateway.Id)),
 		NextPeriodInvoice: nextPeriodInvoice,
 	}, nil
 }
@@ -755,9 +755,9 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 // GatewaySubscriptionUpdate 需保证同一个 Price 在 Items 中不能出现两份
 func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	items, err := s.makeSubscriptionUpdateItems(subscriptionRo)
@@ -786,7 +786,7 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 		}
 	}
 	updateSubscription, err := sub.Update(subscriptionRo.Subscription.GatewaySubscriptionId, params)
-	log.SaveChannelHttpLog("GatewaySubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionUpdate", params, updateSubscription, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -794,7 +794,7 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 	if subscriptionRo.EffectImmediate && !consts.ProrationUsingUniBeeCompute {
 		queryParams := &stripe.InvoiceParams{}
 		newInvoice, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
-		log.SaveChannelHttpLog("GatewaySubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, channelEntity)
+		log.SaveChannelHttpLog("GatewaySubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, gateway)
 		g.Log().Infof(ctx, "query new invoice:", newInvoice)
 
 		return &ro.GatewayUpdateSubscriptionInternalResp{
@@ -813,15 +813,15 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 }
 
 // GatewaySubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-func (s Stripe) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.SubscriptionParams{}
 	response, err := sub.Get(subscription.GatewaySubscriptionId, params)
-	log.SaveChannelHttpLog("GatewaySubscriptionDetails", params, response, err, subscription.GatewaySubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionDetails", params, response, err, subscription.GatewaySubscriptionId, nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -844,43 +844,43 @@ func (s Stripe) GatewaySubscriptionDetails(ctx context.Context, plan *entity.Sub
 }
 
 // GatewayPlanActive 使用 price 代替 plan  https://stripe.com/docs/api/plans
-func (s Stripe) GatewayPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewayPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(true) // todo mark 使用这种方式可能不能用
-	result, err := price.Update(planChannel.GatewayPlanId, params)
-	log.SaveChannelHttpLog("GatewayPlanActive", params, result, err, "", nil, channelEntity)
+	result, err := price.Update(gatewayPlan.GatewayPlanId, params)
+	log.SaveChannelHttpLog("GatewayPlanActive", params, result, err, "", nil, gateway)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s Stripe) GatewayPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewayPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
-	result, err := price.Update(planChannel.GatewayPlanId, params)
-	log.SaveChannelHttpLog("GatewayPlanDeactivate", params, result, err, "", nil, channelEntity)
+	result, err := price.Update(gatewayPlan.GatewayPlanId, params)
+	log.SaveChannelHttpLog("GatewayPlanDeactivate", params, result, err, "", nil, gateway)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.ProductParams{
 		Active:      stripe.Bool(true),
@@ -894,7 +894,7 @@ func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 		params.URL = stripe.String(plan.HomeUrl)
 	}
 	result, err := product.New(params)
-	log.SaveChannelHttpLog("GatewayProductCreate", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayProductCreate", params, result, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -905,11 +905,11 @@ func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 	}, nil
 }
 
-func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	//params := &stripe.PlanParams{
 	//	//todo mark
@@ -928,18 +928,18 @@ func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *en
 			Interval:      stripe.String(targetPlan.IntervalUnit),
 			IntervalCount: stripe.Int64(int64(targetPlan.IntervalCount)),
 		},
-		Product: stripe.String(planChannel.GatewayProductId),
+		Product: stripe.String(gatewayPlan.GatewayProductId),
 		Metadata: map[string]string{
 			"PlanId": strconv.FormatUint(targetPlan.Id, 10),
 			"Type":   strconv.Itoa(targetPlan.Type),
 		},
 		//ProductData: &stripe.PriceProductDataParams{
-		//	ID:   stripe.String(planChannel.GatewayProductId),
+		//	ID:   stripe.String(gatewayPlan.GatewayProductId),
 		//	Name: stripe.String(targetPlan.PlanName),
 		//},//这里是创建的意思
 	}
 	result, err := price.New(params)
-	log.SaveChannelHttpLog("GatewayPlanCreateAndActivate", params, result, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayPlanCreateAndActivate", params, result, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -969,11 +969,11 @@ func (s Stripe) GatewayInvoiceCreateAndPay(ctx context.Context, gateway *entity.
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
-	channelUser := queryAndCreateChannelUser(ctx, gateway, createInvoiceInternalReq.Invoice.UserId)
+	gatewayUser := queryAndCreateChannelUser(ctx, gateway, createInvoiceInternalReq.Invoice.UserId)
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Customer: stripe.String(channelUser.GatewayUserId)}
+		Customer: stripe.String(gatewayUser.GatewayUserId)}
 	if createInvoiceInternalReq.PayMethod == 1 {
 		params.CollectionMethod = stripe.String("charge_automatically")
 	} else {
@@ -997,7 +997,7 @@ func (s Stripe) GatewayInvoiceCreateAndPay(ctx context.Context, gateway *entity.
 			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
 			//Quantity:    stripe.Int64(line.Quantity),
-			Customer: stripe.String(channelUser.GatewayUserId)}
+			Customer: stripe.String(gatewayUser.GatewayUserId)}
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1079,13 +1079,13 @@ func (s Stripe) GatewayInvoicePay(ctx context.Context, gateway *entity.MerchantG
 	return parseStripeInvoice(response, int64(gateway.Id)), nil
 }
 
-func (s Stripe) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, channelInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
+func (s Stripe) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, gatewayInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
 	params := &stripe.InvoiceParams{}
-	detail, err := invoice.Get(channelInvoiceId, params)
+	detail, err := invoice.Get(gatewayInvoiceId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1097,7 +1097,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	channelUser := queryAndCreateChannelUser(ctx, createPayContext.Gateway, createPayContext.Pay.UserId)
+	gatewayUser := queryAndCreateChannelUser(ctx, createPayContext.Gateway, createPayContext.Pay.UserId)
 
 	if createPayContext.CheckoutMode {
 		var items []*stripe.CheckoutSessionLineItemParams
@@ -1111,11 +1111,11 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 					UnitAmount: stripe.Int64(line.Amount),
 				},
 				Quantity: stripe.Int64(1),
-				//TaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)}, // not apply tax
+				//TaxRates: []*string{stripe.String(gatewayVatRate.ChannelVatRateId)}, // not apply tax
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
-			Customer:   stripe.String(channelUser.GatewayUserId),
+			Customer:   stripe.String(gatewayUser.GatewayUserId),
 			Currency:   stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
@@ -1139,33 +1139,33 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		} else if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
 			status = consts.PAY_FAILED
 		}
-		var channelPaymentId string
+		var gatewayPaymentId string
 		if detail.PaymentIntent != nil {
-			channelPaymentId = detail.PaymentIntent.ID
+			gatewayPaymentId = detail.PaymentIntent.ID
 		}
 		return &ro.CreatePayInternalResp{
 			Status:                 status,
-			GatewayPaymentId:       channelPaymentId,
+			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
 			Link:                   detail.URL,
 		}, nil
 	} else {
 		if createPayContext.PayMethod == 1 && createPayContext.PayImmediate {
 			// try use payment intent
-			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, channelUser.UserId)
-			log.SaveChannelHttpLog("GatewayPayment", channelUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
+			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
+			log.SaveChannelHttpLog("GatewayPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
 			if err != nil {
 				return nil, err
 			}
 
 			var success = false
 			var targetIntent *stripe.PaymentIntent
-			var channelPaymentId = ""
+			var gatewayPaymentId = ""
 			var link = ""
 			var cancelErr error
 			for _, method := range listQuery.PaymentMethods {
 				params := &stripe.PaymentIntentParams{
-					Customer: stripe.String(channelUser.GatewayUserId),
+					Customer: stripe.String(gatewayUser.GatewayUserId),
 					Confirm:  stripe.Bool(true),
 					Amount:   stripe.Int64(createPayContext.Invoice.TotalAmount),
 					Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
@@ -1182,7 +1182,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 
 				if targetIntent != nil {
 					status = string(targetIntent.Status)
-					channelPaymentId = targetIntent.ID
+					gatewayPaymentId = targetIntent.ID
 					if targetIntent.Invoice != nil {
 						link = targetIntent.Invoice.HostedInvoiceURL
 					}
@@ -1196,12 +1196,12 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 				} else {
 					cancelErr = gerror.Newf("targetIntent is nil")
 				}
-				g.Log().Printf(ctx, "GatewayPayment try PaymentIntent Method::%s channelPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, channelPaymentId, status, success, link, err, cancelErr)
+				g.Log().Printf(ctx, "GatewayPayment try PaymentIntent Method::%s gatewayPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, gatewayPaymentId, status, success, link, err, cancelErr)
 			}
-			if success && targetIntent != nil && len(channelPaymentId) > 0 {
+			if success && targetIntent != nil && len(gatewayPaymentId) > 0 {
 				return &ro.CreatePayInternalResp{
 					Status:                 consts.PAY_SUCCESS,
-					GatewayPaymentId:       channelPaymentId,
+					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
 					Link:                   link,
 				}, nil
@@ -1211,19 +1211,19 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		params := &stripe.InvoiceParams{
 			Metadata: createPayContext.MediaData,
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-			Customer: stripe.String(channelUser.GatewayUserId)}
+			Customer: stripe.String(gatewayUser.GatewayUserId)}
 
 		if createPayContext.PayMethod == 1 {
 			params.CollectionMethod = stripe.String("charge_automatically")
-			// check the channel user contains the payment method now
-			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, channelUser.UserId)
+			// check the gateway user contains the payment method now
+			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
 			if err != nil {
 				return nil, err
 			}
 			if len(createPayContext.GatewayPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, createPayContext.GatewayPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(createPayContext.GatewayPaymentMethod)
-			} else if len(channelUser.GatewayDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, channelUser.GatewayDefaultPaymentMethod) {
-				params.DefaultPaymentMethod = stripe.String(channelUser.GatewayDefaultPaymentMethod)
+			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, gatewayUser.GatewayDefaultPaymentMethod) {
+				params.DefaultPaymentMethod = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
 			} else if len(listQuery.PaymentMethods) > 0 {
 				// todo mark use detail query
 				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0])
@@ -1248,7 +1248,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 				Amount:      stripe.Int64(line.Amount),
 				Description: stripe.String(line.Description),
 				//Quantity:    stripe.Int64(line.Quantity),
-				Customer: stripe.String(channelUser.GatewayUserId)}
+				Customer: stripe.String(gatewayUser.GatewayUserId)}
 			_, err = invoiceitem.New(ItemParams)
 			if err != nil {
 				return nil, err
@@ -1283,13 +1283,13 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		} else if strings.Compare(string(detail.Status), "void") == 0 {
 			status = consts.PAY_FAILED
 		}
-		var channelPaymentId string
+		var gatewayPaymentId string
 		if detail.PaymentIntent != nil {
-			channelPaymentId = detail.PaymentIntent.ID
+			gatewayPaymentId = detail.PaymentIntent.ID
 		}
 		return &ro.CreatePayInternalResp{
 			Status:                 status,
-			GatewayPaymentId:       channelPaymentId,
+			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
 			Link:                   detail.HostedInvoiceURL,
 		}, nil
@@ -1312,15 +1312,15 @@ func (s Stripe) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 }
 
 func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	utility.Assert(payment.GatewayId > 0, "invalid payment channelId")
+	utility.Assert(payment.GatewayId > 0, "invalid payment gatewayId")
 	utility.Assert(len(payment.GatewayPaymentIntentId) > 0, "invalid payment GatewayPaymentIntentId")
-	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.InvoiceVoidInvoiceParams{}
 	result, err := invoice.VoidInvoice(payment.GatewayPaymentIntentId, params)
-	log.SaveChannelHttpLog("GatewayCancel", params, result, err, "VoidInvoice", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayCancel", params, result, err, "VoidInvoice", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -1351,9 +1351,9 @@ func (s Stripe) GatewayRefundStatusCheck(ctx context.Context, payment *entity.Pa
 
 func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	stripe.Key = channelEntity.GatewaySecret
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.GatewayPaymentId)}
 	params.Reason = stripe.String("requested_by_customer")
@@ -1361,7 +1361,7 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	//params.Currency = stripe.String(strings.ToLower(one.Currency))
 	params.Metadata = map[string]string{"RefundId": one.RefundId}
 	result, err := refund.New(params)
-	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))
 	utility.Assert(result != nil, "Stripe refund failed, result is nil")
 	return &ro.OutPayRefundRo{
@@ -1371,9 +1371,9 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 }
 
 func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
-	var channelPaymentId string
+	var gatewayPaymentId string
 	if item.PaymentIntent != nil {
-		channelPaymentId = item.PaymentIntent.ID
+		gatewayPaymentId = item.PaymentIntent.ID
 	}
 	var status consts.RefundStatusEnum = consts.REFUND_ING
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
@@ -1386,7 +1386,7 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	return &ro.OutPayRefundRo{
 		MerchantId:       "",
 		GatewayRefundId:  item.ID,
-		GatewayPaymentId: channelPaymentId,
+		GatewayPaymentId: gatewayPaymentId,
 		Status:           status,
 		Reason:           string(item.Reason),
 		RefundAmount:     item.Amount,
@@ -1396,13 +1396,13 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 }
 
 func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGateway) *ro.GatewayPaymentRo {
-	var channelInvoiceId string
+	var gatewayInvoiceId string
 	if item.Invoice != nil {
-		channelInvoiceId = item.Invoice.ID
+		gatewayInvoiceId = item.Invoice.ID
 	}
-	var channelUserId string
+	var gatewayUserId string
 	if item.Customer != nil {
-		channelUserId = item.Customer.ID
+		gatewayUserId = item.Customer.ID
 	}
 	var status = consts.TO_BE_PAID
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
@@ -1427,8 +1427,8 @@ func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGate
 	return &ro.GatewayPaymentRo{
 		GatewayId:        int64(gateway.Id),
 		MerchantId:       gateway.MerchantId,
-		GatewayInvoiceId: channelInvoiceId,
-		GatewayUserId:    channelUserId,
+		GatewayInvoiceId: gatewayInvoiceId,
+		GatewayUserId:    gatewayUserId,
 		GatewayPaymentId: item.ID,
 		Status:           status,
 		AuthorizeStatus:  captureStatus,
@@ -1476,9 +1476,9 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.GatewayDetai
 	if subscription.LatestInvoice != nil && subscription.LatestInvoice.PaymentIntent != nil {
 		latestChannelPaymentId = subscription.LatestInvoice.PaymentIntent.ID
 	}
-	var channelDefaultPaymentMethod = ""
+	var gatewayDefaultPaymentMethod = ""
 	if subscription.DefaultPaymentMethod != nil {
-		channelDefaultPaymentMethod = subscription.DefaultPaymentMethod.ID
+		gatewayDefaultPaymentMethod = subscription.DefaultPaymentMethod.ID
 	}
 
 	return &ro.GatewayDetailSubscriptionInternalResp{
@@ -1489,7 +1489,7 @@ func parseStripeSubscription(subscription *stripe.Subscription) *ro.GatewayDetai
 		GatewayItemData:             utility.MarshalToJsonString(subscription.Items.Data),
 		GatewayLatestInvoiceId:      subscription.LatestInvoice.ID,
 		GatewayLatestPaymentId:      latestChannelPaymentId,
-		GatewayDefaultPaymentMethod: channelDefaultPaymentMethod,
+		GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
 		CancelAtPeriodEnd:           subscription.CancelAtPeriodEnd,
 		CurrentPeriodStart:          subscription.CurrentPeriodStart,
 		CurrentPeriodEnd:            subscription.CurrentPeriodEnd,
@@ -1532,21 +1532,21 @@ func parseStripeInvoice(detail *stripe.Invoice, gatewayId int64) *ro.GatewayDeta
 		})
 	}
 
-	var channelPaymentId string
+	var gatewayPaymentId string
 	if detail.PaymentIntent != nil {
-		channelPaymentId = detail.PaymentIntent.ID
+		gatewayPaymentId = detail.PaymentIntent.ID
 	}
-	var channelSubscriptionId string
+	var gatewaySubscriptionId string
 	if detail.Subscription != nil {
-		channelSubscriptionId = detail.Subscription.ID
+		gatewaySubscriptionId = detail.Subscription.ID
 	}
 	var subscriptionId string
 	if detail.SubscriptionDetails != nil {
 		subscriptionId = detail.SubscriptionDetails.Metadata["SubId"]
 	}
-	var channelUserId string
+	var gatewayUserId string
 	if detail.Customer != nil {
-		channelUserId = detail.Customer.ID
+		gatewayUserId = detail.Customer.ID
 	}
 	var paymentTime int64
 	var cancelTime int64
@@ -1554,13 +1554,13 @@ func parseStripeInvoice(detail *stripe.Invoice, gatewayId int64) *ro.GatewayDeta
 		paymentTime = detail.StatusTransitions.PaidAt
 		cancelTime = detail.StatusTransitions.VoidedAt
 	}
-	var channelDefaultPaymentMethod = ""
+	var gatewayDefaultPaymentMethod = ""
 	if detail.DefaultPaymentMethod != nil {
-		channelDefaultPaymentMethod = detail.DefaultPaymentMethod.ID
+		gatewayDefaultPaymentMethod = detail.DefaultPaymentMethod.ID
 	}
 
 	return &ro.GatewayDetailInvoiceInternalResp{
-		GatewayDefaultPaymentMethod:    channelDefaultPaymentMethod,
+		GatewayDefaultPaymentMethod:    gatewayDefaultPaymentMethod,
 		TotalAmount:                    detail.Total,
 		PaymentAmount:                  detail.AmountPaid,
 		BalanceAmount:                  -(detail.StartingBalance) - -(detail.EndingBalance),
@@ -1580,10 +1580,10 @@ func parseStripeInvoice(detail *stripe.Invoice, gatewayId int64) *ro.GatewayDeta
 		PeriodStart:                    detail.PeriodStart,
 		PeriodEnd:                      detail.PeriodEnd,
 		GatewayInvoiceId:               detail.ID,
-		GatewayUserId:                  channelUserId,
-		GatewaySubscriptionId:          channelSubscriptionId,
+		GatewayUserId:                  gatewayUserId,
+		GatewaySubscriptionId:          gatewaySubscriptionId,
 		SubscriptionId:                 subscriptionId,
-		GatewayPaymentId:               channelPaymentId,
+		GatewayPaymentId:               gatewayPaymentId,
 		PaymentTime:                    paymentTime,
 		Reason:                         string(detail.BillingReason),
 		CreateTime:                     detail.Created,

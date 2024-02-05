@@ -45,7 +45,7 @@ func (p Paypal) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantG
 	panic("implement me")
 }
 
-func (p Paypal) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+func (p Paypal) GatewaySubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -55,17 +55,17 @@ func (p Paypal) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	panic("implement me")
 }
 
-func (p Paypal) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (p Paypal) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, channelPaymentId string) (res *ro.GatewayPaymentRo, err error) {
+func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, channelRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -95,12 +95,12 @@ func (p Paypal) GatewayInvoicePay(ctx context.Context, gateway *entity.MerchantG
 	panic("implement me")
 }
 
-func (p Paypal) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, channelInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
+func (p Paypal) GatewayInvoiceDetails(ctx context.Context, gateway *entity.MerchantGateway, gatewayInvoiceId string) (res *ro.GatewayDetailInvoiceInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (p Paypal) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+func (p Paypal) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -111,7 +111,7 @@ func (p Paypal) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 }
 
 func init() {
-	//注册 channel_webhook_entry
+	//注册 gateway_webhook_entry
 }
 
 // todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
@@ -131,9 +131,9 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 func (p Paypal) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
 	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (p Paypal) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 		CustomID:           "",
 	}
 	createSubscription, err := client.CreateSubscription(ctx, param)
-	log.SaveChannelHttpLog("GatewaySubscriptionCreate", param, createSubscription, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionCreate", param, createSubscription, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -209,18 +209,18 @@ func (p Paypal) GatewaySubscriptionCancel(ctx context.Context, subscriptionCance
 }
 
 // todo mark paypal 的 cancel 似乎是无法恢复的，和 stripe 不一样，需要确认是否有真实 cancel 的需求
-func (p Paypal) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+func (p Paypal) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	err = client.CancelSubscription(ctx, subscription.GatewaySubscriptionId, "")
-	log.SaveChannelHttpLog("GatewaySubscriptionCancelAtPeriodEnd", nil, nil, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionCancelAtPeriodEnd", nil, nil, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	} // cancelReason
@@ -228,7 +228,7 @@ func (p Paypal) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *
 	return &ro.GatewayCancelAtPeriodEndSubscriptionInternalResp{}, nil //todo mark
 }
 
-func (p Paypal) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+func (p Paypal) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -243,9 +243,9 @@ func Int(v int) *int {
 func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
 	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
 	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
@@ -298,7 +298,7 @@ func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 		//todo mark
 	}
 	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.GatewaySubscriptionId, param)
-	log.SaveChannelHttpLog("GatewaySubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -320,18 +320,18 @@ func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 	}, nil
 }
 
-func (p Paypal) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+func (p Paypal) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
 	}
 	response, err := client.GetSubscriptionDetails(ctx, subscription.GatewaySubscriptionId)
-	log.SaveChannelHttpLog("GatewaySubscriptionDetails", subscription.GatewaySubscriptionId, response, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewaySubscriptionDetails", subscription.GatewaySubscriptionId, response, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -357,54 +357,54 @@ func (p Paypal) GatewaySubscriptionDetails(ctx context.Context, plan *entity.Sub
 	}, nil
 }
 
-func (p Paypal) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+func (p Paypal) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return err
 	}
-	err = client.ActivateSubscriptionPlan(ctx, planChannel.GatewayPlanId)
-	log.SaveChannelHttpLog("GatewayPlanActive", planChannel.GatewayPlanId, nil, err, "", nil, channelEntity)
+	err = client.ActivateSubscriptionPlan(ctx, gatewayPlan.GatewayPlanId)
+	log.SaveChannelHttpLog("GatewayPlanActive", gatewayPlan.GatewayPlanId, nil, err, "", nil, gateway)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p Paypal) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+func (p Paypal) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return err
 	}
-	err = client.DeactivateSubscriptionPlans(ctx, planChannel.GatewayPlanId)
-	log.SaveChannelHttpLog("GatewayPlanDeactivate", planChannel.GatewayPlanId, nil, err, "", nil, channelEntity)
+	err = client.DeactivateSubscriptionPlans(ctx, gatewayPlan.GatewayPlanId)
+	log.SaveChannelHttpLog("GatewayPlanDeactivate", gatewayPlan.GatewayPlanId, nil, err, "", nil, gateway)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	if len(channelEntity.UniqueProductId) > 0 {
+func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	if len(gateway.UniqueProductId) > 0 {
 		//paypal 保证只创建一个 Product
 		return &ro.GatewayCreateProductInternalResp{
-			GatewayProductId:     channelEntity.UniqueProductId,
+			GatewayProductId:     gateway.UniqueProductId,
 			GatewayProductStatus: "",
 		}, nil
 	}
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
@@ -418,11 +418,11 @@ func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 		HomeUrl:     plan.HomeUrl,  //paypal 通道可为空
 	}
 	productResult, err := client.CreateProduct(ctx, param)
-	log.SaveChannelHttpLog("GatewayProductCreate", param, productResult, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayProductCreate", param, productResult, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
-	err = query.SaveGatewayUniqueProductId(ctx, int64(channelEntity.Id), productResult.ID)
+	err = query.SaveGatewayUniqueProductId(ctx, int64(gateway.Id), productResult.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -432,12 +432,12 @@ func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 	}, nil
 }
 
-func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
-	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(planChannel.GatewayProductId) > 0, "Product未创建")
-	channelEntity := util.GetGatewayById(ctx, planChannel.GatewayId)
-	utility.Assert(channelEntity != nil, "gateway not found")
-	client, _ := NewClient(channelEntity.GatewayKey, channelEntity.GatewaySecret, channelEntity.Host)
+func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
+	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
+	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		return nil, err
@@ -449,7 +449,7 @@ func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.S
 		taxInclusive = false
 	}
 	param := paypal.SubscriptionPlan{
-		ProductId:   planChannel.GatewayProductId,
+		ProductId:   gatewayPlan.GatewayProductId,
 		Name:        plan.PlanName,
 		Status:      paypal.SubscriptionPlanStatusActive,
 		Description: plan.Description,
@@ -487,7 +487,7 @@ func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.S
 		QuantitySupported: false,
 	}
 	subscriptionPlan, err := client.CreateSubscriptionPlan(ctx, param)
-	log.SaveChannelHttpLog("GatewayPlanCreateAndActivate", param, subscriptionPlan, err, "", nil, channelEntity)
+	log.SaveChannelHttpLog("GatewayPlanCreateAndActivate", param, subscriptionPlan, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}

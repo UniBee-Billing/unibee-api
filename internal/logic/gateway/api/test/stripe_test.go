@@ -11,8 +11,8 @@ import (
 func TestChangeBillingCycleAnchor(t *testing.T) {
 	//go func() {
 	//ctx := context.Background()
-	//channelEntity := util.GetOverseaPayChannel(ctx, 25)
-	//utility.Assert(channelEntity != nil, "gateway not found")
+	//gateway := util.GetOverseaPayChannel(ctx, 25)
+	//utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = "sk_test_51ONBbPHhgikz9ijMYqMBiSjihBxHApWQmt9s9mtd8vgA4O9PupcHHNVQWc4Dd7JYZ2xRrg9quSrp0g1XfO64Xkbq00zOkBRIoz"
 	stripe.SetAppInfo(&stripe.AppInfo{
 		Name:    "unibee.server",

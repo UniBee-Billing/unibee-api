@@ -48,7 +48,7 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 			}
 			for _, one := range mainList {
 				gateway := query.GetGatewayById(backgroundCtx, one.GatewayId)
-				utility.Assert(gateway != nil, "invalid planChannel")
+				utility.Assert(gateway != nil, "invalid gatewayPlan")
 				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewayPaymentDetail(backgroundCtx, gateway, one.GatewayPaymentId)
 				details.UniqueId = details.GatewayPaymentId
 				if err == nil {

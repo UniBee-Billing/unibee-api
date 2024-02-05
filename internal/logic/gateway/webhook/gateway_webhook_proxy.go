@@ -14,44 +14,44 @@ import (
 	"time"
 )
 
-type PayChannelKeyEnum struct {
+type GatewayKeyEnum struct {
 	Code int64
 	Desc string
 }
 
 var (
-	ChannelInvalid  = PayChannelKeyEnum{-1, "无效支付"}
-	ChannelGrab     = PayChannelKeyEnum{0, "Grab支付"}
-	ChannelKlarna   = PayChannelKeyEnum{1, "Klarna支付"}
-	ChannelEvonet   = PayChannelKeyEnum{2, "Evonet支付"}
-	ChannelPaypal   = PayChannelKeyEnum{3, "Paypal支付"}
-	ChannelStripe   = PayChannelKeyEnum{4, "Stripe支付"}
-	ChannelBlank    = PayChannelKeyEnum{50, "0金额支付专用"}
-	ChannelAutoTest = PayChannelKeyEnum{500, "自动化测试支付专用"}
+	GatewayInvalid  = GatewayKeyEnum{-1, "无效支付"}
+	GatewayGrab     = GatewayKeyEnum{0, "Grab支付"}
+	GatewayKlarna   = GatewayKeyEnum{1, "Klarna支付"}
+	GatewayEvonet   = GatewayKeyEnum{2, "Evonet支付"}
+	GatewayPaypal   = GatewayKeyEnum{3, "Paypal支付"}
+	GatewayStripe   = GatewayKeyEnum{4, "Stripe支付"}
+	GatewayBlank    = GatewayKeyEnum{50, "0金额支付专用"}
+	GatewayAutoTest = GatewayKeyEnum{500, "自动化测试支付专用"}
 )
 
-type PayChannelWebhookProxy struct {
+type GatewayWebhookProxy struct {
 	PaymentChannel *entity.MerchantGateway
 }
 
-func (p PayChannelWebhookProxy) getRemoteChannel() (channelService _interface.RemotePaymentChannelWebhookInterface) {
-	utility.Assert(p.PaymentChannel != nil, "channel is not set")
-	if p.PaymentChannel.EnumKey == ChannelEvonet.Code {
+func (p GatewayWebhookProxy) getRemoteGateway() (one _interface.GatewayWebhookInterface) {
+	utility.Assert(p.PaymentChannel != nil, "gateway is not set")
+	if p.PaymentChannel.EnumKey == GatewayEvonet.Code {
 		return &EvonetWebhook{}
-	} else if p.PaymentChannel.EnumKey == ChannelPaypal.Code {
+	} else if p.PaymentChannel.EnumKey == GatewayPaypal.Code {
 		return &PaypalWebhook{}
-	} else if p.PaymentChannel.EnumKey == ChannelStripe.Code {
+	} else if p.PaymentChannel.EnumKey == GatewayStripe.Code {
 		return &StripeWebhook{}
-	} else if p.PaymentChannel.EnumKey == ChannelBlank.Code {
+	} else if p.PaymentChannel.EnumKey == GatewayBlank.Code {
 		return &BlankWebhook{}
-	} else if p.PaymentChannel.EnumKey == ChannelAutoTest.Code {
+	} else if p.PaymentChannel.EnumKey == GatewayAutoTest.Code {
 		return &AutoTestWebhook{}
 	} else {
 		return &InvalidWebhook{}
 	}
 }
 
-func (p PayChannelWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
+func (p GatewayWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -64,7 +64,7 @@ func (p PayChannelWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context,
 		}
 	}()
 	startTime := time.Now()
-	err = p.getRemoteChannel().GatewayCheckAndSetupWebhook(ctx, gateway)
+	err = p.getRemoteGateway().GatewayCheckAndSetupWebhook(ctx, gateway)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayCheckAndSetupWebhook cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
@@ -72,14 +72,14 @@ func (p PayChannelWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context,
 	return err
 }
 
-func (p PayChannelWebhookProxy) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
+func (p GatewayWebhookProxy) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	startTime := time.Now()
-	p.getRemoteChannel().GatewayWebhook(r, gateway)
+	p.getRemoteGateway().GatewayWebhook(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayWebhook cost：%s \n", time.Now().Sub(startTime))
 }
-func (p PayChannelWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (p GatewayWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
 	startTime := time.Now()
-	res, err = p.getRemoteChannel().GatewayRedirect(r, gateway)
+	res, err = p.getRemoteGateway().GatewayRedirect(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayRedirect cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())

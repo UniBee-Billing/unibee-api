@@ -140,7 +140,7 @@ func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Paymen
 	}()
 }
 
-func (p proxy) GetCallbackImpl() (channelService _interface.PaymentBizCallbackInterface) {
+func (p proxy) GetCallbackImpl() (one _interface.PaymentBizCallbackInterface) {
 	utility.Assert(p.BizType >= 0, "bizType is not set")
 	if p.BizType == consts.BIZ_TYPE_ONE_TIME {
 		return &calllback.MerchantOneTimePaymentCallback{}

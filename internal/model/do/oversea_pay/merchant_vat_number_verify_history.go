@@ -16,7 +16,7 @@ type MerchantVatNumberVerifyHistory struct {
 	MerchantId      interface{} // merchantId
 	VatNumber       interface{} // vat_number
 	Valid           interface{} // 0-Invalid，1-Valid
-	ValidateChannel interface{} // validate_channel
+	ValidateGateway interface{} // validate_gateway
 	CountryCode     interface{} // country_code
 	CompanyName     interface{} // company_name
 	CompanyAddress  interface{} // company_address

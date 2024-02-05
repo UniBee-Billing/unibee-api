@@ -91,12 +91,12 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, gatewa
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
-	planChannel := query.GetGatewayPlan(ctx, planId, gatewayId)
-	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel should be transfer first")
+	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
+	utility.Assert(gatewayPlan != nil && len(gatewayPlan.GatewayProductId) > 0 && len(gatewayPlan.GatewayPlanId) > 0, "plan gateway should be transfer first")
 	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
-	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanDeactivate(ctx, plan, planChannel)
+	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanDeactivate(ctx, plan, gatewayPlan)
 	if err != nil {
 		return
 	}
@@ -104,7 +104,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, gatewa
 		dao.GatewayPlan.Columns().Status: consts.GatewayPlanStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().GatewayPlanStatus: consts.GatewayPlanStatusInActive,// todo mark
 		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).OmitNil().Update()
+	}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}

@@ -1,4 +1,4 @@
-package channel_log
+package gateway_log
 
 // https://goframe.org/pages/viewpage.action?pageId=30736417
 func deleteChannelLogs() error {

@@ -23,12 +23,12 @@ import (
 	"strconv"
 )
 
-func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayContext) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
+func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayContext) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
-	utility.Assert(createPayContext.Gateway != nil, "pay channel is nil")
+	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
-	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay channelId is nil")
+	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay gatewayId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	//utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
@@ -66,7 +66,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 channel refund
+			//事务处理 gateway refund
 			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
@@ -81,30 +81,30 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
-			channelInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayPayment(ctx, createPayContext)
+			gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}
-			jsonData, err := gjson.Marshal(channelInternalPayResult)
+			jsonData, err := gjson.Marshal(gatewayInternalPayResult)
 			if err != nil {
 				return err
 			}
 			var automatic = 0
-			if channelInternalPayResult.Status == consts.PAY_SUCCESS && createPayContext.PayImmediate {
+			if gatewayInternalPayResult.Status == consts.PAY_SUCCESS && createPayContext.PayImmediate {
 				automatic = 1
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
-			createPayContext.Pay.Status = int(channelInternalPayResult.Status)
-			createPayContext.Pay.GatewayPaymentId = channelInternalPayResult.GatewayPaymentId
-			createPayContext.Pay.GatewayPaymentIntentId = channelInternalPayResult.GatewayPaymentIntentId
-			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
+			createPayContext.Pay.Status = int(gatewayInternalPayResult.Status)
+			createPayContext.Pay.GatewayPaymentId = gatewayInternalPayResult.GatewayPaymentId
+			createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
+			gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().PaymentData:            string(jsonData),
 				dao.Payment.Columns().Automatic:              automatic,
 				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
-				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
-				dao.Payment.Columns().GatewayPaymentId:       channelInternalPayResult.GatewayPaymentId,
-				dao.Payment.Columns().GatewayPaymentIntentId: channelInternalPayResult.GatewayPaymentIntentId},
+				dao.Payment.Columns().Link:                   gatewayInternalPayResult.Link,
+				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
+				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				return err
@@ -144,10 +144,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
 		})
 	}
-	return channelInternalPayResult, nil
+	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string) (channelInternalPayResult *ro.CreatePayInternalResp, err error) {
+func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	var mobile = ""
 	var firstName = ""

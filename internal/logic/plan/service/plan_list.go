@@ -133,10 +133,10 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	var allPlanChannelList []*entity.GatewayPlan
 	err = dao.GatewayPlan.Ctx(ctx).WhereIn(dao.GatewayPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
 	if err == nil {
-		for _, planChannel := range allPlanChannelList {
+		for _, gatewayPlan := range allPlanChannelList {
 			for _, planRo := range list {
-				if int64(planRo.Plan.Id) == planChannel.PlanId && planChannel.Status == consts.GatewayPlanStatusActive {
-					outChannel := query.GetGatewayById(ctx, planChannel.GatewayId)
+				if int64(planRo.Plan.Id) == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
+					outChannel := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
 					planRo.Gateways = append(planRo.Gateways, &ro2.OutGatewayRo{
 						GatewayId:   outChannel.Id,
 						GatewayName: outChannel.Name,

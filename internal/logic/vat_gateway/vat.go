@@ -52,7 +52,7 @@ func getDefaultMerchantVatConfig(ctx context.Context, merchantId int64) (vatName
 
 func SetupMerchantVatConfig(ctx context.Context, merchantId int64, vatName string, data string, isDefault bool) error {
 	if !strings.Contains(VAT_IMPLEMENT_NAMES, vatName) {
-		return gerror.New("Vat channel not support")
+		return gerror.New("Vat gateway not support")
 	}
 	err := merchant_config.SetMerchantConfig(ctx, merchantId, vatName, data)
 	if err != nil {
@@ -67,23 +67,23 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId int64, vatName strin
 func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
 	}
 	countries, err := gateway.ListAllCountries()
 	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d channel:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
 	}
 	if countries != nil && len(countries) > 0 {
 		_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
 		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d channel:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 			return err
 		}
 	}
 	countryRates, err := gateway.ListAllRates()
 	if err != nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d channel:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
 	}
 	if countryRates != nil && len(countryRates) > 0 {
@@ -99,7 +99,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 				OmitEmpty().Save()
 		}
 		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d channel:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 			return err
 		}
 	}
@@ -125,8 +125,8 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 	}
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat channel not setup")
+		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
+		return nil, gerror.New("default vat gateway not setup")
 	}
 	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
 	if validateError != nil {
@@ -140,7 +140,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 		MerchantId:      merchantId,
 		VatNumber:       vatNumber,
 		Valid:           int64(valid),
-		ValidateChannel: gateway.GetGatewayName(),
+		ValidateGateway: gateway.GetGatewayName(),
 		CountryCode:     result.CountryCode,
 		CompanyName:     result.CompanyName,
 		CompanyAddress:  result.CompanyAddress,
@@ -156,8 +156,8 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat channel not setup")
+		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
+		return nil, gerror.New("default vat gateway not setup")
 	}
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
@@ -189,8 +189,8 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*ro.VatCo
 func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant channel data not setup merchantId:%d channel:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat channel not setup")
+		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
+		return nil, gerror.New("default vat gateway not setup")
 	}
 	var one *entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).

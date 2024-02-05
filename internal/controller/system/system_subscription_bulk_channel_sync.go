@@ -50,9 +50,9 @@ func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subsc
 				plan := query.GetPlanById(backgroundCtx, one.PlanId)
 				utility.Assert(plan != nil, "invalid planId")
 				utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-				planChannel := query.GetGatewayPlan(backgroundCtx, one.PlanId, one.GatewayId)
-				utility.Assert(planChannel != nil, "invalid planChannel")
-				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewaySubscriptionDetails(backgroundCtx, plan, planChannel, one)
+				gatewayPlan := query.GetGatewayPlan(backgroundCtx, one.PlanId, one.GatewayId)
+				utility.Assert(gatewayPlan != nil, "invalid gatewayPlan")
+				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewaySubscriptionDetails(backgroundCtx, plan, gatewayPlan, one)
 				if err == nil {
 					err := handler.UpdateSubWithGatewayDetailBack(backgroundCtx, one, details)
 					if err != nil {

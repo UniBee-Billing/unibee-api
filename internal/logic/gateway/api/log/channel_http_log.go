@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, channel *entity.MerchantGateway) {
+func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, gateway *entity.MerchantGateway) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -31,7 +31,7 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 			Response:  utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
 			RequestId: utility.FormatToJsonString(requestId),
 			Mamo:      memo,
-			GatewayId: strconv.FormatUint(channel.Id, 10),
+			GatewayId: strconv.FormatUint(gateway.Id, 10),
 		}
 		_, _ = dao.GatewayHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
 		//g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)

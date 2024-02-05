@@ -6,11 +6,11 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, channelId uint64) (one *entity.GatewayVatRate) {
-	if channelId <= 0 || vatRateId <= 0 {
+func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, gatewayId uint64) (one *entity.GatewayVatRate) {
+	if gatewayId <= 0 || vatRateId <= 0 {
 		return nil
 	}
-	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{VatRateId: int64(vatRateId), GatewayId: int64(channelId)}).OmitEmpty().Scan(&one)
+	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{VatRateId: int64(vatRateId), GatewayId: int64(gatewayId)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

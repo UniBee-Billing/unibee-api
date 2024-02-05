@@ -14,7 +14,7 @@ type MerchantVatNumberVerifyHistory struct {
 	MerchantId      int64       `json:"merchantId"      description:"merchantId"`            // merchantId
 	VatNumber       string      `json:"vatNumber"       description:"vat_number"`            // vat_number
 	Valid           int64       `json:"valid"           description:"0-Invalid，1-Valid"`     // 0-Invalid，1-Valid
-	ValidateChannel string      `json:"validateChannel" description:"validate_channel"`      // validate_channel
+	ValidateGateway string      `json:"validateGateway" description:"validate_gateway"`      // validate_gateway
 	CountryCode     string      `json:"countryCode"     description:"country_code"`          // country_code
 	CompanyName     string      `json:"companyName"     description:"company_name"`          // company_name
 	CompanyAddress  string      `json:"companyAddress"  description:"company_address"`       // company_address

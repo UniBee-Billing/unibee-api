@@ -48,7 +48,7 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 			}
 			for _, one := range mainList {
 				gateway := query.GetGatewayById(backgroundCtx, one.GatewayId)
-				utility.Assert(gateway != nil, "invalid planChannel")
+				utility.Assert(gateway != nil, "invalid gatewayPlan")
 				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewayRefundList(backgroundCtx, gateway, one.GatewayPaymentId)
 				if err == nil {
 					for _, detail := range details {

@@ -24,7 +24,7 @@ type PaypalWebhook struct {
 }
 
 func init() {
-	//注册 channel_webhook_entry
+	//注册 gateway_webhook_entry
 }
 
 // todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
@@ -136,8 +136,8 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 	unibSub := query.GetSubscriptionByGatewaySubscriptionId(ctx, resource.Get("id").String())
 	if unibSub != nil {
 		plan := query.GetPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetGatewayPlan(ctx, unibSub.PlanId, unibSub.GatewayId)
-		details, err := api.GetGatewayServiceProvider(ctx, unibSub.GatewayId).GatewaySubscriptionDetails(ctx, plan, planChannel, unibSub)
+		gatewayPlan := query.GetGatewayPlan(ctx, unibSub.PlanId, unibSub.GatewayId)
+		details, err := api.GetGatewayServiceProvider(ctx, unibSub.GatewayId).GatewaySubscriptionDetails(ctx, plan, gatewayPlan, unibSub)
 		if err != nil {
 			return err
 		}
@@ -148,7 +148,7 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 		}
 		return nil
 	} else {
-		return gerror.New("subscription not found on channelSubId:" + resource.Get("id").String())
+		return gerror.New("subscription not found on gatewaySubId:" + resource.Get("id").String())
 	}
 }
 

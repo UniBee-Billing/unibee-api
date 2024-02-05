@@ -171,16 +171,16 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 
 type SubscriptionPaymentSuccessWebHookReq struct {
 	Payment                     *entity.Payment                           `json:"payment" `
-	ChannelSubscriptionDetail   *ro.GatewayDetailSubscriptionInternalResp `json:"channelSubscriptionDetail"`
-	ChannelInvoiceDetail        *ro.GatewayDetailInvoiceInternalResp      `json:"channelInvoiceDetail"`
-	ChannelPaymentId            string                                    `json:"channelPaymentId" `
-	ChannelInvoiceId            string                                    `json:"channelInvoiceId"`
-	ChannelSubscriptionId       string                                    `json:"channelSubscriptionId" `
-	ChannelSubscriptionUpdateId string                                    `json:"channelSubscriptionUpdateId"`
+	GatewaySubscriptionDetail   *ro.GatewayDetailSubscriptionInternalResp `json:"gatewaySubscriptionDetail"`
+	GatewayInvoiceDetail        *ro.GatewayDetailInvoiceInternalResp      `json:"gatewayInvoiceDetail"`
+	GatewayPaymentId            string                                    `json:"gatewayPaymentId" `
+	GatewayInvoiceId            string                                    `json:"gatewayInvoiceId"`
+	GatewaySubscriptionId       string                                    `json:"gatewaySubscriptionId" `
+	GatewaySubscriptionUpdateId string                                    `json:"gatewaySubscriptionUpdateId"`
 	Status                      consts.SubscriptionStatusEnum             `json:"status"`
-	ChannelStatus               string                                    `json:"channelStatus"                  `
+	GatewayStatus               string                                    `json:"gatewayStatus"                  `
 	Data                        string                                    `json:"data"`
-	ChannelItemData             string                                    `json:"channelItemData"`
+	GatewayItemData             string                                    `json:"gatewayItemData"`
 	CancelAtPeriodEnd           bool                                      `json:"cancelAtPeriodEnd"`
 	CurrentPeriodEnd            int64                                     `json:"currentPeriodEnd"`
 	CurrentPeriodStart          int64                                     `json:"currentPeriodStart"`
@@ -216,13 +216,13 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				planChannel := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId)
-				utility.Assert(len(planChannel.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
-				utility.Assert(planChannel.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v GatewayId:%v channelPlanStatus not active", param.AddonPlanId, gatewayId))
+				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId)
+				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
+				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v GatewayId:%v gatewayPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
 					Quantity:         param.Quantity,
 					AddonPlan:        mapPlans[param.AddonPlanId],
-					AddonGatewayPlan: planChannel,
+					AddonGatewayPlan: gatewayPlan,
 				})
 			}
 		}
@@ -231,12 +231,12 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 }
 
 func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPaymentSuccessWebHookReq) error {
-	sub := query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
+	sub := query.GetSubscriptionByGatewaySubscriptionId(ctx, req.GatewaySubscriptionId)
 	if sub == nil {
-		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.ChannelSubscriptionId)
+		return gerror.Newf("HandleSubscriptionPaymentUpdate sub not found %s", req.GatewaySubscriptionId)
 	}
 	if sub.Type != consts.SubTypeDefault {
-		return gerror.Newf("HandleSubscriptionPaymentUpdate not channel subscription %s", sub.SubscriptionId)
+		return gerror.Newf("HandleSubscriptionPaymentUpdate not gateway subscription %s", sub.SubscriptionId)
 	}
 	eiPendingSubUpdate := query.GetUnfinishedEffectImmediateSubscriptionPendingUpdateByGatewayUpdateId(ctx, req.Payment.PaymentId)
 	if eiPendingSubUpdate != nil {
@@ -258,7 +258,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 				// compensate next pending update billing cycle invoice
 				one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 				if one == nil {
-					sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
+					sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.GatewaySubscriptionId)
 
 					plan := query.GetPlanById(ctx, pendingSubUpdate.UpdatePlanId)
 					var nextPeriodStart = sub.CurrentPeriodEnd
@@ -297,7 +297,7 @@ func HandleSubscriptionPaymentUpdate(ctx context.Context, req *SubscriptionPayme
 			// compensate billing cycle invoice
 			one := query.GetInvoiceByPaymentId(ctx, req.Payment.PaymentId)
 			if one == nil {
-				sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.ChannelSubscriptionId)
+				sub = query.GetSubscriptionByGatewaySubscriptionId(ctx, req.GatewaySubscriptionId)
 				plan := query.GetPlanById(ctx, sub.PlanId)
 
 				var nextPeriodStart = sub.CurrentPeriodEnd

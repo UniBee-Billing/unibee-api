@@ -123,7 +123,7 @@ var (
 			// 通道支付 Redirect 回调
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// 通道支付 MerchantWebhook 回调
-			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/channel_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
+			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			//// 初始化通道 MerchantWebhook 配置
 			//gateway.CheckAndSetupGatewayWebhooks(ctx)
 

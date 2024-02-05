@@ -11,7 +11,7 @@ import (
 // CountryRate is the golang structure for table country_rate.
 type CountryRate struct {
 	Id                    uint64      `json:"id"                    description:"id"`                                                          // id
-	Gateway               string      `json:"gateway"               description:"vat channel name, em vatsense"`                               // vat channel name, em vatsense
+	Gateway               string      `json:"gateway"               description:"vat gateway name, em vatsense"`                               // vat gateway name, em vatsense
 	CountryCode           string      `json:"countryCode"           description:"country_code"`                                                // country_code
 	CountryName           string      `json:"countryName"           description:"country_name"`                                                // country_name
 	Latitude              string      `json:"latitude"              description:"latitude"`                                                    // latitude

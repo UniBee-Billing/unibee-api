@@ -63,7 +63,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			GatewayId: gatewayId,
 			Status:    consts.GatewayPlanStatusInit,
 		}
-		//保存planChannel
+		//保存gatewayPlan
 		result, err := dao.GatewayPlan.Ctx(ctx).Data(gatewayPlan).OmitNil().Insert(gatewayPlan)
 		if err != nil {
 			err = gerror.Newf(`SubscriptionGatewayPlanTransferAndActivate record insert failure %s`, err)

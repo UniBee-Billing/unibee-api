@@ -28,12 +28,12 @@ func (e EvonetWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 }
 
 func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
-	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 channel_webhook_entry 结果通知:%s", r.GetBody())
+	g.Log().Infof(r.Context(), "EvonetNotifyController 收到 gateway_webhook_entry 结果通知:%s", r.GetBody())
 	notificationJson, err := r.GetJson()
 	if err != nil {
 		r.Response.Writeln(err)
 	}
-	g.Log().Infof(r.Context(), "EvonetNotifyController channel_webhook_entry notifications:%s", notificationJson)
+	g.Log().Infof(r.Context(), "EvonetNotifyController gateway_webhook_entry notifications:%s", notificationJson)
 	if notificationJson == nil {
 		r.Response.Writeln("invalid body")
 	}
@@ -60,16 +60,16 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		//授权成功
 		data := payment
 		merchantTradeNo := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelPaymentId := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		gatewayPaymentId := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil && transAmount != nil &&
 			one.TotalAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
-			one.GatewayPaymentId = channelPaymentId
+			one.GatewayPaymentId = gatewayPaymentId
 			err := handler.HandlePayAuthorized(r.Context(), one)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -79,7 +79,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if (strings.Compare(eventCode, "Cancel") == 0 && cancel != nil &&
 		cancel.Contains("status") &&
@@ -112,23 +112,23 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			payment.GetJson("merchantTransInfo").Contains("merchantTransID") {
 			merchantTradeNo = payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		}
-		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		gatewayTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		if one != nil && len(one.GatewayPaymentId) > 0 {
-			utility.Assert(strings.Compare(channelTradeNo, one.GatewayPaymentId) == 0, "channelPaymentId not match")
+			utility.Assert(strings.Compare(gatewayTradeNo, one.GatewayPaymentId) == 0, "gatewayPaymentId not match")
 		}
 
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
 		if one != nil {
 			req := &handler.HandlePayReq{
 				PaymentId:        merchantTradeNo,
-				ChannelPaymentId: channelTradeNo,
+				GatewayPaymentId: gatewayTradeNo,
 				PayStatusEnum:    consts.PAY_FAILED,
 				Reason:           reason,
 			}
 			err := handler.HandlePayFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -139,7 +139,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 
 	} else if (strings.Compare(eventCode, "Capture") == 0 && capture != nil &&
@@ -173,7 +173,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			payment.GetJson("merchantTransInfo").Contains("merchantTransID") {
 			merchantTradeNo = payment.GetJson("merchantTransInfo").Get("merchantTransID").String()
 		}
-		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		gatewayTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
 		transAmount := data.GetJson("transAmount")
 		if one != nil &&
@@ -185,7 +185,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			receiveFee := utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String())
 			req := &handler.HandlePayReq{
 				PaymentId:        merchantTradeNo,
-				ChannelPaymentId: channelTradeNo,
+				GatewayPaymentId: gatewayTradeNo,
 				PayStatusEnum:    consts.PAY_SUCCESS,
 				TotalAmount:      one.TotalAmount,
 				PaymentAmount:    receiveFee,
@@ -193,7 +193,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			}
 			err := handler.HandlePaySuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -203,7 +203,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if strings.Compare(eventCode, "Refund") == 0 &&
 		refund != nil &&
@@ -217,7 +217,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		data := refund
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantRefundId := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelRefundId := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		gatewayRefundId := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetRefundByRefundId(r.Context(), merchantRefundId)
 		transAmount := data.GetJson("transAmount")
 		if one != nil &&
@@ -228,13 +228,13 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
-				GatewayRefundId:  channelRefundId,
+				GatewayRefundId:  gatewayRefundId,
 				RefundStatusEnum: consts.REFUND_SUCCESS,
 				RefundTime:       gtime.Now(),
 			}
 			err := handler.HandleRefundSuccess(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundId, "evonet webhook")
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -244,7 +244,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else if strings.Compare(eventCode, "Refund") == 0 &&
 		refund != nil &&
@@ -258,7 +258,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		data := refund
 		utility.Assert(data != nil, fmt.Sprintf("data is nil  notificationJson:%s", notificationJson.String()))
 		merchantRefundId := data.GetJson("merchantTransInfo").Get("merchantTransID").String()
-		channelRefundId := data.GetJson("evoTransInfo").Get("evoTransID").String()
+		gatewayRefundId := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetRefundByRefundId(r.Context(), merchantRefundId)
 		transAmount := data.GetJson("transAmount")
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
@@ -269,14 +269,14 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
-				GatewayRefundId:  channelRefundId,
+				GatewayRefundId:  gatewayRefundId,
 				RefundStatusEnum: consts.REFUND_FAILED,
 				RefundTime:       gtime.Now(),
 				Reason:           reason,
 			}
 			err := handler.HandleRefundFailure(r.Context(), req)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantRefundId, "evonet webhook")
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s do success object:%s hook:%s result:%s", eventCode, one, notificationJson.String(), err)
 			if err != nil {
 				executeResult = false
 			} else {
@@ -286,7 +286,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				executeResult = true
 			}
 		} else {
-			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
+			g.Log().Infof(r.Context(), "gateway_webhook_entry action:%s not match object:%s hook:%s", eventCode, one, notificationJson.String())
 		}
 	} else {
 		requestId := strconv.FormatInt(utility.CurrentTimeMillis(), 10)
@@ -319,7 +319,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		//Message message = new Message(MqTopicEnum.ChannelPayV2WebHookReceive,new PaymentNotificationMqItem(notifyIsSuccess,notifyEventDate,notifyEventCode,notifyMerchantReference,notifyReason));
 		//boolean sendResult = producerWrapper.send(message);
 	}
-	g.Log().Infof(r.Context(), "channel_webhook_entry execute result:%s %s %s %s %s ", notifyIsSuccess, notifyEventDate, notifyEventCode, notifyMerchantReference, notifyReason)
+	g.Log().Infof(r.Context(), "gateway_webhook_entry execute result:%s %s %s %s %s ", notifyIsSuccess, notifyEventDate, notifyEventCode, notifyMerchantReference, notifyReason)
 
 	r.Response.Writeln("success")
 }
@@ -334,13 +334,13 @@ func (e EvonetWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	utility.Assert(err == nil, "参数错误，payId 需 int 类型 %s")
 	overseaPay := query.GetPaymentById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
-	channelEntity := query.GetPaymentTypeGatewayById(r.Context(), overseaPay.GatewayId)
-	utility.Assert(channelEntity != nil, fmt.Sprintf("payId: %s", payIdStr))
+	gateway = query.GetPaymentTypeGatewayById(r.Context(), overseaPay.GatewayId)
+	utility.Assert(gateway != nil, fmt.Sprintf("payId: %s", payIdStr))
 	g.Log().Infof(r.Context(), "GatewayRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
 	if len(overseaPay.ReturnUrl) > 0 {
 		r.Response.Writeln(fmt.Sprintf("<head>\n<meta http-equiv=\"refresh\" content=\"1;url=%s\">\n</head>", overseaPay.ReturnUrl))
 	} else {
-		//r.Response.Writeln(r.Get("channelId"))
+		//r.Response.Writeln(r.Get("gatewayId"))
 		r.Response.Writeln(overseaPay)
 	}
 	return &ro.GatewayRedirectInternalResp{

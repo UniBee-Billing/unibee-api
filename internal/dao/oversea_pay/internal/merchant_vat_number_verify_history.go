@@ -24,7 +24,7 @@ type MerchantVatNumberVerifyHistoryColumns struct {
 	MerchantId      string // merchantId
 	VatNumber       string // vat_number
 	Valid           string // 0-Invalid，1-Valid
-	ValidateChannel string // validate_channel
+	ValidateGateway string // validate_gateway
 	CountryCode     string // country_code
 	CompanyName     string // company_name
 	CompanyAddress  string // company_address
@@ -40,7 +40,7 @@ var merchantVatNumberVerifyHistoryColumns = MerchantVatNumberVerifyHistoryColumn
 	MerchantId:      "merchant_id",
 	VatNumber:       "vat_number",
 	Valid:           "valid",
-	ValidateChannel: "validate_channel",
+	ValidateGateway: "validate_gateway",
 	CountryCode:     "country_code",
 	CompanyName:     "company_name",
 	CompanyAddress:  "company_address",

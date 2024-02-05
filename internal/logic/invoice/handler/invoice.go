@@ -17,24 +17,6 @@ import (
 	"strconv"
 )
 
-type CreateInvoiceInternalReq struct {
-	Payment                          *entity.Payment                      `json:"payment"`
-	GatewayInvoiceId                 string                               `json:"gatewayInvoiceId"`
-	Currency                         string                               `json:"currency"`
-	PlanId                           int64                                `json:"planId"`
-	Quantity                         int64                                `json:"quantity"`
-	AddonJsonData                    string                               `json:"addonJsonData"`
-	TaxScale                         int64                                `json:"taxScale"`
-	UserId                           int64                                `json:"userId"`
-	MerchantId                       int64                                `json:"merchantId"`
-	SubscriptionId                   string                               `json:"subscriptionId"`
-	ChannelId                        int64                                `json:"channelId"`
-	InvoiceStatus                    int                                  `json:"invoiceStatus"`
-	ChannelDetailInvoiceInternalResp *ro.GatewayDetailInvoiceInternalResp `json:"channelDetailInvoiceInternalResp"`
-	PeriodStart                      int64                                `json:"periodStart"                    description:"period_start"` // period_start
-	PeriodEnd                        int64                                `json:"periodEnd"                      description:"period_end"`   // period_end
-}
-
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
