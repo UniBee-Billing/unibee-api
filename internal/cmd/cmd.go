@@ -129,7 +129,9 @@ var (
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)
 				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
-				g.Log().Infof(ctx, "Server Time: %d ", gtime.Now().Timestamp())
+				//g.Log().Infof(ctx, "Server TimeZone: %d ", time.z)
+				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
+				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
 				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
 				liberr.ErrIsNil(ctx, err, "Redis write check failure")

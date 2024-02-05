@@ -39,7 +39,8 @@ const (
 	TemplateInvoiceRefundCreated                            = "InvoiceRefundCreated"
 )
 
-const SG_KEY = "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"
+// const SG_KEY = "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"
+const SG_KEY = "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"
 
 func SendEmailToUser(mailTo string, subject string, body string) error {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
