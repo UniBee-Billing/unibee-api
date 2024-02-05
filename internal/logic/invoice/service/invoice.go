@@ -257,7 +257,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 			BizType:         consts.BIZ_TYPE_INVOICE,
 			AuthorizeStatus: consts.AUTHORIZED,
 			UserId:          one.UserId,
-			ChannelId:       int64(payChannel.Id),
+			GatewayId:       int64(payChannel.Id),
 			TotalAmount:     one.TotalAmount,
 			Currency:        one.Currency,
 			CountryCode:     user.CountryCode,

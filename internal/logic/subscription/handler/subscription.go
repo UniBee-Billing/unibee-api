@@ -48,13 +48,13 @@ func UpdateSubWithChannelDetailBack(ctx context.Context, subscription *entity.Su
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(details.TrialEnd, subscription.CurrentPeriodEnd), uint64(subscription.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                      details.Status,
-		dao.Subscription.Columns().ChannelSubscriptionId:       details.ChannelSubscriptionId,
-		dao.Subscription.Columns().ChannelStatus:               details.ChannelStatus,
-		dao.Subscription.Columns().ChannelItemData:             details.ChannelItemData,
+		dao.Subscription.Columns().GatewaySubscriptionId:       details.ChannelSubscriptionId,
+		dao.Subscription.Columns().GatewayStatus:               details.ChannelStatus,
+		dao.Subscription.Columns().GatewayItemData:             details.ChannelItemData,
 		dao.Subscription.Columns().CancelAtPeriodEnd:           cancelAtPeriodEnd,
 		dao.Subscription.Columns().BillingCycleAnchor:          details.BillingCycleAnchor,
-		dao.Subscription.Columns().ChannelLatestInvoiceId:      details.ChannelLatestInvoiceId,
-		dao.Subscription.Columns().ChannelDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
+		dao.Subscription.Columns().GatewayLatestInvoiceId:      details.ChannelLatestInvoiceId,
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: details.ChannelDefaultPaymentMethod,
 		dao.Subscription.Columns().TrialEnd:                    details.TrialEnd,
 		dao.Subscription.Columns().DunningTime:                 dunningTime,
 		dao.Subscription.Columns().GmtModify:                   gmtModify,

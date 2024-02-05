@@ -34,18 +34,18 @@ type SubscriptionColumns struct {
 	TaskTime                    string // task_time
 	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-channel sub, 1-unibee sub
-	ChannelId                   string // channel_id
+	GatewayId                   string // gateway_id
 	Status                      string // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
-	ChannelSubscriptionId       string // channel subscription id
+	GatewaySubscriptionId       string // gateway subscription id
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
-	ChannelDefaultPaymentMethod string //
+	GatewayDefaultPaymentMethod string //
 	Link                        string //
-	ChannelStatus               string // channel status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelItemData             string // channel_item_data
+	GatewayStatus               string // gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	GatewayItemData             string // gateway_item_data
 	CancelAtPeriodEnd           string // whether cancel at period end，0-false | 1-true
-	ChannelLatestInvoiceId      string // channel latest invoice id
+	GatewayLatestInvoiceId      string // gateway latest invoice id
 	LastUpdateTime              string //
 	CurrentPeriodStart          string // current_period_start
 	CurrentPeriodEnd            string // current_period_end
@@ -82,18 +82,18 @@ var subscriptionColumns = SubscriptionColumns{
 	TaskTime:                    "task_time",
 	LatestInvoiceId:             "latest_invoice_id",
 	Type:                        "type",
-	ChannelId:                   "channel_id",
+	GatewayId:                   "gateway_id",
 	Status:                      "status",
-	ChannelSubscriptionId:       "channel_subscription_id",
+	GatewaySubscriptionId:       "gateway_subscription_id",
 	CustomerName:                "customer_name",
 	CustomerEmail:               "customer_email",
 	IsDeleted:                   "is_deleted",
-	ChannelDefaultPaymentMethod: "channel_default_payment_method",
+	GatewayDefaultPaymentMethod: "gateway_default_payment_method",
 	Link:                        "link",
-	ChannelStatus:               "channel_status",
-	ChannelItemData:             "channel_item_data",
+	GatewayStatus:               "gateway_status",
+	GatewayItemData:             "gateway_item_data",
 	CancelAtPeriodEnd:           "cancel_at_period_end",
-	ChannelLatestInvoiceId:      "channel_latest_invoice_id",
+	GatewayLatestInvoiceId:      "gateway_latest_invoice_id",
 	LastUpdateTime:              "last_update_time",
 	CurrentPeriodStart:          "current_period_start",
 	CurrentPeriodEnd:            "current_period_end",

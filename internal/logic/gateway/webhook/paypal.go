@@ -136,8 +136,8 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 	unibSub := query.GetSubscriptionByChannelSubscriptionId(ctx, resource.Get("id").String())
 	if unibSub != nil {
 		plan := query.GetPlanById(ctx, unibSub.PlanId)
-		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.ChannelId)
-		details, err := api.GetPayChannelServiceProvider(ctx, unibSub.ChannelId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
+		planChannel := query.GetPlanChannel(ctx, unibSub.PlanId, unibSub.GatewayId)
+		details, err := api.GetPayChannelServiceProvider(ctx, unibSub.GatewayId).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibSub)
 		if err != nil {
 			return err
 		}

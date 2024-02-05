@@ -28,7 +28,7 @@ type PaymentTimelineColumns struct {
 	UniqueId       string // unique id
 	Currency       string // currency
 	TotalAmount    string // total amount
-	ChannelId      string // channel id
+	GatewayId      string // gateway id
 	GmtCreate      string // create time
 	GmtModify      string // update time
 	IsDeleted      string // 0-UnDeleted，1-Deleted
@@ -47,7 +47,7 @@ var paymentTimelineColumns = PaymentTimelineColumns{
 	UniqueId:       "unique_id",
 	Currency:       "currency",
 	TotalAmount:    "total_amount",
-	ChannelId:      "channel_id",
+	GatewayId:      "gateway_id",
 	GmtCreate:      "gmt_create",
 	GmtModify:      "gmt_modify",
 	IsDeleted:      "is_deleted",

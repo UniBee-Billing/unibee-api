@@ -23,8 +23,8 @@ type SubscriptionPlan struct {
 	Description               string      `json:"description"               description:"description"`                                    // description
 	ImageUrl                  string      `json:"imageUrl"                  description:"image_url"`                                      // image_url
 	HomeUrl                   string      `json:"homeUrl"                   description:"home_url"`                                       // home_url
-	ChannelProductName        string      `json:"channelProductName"        description:"channel product name"`                           // channel product name
-	ChannelProductDescription string      `json:"channelProductDescription" description:"channel product description"`                    // channel product description
+	GatewayProductName        string      `json:"gatewayProductName"        description:"gateway product name"`                           // gateway product name
+	GatewayProductDescription string      `json:"gatewayProductDescription" description:"gateway product description"`                    // gateway product description
 	TaxScale                  int         `json:"taxScale"                  description:"tax scale 1000 = 10%"`                           // tax scale 1000 = 10%
 	TaxInclusive              int         `json:"taxInclusive"              description:"deperated"`                                      // deperated
 	Type                      int         `json:"type"                      description:"type，1-main plan，2-addon plan"`                  // type，1-main plan，2-addon plan

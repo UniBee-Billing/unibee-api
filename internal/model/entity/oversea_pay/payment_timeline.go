@@ -18,7 +18,7 @@ type PaymentTimeline struct {
 	UniqueId       string      `json:"uniqueId"       description:"unique id"`                       // unique id
 	Currency       string      `json:"currency"       description:"currency"`                        // currency
 	TotalAmount    int64       `json:"totalAmount"    description:"total amount"`                    // total amount
-	ChannelId      int64       `json:"channelId"      description:"channel id"`                      // channel id
+	GatewayId      int64       `json:"gatewayId"      description:"gateway id"`                      // gateway id
 	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"create time"`                     // create time
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                     // update time
 	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`           // 0-UnDeleted，1-Deleted

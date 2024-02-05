@@ -49,7 +49,7 @@ func GetSubscriptionByChannelSubscriptionId(ctx context.Context, channelSubscrip
 	if len(channelSubscriptionId) == 0 {
 		return nil
 	}
-	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{ChannelSubscriptionId: channelSubscriptionId}).OmitEmpty().Scan(&one)
+	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{GatewaySubscriptionId: channelSubscriptionId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -81,7 +81,7 @@ func GetSubscriptionUpgradePendingUpdateByChannelUpdateId(ctx context.Context, c
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -140,7 +140,7 @@ func GetUnfinishedSubscriptionPendingUpdateByChannelUpdateId(ctx context.Context
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -155,7 +155,7 @@ func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByChannelUpdateId(ctx 
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().ChannelUpdateId, channelUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, channelUpdateId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)

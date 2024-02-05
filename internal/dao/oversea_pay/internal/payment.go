@@ -40,9 +40,9 @@ type PaymentColumns struct {
 	CountryCode            string // country code
 	AuthorizeStatus        string // authorize status，0-waiting authorize，1-authorized，2-authorized_request
 	AuthorizeReason        string //
-	ChannelId              string // channel_id
-	ChannelPaymentIntentId string // channel_payment_intent_id
-	ChannelPaymentId       string // channel_payment_id
+	GatewayId              string // gateway_id
+	GatewayPaymentIntentId string // gateway_payment_intent_id
+	GatewayPaymentId       string // gateway_payment_id
 	CaptureDelayHours      string // capture_delay_hours
 	CreateTime             string // create time
 	CancelTime             string // cancel time
@@ -51,7 +51,7 @@ type PaymentColumns struct {
 	GmtModify              string // update time
 	AppId                  string // app id
 	ReturnUrl              string // return url
-	ChannelEdition         string // channel edition
+	GatewayEdition         string // gateway edition
 	HidePaymentMethods     string // hide_payment_methods
 	Verify                 string // codeVerify
 	Code                   string //
@@ -66,7 +66,7 @@ type PaymentColumns struct {
 	BalanceStart           string // balance_start
 	BalanceEnd             string // balance_end
 	InvoiceData            string //
-	ChannelPaymentMethod   string //
+	GatewayPaymentMethod   string //
 }
 
 // paymentColumns holds the columns for table payment.
@@ -91,9 +91,9 @@ var paymentColumns = PaymentColumns{
 	CountryCode:            "country_code",
 	AuthorizeStatus:        "authorize_status",
 	AuthorizeReason:        "authorize_reason",
-	ChannelId:              "channel_id",
-	ChannelPaymentIntentId: "channel_payment_intent_id",
-	ChannelPaymentId:       "channel_payment_id",
+	GatewayId:              "gateway_id",
+	GatewayPaymentIntentId: "gateway_payment_intent_id",
+	GatewayPaymentId:       "gateway_payment_id",
 	CaptureDelayHours:      "capture_delay_hours",
 	CreateTime:             "create_time",
 	CancelTime:             "cancel_time",
@@ -102,7 +102,7 @@ var paymentColumns = PaymentColumns{
 	GmtModify:              "gmt_modify",
 	AppId:                  "app_id",
 	ReturnUrl:              "return_url",
-	ChannelEdition:         "channel_edition",
+	GatewayEdition:         "gateway_edition",
 	HidePaymentMethods:     "hide_payment_methods",
 	Verify:                 "verify",
 	Code:                   "code",
@@ -117,7 +117,7 @@ var paymentColumns = PaymentColumns{
 	BalanceStart:           "balance_start",
 	BalanceEnd:             "balance_end",
 	InvoiceData:            "invoice_data",
-	ChannelPaymentMethod:   "channel_payment_method",
+	GatewayPaymentMethod:   "gateway_payment_method",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

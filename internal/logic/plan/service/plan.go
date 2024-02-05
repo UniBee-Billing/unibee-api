@@ -183,8 +183,8 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
 		BindingAddonIds:           intListToString(req.AddonIds),
-		ChannelProductName:        req.ProductName,
-		ChannelProductDescription: req.ProductDescription,
+		GatewayProductName:        req.ProductName,
+		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -246,17 +246,17 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	}
 
 	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PlanName:                  req.PlanName,
-		dao.SubscriptionPlan.Columns().Amount:                    req.Amount,
-		dao.SubscriptionPlan.Columns().Currency:                  strings.ToUpper(req.Currency),
-		dao.SubscriptionPlan.Columns().IntervalUnit:              req.IntervalUnit,
-		dao.SubscriptionPlan.Columns().IntervalCount:             req.IntervalCount,
-		dao.SubscriptionPlan.Columns().Description:               req.Description,
-		dao.SubscriptionPlan.Columns().ImageUrl:                  req.ImageUrl,
-		dao.SubscriptionPlan.Columns().HomeUrl:                   req.HomeUrl,
-		dao.SubscriptionPlan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
-		dao.SubscriptionPlan.Columns().ChannelProductName:        req.ProductName,
-		dao.SubscriptionPlan.Columns().ChannelProductDescription: req.ProductDescription,
+		dao.SubscriptionPlan.Columns().PlanName:           req.PlanName,
+		dao.SubscriptionPlan.Columns().Amount:             req.Amount,
+		dao.SubscriptionPlan.Columns().Currency:           strings.ToUpper(req.Currency),
+		dao.SubscriptionPlan.Columns().IntervalUnit:       req.IntervalUnit,
+		dao.SubscriptionPlan.Columns().IntervalCount:      req.IntervalCount,
+		dao.SubscriptionPlan.Columns().Description:        req.Description,
+		dao.SubscriptionPlan.Columns().ImageUrl:           req.ImageUrl,
+		dao.SubscriptionPlan.Columns().HomeUrl:            req.HomeUrl,
+		dao.SubscriptionPlan.Columns().BindingAddonIds:    intListToString(req.AddonIds),
+		dao.SubscriptionPlan.Columns().GatewayProductName: req.ProductName,
+		dao.SubscriptionPlan.Columns().GatewayProductName: req.ProductDescription,
 	}).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
@@ -271,8 +271,8 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.ImageUrl = req.ImageUrl
 	one.HomeUrl = req.HomeUrl
 	one.BindingAddonIds = intListToString(req.AddonIds)
-	one.ChannelProductName = req.ProductName
-	one.ChannelProductDescription = req.ProductDescription
+	one.GatewayProductName = req.ProductName
+	one.GatewayProductDescription = req.ProductDescription
 
 	return one, nil
 }

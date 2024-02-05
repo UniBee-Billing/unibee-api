@@ -30,7 +30,7 @@ func DoChannelCancel(ctx context.Context, payment *entity.Payment) (err error) {
 		//}
 
 		//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
-		_, err = api.GetPayChannelServiceProvider(ctx, payment.ChannelId).DoRemoteChannelCancel(ctx, payment)
+		_, err = api.GetPayChannelServiceProvider(ctx, payment.GatewayId).DoRemoteChannelCancel(ctx, payment)
 		if err != nil {
 			//_ = transaction.Rollback()
 			return err

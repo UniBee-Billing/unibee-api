@@ -51,7 +51,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:           status,
 		dao.Invoice.Columns().GmtModify:        gtime.Now(),
-		dao.Invoice.Columns().GatewayPaymentId: payment.ChannelPaymentId,
+		dao.Invoice.Columns().GatewayPaymentId: payment.GatewayPaymentId,
 		dao.Invoice.Columns().Link:             payment.Link,
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
@@ -62,7 +62,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		_ = SubscriptionInvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status
-	one.GatewayPaymentId = payment.ChannelPaymentId
+	one.GatewayPaymentId = payment.GatewayPaymentId
 	one.Link = payment.Link
 	return one, nil
 }
@@ -112,11 +112,11 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			PeriodStartTime:                gtime.NewFromTimeStamp(simplify.PeriodStart),
 			PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
 			Currency:                       payment.Currency,
-			GatewayId:                      payment.ChannelId,
+			GatewayId:                      payment.GatewayId,
 			Status:                         status,
 			SendStatus:                     0,
 			SendEmail:                      sendEmail,
-			GatewayPaymentId:               payment.ChannelPaymentId,
+			GatewayPaymentId:               payment.GatewayPaymentId,
 			UniqueId:                       payment.PaymentId,
 			PaymentId:                      payment.PaymentId,
 			TotalAmount:                    simplify.TotalAmount,
@@ -148,13 +148,13 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			dao.Invoice.Columns().MerchantId:                     payment.MerchantId,
 			dao.Invoice.Columns().UserId:                         payment.UserId,
 			dao.Invoice.Columns().SubscriptionId:                 payment.SubscriptionId,
-			dao.Invoice.Columns().GatewayId:                      payment.ChannelId,
+			dao.Invoice.Columns().GatewayId:                      payment.GatewayId,
 			dao.Invoice.Columns().PaymentId:                      payment.PaymentId,
 			dao.Invoice.Columns().UniqueId:                       payment.PaymentId,
 			dao.Invoice.Columns().Currency:                       payment.Currency,
 			dao.Invoice.Columns().Status:                         status,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-			dao.Invoice.Columns().GatewayPaymentId:               payment.ChannelPaymentId,
+			dao.Invoice.Columns().GatewayPaymentId:               payment.GatewayPaymentId,
 			dao.Invoice.Columns().TotalAmount:                    simplify.TotalAmount,
 			dao.Invoice.Columns().TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 			dao.Invoice.Columns().TaxAmount:                      simplify.TaxAmount,

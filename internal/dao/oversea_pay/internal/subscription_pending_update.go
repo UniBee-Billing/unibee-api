@@ -24,7 +24,7 @@ type SubscriptionPendingUpdateColumns struct {
 	MerchantId           string // merchant id
 	SubscriptionId       string // subscription id
 	UpdateSubscriptionId string // pending update unique id
-	ChannelUpdateId      string // channel update payment id assosiate to this update, use payment.paymentId
+	GatewayUpdateId      string // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            string // create time
 	Amount               string // amount of this period, cent
 	Status               string // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
@@ -38,13 +38,13 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdateQuantity       string // quantity after update
 	AddonData            string // plan addon data (json) of this period
 	UpdateAddonData      string // plan addon data (json) after update
-	ChannelId            string // channel_id
+	GatewayId            string // gateway_id
 	UserId               string // userId
 	GmtModify            string // update time
 	IsDeleted            string // 0-UnDeleted，1-Deleted
 	Paid                 string // paid，0-no，1-yes
 	Link                 string // payment link
-	ChannelStatus        string // channel status
+	GatewayStatus        string // gateway status
 	MerchantUserId       string // merchant_user_id
 	Data                 string //
 	ResponseData         string //
@@ -60,7 +60,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	MerchantId:           "merchant_id",
 	SubscriptionId:       "subscription_id",
 	UpdateSubscriptionId: "update_subscription_id",
-	ChannelUpdateId:      "channel_update_id",
+	GatewayUpdateId:      "gateway_update_id",
 	GmtCreate:            "gmt_create",
 	Amount:               "amount",
 	Status:               "status",
@@ -74,13 +74,13 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UpdateQuantity:       "update_quantity",
 	AddonData:            "addon_data",
 	UpdateAddonData:      "update_addon_data",
-	ChannelId:            "channel_id",
+	GatewayId:            "gateway_id",
 	UserId:               "user_id",
 	GmtModify:            "gmt_modify",
 	IsDeleted:            "is_deleted",
 	Paid:                 "paid",
 	Link:                 "link",
-	ChannelStatus:        "channel_status",
+	GatewayStatus:        "gateway_status",
 	MerchantUserId:       "merchant_user_id",
 	Data:                 "data",
 	ResponseData:         "response_data",

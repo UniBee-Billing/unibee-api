@@ -32,9 +32,9 @@ type Payment struct {
 	CountryCode            interface{} // country code
 	AuthorizeStatus        interface{} // authorize status，0-waiting authorize，1-authorized，2-authorized_request
 	AuthorizeReason        interface{} //
-	ChannelId              interface{} // channel_id
-	ChannelPaymentIntentId interface{} // channel_payment_intent_id
-	ChannelPaymentId       interface{} // channel_payment_id
+	GatewayId              interface{} // gateway_id
+	GatewayPaymentIntentId interface{} // gateway_payment_intent_id
+	GatewayPaymentId       interface{} // gateway_payment_id
 	CaptureDelayHours      interface{} // capture_delay_hours
 	CreateTime             *gtime.Time // create time
 	CancelTime             *gtime.Time // cancel time
@@ -43,7 +43,7 @@ type Payment struct {
 	GmtModify              *gtime.Time // update time
 	AppId                  interface{} // app id
 	ReturnUrl              interface{} // return url
-	ChannelEdition         interface{} // channel edition
+	GatewayEdition         interface{} // gateway edition
 	HidePaymentMethods     interface{} // hide_payment_methods
 	Verify                 interface{} // codeVerify
 	Code                   interface{} //
@@ -58,5 +58,5 @@ type Payment struct {
 	BalanceStart           interface{} // balance_start
 	BalanceEnd             interface{} // balance_end
 	InvoiceData            interface{} //
-	ChannelPaymentMethod   interface{} //
+	GatewayPaymentMethod   interface{} //
 }

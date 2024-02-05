@@ -25,8 +25,8 @@ type SubscriptionPlan struct {
 	Description               interface{} // description
 	ImageUrl                  interface{} // image_url
 	HomeUrl                   interface{} // home_url
-	ChannelProductName        interface{} // channel product name
-	ChannelProductDescription interface{} // channel product description
+	GatewayProductName        interface{} // gateway product name
+	GatewayProductDescription interface{} // gateway product description
 	TaxScale                  interface{} // tax scale 1000 = 10%
 	TaxInclusive              interface{} // deperated
 	Type                      interface{} // type，1-main plan，2-addon plan

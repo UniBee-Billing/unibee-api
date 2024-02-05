@@ -32,7 +32,7 @@ func GetPaymentByChannelPaymentId(ctx context.Context, channelPaymentId string) 
 	if len(channelPaymentId) == 0 {
 		return nil
 	}
-	err := dao.Payment.Ctx(ctx).Where(entity.Payment{ChannelPaymentId: channelPaymentId}).OmitEmpty().Scan(&one)
+	err := dao.Payment.Ctx(ctx).Where(entity.Payment{GatewayPaymentId: channelPaymentId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

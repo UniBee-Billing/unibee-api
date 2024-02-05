@@ -17,7 +17,7 @@ type Refund struct {
 	MerchantId           interface{} // merchant id
 	UserId               interface{} // user_id
 	OpenApiId            interface{} // open api id
-	ChannelId            interface{} // channel_id
+	GatewayId            interface{} // gateway_id
 	BizType              interface{} // biz type, copy from payment.biz_type
 	BizId                interface{} // biz id,copy from payment.biz_id
 	CountryCode          interface{} // country code
@@ -30,7 +30,7 @@ type Refund struct {
 	RefundTime           *gtime.Time // refund success time
 	GmtCreate            *gtime.Time // create time
 	GmtModify            *gtime.Time // update time
-	ChannelRefundId      interface{} // channel refund id
+	GatewayRefundId      interface{} // gateway refund id
 	AppId                interface{} // app id
 	RefundCommentExplain interface{} // refund comment
 	ReturnUrl            interface{} // return url after refund success

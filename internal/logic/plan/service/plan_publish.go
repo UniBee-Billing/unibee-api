@@ -79,11 +79,11 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	}
 	if len(planChannel.GatewayProductId) == 0 {
 		//产品尚未创建
-		if len(plan.ChannelProductName) == 0 {
-			plan.ChannelProductName = plan.PlanName
+		if len(plan.GatewayProductName) == 0 {
+			plan.GatewayProductName = plan.PlanName
 		}
-		if len(plan.ChannelProductDescription) == 0 {
-			plan.ChannelProductDescription = plan.Description
+		if len(plan.GatewayProductDescription) == 0 {
+			plan.GatewayProductDescription = plan.Description
 		}
 		res, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelProductCreate(ctx, plan, planChannel)
 		if err != nil {

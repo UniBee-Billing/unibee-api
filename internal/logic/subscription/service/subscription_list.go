@@ -50,8 +50,8 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 			plan := query.GetPlanById(backgroundCtx, one.PlanId)
 			utility.Assert(plan != nil, "invalid planId")
 			utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-			planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
-			details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
+			planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.GatewayId)
+			details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 			if err == nil {
 				err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
 				if err != nil {
@@ -73,7 +73,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 	return &subscription.SubscriptionDetailRes{
 		User:                                user,
 		Subscription:                        one,
-		Channel:                             ConvertChannelToRo(query.GetPayChannelById(ctx, one.ChannelId)),
+		Channel:                             ConvertChannelToRo(query.GetPayChannelById(ctx, one.GatewayId)),
 		Plan:                                query.GetPlanById(ctx, one.PlanId),
 		Addons:                              query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
@@ -131,7 +131,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		list = append(list, &ro.SubscriptionDetailRo{
 			User:         user,
 			Subscription: sub,
-			Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, sub.ChannelId)),
+			Channel:      ConvertChannelToRo(query.GetPayChannelById(ctx, sub.GatewayId)),
 			Plan:         nil,
 			Addons:       nil,
 			AddonParams:  addonParams,

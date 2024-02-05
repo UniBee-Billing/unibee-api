@@ -39,7 +39,7 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 			PlanId:          sub.PlanId,
 			Quantity:        sub.Quantity,
 			AddonData:       sub.AddonData,
-			ChannelId:       sub.ChannelId,
+			GatewayId:       sub.GatewayId,
 			PeriodStart:     periodStart,
 			PeriodEnd:       periodEnd,
 			PeriodStartTime: gtime.NewFromTimeStamp(periodStart),

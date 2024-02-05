@@ -21,7 +21,7 @@ func GetRefundByChannelRefundId(ctx context.Context, channelRefundId string) (on
 	if len(channelRefundId) == 0 {
 		return nil
 	}
-	err := dao.Refund.Ctx(ctx).Where(entity.Refund{ChannelRefundId: channelRefundId}).OmitEmpty().Scan(&one)
+	err := dao.Refund.Ctx(ctx).Where(entity.Refund{GatewayRefundId: channelRefundId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

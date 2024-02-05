@@ -290,7 +290,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			MerchantId:           payment.MerchantId,
 			UserId:               payment.UserId,
 			OpenApiId:            payment.OpenApiId,
-			ChannelId:            payment.ChannelId,
+			GatewayId:            payment.GatewayId,
 			CountryCode:          payment.CountryCode,
 			Currency:             details.Currency,
 			PaymentId:            payment.PaymentId,
@@ -299,7 +299,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			RefundComment:        details.Reason,
 			Status:               int(details.Status),
 			RefundTime:           details.RefundTime,
-			ChannelRefundId:      details.ChannelRefundId,
+			GatewayRefundId:      details.ChannelRefundId,
 			RefundCommentExplain: details.Reason,
 			UniqueId:             uniqueId,
 			SubscriptionId:       payment.SubscriptionId,
@@ -320,7 +320,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().MerchantId:           payment.MerchantId,
 			dao.Refund.Columns().UserId:               payment.UserId,
 			dao.Refund.Columns().OpenApiId:            payment.OpenApiId,
-			dao.Refund.Columns().ChannelId:            payment.ChannelId,
+			dao.Refund.Columns().GatewayId:            payment.GatewayId,
 			dao.Refund.Columns().CountryCode:          payment.CountryCode,
 			dao.Refund.Columns().Currency:             details.Currency,
 			dao.Refund.Columns().PaymentId:            payment.PaymentId,
@@ -328,7 +328,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().RefundComment:        details.Reason,
 			dao.Refund.Columns().Status:               details.Status,
 			dao.Refund.Columns().RefundTime:           details.RefundTime,
-			dao.Refund.Columns().ChannelRefundId:      details.ChannelRefundId,
+			dao.Refund.Columns().GatewayRefundId:      details.ChannelRefundId,
 			dao.Refund.Columns().RefundCommentExplain: details.Reason,
 			dao.Refund.Columns().UniqueId:             uniqueId,
 			dao.Refund.Columns().SubscriptionId:       payment.SubscriptionId,
@@ -368,7 +368,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			UniqueId:     uniqueId,
 			Currency:     refund.Currency,
 			TotalAmount:  refund.RefundAmount,
-			ChannelId:    refund.ChannelId,
+			GatewayId:    refund.GatewayId,
 			Status:       status,
 			TimelineType: 1,
 		}
@@ -389,7 +389,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			//dao.PaymentTimeline.Columns().InvoiceId:      refund.InvoiceId,
 			dao.PaymentTimeline.Columns().Currency:    refund.Currency,
 			dao.PaymentTimeline.Columns().TotalAmount: refund.RefundAmount,
-			dao.PaymentTimeline.Columns().ChannelId:   refund.ChannelId,
+			dao.PaymentTimeline.Columns().GatewayId:   refund.GatewayId,
 			//dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:    gtime.Now(),
 			dao.PaymentTimeline.Columns().Status:       status,
@@ -398,10 +398,6 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 		if err != nil {
 			return err
 		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return gerror.Newf("CreateOrUpdatePaymentTimelineFromRefund err:%s", update)
-		//}
 	}
 	return nil
 }

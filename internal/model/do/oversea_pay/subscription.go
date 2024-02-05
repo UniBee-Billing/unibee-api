@@ -26,18 +26,18 @@ type Subscription struct {
 	TaskTime                    *gtime.Time // task_time
 	LatestInvoiceId             interface{} // latest_invoice_id
 	Type                        interface{} // sub type, 0-channel sub, 1-unibee sub
-	ChannelId                   interface{} // channel_id
+	GatewayId                   interface{} // gateway_id
 	Status                      interface{} // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
-	ChannelSubscriptionId       interface{} // channel subscription id
+	GatewaySubscriptionId       interface{} // gateway subscription id
 	CustomerName                interface{} // customer_name
 	CustomerEmail               interface{} // customer_email
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
-	ChannelDefaultPaymentMethod interface{} //
+	GatewayDefaultPaymentMethod interface{} //
 	Link                        interface{} //
-	ChannelStatus               interface{} // channel status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	ChannelItemData             interface{} // channel_item_data
+	GatewayStatus               interface{} // gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+	GatewayItemData             interface{} // gateway_item_data
 	CancelAtPeriodEnd           interface{} // whether cancel at period end，0-false | 1-true
-	ChannelLatestInvoiceId      interface{} // channel latest invoice id
+	GatewayLatestInvoiceId      interface{} // gateway latest invoice id
 	LastUpdateTime              interface{} //
 	CurrentPeriodStart          interface{} // current_period_start
 	CurrentPeriodEnd            interface{} // current_period_end

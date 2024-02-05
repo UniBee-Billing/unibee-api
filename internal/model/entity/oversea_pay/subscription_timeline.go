@@ -25,7 +25,7 @@ type SubscriptionTimeline struct {
 	PlanId          int64       `json:"planId"          description:"PlanId"`                  // PlanId
 	Quantity        int64       `json:"quantity"        description:"quantity"`                // quantity
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`    // plan addon json data
-	ChannelId       int64       `json:"channelId"       description:"channel_id"`              // channel_id
+	GatewayId       int64       `json:"gatewayId"       description:"gateway_id"`              // gateway_id
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`             // update time
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)

@@ -35,7 +35,7 @@ type SubscriptionTimelineColumns struct {
 	PlanId          string // PlanId
 	Quantity        string // quantity
 	AddonData       string // plan addon json data
-	ChannelId       string // channel_id
+	GatewayId       string // gateway_id
 	GmtModify       string // update time
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	UniqueKey       string // unique key (deperated)
@@ -58,7 +58,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	PlanId:          "plan_id",
 	Quantity:        "quantity",
 	AddonData:       "addon_data",
-	ChannelId:       "channel_id",
+	GatewayId:       "gateway_id",
 	GmtModify:       "gmt_modify",
 	IsDeleted:       "is_deleted",
 	UniqueKey:       "unique_key",

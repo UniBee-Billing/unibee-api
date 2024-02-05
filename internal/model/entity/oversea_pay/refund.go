@@ -15,7 +15,7 @@ type Refund struct {
 	MerchantId           int64       `json:"merchantId"           description:"merchant id"`                                        // merchant id
 	UserId               int64       `json:"userId"               description:"user_id"`                                            // user_id
 	OpenApiId            int64       `json:"openApiId"            description:"open api id"`                                        // open api id
-	ChannelId            int64       `json:"channelId"            description:"channel_id"`                                         // channel_id
+	GatewayId            int64       `json:"gatewayId"            description:"gateway_id"`                                         // gateway_id
 	BizType              int         `json:"bizType"              description:"biz type, copy from payment.biz_type"`               // biz type, copy from payment.biz_type
 	BizId                string      `json:"bizId"                description:"biz id,copy from payment.biz_id"`                    // biz id,copy from payment.biz_id
 	CountryCode          string      `json:"countryCode"          description:"country code"`                                       // country code
@@ -28,7 +28,7 @@ type Refund struct {
 	RefundTime           *gtime.Time `json:"refundTime"           description:"refund success time"`                                // refund success time
 	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"create time"`                                        // create time
 	GmtModify            *gtime.Time `json:"gmtModify"            description:"update time"`                                        // update time
-	ChannelRefundId      string      `json:"channelRefundId"      description:"channel refund id"`                                  // channel refund id
+	GatewayRefundId      string      `json:"gatewayRefundId"      description:"gateway refund id"`                                  // gateway refund id
 	AppId                string      `json:"appId"                description:"app id"`                                             // app id
 	RefundCommentExplain string      `json:"refundCommentExplain" description:"refund comment"`                                     // refund comment
 	ReturnUrl            string      `json:"returnUrl"            description:"return url after refund success"`                    // return url after refund success

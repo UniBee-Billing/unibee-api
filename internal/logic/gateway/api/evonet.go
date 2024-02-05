@@ -202,7 +202,7 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			"totalQuantity": fmt.Sprintf("%d", len(createPayContext.Invoice.Lines)),
 		},
 		"returnURL": gateway.GetPaymentRedirectEntranceUrl(createPayContext.Pay),
-		"webhook":   gateway.GetPaymentWebhookEntranceUrl(createPayContext.Pay.ChannelId),
+		"webhook":   gateway.GetPaymentWebhookEntranceUrl(createPayContext.Pay.GatewayId),
 	}
 
 	if len(createPayContext.PayChannel.BrandData) > 0 {
@@ -263,8 +263,8 @@ func (e Evonet) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 }
 
 func (e Evonet) DoRemoteChannelCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
-	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
+	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
@@ -276,7 +276,7 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, payment *entity.Paym
 			"currency": payment.Currency,
 			"value":    utility.ConvertCentToDollarStr(payment.PaymentAmount, payment.Currency),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.ChannelId),
+		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -302,8 +302,8 @@ func (e Evonet) DoRemoteChannelCapture(ctx context.Context, payment *entity.Paym
 }
 
 func (e Evonet) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
+	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + payment.PaymentId
 	param := map[string]interface{}{
@@ -311,7 +311,7 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payme
 			"merchantTransID":   utility.CreatePaymentId(),
 			"merchantTransTime": getCurrentDateTime(),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.ChannelId),
+		"webhook": gateway.GetPaymentWebhookEntranceUrl(payment.GatewayId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -337,8 +337,8 @@ func (e Evonet) DoRemoteChannelCancel(ctx context.Context, payment *entity.Payme
 }
 
 func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.ChannelPaymentRo, err error) {
-	utility.Assert(payment.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, payment.ChannelId)
+	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, payment.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.payment"
 	param := map[string]interface{}{
@@ -383,8 +383,8 @@ func (e Evonet) DoRemoteChannelPayStatusCheck(ctx context.Context, payment *enti
 }
 
 func (e Evonet) DoRemoteChannelRefund(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(channelPayment.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.ChannelId)
+	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + channelPayment.PaymentId
 	param := map[string]interface{}{
@@ -396,7 +396,7 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, channelPayment *entit
 			"currency": channelPayment.Currency,
 			"value":    utility.ConvertCentToDollarStr(refund.RefundAmount, channelPayment.Currency),
 		},
-		"webhook": gateway.GetPaymentWebhookEntranceUrl(channelPayment.ChannelId),
+		"webhook": gateway.GetPaymentWebhookEntranceUrl(channelPayment.GatewayId),
 	}
 	data, err := sendEvonetRequest(ctx, channelEntity, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("call evonet error %s", err))
@@ -421,8 +421,8 @@ func (e Evonet) DoRemoteChannelRefund(ctx context.Context, channelPayment *entit
 }
 
 func (e Evonet) DoRemoteChannelRefundStatusCheck(ctx context.Context, channelPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(channelPayment.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.ChannelId)
+	utility.Assert(channelPayment.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, channelPayment.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	urlPath := "/g2/auth/payment/mer/" + channelEntity.GatewayAccountId + "/evo.e-commerce.refund"
 	param := map[string]interface{}{

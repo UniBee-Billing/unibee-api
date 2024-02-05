@@ -219,7 +219,7 @@ func (p Paypal) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 	if err != nil {
 		return nil, err
 	}
-	err = client.CancelSubscription(ctx, subscription.ChannelSubscriptionId, "")
+	err = client.CancelSubscription(ctx, subscription.GatewaySubscriptionId, "")
 	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionCancelAtPeriodEnd", nil, nil, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
@@ -297,8 +297,8 @@ func (p Paypal) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 		},
 		//todo mark
 	}
-	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.ChannelSubscriptionId, param)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.ChannelSubscriptionId, nil, channelEntity)
+	updateSubscription, err := client.ReviseSubscription(ctx, subscriptionRo.Subscription.GatewaySubscriptionId, param)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionUpdate", param, updateSubscription, err, subscriptionRo.Subscription.GatewaySubscriptionId, nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -330,8 +330,8 @@ func (p Paypal) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 	if err != nil {
 		return nil, err
 	}
-	response, err := client.GetSubscriptionDetails(ctx, subscription.ChannelSubscriptionId)
-	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionDetails", subscription.ChannelSubscriptionId, response, err, "", nil, channelEntity)
+	response, err := client.GetSubscriptionDetails(ctx, subscription.GatewaySubscriptionId)
+	log.SaveChannelHttpLog("DoRemoteChannelSubscriptionDetails", subscription.GatewaySubscriptionId, response, err, "", nil, channelEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -410,8 +410,8 @@ func (p Paypal) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 		return nil, err
 	}
 	param := paypal.Product{
-		Name:        plan.ChannelProductName,
-		Description: plan.ChannelProductDescription,
+		Name:        plan.GatewayProductName,
+		Description: plan.GatewayProductDescription,
 		Category:    paypal.ProductCategorySoftware,
 		Type:        paypal.ProductTypeService,
 		ImageUrl:    plan.ImageUrl, //paypal 通道可为空

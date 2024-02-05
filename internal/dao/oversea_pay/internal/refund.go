@@ -25,7 +25,7 @@ type RefundColumns struct {
 	MerchantId           string // merchant id
 	UserId               string // user_id
 	OpenApiId            string // open api id
-	ChannelId            string // channel_id
+	GatewayId            string // gateway_id
 	BizType              string // biz type, copy from payment.biz_type
 	BizId                string // biz id,copy from payment.biz_id
 	CountryCode          string // country code
@@ -38,7 +38,7 @@ type RefundColumns struct {
 	RefundTime           string // refund success time
 	GmtCreate            string // create time
 	GmtModify            string // update time
-	ChannelRefundId      string // channel refund id
+	GatewayRefundId      string // gateway refund id
 	AppId                string // app id
 	RefundCommentExplain string // refund comment
 	ReturnUrl            string // return url after refund success
@@ -54,7 +54,7 @@ var refundColumns = RefundColumns{
 	MerchantId:           "merchant_id",
 	UserId:               "user_id",
 	OpenApiId:            "open_api_id",
-	ChannelId:            "channel_id",
+	GatewayId:            "gateway_id",
 	BizType:              "biz_type",
 	BizId:                "biz_id",
 	CountryCode:          "country_code",
@@ -67,7 +67,7 @@ var refundColumns = RefundColumns{
 	RefundTime:           "refund_time",
 	GmtCreate:            "gmt_create",
 	GmtModify:            "gmt_modify",
-	ChannelRefundId:      "channel_refund_id",
+	GatewayRefundId:      "gateway_refund_id",
 	AppId:                "app_id",
 	RefundCommentExplain: "refund_comment_explain",
 	ReturnUrl:            "return_url",

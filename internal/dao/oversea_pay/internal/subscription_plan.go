@@ -33,8 +33,8 @@ type SubscriptionPlanColumns struct {
 	Description               string // description
 	ImageUrl                  string // image_url
 	HomeUrl                   string // home_url
-	ChannelProductName        string // channel product name
-	ChannelProductDescription string // channel product description
+	GatewayProductName        string // gateway product name
+	GatewayProductDescription string // gateway product description
 	TaxScale                  string // tax scale 1000 = 10%
 	TaxInclusive              string // deperated
 	Type                      string // type，1-main plan，2-addon plan
@@ -59,8 +59,8 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	Description:               "description",
 	ImageUrl:                  "image_url",
 	HomeUrl:                   "home_url",
-	ChannelProductName:        "channel_product_name",
-	ChannelProductDescription: "channel_product_description",
+	GatewayProductName:        "gateway_product_name",
+	GatewayProductDescription: "gateway_product_description",
 	TaxScale:                  "tax_scale",
 	TaxInclusive:              "tax_inclusive",
 	Type:                      "type",

@@ -38,7 +38,7 @@ type UserAccountColumns struct {
 	Custom             string // custom
 	NearTime           string // last login time
 	IsRisk             string // is risk account (deperated)
-	Channel            string // channel
+	GatewayId          string // gateway_id
 	Version            string // version
 	Phone              string // phone
 	Address            string // address
@@ -83,7 +83,7 @@ var userAccountColumns = UserAccountColumns{
 	Custom:             "custom",
 	NearTime:           "near_time",
 	IsRisk:             "is_risk",
-	Channel:            "channel",
+	GatewayId:          "gateway_id",
 	Version:            "version",
 	Phone:              "phone",
 	Address:            "address",

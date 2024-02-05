@@ -27,7 +27,7 @@ type SubscriptionTimeline struct {
 	PlanId          interface{} // PlanId
 	Quantity        interface{} // quantity
 	AddonData       interface{} // plan addon json data
-	ChannelId       interface{} // channel_id
+	GatewayId       interface{} // gateway_id
 	GmtModify       *gtime.Time // update time
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} // unique key (deperated)

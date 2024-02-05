@@ -20,7 +20,7 @@ type PaymentTimeline struct {
 	UniqueId       interface{} // unique id
 	Currency       interface{} // currency
 	TotalAmount    interface{} // total amount
-	ChannelId      interface{} // channel id
+	GatewayId      interface{} // gateway id
 	GmtCreate      *gtime.Time // create time
 	GmtModify      *gtime.Time // update time
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted

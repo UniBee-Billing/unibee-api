@@ -28,7 +28,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 	utility.Assert(createPayContext.PayChannel != nil, "pay channel is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
-	utility.Assert(createPayContext.Pay.ChannelId > 0, "pay channelId is nil")
+	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay channelId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	//utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
@@ -81,7 +81,7 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
-			channelInternalPayResult, err = api.GetPayChannelServiceProvider(ctx, createPayContext.Pay.ChannelId).DoRemoteChannelPayment(ctx, createPayContext)
+			channelInternalPayResult, err = api.GetPayChannelServiceProvider(ctx, createPayContext.Pay.GatewayId).DoRemoteChannelPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}
@@ -95,16 +95,16 @@ func DoChannelPay(ctx context.Context, createPayContext *ro.CreatePayContext) (c
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
 			createPayContext.Pay.Status = int(channelInternalPayResult.Status)
-			createPayContext.Pay.ChannelPaymentId = channelInternalPayResult.ChannelPaymentId
-			createPayContext.Pay.ChannelPaymentIntentId = channelInternalPayResult.ChannelPaymentIntentId
+			createPayContext.Pay.GatewayPaymentId = channelInternalPayResult.ChannelPaymentId
+			createPayContext.Pay.GatewayPaymentIntentId = channelInternalPayResult.ChannelPaymentIntentId
 			channelInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().PaymentData:            string(jsonData),
 				dao.Payment.Columns().Automatic:              automatic,
 				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
 				dao.Payment.Columns().Link:                   channelInternalPayResult.Link,
-				dao.Payment.Columns().ChannelPaymentId:       channelInternalPayResult.ChannelPaymentId,
-				dao.Payment.Columns().ChannelPaymentIntentId: channelInternalPayResult.ChannelPaymentIntentId},
+				dao.Payment.Columns().GatewayPaymentId:       channelInternalPayResult.ChannelPaymentId,
+				dao.Payment.Columns().GatewayPaymentIntentId: channelInternalPayResult.ChannelPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				return err
@@ -161,7 +161,7 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 		gender = user.Gender
 		email = user.Email
 	}
-	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId)
+	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.GatewayId)
 	if payChannel == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice pay channel not found")
 	}
@@ -177,7 +177,7 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 			BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
 			AuthorizeStatus: consts.AUTHORIZED,
 			UserId:          sub.UserId,
-			ChannelId:       int64(payChannel.Id),
+			GatewayId:       int64(payChannel.Id),
 			TotalAmount:     invoice.TotalAmount,
 			Currency:        invoice.Currency,
 			CountryCode:     sub.CountryCode,
@@ -201,6 +201,6 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 		MerchantOrderReference: sub.SubscriptionId,
 		PayMethod:              1, //automatic
 		DaysUtilDue:            5, // todo mark
-		ChannelPaymentMethod:   sub.ChannelDefaultPaymentMethod,
+		ChannelPaymentMethod:   sub.GatewayDefaultPaymentMethod,
 	})
 }

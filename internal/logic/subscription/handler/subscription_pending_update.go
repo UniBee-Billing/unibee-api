@@ -50,11 +50,11 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		if err != nil {
 			return false, err
 		}
-		_, err = api.GetPayChannelServiceProvider(ctx, one.ChannelId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
+		_, err = api.GetPayChannelServiceProvider(ctx, one.GatewayId).DoRemoteChannelSubscriptionUpdate(ctx, &ro.ChannelUpdateSubscriptionInternalReq{
 			Plan:            query.GetPlanById(ctx, one.UpdatePlanId),
 			Quantity:        one.UpdateQuantity,
-			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.ChannelId),
-			PlanChannel:     query.GetPlanChannel(ctx, one.UpdatePlanId, one.ChannelId),
+			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.GatewayId),
+			PlanChannel:     query.GetPlanChannel(ctx, one.UpdatePlanId, one.GatewayId),
 			Subscription:    query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId),
 			ProrationDate:   one.ProrationDate,
 			EffectImmediate: false,
@@ -96,7 +96,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
-		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).ChannelProductName,
+		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,
 		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),

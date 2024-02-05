@@ -28,7 +28,7 @@ type UserAccount struct {
 	Custom             string      `json:"custom"             description:"custom"`                                                                                                   // custom
 	NearTime           *gtime.Time `json:"nearTime"           description:"last login time"`                                                                                          // last login time
 	IsRisk             int         `json:"isRisk"             description:"is risk account (deperated)"`                                                                              // is risk account (deperated)
-	Channel            string      `json:"channel"            description:"channel"`                                                                                                  // channel
+	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                               // gateway_id
 	Version            int         `json:"version"            description:"version"`                                                                                                  // version
 	Phone              string      `json:"phone"              description:"phone"`                                                                                                    // phone
 	Address            string      `json:"address"            description:"address"`                                                                                                  // address

@@ -38,7 +38,7 @@ func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subsc
 			var mainList []*entity.Subscription
 			err := dao.Subscription.Ctx(backgroundCtx).
 				Where(dao.Subscription.Columns().MerchantId, req.MerchantId).
-				WhereNotNull(dao.Subscription.Columns().ChannelSubscriptionId).
+				WhereNotNull(dao.Subscription.Columns().GatewaySubscriptionId).
 				OrderDesc("id").
 				Limit(page*count, count).
 				OmitEmpty().Scan(&mainList)
@@ -50,9 +50,9 @@ func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subsc
 				plan := query.GetPlanById(backgroundCtx, one.PlanId)
 				utility.Assert(plan != nil, "invalid planId")
 				utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-				planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.ChannelId)
+				planChannel := query.GetPlanChannel(backgroundCtx, one.PlanId, one.GatewayId)
 				utility.Assert(planChannel != nil, "invalid planChannel")
-				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
+				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).DoRemoteChannelSubscriptionDetails(backgroundCtx, plan, planChannel, one)
 				if err == nil {
 					err := handler.UpdateSubWithChannelDetailBack(backgroundCtx, one, details)
 					if err != nil {

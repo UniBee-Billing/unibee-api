@@ -30,9 +30,9 @@ type Payment struct {
 	CountryCode            string      `json:"countryCode"            description:"country code"`                                                           // country code
 	AuthorizeStatus        int         `json:"authorizeStatus"        description:"authorize status，0-waiting authorize，1-authorized，2-authorized_request"` // authorize status，0-waiting authorize，1-authorized，2-authorized_request
 	AuthorizeReason        string      `json:"authorizeReason"        description:""`                                                                       //
-	ChannelId              int64       `json:"channelId"              description:"channel_id"`                                                             // channel_id
-	ChannelPaymentIntentId string      `json:"channelPaymentIntentId" description:"channel_payment_intent_id"`                                              // channel_payment_intent_id
-	ChannelPaymentId       string      `json:"channelPaymentId"       description:"channel_payment_id"`                                                     // channel_payment_id
+	GatewayId              int64       `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
+	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
+	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	CaptureDelayHours      int         `json:"captureDelayHours"      description:"capture_delay_hours"`                                                    // capture_delay_hours
 	CreateTime             *gtime.Time `json:"createTime"             description:"create time"`                                                            // create time
 	CancelTime             *gtime.Time `json:"cancelTime"             description:"cancel time"`                                                            // cancel time
@@ -41,7 +41,7 @@ type Payment struct {
 	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time
 	AppId                  string      `json:"appId"                  description:"app id"`                                                                 // app id
 	ReturnUrl              string      `json:"returnUrl"              description:"return url"`                                                             // return url
-	ChannelEdition         string      `json:"channelEdition"         description:"channel edition"`                                                        // channel edition
+	GatewayEdition         string      `json:"gatewayEdition"         description:"gateway edition"`                                                        // gateway edition
 	HidePaymentMethods     string      `json:"hidePaymentMethods"     description:"hide_payment_methods"`                                                   // hide_payment_methods
 	Verify                 string      `json:"verify"                 description:"codeVerify"`                                                             // codeVerify
 	Code                   string      `json:"code"                   description:""`                                                                       //
@@ -56,5 +56,5 @@ type Payment struct {
 	BalanceStart           int64       `json:"balanceStart"           description:"balance_start"`                                                          // balance_start
 	BalanceEnd             int64       `json:"balanceEnd"             description:"balance_end"`                                                            // balance_end
 	InvoiceData            string      `json:"invoiceData"            description:""`                                                                       //
-	ChannelPaymentMethod   string      `json:"channelPaymentMethod"   description:""`                                                                       //
+	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
 }

@@ -289,9 +289,9 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 			stripe.Key = payChannel.GatewaySecret
 			s.setUnibeeAppInfo()
 			payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
-			if payment == nil || len(payment.ChannelPaymentIntentId) == 0 {
+			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
 				response = "paymentId invalid"
-			} else if len(payment.ChannelPaymentId) > 0 && payment.Status == consts.PAY_SUCCESS {
+			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PAY_SUCCESS {
 				returnUrl = payment.ReturnUrl
 				response = "success"
 				status = true
@@ -300,7 +300,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 				returnUrl = payment.ReturnUrl
 				params := &stripe.CheckoutSessionParams{}
 				result, err := session.Get(
-					payment.ChannelPaymentIntentId,
+					payment.GatewayPaymentIntentId,
 					params,
 				)
 				if err != nil {
@@ -319,7 +319,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 							if paymentIntentDetail.Status == consts.PAY_SUCCESS {
 								err := handler2.HandlePaySuccess(r.Context(), &handler2.HandlePayReq{
 									PaymentId:                        payment.PaymentId,
-									ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+									ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 									ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 									TotalAmount:                      paymentIntentDetail.TotalAmount,
 									PayStatusEnum:                    consts.PAY_SUCCESS,
@@ -339,7 +339,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 							} else if paymentIntentDetail.Status == consts.PAY_FAILED {
 								err := handler2.HandlePayFailure(r.Context(), &handler2.HandlePayReq{
 									PaymentId:                        payment.PaymentId,
-									ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+									ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 									ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 									TotalAmount:                      paymentIntentDetail.TotalAmount,
 									PayStatusEnum:                    consts.PAY_FAILED,
@@ -373,7 +373,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 			unibSub := query.GetSubscriptionBySubscriptionId(r.Context(), SubIdStr)
 			if unibSub == nil {
 				response = "subId invalid"
-			} else if len(unibSub.ChannelSubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
+			} else if len(unibSub.GatewaySubscriptionId) > 0 && unibSub.Status == consts.SubStatusActive {
 				returnUrl = unibSub.ReturnUrl
 				response = "active"
 				status = true
@@ -471,7 +471,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
 				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 					PaymentId:                        payment.PaymentId,
-					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 					TotalAmount:                      paymentIntentDetail.TotalAmount,
 					PayStatusEnum:                    consts.PAY_SUCCESS,
@@ -488,7 +488,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			} else if paymentIntentDetail.Status == consts.PAY_FAILED {
 				err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
 					PaymentId:                        payment.PaymentId,
-					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 					TotalAmount:                      paymentIntentDetail.TotalAmount,
 					PayStatusEnum:                    consts.PAY_FAILED,
@@ -574,12 +574,12 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		var subNeedUpdate = false
 		if unibeeSub == nil && len(invoiceDetails.SubscriptionId) > 0 {
 			unibeeSub = query.GetSubscriptionBySubscriptionId(ctx, invoiceDetails.SubscriptionId)
-			unibeeSub.ChannelSubscriptionId = invoiceDetails.ChannelSubscriptionId
+			unibeeSub.GatewaySubscriptionId = invoiceDetails.ChannelSubscriptionId
 			subNeedUpdate = true
 		}
 		if unibeeSub != nil {
 			plan := query.GetPlanById(ctx, unibeeSub.PlanId)
-			planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.ChannelId)
+			planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.GatewayId)
 			channelSubscriptionDetail, err = api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibeeSub)
 			if subNeedUpdate {
 				err = handler.HandleSubscriptionWebhookEvent(ctx, unibeeSub, eventType, channelSubscriptionDetail)
@@ -630,12 +630,12 @@ func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType
 	if unibeeSub == nil {
 		if unibSubId, ok := subscription.Metadata["SubId"]; ok {
 			unibeeSub = query.GetSubscriptionBySubscriptionId(ctx, unibSubId)
-			unibeeSub.ChannelSubscriptionId = subscription.ID
+			unibeeSub.GatewaySubscriptionId = subscription.ID
 		}
 	}
 	if unibeeSub != nil {
 		plan := query.GetPlanById(ctx, unibeeSub.PlanId)
-		planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.ChannelId)
+		planChannel := query.GetPlanChannel(ctx, unibeeSub.PlanId, unibeeSub.GatewayId)
 		details, err := api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, unibeeSub)
 		if err != nil {
 			return err
@@ -658,7 +658,7 @@ func (s StripeWebhook) processSubscriptionWebhook(ctx context.Context, eventType
 					oneSub := query.GetSubscriptionByChannelSubscriptionId(ctx, invoiceDetails.ChannelSubscriptionId)
 					if oneSub != nil {
 						plan := query.GetPlanById(ctx, oneSub.PlanId)
-						planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.ChannelId)
+						planChannel := query.GetPlanChannel(ctx, oneSub.PlanId, oneSub.GatewayId)
 						channelSubscriptionDetail, err = api.GetPayChannelServiceProvider(ctx, int64(payChannel.Id)).DoRemoteChannelSubscriptionDetails(ctx, plan, planChannel, oneSub)
 					}
 				}
@@ -710,7 +710,7 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
 				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 					PaymentId:                        payment.PaymentId,
-					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 					TotalAmount:                      paymentIntentDetail.TotalAmount,
 					PayStatusEnum:                    consts.PAY_SUCCESS,
@@ -727,7 +727,7 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 			} else if paymentIntentDetail.Status == consts.PAY_FAILED {
 				err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
 					PaymentId:                        payment.PaymentId,
-					ChannelPaymentIntentId:           payment.ChannelPaymentIntentId,
+					ChannelPaymentIntentId:           payment.GatewayPaymentIntentId,
 					ChannelPaymentId:                 paymentIntentDetail.ChannelPaymentId,
 					TotalAmount:                      paymentIntentDetail.TotalAmount,
 					PayStatusEnum:                    consts.PAY_FAILED,

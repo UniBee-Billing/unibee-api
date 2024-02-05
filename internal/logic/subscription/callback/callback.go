@@ -34,7 +34,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 				if merchant != nil {
 					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
 						UserName:            user.FirstName + " " + user.LastName,
-						MerchantProductName: plan.ChannelProductName,
+						MerchantProductName: plan.PlanName,
 						MerchantCustomEmail: merchant.Email,
 						MerchantName:        merchant.Name,
 						PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
@@ -84,8 +84,8 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Upgrade")
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
-				if len(pendingSubDowngrade.ChannelUpdateId) > 0 {
-					utility.Assert(strings.Compare(pendingSubDowngrade.ChannelUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
+				if len(pendingSubDowngrade.GatewayUpdateId) > 0 {
+					utility.Assert(strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate ChannelUpdateId")
 				}
 				utility.Assert(pendingSubDowngrade.UpdateAmount == payment.TotalAmount, "totalAmount not match")
 				// Downgrade

@@ -66,7 +66,7 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		if one != nil && transAmount != nil &&
 			one.TotalAmount == utility.ConvertDollarStrToCent(transAmount.Get("value").String(), transAmount.Get("currency").String()) &&
 			strings.Compare(one.Currency, transAmount.Get("currency").String()) == 0 {
-			one.ChannelPaymentId = channelPaymentId
+			one.GatewayPaymentId = channelPaymentId
 			err := handler.HandlePayAuthorized(r.Context(), one)
 			log.DoSaveChannelLog(r.Context(), notificationJson.String(), "webhook", strconv.FormatBool(err == nil), eventCode, merchantTradeNo, "evonet webhook")
 			g.Log().Infof(r.Context(), "channel_webhook_entry action:%s handlePayAuthorized object:%s hook:%s err:%s", eventCode, one, notificationJson.String(), err)
@@ -114,8 +114,8 @@ func (e EvonetWebhook) DoRemoteChannelWebhook(r *ghttp.Request, payChannel *enti
 		}
 		channelTradeNo := data.GetJson("evoTransInfo").Get("evoTransID").String()
 		one := query.GetPaymentByPaymentId(r.Context(), merchantTradeNo)
-		if one != nil && len(one.ChannelPaymentId) > 0 {
-			utility.Assert(strings.Compare(channelTradeNo, one.ChannelPaymentId) == 0, "channelPaymentId not match")
+		if one != nil && len(one.GatewayPaymentId) > 0 {
+			utility.Assert(strings.Compare(channelTradeNo, one.GatewayPaymentId) == 0, "channelPaymentId not match")
 		}
 
 		reason := fmt.Sprintf("from_webhook:%s", data.Get("failureReason").String())
@@ -334,7 +334,7 @@ func (e EvonetWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 	utility.Assert(err == nil, "参数错误，payId 需 int 类型 %s")
 	overseaPay := query.GetPaymentById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
-	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.ChannelId)
+	channelEntity := query.GetPaymentTypePayChannelById(r.Context(), overseaPay.GatewayId)
 	utility.Assert(channelEntity != nil, fmt.Sprintf("payId: %s", payIdStr))
 	g.Log().Infof(r.Context(), "DoRemoteChannelRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
 	if len(overseaPay.ReturnUrl) > 0 {

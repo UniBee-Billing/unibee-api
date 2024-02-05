@@ -30,7 +30,7 @@ type UserAccount struct {
 	Custom             interface{} // custom
 	NearTime           *gtime.Time // last login time
 	IsRisk             interface{} // is risk account (deperated)
-	Channel            interface{} // channel
+	GatewayId          interface{} // gateway_id
 	Version            interface{} // version
 	Phone              interface{} // phone
 	Address            interface{} // address

@@ -38,7 +38,7 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 			var mainList []*entity.Payment
 			err := dao.Payment.Ctx(backgroundCtx).
 				Where(dao.Payment.Columns().MerchantId, req.MerchantId).
-				WhereNotNull(dao.Payment.Columns().ChannelPaymentId).
+				WhereNotNull(dao.Payment.Columns().GatewayPaymentId).
 				OrderDesc("id").
 				Limit(page*count, count).
 				OmitEmpty().Scan(&mainList)
@@ -47,9 +47,9 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 				return
 			}
 			for _, one := range mainList {
-				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
+				payChannel := query.GetPayChannelById(backgroundCtx, one.GatewayId)
 				utility.Assert(payChannel != nil, "invalid planChannel")
-				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.ChannelPaymentId)
+				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).DoRemoteChannelRefundList(backgroundCtx, payChannel, one.GatewayPaymentId)
 				if err == nil {
 					for _, detail := range details {
 						err := handler2.CreateOrUpdateRefundByDetail(backgroundCtx, one, detail, detail.ChannelRefundId)
@@ -60,7 +60,7 @@ func (c *ControllerRefund) BulkChannelSync(ctx context.Context, req *refund.Bulk
 						fmt.Printf("BulkChannelSync Background Fetch ChannelRefundId:%s success\n", detail.ChannelRefundId)
 					}
 				} else {
-					fmt.Printf("BulkChannelSync Background Fetch ChannelPaymentIntentId:%s error%s\n", one.ChannelPaymentId, err.Error())
+					fmt.Printf("BulkChannelSync Background Fetch GatewayPaymentId:%s error%s\n", one.GatewayPaymentId, err.Error())
 				}
 			}
 			if len(mainList) == 0 {
