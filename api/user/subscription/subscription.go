@@ -133,7 +133,7 @@ type SubscriptionListRes struct {
 }
 
 type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
+	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"User Cancel Subscription Immediately (Should In Create Status)"`
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionCancelRes struct {
