@@ -33,7 +33,7 @@ import (
 type SubscriptionCreatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"planId"`
 	Quantity          int64                              `json:"quantity"`
-	PlanChannel       *entity.ChannelPlan                `json:"planChannel"`
+	PlanChannel       *entity.GatewayPlan                `json:"planChannel"`
 	PayChannel        *entity.MerchantGateway            `json:"payChannel"`
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
@@ -82,7 +82,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
 				planChannel := query.GetPlanChannel(ctx, int64(mapPlans[param.AddonPlanId].Id), channelId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 channelId 合并查询
-				utility.Assert(len(planChannel.ChannelPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanId invalid", param.AddonPlanId, channelId))
+				utility.Assert(len(planChannel.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v ChannelId:%v GatewayPlanId invalid", param.AddonPlanId, channelId))
 				utility.Assert(planChannel.Status == consts.PlanChannelStatusActive, fmt.Sprintf("internal error PlanId:%v ChannelId:%v channelPlanStatus not active", param.AddonPlanId, channelId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
 					Quantity:         param.Quantity,
@@ -127,7 +127,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	planChannel := query.GetPlanChannel(ctx, req.PlanId, req.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, req.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
@@ -179,7 +179,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var currency = plan.Currency
 	var TotalAmountExcludingTax = plan.Amount * req.Quantity
 
-	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
+	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.GatewayId)
 
 	for _, addon := range addons {
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
@@ -258,7 +258,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		MerchantId:         prepare.MerchantInfo.Id,
 		Type:               subType,
 		PlanId:             int64(prepare.Plan.Id),
-		ChannelId:          prepare.PlanChannel.ChannelId,
+		ChannelId:          prepare.PlanChannel.GatewayId,
 		UserId:             prepare.UserId,
 		Quantity:           prepare.Quantity,
 		Amount:             prepare.TotalAmount,
@@ -387,7 +387,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Subscription *entity.Subscription               `json:"subscription"`
 	Plan         *entity.SubscriptionPlan           `json:"planId"`
 	Quantity     int64                              `json:"quantity"`
-	PlanChannel  *entity.ChannelPlan                `json:"planChannel"`
+	PlanChannel  *entity.GatewayPlan                `json:"planChannel"`
 	PayChannel   *entity.MerchantGateway            `json:"payChannel"`
 	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
@@ -396,7 +396,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Currency     string                             `json:"currency"              `
 	UserId       int64                              `json:"userId" `
 	OldPlan      *entity.SubscriptionPlan           `json:"oldPlan"`
-	//OldPlanChannel    *entity.ChannelPlan    `json:"oldPlanChannel"`
+	//OldPlanChannel    *entity.GatewayPlan    `json:"oldPlanChannel"`
 	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
 	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
 	ProrationDate     int64                     `json:"prorationDate"`
@@ -418,7 +418,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	planChannel := query.GetPlanChannel(ctx, req.NewPlanId, sub.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
@@ -433,7 +433,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		req.Quantity = 1
 	}
 
-	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.ChannelId)
+	addons := checkAndListAddonsFromParams(ctx, req.AddonParams, planChannel.GatewayId)
 
 	var currency = sub.Currency
 	for _, addon := range addons {
@@ -978,7 +978,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payment channel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
@@ -1055,7 +1055,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
@@ -1116,7 +1116,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "internal error plan channel transfer not complete")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "internal error plan channel transfer not complete")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, sub.ChannelId) //todo mark 改造成支持 Merchant 级别的 PayChannel
 	utility.Assert(payChannel != nil, "payChannel not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)

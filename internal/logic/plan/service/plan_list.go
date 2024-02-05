@@ -130,13 +130,13 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 	}
 	//添加 Channel 信息
-	var allPlanChannelList []*entity.ChannelPlan
-	err = dao.ChannelPlan.Ctx(ctx).WhereIn(dao.ChannelPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
+	var allPlanChannelList []*entity.GatewayPlan
+	err = dao.GatewayPlan.Ctx(ctx).WhereIn(dao.GatewayPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
 	if err == nil {
 		for _, planChannel := range allPlanChannelList {
 			for _, planRo := range list {
 				if int64(planRo.Plan.Id) == planChannel.PlanId && planChannel.Status == consts.PlanChannelStatusActive {
-					outChannel := query.GetPayChannelById(ctx, planChannel.ChannelId)
+					outChannel := query.GetPayChannelById(ctx, planChannel.GatewayId)
 					planRo.Channels = append(planRo.Channels, &ro2.OutChannelRo{
 						ChannelId:   outChannel.Id,
 						ChannelName: outChannel.Name,

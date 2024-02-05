@@ -8,19 +8,19 @@ import (
 	"go-oversea-pay/internal/dao/oversea_pay/internal"
 )
 
-// internalChannelPlanDao is internal type for wrapping internal DAO implements.
-type internalChannelPlanDao = *internal.ChannelPlanDao
+// internalGatewayVatRateDao is internal type for wrapping internal DAO implements.
+type internalGatewayVatRateDao = *internal.GatewayVatRateDao
 
-// channelPlanDao is the data access object for table channel_plan.
+// gatewayVatRateDao is the data access object for table gateway_vat_rate.
 // You can define custom methods on it to extend its functionality as you wish.
-type channelPlanDao struct {
-	internalChannelPlanDao
+type gatewayVatRateDao struct {
+	internalGatewayVatRateDao
 }
 
 var (
-	// ChannelPlan is globally public accessible object for table channel_plan operations.
-	ChannelPlan = channelPlanDao{
-		internal.NewChannelPlanDao(),
+	// GatewayVatRate is globally public accessible object for table gateway_vat_rate operations.
+	GatewayVatRate = gatewayVatRateDao{
+		internal.NewGatewayVatRateDao(),
 	}
 )
 

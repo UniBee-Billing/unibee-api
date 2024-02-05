@@ -223,8 +223,8 @@ func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -246,8 +246,8 @@ func (s Stripe) DoRemoteChannelSubscriptionEndTrial(ctx context.Context, plan *e
 }
 
 // DoRemoteChannelSubscriptionNewTrialEnd https://stripe.com/docs/billing/subscriptions/billing-cycle#add-a-trial-to-change-the-billing-cycle
-func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionNewTrialEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription, newTrialEnd int64) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -288,8 +288,8 @@ func (s Stripe) setUnibeeAppInfo() {
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscriptionRo *ro.ChannelCreateSubscriptionInternalReq) (res *ro.ChannelCreateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
+	utility.Assert(subscriptionRo.PlanChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -312,12 +312,12 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				g.Log().Printf(ctx, "taxrate.New: %v", err.Error())
 				return nil, err
 			}
-			channelVatRate = &entity.ChannelVatRate{
+			channelVatRate = &entity.GatewayVatRate{
 				VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
-				ChannelId:        int64(channelEntity.Id),
-				ChannelVatRateId: vatCreateResult.ID,
+				GatewayId:        int64(channelEntity.Id),
+				GatewayVatRateId: vatCreateResult.ID,
 			}
-			result, err := dao.ChannelVatRate.Ctx(ctx).Data(channelVatRate).OmitNil().Insert(channelVatRate)
+			result, err := dao.GatewayVatRate.Ctx(ctx).Data(channelVatRate).OmitNil().Insert(channelVatRate)
 			if err != nil {
 				err = gerror.Newf(`SubscriptionVatRateChannel record insert failure %s`, err.Error())
 				return nil, err
@@ -336,13 +336,13 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		if checkoutMode {
 			items := []*stripe.CheckoutSessionLineItemParams{
 				{
-					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Price:    stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 					Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
 				},
 			}
 			for _, addon := range subscriptionRo.AddonPlans {
 				items = append(items, &stripe.CheckoutSessionLineItemParams{
-					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+					Price:    stripe.String(addon.AddonPlanChannel.GatewayPlanId),
 					Quantity: stripe.Int64(addon.Quantity),
 				})
 			}
@@ -364,7 +364,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
-				DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
+				DefaultTaxRates: []*string{stripe.String(channelVatRate.GatewayVatRateId)},
 			}
 			//checkoutParams.ExpiresAt
 			createSubscription, err := session.New(checkoutParams)
@@ -381,7 +381,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 		} else {
 			items := []*stripe.SubscriptionItemsParams{
 				{
-					Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+					Price:    stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 					Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
 					Metadata: map[string]string{
 						"BillingPlanType": "Main",
@@ -391,7 +391,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 			for _, addon := range subscriptionRo.AddonPlans {
 				items = append(items, &stripe.SubscriptionItemsParams{
-					Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+					Price:    stripe.String(addon.AddonPlanChannel.GatewayPlanId),
 					Quantity: stripe.Int64(addon.Quantity),
 					Metadata: map[string]string{
 						"BillingPlanType": "Addon",
@@ -411,7 +411,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
-				DefaultTaxRates: []*string{stripe.String(channelVatRate.ChannelVatRateId)},
+				DefaultTaxRates: []*string{stripe.String(channelVatRate.GatewayVatRateId)},
 			}
 			subscriptionParams.AddExpand("latest_invoice.payment_intent")
 			createSubscription, err := sub.New(subscriptionParams)
@@ -436,11 +436,11 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	//	params := &stripe.PaymentLinkParams{
 	//		LineItems: []*stripe.PaymentLinkLineItemParams{
 	//			{
-	//				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//				Price:    stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 	//				Quantity: stripe.Int64(1),
 	//			},
 	//			//{
-	//			//	Price: stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//			//	Price: stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 	//			//},
 	//		},
 	//		AfterCompletion: &stripe.PaymentLinkAfterCompletionParams{
@@ -474,7 +474,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 	//		Mode: stripe.String(string(stripe.CheckoutSessionModeSubscription)),
 	//		LineItems: []*stripe.CheckoutSessionLineItemParams{
 	//			{
-	//				Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+	//				Price:    stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 	//				Quantity: stripe.Int64(1),
 	//			},
 	//		},
@@ -517,9 +517,9 @@ func (s Stripe) DoRemoteChannelSubscriptionCancel(ctx context.Context, subscript
 }
 
 // DoRemoteChannelSubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
-func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -534,9 +534,9 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelAtPeriodEnd(ctx context.Context
 	return &ro.ChannelCancelAtPeriodEndSubscriptionInternalResp{}, nil
 }
 
-func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -552,8 +552,8 @@ func (s Stripe) DoRemoteChannelSubscriptionCancelLastCancelAtPeriodEnd(ctx conte
 }
 
 func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionPreviewInternalResp, err error) {
-	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
+	utility.Assert(subscriptionRo.PlanChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -685,7 +685,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 		}
 		//新增新的项目
 		items = append(items, &stripe.SubscriptionItemsParams{
-			Price:    stripe.String(subscriptionRo.PlanChannel.ChannelPlanId),
+			Price:    stripe.String(subscriptionRo.PlanChannel.GatewayPlanId),
 			Quantity: stripe.Int64(subscriptionRo.Quantity),
 			Metadata: map[string]string{
 				"BillingPlanType": "Main",
@@ -694,7 +694,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 		})
 		for _, addon := range subscriptionRo.AddonPlans {
 			items = append(items, &stripe.SubscriptionItemsParams{
-				Price:    stripe.String(addon.AddonPlanChannel.ChannelPlanId),
+				Price:    stripe.String(addon.AddonPlanChannel.GatewayPlanId),
 				Quantity: stripe.Int64(addon.Quantity),
 				Metadata: map[string]string{
 					"BillingPlanType": "Addon",
@@ -719,9 +719,9 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
 		newMap := make(map[string]int64)
 		for _, addon := range subscriptionRo.AddonPlans {
-			newMap[addon.AddonPlanChannel.ChannelPlanId] = addon.Quantity
+			newMap[addon.AddonPlanChannel.GatewayPlanId] = addon.Quantity
 		}
-		newMap[subscriptionRo.PlanChannel.ChannelPlanId] = subscriptionRo.Quantity
+		newMap[subscriptionRo.PlanChannel.GatewayPlanId] = subscriptionRo.Quantity
 		//匹配
 		for _, item := range stripeSubscriptionItems {
 			if quantity, ok := newMap[item.Price.ID]; ok {
@@ -741,9 +741,9 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 			}
 		}
 		//新增剩余的
-		for channelPlanId, quantity := range newMap {
+		for GatewayPlanId, quantity := range newMap {
 			items = append(items, &stripe.SubscriptionItemsParams{
-				Price:    stripe.String(channelPlanId),
+				Price:    stripe.String(GatewayPlanId),
 				Quantity: stripe.Int64(quantity),
 			})
 		}
@@ -754,8 +754,8 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.ChannelUpdateSubs
 
 // DoRemoteChannelSubscriptionUpdate 需保证同一个 Price 在 Items 中不能出现两份
 func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscriptionRo *ro.ChannelUpdateSubscriptionInternalReq) (res *ro.ChannelUpdateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.PlanChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.ChannelId)
+	utility.Assert(subscriptionRo.PlanChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, subscriptionRo.PlanChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "out channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -813,9 +813,9 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdate(ctx context.Context, subscript
 }
 
 // DoRemoteChannelSubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.ChannelDetailSubscriptionInternalResp, err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -844,15 +844,15 @@ func (s Stripe) DoRemoteChannelSubscriptionDetails(ctx context.Context, plan *en
 }
 
 // DoRemoteChannelPlanActive 使用 price 代替 plan  https://stripe.com/docs/api/plans
-func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(true) // todo mark 使用这种方式可能不能用
-	result, err := price.Update(planChannel.ChannelPlanId, params)
+	result, err := price.Update(planChannel.GatewayPlanId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelPlanActive", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
@@ -860,15 +860,15 @@ func (s Stripe) DoRemoteChannelPlanActive(ctx context.Context, targetPlan *entit
 	return nil
 }
 
-func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
 	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
-	result, err := price.Update(planChannel.ChannelPlanId, params)
+	result, err := price.Update(planChannel.GatewayPlanId, params)
 	log.SaveChannelHttpLog("DoRemoteChannelPlanDeactivate", params, result, err, "", nil, channelEntity)
 	if err != nil {
 		return err
@@ -876,9 +876,9 @@ func (s Stripe) DoRemoteChannelPlanDeactivate(ctx context.Context, targetPlan *e
 	return nil
 }
 
-func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (res *ro.ChannelCreateProductInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreateProductInternalResp, err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -900,14 +900,14 @@ func (s Stripe) DoRemoteChannelProductCreate(ctx context.Context, plan *entity.S
 	}
 	//Prod 创建好了之后似乎并不是Active 状态 todo mark
 	return &ro.ChannelCreateProductInternalResp{
-		ChannelProductId:     result.ID,
+		GatewayProductId:     result.ID,
 		ChannelProductStatus: fmt.Sprintf("%v", result.Active),
 	}, nil
 }
 
-func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.ChannelPlan) (res *ro.ChannelCreatePlanInternalResp, err error) {
-	utility.Assert(planChannel.ChannelId > 0, "支付渠道异常")
-	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.ChannelId)
+func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, planChannel *entity.GatewayPlan) (res *ro.ChannelCreatePlanInternalResp, err error) {
+	utility.Assert(planChannel.GatewayId > 0, "支付渠道异常")
+	channelEntity := util.GetOverseaPayChannel(ctx, planChannel.GatewayId)
 	utility.Assert(channelEntity != nil, "channel not found")
 	stripe.Key = channelEntity.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -928,13 +928,13 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 			Interval:      stripe.String(targetPlan.IntervalUnit),
 			IntervalCount: stripe.Int64(int64(targetPlan.IntervalCount)),
 		},
-		Product: stripe.String(planChannel.ChannelProductId),
+		Product: stripe.String(planChannel.GatewayProductId),
 		Metadata: map[string]string{
 			"PlanId": strconv.FormatUint(targetPlan.Id, 10),
 			"Type":   strconv.Itoa(targetPlan.Type),
 		},
 		//ProductData: &stripe.PriceProductDataParams{
-		//	ID:   stripe.String(planChannel.ChannelProductId),
+		//	ID:   stripe.String(planChannel.GatewayProductId),
 		//	Name: stripe.String(targetPlan.PlanName),
 		//},//这里是创建的意思
 	}
@@ -944,7 +944,7 @@ func (s Stripe) DoRemoteChannelPlanCreateAndActivate(ctx context.Context, target
 		return nil, err
 	}
 	return &ro.ChannelCreatePlanInternalResp{
-		ChannelPlanId:     result.ID,
+		GatewayPlanId:     result.ID,
 		ChannelPlanStatus: fmt.Sprintf("%v", result.Active),
 		Data:              utility.FormatToJsonString(result),
 		Status:            consts.PlanChannelStatusActive,

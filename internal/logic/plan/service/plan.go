@@ -57,7 +57,7 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
 	planChannel := query.GetPlanChannel(ctx, planId, channelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel should be transfer first")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 
@@ -65,11 +65,11 @@ func SubscriptionPlanChannelActivate(ctx context.Context, planId int64, channelI
 	if err != nil {
 		return
 	}
-	_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
-		dao.ChannelPlan.Columns().Status: consts.PlanChannelStatusActive,
+	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
+		dao.GatewayPlan.Columns().Status: consts.PlanChannelStatusActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusActive,// todo mark
-		dao.ChannelPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).Update()
+		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).Update()
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "invalid planId")
 	planChannel := query.GetPlanChannel(ctx, planId, channelId)
-	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel should be transfer first")
+	utility.Assert(planChannel != nil && len(planChannel.GatewayProductId) > 0 && len(planChannel.GatewayPlanId) > 0, "plan channel should be transfer first")
 	payChannel := query.GetSubscriptionTypePayChannelById(ctx, channelId)
 	utility.Assert(payChannel != nil, "payChannel not found")
 
@@ -100,11 +100,11 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, channe
 	if err != nil {
 		return
 	}
-	_, err = dao.ChannelPlan.Ctx(ctx).Data(g.Map{
-		dao.ChannelPlan.Columns().Status: consts.PlanChannelStatusInActive,
+	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
+		dao.GatewayPlan.Columns().Status: consts.PlanChannelStatusInActive,
 		//dao.SubscriptionPlanChannel.Columns().ChannelPlanStatus: consts.PlanChannelStatusInActive,// todo mark
-		dao.ChannelPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.ChannelPlan.Columns().Id, planChannel.Id).OmitNil().Update()
+		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.GatewayPlan.Columns().Id, planChannel.Id).OmitNil().Update()
 	if err != nil {
 		return err
 	}

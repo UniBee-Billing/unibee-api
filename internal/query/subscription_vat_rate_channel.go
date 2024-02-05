@@ -6,22 +6,22 @@ import (
 	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 )
 
-func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, channelId uint64) (one *entity.ChannelVatRate) {
+func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, channelId uint64) (one *entity.GatewayVatRate) {
 	if channelId <= 0 || vatRateId <= 0 {
 		return nil
 	}
-	err := dao.ChannelVatRate.Ctx(ctx).Where(entity.ChannelVatRate{VatRateId: int64(vatRateId), ChannelId: int64(channelId)}).OmitEmpty().Scan(&one)
+	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{VatRateId: int64(vatRateId), GatewayId: int64(channelId)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetSubscriptionVatRateChannelById(ctx context.Context, id int64) (one *entity.ChannelVatRate) {
+func GetSubscriptionVatRateChannelById(ctx context.Context, id int64) (one *entity.GatewayVatRate) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.ChannelVatRate.Ctx(ctx).Where(entity.ChannelVatRate{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{Id: uint64(id)}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
