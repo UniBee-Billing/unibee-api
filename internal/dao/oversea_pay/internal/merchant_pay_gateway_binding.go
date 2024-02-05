@@ -11,64 +11,64 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// MerchantPayChannelMappingDao is the data access object for table merchant_pay_channel_mapping.
-type MerchantPayChannelMappingDao struct {
+// MerchantPayGatewayBindingDao is the data access object for table merchant_pay_gateway_binding.
+type MerchantPayGatewayBindingDao struct {
 	table   string                           // table is the underlying table name of the DAO.
 	group   string                           // group is the database configuration group name of current DAO.
-	columns MerchantPayChannelMappingColumns // columns contains all the column names of Table for convenient usage.
+	columns MerchantPayGatewayBindingColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// MerchantPayChannelMappingColumns defines and stores column names for table merchant_pay_channel_mapping.
-type MerchantPayChannelMappingColumns struct {
+// MerchantPayGatewayBindingColumns defines and stores column names for table merchant_pay_gateway_binding.
+type MerchantPayGatewayBindingColumns struct {
 	Id         string //
 	GmtCreate  string // create time
 	GmtModify  string // update time
 	MerchantId string // merchant id
-	ChannelId  string // oversea_pay_channel表的id
+	GatewayId  string // gateway_id
 	IsDeleted  string // 0-UnDeleted，1-Deleted
 }
 
-// merchantPayChannelMappingColumns holds the columns for table merchant_pay_channel_mapping.
-var merchantPayChannelMappingColumns = MerchantPayChannelMappingColumns{
+// merchantPayGatewayBindingColumns holds the columns for table merchant_pay_gateway_binding.
+var merchantPayGatewayBindingColumns = MerchantPayGatewayBindingColumns{
 	Id:         "id",
 	GmtCreate:  "gmt_create",
 	GmtModify:  "gmt_modify",
 	MerchantId: "merchant_id",
-	ChannelId:  "channel_id",
+	GatewayId:  "gateway_id",
 	IsDeleted:  "is_deleted",
 }
 
-// NewMerchantPayChannelMappingDao creates and returns a new DAO object for table data access.
-func NewMerchantPayChannelMappingDao() *MerchantPayChannelMappingDao {
-	return &MerchantPayChannelMappingDao{
+// NewMerchantPayGatewayBindingDao creates and returns a new DAO object for table data access.
+func NewMerchantPayGatewayBindingDao() *MerchantPayGatewayBindingDao {
+	return &MerchantPayGatewayBindingDao{
 		group:   "oversea_pay",
-		table:   "merchant_pay_channel_mapping",
-		columns: merchantPayChannelMappingColumns,
+		table:   "merchant_pay_gateway_binding",
+		columns: merchantPayGatewayBindingColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *MerchantPayChannelMappingDao) DB() gdb.DB {
+func (dao *MerchantPayGatewayBindingDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *MerchantPayChannelMappingDao) Table() string {
+func (dao *MerchantPayGatewayBindingDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *MerchantPayChannelMappingDao) Columns() MerchantPayChannelMappingColumns {
+func (dao *MerchantPayGatewayBindingDao) Columns() MerchantPayGatewayBindingColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *MerchantPayChannelMappingDao) Group() string {
+func (dao *MerchantPayGatewayBindingDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *MerchantPayChannelMappingDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *MerchantPayGatewayBindingDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -78,6 +78,6 @@ func (dao *MerchantPayChannelMappingDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *MerchantPayChannelMappingDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *MerchantPayGatewayBindingDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

@@ -23,7 +23,7 @@ type Invoice struct {
 	SubscriptionAmount             int64       `json:"subscriptionAmount"             description:"sub amount,cent"`                                                        // sub amount,cent
 	Currency                       string      `json:"currency"                       description:"currency"`                                                               // currency
 	Lines                          string      `json:"lines"                          description:"lines( json)"`                                                           // lines( json)
-	ChannelId                      int64       `json:"channelId"                      description:"channel_id"`                                                             // channel_id
+	GatewayId                      int64       `json:"gatewayId"                      description:"gateway_id"`                                                             // gateway_id
 	Status                         int         `json:"status"                         description:"status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     int         `json:"sendStatus"                     description:"email send status，0-No | 1- YES"`                                        // email send status，0-No | 1- YES
 	SendEmail                      string      `json:"sendEmail"                      description:"email"`                                                                  // email
@@ -31,10 +31,10 @@ type Invoice struct {
 	GmtModify                      *gtime.Time `json:"gmtModify"                      description:"update time"`                                                            // update time
 	IsDeleted                      int         `json:"isDeleted"                      description:"0-UnDeleted，1-Deleted"`                                                  // 0-UnDeleted，1-Deleted
 	Link                           string      `json:"link"                           description:"invoice link"`                                                           // invoice link
-	ChannelStatus                  string      `json:"channelStatus"                  description:""`                                                                       //
-	ChannelInvoiceId               string      `json:"channelInvoiceId"               description:""`                                                                       //
-	ChannelPaymentId               string      `json:"channelPaymentId"               description:""`                                                                       //
-	ChannelInvoicePdf              string      `json:"channelInvoicePdf"              description:""`                                                                       //
+	GatewayStatus                  string      `json:"gatewayStatus"                  description:""`                                                                       //
+	GatewayInvoiceId               string      `json:"gatewayInvoiceId"               description:""`                                                                       //
+	GatewayPaymentId               string      `json:"gatewayPaymentId"               description:""`                                                                       //
+	GatewayInvoicePdf              string      `json:"gatewayInvoicePdf"              description:""`                                                                       //
 	TaxScale                       int64       `json:"taxScale"                       description:"Tax scale，1000 = 10%"`                                                   // Tax scale，1000 = 10%
 	SendNote                       string      `json:"sendNote"                       description:"send_note"`                                                              // send_note
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                             // send_terms

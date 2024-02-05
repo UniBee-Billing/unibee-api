@@ -38,7 +38,7 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 			var mainList []*entity.Invoice
 			err = dao.Invoice.Ctx(backgroundCtx).
 				Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
-				WhereNotNull(dao.Invoice.Columns().ChannelPaymentId).
+				WhereNotNull(dao.Invoice.Columns().GatewayPaymentId).
 				OrderDesc("id").
 				Limit(page*count, count).
 				OmitEmpty().Scan(&mainList)
@@ -47,9 +47,9 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				return
 			}
 			for _, one := range mainList {
-				payChannel := query.GetPayChannelById(backgroundCtx, one.ChannelId)
+				payChannel := query.GetPayChannelById(backgroundCtx, one.GatewayId)
 				utility.Assert(payChannel != nil, "invalid planChannel")
-				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.ChannelId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.ChannelPaymentId)
+				details, err := api.GetPayChannelServiceProvider(backgroundCtx, one.GatewayId).DoRemoteChannelPaymentDetail(backgroundCtx, payChannel, one.GatewayPaymentId)
 				details.UniqueId = details.ChannelPaymentId
 				if err == nil {
 					pay, err := handler2.CreateOrUpdateSubscriptionPaymentFromChannel(backgroundCtx, details)

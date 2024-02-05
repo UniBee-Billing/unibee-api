@@ -25,7 +25,7 @@ type Invoice struct {
 	SubscriptionAmount             interface{} // sub amount,cent
 	Currency                       interface{} // currency
 	Lines                          interface{} // lines( json)
-	ChannelId                      interface{} // channel_id
+	GatewayId                      interface{} // gateway_id
 	Status                         interface{} // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     interface{} // email send status，0-No | 1- YES
 	SendEmail                      interface{} // email
@@ -33,10 +33,10 @@ type Invoice struct {
 	GmtModify                      *gtime.Time // update time
 	IsDeleted                      interface{} // 0-UnDeleted，1-Deleted
 	Link                           interface{} // invoice link
-	ChannelStatus                  interface{} //
-	ChannelInvoiceId               interface{} //
-	ChannelPaymentId               interface{} //
-	ChannelInvoicePdf              interface{} //
+	GatewayStatus                  interface{} //
+	GatewayInvoiceId               interface{} //
+	GatewayPaymentId               interface{} //
+	GatewayInvoicePdf              interface{} //
 	TaxScale                       interface{} // Tax scale，1000 = 10%
 	SendNote                       interface{} // send_note
 	SendTerms                      interface{} // send_terms

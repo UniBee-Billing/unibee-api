@@ -33,7 +33,7 @@ type InvoiceColumns struct {
 	SubscriptionAmount             string // sub amount,cent
 	Currency                       string // currency
 	Lines                          string // lines( json)
-	ChannelId                      string // channel_id
+	GatewayId                      string // gateway_id
 	Status                         string // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     string // email send status，0-No | 1- YES
 	SendEmail                      string // email
@@ -41,10 +41,10 @@ type InvoiceColumns struct {
 	GmtModify                      string // update time
 	IsDeleted                      string // 0-UnDeleted，1-Deleted
 	Link                           string // invoice link
-	ChannelStatus                  string //
-	ChannelInvoiceId               string //
-	ChannelPaymentId               string //
-	ChannelInvoicePdf              string //
+	GatewayStatus                  string //
+	GatewayInvoiceId               string //
+	GatewayPaymentId               string //
+	GatewayInvoicePdf              string //
 	TaxScale                       string // Tax scale，1000 = 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
@@ -75,7 +75,7 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmount:             "subscription_amount",
 	Currency:                       "currency",
 	Lines:                          "lines",
-	ChannelId:                      "channel_id",
+	GatewayId:                      "gateway_id",
 	Status:                         "status",
 	SendStatus:                     "send_status",
 	SendEmail:                      "send_email",
@@ -83,10 +83,10 @@ var invoiceColumns = InvoiceColumns{
 	GmtModify:                      "gmt_modify",
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
-	ChannelStatus:                  "channel_status",
-	ChannelInvoiceId:               "channel_invoice_id",
-	ChannelPaymentId:               "channel_payment_id",
-	ChannelInvoicePdf:              "channel_invoice_pdf",
+	GatewayStatus:                  "gateway_status",
+	GatewayInvoiceId:               "gateway_invoice_id",
+	GatewayPaymentId:               "gateway_payment_id",
+	GatewayInvoicePdf:              "gateway_invoice_pdf",
 	TaxScale:                       "tax_scale",
 	SendNote:                       "send_note",
 	SendTerms:                      "send_terms",

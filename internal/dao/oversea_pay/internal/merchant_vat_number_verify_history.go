@@ -20,7 +20,7 @@ type MerchantVatNumberVerifyHistoryDao struct {
 
 // MerchantVatNumberVerifyHistoryColumns defines and stores column names for table merchant_vat_number_verify_history.
 type MerchantVatNumberVerifyHistoryColumns struct {
-	Id              string // ID
+	Id              string // Id
 	MerchantId      string // merchantId
 	VatNumber       string // vat_number
 	Valid           string // 0-Invalid，1-Valid

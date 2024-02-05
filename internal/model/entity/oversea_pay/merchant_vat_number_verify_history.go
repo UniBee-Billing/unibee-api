@@ -10,7 +10,7 @@ import (
 
 // MerchantVatNumberVerifyHistory is the golang structure for table merchant_vat_number_verify_history.
 type MerchantVatNumberVerifyHistory struct {
-	Id              int64       `json:"id"              description:"ID"`                    // ID
+	Id              int64       `json:"id"              description:"Id"`                    // Id
 	MerchantId      int64       `json:"merchantId"      description:"merchantId"`            // merchantId
 	VatNumber       string      `json:"vatNumber"       description:"vat_number"`            // vat_number
 	Valid           int64       `json:"valid"           description:"0-Invalid，1-Valid"`     // 0-Invalid，1-Valid

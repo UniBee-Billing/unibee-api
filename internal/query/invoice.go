@@ -21,7 +21,7 @@ func GetInvoiceByChannelInvoiceId(ctx context.Context, channelInvoiceId string) 
 	if len(channelInvoiceId) == 0 {
 		return nil
 	}
-	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{ChannelInvoiceId: channelInvoiceId}).OmitEmpty().Scan(&one)
+	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{GatewayInvoiceId: channelInvoiceId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

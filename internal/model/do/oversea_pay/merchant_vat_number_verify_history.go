@@ -12,7 +12,7 @@ import (
 // MerchantVatNumberVerifyHistory is the golang structure of table merchant_vat_number_verify_history for DAO operations like Where/Data.
 type MerchantVatNumberVerifyHistory struct {
 	g.Meta          `orm:"table:merchant_vat_number_verify_history, do:true"`
-	Id              interface{} // ID
+	Id              interface{} // Id
 	MerchantId      interface{} // merchantId
 	VatNumber       interface{} // vat_number
 	Valid           interface{} // 0-Invalid，1-Valid

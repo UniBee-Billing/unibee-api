@@ -20,36 +20,36 @@ type OpenApiConfigDao struct {
 
 // OpenApiConfigColumns defines and stores column names for table open_api_config.
 type OpenApiConfigColumns struct {
-	Id              string //
-	Qps             string // total qps control
-	GmtCreate       string // create time
-	GmtModify       string // update time
-	MerchantId      string // merchant id
-	Hmac            string // webhook hmac key
-	Callback        string // callback url
-	ApiKey          string // api key
-	Token           string // api token
-	IsDeleted       string // 0-UnDeleted，1-Deleted
-	Validips        string //
-	ChannelCallback string // callback return data
-	CompanyId       string // company id
+	Id                      string //
+	Qps                     string // total qps control
+	GmtCreate               string // create time
+	GmtModify               string // update time
+	MerchantId              string // merchant id
+	Hmac                    string // webhook hmac key
+	Callback                string // callback url
+	ApiKey                  string // api key
+	Token                   string // api token
+	IsDeleted               string // 0-UnDeleted，1-Deleted
+	Validips                string //
+	ChannelCallbackResponse string // callback return response
+	CompanyId               string // company id
 }
 
 // openApiConfigColumns holds the columns for table open_api_config.
 var openApiConfigColumns = OpenApiConfigColumns{
-	Id:              "id",
-	Qps:             "qps",
-	GmtCreate:       "gmt_create",
-	GmtModify:       "gmt_modify",
-	MerchantId:      "merchant_id",
-	Hmac:            "hmac",
-	Callback:        "callback",
-	ApiKey:          "api_key",
-	Token:           "token",
-	IsDeleted:       "is_deleted",
-	Validips:        "validips",
-	ChannelCallback: "channel_callback",
-	CompanyId:       "company_id",
+	Id:                      "id",
+	Qps:                     "qps",
+	GmtCreate:               "gmt_create",
+	GmtModify:               "gmt_modify",
+	MerchantId:              "merchant_id",
+	Hmac:                    "hmac",
+	Callback:                "callback",
+	ApiKey:                  "api_key",
+	Token:                   "token",
+	IsDeleted:               "is_deleted",
+	Validips:                "validips",
+	ChannelCallbackResponse: "channel_callback_response",
+	CompanyId:               "company_id",
 }
 
 // NewOpenApiConfigDao creates and returns a new DAO object for table data access.
