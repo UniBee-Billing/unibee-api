@@ -309,7 +309,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 				channelUser := query.GetUserChannel(r.Context(), payment.UserId, int64(payChannel.Id))
 				if channelUser != nil && result != nil {
 					//find
-					if strings.Compare(result.Customer.ID, channelUser.ChannelUserId) != 0 {
+					if strings.Compare(result.Customer.ID, channelUser.GatewayUserId) != 0 {
 						response = "user not match"
 					} else if strings.Compare(string(result.Status), "complete") == 0 && result.PaymentIntent != nil && len(result.PaymentIntent.ID) > 0 {
 						paymentIntentDetail, err := api.GetPayChannelServiceProvider(r.Context(), int64(payChannel.Id)).DoRemoteChannelPaymentDetail(r.Context(), payChannel, result.PaymentIntent.ID)
@@ -389,7 +389,7 @@ func (s StripeWebhook) DoRemoteChannelRedirect(r *ghttp.Request, payChannel *ent
 				channelUser := query.GetUserChannel(r.Context(), unibSub.UserId, int64(payChannel.Id))
 				if channelUser != nil && result.SubscriptionSearchResult().Data != nil && len(result.SubscriptionSearchResult().Data) == 1 {
 					//找到
-					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, channelUser.ChannelUserId) != 0 {
+					if strings.Compare(result.SubscriptionSearchResult().Data[0].Customer.ID, channelUser.GatewayUserId) != 0 {
 						response = "customId not match"
 					} else {
 						detail := parseStripeSubscription(result.SubscriptionSearchResult().Data[0])

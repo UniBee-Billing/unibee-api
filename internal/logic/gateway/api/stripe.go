@@ -43,7 +43,7 @@ func (s Stripe) DoRemoteChannelUserPaymentMethodListQuery(ctx context.Context, p
 	channelUser := queryAndCreateChannelUser(ctx, payChannel, userId)
 
 	params := &stripe.CustomerListPaymentMethodsParams{
-		Customer: stripe.String(channelUser.ChannelUserId),
+		Customer: stripe.String(channelUser.GatewayUserId),
 	}
 	params.Limit = stripe.Int64(10)
 	result := customer.ListPaymentMethods(params)
@@ -82,7 +82,7 @@ func (s Stripe) DoRemoteChannelPaymentList(ctx context.Context, payChannel *enti
 	channelUser := queryAndCreateChannelUser(ctx, payChannel, listReq.UserId)
 
 	params := &stripe.PaymentIntentListParams{}
-	params.Customer = stripe.String(channelUser.ChannelUserId)
+	params.Customer = stripe.String(channelUser.GatewayUserId)
 	params.Limit = stripe.Int64(200)
 	paymentList := paymentintent.List(params)
 	log.SaveChannelHttpLog("DoRemoteChannelPaymentList", params, paymentList, err, "", nil, payChannel)
@@ -184,7 +184,7 @@ func (s Stripe) DoRemoteChannelUserDetailQuery(ctx context.Context, payChannel *
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(queryAndCreateChannelUserWithOutPaymentMethod(ctx, payChannel, userId).ChannelUserId, params)
+	response, err := customer.Get(queryAndCreateChannelUserWithOutPaymentMethod(ctx, payChannel, userId).GatewayUserId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +347,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				})
 			}
 			checkoutParams := &stripe.CheckoutSessionParams{
-				Customer:  stripe.String(channelUser.ChannelUserId),
+				Customer:  stripe.String(channelUser.GatewayUserId),
 				Currency:  stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				LineItems: items,
 				//AutomaticTax: &stripe.CheckoutSessionAutomaticTaxParams{
@@ -373,7 +373,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				return nil, err
 			}
 			return &ro.ChannelCreateSubscriptionInternalResp{
-				ChannelUserId: channelUser.ChannelUserId,
+				ChannelUserId: channelUser.GatewayUserId,
 				Link:          createSubscription.URL,
 				Data:          utility.FormatToJsonString(createSubscription),
 				Status:        0, //todo mark
@@ -400,7 +400,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 				})
 			}
 			subscriptionParams := &stripe.SubscriptionParams{
-				Customer: stripe.String(channelUser.ChannelUserId),
+				Customer: stripe.String(channelUser.GatewayUserId),
 				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				Items:    items,
 				//AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
@@ -421,7 +421,7 @@ func (s Stripe) DoRemoteChannelSubscriptionCreate(ctx context.Context, subscript
 			}
 
 			return &ro.ChannelCreateSubscriptionInternalResp{
-				ChannelUserId:             channelUser.ChannelUserId,
+				ChannelUserId:             channelUser.GatewayUserId,
 				Link:                      createSubscription.LatestInvoice.HostedInvoiceURL,
 				ChannelSubscriptionId:     createSubscription.ID,
 				ChannelSubscriptionStatus: string(createSubscription.Status),
@@ -573,7 +573,7 @@ func (s Stripe) DoRemoteChannelSubscriptionUpdateProrationPreview(ctx context.Co
 		return nil, err
 	}
 	params := &stripe.InvoiceUpcomingParams{
-		Customer:          stripe.String(channelUser.ChannelUserId),
+		Customer:          stripe.String(channelUser.GatewayUserId),
 		Subscription:      stripe.String(subscriptionRo.Subscription.ChannelSubscriptionId),
 		SubscriptionItems: items,
 		//SubscriptionProrationBehavior: stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice)),// 设置了就只会输出 Proration 账单
@@ -973,7 +973,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 
 	params := &stripe.InvoiceParams{
 		Currency: stripe.String(strings.ToLower(createInvoiceInternalReq.Invoice.Currency)), //小写
-		Customer: stripe.String(channelUser.ChannelUserId)}
+		Customer: stripe.String(channelUser.GatewayUserId)}
 	if createInvoiceInternalReq.PayMethod == 1 {
 		params.CollectionMethod = stripe.String("charge_automatically")
 	} else {
@@ -997,7 +997,7 @@ func (s Stripe) DoRemoteChannelInvoiceCreateAndPay(ctx context.Context, payChann
 			Amount:      stripe.Int64(line.Amount),
 			Description: stripe.String(line.Description),
 			//Quantity:    stripe.Int64(line.Quantity),
-			Customer: stripe.String(channelUser.ChannelUserId)}
+			Customer: stripe.String(channelUser.GatewayUserId)}
 		_, err = invoiceitem.New(ItemParams)
 		if err != nil {
 			return nil, err
@@ -1115,7 +1115,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
-			Customer:   stripe.String(channelUser.ChannelUserId),
+			Customer:   stripe.String(channelUser.GatewayUserId),
 			Currency:   stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
@@ -1165,7 +1165,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			var cancelErr error
 			for _, method := range listQuery.PaymentMethods {
 				params := &stripe.PaymentIntentParams{
-					Customer: stripe.String(channelUser.ChannelUserId),
+					Customer: stripe.String(channelUser.GatewayUserId),
 					Confirm:  stripe.Bool(true),
 					Amount:   stripe.Int64(createPayContext.Invoice.TotalAmount),
 					Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
@@ -1211,7 +1211,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 		params := &stripe.InvoiceParams{
 			Metadata: createPayContext.MediaData,
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-			Customer: stripe.String(channelUser.ChannelUserId)}
+			Customer: stripe.String(channelUser.GatewayUserId)}
 
 		if createPayContext.PayMethod == 1 {
 			params.CollectionMethod = stripe.String("charge_automatically")
@@ -1222,8 +1222,8 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 			}
 			if len(createPayContext.ChannelPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, createPayContext.ChannelPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(createPayContext.ChannelPaymentMethod)
-			} else if len(channelUser.ChannelDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, channelUser.ChannelDefaultPaymentMethod) {
-				params.DefaultPaymentMethod = stripe.String(channelUser.ChannelDefaultPaymentMethod)
+			} else if len(channelUser.GatewayDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, channelUser.GatewayDefaultPaymentMethod) {
+				params.DefaultPaymentMethod = stripe.String(channelUser.GatewayDefaultPaymentMethod)
 			} else if len(listQuery.PaymentMethods) > 0 {
 				// todo mark use detail query
 				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0])
@@ -1248,7 +1248,7 @@ func (s Stripe) DoRemoteChannelPayment(ctx context.Context, createPayContext *ro
 				Amount:      stripe.Int64(line.Amount),
 				Description: stripe.String(line.Description),
 				//Quantity:    stripe.Int64(line.Quantity),
-				Customer: stripe.String(channelUser.ChannelUserId)}
+				Customer: stripe.String(channelUser.GatewayUserId)}
 			_, err = invoiceitem.New(ItemParams)
 			if err != nil {
 				return nil, err

@@ -11,70 +11,70 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// ChannelHttpLogDao is the data access object for table channel_http_log.
-type ChannelHttpLogDao struct {
+// GatewayHttpLogDao is the data access object for table gateway_http_log.
+type GatewayHttpLogDao struct {
 	table   string                // table is the underlying table name of the DAO.
 	group   string                // group is the database configuration group name of current DAO.
-	columns ChannelHttpLogColumns // columns contains all the column names of Table for convenient usage.
+	columns GatewayHttpLogColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// ChannelHttpLogColumns defines and stores column names for table channel_http_log.
-type ChannelHttpLogColumns struct {
+// GatewayHttpLogColumns defines and stores column names for table gateway_http_log.
+type GatewayHttpLogColumns struct {
 	Id        string // id
 	Url       string // request url
 	Request   string // request body(json)
 	Response  string // response(json)
 	RequestId string // request_id
 	Mamo      string // mamo
-	ChannelId string // channel_id
+	GatewayId string // gateway_id
 	GmtCreate string // create time
 	GmtModify string // update time
 }
 
-// channelHttpLogColumns holds the columns for table channel_http_log.
-var channelHttpLogColumns = ChannelHttpLogColumns{
+// gatewayHttpLogColumns holds the columns for table gateway_http_log.
+var gatewayHttpLogColumns = GatewayHttpLogColumns{
 	Id:        "id",
 	Url:       "url",
 	Request:   "request",
 	Response:  "response",
 	RequestId: "request_id",
 	Mamo:      "mamo",
-	ChannelId: "channel_id",
+	GatewayId: "gateway_id",
 	GmtCreate: "gmt_create",
 	GmtModify: "gmt_modify",
 }
 
-// NewChannelHttpLogDao creates and returns a new DAO object for table data access.
-func NewChannelHttpLogDao() *ChannelHttpLogDao {
-	return &ChannelHttpLogDao{
+// NewGatewayHttpLogDao creates and returns a new DAO object for table data access.
+func NewGatewayHttpLogDao() *GatewayHttpLogDao {
+	return &GatewayHttpLogDao{
 		group:   "oversea_pay",
-		table:   "channel_http_log",
-		columns: channelHttpLogColumns,
+		table:   "gateway_http_log",
+		columns: gatewayHttpLogColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *ChannelHttpLogDao) DB() gdb.DB {
+func (dao *GatewayHttpLogDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *ChannelHttpLogDao) Table() string {
+func (dao *GatewayHttpLogDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *ChannelHttpLogDao) Columns() ChannelHttpLogColumns {
+func (dao *GatewayHttpLogDao) Columns() GatewayHttpLogColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *ChannelHttpLogDao) Group() string {
+func (dao *GatewayHttpLogDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *ChannelHttpLogDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *GatewayHttpLogDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -84,6 +84,6 @@ func (dao *ChannelHttpLogDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *ChannelHttpLogDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *GatewayHttpLogDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

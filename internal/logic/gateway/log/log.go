@@ -10,15 +10,15 @@ import (
 )
 
 func DoSaveChannelLog(ctx context.Context, request string, url string, response string, memo string, requestId string, channelId string) {
-	log := &entity.ChannelHttpLog{
+	log := &entity.GatewayHttpLog{
 		Url:       url,
 		Request:   request,
 		Response:  response,
 		RequestId: requestId,
 		Mamo:      memo,
-		ChannelId: channelId,
+		GatewayId: channelId,
 	}
-	_, err := dao.ChannelHttpLog.Ctx(ctx).Data(log).OmitNil().Insert(log)
+	_, err := dao.GatewayHttpLog.Ctx(ctx).Data(log).OmitNil().Insert(log)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)
 	}

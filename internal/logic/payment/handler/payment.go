@@ -441,9 +441,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq, err error, payment *entity.Payment) error {
-	_, err = dao.ChannelUser.Ctx(ctx).Data(g.Map{
-		dao.ChannelUser.Columns().ChannelDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
-	}).Where(dao.ChannelUser.Columns().UserId, payment.UserId).Where(dao.ChannelUser.Columns().ChannelId, payment.ChannelId).OmitNil().Update()
+	_, err = dao.GatewayUser.Ctx(ctx).Data(g.Map{
+		dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
+	}).Where(dao.GatewayUser.Columns().UserId, payment.UserId).Where(dao.GatewayUser.Columns().GatewayId, payment.ChannelId).OmitNil().Update()
 	if err != nil {
 		g.Log().Printf(ctx, `SaveChannelUserDefaultPaymentMethod ChannelDefaultPaymentMethod failure %s`, err.Error())
 	}

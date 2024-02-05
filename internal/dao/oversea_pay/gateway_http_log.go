@@ -8,19 +8,19 @@ import (
 	"go-oversea-pay/internal/dao/oversea_pay/internal"
 )
 
-// internalChannelUserDao is internal type for wrapping internal DAO implements.
-type internalChannelUserDao = *internal.ChannelUserDao
+// internalGatewayHttpLogDao is internal type for wrapping internal DAO implements.
+type internalGatewayHttpLogDao = *internal.GatewayHttpLogDao
 
-// channelUserDao is the data access object for table channel_user.
+// gatewayHttpLogDao is the data access object for table gateway_http_log.
 // You can define custom methods on it to extend its functionality as you wish.
-type channelUserDao struct {
-	internalChannelUserDao
+type gatewayHttpLogDao struct {
+	internalGatewayHttpLogDao
 }
 
 var (
-	// ChannelUser is globally public accessible object for table channel_user operations.
-	ChannelUser = channelUserDao{
-		internal.NewChannelUserDao(),
+	// GatewayHttpLog is globally public accessible object for table gateway_http_log operations.
+	GatewayHttpLog = gatewayHttpLogDao{
+		internal.NewGatewayHttpLogDao(),
 	}
 )
 

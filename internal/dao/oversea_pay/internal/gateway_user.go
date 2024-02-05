@@ -11,68 +11,68 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// ChannelUserDao is the data access object for table channel_user.
-type ChannelUserDao struct {
+// GatewayUserDao is the data access object for table gateway_user.
+type GatewayUserDao struct {
 	table   string             // table is the underlying table name of the DAO.
 	group   string             // group is the database configuration group name of current DAO.
-	columns ChannelUserColumns // columns contains all the column names of Table for convenient usage.
+	columns GatewayUserColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// ChannelUserColumns defines and stores column names for table channel_user.
-type ChannelUserColumns struct {
+// GatewayUserColumns defines and stores column names for table gateway_user.
+type GatewayUserColumns struct {
 	Id                          string //
 	GmtCreate                   string // create time
 	GmtModify                   string // update time
 	UserId                      string // userId
-	ChannelId                   string // channel_id
-	ChannelUserId               string // channel_user_Id
+	GatewayId                   string // gateway_id
+	GatewayUserId               string // gateway_user_Id
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
-	ChannelDefaultPaymentMethod string // channel_default_payment_method
+	GatewayDefaultPaymentMethod string // gateway_default_payment_method
 }
 
-// channelUserColumns holds the columns for table channel_user.
-var channelUserColumns = ChannelUserColumns{
+// gatewayUserColumns holds the columns for table gateway_user.
+var gatewayUserColumns = GatewayUserColumns{
 	Id:                          "id",
 	GmtCreate:                   "gmt_create",
 	GmtModify:                   "gmt_modify",
 	UserId:                      "user_id",
-	ChannelId:                   "channel_id",
-	ChannelUserId:               "channel_user_id",
+	GatewayId:                   "gateway_id",
+	GatewayUserId:               "gateway_user_id",
 	IsDeleted:                   "is_deleted",
-	ChannelDefaultPaymentMethod: "channel_default_payment_method",
+	GatewayDefaultPaymentMethod: "gateway_default_payment_method",
 }
 
-// NewChannelUserDao creates and returns a new DAO object for table data access.
-func NewChannelUserDao() *ChannelUserDao {
-	return &ChannelUserDao{
+// NewGatewayUserDao creates and returns a new DAO object for table data access.
+func NewGatewayUserDao() *GatewayUserDao {
+	return &GatewayUserDao{
 		group:   "oversea_pay",
-		table:   "channel_user",
-		columns: channelUserColumns,
+		table:   "gateway_user",
+		columns: gatewayUserColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *ChannelUserDao) DB() gdb.DB {
+func (dao *GatewayUserDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *ChannelUserDao) Table() string {
+func (dao *GatewayUserDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *ChannelUserDao) Columns() ChannelUserColumns {
+func (dao *GatewayUserDao) Columns() GatewayUserColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *ChannelUserDao) Group() string {
+func (dao *GatewayUserDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *ChannelUserDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *GatewayUserDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -82,6 +82,6 @@ func (dao *ChannelUserDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *ChannelUserDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *GatewayUserDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

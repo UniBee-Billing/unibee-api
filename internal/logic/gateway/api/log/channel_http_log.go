@@ -25,15 +25,15 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 				return
 			}
 		}()
-		httpLog := &entity.ChannelHttpLog{
+		httpLog := &entity.GatewayHttpLog{
 			Url:       url,
 			Request:   utility.FormatToJsonString(request),
 			Response:  utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
 			RequestId: utility.FormatToJsonString(requestId),
 			Mamo:      memo,
-			ChannelId: strconv.FormatUint(channel.Id, 10),
+			GatewayId: strconv.FormatUint(channel.Id, 10),
 		}
-		_, _ = dao.ChannelHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
+		_, _ = dao.GatewayHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
 		//g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)
 	}()
 }
