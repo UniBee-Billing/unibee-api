@@ -543,7 +543,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 			}
 		}
 	} else {
-		return gerror.Newf("Invalid Payment Type GatewayPaymentId:%s GatewayInvoiceId:%s GatewaySubscriptionId:%s", gatewayPaymentRo.GatewayPaymentId, gatewayPaymentRo.GatewayInvoiceId, gatewayPaymentRo.GatewaySubscriptionId)
+		return gerror.Newf("Payment Not Match Or Not Found GatewayPaymentId:%s GatewayInvoiceId:%s GatewaySubscriptionId:%s", gatewayPaymentRo.GatewayPaymentId, gatewayPaymentRo.GatewayInvoiceId, gatewayPaymentRo.GatewaySubscriptionId)
 	}
 
 	return nil
