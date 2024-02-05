@@ -975,6 +975,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
+	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	planChannel := query.GetPlanChannel(ctx, sub.PlanId, sub.ChannelId)
 	utility.Assert(planChannel != nil && len(planChannel.ChannelProductId) > 0 && len(planChannel.ChannelPlanId) > 0, "plan channel transfer not complete")

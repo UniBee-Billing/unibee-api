@@ -132,6 +132,13 @@ type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"Subscription List"`
 }
 
+type SubscriptionCancelReq struct {
+	g.Meta         `path:"/subscription_cancel" tags:"User-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
+	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+}
+type SubscriptionCancelRes struct {
+}
+
 type SubscriptionUpdateCancelAtPeriodEndReq struct {
 	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Set Cancel Ad Period End"`
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
