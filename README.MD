@@ -2,13 +2,11 @@
 
 ### For Env Stage 
 
-#### Api Doc：http://unibee.top/unibee/swagger
+#### OpenApi V3 Doc：http://unibee.top/unib/swagger
+
+#### OpenApi V3 Json：http://unibee.top/unib/swagger
 
 #### Stage Information Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
-
-##### Mock-Controller Mock One Time Payment OpenApi (Test)
-
-##### Open-Controller OpenApi (Token Need)
 
 ### For Env Local
 
@@ -16,13 +14,18 @@
 
 ##### ex: go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 
+#### OpenApi V3 Doc：http://127.0.0.1:8088/unib/swagger
+
+#### Swagger Try Api：http://127.0.0.1:8088/unib/swagger-ui.html
+
+#### OpenApi V3 Json：http://127.0.0.1:8088/unib/api.json
+
 #### Generate API Controller Shell：sh generate_ctrl.sh
 
 #### Generate DAO Code Shell：sh generale_dao.sh
 
 
-### Mark
-GoFrame Quick Start:
+### GoFrame Quick Start:
 - Github : https://github.com/gogf/gf
 - Doc : https://goframe.org/pages/viewpage.action?pageId=1114399
 - Api Generate Shell: gf gen ctrl (should have gf install)
@@ -32,27 +35,28 @@ GoFrame Quick Start:
   - Generate Dao|Entity|DO After Database Table Change 
   - Doc https://goframe.org/pages/viewpage.action?pageId=3673173 (need delete config.yaml under root dic)
 
-Mysql Integration
+#### Mysql Integration Needed
 
 - \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-Redis Integration
+#### Redis Integration Needed
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-Nacos Integration (Only In Stage & Local-Publish Will Remove)
-Params
---nacos-ip
---nacos-port
---nacos-namespace
---nacos-group
---nacos-data-id
-Env
-nacos.ip
-nacos.port
-nacos.namespace
-nacos.group
-nacos.data.id
+#### Nacos Integration (Only In Stage & Local-Publish Will Remove)
+###### Program Params
+--nacos-ip={your_nacos_ip}\
+--nacos-port={your_nacos_port}\
+--nacos-namespace={your_nacos_namespace}\
+--nacos-group={your_nacos_group}\
+--nacos-data-id={your_nacos_data_id}\
+###### If Add To Env (K8S)
+nacos.ip={your_nacos_ip}\
+nacos.port={your_nacos_port}\
+nacos.namespace={your_nacos_namespace}\
+nacos.group={your_nacos_group}\
+nacos.data.id={your_nacos_data_id}\
+
 Stage Nacos Web Manage
 http://43.207.114.88:30099/nacos
 
