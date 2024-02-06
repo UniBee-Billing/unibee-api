@@ -25,11 +25,6 @@ var (
 		Usage: "main",
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
-			// Set Global TimeZone, Should Set Before Standard Time Package Init
-			err = gtime.SetTimeZone("UTC")
-			if err != nil {
-				panic(err)
-			}
 			s := g.Server()
 			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
