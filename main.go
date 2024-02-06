@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 	"github.com/gogf/gf/v2/os/gctx"
@@ -10,11 +9,9 @@ import (
 	_ "go-oversea-pay/internal/consumer"
 	_ "go-oversea-pay/internal/logic"
 	"go-oversea-pay/redismq"
-	"runtime"
 )
 
 func main() {
-	fmt.Println("Go version:", runtime.Version())
 	nacos.Init()
 	redismq.StartRedisMqConsumer()
 	cmd.Main.Run(gctx.GetInitCtx())
