@@ -1,6 +1,47 @@
-# UniBee Recurring Payment Project Base On GoFrame Template 
+# UniBee Recurring Billing Project Based On GoFrame Template
 
-### For Env Stage 
+<div align=center>
+<img src="http://unibee.top/files/invoice/SubStatusAndTimeline.png" width="300"/>
+</div>
+
+### Gateway
+- Stripe
+- Paypal (In Process)
+- Bitcoin (In Process)
+
+### VatGateway
+- VatSense
+
+### Email
+- SendGrid
+
+
+#### Mysql Integration(Needed)
+
+- \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+
+#### Redis Integration(Needed)
+
+- \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
+-
+#### Minio Integration(Needed For Invoice Pdf)
+- \_ "github.com/minio/minio-go/v7"
+
+#### Nacos Integration(Optional)
+###### Program Params
+--nacos-ip={your_nacos_ip}\
+--nacos-port={your_nacos_port}\
+--nacos-namespace={your_nacos_namespace}\
+--nacos-group={your_nacos_group}\
+--nacos-data-id={your_nacos_data_id}\
+###### If Add To Env (K8S)
+nacos.ip={your_nacos_ip}\
+nacos.port={your_nacos_port}\
+nacos.namespace={your_nacos_namespace}\
+nacos.group={your_nacos_group}\
+nacos.data.id={your_nacos_data_id}\
+
+### Env `Stage`
 
 #### OpenApi V3 Doc：http://unibee.top/unib/swagger
 
@@ -8,18 +49,18 @@
 
 #### Stage Information Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
 
-### For Env Local
+### Env `Local`
 
 #### Local Run Add Program Arguments Below: 
 ```bash
 --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 ```
-If not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`
-
 ##### ex: 
 ```bash
 go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 ```
+
+If do not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`
 
 #### OpenApi V3 Doc：http://127.0.0.1:8088/unib/swagger
 
@@ -27,6 +68,7 @@ go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config -
 
 #### OpenApi V3 Json：http://127.0.0.1:8088/unib/api.json
 
+### Develop Tools
 #### Generate Api Controller Shell：
 ```bash
 sh generate_ctrl.sh
@@ -46,30 +88,6 @@ sh generale_dao.sh
   - Generate Dao|Entity|DO After Database Table Change 
   - Doc https://goframe.org/pages/viewpage.action?pageId=3673173 (need delete config.yaml under root dic)
 
-#### Mysql Integration(Needed)
-
-- \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
-
-#### Redis Integration(Needed)
-
-- \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
-- 
-#### Minio Integration(Needed For Invoice Pdf)
-- \_ "github.com/minio/minio-go/v7"
-
-#### Nacos Integration
-###### Program Params
---nacos-ip={your_nacos_ip}\
---nacos-port={your_nacos_port}\
---nacos-namespace={your_nacos_namespace}\
---nacos-group={your_nacos_group}\
---nacos-data-id={your_nacos_data_id}\
-###### If Add To Env (K8S)
-nacos.ip={your_nacos_ip}\
-nacos.port={your_nacos_port}\
-nacos.namespace={your_nacos_namespace}\
-nacos.group={your_nacos_group}\
-nacos.data.id={your_nacos_data_id}\
 
 Stage Nacos Web Manage
 http://43.207.114.88:30099/nacos
