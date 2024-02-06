@@ -9,5 +9,11 @@ type MerchantInformationReq struct {
 
 type MerchantInformationRes struct {
 	SupportTimeZone []string
-	SupportCurrency []string
+	SupportCurrency []*SupportCurrency
+}
+
+type SupportCurrency struct {
+	Currency string
+	Symbol   string
+	Scale    int
 }
