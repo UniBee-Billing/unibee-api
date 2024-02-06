@@ -62,7 +62,6 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		code gcode.Code = gcode.CodeOK
 	)
 
-	// 如果已经有返回内容，那么该中间件什么也不做
 	if err == nil && r.Response.BufferLength() > 0 {
 		return
 	}
