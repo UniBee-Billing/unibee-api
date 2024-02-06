@@ -113,7 +113,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	//email.SendEmailToUser(req.Email, "Verification Code from UniBee", verificationCode)
-	err = email.SendTemplateEmail(ctx, 0, req.Email, email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

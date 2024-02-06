@@ -2,6 +2,9 @@ package user
 
 import (
 	"context"
+	"fmt"
+	"unibee-api/time"
+	"unibee-api/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -11,9 +14,11 @@ import (
 )
 
 func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error) {
-
+	// timezone check
+	if len(req.TimeZone) > 0 {
+		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
+	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-		// dao.UserAccount.Columns().Email :        req.Email,
 		dao.UserAccount.Columns().LastName:        req.LastName,
 		dao.UserAccount.Columns().FirstName:       req.FirstName,
 		dao.UserAccount.Columns().Address:         req.Address,

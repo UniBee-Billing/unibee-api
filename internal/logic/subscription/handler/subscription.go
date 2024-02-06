@@ -347,13 +347,13 @@ func SendSubscriptionEmailToUser(ctx context.Context, subscriptionId string, tem
 		merchantProductName = plan.PlanName
 	}
 
-	err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, template, "", &email.TemplateVariable{
+	err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, template, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: merchantProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,
-		DateNow:             gtime.Now().Layout(`2006-01-02`),
-		PeriodEnd:           gtime.NewFromTimeStamp(one.CurrentPeriodEnd).Layout(`2006-01-02`),
+		DateNow:             gtime.Now(),
+		PeriodEnd:           gtime.NewFromTimeStamp(one.CurrentPeriodEnd),
 	})
 	if err != nil {
 		return err

@@ -1023,12 +1023,12 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	if user != nil {
 		merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 		if merchant != nil {
-			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,
 				MerchantProductName: plan.PlanName,
 				MerchantCustomEmail: merchant.Email,
 				MerchantName:        merchant.Name,
-				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 			})
 			if err != nil {
 				fmt.Printf("SendTemplateEmail err:%s", err.Error())
@@ -1081,23 +1081,23 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	// SendEmail
 	if merchantUserId > 0 {
 		//merchant Cancel
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.PlanName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
-			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
 			fmt.Printf("SendTemplateEmail err:%s", err.Error())
 		}
 	} else {
-		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
+		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.PlanName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
-			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
 			fmt.Printf("SendTemplateEmail err:%s", err.Error())
@@ -1139,12 +1139,12 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: plan.PlanName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,
-		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {
 		fmt.Printf("SendTemplateEmail err:%s", err.Error())

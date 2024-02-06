@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strings"
 	redismq2 "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -15,7 +16,6 @@ import (
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
 	"unibee-api/utility"
-	"strings"
 )
 
 type SubscriptionPaymentCallback struct {
@@ -32,14 +32,14 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 			if user != nil {
 				merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 				if merchant != nil {
-					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
+					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
 						UserName:            user.FirstName + " " + user.LastName,
 						MerchantProductName: plan.PlanName,
 						MerchantCustomEmail: merchant.Email,
 						MerchantName:        merchant.Name,
 						PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
 						Currency:            strings.ToUpper(invoice.Currency),
-						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 					})
 					if err != nil {
 						fmt.Printf("PaymentNeedAuthorisedCallback SendTemplateEmail err:%s", err.Error())

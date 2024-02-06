@@ -94,12 +94,12 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
-	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,
 		MerchantCustomEmail: merchant.Email,
 		MerchantName:        merchant.Name,
-		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd).Layout("2006-01-02"),
+		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {
 		fmt.Printf("SendTemplateEmail err:%s", err.Error())

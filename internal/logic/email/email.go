@@ -115,24 +115,24 @@ func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFil
 }
 
 type TemplateVariable struct {
-	InvoiceId           string `json:"InvoiceId"`
-	UserName            string `json:"User name"`
-	MerchantProductName string `json:"Merchant Product Name"`
-	MerchantCustomEmail string `json:"Merchant’s customer support email address"`
-	MerchantName        string `json:"Merchant Name"`
-	DateNow             string `json:"DateNow"`
-	PaymentAmount       string `json:"Payment Amount"`
-	RefundAmount        string `json:"Refund Amount"`
-	Currency            string `json:"Currency"`
-	TokenExpireMinute   string `json:"TokenExpireMinute"`
-	CodeExpireMinute    string `json:"CodeExpireMinute"`
-	Code                string `json:"Code"`
-	PeriodEnd           string `json:"PeriodEnd"`
-	Link                string `json:"Link"`
+	InvoiceId           string      `json:"InvoiceId"`
+	UserName            string      `json:"User name"`
+	MerchantProductName string      `json:"Merchant Product Name"`
+	MerchantCustomEmail string      `json:"Merchant’s customer support email address"`
+	MerchantName        string      `json:"Merchant Name"`
+	DateNow             *gtime.Time `json:"DateNow" layout:"2006-01-02"`
+	PeriodEnd           *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
+	PaymentAmount       string      `json:"Payment Amount"`
+	RefundAmount        string      `json:"Refund Amount"`
+	Currency            string      `json:"Currency"`
+	TokenExpireMinute   string      `json:"TokenExpireMinute"`
+	CodeExpireMinute    string      `json:"CodeExpireMinute"`
+	Code                string      `json:"Code"`
+	Link                string      `json:"Link"`
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	var template *entity.EmailTemplate
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
@@ -141,7 +141,7 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tem
 	}
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(templateVariables != nil, "templateVariables not found")
-	variableMap, err := utility.ReflectStructToMap(templateVariables)
+	variableMap, err := utility.ReflectTemplateStructToMap(templateVariables, timezone)
 	if err != nil {
 		return err
 	}

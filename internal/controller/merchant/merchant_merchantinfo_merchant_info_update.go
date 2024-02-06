@@ -2,14 +2,16 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strings"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/query"
+	"unibee-api/time"
 	"unibee-api/utility"
-	"strings"
 
 	"unibee-api/api/merchant/merchantinfo"
 )
@@ -20,6 +22,9 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "MerchantId invalid")
+	}
+	if len(req.TimeZone) > 0 {
+		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}
 	info := query.GetMerchantInfoById(ctx, int64(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId))
 	utility.Assert(info != nil, "merchantInfo not found")
@@ -36,6 +41,7 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		dao.MerchantInfo.Columns().CompanyName: req.CompanyName,
 		dao.MerchantInfo.Columns().CompanyLogo: companyLogo,
 		dao.MerchantInfo.Columns().Phone:       req.Phone,
+		dao.MerchantInfo.Columns().TimeZone:    req.TimeZone,
 		dao.MerchantInfo.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.MerchantInfo.Columns().Id, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId).OmitEmpty().Update()
 	if err != nil {

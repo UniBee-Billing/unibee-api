@@ -44,7 +44,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	//email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from UniBee", verificationCode)
 	user := query.GetUserAccountByEmail(ctx, req.Email)
 	utility.Assert(user != nil, "user not found")
-	err = email.SendTemplateEmail(ctx, 0, req.Email, email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
 		UserName:         user.FirstName + " " + user.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,

@@ -234,14 +234,14 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 			template = email.TemplateInvoiceCancel
 		}
 		//err := email.SendPdfAttachEmailToUser(one.SendEmail, "Invoice", "Invoice", pdfFileName, fmt.Sprintf("%s.pdf", one.InvoiceId))
-		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, template, pdfFileName, &email.TemplateVariable{
+		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
 			InvoiceId:           one.InvoiceId,
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: merchantProductName,
 			MerchantCustomEmail: merchant.Email,
 			MerchantName:        merchant.Name,
-			DateNow:             gtime.Now().Layout(`2006-01-02`),
-			PeriodEnd:           gtime.Now().AddDate(0, 0, 5).Layout(`2006-01-02`), //todo mark
+			DateNow:             gtime.Now(),
+			PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
 			TokenExpireMinute:   strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
 			Link:                "<a href=\"" + link + "\">Link</a>",
