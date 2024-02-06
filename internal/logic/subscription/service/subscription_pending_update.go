@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/payment/service"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/payment/service"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 )
 
 func SubscriptionPendingUpdateCancel(ctx context.Context, pendingUpdateId string, reason string) error {

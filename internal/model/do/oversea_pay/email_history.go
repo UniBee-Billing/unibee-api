@@ -21,4 +21,5 @@ type EmailHistory struct {
 	GmtCreate  *gtime.Time // create time
 	GmtModify  *gtime.Time // update time
 	Response   interface{} //
+	CreateAt   interface{} // create utc time
 }

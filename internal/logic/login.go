@@ -1,7 +1,7 @@
 package logic
 
 import (
-	_ "go-oversea-pay/internal/logic/bizctx"
-	_ "go-oversea-pay/internal/logic/middleware"
-	_ "go-oversea-pay/internal/logic/session"
+	_ "unibee-api/internal/logic/bizctx"
+	_ "unibee-api/internal/logic/middleware"
+	_ "unibee-api/internal/logic/session"
 )

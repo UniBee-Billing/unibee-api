@@ -27,4 +27,5 @@ type CountryRate struct {
 	GmtCreate             *gtime.Time `json:"gmtCreate"             description:"create time"`                                                 // create time
 	GmtModify             *gtime.Time `json:"gmtModify"             description:"update time"`                                                 // update time
 	IsDeleted             int         `json:"isDeleted"             description:"0-UnDeleted，1-Deleted"`                                       // 0-UnDeleted，1-Deleted
+	CreateAt              int64       `json:"createAt"              description:"create utc time"`                                             // create utc time
 }

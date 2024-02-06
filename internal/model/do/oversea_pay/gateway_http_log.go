@@ -21,4 +21,5 @@ type GatewayHttpLog struct {
 	GatewayId interface{} // gateway_id
 	GmtCreate *gtime.Time // create time
 	GmtModify *gtime.Time // update time
+	CreateAt  interface{} // create utc time
 }

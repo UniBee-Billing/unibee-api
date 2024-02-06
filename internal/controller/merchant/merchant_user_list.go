@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/auth"
+	"unibee-api/internal/logic/auth"
 
-	"go-oversea-pay/api/merchant/user"
+	"unibee-api/api/merchant/user"
 )
 
 func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error) {

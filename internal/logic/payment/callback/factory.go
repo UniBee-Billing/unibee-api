@@ -2,7 +2,7 @@ package callback
 
 import (
 	"context"
-	_interface "go-oversea-pay/internal/interface"
+	_interface "unibee-api/internal/interface"
 )
 
 func GetPaymentCallbackServiceProvider(ctx context.Context, bizType int) (one _interface.PaymentBizCallbackInterface) {

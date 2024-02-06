@@ -2,10 +2,10 @@ package open
 
 import (
 	"context"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/redismq"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/redismq"
 
-	"go-oversea-pay/api/open/mock"
+	"unibee-api/api/open/mock"
 )
 
 func (c *ControllerMock) MockMessageSend(ctx context.Context, req *mock.MockMessageSendReq) (res *mock.MockMessageSendRes, err error) {

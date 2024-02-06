@@ -2,15 +2,15 @@ package user
 
 import (
 	"context"
-	v1 "go-oversea-pay/api/user/profile"
+	v1 "unibee-api/api/user/profile"
 
-	_interface "go-oversea-pay/internal/interface"
+	_interface "unibee-api/internal/interface"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 )
 
 func (c *ControllerProfile) Profile(ctx context.Context, req *v1.ProfileReq) (res *v1.ProfileRes, err error) {

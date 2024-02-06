@@ -6,19 +6,19 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/api/merchant/invoice"
-	v1 "go-oversea-pay/api/open/payment"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/invoice/invoice_compute"
-	"go-oversea-pay/internal/logic/payment/service"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
+	"unibee-api/api/merchant/invoice"
+	v1 "unibee-api/api/open/payment"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/email"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/invoice/invoice_compute"
+	"unibee-api/internal/logic/payment/service"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func checkInvoice(one *ro.InvoiceDetailRo) {
@@ -89,6 +89,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		SendStatus:                     0,
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
+		CreateAt:                       gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

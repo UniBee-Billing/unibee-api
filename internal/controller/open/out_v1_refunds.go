@@ -2,10 +2,10 @@ package open
 
 import (
 	"context"
-	"go-oversea-pay/api/open/payment"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/service"
-	"go-oversea-pay/utility"
+	"unibee-api/api/open/payment"
+	"unibee-api/internal/consts"
+	"unibee-api/internal/logic/payment/service"
+	"unibee-api/utility"
 )
 
 func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq) (res *payment.RefundsRes, err error) {

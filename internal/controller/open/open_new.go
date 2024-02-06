@@ -5,7 +5,7 @@
 package open
 
 import (
-	"go-oversea-pay/api/open"
+	"unibee-api/api/open"
 )
 
 type ControllerMock struct{}

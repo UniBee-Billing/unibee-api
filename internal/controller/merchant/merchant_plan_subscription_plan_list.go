@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	v1 "go-oversea-pay/api/merchant/plan"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/plan/service"
-	"go-oversea-pay/utility"
+	v1 "unibee-api/api/merchant/plan"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/plan/service"
+	"unibee-api/utility"
 )
 
 func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (res *v1.SubscriptionPlanListRes, err error) {

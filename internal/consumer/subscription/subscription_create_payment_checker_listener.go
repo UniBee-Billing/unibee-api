@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	sub2 "go-oversea-pay/internal/cronjob/sub"
-	"go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	sub2 "unibee-api/internal/cronjob/sub"
+	"unibee-api/internal/logic/invoice/handler"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type SubscriptionCreatePaymentCheckListener struct {

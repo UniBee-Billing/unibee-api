@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 func GetPaymentById(ctx context.Context, payId int64) (one *entity.Payment) {

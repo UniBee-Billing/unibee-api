@@ -19,7 +19,7 @@ type MerchantOperationLog struct {
 	BizType            int         `json:"bizType"            description:"biz_type"`                // biz_type
 	OptTarget          string      `json:"optTarget"          description:"operation target"`        // operation target
 	OptContent         string      `json:"optContent"         description:"operation content"`       // operation content
-	OptCreate          *gtime.Time `json:"optCreate"          description:"operation create time"`   // operation create time
+	CreateAt           int64       `json:"createAt"           description:"operation create time"`   // operation create time
 	IsDelete           int         `json:"isDelete"           description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"create time"`             // create time
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`             // update time

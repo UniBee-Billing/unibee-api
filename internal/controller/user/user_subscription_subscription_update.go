@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/api/user/subscription"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/user/subscription"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/subscription/service"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error) {

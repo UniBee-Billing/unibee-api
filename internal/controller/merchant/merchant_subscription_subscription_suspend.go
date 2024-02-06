@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"go-oversea-pay/api/merchant/subscription"
+	"unibee-api/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionSuspend(ctx context.Context, req *subscription.SubscriptionSuspendReq) (res *subscription.SubscriptionSuspendRes, err error) {

@@ -48,4 +48,5 @@ type Invoice struct {
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                               // refundId
 	Data                           string      `json:"data"                           description:"data (json)"`                                                            // data (json)
 	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
+	CreateAt                       int64       `json:"createAt"                       description:"create utc time"`                                                        // create utc time
 }

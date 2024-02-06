@@ -3,8 +3,8 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionDetailReq struct {

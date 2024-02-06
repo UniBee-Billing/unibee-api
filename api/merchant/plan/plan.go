@@ -2,8 +2,8 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionPlanCreateReq struct {

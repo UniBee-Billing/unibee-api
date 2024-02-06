@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/merchantinfo"
+	"unibee-api/api/merchant/merchantinfo"
 )
 
 func (c *ControllerMerchantinfo) MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error) {

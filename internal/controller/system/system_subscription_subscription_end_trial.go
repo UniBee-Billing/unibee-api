@@ -2,12 +2,12 @@ package system
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/subscription/service"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/system/subscription"
+	"unibee-api/api/system/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionEndTrial(ctx context.Context, req *subscription.SubscriptionEndTrialReq) (res *subscription.SubscriptionEndTrialRes, err error) {

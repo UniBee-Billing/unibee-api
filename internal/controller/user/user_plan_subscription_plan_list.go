@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/api/user/plan"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/plan/service"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/user/plan"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/plan/service"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 // SubscriptionPlanList todo mark 修改成 User Protal Plan List， Only Return Publish Plans And User Sub Plan

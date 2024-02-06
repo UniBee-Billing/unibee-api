@@ -3,9 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
-	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/interface"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func GetGatewayServiceProvider(ctx context.Context, gatewayId int64) (one _interface.GatewayInterface) {

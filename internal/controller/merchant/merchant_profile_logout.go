@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/auth"
-	"go-oversea-pay/utility"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/auth"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/profile"
+	"unibee-api/api/merchant/profile"
 )
 
 func (c *ControllerProfile) Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error) {

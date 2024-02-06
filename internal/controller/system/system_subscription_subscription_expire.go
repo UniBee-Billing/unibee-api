@@ -2,11 +2,11 @@ package system
 
 import (
 	"context"
-	"go-oversea-pay/internal/cronjob/sub"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/cronjob/sub"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/system/subscription"
+	"unibee-api/api/system/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionExpire(ctx context.Context, req *subscription.SubscriptionExpireReq) (res *subscription.SubscriptionExpireRes, err error) {

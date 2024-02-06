@@ -2,16 +2,17 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
+	"unibee-api/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
 	"encoding/json"
-	"go-oversea-pay/api/merchant/auth"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	"unibee-api/api/merchant/auth"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 
 	"github.com/gogf/gf/v2/frame/g"
 )
@@ -57,6 +58,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		// Phone:     u.Phone,
 		// Address:   u.Address,
 		UserName: u.UserName,
+		CreateAt: gtime.Now().Timestamp(),
 	}
 
 	// race condition: email exist checking is too earlier

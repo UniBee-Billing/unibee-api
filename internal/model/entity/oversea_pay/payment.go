@@ -17,6 +17,7 @@ type Payment struct {
 	UserId                 int64       `json:"userId"                 description:"user_id"`                                                                // user_id
 	SubscriptionId         string      `json:"subscriptionId"         description:"subscription id"`                                                        // subscription id
 	GmtCreate              *gtime.Time `json:"gmtCreate"              description:"create time"`                                                            // create time
+	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time
 	BizType                int         `json:"bizType"                description:"biz_type 1-single payment, 3-subscription"`                              // biz_type 1-single payment, 3-subscription
 	BizId                  string      `json:"bizId"                  description:"biz_id"`                                                                 // biz_id
 	Currency               string      `json:"currency"               description:"currency，“SGD” “MYR” “PHP” “IDR” “THB”"`                                 // currency，“SGD” “MYR” “PHP” “IDR” “THB”
@@ -34,11 +35,10 @@ type Payment struct {
 	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
 	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	CaptureDelayHours      int         `json:"captureDelayHours"      description:"capture_delay_hours"`                                                    // capture_delay_hours
-	CreateTime             *gtime.Time `json:"createTime"             description:"create time"`                                                            // create time
-	CancelTime             *gtime.Time `json:"cancelTime"             description:"cancel time"`                                                            // cancel time
-	PaidTime               *gtime.Time `json:"paidTime"               description:"paid time"`                                                              // paid time
+	CreateAt               int64       `json:"createAt"               description:"create time"`                                                            // create time
+	CancelAt               int64       `json:"cancelAt"               description:"cancel time"`                                                            // cancel time
+	PaidAt                 int64       `json:"paidAt"                 description:"paid time"`                                                              // paid time
 	InvoiceId              string      `json:"invoiceId"              description:"invoice id"`                                                             // invoice id
-	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time
 	AppId                  string      `json:"appId"                  description:"app id"`                                                                 // app id
 	ReturnUrl              string      `json:"returnUrl"              description:"return url"`                                                             // return url
 	GatewayEdition         string      `json:"gatewayEdition"         description:"gateway edition"`                                                        // gateway edition

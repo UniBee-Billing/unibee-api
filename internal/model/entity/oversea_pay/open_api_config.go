@@ -23,4 +23,5 @@ type OpenApiConfig struct {
 	Validips                string      `json:"validips"                description:""`                         //
 	GatewayCallbackResponse string      `json:"gatewayCallbackResponse" description:"callback return response"` // callback return response
 	CompanyId               int64       `json:"companyId"               description:"company id"`               // company id
+	CreateAt                int64       `json:"createAt"                description:"create utc time"`          // create utc time
 }

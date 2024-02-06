@@ -4,18 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"go-oversea-pay/api/merchant/auth"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/utility"
 	"log"
 	"math/rand"
 	"regexp"
 	"time"
+	"unibee-api/api/merchant/auth"
+	"unibee-api/internal/logic/email"
+	"unibee-api/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -122,23 +122,4 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	return &auth.RegisterRes{}, nil
-
-	/*
-		result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
-		if err != nil {
-			err = gerror.Newf(`record insert failure %s`, err)
-			return
-		}
-		id, _ := result.LastInsertId()
-		user.Id = uint64(id)
-		var newOne *entity.UserAccount
-		newOne = query.GetUserAccountById(ctx, user.Id)
-		if newOne == nil {
-			return nil, gerror.New("internal err:user query")
-		}
-
-		email.SendEmailToUser(newOne)
-	*/
-
-	// return &auth.RegisterRes{User: newOne}, nil
 }

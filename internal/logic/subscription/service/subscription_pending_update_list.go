@@ -2,12 +2,12 @@ package service
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 	"strings"
 )
 

@@ -27,6 +27,7 @@ type PaymentColumns struct {
 	UserId                 string // user_id
 	SubscriptionId         string // subscription id
 	GmtCreate              string // create time
+	GmtModify              string // update time
 	BizType                string // biz_type 1-single payment, 3-subscription
 	BizId                  string // biz_id
 	Currency               string // currency，“SGD” “MYR” “PHP” “IDR” “THB”
@@ -44,11 +45,10 @@ type PaymentColumns struct {
 	GatewayPaymentIntentId string // gateway_payment_intent_id
 	GatewayPaymentId       string // gateway_payment_id
 	CaptureDelayHours      string // capture_delay_hours
-	CreateTime             string // create time
-	CancelTime             string // cancel time
-	PaidTime               string // paid time
+	CreateAt               string // create time
+	CancelAt               string // cancel time
+	PaidAt                 string // paid time
 	InvoiceId              string // invoice id
-	GmtModify              string // update time
 	AppId                  string // app id
 	ReturnUrl              string // return url
 	GatewayEdition         string // gateway edition
@@ -78,6 +78,7 @@ var paymentColumns = PaymentColumns{
 	UserId:                 "user_id",
 	SubscriptionId:         "subscription_id",
 	GmtCreate:              "gmt_create",
+	GmtModify:              "gmt_modify",
 	BizType:                "biz_type",
 	BizId:                  "biz_id",
 	Currency:               "currency",
@@ -95,11 +96,10 @@ var paymentColumns = PaymentColumns{
 	GatewayPaymentIntentId: "gateway_payment_intent_id",
 	GatewayPaymentId:       "gateway_payment_id",
 	CaptureDelayHours:      "capture_delay_hours",
-	CreateTime:             "create_time",
-	CancelTime:             "cancel_time",
-	PaidTime:               "paid_time",
+	CreateAt:               "create_at",
+	CancelAt:               "cancel_at",
+	PaidAt:                 "paid_at",
 	InvoiceId:              "invoice_id",
-	GmtModify:              "gmt_modify",
 	AppId:                  "app_id",
 	ReturnUrl:              "return_url",
 	GatewayEdition:         "gateway_edition",

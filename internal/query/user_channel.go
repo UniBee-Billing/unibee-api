@@ -4,9 +4,10 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/utility"
 )
 
 func GetGatewayUser(ctx context.Context, userId int64, gatewayId int64) (one *entity.GatewayUser) {
@@ -40,6 +41,7 @@ func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId int6
 			GatewayId:                   gatewayId,
 			GatewayUserId:               gatewayUserId,
 			GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
+			CreateAt:                    gtime.Now().Timestamp(),
 		}
 		result, err := dao.GatewayUser.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {

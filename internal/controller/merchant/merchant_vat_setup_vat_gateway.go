@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/vat_gateway"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/vat_gateway"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/vat"
+	"unibee-api/api/merchant/vat"
 )
 
 func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error) {

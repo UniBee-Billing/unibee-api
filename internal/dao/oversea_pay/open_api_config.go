@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"go-oversea-pay/internal/dao/oversea_pay/internal"
+	"unibee-api/internal/dao/oversea_pay/internal"
 )
 
 // internalOpenApiConfigDao is internal type for wrapping internal DAO implements.

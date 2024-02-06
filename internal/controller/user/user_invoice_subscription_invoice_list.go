@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/invoice/service"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/invoice/service"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/user/invoice"
+	"unibee-api/api/user/invoice"
 )
 
 func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error) {

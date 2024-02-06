@@ -2,10 +2,10 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/subscription/service"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/subscription/service"
 
-	"go-oversea-pay/api/user/subscription"
+	"unibee-api/api/user/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (res *subscription.SubscriptionCreatePreviewRes, err error) {

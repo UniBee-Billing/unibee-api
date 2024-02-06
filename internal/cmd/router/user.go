@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/controller/user"
+	"unibee-api/internal/controller/user"
 )
 
 // UserAuth 工具类

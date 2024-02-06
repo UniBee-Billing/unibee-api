@@ -2,10 +2,10 @@ package query
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 func GetGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *entity.GatewayPlan) {

@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	balance2 "go-oversea-pay/internal/logic/balance"
+	balance2 "unibee-api/internal/logic/balance"
 
-	"go-oversea-pay/api/merchant/balance"
+	"unibee-api/api/merchant/balance"
 )
 
 func (c *ControllerBalance) UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error) {

@@ -4,14 +4,14 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 	"strings"
 
-	"go-oversea-pay/api/merchant/merchantinfo"
+	"unibee-api/api/merchant/merchantinfo"
 )
 
 func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error) {

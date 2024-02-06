@@ -3,17 +3,17 @@ package user
 import (
 	"context"
 	"fmt"
-	"go-oversea-pay/api/user/auth"
-	auth2 "go-oversea-pay/internal/logic/auth"
-	"go-oversea-pay/utility"
+	"unibee-api/api/user/auth"
+	auth2 "unibee-api/internal/logic/auth"
+	"unibee-api/utility"
 
 	// "github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 )
 
 func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error) {

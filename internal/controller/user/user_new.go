@@ -5,7 +5,7 @@
 package user
 
 import (
-	"go-oversea-pay/api/user"
+	"unibee-api/api/user"
 )
 
 type ControllerAuth struct{}

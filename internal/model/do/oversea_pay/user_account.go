@@ -28,7 +28,7 @@ type UserAccount struct {
 	Profession         interface{} // profession
 	School             interface{} // school
 	Custom             interface{} // custom
-	NearTime           *gtime.Time // last login time
+	LastLoginAt        interface{} // last login time
 	IsRisk             interface{} // is risk account (deperated)
 	GatewayId          interface{} // gateway_id
 	Version            interface{} // version
@@ -54,4 +54,5 @@ type UserAccount struct {
 	RecurringAmount    interface{} // total recurring amount, cent
 	BillingType        interface{} // 1-recurring,2-one-time
 	TimeZone           interface{} //
+	CreateAt           interface{} // create utc time
 }

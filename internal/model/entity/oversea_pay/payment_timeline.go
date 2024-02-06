@@ -25,4 +25,5 @@ type PaymentTimeline struct {
 	PaymentId      string      `json:"paymentId"      description:"PaymentId"`                       // PaymentId
 	Status         int         `json:"status"         description:"0-pending, 1-success, 2-failure"` // 0-pending, 1-success, 2-failure
 	TimelineType   int         `json:"timelineType"   description:"0-pay, 1-refund"`                 // 0-pay, 1-refund
+	CreateAt       int64       `json:"createAt"       description:"create utc time"`                 // create utc time
 }

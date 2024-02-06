@@ -7,15 +7,15 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	redismqcmd "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/payment/event"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismqcmd "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/payment/event"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type HandleRefundReq struct {
@@ -129,9 +129,13 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	//	}
 	//	return BusinessWrapper.success();
 	//}
+	var refundAt = gtime.Now().Timestamp()
+	if req.RefundTime != nil {
+		refundAt = req.RefundTime.Timestamp()
+	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: req.RefundTime},
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundAt: refundAt},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -298,11 +302,12 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			RefundAmount:         details.RefundAmount,
 			RefundComment:        details.Reason,
 			Status:               int(details.Status),
-			RefundTime:           details.RefundTime,
+			RefundAt:             details.RefundTime.Timestamp(),
 			GatewayRefundId:      details.GatewayRefundId,
 			RefundCommentExplain: details.Reason,
 			UniqueId:             uniqueId,
 			SubscriptionId:       payment.SubscriptionId,
+			CreateAt:             gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -327,7 +332,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().RefundAmount:         details.RefundAmount,
 			dao.Refund.Columns().RefundComment:        details.Reason,
 			dao.Refund.Columns().Status:               details.Status,
-			dao.Refund.Columns().RefundTime:           details.RefundTime,
+			dao.Refund.Columns().RefundAt:             details.RefundTime.Timestamp(),
 			dao.Refund.Columns().GatewayRefundId:      details.GatewayRefundId,
 			dao.Refund.Columns().RefundCommentExplain: details.Reason,
 			dao.Refund.Columns().UniqueId:             uniqueId,
@@ -371,6 +376,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			GatewayId:    refund.GatewayId,
 			Status:       status,
 			TimelineType: 1,
+			CreateAt:     gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

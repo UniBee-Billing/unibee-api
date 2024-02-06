@@ -29,7 +29,7 @@ type MerchantOperationLogColumns struct {
 	BizType            string // biz_type
 	OptTarget          string // operation target
 	OptContent         string // operation content
-	OptCreate          string // operation create time
+	CreateAt           string // operation create time
 	IsDelete           string // 0-UnDeleted，1-Deleted
 	GmtCreate          string // create time
 	GmtModify          string // update time
@@ -49,7 +49,7 @@ var merchantOperationLogColumns = MerchantOperationLogColumns{
 	BizType:            "biz_type",
 	OptTarget:          "opt_target",
 	OptContent:         "opt_content",
-	OptCreate:          "opt_create",
+	CreateAt:           "create_at",
 	IsDelete:           "is_delete",
 	GmtCreate:          "gmt_create",
 	GmtModify:          "gmt_modify",

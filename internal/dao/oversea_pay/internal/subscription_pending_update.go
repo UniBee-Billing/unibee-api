@@ -52,6 +52,7 @@ type SubscriptionPendingUpdateColumns struct {
 	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
 	Note                 string // note
 	ProrationDate        string // merchant_user_id
+	CreateAt             string // create utc time
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -88,6 +89,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	EffectTime:           "effect_time",
 	Note:                 "note",
 	ProrationDate:        "proration_date",
+	CreateAt:             "create_at",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.

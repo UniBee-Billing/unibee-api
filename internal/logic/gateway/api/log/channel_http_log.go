@@ -5,10 +5,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/utility"
 )
 
 func SaveChannelHttpLog(url string, request interface{}, response interface{}, err interface{}, memo string, requestId interface{}, gateway *entity.MerchantGateway) {
@@ -32,6 +33,7 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 			RequestId: utility.FormatToJsonString(requestId),
 			Mamo:      memo,
 			GatewayId: strconv.FormatUint(gateway.Id, 10),
+			CreateAt:  gtime.Now().Timestamp(),
 		}
 		_, _ = dao.GatewayHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
 		//g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)

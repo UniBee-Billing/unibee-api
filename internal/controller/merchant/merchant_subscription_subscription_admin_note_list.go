@@ -2,10 +2,10 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/api/merchant/subscription"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	"unibee-api/api/merchant/subscription"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 )
 
 func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, req *subscription.SubscriptionAdminNoteListReq) (res *subscription.SubscriptionAdminNoteListRes, err error) {

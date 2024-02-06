@@ -2,9 +2,9 @@ package session
 
 import (
 	"context"
-	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/model"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"unibee-api/internal/interface"
+	"unibee-api/internal/model"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type sSession struct{}

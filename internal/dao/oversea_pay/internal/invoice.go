@@ -58,6 +58,7 @@ type InvoiceColumns struct {
 	RefundId                       string // refundId
 	Data                           string // data (json)
 	BizType                        string // biz type from payment 1-single payment, 3-subscription
+	CreateAt                       string // create utc time
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -100,6 +101,7 @@ var invoiceColumns = InvoiceColumns{
 	RefundId:                       "refund_id",
 	Data:                           "data",
 	BizType:                        "biz_type",
+	CreateAt:                       "create_at",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

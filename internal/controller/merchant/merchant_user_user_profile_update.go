@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
+	dao "unibee-api/internal/dao/oversea_pay"
 
-	"go-oversea-pay/api/merchant/user"
+	"unibee-api/api/merchant/user"
 )
 
 func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error) {

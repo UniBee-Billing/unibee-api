@@ -29,6 +29,7 @@ type SubscriptionTimelineColumns struct {
 	PeriodStartTime string // period start (datetime)
 	PeriodEndTime   string // period end (datatime)
 	GmtCreate       string // create time
+	GmtModify       string // update time
 	InvoiceId       string // invoice id
 	UniqueId        string // unique id
 	Currency        string // currency
@@ -36,9 +37,9 @@ type SubscriptionTimelineColumns struct {
 	Quantity        string // quantity
 	AddonData       string // plan addon json data
 	GatewayId       string // gateway_id
-	GmtModify       string // update time
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	UniqueKey       string // unique key (deperated)
+	CreateAt        string // create utc time
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.
@@ -52,6 +53,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	PeriodStartTime: "period_start_time",
 	PeriodEndTime:   "period_end_time",
 	GmtCreate:       "gmt_create",
+	GmtModify:       "gmt_modify",
 	InvoiceId:       "invoice_id",
 	UniqueId:        "unique_id",
 	Currency:        "currency",
@@ -59,9 +61,9 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	Quantity:        "quantity",
 	AddonData:       "addon_data",
 	GatewayId:       "gateway_id",
-	GmtModify:       "gmt_modify",
 	IsDeleted:       "is_deleted",
 	UniqueKey:       "unique_key",
+	CreateAt:        "create_at",
 }
 
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.

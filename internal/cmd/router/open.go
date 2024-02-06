@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"go-oversea-pay/internal/controller/open"
+	"unibee-api/internal/controller/open"
 )
 
 // OpenPayment 工具类的，不含业务属性的

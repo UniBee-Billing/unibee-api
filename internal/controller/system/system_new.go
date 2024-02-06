@@ -5,7 +5,7 @@
 package system
 
 import (
-	"go-oversea-pay/api/system"
+	"unibee-api/api/system"
 )
 
 type ControllerSubscription struct{}

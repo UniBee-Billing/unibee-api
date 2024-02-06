@@ -6,12 +6,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
 	"os"
 	"strings"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
 	// entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	// "os"
@@ -204,6 +205,7 @@ func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title str
 		Content:    content,
 		AttachFile: attachFilePath,
 		Response:   response,
+		CreateAt:   gtime.Now().Timestamp(),
 	}
 	_, _ = dao.EmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }

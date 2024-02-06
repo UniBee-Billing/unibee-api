@@ -6,10 +6,10 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/nacos-group/nacos-sdk-go/util"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscription, source string) error {
@@ -44,6 +44,7 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 			PeriodEnd:       periodEnd,
 			PeriodStartTime: gtime.NewFromTimeStamp(periodStart),
 			PeriodEndTime:   gtime.NewFromTimeStamp(periodEnd),
+			CreateAt:        gtime.Now().Timestamp(),
 		}
 
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

@@ -28,6 +28,7 @@ type GatewayUserColumns struct {
 	GatewayUserId               string // gateway_user_Id
 	IsDeleted                   string // 0-UnDeleted，1-Deleted
 	GatewayDefaultPaymentMethod string // gateway_default_payment_method
+	CreateAt                    string // create utc time
 }
 
 // gatewayUserColumns holds the columns for table gateway_user.
@@ -40,6 +41,7 @@ var gatewayUserColumns = GatewayUserColumns{
 	GatewayUserId:               "gateway_user_id",
 	IsDeleted:                   "is_deleted",
 	GatewayDefaultPaymentMethod: "gateway_default_payment_method",
+	CreateAt:                    "create_at",
 }
 
 // NewGatewayUserDao creates and returns a new DAO object for table data access.

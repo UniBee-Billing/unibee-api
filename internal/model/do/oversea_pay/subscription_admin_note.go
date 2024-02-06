@@ -19,4 +19,5 @@ type SubscriptionAdminNote struct {
 	MerchantUserId interface{} // merchant_user_id
 	Note           interface{} // note
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
+	CreateAt       interface{} // create utc time
 }

@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	service2 "go-oversea-pay/internal/logic/subscription/service"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	service2 "unibee-api/internal/logic/subscription/service"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type SubscriptionCancelListener struct {

@@ -44,4 +44,5 @@ type SubscriptionPendingUpdate struct {
 	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
 	Note                 interface{} // note
 	ProrationDate        interface{} // merchant_user_id
+	CreateAt             interface{} // create utc time
 }

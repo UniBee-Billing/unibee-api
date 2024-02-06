@@ -42,4 +42,5 @@ type SubscriptionPendingUpdate struct {
 	EffectTime           int64       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`                                      // effect_immediate=0, 预计生效时间 unit_time
 	Note                 string      `json:"note"                 description:"note"`                                                                      // note
 	ProrationDate        int64       `json:"prorationDate"        description:"merchant_user_id"`                                                          // merchant_user_id
+	CreateAt             int64       `json:"createAt"             description:"create utc time"`                                                           // create utc time
 }

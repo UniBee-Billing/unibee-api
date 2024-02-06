@@ -18,19 +18,19 @@ import (
 	"github.com/stripe/stripe-go/v76/refund"
 	sub "github.com/stripe/stripe-go/v76/subscription"
 	"github.com/stripe/stripe-go/v76/taxrate"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	webhook2 "go-oversea-pay/internal/logic/gateway"
-	"go-oversea-pay/internal/logic/gateway/api/log"
-	_ "go-oversea-pay/internal/logic/gateway/base"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/gateway/util"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
 	"time"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	webhook2 "unibee-api/internal/logic/gateway"
+	"unibee-api/internal/logic/gateway/api/log"
+	_ "unibee-api/internal/logic/gateway/base"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/gateway/util"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 type Stripe struct {
@@ -316,6 +316,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
 				GatewayId:        int64(gateway.Id),
 				GatewayVatRateId: vatCreateResult.ID,
+				CreateAt:         gtime.Now().Timestamp(),
 			}
 			result, err := dao.GatewayVatRate.Ctx(ctx).Data(gatewayVatRate).OmitNil().Insert(gatewayVatRate)
 			if err != nil {

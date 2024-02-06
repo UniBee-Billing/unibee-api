@@ -36,7 +36,7 @@ type UserAccountColumns struct {
 	Profession         string // profession
 	School             string // school
 	Custom             string // custom
-	NearTime           string // last login time
+	LastLoginAt        string // last login time
 	IsRisk             string // is risk account (deperated)
 	GatewayId          string // gateway_id
 	Version            string // version
@@ -62,6 +62,7 @@ type UserAccountColumns struct {
 	RecurringAmount    string // total recurring amount, cent
 	BillingType        string // 1-recurring,2-one-time
 	TimeZone           string //
+	CreateAt           string // create utc time
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -82,7 +83,7 @@ var userAccountColumns = UserAccountColumns{
 	Profession:         "profession",
 	School:             "school",
 	Custom:             "custom",
-	NearTime:           "near_time",
+	LastLoginAt:        "last_login_at",
 	IsRisk:             "is_risk",
 	GatewayId:          "gateway_id",
 	Version:            "version",
@@ -108,6 +109,7 @@ var userAccountColumns = UserAccountColumns{
 	RecurringAmount:    "recurring_amount",
 	BillingType:        "billing_type",
 	TimeZone:           "time_zone",
+	CreateAt:           "create_at",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

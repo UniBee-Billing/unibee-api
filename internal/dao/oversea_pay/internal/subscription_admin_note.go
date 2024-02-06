@@ -27,6 +27,7 @@ type SubscriptionAdminNoteColumns struct {
 	MerchantUserId string // merchant_user_id
 	Note           string // note
 	IsDeleted      string // 0-UnDeleted，1-Deleted
+	CreateAt       string // create utc time
 }
 
 // subscriptionAdminNoteColumns holds the columns for table subscription_admin_note.
@@ -38,6 +39,7 @@ var subscriptionAdminNoteColumns = SubscriptionAdminNoteColumns{
 	MerchantUserId: "merchant_user_id",
 	Note:           "note",
 	IsDeleted:      "is_deleted",
+	CreateAt:       "create_at",
 }
 
 // NewSubscriptionAdminNoteDao creates and returns a new DAO object for table data access.

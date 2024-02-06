@@ -19,6 +19,7 @@ type SubscriptionTimeline struct {
 	PeriodStartTime *gtime.Time `json:"periodStartTime" description:"period start (datetime)"` // period start (datetime)
 	PeriodEndTime   *gtime.Time `json:"periodEndTime"   description:"period end (datatime)"`   // period end (datatime)
 	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`             // create time
+	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`             // update time
 	InvoiceId       string      `json:"invoiceId"       description:"invoice id"`              // invoice id
 	UniqueId        string      `json:"uniqueId"        description:"unique id"`               // unique id
 	Currency        string      `json:"currency"        description:"currency"`                // currency
@@ -26,7 +27,7 @@ type SubscriptionTimeline struct {
 	Quantity        int64       `json:"quantity"        description:"quantity"`                // quantity
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`    // plan addon json data
 	GatewayId       int64       `json:"gatewayId"       description:"gateway_id"`              // gateway_id
-	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`             // update time
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)
+	CreateAt        int64       `json:"createAt"        description:"create utc time"`         // create utc time
 }

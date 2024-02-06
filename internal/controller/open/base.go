@@ -2,11 +2,11 @@ package open
 
 import (
 	"context"
-	"go-oversea-pay/api/open/payment"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/interface"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/utility"
+	"unibee-api/api/open/payment"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/interface"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/utility"
 	"strings"
 )
 

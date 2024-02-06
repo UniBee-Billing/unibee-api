@@ -6,11 +6,11 @@ package system
 
 import (
 	"context"
-	
-	"go-oversea-pay/api/system/invoice"
-	"go-oversea-pay/api/system/payment"
-	"go-oversea-pay/api/system/refund"
-	"go-oversea-pay/api/system/subscription"
+
+	"unibee-api/api/system/invoice"
+	"unibee-api/api/system/payment"
+	"unibee-api/api/system/refund"
+	"unibee-api/api/system/subscription"
 )
 
 type ISystemInvoice interface {

@@ -17,13 +17,13 @@ type Subscription struct {
 	UserId                      interface{} // userId
 	GmtCreate                   *gtime.Time // create time
 	GmtModify                   *gtime.Time // update time
+	TaskTime                    *gtime.Time // task_time
 	Amount                      interface{} // amount, cent
 	Currency                    interface{} // currency
 	MerchantId                  interface{} // merchant id
 	PlanId                      interface{} // plan id
 	Quantity                    interface{} // quantity
 	AddonData                   interface{} // plan addon json data
-	TaskTime                    *gtime.Time // task_time
 	LatestInvoiceId             interface{} // latest_invoice_id
 	Type                        interface{} // sub type, 0-gateway sub, 1-unibee sub
 	GatewayId                   interface{} // gateway_id
@@ -47,7 +47,7 @@ type Subscription struct {
 	DunningTime                 interface{} //
 	TrialEnd                    interface{} // trial_end
 	ReturnUrl                   interface{} //
-	FirstPayTime                *gtime.Time // first success payment time
+	FirstPaidAt                 interface{} // first success payment time
 	CancelReason                interface{} //
 	CountryCode                 interface{} //
 	VatNumber                   interface{} //
@@ -56,4 +56,5 @@ type Subscription struct {
 	Data                        interface{} //
 	ResponseData                interface{} //
 	PendingUpdateId             interface{} //
+	CreateAt                    interface{} // create utc time
 }

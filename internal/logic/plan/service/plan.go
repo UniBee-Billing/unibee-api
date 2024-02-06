@@ -6,16 +6,16 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/merchant/plan"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/gateway/api"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
+	v1 "unibee-api/api/merchant/plan"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/gateway/api"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func SubscriptionPlanPublish(ctx context.Context, planId int64) (err error) {
@@ -186,6 +186,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		GatewayProductName:        req.ProductName,
 		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
+		CreateAt:                  gtime.Now().Timestamp(),
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/query"
+	"unibee-api/internal/query"
 
-	"go-oversea-pay/api/merchant/user"
+	"unibee-api/api/merchant/user"
 )
 
 func (c *ControllerUser) Get(ctx context.Context, req *user.GetReq) (res *user.GetRes, err error) {

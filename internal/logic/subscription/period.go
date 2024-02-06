@@ -3,9 +3,9 @@ package subscription
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 	"strings"
 )
 

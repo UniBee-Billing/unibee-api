@@ -19,4 +19,5 @@ type GatewayVatRate struct {
 	GatewayId        interface{} // gateway_id
 	GatewayVatRateId interface{} // gateway_vat_rate_Id
 	IsDeleted        interface{} // 0-UnDeleted，1-Deleted
+	CreateAt         interface{} // create utc time
 }

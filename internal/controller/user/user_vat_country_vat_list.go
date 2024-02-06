@@ -2,9 +2,9 @@ package user
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/vat_gateway"
+	"unibee-api/internal/logic/vat_gateway"
 
-	"go-oversea-pay/api/user/vat"
+	"unibee-api/api/user/vat"
 )
 
 func (c *ControllerVat) CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error) {

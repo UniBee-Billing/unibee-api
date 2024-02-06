@@ -3,13 +3,13 @@ package merchant
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	subscription2 "go-oversea-pay/api/user/subscription"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
-	"go-oversea-pay/utility"
+	subscription2 "unibee-api/api/user/subscription"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/subscription/service"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/subscription"
+	"unibee-api/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error) {

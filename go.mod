@@ -1,4 +1,4 @@
-module go-oversea-pay
+module unibee-api
 
 go 1.21
 

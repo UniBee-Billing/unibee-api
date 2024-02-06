@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/invoice/handler"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/invoice"
+	"unibee-api/api/merchant/invoice"
 )
 
 func (c *ControllerInvoice) SubscriptionInvoiceSendEmail(ctx context.Context, req *invoice.SubscriptionInvoiceSendEmailReq) (res *invoice.SubscriptionInvoiceSendEmailRes, err error) {

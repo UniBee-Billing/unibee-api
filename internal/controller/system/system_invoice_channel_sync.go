@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"go-oversea-pay/api/system/invoice"
+	"unibee-api/api/system/invoice"
 )
 
 func (c *ControllerInvoice) ChannelSync(ctx context.Context, req *invoice.ChannelSyncReq) (res *invoice.ChannelSyncRes, err error) {

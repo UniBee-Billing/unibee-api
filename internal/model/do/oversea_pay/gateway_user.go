@@ -20,4 +20,5 @@ type GatewayUser struct {
 	GatewayUserId               interface{} // gateway_user_Id
 	IsDeleted                   interface{} // 0-UnDeleted，1-Deleted
 	GatewayDefaultPaymentMethod interface{} // gateway_default_payment_method
+	CreateAt                    interface{} // create utc time
 }

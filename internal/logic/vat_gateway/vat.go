@@ -4,15 +4,16 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/merchant_config"
-	vat "go-oversea-pay/internal/logic/vat_gateway/github"
-	"go-oversea-pay/internal/logic/vat_gateway/vatsense"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/interface"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/merchant_config"
+	vat "unibee-api/internal/logic/vat_gateway/github"
+	"unibee-api/internal/logic/vat_gateway/vatsense"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 )
 
 const (
@@ -145,6 +146,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 		CompanyName:     result.CompanyName,
 		CompanyAddress:  result.CompanyAddress,
 		ValidateMessage: result.ValidateMessage,
+		CreateAt:        gtime.Now().Timestamp(),
 	}
 	_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

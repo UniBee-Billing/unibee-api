@@ -24,4 +24,5 @@ type MerchantVatNumberVerifyHistory struct {
 	GmtModify       *gtime.Time // update time
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	ValidateMessage interface{} // validate_message
+	CreateAt        interface{} // create utc time
 }

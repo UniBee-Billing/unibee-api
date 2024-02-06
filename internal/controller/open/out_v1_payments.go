@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/api/open/payment"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/payment/service"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/open/payment"
+	"unibee-api/internal/consts"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/payment/service"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsReq) (res *payment.PaymentsRes, err error) {

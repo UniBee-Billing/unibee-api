@@ -2,14 +2,14 @@ package merchant
 
 import (
 	"context"
-	_plan "go-oversea-pay/api/merchant/plan"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/plan/service"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	_plan "unibee-api/api/merchant/plan"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/plan/service"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 	"strconv"
 	"strings"
 )

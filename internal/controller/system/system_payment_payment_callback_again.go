@@ -2,12 +2,12 @@ package system
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/internal/logic/payment/callback"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	"unibee-api/internal/logic/payment/callback"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/system/payment"
+	"unibee-api/api/system/payment"
 )
 
 func (c *ControllerPayment) PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error) {

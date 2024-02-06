@@ -27,6 +27,7 @@ type MerchantConfigColumns struct {
 	GmtCreate   string // create time
 	GmtModify   string // update time
 	IsDeleted   string // 0-UnDeleted，1-Deleted
+	CreateAt    string // create utc time
 }
 
 // merchantConfigColumns holds the columns for table merchant_config.
@@ -38,6 +39,7 @@ var merchantConfigColumns = MerchantConfigColumns{
 	GmtCreate:   "gmt_create",
 	GmtModify:   "gmt_modify",
 	IsDeleted:   "is_deleted",
+	CreateAt:    "create_at",
 }
 
 // NewMerchantConfigDao creates and returns a new DAO object for table data access.

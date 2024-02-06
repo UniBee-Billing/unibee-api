@@ -6,16 +6,16 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/internal/logic/invoice/invoice_compute"
-	subscription2 "go-oversea-pay/internal/logic/subscription"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/email"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/invoice/handler"
+	"unibee-api/internal/logic/invoice/invoice_compute"
+	subscription2 "unibee-api/internal/logic/subscription"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func HandleSubscriptionWebhookEvent(ctx context.Context, subscription *entity.Subscription, eventType string, details *ro.GatewayDetailSubscriptionInternalResp) error {
@@ -32,16 +32,18 @@ func UpdateSubWithGatewayDetailBack(ctx context.Context, subscription *entity.Su
 	if details.CancelAtPeriodEnd {
 		cancelAtPeriodEnd = 1
 	}
-	var firstPayTime *gtime.Time
-	if subscription.FirstPayTime == nil && details.Status == consts.SubStatusActive {
-		firstPayTime = gtime.Now()
+	var firstPaidAt int64 = 0
+	if subscription.FirstPaidAt == 0 && details.Status == consts.SubStatusActive {
+		firstPaidAt = gtime.Now().Timestamp()
+	} else {
+		firstPaidAt = subscription.FirstPaidAt
 	}
 	var gmtModify = subscription.GmtModify
 	if subscription.Status != int(details.Status) ||
 		subscription.CancelAtPeriodEnd != cancelAtPeriodEnd ||
 		subscription.BillingCycleAnchor != details.BillingCycleAnchor ||
 		subscription.TrialEnd != details.TrialEnd ||
-		subscription.FirstPayTime != firstPayTime {
+		subscription.FirstPaidAt != firstPaidAt {
 		gmtModify = gtime.Now()
 	}
 
@@ -58,7 +60,7 @@ func UpdateSubWithGatewayDetailBack(ctx context.Context, subscription *entity.Su
 		dao.Subscription.Columns().TrialEnd:                    details.TrialEnd,
 		dao.Subscription.Columns().DunningTime:                 dunningTime,
 		dao.Subscription.Columns().GmtModify:                   gmtModify,
-		dao.Subscription.Columns().FirstPayTime:                firstPayTime,
+		dao.Subscription.Columns().FirstPaidAt:                 firstPaidAt,
 	}).Where(dao.Subscription.Columns().Id, subscription.Id).OmitNil().Update()
 	if err != nil {
 		return err
@@ -82,7 +84,7 @@ func HandleSubscriptionCreatePaymentSuccess(ctx context.Context, sub *entity.Sub
 		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
-		dao.Subscription.Columns().FirstPayTime:           payment.PaidTime,
+		dao.Subscription.Columns().FirstPaidAt:            payment.PaidAt,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
@@ -148,9 +150,9 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
-	var firstPayTime = sub.FirstPayTime
-	if sub.FirstPayTime == nil && payment.Status == consts.PAY_SUCCESS {
-		firstPayTime = payment.PaidTime
+	var firstPaidAt int64 = 0
+	if sub.FirstPaidAt == 0 && payment.Status == consts.PAY_SUCCESS {
+		firstPaidAt = payment.PaidAt
 	}
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), uint64(sub.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -161,7 +163,7 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
-		dao.Subscription.Columns().FirstPayTime:           firstPayTime,
+		dao.Subscription.Columns().FirstPaidAt:            firstPaidAt,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err

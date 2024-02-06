@@ -31,4 +31,5 @@ type MerchantInfo struct {
 	FirstName   interface{} // first_name
 	LastName    interface{} // last_name
 	Phone       interface{} // phone
+	CreateAt    interface{} // create utc time
 }

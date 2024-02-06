@@ -6,14 +6,14 @@ package user
 
 import (
 	"context"
-	
-	"go-oversea-pay/api/user/auth"
-	"go-oversea-pay/api/user/invoice"
-	"go-oversea-pay/api/user/payment"
-	"go-oversea-pay/api/user/plan"
-	"go-oversea-pay/api/user/profile"
-	"go-oversea-pay/api/user/subscription"
-	"go-oversea-pay/api/user/vat"
+
+	"unibee-api/api/user/auth"
+	"unibee-api/api/user/invoice"
+	"unibee-api/api/user/payment"
+	"unibee-api/api/user/plan"
+	"unibee-api/api/user/profile"
+	"unibee-api/api/user/subscription"
+	"unibee-api/api/user/vat"
 )
 
 type IUserAuth interface {

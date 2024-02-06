@@ -18,4 +18,5 @@ type MerchantPayGatewayBinding struct {
 	MerchantId interface{} // merchant id
 	GatewayId  interface{} // gateway_id
 	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
+	CreateAt   interface{} // create utc time
 }

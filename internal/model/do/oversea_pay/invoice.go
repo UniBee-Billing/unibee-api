@@ -50,4 +50,5 @@ type Invoice struct {
 	RefundId                       interface{} // refundId
 	Data                           interface{} // data (json)
 	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
+	CreateAt                       interface{} // create utc time
 }

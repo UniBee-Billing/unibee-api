@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/invoice/service"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/invoice/service"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/invoice"
+	"unibee-api/api/merchant/invoice"
 )
 
 func (c *ControllerInvoice) CancelProcessingInvoice(ctx context.Context, req *invoice.CancelProcessingInvoiceReq) (res *invoice.CancelProcessingInvoiceRes, err error) {

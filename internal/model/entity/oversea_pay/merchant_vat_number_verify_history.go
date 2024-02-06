@@ -22,4 +22,5 @@ type MerchantVatNumberVerifyHistory struct {
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`           // update time
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	ValidateMessage string      `json:"validateMessage" description:"validate_message"`      // validate_message
+	CreateAt        int64       `json:"createAt"        description:"create utc time"`       // create utc time
 }

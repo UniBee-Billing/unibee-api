@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/api/merchant/subscription"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
-	"go-oversea-pay/utility"
+	"unibee-api/api/merchant/subscription"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/subscription/service"
+	"unibee-api/utility"
 )
 
 func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error) {

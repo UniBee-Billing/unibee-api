@@ -34,4 +34,5 @@ type SubscriptionPlan struct {
 	IsDeleted                 interface{} // 0-UnDeleted，1-Deleted
 	BindingAddonIds           interface{} // binded addon planIds，split with ,
 	PublishStatus             interface{} // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
+	CreateAt                  interface{} // create utc time
 }

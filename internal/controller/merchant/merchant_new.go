@@ -5,7 +5,7 @@
 package merchant
 
 import (
-	"go-oversea-pay/api/merchant"
+	"unibee-api/api/merchant"
 )
 
 type ControllerPlan struct{}

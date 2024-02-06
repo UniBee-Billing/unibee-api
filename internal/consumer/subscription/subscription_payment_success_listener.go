@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/logic/user"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/logic/user"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type SubscriptionPaymentSuccessListener struct {

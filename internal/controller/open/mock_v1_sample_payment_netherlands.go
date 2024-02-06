@@ -3,12 +3,12 @@ package open
 import (
 	"context"
 	"github.com/google/uuid"
-	"go-oversea-pay/api/open/mock"
-	v12 "go-oversea-pay/api/open/payment"
-	"go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/open/mock"
+	v12 "unibee-api/api/open/payment"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock.SamplePaymentNetherlandsReq) (res *mock.SamplePaymentNetherlandsRes, err error) {

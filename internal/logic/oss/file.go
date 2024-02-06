@@ -9,12 +9,12 @@ import (
 	"github.com/gogf/gf/v2/util/grand"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
 	"os"
 	"strconv"
 	"strings"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 // FileUploadInput
@@ -86,6 +86,7 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 		Url:      consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
 		FileName: uploadFileName,
 		Tag:      uploadPath,
+		CreateAt: gtime.Now().Timestamp(),
 	}
 	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitNil().Insert()
 	if err != nil {

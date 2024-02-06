@@ -2,10 +2,10 @@ package open
 
 import (
 	"context"
-	"go-oversea-pay/api/open/payment"
-	"go-oversea-pay/internal/logic/payment/service"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/open/payment"
+	"unibee-api/internal/logic/payment/service"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesReq) (res *payment.CapturesRes, err error) {

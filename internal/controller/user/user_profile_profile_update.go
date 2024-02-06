@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 
-	"go-oversea-pay/api/user/profile"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
+	"unibee-api/api/user/profile"
+	dao "unibee-api/internal/dao/oversea_pay"
 )
 
 func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error) {

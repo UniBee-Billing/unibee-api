@@ -5,13 +5,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/api"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 	"strings"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/api"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
@@ -62,6 +62,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 			PlanId:    planId,
 			GatewayId: gatewayId,
 			Status:    consts.GatewayPlanStatusInit,
+			CreateAt:  gtime.Now().Timestamp(),
 		}
 		//保存gatewayPlan
 		result, err := dao.GatewayPlan.Ctx(ctx).Data(gatewayPlan).OmitNil().Insert(gatewayPlan)

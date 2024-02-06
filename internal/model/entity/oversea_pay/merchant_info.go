@@ -29,4 +29,5 @@ type MerchantInfo struct {
 	FirstName   string      `json:"firstName"   description:"first_name"`            // first_name
 	LastName    string      `json:"lastName"    description:"last_name"`             // last_name
 	Phone       string      `json:"phone"       description:"phone"`                 // phone
+	CreateAt    int64       `json:"createAt"    description:"create utc time"`       // create utc time
 }

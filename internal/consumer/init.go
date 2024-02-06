@@ -1,6 +1,6 @@
 package consumer
 
 import (
-	_ "go-oversea-pay/internal/consumer/mock"
-	_ "go-oversea-pay/internal/consumer/subscription"
+	_ "unibee-api/internal/consumer/mock"
+	_ "unibee-api/internal/consumer/subscription"
 )

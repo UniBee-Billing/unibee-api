@@ -7,14 +7,14 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
 	"strconv"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/email"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
@@ -108,6 +108,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 			Lines:                          utility.MarshalToJsonString(simplify.Lines),
 			Link:                           payment.Link,
+			CreateAt:                       gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

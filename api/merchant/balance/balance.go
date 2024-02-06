@@ -2,7 +2,7 @@ package balance
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/gateway/ro"
 )
 
 type DetailQueryReq struct {

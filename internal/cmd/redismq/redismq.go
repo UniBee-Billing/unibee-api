@@ -2,8 +2,8 @@ package redismq
 
 import (
 	"github.com/redis/go-redis/v9"
-	"go-oversea-pay/internal/consts"
-	"go-oversea-pay/redismq"
+	"unibee-api/internal/consts"
+	"unibee-api/redismq"
 )
 
 var (

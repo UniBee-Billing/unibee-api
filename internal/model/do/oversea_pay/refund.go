@@ -27,7 +27,7 @@ type Refund struct {
 	RefundAmount         interface{} // refund amount, cent
 	RefundComment        interface{} // refund comment
 	Status               interface{} // status。10-pending，20-success，30-failure, 40-cancel
-	RefundTime           *gtime.Time // refund success time
+	RefundAt             interface{} // refund success time
 	GmtCreate            *gtime.Time // create time
 	GmtModify            *gtime.Time // update time
 	GatewayRefundId      interface{} // gateway refund id
@@ -37,4 +37,5 @@ type Refund struct {
 	AdditionalData       interface{} //
 	UniqueId             interface{} // unique id
 	SubscriptionId       interface{} // subscription id
+	CreateAt             interface{} // create utc time
 }

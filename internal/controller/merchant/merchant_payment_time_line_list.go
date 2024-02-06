@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/payment/service"
+	"unibee-api/internal/logic/payment/service"
 
-	"go-oversea-pay/api/merchant/payment"
+	"unibee-api/api/merchant/payment"
 )
 
 func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error) {

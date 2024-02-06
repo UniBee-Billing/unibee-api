@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type ListReq struct {

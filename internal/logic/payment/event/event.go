@@ -3,8 +3,9 @@ package event
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"github.com/gogf/gf/v2/os/gtime"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type TradeEventTypeEnum struct {
@@ -34,6 +35,7 @@ var (
 )
 
 func SaveEvent(ctx context.Context, overseaPayEvent entity.PaymentEvent) {
+	overseaPayEvent.CreateAt = gtime.Now().Timestamp()
 	_, err := dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
 	if err != nil {
 		g.Log().Errorf(ctx, `record insert failure %s`, err)

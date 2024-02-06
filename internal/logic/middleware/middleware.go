@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"fmt"
-	"go-oversea-pay/internal/consts"
-	_ "go-oversea-pay/internal/consts"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/auth"
-	"go-oversea-pay/internal/model"
-	"go-oversea-pay/internal/query"
-	utility "go-oversea-pay/utility"
+	"unibee-api/internal/consts"
+	_ "unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/auth"
+	"unibee-api/internal/model"
+	"unibee-api/internal/query"
+	utility "unibee-api/utility"
 	"strings"
 
 	"github.com/gogf/gf/v2/errors/gcode"

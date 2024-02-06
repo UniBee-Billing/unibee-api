@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/api"
-	handler2 "go-oversea-pay/internal/logic/payment/handler"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/api"
+	handler2 "unibee-api/internal/logic/payment/handler"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"go-oversea-pay/api/system/payment"
+	"unibee-api/api/system/payment"
 )
 
 func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.BulkChannelSyncReq) (res *payment.BulkChannelSyncRes, err error) {
@@ -52,9 +52,9 @@ func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.Bu
 				details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewayPaymentDetail(backgroundCtx, gateway, one.GatewayPaymentId)
 				details.UniqueId = details.GatewayPaymentId
 				if err == nil {
-					pay, err := handler2.CreateOrUpdateSubscriptionPaymentFromChannel(backgroundCtx, details)
+					pay, err := handler2.CreateOrUpdateSubscriptionPaymentFromGateway(backgroundCtx, details)
 					if err != nil {
-						fmt.Printf("BulkChannelSync Background CreateOrUpdateSubscriptionPaymentFromChannel GatewayPaymentIntentId:%s error%s\n", details.GatewayPaymentId, err.Error())
+						fmt.Printf("BulkChannelSync Background CreateOrUpdateSubscriptionPaymentFromGateway GatewayPaymentIntentId:%s error%s\n", details.GatewayPaymentId, err.Error())
 						return
 					}
 					_, _ = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{

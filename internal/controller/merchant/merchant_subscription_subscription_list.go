@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/subscription/service"
+	"unibee-api/internal/logic/subscription/service"
 
-	"go-oversea-pay/api/merchant/subscription"
+	"unibee-api/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error) {

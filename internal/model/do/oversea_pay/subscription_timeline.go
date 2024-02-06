@@ -21,6 +21,7 @@ type SubscriptionTimeline struct {
 	PeriodStartTime *gtime.Time // period start (datetime)
 	PeriodEndTime   *gtime.Time // period end (datatime)
 	GmtCreate       *gtime.Time // create time
+	GmtModify       *gtime.Time // update time
 	InvoiceId       interface{} // invoice id
 	UniqueId        interface{} // unique id
 	Currency        interface{} // currency
@@ -28,7 +29,7 @@ type SubscriptionTimeline struct {
 	Quantity        interface{} // quantity
 	AddonData       interface{} // plan addon json data
 	GatewayId       interface{} // gateway_id
-	GmtModify       *gtime.Time // update time
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} // unique key (deperated)
+	CreateAt        interface{} // create utc time
 }

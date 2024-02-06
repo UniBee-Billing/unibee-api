@@ -3,11 +3,11 @@ package user
 import (
 	"context"
 	"fmt"
-	"go-oversea-pay/api/user/auth"
-	auth2 "go-oversea-pay/internal/logic/auth"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/api/user/auth"
+	auth2 "unibee-api/internal/logic/auth"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"

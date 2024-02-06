@@ -37,6 +37,7 @@ type CountryRateColumns struct {
 	GmtCreate             string // create time
 	GmtModify             string // update time
 	IsDeleted             string // 0-UnDeleted，1-Deleted
+	CreateAt              string // create utc time
 }
 
 // countryRateColumns holds the columns for table country_rate.
@@ -58,6 +59,7 @@ var countryRateColumns = CountryRateColumns{
 	GmtCreate:             "gmt_create",
 	GmtModify:             "gmt_modify",
 	IsDeleted:             "is_deleted",
+	CreateAt:              "create_at",
 }
 
 // NewCountryRateDao creates and returns a new DAO object for table data access.

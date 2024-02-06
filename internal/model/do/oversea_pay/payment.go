@@ -19,6 +19,7 @@ type Payment struct {
 	UserId                 interface{} // user_id
 	SubscriptionId         interface{} // subscription id
 	GmtCreate              *gtime.Time // create time
+	GmtModify              *gtime.Time // update time
 	BizType                interface{} // biz_type 1-single payment, 3-subscription
 	BizId                  interface{} // biz_id
 	Currency               interface{} // currency，“SGD” “MYR” “PHP” “IDR” “THB”
@@ -36,11 +37,10 @@ type Payment struct {
 	GatewayPaymentIntentId interface{} // gateway_payment_intent_id
 	GatewayPaymentId       interface{} // gateway_payment_id
 	CaptureDelayHours      interface{} // capture_delay_hours
-	CreateTime             *gtime.Time // create time
-	CancelTime             *gtime.Time // cancel time
-	PaidTime               *gtime.Time // paid time
+	CreateAt               interface{} // create time
+	CancelAt               interface{} // cancel time
+	PaidAt                 interface{} // paid time
 	InvoiceId              interface{} // invoice id
-	GmtModify              *gtime.Time // update time
 	AppId                  interface{} // app id
 	ReturnUrl              interface{} // return url
 	GatewayEdition         interface{} // gateway edition

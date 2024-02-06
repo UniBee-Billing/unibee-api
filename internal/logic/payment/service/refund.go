@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	v1 "go-oversea-pay/api/open/payment"
-	redismqcmd "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/api"
-	"go-oversea-pay/internal/logic/payment/event"
-	"go-oversea-pay/internal/logic/payment/handler"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	v1 "unibee-api/api/open/payment"
+	redismqcmd "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/api"
+	"unibee-api/internal/logic/payment/event"
+	"unibee-api/internal/logic/payment/handler"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
@@ -82,8 +83,8 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.Refund
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway refund
-			//insert, err := transaction.Insert(dao.OverseaRefund.Table(), overseaRefund, 100) //todo mark ignore nil field
 			one.UniqueId = one.RefundId
+			one.CreateAt = gtime.Now().Timestamp()
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()

@@ -6,9 +6,9 @@ package open
 
 import (
 	"context"
-	
-	"go-oversea-pay/api/open/mock"
-	"go-oversea-pay/api/open/payment"
+
+	"unibee-api/api/open/mock"
+	"unibee-api/api/open/payment"
 )
 
 type IOpenMock interface {

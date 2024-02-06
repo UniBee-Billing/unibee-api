@@ -6,28 +6,28 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "go-oversea-pay/api/open/payment"
-	"go-oversea-pay/api/user/subscription"
-	"go-oversea-pay/api/user/vat"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/logic/gateway/api"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/invoice/invoice_compute"
-	"go-oversea-pay/internal/logic/payment/service"
-	subscription2 "go-oversea-pay/internal/logic/subscription"
-	"go-oversea-pay/internal/logic/subscription/handler"
-	"go-oversea-pay/internal/logic/vat_gateway"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
 	"strconv"
 	"strings"
 	"time"
+	v1 "unibee-api/api/open/payment"
+	"unibee-api/api/user/subscription"
+	"unibee-api/api/user/vat"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/email"
+	"unibee-api/internal/logic/gateway/api"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/invoice/invoice_compute"
+	"unibee-api/internal/logic/payment/service"
+	subscription2 "unibee-api/internal/logic/subscription"
+	"unibee-api/internal/logic/subscription/handler"
+	"unibee-api/internal/logic/vat_gateway"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
@@ -277,6 +277,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		CurrentPeriodEnd:   prepare.Invoice.PeriodEnd,
 		DunningTime:        dunningTime,
 		BillingCycleAnchor: prepare.Invoice.PeriodStart,
+		CreateAt:           gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -798,6 +799,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		ProrationDate:        req.ProrationDate,
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
+		CreateAt:             gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)

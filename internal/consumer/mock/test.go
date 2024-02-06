@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	redismq2 "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type TestMessageListener struct {

@@ -27,4 +27,5 @@ type PaymentTimeline struct {
 	PaymentId      interface{} // PaymentId
 	Status         interface{} // 0-pending, 1-success, 2-failure
 	TimelineType   interface{} // 0-pay, 1-refund
+	CreateAt       interface{} // create utc time
 }

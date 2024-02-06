@@ -31,6 +31,7 @@ type MerchantUserAccountColumns struct {
 	Email      string // email
 	FirstName  string // first name
 	LastName   string // last name
+	CreateAt   string // create utc time
 }
 
 // merchantUserAccountColumns holds the columns for table merchant_user_account.
@@ -46,6 +47,7 @@ var merchantUserAccountColumns = MerchantUserAccountColumns{
 	Email:      "email",
 	FirstName:  "first_name",
 	LastName:   "last_name",
+	CreateAt:   "create_at",
 }
 
 // NewMerchantUserAccountDao creates and returns a new DAO object for table data access.

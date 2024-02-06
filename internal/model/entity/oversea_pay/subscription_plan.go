@@ -32,4 +32,5 @@ type SubscriptionPlan struct {
 	IsDeleted                 int         `json:"isDeleted"                 description:"0-UnDeleted，1-Deleted"`                          // 0-UnDeleted，1-Deleted
 	BindingAddonIds           string      `json:"bindingAddonIds"           description:"binded addon planIds，split with ,"`              // binded addon planIds，split with ,
 	PublishStatus             int         `json:"publishStatus"             description:"1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示"`   // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
+	CreateAt                  int64       `json:"createAt"                  description:"create utc time"`                                // create utc time
 }

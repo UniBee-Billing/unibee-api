@@ -2,10 +2,10 @@ package merchant
 
 import (
 	"context"
-	"go-oversea-pay/api/merchant/search"
-	"go-oversea-pay/internal/logic/auth"
-	"go-oversea-pay/internal/logic/invoice/service"
-	"go-oversea-pay/internal/query"
+	"unibee-api/api/merchant/search"
+	"unibee-api/internal/logic/auth"
+	"unibee-api/internal/logic/invoice/service"
+	"unibee-api/internal/query"
 	"strconv"
 	"strings"
 )

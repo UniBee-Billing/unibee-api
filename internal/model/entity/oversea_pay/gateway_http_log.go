@@ -19,4 +19,5 @@ type GatewayHttpLog struct {
 	GatewayId string      `json:"gatewayId" description:"gateway_id"`         // gateway_id
 	GmtCreate *gtime.Time `json:"gmtCreate" description:"create time"`        // create time
 	GmtModify *gtime.Time `json:"gmtModify" description:"update time"`        // update time
+	CreateAt  int64       `json:"createAt"  description:"create utc time"`    // create utc time
 }

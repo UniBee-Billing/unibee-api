@@ -6,20 +6,20 @@ package merchant
 
 import (
 	"context"
-	
-	"go-oversea-pay/api/merchant/auth"
-	"go-oversea-pay/api/merchant/balance"
-	"go-oversea-pay/api/merchant/invoice"
-	"go-oversea-pay/api/merchant/merchantinfo"
-	"go-oversea-pay/api/merchant/oss"
-	"go-oversea-pay/api/merchant/payment"
-	"go-oversea-pay/api/merchant/plan"
-	"go-oversea-pay/api/merchant/profile"
-	"go-oversea-pay/api/merchant/search"
-	"go-oversea-pay/api/merchant/subscription"
-	"go-oversea-pay/api/merchant/user"
-	"go-oversea-pay/api/merchant/vat"
-	"go-oversea-pay/api/merchant/webhook"
+
+	"unibee-api/api/merchant/auth"
+	"unibee-api/api/merchant/balance"
+	"unibee-api/api/merchant/invoice"
+	"unibee-api/api/merchant/merchantinfo"
+	"unibee-api/api/merchant/oss"
+	"unibee-api/api/merchant/payment"
+	"unibee-api/api/merchant/plan"
+	"unibee-api/api/merchant/profile"
+	"unibee-api/api/merchant/search"
+	"unibee-api/api/merchant/subscription"
+	"unibee-api/api/merchant/user"
+	"unibee-api/api/merchant/vat"
+	"unibee-api/api/merchant/webhook"
 )
 
 type IMerchantAuth interface {

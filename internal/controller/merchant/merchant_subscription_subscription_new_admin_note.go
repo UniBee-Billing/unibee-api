@@ -2,13 +2,14 @@ package merchant
 
 import (
 	"context"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"github.com/gogf/gf/v2/os/gtime"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"go-oversea-pay/api/merchant/subscription"
+	"unibee-api/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionNewAdminNote(ctx context.Context, req *subscription.SubscriptionNewAdminNoteReq) (res *subscription.SubscriptionNewAdminNoteRes, err error) {
@@ -16,6 +17,7 @@ func (c *ControllerSubscription) SubscriptionNewAdminNote(ctx context.Context, r
 		SubscriptionId: req.SubscriptionId,
 		MerchantUserId: req.MerchantUserId,
 		Note:           req.Note,
+		CreateAt:       gtime.Now().Timestamp(),
 	}
 
 	_, err = dao.SubscriptionAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)

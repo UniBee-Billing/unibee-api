@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"github.com/gogf/gf/v2/os/gtime"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 func DoSaveChannelLog(ctx context.Context, request string, url string, response string, memo string, requestId string, gatewayId string) {
@@ -17,6 +18,7 @@ func DoSaveChannelLog(ctx context.Context, request string, url string, response 
 		RequestId: requestId,
 		Mamo:      memo,
 		GatewayId: gatewayId,
+		CreateAt:  gtime.Now().Timestamp(),
 	}
 	_, err := dao.GatewayHttpLog.Ctx(ctx).Data(log).OmitNil().Insert(log)
 	if err != nil {

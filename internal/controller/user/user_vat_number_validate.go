@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	_interface "go-oversea-pay/internal/interface"
-	"go-oversea-pay/internal/logic/subscription/service"
-	"go-oversea-pay/utility"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/subscription/service"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/user/vat"
+	"unibee-api/api/user/vat"
 )
 
 func (c *ControllerVat) NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error) {

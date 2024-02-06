@@ -2,10 +2,10 @@ package balance
 
 import (
 	"context"
-	"go-oversea-pay/internal/logic/gateway/api"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/logic/gateway/api"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 )
 
 func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, gatewayId int64) (*ro.GatewayUserDetailQueryInternalResp, error) {

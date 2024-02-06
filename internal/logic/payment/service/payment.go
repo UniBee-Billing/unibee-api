@@ -7,20 +7,21 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	v1 "go-oversea-pay/api/open/payment"
-	redismqcmd "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/api"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	"go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/internal/logic/payment/callback"
-	"go-oversea-pay/internal/logic/payment/event"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	v1 "unibee-api/api/open/payment"
+	redismqcmd "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/api"
+	"unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/invoice/handler"
+	"unibee-api/internal/logic/payment/callback"
+	"unibee-api/internal/logic/payment/event"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayContext) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
@@ -66,9 +67,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//事务处理 gateway refund
-			//insert, err := transaction.Insert(dao.OverseaPay.Table(), createPayContext.Pay, 100)
+			//transaction gateway refund
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
+			createPayContext.Pay.CreateAt = gtime.Now().Timestamp()
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
 			if err != nil {
 				return err

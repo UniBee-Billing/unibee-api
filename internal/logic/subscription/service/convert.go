@@ -1,8 +1,8 @@
 package service
 
 import (
-	"go-oversea-pay/internal/logic/gateway/ro"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 func ConvertGatewayToRo(gateway *entity.MerchantGateway) *ro.OutGatewayRo {

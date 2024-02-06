@@ -30,4 +30,5 @@ type MerchantGateway struct {
 	WebhookKey       string      `json:"webhookKey"       description:"webhook_key"`                                               // webhook_key
 	WebhookSecret    string      `json:"webhookSecret"    description:"webhook_secret"`                                            // webhook_secret
 	UniqueProductId  string      `json:"uniqueProductId"  description:"unique  gateway productId, only stripe need"`               // unique  gateway productId, only stripe need
+	CreateAt         int64       `json:"createAt"         description:"create utc time"`                                           // create utc time
 }

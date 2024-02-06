@@ -26,7 +26,7 @@ type UserAccount struct {
 	Profession         string      `json:"profession"         description:"profession"`                                                                                               // profession
 	School             string      `json:"school"             description:"school"`                                                                                                   // school
 	Custom             string      `json:"custom"             description:"custom"`                                                                                                   // custom
-	NearTime           *gtime.Time `json:"nearTime"           description:"last login time"`                                                                                          // last login time
+	LastLoginAt        int64       `json:"lastLoginAt"        description:"last login time"`                                                                                          // last login time
 	IsRisk             int         `json:"isRisk"             description:"is risk account (deperated)"`                                                                              // is risk account (deperated)
 	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                               // gateway_id
 	Version            int         `json:"version"            description:"version"`                                                                                                  // version
@@ -52,4 +52,5 @@ type UserAccount struct {
 	RecurringAmount    int64       `json:"recurringAmount"    description:"total recurring amount, cent"`                                                                             // total recurring amount, cent
 	BillingType        int         `json:"billingType"        description:"1-recurring,2-one-time"`                                                                                   // 1-recurring,2-one-time
 	TimeZone           string      `json:"timeZone"           description:""`                                                                                                         //
+	CreateAt           int64       `json:"createAt"           description:"create utc time"`                                                                                          // create utc time
 }

@@ -25,13 +25,13 @@ type SubscriptionColumns struct {
 	UserId                      string // userId
 	GmtCreate                   string // create time
 	GmtModify                   string // update time
+	TaskTime                    string // task_time
 	Amount                      string // amount, cent
 	Currency                    string // currency
 	MerchantId                  string // merchant id
 	PlanId                      string // plan id
 	Quantity                    string // quantity
 	AddonData                   string // plan addon json data
-	TaskTime                    string // task_time
 	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-gateway sub, 1-unibee sub
 	GatewayId                   string // gateway_id
@@ -55,7 +55,7 @@ type SubscriptionColumns struct {
 	DunningTime                 string //
 	TrialEnd                    string // trial_end
 	ReturnUrl                   string //
-	FirstPayTime                string // first success payment time
+	FirstPaidAt                 string // first success payment time
 	CancelReason                string //
 	CountryCode                 string //
 	VatNumber                   string //
@@ -64,6 +64,7 @@ type SubscriptionColumns struct {
 	Data                        string //
 	ResponseData                string //
 	PendingUpdateId             string //
+	CreateAt                    string // create utc time
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -73,13 +74,13 @@ var subscriptionColumns = SubscriptionColumns{
 	UserId:                      "user_id",
 	GmtCreate:                   "gmt_create",
 	GmtModify:                   "gmt_modify",
+	TaskTime:                    "task_time",
 	Amount:                      "amount",
 	Currency:                    "currency",
 	MerchantId:                  "merchant_id",
 	PlanId:                      "plan_id",
 	Quantity:                    "quantity",
 	AddonData:                   "addon_data",
-	TaskTime:                    "task_time",
 	LatestInvoiceId:             "latest_invoice_id",
 	Type:                        "type",
 	GatewayId:                   "gateway_id",
@@ -103,7 +104,7 @@ var subscriptionColumns = SubscriptionColumns{
 	DunningTime:                 "dunning_time",
 	TrialEnd:                    "trial_end",
 	ReturnUrl:                   "return_url",
-	FirstPayTime:                "first_pay_time",
+	FirstPaidAt:                 "first_paid_at",
 	CancelReason:                "cancel_reason",
 	CountryCode:                 "country_code",
 	VatNumber:                   "vat_number",
@@ -112,6 +113,7 @@ var subscriptionColumns = SubscriptionColumns{
 	Data:                        "data",
 	ResponseData:                "response_data",
 	PendingUpdateId:             "pendingUpdateId",
+	CreateAt:                    "create_at",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

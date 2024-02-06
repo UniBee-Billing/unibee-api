@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	ossService "go-oversea-pay/internal/logic/oss"
+	ossService "unibee-api/internal/logic/oss"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"go-oversea-pay/api/merchant/oss"
+	"unibee-api/api/merchant/oss"
 )
 
 func (c *ControllerOss) FileUpload(ctx context.Context, req *oss.FileUploadReq) (res *oss.FileUploadRes, err error) {

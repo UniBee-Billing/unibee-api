@@ -8,18 +8,18 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	redismqcmd "go-oversea-pay/internal/cmd/redismq"
-	"go-oversea-pay/internal/consts"
-	dao "go-oversea-pay/internal/dao/oversea_pay"
-	"go-oversea-pay/internal/logic/gateway/ro"
-	handler2 "go-oversea-pay/internal/logic/invoice/handler"
-	"go-oversea-pay/internal/logic/payment/callback"
-	"go-oversea-pay/internal/logic/payment/event"
-	"go-oversea-pay/internal/logic/subscription/handler"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/redismq"
-	"go-oversea-pay/utility"
+	redismqcmd "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
+	handler2 "unibee-api/internal/logic/invoice/handler"
+	"unibee-api/internal/logic/payment/callback"
+	"unibee-api/internal/logic/payment/event"
+	"unibee-api/internal/logic/subscription/handler"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/redismq"
+	"unibee-api/utility"
 )
 
 type HandlePayReq struct {
@@ -224,7 +224,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelTime: gtime.Now(), dao.Payment.Columns().FailureReason: req.Reason},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelAt: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -296,7 +296,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelTime: gtime.Now(), dao.Payment.Columns().FailureReason: req.Reason},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelAt: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -369,12 +369,15 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	//	g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
 	//	return nil
 	//}
-
+	var paidAt = gtime.Now().Timestamp()
+	if req.PaidTime != nil {
+		paidAt = req.PaidTime.Timestamp()
+	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().Status:                 consts.PAY_SUCCESS,
-				dao.Payment.Columns().PaidTime:               req.PaidTime,
+				dao.Payment.Columns().PaidAt:                 paidAt,
 				dao.Payment.Columns().GatewayPaymentIntentId: req.GatewayPaymentIntentId,
 				dao.Payment.Columns().GatewayPaymentId:       req.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentMethod:   req.ChannelDefaultPaymentMethod,
@@ -454,7 +457,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 	one := query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
 	if gatewayPaymentRo.GatewaySubscriptionDetail != nil && gatewayPaymentRo.GatewayInvoiceDetail != nil {
 		// payment for subscription
-		payment, err := CreateOrUpdateSubscriptionPaymentFromChannel(ctx, gatewayPaymentRo)
+		payment, err := CreateOrUpdateSubscriptionPaymentFromGateway(ctx, gatewayPaymentRo)
 		// payment not first generate from system
 		if err != nil {
 			return err
@@ -549,7 +552,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 	return nil
 }
 
-func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) (*entity.Payment, error) {
+func CreateOrUpdateSubscriptionPaymentFromGateway(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) (*entity.Payment, error) {
 	utility.Assert(len(gatewayPaymentRo.UniqueId) > 0, "uniqueId invalid")
 	gatewayUser := query.GetGatewayUserByGatewayUserId(ctx, gatewayPaymentRo.GatewayUserId, gatewayPaymentRo.GatewayId)
 	utility.Assert(gatewayUser != nil, "gatewayUser not found")
@@ -591,9 +594,9 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, gatewayPa
 			GatewayId:              gatewayPaymentRo.GatewayId,
 			GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 			GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
-			CreateTime:             gatewayPaymentRo.CreateTime,
-			CancelTime:             gatewayPaymentRo.CancelTime,
-			PaidTime:               gatewayPaymentRo.PayTime,
+			CreateAt:               gatewayPaymentRo.CreateTime.Timestamp(),
+			CancelAt:               gatewayPaymentRo.CancelTime.Timestamp(),
+			PaidAt:                 gatewayPaymentRo.PayTime.Timestamp(),
 			FailureReason:          gatewayPaymentRo.CancelReason,
 			PaymentData:            gatewayPaymentRo.PaymentData,
 			AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
@@ -603,7 +606,7 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, gatewayPa
 		}
 		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateSubscriptionPaymentFromChannel record insert failure %s`, err.Error())
+			err = gerror.Newf(`CreateOrUpdateSubscriptionPaymentFromGateway record insert failure %s`, err.Error())
 			return nil, err
 		}
 		id, _ := result.LastInsertId()
@@ -625,9 +628,9 @@ func CreateOrUpdateSubscriptionPaymentFromChannel(ctx context.Context, gatewayPa
 			dao.Payment.Columns().AuthorizeStatus:        gatewayPaymentRo.AuthorizeStatus,
 			dao.Payment.Columns().GatewayId:              gatewayPaymentRo.GatewayId,
 			dao.Payment.Columns().GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
-			dao.Payment.Columns().CreateTime:             gatewayPaymentRo.CreateTime,
-			dao.Payment.Columns().CancelTime:             gatewayPaymentRo.CancelTime,
-			dao.Payment.Columns().PaidTime:               gatewayPaymentRo.PayTime,
+			dao.Payment.Columns().CreateAt:               gatewayPaymentRo.CreateTime.Timestamp(),
+			dao.Payment.Columns().CreateAt:               gatewayPaymentRo.CancelTime.Timestamp(),
+			dao.Payment.Columns().PaidAt:                 gatewayPaymentRo.PayTime.Timestamp(),
 			dao.Payment.Columns().FailureReason:          gatewayPaymentRo.CancelReason,
 			dao.Payment.Columns().PaymentData:            gatewayPaymentRo.PaymentData,
 			dao.Payment.Columns().AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
@@ -675,6 +678,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			PaymentId:      payment.PaymentId,
 			Status:         status,
 			TimelineType:   timeLineType,
+			CreateAt:       gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

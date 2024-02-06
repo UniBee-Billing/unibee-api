@@ -2,7 +2,7 @@ package calllback
 
 import (
 	"context"
-	entity "go-oversea-pay/internal/model/entity/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type MerchantOneTimePaymentCallback struct {

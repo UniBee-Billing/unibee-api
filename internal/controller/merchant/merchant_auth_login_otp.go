@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"go-oversea-pay/internal/logic/email"
-	"go-oversea-pay/internal/query"
-	"go-oversea-pay/utility"
+	"unibee-api/internal/logic/email"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
 
-	"go-oversea-pay/api/merchant/auth"
+	"unibee-api/api/merchant/auth"
 )
 
 func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {
