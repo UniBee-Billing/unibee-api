@@ -10,9 +10,16 @@
 
 ### For Env Local
 
-#### Local Run Add Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+#### Local Run Add Program Arguments Below: 
+```bash
+--nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+```
+If not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`
 
-##### ex: go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+##### ex: 
+```bash
+go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+```
 
 #### OpenApi V3 Doc：http://127.0.0.1:8088/unib/swagger
 
@@ -20,10 +27,14 @@
 
 #### OpenApi V3 Json：http://127.0.0.1:8088/unib/api.json
 
-#### Generate API Controller Shell：sh generate_ctrl.sh
-
-#### Generate DAO Code Shell：sh generale_dao.sh
-
+#### Generate Api Controller Shell：
+```bash
+sh generate_ctrl.sh
+```
+#### Generate Dao Code Shell：
+```bash
+sh generale_dao.sh
+```
 
 ### GoFrame Quick Start:
 - Github : https://github.com/gogf/gf
@@ -35,15 +46,18 @@
   - Generate Dao|Entity|DO After Database Table Change 
   - Doc https://goframe.org/pages/viewpage.action?pageId=3673173 (need delete config.yaml under root dic)
 
-#### Mysql Integration Needed
+#### Mysql Integration(Needed)
 
 - \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-#### Redis Integration Needed
+#### Redis Integration(Needed)
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
+- 
+#### Minio Integration(Needed For Invoice Pdf)
+- \_ "github.com/minio/minio-go/v7"
 
-#### Nacos Integration (Only In Stage & Local-Publish Will Remove)
+#### Nacos Integration
 ###### Program Params
 --nacos-ip={your_nacos_ip}\
 --nacos-port={your_nacos_port}\

@@ -11,43 +11,49 @@ import (
 )
 
 func Init() {
-	// 使用 flag 包声明命令行参数
+	// Use flag For Params
 	var (
-		nacosDisableArg   string
+		nacosEnableArg    string
 		nacosIpArg        string
 		nacosPortArg      string
 		nacosNamespaceArg string
 		nacosGroupArg     string
 		nacosDataIdArg    string
 	)
-	flag.StringVar(&nacosDisableArg, "nacos-disable", "false", "true|false")
+	flag.StringVar(&nacosEnableArg, "nacos-enable", "true", "true|false")
 	flag.StringVar(&nacosIpArg, "nacos-ip", os.Getenv("nacos.ip"), "ip or domain")
 	flag.StringVar(&nacosPortArg, "nacos-port", os.Getenv("nacos.port"), "port like 8848")
 	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "port like 8848")
 	flag.StringVar(&nacosGroupArg, "nacos-group", os.Getenv("nacos.group"), "nacos group")
 	flag.StringVar(&nacosDataIdArg, "nacos-data-id", os.Getenv("nacos.data.id"), "nacos dataid like hk-go-settings.yaml")
 
-	// 解析命令行参数
+	// Parse Params
 	flag.Parse()
 
-	_ = deleteFile(nacosConfigSyncFilePath) //删除原 nacos 文件
-	if g.IsEmpty(nacosDisableArg) || !strings.EqualFold(nacosDisableArg, "true") {
+	fmt.Printf("Nacos Eable:%s\n", nacosEnableArg)
+	if g.IsEmpty(nacosEnableArg) || strings.EqualFold(nacosEnableArg, "true") {
+		_ = deleteFile(nacosConfigSyncFilePath) //delete old config file
 		uPort, err := strconv.ParseUint(nacosPortArg, 10, 64)
 		if err != nil {
-			fmt.Println("port 转换失败:", err)
+			fmt.Println("Get Nacos Port:", err)
 			panic(err)
 		}
-		fmt.Printf("nacos ip:%s \n", nacosIpArg)
-		fmt.Printf("nacos port:%d \n", uPort)
-		fmt.Printf("nacos namespace:%s \n", nacosNamespaceArg)
-		fmt.Printf("nacos group:%s \n", nacosGroupArg)
-		fmt.Printf("nacos dataId:%s \n", nacosDataIdArg)
+		fmt.Printf("Nacos IP:%s \n", nacosIpArg)
+		fmt.Printf("Nacos Port:%d \n", uPort)
+		fmt.Printf("Nacos Namespace:%s \n", nacosNamespaceArg)
+		fmt.Printf("Nacos Group:%s \n", nacosGroupArg)
+		fmt.Printf("Nacos DataId:%s \n", nacosDataIdArg)
 
-		//获取nacos配置文件
+		//Get Config File From Nacos
 		nacosObj, _ := loadNacosConfig(strings.Trim(nacosIpArg, " "), uPort, strings.Trim(nacosNamespaceArg, " "), strings.Trim(nacosDataIdArg, " "), strings.Trim(nacosGroupArg, " "))
-		fmt.Println("nacos config filepath:", nacosObj.GetConfigFilePath())
+		fmt.Println("Nacos Config Filepath:", nacosObj.GetConfigFilePath())
 	} else {
-		fmt.Println("nacos disabled")
+		_, err := os.Stat(nacosConfigSyncFilePath)
+		if os.IsNotExist(err) {
+			panic(fmt.Sprintf("%s not found\n", nacosConfigSyncFilePath))
+		} else if err != nil {
+			panic(fmt.Sprintf("Stat %s Error:%s\n", nacosConfigSyncFilePath, err.Error()))
+		}
 	}
 }
 

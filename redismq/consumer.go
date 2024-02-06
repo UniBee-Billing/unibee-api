@@ -41,34 +41,34 @@ func StartRedisMqConsumer() {
 }
 
 func innerSettingConsumerName() {
-	// 获取本机的所有网络接口信息
+	// Check IP Interfaces
 	interfaces, err := net.Interfaces()
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	// 遍历所有网络接口
+	// range interfaces
 	for _, iface := range interfaces {
-		// 排除 lo（loopback）接口
+		// skip lo（loopback）
 		if iface.Flags&net.FlagLoopback == 0 {
-			// 获取该网络接口的所有地址信息
+			// Get ALL Addr
 			addrs, err := iface.Addrs()
 			if err != nil {
 				fmt.Println("Error:", err)
 				continue
 			}
 
-			// 遍历所有地址
+			// range addr
 			for _, addr := range addrs {
-				// 将地址转换为 IP 地址
+				// change to IPV4
 				ip, _, err := net.ParseCIDR(addr.String())
 				if err != nil {
 					fmt.Println("Error:", err)
 					continue
 				}
 
-				// 判断是否为 IPv4 地址
+				// Check IPv4 Addr
 				if ip.To4() != nil {
 					fmt.Printf("IPv4 Address: %s\n", ip)
 					consumerName = ip.String()
@@ -91,7 +91,7 @@ func tryCreateGroup(queueName string, topic string) {
 		}
 	}()
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Defer Close
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -103,10 +103,10 @@ func tryCreateGroup(queueName string, topic string) {
 		Tag:   "blank",
 		Body:  "test",
 	}
-	// 发送一条测试消息到 Stream
+	// Sent Test Stream Message
 	_, err := client.XAdd(context.Background(), message.toStreamAddArgsValues(queueName)).Result()
 	if err != nil {
-		fmt.Printf("MQ STREAM初始化 Group Failure Or Group Exsit exception:%s queueName:%s group:%s\n", err, queueName, GroupId)
+		fmt.Printf("MQ STREAM Setup Group Failure Or Group Exsit exception:%s queueName:%s group:%s\n", err, queueName, GroupId)
 	}
 	found := false
 	groups, _ := client.XInfoGroups(context.Background(), queueName).Result()
@@ -116,8 +116,8 @@ func tryCreateGroup(queueName string, topic string) {
 		}
 	}
 	if !found {
-		//尝试创建 Group
-		// 创建消费者组
+		// Try To Create Group
+		// Create Consumer Group
 		if err := client.XGroupCreateMkStream(context.Background(), queueName, GroupId, "$").Err(); err != nil {
 			fmt.Printf("MQ STREAM GroupId exsit queueName:%s groupId:%s err:%s \n", queueName, GroupId, err)
 			return
@@ -135,7 +135,7 @@ func tryCreateConsumer(queueName string, topic string) {
 		}
 	}()
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -170,7 +170,7 @@ func blockConsumerTopic(topic string) {
 
 func loopConsumer(topic string) {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -195,14 +195,14 @@ func loopConsumer(topic string) {
 		if message != nil {
 			if consumer := getConsumer(message); consumer != nil {
 				runConsumeMessage(consumer, message)
-				//找不到本地订阅方,塞回队列，ToDo mark 实现group拉取方式应该丢弃
+				//todo mark use group get message , should drop message which has no consumer
 			} else {
 				fmt.Printf("MQ STREAM Redismq Stream Receive Group:{} No Comsumer Drop message::%v\n", message)
 				messageAck(message)
 			}
 			count++
 		}
-		//当所有的队列都为空时休眠1s
+		//Sleep
 		if count == len(Topics) {
 			time.Sleep(1 * time.Second)
 		}
@@ -226,16 +226,16 @@ func loopTransactionChecker(topic string) {
 				} else if status == RollbackTransaction {
 					_, _ = rollbackTransactionPrepareMessage(message)
 				} else {
-					//保存数据次数，最多50次重试
+					//todo mark save send time，max retry times limit 50
 					if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*8 {
-						//超过8小时，事务消息丢入死信队列
+						//After 8 Hours，Transaction Message Drop To Death
 						putMessageToTransactionDeathQueue(topic, message)
 					}
 				}
 			} else {
 				// todo mark 检查优化处理没有checker 的情况，超过一定时间删除半消息
 				if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*24*7 {
-					//超过7天，事务消息回滚
+					//After 7 Days，Transaction Rollback
 					_, _ = rollbackTransactionPrepareMessage(message)
 				}
 			}
@@ -266,7 +266,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		}
 	}()
 	if message.isBoardCastingMessage() {
-		// todo mark 出现这种情况属于bug
+		// todo mark it's a bug
 		fmt.Printf("RedisMQ_Receive Stream Message Exception Group Receive Boardcast，Drop messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
 		return
 	}
@@ -275,7 +275,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		cost = utility.CurrentTimeMillis() - message.SendTime
 		//历史消息没有过期时间
 		if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*24*3 {
-			//超过3天消息定义为过期消息，丢弃
+			//message should expire after 3 days，drop
 			fmt.Printf("RedisMQ_Receive Stream Message Exception After 3 Days Drop Expired messageKey:%s message:%v\n ", GetMessageKey(message.Topic, message.Tag), message)
 			return
 		}
@@ -290,7 +290,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 				if pushTaskToResumeLater(consumer, message) {
 					messageAck(message)
 				} else {
-					// todo mark 进入Resumer流程失败,防止消息丢失
+					// todo mark enter Resume failure, avoid message loss
 				}
 				return
 			}
@@ -302,7 +302,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 			if pushTaskToResumeLater(consumer, message) {
 				messageAck(message)
 			} else {
-				// todo mark 进入Resumer流程失败,防止消息丢失
+				// todo mark enter Resume failure, avoid message loss
 			}
 		} else {
 			messageAck(message)
@@ -324,14 +324,14 @@ func messageAck(message *Message) {
 			return
 		}
 	}()
-	//todo mark messageId java 中有特殊处理
+	//todo mark messageId has special logic in java redismq implementation, should take focus future
 	//if strings.Contains(message.MessageId, "-") {
 	//
 	//} else {
 	//
 	//}
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -403,7 +403,7 @@ func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
 
 func putMessageToDeathQueue(topic string, id string, message *Message) bool {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -421,7 +421,7 @@ func putMessageToDeathQueue(topic string, id string, message *Message) bool {
 
 func putMessageToTransactionDeathQueue(topic string, message *Message) bool {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -448,7 +448,7 @@ func putMessageToTransactionDeathQueue(topic string, message *Message) bool {
 
 func fetchTransactionPrepareMessagesForChecker(topic string) []*Message {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -482,7 +482,7 @@ func startScheduleTrimStream() {
 	var maxLen = 10000
 	go func() {
 		client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-		// 关闭连接
+		// Close Conn
 		defer func(client *redis.Client) {
 			err := client.Close()
 			if err != nil {

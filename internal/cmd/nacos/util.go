@@ -45,7 +45,8 @@ func GetNacosConfig(ip string, port uint64, namespace string, group string, data
 	if err != nil {
 		fmt.Println("Error unmarshalling YAML:", err)
 	} else {
-		fmt.Printf(`Load Nacos Config: %+v\n`, consts.GetConfigInstance())
+		fmt.Printf(`Nacos Sync Config: %+v`, consts.GetConfigInstance())
+		fmt.Println("")
 	}
 
 	return content, err

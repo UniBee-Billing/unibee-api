@@ -62,7 +62,7 @@ func sendMessage(message *Message, source string) (bool, error) {
 	message.SendTime = utility.CurrentTimeMillis()
 	utility.Assert(len(message.MessageId) == 0, "Send Stream Need Blank MessageId")
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -87,7 +87,7 @@ func sendTransactionPrepareMessage(message *Message) (bool, error) {
 	message.MessageId = GenerateUniqueNo(message.Topic)
 	message.SendTime = utility.CurrentTimeMillis()
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -122,7 +122,7 @@ func rollbackTransactionPrepareMessage(message *Message) (bool, error) {
 
 func delTransactionPrepareMessage(message *Message) (bool, error) {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -149,7 +149,7 @@ func commitTransactionPrepareMessage(message *Message) (bool, error) {
 	oldMessageId := message.MessageId
 	message.MessageId = ""
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {

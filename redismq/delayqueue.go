@@ -33,7 +33,7 @@ func StartDelayBackgroundThread() {
 
 func polling() {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -59,7 +59,7 @@ func pollingCore(key string) {
 	}()
 
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {
@@ -103,7 +103,7 @@ func pollingCore(key string) {
 
 func SendDelay(message *Message, delay int64) (bool, error) {
 	client := redis.NewClient(SharedConfig().GetRedisStreamConfig())
-	// 关闭连接
+	// Close Conn
 	defer func(client *redis.Client) {
 		err := client.Close()
 		if err != nil {

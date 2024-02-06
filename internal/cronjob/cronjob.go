@@ -23,7 +23,7 @@ func StartCronJobs() {
 		sub.SubscriptionBillingCycleDunningInvoice(ctx, name)
 	}, name)
 	if err != nil {
-		g.Log().Print(ctx, "StartCronJobs Name:%s Err:%s", name, err.Error())
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", name, err.Error())
 	}
 	// every 10 second
 	var backName = "SubscriptionBillingCycleDunningInvoiceBackup"
@@ -31,7 +31,7 @@ func StartCronJobs() {
 		sub.SubscriptionBillingCycleDunningInvoice(ctx, backName)
 	}, backName)
 	if err != nil {
-		g.Log().Print(ctx, "StartCronJobs Name:%s Err:%s", backName, err.Error())
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", backName, err.Error())
 	}
 	// every hour
 	var httpLogDeleteTaskName = "httpLogDeleteTaskName"
@@ -39,7 +39,7 @@ func StartCronJobs() {
 
 	}, backName)
 	if err != nil {
-		g.Log().Print(ctx, "StartCronJobs Name:%s Err:%s", httpLogDeleteTaskName, err.Error())
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", httpLogDeleteTaskName, err.Error())
 	}
 	return
 }
