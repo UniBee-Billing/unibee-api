@@ -263,7 +263,7 @@ func (e Evonet) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 }
 
 func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
-	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.capture" + "?merchantTransID=" + payment.PaymentId
@@ -302,7 +302,7 @@ func (e Evonet) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 }
 
 func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.cancel" + "?merchantTransID=" + payment.PaymentId
@@ -337,7 +337,7 @@ func (e Evonet) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 }
 
 func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.payment"
@@ -383,7 +383,7 @@ func (e Evonet) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payme
 }
 
 func (e Evonet) GatewayRefund(ctx context.Context, gatewayPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(gatewayPayment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPayment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPayment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.refund" + "?merchantTransID=" + gatewayPayment.PaymentId
@@ -421,7 +421,7 @@ func (e Evonet) GatewayRefund(ctx context.Context, gatewayPayment *entity.Paymen
 }
 
 func (e Evonet) GatewayRefundStatusCheck(ctx context.Context, gatewayPayment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(gatewayPayment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPayment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPayment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	urlPath := "/g2/auth/payment/mer/" + gateway.GatewayAccountId + "/evo.e-commerce.refund"

@@ -9,12 +9,12 @@ const (
 type InvoiceStatusEnum int
 
 const (
-	InvoiceStatusInit       = 0 //初始化
-	InvoiceStatusPending    = 1 // 草稿-渠道状态
-	InvoiceStatusProcessing = 2 //打开可用于支付-渠道状态
-	InvoiceStatusPaid       = 3 //已支付-渠道状态
-	InvoiceStatusFailed     = 4 //支付失败-渠道状态
-	InvoiceStatusCancelled  = 5 //取消-渠道状态
+	InvoiceStatusInit       = 0 //
+	InvoiceStatusPending    = 1 //
+	InvoiceStatusProcessing = 2 //
+	InvoiceStatusPaid       = 3 //
+	InvoiceStatusFailed     = 4 //
+	InvoiceStatusCancelled  = 5 //
 )
 
 type SubscriptionStatusEnum int
@@ -22,14 +22,14 @@ type SubscriptionStatusEnum int
 const (
 	SubTypeDefault            = 0
 	SubTypeUniBeeControl      = 1
-	SubStatusInit             = 0 //初始化
-	SubStatusCreate           = 1 //创建-渠道状态
-	SubStatusActive           = 2 //有效-渠道状态
-	SubStatusPendingInActive  = 3 //PendingInActive
-	SubStatusCancelled        = 4 //取消-渠道状态
-	SubStatusExpired          = 5 //过期-渠道状态
-	SubStatusSuspended        = 6 //暂停-渠道状态
-	SubStatusIncomplete       = 7 //付款支付失败-渠道状态
+	SubStatusInit             = 0 //
+	SubStatusCreate           = 1 //
+	SubStatusActive           = 2 //
+	SubStatusPendingInActive  = 3 //
+	SubStatusCancelled        = 4 //
+	SubStatusExpired          = 5 //
+	SubStatusSuspended        = 6 //
+	SubStatusIncomplete       = 7 //
 	PendingSubStatusInit      = 0
 	PendingSubStatusCreate    = 1
 	PendingSubStatusFinished  = 2

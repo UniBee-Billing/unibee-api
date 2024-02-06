@@ -5,19 +5,19 @@ const (
 	BIZ_TYPE_INVOICE      = 2
 	BIZ_TYPE_SUBSCRIPTION = 3
 
-	WAITING_AUTHORIZED = 0 //待授权
-	AUTHORIZED         = 1 // 已授权
-	CAPTURE_REQUEST    = 2 //已发起捕获货已捕获
+	WAITING_AUTHORIZED = 0 //
+	AUTHORIZED         = 1 //
+	CAPTURE_REQUEST    = 2 //
 
 )
 
 type PayStatusEnum int
 
 const (
-	TO_BE_PAID  = 10 //待支付
-	PAY_SUCCESS = 20 // 支付成功
-	PAY_FAILED  = 30 //支付失败
-	PAY_CANCEL  = 40 //支付取消
+	TO_BE_PAID  = 10 //
+	PAY_SUCCESS = 20 //
+	PAY_FAILED  = 30 //
+	PAY_CANCEL  = 40 //
 )
 
 func (action PayStatusEnum) Description() string {
@@ -36,10 +36,10 @@ func (action PayStatusEnum) Description() string {
 type RefundStatusEnum int
 
 const (
-	REFUND_ING     = 10 //退款中
-	REFUND_SUCCESS = 20 //退款成功
-	REFUND_FAILED  = 30 //退款失败
-	REFUND_REVERSE = 40 //退款失败
+	REFUND_ING     = 10 //
+	REFUND_SUCCESS = 20 //
+	REFUND_FAILED  = 30 //
+	REFUND_REVERSE = 40 //
 )
 
 func (action RefundStatusEnum) Description() string {

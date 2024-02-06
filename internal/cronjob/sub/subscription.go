@@ -23,9 +23,9 @@ import (
 )
 
 func mainTask(ctx context.Context) {
-	//3 分钟 Invoice 未支付邮件提醒
-	//subscription cycle 支付邮件
-	//invoice 保留 3 天时间，每天到点提醒
+	//3 Min Invoice Out Of Pay Email
+	//Subscription Cycle Email
+	//Invoice 3 Day Out Of Pay Email
 }
 
 var (

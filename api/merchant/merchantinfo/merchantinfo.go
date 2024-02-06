@@ -6,7 +6,7 @@ import (
 )
 
 type MerchantInfoReq struct {
-	g.Meta `path:"/info" tags:"Merchant-Info-Controller" method:"get" summary:"get merchant Info"`
+	g.Meta `path:"/info" tags:"Merchant-Info-Controller" method:"get" summary:"Get Merchant Info"`
 }
 
 type MerchantInfoRes struct {
@@ -14,7 +14,7 @@ type MerchantInfoRes struct {
 }
 
 type MerchantInfoUpdateReq struct {
-	g.Meta      `path:"/update" tags:"Merchant-Info-Controller" method:"post" summary:"update merchant Info"`
+	g.Meta      `path:"/update" tags:"Merchant-Info-Controller" method:"post" summary:"Update Merchant Info"`
 	CompanyName string `p:"companyName" description:"company_name"` // company_name
 	Email       string `p:"email"       description:"email"`        // email
 	Address     string `p:"address"     description:"address"`      // address

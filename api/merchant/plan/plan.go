@@ -117,7 +117,7 @@ type SubscriptionPlanDetailRes struct {
 }
 
 type SubscriptionPlanExpireReq struct {
-	g.Meta    `path:"/subscription_plan_expire" tags:"Merchant-Plan-Controller" method:"post" summary:"Expired Plan"`
+	g.Meta    `path:"/subscription_plan_expire" tags:"Merchant-Plan-Controller" method:"post" summary:"Expire A Plan"`
 	PlanId    int64 `p:"planId" dc:"PlanId" v:"required"`
 	EmailCode int64 `p:"emailCode" dc:"Code From Email" v:"required"`
 }

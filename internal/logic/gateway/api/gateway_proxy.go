@@ -19,14 +19,14 @@ type GatewayKeyEnum struct {
 }
 
 var (
-	GatewayInvalid  = GatewayKeyEnum{-1, "无效支付"}
-	GatewayGrab     = GatewayKeyEnum{0, "Grab支付"}
-	GatewayKlarna   = GatewayKeyEnum{1, "Klarna支付"}
-	GatewayEvonet   = GatewayKeyEnum{2, "Evonet支付"}
-	GatewayPaypal   = GatewayKeyEnum{3, "Paypal支付"}
-	GatewayStripe   = GatewayKeyEnum{4, "Stripe支付"}
-	GatewayBlank    = GatewayKeyEnum{50, "0金额支付专用"}
-	GatewayAutoTest = GatewayKeyEnum{500, "自动化测试支付专用"}
+	GatewayInvalid  = GatewayKeyEnum{-1, "Invalid Gateway"}
+	GatewayGrab     = GatewayKeyEnum{0, "Grab"}
+	GatewayKlarna   = GatewayKeyEnum{1, "Klarna"}
+	GatewayEvonet   = GatewayKeyEnum{2, "Evonet"}
+	GatewayPaypal   = GatewayKeyEnum{3, "Paypal"}
+	GatewayStripe   = GatewayKeyEnum{4, "Stripe"}
+	GatewayBlank    = GatewayKeyEnum{50, "0 Payment"}
+	GatewayAutoTest = GatewayKeyEnum{500, "For Automatic Test Payment"}
 )
 
 type GatewayProxy struct {

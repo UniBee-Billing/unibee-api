@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// 接口文档：https://developer.paypal.com/docs/api/payments/v1/#payment_create
+// link：https://developer.paypal.com/docs/api/payments/v1/#payment_create
 // https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_transactions
 // clientId ATaWQ8G9oJNFyle9YCt59
 // Secret EHUy5GALkYr1Qp0n6MepJY8LnUwYCBIWElG4Iv_DO3mdYcbB2l6zwJxk99OrPhbdNRLk7GkHEqb5RHEA
@@ -111,7 +111,7 @@ func (p Paypal) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, s
 }
 
 func init() {
-	//注册 gateway_webhook_entry
+	// gateway_webhook_entry
 }
 
 // todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
@@ -129,7 +129,7 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 }
 
 func (p Paypal) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -144,7 +144,7 @@ func (p Paypal) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 		StartTime:     nil,
 		EffectiveTime: nil,
 		Quantity:      "",
-		//测试安装费
+		//Test Setup Fee
 		ShippingAmount: &paypal.Money{
 			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
 			Value:    "10",
@@ -185,7 +185,7 @@ func (p Paypal) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 	if err != nil {
 		return nil, err
 	}
-	//获取 Link
+	//Get Link
 	var link string
 	for _, item := range createSubscription.Links {
 		if strings.Compare(item.Rel, "approve") == 0 {
@@ -210,7 +210,7 @@ func (p Paypal) GatewaySubscriptionCancel(ctx context.Context, subscriptionCance
 
 // todo mark paypal 的 cancel 似乎是无法恢复的，和 stripe 不一样，需要确认是否有真实 cancel 的需求
 func (p Paypal) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -238,13 +238,13 @@ func Int(v int) *int {
 	return &v
 }
 
-// GatewaySubscriptionUpdate 新旧 Plan 需要在同一个 Product 下，你这个 Product 有什么用，stripe 不需要
-// 需要支付之后才能更新，stripe 不需要
+// GatewaySubscriptionUpdate 新旧 Plan 需要在同一个 Product 下，Product Seems Useless，stripe don't
+// Need Update After Paid，but stripe don't
 func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
-	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product未创建")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "GatewayId Invalid")
+	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product Not Created")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
+	utility.Assert(gateway != nil, "Gateway Not Found")
 	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
@@ -276,7 +276,7 @@ func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 				//		InvoiceDate: 1,
 				//		FixedPrice: paypal.Money{
 				//			Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-				//			Amount:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount * 2), //paypal 需要元为单位，小数点处理
+				//			Amount:    utility.ConvertCentToDollarStr(subscriptionRo.Plan.Amount * 2), //paypal need doller，cents should change
 				//		},
 				//		CreateTime: time.Now(),
 				//		UpdateTime: time.Now(),
@@ -288,7 +288,7 @@ func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 				AutoBillOutstanding: false,
 				SetupFee: paypal.Money{
 					Currency: strings.ToUpper(subscriptionRo.Plan.Currency),
-					Value:    "25", //todo mark 开户费在更新的时候似乎没有用处
+					Value:    "25", //todo mark
 				},
 				SetupFeeFailureAction:   paypal.SetupFeeFailureActionCancel,
 				PaymentFailureThreshold: 2,
@@ -321,7 +321,7 @@ func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 }
 
 func (p Paypal) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -358,7 +358,7 @@ func (p Paypal) GatewaySubscriptionDetails(ctx context.Context, plan *entity.Sub
 }
 
 func (p Paypal) GatewayPlanActive(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -376,7 +376,7 @@ func (p Paypal) GatewayPlanActive(ctx context.Context, plan *entity.Subscription
 }
 
 func (p Paypal) GatewayPlanDeactivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -394,7 +394,7 @@ func (p Paypal) GatewayPlanDeactivate(ctx context.Context, plan *entity.Subscrip
 }
 
 func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	if len(gateway.UniqueProductId) > 0 {
@@ -433,7 +433,7 @@ func (p Paypal) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 }
 
 func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	utility.Assert(len(gatewayPlan.GatewayProductId) > 0, "Product未创建")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -460,7 +460,7 @@ func (p Paypal) GatewayPlanCreateAndActivate(ctx context.Context, plan *entity.S
 					Version: 1,
 					FixedPrice: paypal.Money{
 						Currency: strings.ToUpper(plan.Currency),
-						Value:    utility.ConvertCentToDollarStr(plan.Amount, plan.Currency), //paypal 需要元为单位，小数点处理
+						Value:    utility.ConvertCentToDollarStr(plan.Amount, plan.Currency),
 					},
 					CreateTime: time.Now(),
 					UpdateTime: time.Now(),

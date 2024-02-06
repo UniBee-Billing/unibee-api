@@ -1,16 +1,16 @@
-# GoFrame Template For UniBee Recurring Payment Project
+# UniBee Recurring Payment Project Base On GoFrame Template 
 
-### Env Stage 
+### For Env Stage 
 
 #### Api Doc：http://unibee.top/unibee/swagger
 
-#### Stage Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
+#### Stage Information Doc https://unibee.atlassian.net/wiki/spaces/SD/pages/4292713/AWS+Develop+Environment
 
 ##### Mock-Controller Mock One Time Payment OpenApi (Test)
 
 ##### Open-Controller OpenApi (Token Need)
 
-### Env Local
+### For Env Local
 
 #### Local Run Add Program Arguments: --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
 
@@ -22,21 +22,25 @@
 
 
 ### Mark
-Quick Start:
+GoFrame Quick Start:
+- Github : https://github.com/gogf/gf
+- Doc : https://goframe.org/pages/viewpage.action?pageId=1114399
+- Api Generate Shell: gf gen ctrl (should have gf install)
+  - Generate Controller After Api Definition
+  - Doc https://goframe.org/pages/viewpage.action?pageId=93880327
+- Dao Generate Shell: gf gen dao (should have gf install)
+  - Generate Dao|Entity|DO After Database Table Change 
+  - Doc https://goframe.org/pages/viewpage.action?pageId=3673173 (need delete config.yaml under root dic)
 
-- https://goframe.org/pages/viewpage.action?pageId=1114399
-- goland api generate https://goframe.org/pages/viewpage.action?pageId=93880327
-- gf gen dao https://goframe.org/pages/viewpage.action?pageId=3673173 need delete config.yaml under root dic
-
-mysql Integration
+Mysql Integration
 
 - \_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 
-redis Integration
+Redis Integration
 
 - \_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 
-Nacos Integration (Only In Stage-Publish Need Remove)
+Nacos Integration (Only In Stage & Local-Publish Will Remove)
 Params
 --nacos-ip
 --nacos-port
@@ -58,27 +62,27 @@ https://openapi-generator.tech/docs/generators/
 Basic Directory Structure
 The basic directory structure of the GoFrame business project is as follows (using the Single Repo as an example) :
 
-/
-├── api
-├── hack
-├── internal
-│   ├── cmd
-│   ├── consts
-│   ├── controller
-│   ├── dao
-│   ├── logic
-│   ├── model
-│   |   ├── do
-│   │   └── entity
-│   └── service
-├── manifest
-├── resource
-├── utility
-├── go.mod
-└── main.go
+
+├── api\
+├── hack\
+├── internal\
+│   ├── cmd\
+│   ├── consts\
+│   ├── controller\
+│   ├── dao\
+│   ├── logic\
+│   ├── model\
+│   |   ├── do\
+│   │   └── entity\
+│   └── service\
+├── manifest\
+├── resource\
+├── utility\
+├── go.mod\
+└── main.go\
 🔥 Important note 🔥 : The engineering catalog of the framework adopts a universal design to meet the needs of different complex business projects, but the actual project can be appropriate to increase or decrease the default catalog according to the needs of the project. For example, if no i18n/template/protobuf requirement is required, delete the corresponding directory. For example, for very simple business projects (such as verification/demonstration projects), do not consider the use of rigorous dao/logic/model directory and features, then directly delete the corresponding directory, you can directly implement the business logic in the controller. Everything can be flexibly assembled by the developer!
 
-api External interface Defines the input/output data structure of the service provided externally. Considering the need for version management, api/xxx/v1... Exists.
+Api External interface Defines the input/output data structure of the service provided externally. Considering the need for version management, api/xxx/v1... Exists.
 hack tool scripts Store project development tools and scripts. For example, the configuration of CLI tools, various shell/bat scripts and other files.
 internal Internal logic Directory for storing service logic. Hide visibility from the outside through the Golang internal feature.
 - cmd CLI manages the directory. Multiple command lines can be managed and maintained.
@@ -92,10 +96,13 @@ All constant definitions for the project.
 
 Data Access Data access objects, a layer of abstract objects used to interact with the underlying database, contain only the most basic CURD methods
 - logic Service encapsulation Service logic encapsulation management, specific service logic implementation and encapsulation. Is often the most complex part of a project.
+- redismq Message System Core Implementation Base On Redis Stream
+- consumer Message Topic Consumer For Redis Stream 
+- cronjob CronJobs
 - model structure Model data structure management module, manage data entity objects, and input and output data structure definitions.
   -do domain objects are used to transform the service model and instance model in dao data operations. They are maintained by the tool and cannot be modified by users.
 - entity Data model A data model is a one-to-one relationship between a model and a data set. It is maintained by the tool and cannot be modified by users.
-- service Service interface Indicates the interface definition layer for decoupling service modules. The specific interface implementation is injected in logic.
+- [Deprecate]service Service interface Indicates the interface definition layer for decoupling service modules. The specific interface implementation is injected in logic.
   The manifest delivery list contains the files that compile, deploy, run, and configure the program. Common contents are as follows:
 - config Indicates the directory for storing configuration files.
 - docker image file Docker image related dependency files, script files, and so on.

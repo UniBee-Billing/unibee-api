@@ -16,5 +16,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	PaymentTimelines []*entity.PaymentTimeline `p:"paymentTimeline" dc:"paymentTimelines明细"`
+	PaymentTimelines []*entity.PaymentTimeline `p:"paymentTimeline" dc:"PaymentTimelines"`
 }

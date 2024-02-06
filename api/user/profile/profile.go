@@ -46,12 +46,8 @@ type ProfileUpdateReq struct {
 	TimeZone        string `p:"timeZone" dc:"User TimeZone"`
 	CountryCode     string `p:"countryCode" dc:"Country Code" v:"required"`
 	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
-	// Email string `p:"email" dc:"email" v:"required"`
-	// Password  string `p:"password" dc:"password" v:"required"`
 }
 
-// with token to be implemented in the future
 type ProfileUpdateRes struct {
 	User *entity.UserAccount `p:"user" dc:"User"`
-	// Token string `p:"token" dc:"token string"`
 }

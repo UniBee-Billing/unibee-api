@@ -37,7 +37,7 @@ var (
 					// _interface.Middleware().PreOpenApiAuth,
 				)
 				//group.Bind(
-				//	hello.NewV1(), //测试接口
+				//	hello.NewV1(),
 				//)
 			})
 
@@ -46,8 +46,8 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().PreOpenApiAuth,
 				)
-				router.OpenPayment(ctx, group) //开放平台接口
-				router.OpenMocks(ctx, group)   //Out本地测试用Mock接口
+				router.OpenPayment(ctx, group)
+				router.OpenMocks(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant", func(group *ghttp.RouterGroup) {
@@ -123,11 +123,11 @@ var (
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
-			// 通道支付 Redirect 回调
+			// Gateway Redirect
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
-			// 通道支付 MerchantWebhook 回调
+			// Gateway Webhook
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
-			//// 初始化通道 MerchantWebhook 配置
+			//// Gateway Webhook Setup
 			//gateway.CheckAndSetupGatewayWebhooks(ctx)
 
 			{

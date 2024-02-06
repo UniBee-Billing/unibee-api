@@ -272,12 +272,12 @@ func (s Stripe) GatewaySubscriptionNewTrialEnd(ctx context.Context, plan *entity
 	return details, nil
 }
 
-// 测试数据
-// 付款成功
+// Test Card Data
+// Payment Success
 // 4242 4242 4242 4242
-// 付款需要验证
+// Need 3DS
 // 4000 0025 0000 3155
-// 付款被拒绝
+// Reject
 // 4000 0000 0000 9995
 func (s Stripe) setUnibeeAppInfo() {
 	stripe.SetAppInfo(&stripe.AppInfo{
@@ -288,7 +288,7 @@ func (s Stripe) setUnibeeAppInfo() {
 }
 
 func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *ro.GatewayCreateSubscriptionInternalReq) (res *ro.GatewayCreateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -325,12 +325,6 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 			id, _ := result.LastInsertId()
 			gatewayVatRate.Id = uint64(uint(id))
 		}
-
-		//taxInclusive := true
-		//if subscriptionRo.Plan.TaxInclusive == 0 {
-		//	//税费不包含
-		//	taxInclusive = false
-		//}
 
 		var checkoutMode = true
 		if checkoutMode {
@@ -404,10 +398,10 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				Currency: stripe.String(strings.ToLower(subscriptionRo.Plan.Currency)), //小写
 				Items:    items,
 				//AutomaticTax: &stripe.SubscriptionAutomaticTaxParams{
-				//	Enabled: stripe.Bool(!taxInclusive), //Default值 false，表示不需要 stripe 计算税率，true 反之 todo 添加 item 里面的 tax_tates
+				//	Enabled: stripe.Bool(!taxInclusive), //Default false = need stripe compute tax，true != todo
 				//},
 				PaymentBehavior:  stripe.String("default_incomplete"),   // todo mark https://stripe.com/docs/api/subscriptions/create
-				CollectionMethod: stripe.String("charge_automatically"), //Default行为 charge_automatically，自动扣款
+				CollectionMethod: stripe.String("charge_automatically"), //Default charge_automatically，charge automatic
 				Metadata: map[string]string{
 					"SubId": subscriptionRo.Subscription.SubscriptionId,
 				},
@@ -499,7 +493,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 
 // GatewaySubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel?dashboard-or-api=api
 func (s Stripe) GatewaySubscriptionCancel(ctx context.Context, subscriptionCancelInternalReq *ro.GatewayCancelSubscriptionInternalReq) (res *ro.GatewayCancelSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionCancelInternalReq.Subscription.GatewayId > 0, "支付渠道异常")
+	utility.Assert(subscriptionCancelInternalReq.Subscription.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, subscriptionCancelInternalReq.Subscription.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -518,7 +512,7 @@ func (s Stripe) GatewaySubscriptionCancel(ctx context.Context, subscriptionCance
 
 // GatewaySubscriptionCancel https://stripe.com/docs/billing/subscriptions/cancel
 func (s Stripe) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -535,7 +529,7 @@ func (s Stripe) GatewaySubscriptionCancelAtPeriodEnd(ctx context.Context, plan *
 }
 
 func (s Stripe) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -552,7 +546,7 @@ func (s Stripe) GatewaySubscriptionCancelLastCancelAtPeriodEnd(ctx context.Conte
 }
 
 func (s Stripe) GatewaySubscriptionUpdateProrationPreview(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionPreviewInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -675,15 +669,15 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 			}
 			stripeSubscriptionItems = detail.Items.Data
 		}
-		//方案 1 遍历并删除，下周期生效，不支持 PendingUpdate
+		//Solution 1 range and delete，Effect Next Period，PendingUpdate Not Support
 		for _, item := range stripeSubscriptionItems {
-			//删除之前全部，新增 Plan 和 Addons 方式
+			//delete all，Add Plan and Addons
 			items = append(items, &stripe.SubscriptionItemsParams{
 				ID:      stripe.String(item.ID),
 				Deleted: stripe.Bool(true),
 			})
 		}
-		//新增新的项目
+		//Add Plan
 		items = append(items, &stripe.SubscriptionItemsParams{
 			Price:    stripe.String(subscriptionRo.GatewayPlan.GatewayPlanId),
 			Quantity: stripe.Int64(subscriptionRo.Quantity),
@@ -703,7 +697,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 			})
 		}
 	} else {
-		//使用PendingUpdate
+		//Use PendingUpdate
 		if len(subscriptionRo.Subscription.GatewayItemData) > 0 {
 			err := utility.UnmarshalFromJsonString(subscriptionRo.Subscription.GatewayItemData, &stripeSubscriptionItems)
 			if err != nil {
@@ -716,16 +710,16 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 			}
 			stripeSubscriptionItems = detail.Items.Data
 		}
-		//方案 2 EffectImmediate=true, 使用PendingUpdate，对于删除的 Plan 和 Addon，修改 Quantity 为 0
+		//Solution 2 EffectImmediate=true, Use PendingUpdate，Modify Quantity = 0 for Plan&Addon Need Delete，
 		newMap := make(map[string]int64)
 		for _, addon := range subscriptionRo.AddonPlans {
 			newMap[addon.AddonGatewayPlan.GatewayPlanId] = addon.Quantity
 		}
 		newMap[subscriptionRo.GatewayPlan.GatewayPlanId] = subscriptionRo.Quantity
-		//匹配
+		//Range Match
 		for _, item := range stripeSubscriptionItems {
 			if quantity, ok := newMap[item.Price.ID]; ok {
-				//替换
+				//Replace
 				items = append(items, &stripe.SubscriptionItemsParams{
 					ID:       stripe.String(item.ID),
 					Price:    stripe.String(item.Price.ID),
@@ -733,14 +727,13 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 				})
 				delete(newMap, item.Price.ID)
 			} else {
-				//删除之前全部，新增 Plan 和 Addons 方式
 				items = append(items, &stripe.SubscriptionItemsParams{
 					ID:       stripe.String(item.ID),
 					Quantity: stripe.Int64(0),
 				})
 			}
 		}
-		//新增剩余的
+		//Add Others
 		for GatewayPlanId, quantity := range newMap {
 			items = append(items, &stripe.SubscriptionItemsParams{
 				Price:    stripe.String(GatewayPlanId),
@@ -752,9 +745,9 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 	return items, nil
 }
 
-// GatewaySubscriptionUpdate 需保证同一个 Price 在 Items 中不能出现两份
+// GatewaySubscriptionUpdate Price Can Not Duplicate In Items
 func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -773,13 +766,13 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
 		} else {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
-			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete Only Some Attr Can Update,  Price Quantity
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 		}
 	} else {
 		if consts.NonEffectImmediatelyUsePendingUpdate {
 			params.ProrationDate = stripe.Int64(subscriptionRo.ProrationDate)
-			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete 只有部分字段可以更新 Price Quantity
+			params.PaymentBehavior = stripe.String("pending_if_incomplete") //pendingIfIncomplete Only Some Attr Can Update,  Price Quantity
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorAlwaysInvoice))
 		} else {
 			params.ProrationBehavior = stripe.String(string(stripe.SubscriptionSchedulePhaseProrationBehaviorNone))
@@ -804,7 +797,7 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 			Paid:            newInvoice.Paid,
 		}, nil
 	} else {
-		//EffectImmediate=false 不需要支付 获取的发票是之前最新的发票
+		//EffectImmediate=false Do Not Need Pay, The Invoice Is Old
 		return &ro.GatewayUpdateSubscriptionInternalResp{
 			Data: utility.FormatToJsonString(updateSubscription),
 			Paid: false,
@@ -812,9 +805,9 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 	}
 }
 
-// GatewaySubscriptionDetails 渠道最新状态，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
+// GatewaySubscriptionDetails，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 func (s Stripe) GatewaySubscriptionDetails(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan, subscription *entity.Subscription) (res *ro.GatewayDetailSubscriptionInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -845,7 +838,7 @@ func (s Stripe) GatewaySubscriptionDetails(ctx context.Context, plan *entity.Sub
 
 // GatewayPlanActive 使用 price 代替 plan  https://stripe.com/docs/api/plans
 func (s Stripe) GatewayPlanActive(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -861,13 +854,13 @@ func (s Stripe) GatewayPlanActive(ctx context.Context, targetPlan *entity.Subscr
 }
 
 func (s Stripe) GatewayPlanDeactivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.PriceParams{}
-	params.Active = stripe.Bool(false) // todo mark 使用这种方式可能不能用
+	params.Active = stripe.Bool(false) // todo mark this way may not work
 	result, err := price.Update(gatewayPlan.GatewayPlanId, params)
 	log.SaveChannelHttpLog("GatewayPlanDeactivate", params, result, err, "", nil, gateway)
 	if err != nil {
@@ -877,14 +870,14 @@ func (s Stripe) GatewayPlanDeactivate(ctx context.Context, targetPlan *entity.Su
 }
 
 func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreateProductInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	params := &stripe.ProductParams{
 		Active:      stripe.Bool(true),
-		Description: stripe.String(plan.GatewayProductDescription), // todo mark 暂时不确定 description 如果为空会怎么样
+		Description: stripe.String(plan.GatewayProductDescription), // todo mark not sure about if description is nil
 		Name:        stripe.String(plan.GatewayProductName),
 	}
 	if len(plan.ImageUrl) > 0 {
@@ -898,7 +891,7 @@ func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 	if err != nil {
 		return nil, err
 	}
-	//Prod 创建好了之后似乎并不是Active 状态 todo mark
+	//Prod Status Seems Not Active After Create todo mark
 	return &ro.GatewayCreateProductInternalResp{
 		GatewayProductId:     result.ID,
 		GatewayProductStatus: fmt.Sprintf("%v", result.Active),
@@ -906,7 +899,7 @@ func (s Stripe) GatewayProductCreate(ctx context.Context, plan *entity.Subscript
 }
 
 func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *entity.SubscriptionPlan, gatewayPlan *entity.GatewayPlan) (res *ro.GatewayCreatePlanInternalResp, err error) {
-	utility.Assert(gatewayPlan.GatewayId > 0, "支付渠道异常")
+	utility.Assert(gatewayPlan.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, gatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -920,7 +913,7 @@ func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *en
 	//	Product:  &stripe.PlanProductParams{ID: stripe.String("prod_NjpI7DbZx6AlWQ")},
 	//}
 	//result, err := plan.New(params)
-	// 使用 Price 代替 Plan https://stripe.com/docs/api/plans
+	// Price Replace Plan https://stripe.com/docs/api/plans
 	params := &stripe.PriceParams{
 		Currency:   stripe.String(strings.ToLower(targetPlan.Currency)),
 		UnitAmount: stripe.Int64(targetPlan.Amount),
@@ -936,7 +929,7 @@ func (s Stripe) GatewayPlanCreateAndActivate(ctx context.Context, targetPlan *en
 		//ProductData: &stripe.PriceProductDataParams{
 		//	ID:   stripe.String(gatewayPlan.GatewayProductId),
 		//	Name: stripe.String(targetPlan.PlanName),
-		//},//这里是创建的意思
+		//},//this is create
 	}
 	result, err := price.New(params)
 	log.SaveChannelHttpLog("GatewayPlanCreateAndActivate", params, result, err, "", nil, gateway)
@@ -1296,7 +1289,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 	}
 }
 
-// ContainString 检查字符串切片是否包含特定元素
+// ContainString
 func ContainString(slice []string, item string) bool {
 	for _, v := range slice {
 		if v == item {
@@ -1350,7 +1343,7 @@ func (s Stripe) GatewayRefundStatusCheck(ctx context.Context, payment *entity.Pa
 }
 
 func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(payment.GatewayId > 0, "支付渠道异常")
+	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
