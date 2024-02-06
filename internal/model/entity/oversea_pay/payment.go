@@ -35,9 +35,9 @@ type Payment struct {
 	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
 	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	CaptureDelayHours      int         `json:"captureDelayHours"      description:"capture_delay_hours"`                                                    // capture_delay_hours
-	CreateAt               int64       `json:"createAt"               description:"create time"`                                                            // create time
-	CancelAt               int64       `json:"cancelAt"               description:"cancel time"`                                                            // cancel time
-	PaidAt                 int64       `json:"paidAt"                 description:"paid time"`                                                              // paid time
+	CreateAt               int64       `json:"createAt"               description:"create time, utc time"`                                                  // create time, utc time
+	CancelAt               int64       `json:"cancelAt"               description:"cancel time, utc time"`                                                  // cancel time, utc time
+	PaidAt                 int64       `json:"paidAt"                 description:"paid time, utc time"`                                                    // paid time, utc time
 	InvoiceId              string      `json:"invoiceId"              description:"invoice id"`                                                             // invoice id
 	AppId                  string      `json:"appId"                  description:"app id"`                                                                 // app id
 	ReturnUrl              string      `json:"returnUrl"              description:"return url"`                                                             // return url
@@ -53,8 +53,8 @@ type Payment struct {
 	Link                   string      `json:"link"                   description:""`                                                                       //
 	PaymentData            string      `json:"paymentData"            description:"payment create data (json)"`                                             // payment create data (json)
 	UniqueId               string      `json:"uniqueId"               description:"unique id"`                                                              // unique id
-	BalanceStart           int64       `json:"balanceStart"           description:"balance_start"`                                                          // balance_start
-	BalanceEnd             int64       `json:"balanceEnd"             description:"balance_end"`                                                            // balance_end
+	BalanceStart           int64       `json:"balanceStart"           description:"balance_start, utc time"`                                                // balance_start, utc time
+	BalanceEnd             int64       `json:"balanceEnd"             description:"balance_end, utc time"`                                                  // balance_end, utc time
 	InvoiceData            string      `json:"invoiceData"            description:""`                                                                       //
 	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
 }

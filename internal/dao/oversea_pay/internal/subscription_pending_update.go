@@ -48,8 +48,8 @@ type SubscriptionPendingUpdateColumns struct {
 	MerchantUserId       string // merchant_user_id
 	Data                 string //
 	ResponseData         string //
-	EffectImmediate      string // 是否马上生效，0-否，1-是
-	EffectTime           string // effect_immediate=0, 预计生效时间 unit_time
+	EffectImmediate      string // effect immediate，0-no，1-yes
+	EffectTime           string // effect_immediate=0, effect time, utc_time
 	Note                 string // note
 	ProrationDate        string // merchant_user_id
 	CreateAt             string // create utc time

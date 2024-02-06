@@ -47,12 +47,12 @@ type SubscriptionColumns struct {
 	CancelAtPeriodEnd           string // whether cancel at period end，0-false | 1-true
 	GatewayLatestInvoiceId      string // gateway latest invoice id
 	LastUpdateTime              string //
-	CurrentPeriodStart          string // current_period_start
-	CurrentPeriodEnd            string // current_period_end
+	CurrentPeriodStart          string // current_period_start, utc time
+	CurrentPeriodEnd            string // current_period_end, utc time
 	CurrentPeriodStartTime      string //
 	CurrentPeriodEndTime        string //
 	BillingCycleAnchor          string // billing_cycle_anchor
-	DunningTime                 string //
+	DunningTime                 string // dunning_time, utc time
 	TrialEnd                    string // trial_end
 	ReturnUrl                   string //
 	FirstPaidAt                 string // first success payment time

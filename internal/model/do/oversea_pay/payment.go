@@ -37,9 +37,9 @@ type Payment struct {
 	GatewayPaymentIntentId interface{} // gateway_payment_intent_id
 	GatewayPaymentId       interface{} // gateway_payment_id
 	CaptureDelayHours      interface{} // capture_delay_hours
-	CreateAt               interface{} // create time
-	CancelAt               interface{} // cancel time
-	PaidAt                 interface{} // paid time
+	CreateAt               interface{} // create time, utc time
+	CancelAt               interface{} // cancel time, utc time
+	PaidAt                 interface{} // paid time, utc time
 	InvoiceId              interface{} // invoice id
 	AppId                  interface{} // app id
 	ReturnUrl              interface{} // return url
@@ -55,8 +55,8 @@ type Payment struct {
 	Link                   interface{} //
 	PaymentData            interface{} // payment create data (json)
 	UniqueId               interface{} // unique id
-	BalanceStart           interface{} // balance_start
-	BalanceEnd             interface{} // balance_end
+	BalanceStart           interface{} // balance_start, utc time
+	BalanceEnd             interface{} // balance_end, utc time
 	InvoiceData            interface{} //
 	GatewayPaymentMethod   interface{} //
 }

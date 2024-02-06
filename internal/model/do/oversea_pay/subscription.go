@@ -39,12 +39,12 @@ type Subscription struct {
 	CancelAtPeriodEnd           interface{} // whether cancel at period end，0-false | 1-true
 	GatewayLatestInvoiceId      interface{} // gateway latest invoice id
 	LastUpdateTime              interface{} //
-	CurrentPeriodStart          interface{} // current_period_start
-	CurrentPeriodEnd            interface{} // current_period_end
+	CurrentPeriodStart          interface{} // current_period_start, utc time
+	CurrentPeriodEnd            interface{} // current_period_end, utc time
 	CurrentPeriodStartTime      *gtime.Time //
 	CurrentPeriodEndTime        *gtime.Time //
 	BillingCycleAnchor          interface{} // billing_cycle_anchor
-	DunningTime                 interface{} //
+	DunningTime                 interface{} // dunning_time, utc time
 	TrialEnd                    interface{} // trial_end
 	ReturnUrl                   interface{} //
 	FirstPaidAt                 interface{} // first success payment time

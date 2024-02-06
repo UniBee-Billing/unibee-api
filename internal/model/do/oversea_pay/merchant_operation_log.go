@@ -21,7 +21,7 @@ type MerchantOperationLog struct {
 	BizType            interface{} // biz_type
 	OptTarget          interface{} // operation target
 	OptContent         interface{} // operation content
-	CreateAt           interface{} // operation create time
+	CreateAt           interface{} // operation create utc time
 	IsDelete           interface{} // 0-UnDeleted，1-Deleted
 	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // update time

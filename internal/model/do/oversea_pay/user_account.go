@@ -28,7 +28,7 @@ type UserAccount struct {
 	Profession         interface{} // profession
 	School             interface{} // school
 	Custom             interface{} // custom
-	LastLoginAt        interface{} // last login time
+	LastLoginAt        interface{} // last login time, utc time
 	IsRisk             interface{} // is risk account (deperated)
 	GatewayId          interface{} // gateway_id
 	Version            interface{} // version

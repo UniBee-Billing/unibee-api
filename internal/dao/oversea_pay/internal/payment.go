@@ -45,9 +45,9 @@ type PaymentColumns struct {
 	GatewayPaymentIntentId string // gateway_payment_intent_id
 	GatewayPaymentId       string // gateway_payment_id
 	CaptureDelayHours      string // capture_delay_hours
-	CreateAt               string // create time
-	CancelAt               string // cancel time
-	PaidAt                 string // paid time
+	CreateAt               string // create time, utc time
+	CancelAt               string // cancel time, utc time
+	PaidAt                 string // paid time, utc time
 	InvoiceId              string // invoice id
 	AppId                  string // app id
 	ReturnUrl              string // return url
@@ -63,8 +63,8 @@ type PaymentColumns struct {
 	Link                   string //
 	PaymentData            string // payment create data (json)
 	UniqueId               string // unique id
-	BalanceStart           string // balance_start
-	BalanceEnd             string // balance_end
+	BalanceStart           string // balance_start, utc time
+	BalanceEnd             string // balance_end, utc time
 	InvoiceData            string //
 	GatewayPaymentMethod   string //
 }

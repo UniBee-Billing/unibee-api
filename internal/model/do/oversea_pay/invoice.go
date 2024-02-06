@@ -42,8 +42,8 @@ type Invoice struct {
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} //
 	SubscriptionAmountExcludingTax interface{} //
-	PeriodStart                    interface{} // period_start
-	PeriodEnd                      interface{} // period_end
+	PeriodStart                    interface{} // period_start, utc time
+	PeriodEnd                      interface{} // period_end utc time
 	PeriodStartTime                *gtime.Time //
 	PeriodEndTime                  *gtime.Time //
 	PaymentId                      interface{} // paymentId

@@ -38,8 +38,8 @@ type SubscriptionPendingUpdate struct {
 	MerchantUserId       int64       `json:"merchantUserId"       description:"merchant_user_id"`                                                          // merchant_user_id
 	Data                 string      `json:"data"                 description:""`                                                                          //
 	ResponseData         string      `json:"responseData"         description:""`                                                                          //
-	EffectImmediate      int         `json:"effectImmediate"      description:"是否马上生效，0-否，1-是"`                                                            // 是否马上生效，0-否，1-是
-	EffectTime           int64       `json:"effectTime"           description:"effect_immediate=0, 预计生效时间 unit_time"`                                      // effect_immediate=0, 预计生效时间 unit_time
+	EffectImmediate      int         `json:"effectImmediate"      description:"effect immediate，0-no，1-yes"`                                               // effect immediate，0-no，1-yes
+	EffectTime           int64       `json:"effectTime"           description:"effect_immediate=0, effect time, utc_time"`                                 // effect_immediate=0, effect time, utc_time
 	Note                 string      `json:"note"                 description:"note"`                                                                      // note
 	ProrationDate        int64       `json:"prorationDate"        description:"merchant_user_id"`                                                          // merchant_user_id
 	CreateAt             int64       `json:"createAt"             description:"create utc time"`                                                           // create utc time

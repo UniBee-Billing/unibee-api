@@ -40,8 +40,8 @@ type Invoice struct {
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                             // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        description:""`                                                                       //
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" description:""`                                                                       //
-	PeriodStart                    int64       `json:"periodStart"                    description:"period_start"`                                                           // period_start
-	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end"`                                                             // period_end
+	PeriodStart                    int64       `json:"periodStart"                    description:"period_start, utc time"`                                                 // period_start, utc time
+	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end utc time"`                                                    // period_end utc time
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                       //
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                       //
 	PaymentId                      string      `json:"paymentId"                      description:"paymentId"`                                                              // paymentId

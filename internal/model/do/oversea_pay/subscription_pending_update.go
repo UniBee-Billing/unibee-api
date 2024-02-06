@@ -40,8 +40,8 @@ type SubscriptionPendingUpdate struct {
 	MerchantUserId       interface{} // merchant_user_id
 	Data                 interface{} //
 	ResponseData         interface{} //
-	EffectImmediate      interface{} // 是否马上生效，0-否，1-是
-	EffectTime           interface{} // effect_immediate=0, 预计生效时间 unit_time
+	EffectImmediate      interface{} // effect immediate，0-no，1-yes
+	EffectTime           interface{} // effect_immediate=0, effect time, utc_time
 	Note                 interface{} // note
 	ProrationDate        interface{} // merchant_user_id
 	CreateAt             interface{} // create utc time

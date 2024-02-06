@@ -36,7 +36,7 @@ type UserAccountColumns struct {
 	Profession         string // profession
 	School             string // school
 	Custom             string // custom
-	LastLoginAt        string // last login time
+	LastLoginAt        string // last login time, utc time
 	IsRisk             string // is risk account (deperated)
 	GatewayId          string // gateway_id
 	Version            string // version

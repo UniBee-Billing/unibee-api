@@ -50,8 +50,8 @@ type InvoiceColumns struct {
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string //
 	SubscriptionAmountExcludingTax string //
-	PeriodStart                    string // period_start
-	PeriodEnd                      string // period_end
+	PeriodStart                    string // period_start, utc time
+	PeriodEnd                      string // period_end utc time
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
 	PaymentId                      string // paymentId

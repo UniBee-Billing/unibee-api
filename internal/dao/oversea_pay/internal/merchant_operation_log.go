@@ -29,7 +29,7 @@ type MerchantOperationLogColumns struct {
 	BizType            string // biz_type
 	OptTarget          string // operation target
 	OptContent         string // operation content
-	CreateAt           string // operation create time
+	CreateAt           string // operation create utc time
 	IsDelete           string // 0-UnDeleted，1-Deleted
 	GmtCreate          string // create time
 	GmtModify          string // update time
