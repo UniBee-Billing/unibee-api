@@ -9,7 +9,10 @@ import (
 	"go-oversea-pay/internal/controller"
 	"go-oversea-pay/internal/controller/gateway_webhook_entry"
 	"go-oversea-pay/internal/cronjob"
+	dao "go-oversea-pay/internal/dao/xin"
 	_interface "go-oversea-pay/internal/interface"
+	entity "go-oversea-pay/internal/model/entity/xin"
+	"go-oversea-pay/utility"
 	"go-oversea-pay/utility/liberr"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -143,10 +146,15 @@ var (
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
 				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
 				if !consts.GetConfigInstance().IsServerDev() && !consts.GetConfigInstance().IsLocal() {
-					//g.Log().SetLevel(glog.LEVEL_ALL ^ glog.LEVEL_DEBU) // remote debug log
-					_ = g.Log().SetLevelStr("info") // remote debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
+					//g.Log().SetLevel(glog.LEVEL_ALL ^ glog.LEVEL_DEBU) // use bit migrate remove debug log
+					_ = g.Log().SetLevelStr("info") // remove debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
 				}
 				cronjob.StartCronJobs()
+			}
+			{
+				var oneTest *entity.Test
+				err = dao.Test.Ctx(ctx).Scan(&oneTest)
+				g.Log().Infof(ctx, "Test One is %s", utility.MarshalToJsonString(oneTest))
 			}
 
 			s.Run()

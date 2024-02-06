@@ -20,14 +20,20 @@ type TestDao struct {
 
 // TestColumns defines and stores column names for table test.
 type TestColumns struct {
-	Id   string //
-	Name string //
+	Id        string //
+	Name      string //
+	GmtCreate string //
+	GmtUpdate string //
+	PaidTime  string //
 }
 
 // testColumns holds the columns for table test.
 var testColumns = TestColumns{
-	Id:   "id",
-	Name: "name",
+	Id:        "id",
+	Name:      "name",
+	GmtCreate: "gmt_create",
+	GmtUpdate: "gmt_update",
+	PaidTime:  "paid_time",
 }
 
 // NewTestDao creates and returns a new DAO object for table data access.

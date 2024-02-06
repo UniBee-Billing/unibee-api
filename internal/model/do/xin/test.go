@@ -10,7 +10,10 @@ import (
 
 // Test is the golang structure of table test for DAO operations like Where/Data.
 type Test struct {
-	g.Meta `orm:"table:test, do:true"`
-	Id     interface{} //
-	Name   interface{} //
+	g.Meta    `orm:"table:test, do:true"`
+	Id        interface{} //
+	Name      interface{} //
+	GmtCreate interface{} //
+	GmtUpdate interface{} //
+	PaidTime  interface{} //
 }
