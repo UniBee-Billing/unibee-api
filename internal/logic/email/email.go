@@ -11,7 +11,6 @@ import (
 	"go-oversea-pay/internal/query"
 	"go-oversea-pay/utility"
 	"os"
-	"reflect"
 	"strings"
 
 	// entity "go-oversea-pay/internal/model/entity/oversea_pay"
@@ -131,30 +130,6 @@ type TemplateVariable struct {
 	Link                string `json:"Link"`
 }
 
-func ToMap(in interface{}) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-
-	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	if v.Kind() != reflect.Struct { // 非结构体返回错误提示
-		return nil, fmt.Errorf("ToMap only accepts struct or struct pointer; got %T", v)
-	}
-
-	t := v.Type()
-	// 遍历结构体字段
-	// 指定tagName值为map中key;字段值为map中value
-	for i := 0; i < v.NumField(); i++ {
-		fi := t.Field(i)
-		if tagValue := fi.Tag.Get("json"); tagValue != "" {
-			out[tagValue] = v.Field(i).Interface()
-		}
-	}
-	return out, nil
-}
-
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	var template *entity.EmailTemplate
@@ -165,7 +140,7 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tem
 	}
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(templateVariables != nil, "templateVariables not found")
-	variableMap, err := ToMap(templateVariables)
+	variableMap, err := utility.ReflectStructToMap(templateVariables)
 	if err != nil {
 		return err
 	}
