@@ -65,7 +65,7 @@ type Nacos struct {
 	port                                     uint64
 }
 
-// 初始化
+// init
 func loadNacosConfig(ip string, port uint64, namespace, dataId, group string) (n *Nacos, err error) {
 
 	n = &Nacos{
