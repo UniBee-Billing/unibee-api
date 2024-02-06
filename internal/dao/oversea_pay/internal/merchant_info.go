@@ -40,6 +40,7 @@ type MerchantInfoColumns struct {
 	LastName    string // last_name
 	Phone       string // phone
 	CreateAt    string // create utc time
+	TimeZone    string // merchant default time zone
 }
 
 // merchantInfoColumns holds the columns for table merchant_info.
@@ -64,6 +65,7 @@ var merchantInfoColumns = MerchantInfoColumns{
 	LastName:    "last_name",
 	Phone:       "phone",
 	CreateAt:    "create_at",
+	TimeZone:    "time_zone",
 }
 
 // NewMerchantInfoDao creates and returns a new DAO object for table data access.

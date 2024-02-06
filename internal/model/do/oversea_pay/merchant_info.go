@@ -32,4 +32,5 @@ type MerchantInfo struct {
 	LastName    interface{} // last_name
 	Phone       interface{} // phone
 	CreateAt    interface{} // create utc time
+	TimeZone    interface{} // merchant default time zone
 }

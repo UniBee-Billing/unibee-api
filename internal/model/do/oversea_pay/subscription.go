@@ -45,7 +45,7 @@ type Subscription struct {
 	CurrentPeriodEndTime        *gtime.Time //
 	BillingCycleAnchor          interface{} // billing_cycle_anchor
 	DunningTime                 interface{} // dunning_time, utc time
-	TrialEnd                    interface{} // trial_end
+	TrialEnd                    interface{} // trial_end, utc time
 	ReturnUrl                   interface{} //
 	FirstPaidAt                 interface{} // first success payment time
 	CancelReason                interface{} //

@@ -53,7 +53,7 @@ type SubscriptionColumns struct {
 	CurrentPeriodEndTime        string //
 	BillingCycleAnchor          string // billing_cycle_anchor
 	DunningTime                 string // dunning_time, utc time
-	TrialEnd                    string // trial_end
+	TrialEnd                    string // trial_end, utc time
 	ReturnUrl                   string //
 	FirstPaidAt                 string // first success payment time
 	CancelReason                string //
