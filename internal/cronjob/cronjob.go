@@ -37,7 +37,7 @@ func StartCronJobs() {
 	var httpLogDeleteTaskName = "httpLogDeleteTaskName"
 	_, err = gcron.AddSingleton(ctx, "* * */1 * * *", func(ctx context.Context) {
 
-	}, backName)
+	}, httpLogDeleteTaskName)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", httpLogDeleteTaskName, err.Error())
 	}

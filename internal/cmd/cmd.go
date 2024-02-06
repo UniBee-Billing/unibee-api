@@ -9,11 +9,10 @@ import (
 	"go-oversea-pay/internal/controller"
 	"go-oversea-pay/internal/controller/gateway_webhook_entry"
 	"go-oversea-pay/internal/cronjob"
-	dao "go-oversea-pay/internal/dao/xin"
 	_interface "go-oversea-pay/internal/interface"
-	entity "go-oversea-pay/internal/model/entity/xin"
 	"go-oversea-pay/utility"
 	"go-oversea-pay/utility/liberr"
+	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -26,7 +25,11 @@ var (
 		Usage: "main",
 		Brief: "start http server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
-
+			// Set Global TimeZone, Should Set Before Standard Time Package Init
+			err = gtime.SetTimeZone("UTC")
+			if err != nil {
+				panic(err)
+			}
 			s := g.Server()
 			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
@@ -152,9 +155,7 @@ var (
 				cronjob.StartCronJobs()
 			}
 			{
-				var oneTest *entity.Test
-				err = dao.Test.Ctx(ctx).Scan(&oneTest)
-				g.Log().Infof(ctx, "Test One is %s", utility.MarshalToJsonString(oneTest))
+				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
 			}
 
 			s.Run()
