@@ -8,7 +8,7 @@ import (
 )
 
 func MerchantUserAuth(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewAuth(),
@@ -17,7 +17,7 @@ func MerchantUserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func MerchantProfile(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// profile
 	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewProfile(),
@@ -27,7 +27,7 @@ func MerchantProfile(ctx context.Context, group *ghttp.RouterGroup) {
 
 // MerchantPlan 订阅类
 func MerchantPlan(ctx context.Context, group *ghttp.RouterGroup) {
-	// plan 库相关接口
+	// plan
 	group.Group("/plan", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewPlan(), //MerchantPlan Admin接口-Merchant Portal使用
@@ -37,7 +37,7 @@ func MerchantPlan(ctx context.Context, group *ghttp.RouterGroup) {
 
 // MerchantSubscrption 订阅类
 func MerchantSubscrption(ctx context.Context, group *ghttp.RouterGroup) {
-	// plan 库相关接口
+	// plan
 	group.Group("/subscription", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewSubscription(), //MerchantSubscription Admin接口-Merchant Portal使用
@@ -47,7 +47,7 @@ func MerchantSubscrption(ctx context.Context, group *ghttp.RouterGroup) {
 
 // MerchantInvoice 发票类
 func MerchantInvoice(ctx context.Context, group *ghttp.RouterGroup) {
-	// plan 库相关接口
+	// plan
 	group.Group("/invoice", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewInvoice(), //MerchantSubscription Admin接口-Merchant Portal使用
@@ -56,7 +56,7 @@ func MerchantInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/webhook", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewWebhook(), //Webhook接口-Go Server使用
@@ -65,7 +65,7 @@ func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func MerchantOss(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/oss", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewOss(), //Oss 文件接口-Go Server使用
@@ -74,7 +74,7 @@ func MerchantOss(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func MerchantVat(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/vat", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewVat(), //Vat 文件接口-Go Server使用
@@ -83,7 +83,7 @@ func MerchantVat(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func MerchantBalance(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/balance", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			merchant.NewBalance(), //Balance 文件接口-Go Server使用

@@ -22,6 +22,7 @@ type MerchantInfoUpdateReq struct {
 	FirstName   string `p:"firstName"   description:"first_name"`   // first_name
 	LastName    string `p:"lastName"    description:"last_name"`    // last_name
 	Phone       string `p:"phone"       description:"phone"`        // phone
+	TimeZone    string `p:"timeZone" description:"User TimeZone"`
 }
 
 type MerchantInfoUpdateRes struct {

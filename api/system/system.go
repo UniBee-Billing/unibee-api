@@ -6,12 +6,17 @@ package system
 
 import (
 	"context"
-
+	
+	"unibee-api/api/system/information"
 	"unibee-api/api/system/invoice"
 	"unibee-api/api/system/payment"
 	"unibee-api/api/system/refund"
 	"unibee-api/api/system/subscription"
 )
+
+type ISystemInformation interface {
+	MerchantInformation(ctx context.Context, req *information.MerchantInformationReq) (res *information.MerchantInformationRes, err error)
+}
 
 type ISystemInvoice interface {
 	BulkChannelSync(ctx context.Context, req *invoice.BulkChannelSyncReq) (res *invoice.BulkChannelSyncRes, err error)

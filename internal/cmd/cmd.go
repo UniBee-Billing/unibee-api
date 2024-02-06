@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
+	"time"
 	"unibee-api/internal/cmd/router"
 	"unibee-api/internal/cmd/swagger"
 	"unibee-api/internal/consts"
@@ -12,7 +13,6 @@ import (
 	_interface "unibee-api/internal/interface"
 	"unibee-api/utility"
 	"unibee-api/utility/liberr"
-	"time"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -116,6 +116,7 @@ var (
 					router.SystemInvoice(ctx, group)
 					router.SystemPayment(ctx, group)
 					router.SystemRefund(ctx, group)
+					router.SystemMerchantInformation(ctx, group)
 				})
 			}
 

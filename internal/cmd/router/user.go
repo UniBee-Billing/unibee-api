@@ -8,7 +8,7 @@ import (
 
 // UserAuth 工具类
 func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
-	// auth 库相关接口
+	// auth
 	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewAuth(),
@@ -18,7 +18,7 @@ func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 
 // UserPlan 工具类
 func UserPlan(ctx context.Context, group *ghttp.RouterGroup) {
-	// subscription 库相关接口
+	// subscription
 	group.Group("/plan", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewPlan(),
@@ -28,7 +28,7 @@ func UserPlan(ctx context.Context, group *ghttp.RouterGroup) {
 
 // UserSubscription 工具类
 func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
-	// subscription 库相关接口
+	// subscription
 	group.Group("/subscription", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewSubscription(),
@@ -38,7 +38,7 @@ func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 
 // UserProfile 工具类
 func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// profile
 	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewProfile(),
@@ -48,7 +48,7 @@ func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 
 // UserVat 工具类
 func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
-	// vat 库相关接口
+	// vat
 	group.Group("/", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewVat(),
@@ -58,7 +58,7 @@ func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
 
 // UserInvoice 工具类
 func UserInvoice(ctx context.Context, group *ghttp.RouterGroup) {
-	// invoice 库相关接口
+	// invoice
 	group.Group("/invoice", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewInvoice(),
@@ -67,7 +67,7 @@ func UserInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func UserPayment(ctx context.Context, group *ghttp.RouterGroup) {
-	// invoice 库相关接口
+	// invoice
 	group.Group("/payment", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			user.NewPayment(),

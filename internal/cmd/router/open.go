@@ -8,7 +8,7 @@ import (
 
 // OpenPayment 工具类的，不含业务属性的
 func OpenPayment(ctx context.Context, group *ghttp.RouterGroup) {
-	// payment 库相关接口
+	// payment
 	group.Group("/payment", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			open.NewPayment(), //开放平台接口
@@ -18,7 +18,7 @@ func OpenPayment(ctx context.Context, group *ghttp.RouterGroup) {
 
 // OpenMocks 工具类
 func OpenMocks(ctx context.Context, group *ghttp.RouterGroup) {
-	// xin_service 库相关接口
+	// xin_service
 	group.Group("/auth", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			open.NewMock(), //开放平台接口

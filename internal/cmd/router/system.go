@@ -7,7 +7,7 @@ import (
 )
 
 func SystemSubscription(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// profile
 	group.Group("/subscription", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			system.NewSubscription(),
@@ -16,7 +16,7 @@ func SystemSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func SystemInvoice(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// profile
 	group.Group("/invoice", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			system.NewInvoice(),
@@ -25,7 +25,7 @@ func SystemInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func SystemPayment(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// profile
 	group.Group("/payment", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			system.NewPayment(),
@@ -34,10 +34,19 @@ func SystemPayment(ctx context.Context, group *ghttp.RouterGroup) {
 }
 
 func SystemRefund(ctx context.Context, group *ghttp.RouterGroup) {
-	// profile 库相关接口
+	// refund
 	group.Group("/refund", func(group *ghttp.RouterGroup) {
 		group.Bind(
 			system.NewRefund(),
+		)
+	})
+}
+
+func SystemMerchantInformation(ctx context.Context, group *ghttp.RouterGroup) {
+	// Information
+	group.Group("/merchant", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			system.NewInformation(),
 		)
 	})
 }

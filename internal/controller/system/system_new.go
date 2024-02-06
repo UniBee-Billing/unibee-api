@@ -32,3 +32,9 @@ func NewRefund() system.ISystemRefund {
 	return &ControllerRefund{}
 }
 
+type ControllerInformation struct{}
+
+func NewInformation() system.ISystemInformation {
+	return &ControllerInformation{}
+}
+
