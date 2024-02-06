@@ -43,6 +43,7 @@ type ProfileUpdateReq struct {
 	TikTok          string `p:"tiktok" dc:"Tiktok"`
 	OtherSocialInfo string `p:"otherSocialInfo" dc:"Other Social Info"`
 	PaymentMethod   string `p:"paymentMethod" dc:"Payment Method"`
+	TimeZone        string `p:"timeZone" dc:"User TimeZone"`
 	CountryCode     string `p:"countryCode" dc:"Country Code" v:"required"`
 	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
 	// Email string `p:"email" dc:"email" v:"required"`

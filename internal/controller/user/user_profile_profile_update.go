@@ -28,6 +28,7 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 		dao.UserAccount.Columns().TikTok:          req.TikTok,
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
 		dao.UserAccount.Columns().PaymentMethod:   req.PaymentMethod,
+		dao.UserAccount.Columns().TimeZone:        req.TimeZone,
 		dao.UserAccount.Columns().CountryCode:     req.CountryCode,
 		dao.UserAccount.Columns().CountryName:     req.CountryName,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
@@ -35,12 +36,6 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 	if err != nil {
 		return nil, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	//}
 
-	// TODO: return the updated user account
 	return &profile.ProfileUpdateRes{}, nil
-	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

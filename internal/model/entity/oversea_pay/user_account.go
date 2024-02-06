@@ -51,4 +51,5 @@ type UserAccount struct {
 	SubscriptionStatus int         `json:"subscriptionStatus" description:"sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete"` // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    int64       `json:"recurringAmount"    description:"total recurring amount, cent"`                                                                             // total recurring amount, cent
 	BillingType        int         `json:"billingType"        description:"1-recurring,2-one-time"`                                                                                   // 1-recurring,2-one-time
+	TimeZone           string      `json:"timeZone"           description:""`                                                                                                         //
 }

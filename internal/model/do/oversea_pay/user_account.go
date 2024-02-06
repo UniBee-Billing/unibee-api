@@ -53,4 +53,5 @@ type UserAccount struct {
 	SubscriptionStatus interface{} // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    interface{} // total recurring amount, cent
 	BillingType        interface{} // 1-recurring,2-one-time
+	TimeZone           interface{} //
 }

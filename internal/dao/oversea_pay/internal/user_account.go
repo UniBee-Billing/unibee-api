@@ -61,6 +61,7 @@ type UserAccountColumns struct {
 	SubscriptionStatus string // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    string // total recurring amount, cent
 	BillingType        string // 1-recurring,2-one-time
+	TimeZone           string //
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -106,6 +107,7 @@ var userAccountColumns = UserAccountColumns{
 	SubscriptionStatus: "subscription_status",
 	RecurringAmount:    "recurring_amount",
 	BillingType:        "billing_type",
+	TimeZone:           "time_zone",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.
