@@ -112,7 +112,7 @@ type GatewayPaymentRo struct {
 }
 
 type OutGatewayRo struct {
-	GatewayId   uint64 `json:"gatewayId"`
+	Id          uint64 `json:"gatewayId"`
 	GatewayName string `json:"gatewayName"`
 }
 
@@ -336,7 +336,7 @@ type InvoiceDetailRo struct {
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"             description:"SubscriptionAmount,Cents"`
 	Currency                       string                 `json:"currency"                       description:"Currency"`
 	Lines                          []*InvoiceItemDetailRo `json:"lines"                          description:"lines json data"`
-	GatewayId                      int64                  `json:"gatewayId"                      description:"GatewayId"`
+	GatewayId                      int64                  `json:"gatewayId"                      description:"Id"`
 	Status                         int                    `json:"status"                         description:"Status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"`
 	SendStatus                     int                    `json:"sendStatus"                     description:"SendStatus，0-No | 1- YES"`
 	SendEmail                      string                 `json:"sendEmail"                      description:"SendEmail"`
@@ -358,6 +358,12 @@ type InvoiceDetailRo struct {
 	PeriodEnd                      int64                  `json:"periodEnd"                      description:"period_end"`
 	PaymentId                      string                 `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                 `json:"refundId"                       description:"refundId"`
+	Gateway                        *OutGatewayRo          `json:"gateway"                       description:"Gateway"`
+	MerchantInfo                   *entity.MerchantInfo   `json:"merchantInfo"                       description:"MerchantInfo"`
+	UserAccount                    *entity.UserAccount    `json:"userAccount"                       description:"UserAccount"`
+	Subscription                   *entity.Subscription   `json:"subscription"                       description:"Subscription"`
+	Payment                        *entity.Payment        `json:"payment"                       description:"Payment"`
+	Refund                         *entity.Refund         `json:"refund"                       description:"Refund"`
 }
 
 type PlanDetailRo struct {
@@ -405,7 +411,7 @@ type SubscriptionPendingUpdateDetail struct {
 	UpdateQuantity       int64                       `json:"updateQuantity"       description:"UpdateQuantity"`
 	AddonData            string                      `json:"addonData"            description:"plan addon json data"`
 	UpdateAddonData      string                      `json:"updateAddonData"     description:"UpdateAddonData"`
-	GatewayId            int64                       `json:"gatewayId"            description:"GatewayId"`
+	GatewayId            int64                       `json:"gatewayId"            description:"Id"`
 	UserId               int64                       `json:"userId"               description:"UserId"`
 	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"GmtModify"`
 	Paid                 int                         `json:"paid"                 description:"Paid"`

@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"strings"
 	"unibee-api/api/merchant/plan"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -10,8 +12,6 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strconv"
-	"strings"
 )
 
 type SubscriptionPlanListInternalReq struct {
@@ -138,7 +138,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 				if int64(planRo.Plan.Id) == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
 					outChannel := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
 					planRo.Gateways = append(planRo.Gateways, &ro2.OutGatewayRo{
-						GatewayId:   outChannel.Id,
+						Id:          outChannel.Id,
 						GatewayName: outChannel.Name,
 					})
 				}

@@ -111,7 +111,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		}
 		one = finishRes.Invoice
 	}
-	return &invoice.NewInvoiceCreateRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
+	return &invoice.NewInvoiceCreateRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
 
 func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
@@ -188,7 +188,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		}
 		one = finishRes.Invoice
 	}
-	return &invoice.NewInvoiceEditRes{Invoice: invoice_compute.ConvertInvoiceToRo(one)}, nil
+	return &invoice.NewInvoiceEditRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
 
 func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
@@ -246,7 +246,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	if err != nil {
 		return nil, err
 	}
-	checkInvoice(invoice_compute.ConvertInvoiceToRo(one))
+	checkInvoice(invoice_compute.ConvertInvoiceToRo(ctx, one))
 
 	merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
@@ -296,7 +296,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 
 	createRes, err := service.GatewayPaymentCreate(ctx, createPayContext)
 
-	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.GatewayId).GatewayInvoiceCreateAndPay(ctx, gateway, &ro.GatewayCreateInvoiceInternalReq{
+	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.Id).GatewayInvoiceCreateAndPay(ctx, gateway, &ro.GatewayCreateInvoiceInternalReq{
 	//	Invoice:      one,
 	//	InvoiceLines: lines,
 	//	PayMethod:    req.PayMethod,

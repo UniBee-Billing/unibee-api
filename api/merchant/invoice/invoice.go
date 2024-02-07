@@ -24,8 +24,14 @@ type SubscriptionInvoiceSendEmailRes struct {
 type SubscriptionInvoiceListReq struct {
 	g.Meta        `path:"/subscription_invoice_list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice List"`
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	FirstName     string `p:"firstName" dc:"FirstName" `
+	LastName      string `p:"lastName" dc:"LastName" `
+	Currency      string `p:"currency" dc:"Currency" `
+	Status        int    `p:"status" dc:"Status, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
+	AmountStart   int64  `p:"amountStart" dc:"AmountStart" `
+	AmountEnd     int64  `p:"amountEnd" dc:"AmountEnd" `
 	UserId        int    `p:"userId" dc:"UserId Filter, Default Filter All" `
-	SendEmail     int    `p:"sendEmail" dc:"SendEmail Filter , Default Filter All" `
+	SendEmail     string `p:"sendEmail" dc:"SendEmail Filter , Default Filter All" `
 	SortField     string `p:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType      string `p:"sortType" dc:"Sort，asc|desc，Default desc" `
 	DeleteInclude bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
@@ -42,7 +48,7 @@ type NewInvoiceCreateReq struct {
 	MerchantId int64                  `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int64                  `p:"userId" dc:"UserId" v:"required"`
 	TaxScale   int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
-	GatewayId  int64                  `p:"gatewayId" dc:"Gateway GatewayId"   v:"required" `
+	GatewayId  int64                  `p:"gatewayId" dc:"Gateway Id"   v:"required" `
 	Currency   string                 `p:"currency"   dc:"Currency" v:"required" `
 	Name       string                 `p:"name"   dc:"Name" `
 	Lines      []*NewInvoiceItemParam `p:"lines"              `
@@ -63,7 +69,7 @@ type NewInvoiceEditReq struct {
 	g.Meta    `path:"/new_invoice_edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
 	InvoiceId string                 `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
-	GatewayId int64                  `p:"gatewayId" dc:"Gateway GatewayId" `
+	GatewayId int64                  `p:"gatewayId" dc:"Gateway Id" `
 	Currency  string                 `p:"currency"   dc:"Currency" `
 	Name      string                 `p:"name"   dc:"Name" `
 	Lines     []*NewInvoiceItemParam `p:"lines"              `

@@ -14,6 +14,8 @@ import (
 	sub "github.com/stripe/stripe-go/v76/subscription"
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
+	"net/http"
+	"strings"
 	"unibee-api/internal/consts"
 	_gateway "unibee-api/internal/logic/gateway"
 	"unibee-api/internal/logic/gateway/api"
@@ -24,8 +26,6 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"net/http"
-	"strings"
 )
 
 type StripeWebhook struct {
@@ -426,7 +426,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 	if err != nil {
 		return err
 	}
-	//details.GatewayId = int64(gateway.Id)
+	//details.Id = int64(gateway.Id)
 	//utility.Assert(len(details.GatewayUserId) > 0, "invalid gatewayUserId")
 	//if payment.Invoice != nil {
 	//	//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 GatewaySubscriptionUpdateId
@@ -440,7 +440,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 	//	oneSub := query.GetSubscriptionByGatewaySubscriptionId(ctx, invoiceDetails.GatewaySubscriptionId)
 	//	if oneSub != nil {
 	//		plan := query.GetPlanById(ctx, oneSub.PlanId)
-	//		gatewayPlan := query.GetGatewayPlan(ctx, oneSub.PlanId, oneSub.GatewayId)
+	//		gatewayPlan := query.GetGatewayPlan(ctx, oneSub.PlanId, oneSub.Id)
 	//		subDetails, err := s.GatewaySubscriptionDetails(ctx, plan, gatewayPlan, oneSub)
 	//		if err != nil {
 	//			return err

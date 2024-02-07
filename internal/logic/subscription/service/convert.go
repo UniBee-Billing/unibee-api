@@ -10,7 +10,7 @@ func ConvertGatewayToRo(gateway *entity.MerchantGateway) *ro.OutGatewayRo {
 		return nil
 	}
 	return &ro.OutGatewayRo{
-		GatewayId:   gateway.Id,
+		Id:          gateway.Id,
 		GatewayName: gateway.Name,
 	}
 }
@@ -19,7 +19,7 @@ func ConvertChannelsToRos(gateways []*entity.MerchantGateway) []*ro.OutGatewayRo
 	var outChannelRos []*ro.OutGatewayRo
 	for _, gateway := range gateways {
 		outChannelRos = append(outChannelRos, &ro.OutGatewayRo{
-			GatewayId:   gateway.Id,
+			Id:          gateway.Id,
 			GatewayName: gateway.Name,
 		})
 	}

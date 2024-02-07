@@ -5,6 +5,10 @@ import (
 	"errors"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/plutov/paypal/v4"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 	"unibee-api/internal/consts"
 	"unibee-api/internal/logic/gateway/api/log"
 	"unibee-api/internal/logic/gateway/ro"
@@ -12,10 +16,6 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // link：https://developer.paypal.com/docs/api/payments/v1/#payment_create
@@ -241,7 +241,7 @@ func Int(v int) *int {
 // GatewaySubscriptionUpdate 新旧 Plan 需要在同一个 Product 下，Product Seems Useless，stripe don't
 // Need Update After Paid，but stripe don't
 func (p Paypal) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *ro.GatewayUpdateSubscriptionInternalReq) (res *ro.GatewayUpdateSubscriptionInternalResp, err error) {
-	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "GatewayId Invalid")
+	utility.Assert(subscriptionRo.GatewayPlan.GatewayId > 0, "Id Invalid")
 	utility.Assert(len(subscriptionRo.GatewayPlan.GatewayProductId) > 0, "Product Not Created")
 	gateway := util.GetGatewayById(ctx, subscriptionRo.GatewayPlan.GatewayId)
 	utility.Assert(gateway != nil, "Gateway Not Found")

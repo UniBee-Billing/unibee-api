@@ -9,10 +9,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
-	"unibee-api/utility"
 	"net"
 	"strings"
 	"time"
+	"unibee-api/utility"
 )
 
 const (
@@ -22,22 +22,24 @@ const (
 var consumerName = ""
 
 func StartRedisMqConsumer() {
-	innerSettingConsumerName()
-	if len(consumerName) == 0 {
-		fmt.Println("StartRedisMqConsumer Failed While ConsumerName Invalid")
-		return
-	}
-	StartDelayBackgroundThread()
-	fmt.Println("Redismq Start Delay Queue！！！！！！")
-	deathQueueName := GetDeathQueueName()
-	createStreamGroup(deathQueueName, "death_message")
-	fmt.Printf("Redismq Stream Init Death Queue deathQueueName:%s", deathQueueName)
-	innerLoadTransactionChecker()
-	fmt.Println("Redismq Finish Transaction Check Loader ！！！！！！")
-	innerLoadConsumer()
-	fmt.Println("Redismq Finish Default MQ Subscribe！！！！！！")
-	startScheduleTrimStream()
-	fmt.Println("Redismq Finish Queue Length Cut！！！！！！")
+	go func() {
+		innerSettingConsumerName()
+		if len(consumerName) == 0 {
+			fmt.Println("StartRedisMqConsumer Failed While ConsumerName Invalid")
+			return
+		}
+		StartDelayBackgroundThread()
+		fmt.Println("Redismq Start Delay Queue！！！！！！")
+		deathQueueName := GetDeathQueueName()
+		createStreamGroup(deathQueueName, "death_message")
+		fmt.Printf("Redismq Stream Init Death Queue deathQueueName:%s", deathQueueName)
+		innerLoadTransactionChecker()
+		fmt.Println("Redismq Finish Transaction Check Loader ！！！！！！")
+		innerLoadConsumer()
+		fmt.Println("Redismq Finish Default MQ Subscribe！！！！！！")
+		startScheduleTrimStream()
+		fmt.Println("Redismq Finish Queue Length Cut！！！！！！")
+	}()
 }
 
 func innerSettingConsumerName() {

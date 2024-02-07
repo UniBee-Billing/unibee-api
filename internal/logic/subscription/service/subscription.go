@@ -82,8 +82,8 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
 				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 gatewayId 合并查询
-				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
-				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v GatewayId:%v GatewayPlanStatus not active", param.AddonPlanId, gatewayId))
+				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
+				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.SubscriptionPlanAddonRo{
 					Quantity:         param.Quantity,
 					AddonPlan:        mapPlans[param.AddonPlanId],
@@ -114,7 +114,7 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId i
 func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.GatewayId > 0, "GatewayId invalid")
+	utility.Assert(req.GatewayId > 0, "Id invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	email := ""
 	if !consts.GetConfigInstance().IsLocal() {
@@ -412,7 +412,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
-	//utility.Assert(sub.GatewayId == req.ConfirmChannelId, "gateway not match")
+	//utility.Assert(sub.Id == req.ConfirmChannelId, "gateway not match")
 	// todo mark addon binding check
 
 	plan := query.GetPlanById(ctx, req.NewPlanId)
@@ -452,7 +452,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "newPlan must have same recurring interval to old")
 	}
 	//暂时不开放不同通道升级功能 todo mark
-	//oldPlanChannel := query.GetGatewayPlan(ctx, int64(oldPlan.Id), sub.GatewayId)
+	//oldPlanChannel := query.GetGatewayPlan(ctx, int64(oldPlan.Id), sub.Id)
 	//utility.Assert(oldPlanChannel != nil, "oldPlangateway not found")
 
 	var effectImmediate = false

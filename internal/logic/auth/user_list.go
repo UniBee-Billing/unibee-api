@@ -2,11 +2,11 @@ package auth
 
 import (
 	"context"
+	"strings"
 	dao "unibee-api/internal/dao/oversea_pay"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strings"
 )
 
 type UserListInternalReq struct {
@@ -109,7 +109,8 @@ func SearchUser(ctx context.Context, searchKey string) (list []*entity.UserAccou
 		var likeList []*entity.UserAccount
 		_ = dao.UserAccount.Ctx(ctx).
 			WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").
-			WhereOrLike(dao.UserAccount.Columns().UserName, "%"+searchKey+"%").
+			WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+searchKey+"%").
+			WhereOrLike(dao.UserAccount.Columns().LastName, "%"+searchKey+"%").
 			WhereOrLike(dao.UserAccount.Columns().CompanyName, "%"+searchKey+"%").
 			WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
 			Order(sortKey).

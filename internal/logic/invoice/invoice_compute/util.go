@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strconv"
 )
 
-func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
+func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.InvoiceDetailRo {
 	var lines []*ro.InvoiceItemDetailRo
 	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
 	for _, line := range lines {
@@ -54,6 +54,12 @@ func ConvertInvoiceToRo(invoice *entity.Invoice) *ro.InvoiceDetailRo {
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
+		Gateway:                        query.GetOutGatewayRoById(ctx, invoice.GatewayId),
+		MerchantInfo:                   query.GetMerchantInfoById(ctx, invoice.MerchantId),
+		UserAccount:                    query.GetUserAccountById(ctx, uint64(invoice.UserId)),
+		Subscription:                   query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId),
+		Payment:                        query.GetPaymentByPaymentId(ctx, invoice.PaymentId),
+		Refund:                         query.GetRefundByRefundId(ctx, invoice.RefundId),
 	}
 }
 

@@ -41,7 +41,7 @@ type SubscriptionCreatePreviewReq struct {
 	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription Preview"`
 	PlanId         int64                              `p:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	GatewayId      int64                              `p:"gatewayId" dc:"GatewayId"   v:"required" `
+	GatewayId      int64                              `p:"gatewayId" dc:"Id"   v:"required" `
 	UserId         int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	VatCountryCode string                             `p:"vatCountryCode" dc:"VatCountryCode, CountryName"`
@@ -69,7 +69,7 @@ type SubscriptionCreateReq struct {
 	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription"`
 	PlanId             int64                              `p:"planId" dc:"PlanId" v:"required"`
 	Quantity           int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          int64                              `p:"gatewayId" dc:"GatewayId"   v:"required" `
+	GatewayId          int64                              `p:"gatewayId" dc:"Id"   v:"required" `
 	UserId             int64                              `p:"userId" dc:"UserId" v:"required"`
 	AddonParams        []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `

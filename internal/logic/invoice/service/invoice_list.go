@@ -2,18 +2,24 @@ package service
 
 import (
 	"context"
+	"strings"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/invoice/invoice_compute"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
-	"strings"
 )
 
 type SubscriptionInvoiceListInternalReq struct {
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId        int    `p:"userId" dc:"FilterUserId Default All" `
-	SendEmail     int    `p:"sendEmail" dc:"Filter SendEmail Default All" `
+	FirstName     string `p:"firstName" dc:"FirstName" `
+	LastName      string `p:"lastName" dc:"LastName" `
+	Currency      string `p:"Currency" dc:"Currency" `
+	Status        int    `p:"status" dc:"Status" `
+	AmountStart   int64  `p:"amountStart" dc:"AmountStart" `
+	AmountEnd     int64  `p:"amountEnd" dc:"AmountEnd" `
+	UserId        int    `p:"userId" dc:"Filter UserId Default All" `
+	SendEmail     string `p:"sendEmail" dc:"Filter SendEmail Default All" `
 	SortField     string `p:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
 	SortType      string `p:"sortType" dc:"Sort Type，asc|desc" `
 	DeleteInclude bool   `p:"deleteInclude" dc:"Is Delete Include" `
@@ -22,7 +28,7 @@ type SubscriptionInvoiceListInternalReq struct {
 }
 
 type SubscriptionInvoiceListInternalRes struct {
-	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"invoices明细"`
+	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"Invoice Detail List"`
 }
 
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
@@ -49,11 +55,37 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 			sortKey = req.SortField + " desc"
 		}
 	}
-	err = dao.Invoice.Ctx(ctx).
+	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
-		Where(dao.Invoice.Columns().UserId, req.UserId).
-		Where(dao.Invoice.Columns().SendEmail, req.SendEmail).
-		WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
+		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency)).
+		Where(dao.Invoice.Columns().Status, req.Status).
+		Where(dao.Invoice.Columns().SendEmail, req.SendEmail)
+	if req.UserId > 0 {
+		query.Where(dao.Invoice.Columns().UserId, req.UserId)
+	}
+	if req.AmountStart < req.AmountEnd {
+		query.WhereGTE(dao.Invoice.Columns().TotalAmount, req.AmountStart)
+		query.WhereLTE(dao.Invoice.Columns().TotalAmount, req.AmountEnd)
+	}
+	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
+		var userIdList []uint64
+		var list []*entity.UserAccount
+		userQuery := dao.UserAccount.Ctx(ctx)
+		if len(req.FirstName) > 0 {
+			userQuery.Builder().WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+		}
+		if len(req.LastName) > 0 {
+			userQuery.Builder().WhereOrLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+		}
+		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&list)
+		for _, user := range list {
+			userIdList = append(userIdList, user.Id)
+		}
+		if len(userIdList) > 0 {
+			query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
+		}
+	}
+	err = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
@@ -62,7 +94,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	}
 	var resultList []*ro.InvoiceDetailRo
 	for _, invoice := range mainList {
-		resultList = append(resultList, invoice_compute.ConvertInvoiceToRo(invoice))
+		resultList = append(resultList, invoice_compute.ConvertInvoiceToRo(ctx, invoice))
 	}
 
 	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil

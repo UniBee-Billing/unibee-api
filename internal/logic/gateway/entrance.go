@@ -11,7 +11,7 @@ func GetPaymentWebhookEntranceUrl(gatewayId int64) string {
 }
 
 //func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
-//	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.GatewayId)
+//	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.Id)
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {

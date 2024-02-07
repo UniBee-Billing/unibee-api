@@ -20,6 +20,12 @@ func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *me
 	}
 
 	internalResult, err := service.SubscriptionInvoiceList(ctx, &service.SubscriptionInvoiceListInternalReq{
+		FirstName:     req.FirstName,
+		LastName:      req.LastName,
+		Currency:      req.Currency,
+		Status:        req.Status,
+		AmountStart:   req.AmountStart,
+		AmountEnd:     req.AmountEnd,
 		MerchantId:    req.MerchantId,
 		UserId:        req.UserId,
 		SendEmail:     req.SendEmail,

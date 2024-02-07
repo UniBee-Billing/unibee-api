@@ -56,7 +56,7 @@ func GetListActiveOutGatewayRos(ctx context.Context, planId int64) []*ro.OutGate
 			outChannel := GetGatewayById(ctx, one.GatewayId)
 			if outChannel != nil {
 				gateways = append(gateways, &ro.OutGatewayRo{
-					GatewayId:   outChannel.Id,
+					Id:          outChannel.Id,
 					GatewayName: outChannel.Name,
 				})
 			}
