@@ -64,18 +64,18 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 		query.Where(dao.Invoice.Columns().UserId, req.UserId)
 	}
 	if req.AmountStart < req.AmountEnd {
-		query.WhereGTE(dao.Invoice.Columns().TotalAmount, req.AmountStart)
-		query.WhereLTE(dao.Invoice.Columns().TotalAmount, req.AmountEnd)
+		query = query.WhereGTE(dao.Invoice.Columns().TotalAmount, req.AmountStart)
+		query = query.WhereLTE(dao.Invoice.Columns().TotalAmount, req.AmountEnd)
 	}
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
 		var userIdList []uint64
 		var list []*entity.UserAccount
 		userQuery := dao.UserAccount.Ctx(ctx)
 		if len(req.FirstName) > 0 {
-			userQuery.Builder().WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+			userQuery = userQuery.WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
 		}
 		if len(req.LastName) > 0 {
-			userQuery.Builder().WhereOrLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+			userQuery = userQuery.WhereOrLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
 		}
 		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&list)
 		for _, user := range list {
