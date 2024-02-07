@@ -31,7 +31,7 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan              *entity.SubscriptionPlan           `json:"planId"`
+	Plan              *entity.SubscriptionPlan           `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	GatewayPlan       *entity.GatewayPlan                `json:"gatewayPlan"`
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
@@ -386,7 +386,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 type SubscriptionUpdatePrepareInternalRes struct {
 	Subscription *entity.Subscription               `json:"subscription"`
-	Plan         *entity.SubscriptionPlan           `json:"planId"`
+	Plan         *entity.SubscriptionPlan           `json:"plan"`
 	Quantity     int64                              `json:"quantity"`
 	GatewayPlan  *entity.GatewayPlan                `json:"gatewayPlan"`
 	Gateway      *entity.MerchantGateway            `json:"gateway"`

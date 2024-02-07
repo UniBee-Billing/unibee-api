@@ -48,7 +48,7 @@ type SubscriptionCreatePreviewReq struct {
 	VatNumber      string                             `p:"vatNumber" dc:"VatNumber" `
 }
 type SubscriptionCreatePreviewRes struct {
-	Plan              *entity.SubscriptionPlan           `json:"planId"`
+	Plan              *entity.SubscriptionPlan           `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *ro.OutGatewayRo                   `json:"gateway"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
