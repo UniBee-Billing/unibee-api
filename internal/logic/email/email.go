@@ -205,7 +205,7 @@ func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title str
 		Content:    content,
 		AttachFile: attachFilePath,
 		Response:   response,
-		CreateAt:   gtime.Now().Timestamp(),
+		CreateTime: gtime.Now().Timestamp(),
 	}
 	_, _ = dao.EmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }

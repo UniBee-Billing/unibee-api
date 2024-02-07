@@ -224,7 +224,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelAt: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -296,7 +296,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelAt: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -377,7 +377,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().Status:                 consts.PAY_SUCCESS,
-				dao.Payment.Columns().PaidAt:                 paidAt,
+				dao.Payment.Columns().PaidTime:               paidAt,
 				dao.Payment.Columns().GatewayPaymentIntentId: req.GatewayPaymentIntentId,
 				dao.Payment.Columns().GatewayPaymentId:       req.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentMethod:   req.ChannelDefaultPaymentMethod,
@@ -594,9 +594,9 @@ func CreateOrUpdateSubscriptionPaymentFromGateway(ctx context.Context, gatewayPa
 			GatewayId:              gatewayPaymentRo.GatewayId,
 			GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 			GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
-			CreateAt:               gatewayPaymentRo.CreateTime.Timestamp(),
-			CancelAt:               gatewayPaymentRo.CancelTime.Timestamp(),
-			PaidAt:                 gatewayPaymentRo.PayTime.Timestamp(),
+			CreateTime:             gatewayPaymentRo.CreateTime.Timestamp(),
+			CancelTime:             gatewayPaymentRo.CancelTime.Timestamp(),
+			PaidTime:               gatewayPaymentRo.PayTime.Timestamp(),
 			FailureReason:          gatewayPaymentRo.CancelReason,
 			PaymentData:            gatewayPaymentRo.PaymentData,
 			AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
@@ -628,9 +628,9 @@ func CreateOrUpdateSubscriptionPaymentFromGateway(ctx context.Context, gatewayPa
 			dao.Payment.Columns().AuthorizeStatus:        gatewayPaymentRo.AuthorizeStatus,
 			dao.Payment.Columns().GatewayId:              gatewayPaymentRo.GatewayId,
 			dao.Payment.Columns().GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
-			dao.Payment.Columns().CreateAt:               gatewayPaymentRo.CreateTime.Timestamp(),
-			dao.Payment.Columns().CreateAt:               gatewayPaymentRo.CancelTime.Timestamp(),
-			dao.Payment.Columns().PaidAt:                 gatewayPaymentRo.PayTime.Timestamp(),
+			dao.Payment.Columns().CreateTime:             gatewayPaymentRo.CreateTime.Timestamp(),
+			dao.Payment.Columns().CreateTime:             gatewayPaymentRo.CancelTime.Timestamp(),
+			dao.Payment.Columns().PaidTime:               gatewayPaymentRo.PayTime.Timestamp(),
 			dao.Payment.Columns().FailureReason:          gatewayPaymentRo.CancelReason,
 			dao.Payment.Columns().PaymentData:            gatewayPaymentRo.PaymentData,
 			dao.Payment.Columns().AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
@@ -678,7 +678,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			PaymentId:      payment.PaymentId,
 			Status:         status,
 			TimelineType:   timeLineType,
-			CreateAt:       gtime.Now().Timestamp(),
+			CreateTime:     gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

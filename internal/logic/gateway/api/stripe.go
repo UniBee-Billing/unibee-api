@@ -316,7 +316,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 				VatRateId:        int64(subscriptionRo.VatCountryRate.Id),
 				GatewayId:        int64(gateway.Id),
 				GatewayVatRateId: vatCreateResult.ID,
-				CreateAt:         gtime.Now().Timestamp(),
+				CreateTime:       gtime.Now().Timestamp(),
 			}
 			result, err := dao.GatewayVatRate.Ctx(ctx).Data(gatewayVatRate).OmitNil().Insert(gatewayVatRate)
 			if err != nil {

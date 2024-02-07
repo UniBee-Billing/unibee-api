@@ -35,7 +35,7 @@ type PaymentEventColumns struct {
 	GmtCreate       string // create time
 	GmtModify       string // update time
 	Message         string // message
-	CreateAt        string // create utc time
+	CreateTime      string // create utc time
 }
 
 // paymentEventColumns holds the columns for table payment_event.
@@ -55,7 +55,7 @@ var paymentEventColumns = PaymentEventColumns{
 	GmtCreate:       "gmt_create",
 	GmtModify:       "gmt_modify",
 	Message:         "message",
-	CreateAt:        "create_at",
+	CreateTime:      "create_time",
 }
 
 // NewPaymentEventDao creates and returns a new DAO object for table data access.

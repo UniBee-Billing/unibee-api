@@ -55,7 +55,7 @@ type SubscriptionColumns struct {
 	DunningTime                 string // dunning_time, utc time
 	TrialEnd                    string // trial_end, utc time
 	ReturnUrl                   string //
-	FirstPaidAt                 string // first success payment time
+	FirstPaidTime               string // first success payment time
 	CancelReason                string //
 	CountryCode                 string //
 	VatNumber                   string //
@@ -64,7 +64,7 @@ type SubscriptionColumns struct {
 	Data                        string //
 	ResponseData                string //
 	PendingUpdateId             string //
-	CreateAt                    string // create utc time
+	CreateTime                  string // create utc time
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -104,7 +104,7 @@ var subscriptionColumns = SubscriptionColumns{
 	DunningTime:                 "dunning_time",
 	TrialEnd:                    "trial_end",
 	ReturnUrl:                   "return_url",
-	FirstPaidAt:                 "first_paid_at",
+	FirstPaidTime:               "first_paid_time",
 	CancelReason:                "cancel_reason",
 	CountryCode:                 "country_code",
 	VatNumber:                   "vat_number",
@@ -113,7 +113,7 @@ var subscriptionColumns = SubscriptionColumns{
 	Data:                        "data",
 	ResponseData:                "response_data",
 	PendingUpdateId:             "pendingUpdateId",
-	CreateAt:                    "create_at",
+	CreateTime:                  "create_time",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

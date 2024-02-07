@@ -44,5 +44,5 @@ type SubscriptionPendingUpdate struct {
 	EffectTime           interface{} // effect_immediate=0, effect time, utc_time
 	Note                 interface{} // note
 	ProrationDate        interface{} // merchant_user_id
-	CreateAt             interface{} // create utc time
+	CreateTime           interface{} // create utc time
 }

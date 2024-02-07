@@ -44,7 +44,7 @@ func CreateOrUpdateSubscriptionTimeline(ctx context.Context, sub *entity.Subscri
 			PeriodEnd:       periodEnd,
 			PeriodStartTime: gtime.NewFromTimeStamp(periodStart),
 			PeriodEndTime:   gtime.NewFromTimeStamp(periodEnd),
-			CreateAt:        gtime.Now().Timestamp(),
+			CreateTime:      gtime.Now().Timestamp(),
 		}
 
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

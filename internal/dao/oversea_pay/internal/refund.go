@@ -35,7 +35,7 @@ type RefundColumns struct {
 	RefundAmount         string // refund amount, cent
 	RefundComment        string // refund comment
 	Status               string // status。10-pending，20-success，30-failure, 40-cancel
-	RefundAt             string // refund success time
+	RefundTime           string // refund success time
 	GmtCreate            string // create time
 	GmtModify            string // update time
 	GatewayRefundId      string // gateway refund id
@@ -45,7 +45,7 @@ type RefundColumns struct {
 	AdditionalData       string //
 	UniqueId             string // unique id
 	SubscriptionId       string // subscription id
-	CreateAt             string // create utc time
+	CreateTime           string // create utc time
 }
 
 // refundColumns holds the columns for table refund.
@@ -65,7 +65,7 @@ var refundColumns = RefundColumns{
 	RefundAmount:         "refund_amount",
 	RefundComment:        "refund_comment",
 	Status:               "status",
-	RefundAt:             "refund_at",
+	RefundTime:           "refund_time",
 	GmtCreate:            "gmt_create",
 	GmtModify:            "gmt_modify",
 	GatewayRefundId:      "gateway_refund_id",
@@ -75,7 +75,7 @@ var refundColumns = RefundColumns{
 	AdditionalData:       "additional_data",
 	UniqueId:             "unique_id",
 	SubscriptionId:       "subscription_id",
-	CreateAt:             "create_at",
+	CreateTime:           "create_time",
 }
 
 // NewRefundDao creates and returns a new DAO object for table data access.

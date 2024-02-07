@@ -41,7 +41,7 @@ func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId int6
 			GatewayId:                   gatewayId,
 			GatewayUserId:               gatewayUserId,
 			GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
-			CreateAt:                    gtime.Now().Timestamp(),
+			CreateTime:                  gtime.Now().Timestamp(),
 		}
 		result, err := dao.GatewayUser.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {

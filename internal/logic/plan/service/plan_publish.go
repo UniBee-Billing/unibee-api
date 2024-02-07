@@ -59,10 +59,10 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
 	if gatewayPlan == nil {
 		gatewayPlan = &entity.GatewayPlan{
-			PlanId:    planId,
-			GatewayId: gatewayId,
-			Status:    consts.GatewayPlanStatusInit,
-			CreateAt:  gtime.Now().Timestamp(),
+			PlanId:     planId,
+			GatewayId:  gatewayId,
+			Status:     consts.GatewayPlanStatusInit,
+			CreateTime: gtime.Now().Timestamp(),
 		}
 		//保存gatewayPlan
 		result, err := dao.GatewayPlan.Ctx(ctx).Data(gatewayPlan).OmitNil().Insert(gatewayPlan)

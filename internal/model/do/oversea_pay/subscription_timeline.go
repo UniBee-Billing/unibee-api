@@ -31,5 +31,5 @@ type SubscriptionTimeline struct {
 	GatewayId       interface{} // gateway_id
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} // unique key (deperated)
-	CreateAt        interface{} // create utc time
+	CreateTime      interface{} // create utc time
 }

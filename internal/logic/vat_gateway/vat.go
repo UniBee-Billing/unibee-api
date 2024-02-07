@@ -146,7 +146,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 		CompanyName:     result.CompanyName,
 		CompanyAddress:  result.CompanyAddress,
 		ValidateMessage: result.ValidateMessage,
-		CreateAt:        gtime.Now().Timestamp(),
+		CreateTime:      gtime.Now().Timestamp(),
 	}
 	_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

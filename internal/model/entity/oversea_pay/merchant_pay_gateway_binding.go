@@ -16,5 +16,5 @@ type MerchantPayGatewayBinding struct {
 	MerchantId int64       `json:"merchantId" description:"merchant id"`           // merchant id
 	GatewayId  string      `json:"gatewayId"  description:"gateway_id"`            // gateway_id
 	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
-	CreateAt   int64       `json:"createAt"   description:"create utc time"`       // create utc time
+	CreateTime int64       `json:"createTime" description:"create utc time"`       // create utc time
 }

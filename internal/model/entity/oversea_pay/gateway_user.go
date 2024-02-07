@@ -18,5 +18,5 @@ type GatewayUser struct {
 	GatewayUserId               string      `json:"gatewayUserId"               description:"gateway_user_Id"`                // gateway_user_Id
 	IsDeleted                   int         `json:"isDeleted"                   description:"0-UnDeleted，1-Deleted"`          // 0-UnDeleted，1-Deleted
 	GatewayDefaultPaymentMethod string      `json:"gatewayDefaultPaymentMethod" description:"gateway_default_payment_method"` // gateway_default_payment_method
-	CreateAt                    int64       `json:"createAt"                    description:"create utc time"`                // create utc time
+	CreateTime                  int64       `json:"createTime"                  description:"create utc time"`                // create utc time
 }

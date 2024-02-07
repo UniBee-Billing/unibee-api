@@ -42,7 +42,7 @@ type SubscriptionPlanColumns struct {
 	IsDeleted                 string // 0-UnDeleted，1-Deleted
 	BindingAddonIds           string // binded addon planIds，split with ,
 	PublishStatus             string // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
-	CreateAt                  string // create utc time
+	CreateTime                string // create utc time
 }
 
 // subscriptionPlanColumns holds the columns for table subscription_plan.
@@ -69,7 +69,7 @@ var subscriptionPlanColumns = SubscriptionPlanColumns{
 	IsDeleted:                 "is_deleted",
 	BindingAddonIds:           "binding_addon_ids",
 	PublishStatus:             "publish_status",
-	CreateAt:                  "create_at",
+	CreateTime:                "create_time",
 }
 
 // NewSubscriptionPlanDao creates and returns a new DAO object for table data access.

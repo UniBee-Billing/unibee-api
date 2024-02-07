@@ -25,5 +25,5 @@ type OpenApiConfig struct {
 	Validips                interface{} //
 	GatewayCallbackResponse interface{} // callback return response
 	CompanyId               interface{} // company id
-	CreateAt                interface{} // create utc time
+	CreateTime              interface{} // create utc time
 }

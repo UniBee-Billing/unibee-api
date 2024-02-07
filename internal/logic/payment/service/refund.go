@@ -84,7 +84,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.Refund
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway refund
 			one.UniqueId = one.RefundId
-			one.CreateAt = gtime.Now().Timestamp()
+			one.CreateTime = gtime.Now().Timestamp()
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()

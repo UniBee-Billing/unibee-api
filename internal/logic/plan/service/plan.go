@@ -186,7 +186,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 		GatewayProductName:        req.ProductName,
 		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
-		CreateAt:                  gtime.Now().Timestamp(),
+		CreateTime:                gtime.Now().Timestamp(),
 	}
 	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

@@ -22,5 +22,5 @@ type GatewayPlan struct {
 	GatewayProductStatus string      `json:"gatewayProductStatus" description:"gateway_product_status"`                // gateway_product_status
 	IsDeleted            int         `json:"isDeleted"            description:"0-UnDeleted，1-Deleted"`                 // 0-UnDeleted，1-Deleted
 	Data                 string      `json:"data"                 description:"data(json)"`                            // data(json)
-	CreateAt             int64       `json:"createAt"             description:"create utc time"`                       // create utc time
+	CreateTime           int64       `json:"createTime"           description:"create utc time"`                       // create utc time
 }

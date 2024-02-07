@@ -56,7 +56,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		Phone:       u.Phone,
 		Address:     u.Address,
 		UserName:    u.UserName,
-		CreateAt:    gtime.Now().Timestamp(),
+		CreateTime:  gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)

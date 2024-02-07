@@ -32,7 +32,7 @@ type GatewayPlanColumns struct {
 	GatewayProductStatus string // gateway_product_status
 	IsDeleted            string // 0-UnDeleted，1-Deleted
 	Data                 string // data(json)
-	CreateAt             string // create utc time
+	CreateTime           string // create utc time
 }
 
 // gatewayPlanColumns holds the columns for table gateway_plan.
@@ -49,7 +49,7 @@ var gatewayPlanColumns = GatewayPlanColumns{
 	GatewayProductStatus: "gateway_product_status",
 	IsDeleted:            "is_deleted",
 	Data:                 "data",
-	CreateAt:             "create_at",
+	CreateTime:           "create_time",
 }
 
 // NewGatewayPlanDao creates and returns a new DAO object for table data access.

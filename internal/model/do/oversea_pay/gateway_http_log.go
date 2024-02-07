@@ -11,15 +11,15 @@ import (
 
 // GatewayHttpLog is the golang structure of table gateway_http_log for DAO operations like Where/Data.
 type GatewayHttpLog struct {
-	g.Meta    `orm:"table:gateway_http_log, do:true"`
-	Id        interface{} // id
-	Url       interface{} // request url
-	Request   interface{} // request body(json)
-	Response  interface{} // response(json)
-	RequestId interface{} // request_id
-	Mamo      interface{} // mamo
-	GatewayId interface{} // gateway_id
-	GmtCreate *gtime.Time // create time
-	GmtModify *gtime.Time // update time
-	CreateAt  interface{} // create utc time
+	g.Meta     `orm:"table:gateway_http_log, do:true"`
+	Id         interface{} // id
+	Url        interface{} // request url
+	Request    interface{} // request body(json)
+	Response   interface{} // response(json)
+	RequestId  interface{} // request_id
+	Mamo       interface{} // mamo
+	GatewayId  interface{} // gateway_id
+	GmtCreate  *gtime.Time // create time
+	GmtModify  *gtime.Time // update time
+	CreateTime interface{} // create utc time
 }

@@ -12,13 +12,13 @@ import (
 
 func DoSaveChannelLog(ctx context.Context, request string, url string, response string, memo string, requestId string, gatewayId string) {
 	log := &entity.GatewayHttpLog{
-		Url:       url,
-		Request:   request,
-		Response:  response,
-		RequestId: requestId,
-		Mamo:      memo,
-		GatewayId: gatewayId,
-		CreateAt:  gtime.Now().Timestamp(),
+		Url:        url,
+		Request:    request,
+		Response:   response,
+		RequestId:  requestId,
+		Mamo:       memo,
+		GatewayId:  gatewayId,
+		CreateTime: gtime.Now().Timestamp(),
 	}
 	_, err := dao.GatewayHttpLog.Ctx(ctx).Data(log).OmitNil().Insert(log)
 	if err != nil {

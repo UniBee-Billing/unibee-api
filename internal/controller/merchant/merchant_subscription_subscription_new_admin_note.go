@@ -17,7 +17,7 @@ func (c *ControllerSubscription) SubscriptionNewAdminNote(ctx context.Context, r
 		SubscriptionId: req.SubscriptionId,
 		MerchantUserId: req.MerchantUserId,
 		Note:           req.Note,
-		CreateAt:       gtime.Now().Timestamp(),
+		CreateTime:     gtime.Now().Timestamp(),
 	}
 
 	_, err = dao.SubscriptionAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)

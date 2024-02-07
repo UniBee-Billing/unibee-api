@@ -29,5 +29,5 @@ type SubscriptionTimeline struct {
 	GatewayId       int64       `json:"gatewayId"       description:"gateway_id"`              // gateway_id
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)
-	CreateAt        int64       `json:"createAt"        description:"create utc time"`         // create utc time
+	CreateTime      int64       `json:"createTime"      description:"create utc time"`         // create utc time
 }

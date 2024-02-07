@@ -24,5 +24,5 @@ type GatewayPlan struct {
 	GatewayProductStatus interface{} // gateway_product_status
 	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
 	Data                 interface{} // data(json)
-	CreateAt             interface{} // create utc time
+	CreateTime           interface{} // create utc time
 }

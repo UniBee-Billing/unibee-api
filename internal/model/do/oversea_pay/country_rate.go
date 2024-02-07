@@ -29,5 +29,5 @@ type CountryRate struct {
 	GmtCreate             *gtime.Time // create time
 	GmtModify             *gtime.Time // update time
 	IsDeleted             interface{} // 0-UnDeleted，1-Deleted
-	CreateAt              interface{} // create utc time
+	CreateTime            interface{} // create utc time
 }

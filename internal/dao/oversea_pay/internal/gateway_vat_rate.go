@@ -27,7 +27,7 @@ type GatewayVatRateColumns struct {
 	GatewayId        string // gateway_id
 	GatewayVatRateId string // gateway_vat_rate_Id
 	IsDeleted        string // 0-UnDeleted，1-Deleted
-	CreateAt         string // create utc time
+	CreateTime       string // create utc time
 }
 
 // gatewayVatRateColumns holds the columns for table gateway_vat_rate.
@@ -39,7 +39,7 @@ var gatewayVatRateColumns = GatewayVatRateColumns{
 	GatewayId:        "gateway_id",
 	GatewayVatRateId: "gateway_vat_rate_id",
 	IsDeleted:        "is_deleted",
-	CreateAt:         "create_at",
+	CreateTime:       "create_time",
 }
 
 // NewGatewayVatRateDao creates and returns a new DAO object for table data access.

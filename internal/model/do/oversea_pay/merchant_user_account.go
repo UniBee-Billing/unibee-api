@@ -23,5 +23,5 @@ type MerchantUserAccount struct {
 	Email      interface{} // email
 	FirstName  interface{} // first name
 	LastName   interface{} // last name
-	CreateAt   interface{} // create utc time
+	CreateTime interface{} // create utc time
 }

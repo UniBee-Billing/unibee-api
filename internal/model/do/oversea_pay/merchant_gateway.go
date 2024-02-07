@@ -32,5 +32,5 @@ type MerchantGateway struct {
 	WebhookKey       interface{} // webhook_key
 	WebhookSecret    interface{} // webhook_secret
 	UniqueProductId  interface{} // unique  gateway productId, only stripe need
-	CreateAt         interface{} // create utc time
+	CreateTime       interface{} // create utc time
 }

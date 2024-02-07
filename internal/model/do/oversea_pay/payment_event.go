@@ -27,5 +27,5 @@ type PaymentEvent struct {
 	GmtCreate       *gtime.Time // create time
 	GmtModify       *gtime.Time // update time
 	Message         interface{} // message
-	CreateAt        interface{} // create utc time
+	CreateTime      interface{} // create utc time
 }

@@ -277,7 +277,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		CurrentPeriodEnd:   prepare.Invoice.PeriodEnd,
 		DunningTime:        dunningTime,
 		BillingCycleAnchor: prepare.Invoice.PeriodStart,
-		CreateAt:           gtime.Now().Timestamp(),
+		CreateTime:         gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -799,7 +799,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		ProrationDate:        req.ProrationDate,
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
-		CreateAt:             gtime.Now().Timestamp(),
+		CreateTime:           gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)

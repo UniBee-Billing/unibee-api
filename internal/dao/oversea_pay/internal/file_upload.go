@@ -20,28 +20,28 @@ type FileUploadDao struct {
 
 // FileUploadColumns defines and stores column names for table file_upload.
 type FileUploadColumns struct {
-	Id        string //
-	UserId    string //
-	Url       string //
-	FileName  string //
-	Tag       string //
-	GmtCreate string // create time
-	GmtModify string //
-	IsDeleted string // 0-UnDeleted，1-Deleted
-	CreateAt  string // create utc time
+	Id         string //
+	UserId     string //
+	Url        string //
+	FileName   string //
+	Tag        string //
+	GmtCreate  string // create time
+	GmtModify  string //
+	IsDeleted  string // 0-UnDeleted，1-Deleted
+	CreateTime string // create utc time
 }
 
 // fileUploadColumns holds the columns for table file_upload.
 var fileUploadColumns = FileUploadColumns{
-	Id:        "id",
-	UserId:    "user_id",
-	Url:       "url",
-	FileName:  "file_name",
-	Tag:       "tag",
-	GmtCreate: "gmt_create",
-	GmtModify: "gmt_modify",
-	IsDeleted: "is_deleted",
-	CreateAt:  "create_at",
+	Id:         "id",
+	UserId:     "user_id",
+	Url:        "url",
+	FileName:   "file_name",
+	Tag:        "tag",
+	GmtCreate:  "gmt_create",
+	GmtModify:  "gmt_modify",
+	IsDeleted:  "is_deleted",
+	CreateTime: "create_time",
 }
 
 // NewFileUploadDao creates and returns a new DAO object for table data access.

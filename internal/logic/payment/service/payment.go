@@ -69,7 +69,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway refund
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
-			createPayContext.Pay.CreateAt = gtime.Now().Timestamp()
+			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
 			if err != nil {
 				return err

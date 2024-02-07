@@ -45,9 +45,9 @@ type PaymentColumns struct {
 	GatewayPaymentIntentId string // gateway_payment_intent_id
 	GatewayPaymentId       string // gateway_payment_id
 	CaptureDelayHours      string // capture_delay_hours
-	CreateAt               string // create time, utc time
-	CancelAt               string // cancel time, utc time
-	PaidAt                 string // paid time, utc time
+	CreateTime             string // create time, utc time
+	CancelTime             string // cancel time, utc time
+	PaidTime               string // paid time, utc time
 	InvoiceId              string // invoice id
 	AppId                  string // app id
 	ReturnUrl              string // return url
@@ -96,9 +96,9 @@ var paymentColumns = PaymentColumns{
 	GatewayPaymentIntentId: "gateway_payment_intent_id",
 	GatewayPaymentId:       "gateway_payment_id",
 	CaptureDelayHours:      "capture_delay_hours",
-	CreateAt:               "create_at",
-	CancelAt:               "cancel_at",
-	PaidAt:                 "paid_at",
+	CreateTime:             "create_time",
+	CancelTime:             "cancel_time",
+	PaidTime:               "paid_time",
 	InvoiceId:              "invoice_id",
 	AppId:                  "app_id",
 	ReturnUrl:              "return_url",

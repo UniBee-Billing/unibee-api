@@ -35,9 +35,9 @@ type Payment struct {
 	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
 	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	CaptureDelayHours      int         `json:"captureDelayHours"      description:"capture_delay_hours"`                                                    // capture_delay_hours
-	CreateAt               int64       `json:"createAt"               description:"create time, utc time"`                                                  // create time, utc time
-	CancelAt               int64       `json:"cancelAt"               description:"cancel time, utc time"`                                                  // cancel time, utc time
-	PaidAt                 int64       `json:"paidAt"                 description:"paid time, utc time"`                                                    // paid time, utc time
+	CreateTime             int64       `json:"createTime"             description:"create time, utc time"`                                                  // create time, utc time
+	CancelTime             int64       `json:"cancelTime"             description:"cancel time, utc time"`                                                  // cancel time, utc time
+	PaidTime               int64       `json:"paidTime"               description:"paid time, utc time"`                                                    // paid time, utc time
 	InvoiceId              string      `json:"invoiceId"              description:"invoice id"`                                                             // invoice id
 	AppId                  string      `json:"appId"                  description:"app id"`                                                                 // app id
 	ReturnUrl              string      `json:"returnUrl"              description:"return url"`                                                             // return url

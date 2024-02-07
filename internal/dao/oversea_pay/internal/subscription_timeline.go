@@ -39,7 +39,7 @@ type SubscriptionTimelineColumns struct {
 	GatewayId       string // gateway_id
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	UniqueKey       string // unique key (deperated)
-	CreateAt        string // create utc time
+	CreateTime      string // create utc time
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.
@@ -63,7 +63,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	GatewayId:       "gateway_id",
 	IsDeleted:       "is_deleted",
 	UniqueKey:       "unique_key",
-	CreateAt:        "create_at",
+	CreateTime:      "create_time",
 }
 
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.

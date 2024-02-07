@@ -62,7 +62,7 @@ type UserAccountColumns struct {
 	RecurringAmount    string // total recurring amount, cent
 	BillingType        string // 1-recurring,2-one-time
 	TimeZone           string //
-	CreateAt           string // create utc time
+	CreateTime         string // create utc time
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -109,7 +109,7 @@ var userAccountColumns = UserAccountColumns{
 	RecurringAmount:    "recurring_amount",
 	BillingType:        "billing_type",
 	TimeZone:           "time_zone",
-	CreateAt:           "create_at",
+	CreateTime:         "create_time",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

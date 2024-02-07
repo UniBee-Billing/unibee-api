@@ -89,7 +89,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		SendStatus:                     0,
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
-		CreateAt:                       gtime.Now().Timestamp(),
+		CreateTime:                     gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

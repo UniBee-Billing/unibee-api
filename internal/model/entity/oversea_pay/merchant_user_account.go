@@ -21,5 +21,5 @@ type MerchantUserAccount struct {
 	Email      string      `json:"email"      description:"email"`                 // email
 	FirstName  string      `json:"firstName"  description:"first name"`            // first name
 	LastName   string      `json:"lastName"   description:"last name"`             // last name
-	CreateAt   int64       `json:"createAt"   description:"create utc time"`       // create utc time
+	CreateTime int64       `json:"createTime" description:"create utc time"`       // create utc time
 }

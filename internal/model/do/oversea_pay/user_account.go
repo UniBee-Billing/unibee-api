@@ -54,5 +54,5 @@ type UserAccount struct {
 	RecurringAmount    interface{} // total recurring amount, cent
 	BillingType        interface{} // 1-recurring,2-one-time
 	TimeZone           interface{} //
-	CreateAt           interface{} // create utc time
+	CreateTime         interface{} // create utc time
 }

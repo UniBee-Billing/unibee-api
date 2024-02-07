@@ -6,13 +6,13 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"time"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/order/calllback"
 	"unibee-api/internal/logic/subscription/callback"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
-	"time"
 )
 
 type proxy struct {
@@ -20,7 +20,11 @@ type proxy struct {
 }
 
 func printChannelPanic(ctx context.Context, err error) {
-	g.Log().Errorf(ctx, "CallbackException panic error:%s", err.Error())
+	if err != nil {
+		g.Log().Errorf(ctx, "CallbackException panic error:%s", err.Error())
+	} else {
+		g.Log().Errorf(ctx, "CallbackException panic error:%s", err)
+	}
 }
 
 func (p proxy) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {

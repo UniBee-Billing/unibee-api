@@ -32,7 +32,7 @@ type MerchantVatNumberVerifyHistoryColumns struct {
 	GmtModify       string // update time
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	ValidateMessage string // validate_message
-	CreateAt        string // create utc time
+	CreateTime      string // create utc time
 }
 
 // merchantVatNumberVerifyHistoryColumns holds the columns for table merchant_vat_number_verify_history.
@@ -49,7 +49,7 @@ var merchantVatNumberVerifyHistoryColumns = MerchantVatNumberVerifyHistoryColumn
 	GmtModify:       "gmt_modify",
 	IsDeleted:       "is_deleted",
 	ValidateMessage: "validate_message",
-	CreateAt:        "create_at",
+	CreateTime:      "create_time",
 }
 
 // NewMerchantVatNumberVerifyHistoryDao creates and returns a new DAO object for table data access.

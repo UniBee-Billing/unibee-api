@@ -108,7 +108,7 @@ func CreateOrUpdateInvoiceFromPayment(ctx context.Context, simplify *ro.InvoiceD
 			SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 			Lines:                          utility.MarshalToJsonString(simplify.Lines),
 			Link:                           payment.Link,
-			CreateAt:                       gtime.Now().Timestamp(),
+			CreateTime:                     int64(gtime.Now().Timestamp()),
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

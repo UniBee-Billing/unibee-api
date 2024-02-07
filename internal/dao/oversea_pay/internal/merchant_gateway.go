@@ -40,7 +40,7 @@ type MerchantGatewayColumns struct {
 	WebhookKey       string // webhook_key
 	WebhookSecret    string // webhook_secret
 	UniqueProductId  string // unique  gateway productId, only stripe need
-	CreateAt         string // create utc time
+	CreateTime       string // create utc time
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
@@ -65,7 +65,7 @@ var merchantGatewayColumns = MerchantGatewayColumns{
 	WebhookKey:       "webhook_key",
 	WebhookSecret:    "webhook_secret",
 	UniqueProductId:  "unique_product_id",
-	CreateAt:         "create_at",
+	CreateTime:       "create_time",
 }
 
 // NewMerchantGatewayDao creates and returns a new DAO object for table data access.

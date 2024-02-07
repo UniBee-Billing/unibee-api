@@ -26,7 +26,7 @@ type MerchantPayGatewayBindingColumns struct {
 	MerchantId string // merchant id
 	GatewayId  string // gateway_id
 	IsDeleted  string // 0-UnDeleted，1-Deleted
-	CreateAt   string // create utc time
+	CreateTime string // create utc time
 }
 
 // merchantPayGatewayBindingColumns holds the columns for table merchant_pay_gateway_binding.
@@ -37,7 +37,7 @@ var merchantPayGatewayBindingColumns = MerchantPayGatewayBindingColumns{
 	MerchantId: "merchant_id",
 	GatewayId:  "gateway_id",
 	IsDeleted:  "is_deleted",
-	CreateAt:   "create_at",
+	CreateTime: "create_time",
 }
 
 // NewMerchantPayGatewayBindingDao creates and returns a new DAO object for table data access.

@@ -25,5 +25,5 @@ type PaymentEvent struct {
 	GmtCreate       *gtime.Time `json:"gmtCreate"       description:"create time"`         // create time
 	GmtModify       *gtime.Time `json:"gmtModify"       description:"update time"`         // update time
 	Message         string      `json:"message"         description:"message"`             // message
-	CreateAt        int64       `json:"createAt"        description:"create utc time"`     // create utc time
+	CreateTime      int64       `json:"createTime"      description:"create utc time"`     // create utc time
 }

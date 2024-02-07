@@ -20,30 +20,30 @@ type GatewayHttpLogDao struct {
 
 // GatewayHttpLogColumns defines and stores column names for table gateway_http_log.
 type GatewayHttpLogColumns struct {
-	Id        string // id
-	Url       string // request url
-	Request   string // request body(json)
-	Response  string // response(json)
-	RequestId string // request_id
-	Mamo      string // mamo
-	GatewayId string // gateway_id
-	GmtCreate string // create time
-	GmtModify string // update time
-	CreateAt  string // create utc time
+	Id         string // id
+	Url        string // request url
+	Request    string // request body(json)
+	Response   string // response(json)
+	RequestId  string // request_id
+	Mamo       string // mamo
+	GatewayId  string // gateway_id
+	GmtCreate  string // create time
+	GmtModify  string // update time
+	CreateTime string // create utc time
 }
 
 // gatewayHttpLogColumns holds the columns for table gateway_http_log.
 var gatewayHttpLogColumns = GatewayHttpLogColumns{
-	Id:        "id",
-	Url:       "url",
-	Request:   "request",
-	Response:  "response",
-	RequestId: "request_id",
-	Mamo:      "mamo",
-	GatewayId: "gateway_id",
-	GmtCreate: "gmt_create",
-	GmtModify: "gmt_modify",
-	CreateAt:  "create_at",
+	Id:         "id",
+	Url:        "url",
+	Request:    "request",
+	Response:   "response",
+	RequestId:  "request_id",
+	Mamo:       "mamo",
+	GatewayId:  "gateway_id",
+	GmtCreate:  "gmt_create",
+	GmtModify:  "gmt_modify",
+	CreateTime: "create_time",
 }
 
 // NewGatewayHttpLogDao creates and returns a new DAO object for table data access.

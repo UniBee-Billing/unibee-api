@@ -11,14 +11,14 @@ import (
 
 // FileUpload is the golang structure of table file_upload for DAO operations like Where/Data.
 type FileUpload struct {
-	g.Meta    `orm:"table:file_upload, do:true"`
-	Id        interface{} //
-	UserId    interface{} //
-	Url       interface{} //
-	FileName  interface{} //
-	Tag       interface{} //
-	GmtCreate *gtime.Time // create time
-	GmtModify *gtime.Time //
-	IsDeleted interface{} // 0-UnDeleted，1-Deleted
-	CreateAt  interface{} // create utc time
+	g.Meta     `orm:"table:file_upload, do:true"`
+	Id         interface{} //
+	UserId     interface{} //
+	Url        interface{} //
+	FileName   interface{} //
+	Tag        interface{} //
+	GmtCreate  *gtime.Time // create time
+	GmtModify  *gtime.Time //
+	IsDeleted  interface{} // 0-UnDeleted，1-Deleted
+	CreateTime interface{} // create utc time
 }

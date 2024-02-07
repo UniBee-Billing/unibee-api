@@ -27,13 +27,13 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 			}
 		}()
 		httpLog := &entity.GatewayHttpLog{
-			Url:       url,
-			Request:   utility.FormatToJsonString(request),
-			Response:  utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
-			RequestId: utility.FormatToJsonString(requestId),
-			Mamo:      memo,
-			GatewayId: strconv.FormatUint(gateway.Id, 10),
-			CreateAt:  gtime.Now().Timestamp(),
+			Url:        url,
+			Request:    utility.FormatToJsonString(request),
+			Response:   utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
+			RequestId:  utility.FormatToJsonString(requestId),
+			Mamo:       memo,
+			GatewayId:  strconv.FormatUint(gateway.Id, 10),
+			CreateTime: gtime.Now().Timestamp(),
 		}
 		_, _ = dao.GatewayHttpLog.Ctx(context.Background()).Data(httpLog).OmitNil().Insert(httpLog)
 		//g.Log().Infof(context.Background(), "SaveChannelHttpLog:%s", url)

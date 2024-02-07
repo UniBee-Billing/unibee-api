@@ -39,7 +39,7 @@ type MerchantInfoColumns struct {
 	FirstName   string // first_name
 	LastName    string // last_name
 	Phone       string // phone
-	CreateAt    string // create utc time
+	CreateTime  string // create utc time
 	TimeZone    string // merchant default time zone
 }
 
@@ -64,7 +64,7 @@ var merchantInfoColumns = MerchantInfoColumns{
 	FirstName:   "first_name",
 	LastName:    "last_name",
 	Phone:       "phone",
-	CreateAt:    "create_at",
+	CreateTime:  "create_time",
 	TimeZone:    "time_zone",
 }
 

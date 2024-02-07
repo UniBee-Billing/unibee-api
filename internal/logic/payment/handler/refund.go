@@ -135,7 +135,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundAt: refundAt},
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: refundAt},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
@@ -302,12 +302,12 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			RefundAmount:         details.RefundAmount,
 			RefundComment:        details.Reason,
 			Status:               int(details.Status),
-			RefundAt:             details.RefundTime.Timestamp(),
+			RefundTime:           details.RefundTime.Timestamp(),
 			GatewayRefundId:      details.GatewayRefundId,
 			RefundCommentExplain: details.Reason,
 			UniqueId:             uniqueId,
 			SubscriptionId:       payment.SubscriptionId,
-			CreateAt:             gtime.Now().Timestamp(),
+			CreateTime:           gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -332,7 +332,7 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 			dao.Refund.Columns().RefundAmount:         details.RefundAmount,
 			dao.Refund.Columns().RefundComment:        details.Reason,
 			dao.Refund.Columns().Status:               details.Status,
-			dao.Refund.Columns().RefundAt:             details.RefundTime.Timestamp(),
+			dao.Refund.Columns().RefundTime:           details.RefundTime.Timestamp(),
 			dao.Refund.Columns().GatewayRefundId:      details.GatewayRefundId,
 			dao.Refund.Columns().RefundCommentExplain: details.Reason,
 			dao.Refund.Columns().UniqueId:             uniqueId,
@@ -376,7 +376,7 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			GatewayId:    refund.GatewayId,
 			Status:       status,
 			TimelineType: 1,
-			CreateAt:     gtime.Now().Timestamp(),
+			CreateTime:   gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)

@@ -57,8 +57,8 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		MerchantId: u.MerchantId,
 		// Phone:     u.Phone,
 		// Address:   u.Address,
-		UserName: u.UserName,
-		CreateAt: gtime.Now().Timestamp(),
+		UserName:   u.UserName,
+		CreateTime: gtime.Now().Timestamp(),
 	}
 
 	// race condition: email exist checking is too earlier

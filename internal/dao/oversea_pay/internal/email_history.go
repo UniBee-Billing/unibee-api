@@ -29,7 +29,7 @@ type EmailHistoryColumns struct {
 	GmtCreate  string // create time
 	GmtModify  string // update time
 	Response   string //
-	CreateAt   string // create utc time
+	CreateTime string // create utc time
 }
 
 // emailHistoryColumns holds the columns for table email_history.
@@ -43,7 +43,7 @@ var emailHistoryColumns = EmailHistoryColumns{
 	GmtCreate:  "gmt_create",
 	GmtModify:  "gmt_modify",
 	Response:   "response",
-	CreateAt:   "create_at",
+	CreateTime: "create_time",
 }
 
 // NewEmailHistoryDao creates and returns a new DAO object for table data access.

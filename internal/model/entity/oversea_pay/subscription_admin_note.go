@@ -17,5 +17,5 @@ type SubscriptionAdminNote struct {
 	MerchantUserId int64       `json:"merchantUserId" description:"merchant_user_id"`      // merchant_user_id
 	Note           string      `json:"note"           description:"note"`                  // note
 	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
-	CreateAt       int64       `json:"createAt"       description:"create utc time"`       // create utc time
+	CreateTime     int64       `json:"createTime"     description:"create utc time"`       // create utc time
 }

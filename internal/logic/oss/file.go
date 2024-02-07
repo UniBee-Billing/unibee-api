@@ -82,11 +82,11 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 
 	// 记录到数据表
 	toSave := entity.FileUpload{
-		UserId:   uploadUserId,
-		Url:      consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
-		FileName: uploadFileName,
-		Tag:      uploadPath,
-		CreateAt: gtime.Now().Timestamp(),
+		UserId:     uploadUserId,
+		Url:        consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		FileName:   uploadFileName,
+		Tag:        uploadPath,
+		CreateTime: gtime.Now().Timestamp(),
 	}
 	result, err := dao.FileUpload.Ctx(ctx).Data(toSave).OmitNil().Insert()
 	if err != nil {

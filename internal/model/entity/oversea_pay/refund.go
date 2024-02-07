@@ -25,7 +25,7 @@ type Refund struct {
 	RefundAmount         int64       `json:"refundAmount"         description:"refund amount, cent"`                                // refund amount, cent
 	RefundComment        string      `json:"refundComment"        description:"refund comment"`                                     // refund comment
 	Status               int         `json:"status"               description:"status。10-pending，20-success，30-failure, 40-cancel"` // status。10-pending，20-success，30-failure, 40-cancel
-	RefundAt             int64       `json:"refundAt"             description:"refund success time"`                                // refund success time
+	RefundTime           int64       `json:"refundTime"           description:"refund success time"`                                // refund success time
 	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"create time"`                                        // create time
 	GmtModify            *gtime.Time `json:"gmtModify"            description:"update time"`                                        // update time
 	GatewayRefundId      string      `json:"gatewayRefundId"      description:"gateway refund id"`                                  // gateway refund id
@@ -35,5 +35,5 @@ type Refund struct {
 	AdditionalData       string      `json:"additionalData"       description:""`                                                   //
 	UniqueId             string      `json:"uniqueId"             description:"unique id"`                                          // unique id
 	SubscriptionId       string      `json:"subscriptionId"       description:"subscription id"`                                    // subscription id
-	CreateAt             int64       `json:"createAt"             description:"create utc time"`                                    // create utc time
+	CreateTime           int64       `json:"createTime"           description:"create utc time"`                                    // create utc time
 }

@@ -47,7 +47,7 @@ type Subscription struct {
 	DunningTime                 interface{} // dunning_time, utc time
 	TrialEnd                    interface{} // trial_end, utc time
 	ReturnUrl                   interface{} //
-	FirstPaidAt                 interface{} // first success payment time
+	FirstPaidTime               interface{} // first success payment time
 	CancelReason                interface{} //
 	CountryCode                 interface{} //
 	VatNumber                   interface{} //
@@ -56,5 +56,5 @@ type Subscription struct {
 	Data                        interface{} //
 	ResponseData                interface{} //
 	PendingUpdateId             interface{} //
-	CreateAt                    interface{} // create utc time
+	CreateTime                  interface{} // create utc time
 }

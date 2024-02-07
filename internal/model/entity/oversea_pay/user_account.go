@@ -52,5 +52,5 @@ type UserAccount struct {
 	RecurringAmount    int64       `json:"recurringAmount"    description:"total recurring amount, cent"`                                                                             // total recurring amount, cent
 	BillingType        int         `json:"billingType"        description:"1-recurring,2-one-time"`                                                                                   // 1-recurring,2-one-time
 	TimeZone           string      `json:"timeZone"           description:""`                                                                                                         //
-	CreateAt           int64       `json:"createAt"           description:"create utc time"`                                                                                          // create utc time
+	CreateTime         int64       `json:"createTime"         description:"create utc time"`                                                                                          // create utc time
 }

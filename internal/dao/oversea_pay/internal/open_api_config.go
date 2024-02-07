@@ -33,7 +33,7 @@ type OpenApiConfigColumns struct {
 	Validips                string //
 	GatewayCallbackResponse string // callback return response
 	CompanyId               string // company id
-	CreateAt                string // create utc time
+	CreateTime              string // create utc time
 }
 
 // openApiConfigColumns holds the columns for table open_api_config.
@@ -51,7 +51,7 @@ var openApiConfigColumns = OpenApiConfigColumns{
 	Validips:                "validips",
 	GatewayCallbackResponse: "gateway_callback_response",
 	CompanyId:               "company_id",
-	CreateAt:                "create_at",
+	CreateTime:              "create_time",
 }
 
 // NewOpenApiConfigDao creates and returns a new DAO object for table data access.
