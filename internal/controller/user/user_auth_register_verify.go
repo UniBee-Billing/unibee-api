@@ -72,6 +72,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	if newOne == nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
+	newOne.Password = ""
 	return &auth.RegisterVerifyRes{User: newOne}, nil
 	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

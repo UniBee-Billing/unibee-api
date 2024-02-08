@@ -42,6 +42,6 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", newOne.Id)), "Cache Error")
-
+	newOne.Password = ""
 	return &auth.LoginOtpVerifyRes{User: newOne, Token: token}, nil
 }

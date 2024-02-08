@@ -3,12 +3,12 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"time"
 	"unibee-api/api/merchant/auth"
 	auth2 "unibee-api/internal/logic/auth"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"time"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -93,7 +93,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id)), "Cache Error")
-
+	newOne.Password = ""
 	return &auth.LoginRes{MerchantUser: newOne, Token: token}, nil
 
 }

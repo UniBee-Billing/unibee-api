@@ -76,6 +76,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	// TODO: return &{} is enough, front-end need to re-login, so don't need to return the whole user obj
+	newOne.Password = ""
 	return &auth.RegisterVerifyRes{MerchantUser: newOne}, nil
 	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
