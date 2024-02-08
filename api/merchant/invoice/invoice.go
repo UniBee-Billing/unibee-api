@@ -27,7 +27,7 @@ type SubscriptionInvoiceListReq struct {
 	FirstName     string `p:"firstName" dc:"FirstName" `
 	LastName      string `p:"lastName" dc:"LastName" `
 	Currency      string `p:"currency" dc:"Currency" `
-	Status        int    `p:"status" dc:"Status, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
+	Status        []int  `p:"status" dc:"Status, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
 	AmountStart   int64  `p:"amountStart" dc:"AmountStart" `
 	AmountEnd     int64  `p:"amountEnd" dc:"AmountEnd" `
 	UserId        int    `p:"userId" dc:"UserId Filter, Default Filter All" `

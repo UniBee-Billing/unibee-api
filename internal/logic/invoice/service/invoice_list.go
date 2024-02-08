@@ -15,7 +15,7 @@ type SubscriptionInvoiceListInternalReq struct {
 	FirstName     string `p:"firstName" dc:"FirstName" `
 	LastName      string `p:"lastName" dc:"LastName" `
 	Currency      string `p:"Currency" dc:"Currency" `
-	Status        int    `p:"status" dc:"Status" `
+	Status        []int  `p:"status" dc:"Status" `
 	AmountStart   int64  `p:"amountStart" dc:"AmountStart" `
 	AmountEnd     int64  `p:"amountEnd" dc:"AmountEnd" `
 	UserId        int    `p:"userId" dc:"Filter UserId Default All" `
@@ -58,10 +58,12 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
 		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency)).
-		Where(dao.Invoice.Columns().Status, req.Status).
 		Where(dao.Invoice.Columns().SendEmail, req.SendEmail)
 	if req.UserId > 0 {
-		query.Where(dao.Invoice.Columns().UserId, req.UserId)
+		query = query.Where(dao.Invoice.Columns().UserId, req.UserId)
+	}
+	if req.Status != nil && len(req.Status) > 0 {
+		query = query.WhereIn(dao.Invoice.Columns().Status, req.Status)
 	}
 	if req.AmountStart < req.AmountEnd {
 		query = query.WhereGTE(dao.Invoice.Columns().TotalAmount, req.AmountStart)
