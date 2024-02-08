@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"unibee-api/api/system/information"
+	"unibee-api/internal/query"
 	"unibee-api/time"
 )
 
@@ -28,6 +29,8 @@ func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *in
 		Scale:    1,
 	})
 	res.SupportCurrency = supportCurrencys
+	res.MerchantId = 15621
+	res.MerchantInfo = query.GetMerchantInfoById(ctx, 15621)
 
 	return res, nil
 }
