@@ -63,6 +63,9 @@ go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config -
 ```
 
 If do not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`
+```bash
+go run main.go --nacos-enable=false
+```
 
 #### OpenApi V3 Doc：http://127.0.0.1:8088/unib/swagger
 
