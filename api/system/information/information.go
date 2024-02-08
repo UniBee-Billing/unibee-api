@@ -2,6 +2,7 @@ package information
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
@@ -14,6 +15,7 @@ type MerchantInformationRes struct {
 	SupportCurrency []*SupportCurrency
 	MerchantId      int64
 	MerchantInfo    *entity.MerchantInfo
+	Gateways        []*ro.OutGatewayRo
 }
 
 type SupportCurrency struct {

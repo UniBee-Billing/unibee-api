@@ -41,6 +41,25 @@ func GetListActiveGatewayPlans(ctx context.Context, planId int64) (list []*entit
 	return
 }
 
+func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId int64) []*ro.OutGatewayRo {
+	if merchantId <= 0 {
+		return nil
+	}
+	var list []*entity.MerchantGateway
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{MerchantId: merchantId, GatewayType: consts.GatewayTypeSubscription}).OmitEmpty().Scan(&list)
+	if err != nil {
+		return nil
+	}
+	var gateways []*ro.OutGatewayRo
+	for _, one := range list {
+		gateways = append(gateways, &ro.OutGatewayRo{
+			Id:          one.Id,
+			GatewayName: one.Name,
+		})
+	}
+	return gateways
+}
+
 func GetListActiveOutGatewayRos(ctx context.Context, planId int64) []*ro.OutGatewayRo {
 	if planId <= 0 {
 		return nil

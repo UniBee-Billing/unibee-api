@@ -29,8 +29,9 @@ func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *in
 		Scale:    1,
 	})
 	res.SupportCurrency = supportCurrencys
-	res.MerchantId = 15621
-	res.MerchantInfo = query.GetMerchantInfoById(ctx, 15621)
+	res.MerchantId = 15621 // firstly only one
+	res.MerchantInfo = query.GetMerchantInfoById(ctx, res.MerchantId)
+	res.Gateways = query.GetListActiveOutGatewayRosByMerchantId(ctx, res.MerchantId)
 
 	return res, nil
 }
