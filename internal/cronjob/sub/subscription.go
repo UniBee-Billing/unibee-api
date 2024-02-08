@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"time"
 	redismq2 "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -19,7 +20,6 @@ import (
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
 	"unibee-api/utility"
-	"time"
 )
 
 func mainTask(ctx context.Context) {
@@ -56,6 +56,12 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		key := fmt.Sprintf("SubscriptionCycle-%s", sub.SubscriptionId)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, taskName, "GetLock 60s", key)
+			_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+				dao.Subscription.Columns().TaskTime: gtime.Now(),
+			}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+			if err != nil {
+				g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
+			}
 			if sub.Status == consts.SubStatusCreate {
 				if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
 					err := SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
@@ -146,12 +152,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 						continue
 					}
 					g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice GatewayPaymentCreate:", utility.MarshalToJsonString(createRes))
-					_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-						dao.Subscription.Columns().TaskTime: gtime.Now(),
-					}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
-					if err != nil {
-						g.Log().Print(ctx, taskName, "SubscriptionBillingCycleDunningInvoice UpdateTaskTime err:", err.Error())
-					}
+
 				}
 			}
 			// compute cycle
