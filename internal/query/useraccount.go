@@ -14,6 +14,7 @@ func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount
 	if err != nil {
 		return nil
 	}
+	one.Password = ""
 	return one
 }
 

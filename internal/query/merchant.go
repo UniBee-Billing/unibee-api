@@ -25,6 +25,7 @@ func GetMerchantAccountById(ctx context.Context, id uint64) (one *entity.Merchan
 	if err != nil {
 		return nil
 	}
+	one.Password = ""
 	return one
 }
 
