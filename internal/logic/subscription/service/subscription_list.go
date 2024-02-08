@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"strings"
 	"unibee-api/api/user/subscription"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -15,13 +16,12 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strings"
 )
 
 type SubscriptionListInternalReq struct {
 	MerchantId int64  `p:"merchantId" dc:"MerchantId"`
 	UserId     int64  `p:"userId"  dc:"UserId" `
-	Status     int    `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	Status     []int  `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page       int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
@@ -98,11 +98,13 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			sortKey = req.SortField + " desc"
 		}
 	}
-	err := dao.Subscription.Ctx(ctx).
+	baseQuery := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().MerchantId, req.MerchantId).
-		Where(dao.Subscription.Columns().UserId, req.UserId).
-		Where(dao.Subscription.Columns().Status, req.Status).
-		Limit(req.Page*req.Count, req.Count).
+		Where(dao.Subscription.Columns().UserId, req.UserId)
+	if req.Status != nil && len(req.Status) > 0 {
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().Status, req.Status)
+	}
+	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		Order(sortKey).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
