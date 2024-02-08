@@ -11,13 +11,13 @@ type MerchantInformationReq struct {
 }
 
 type MerchantInformationRes struct {
-	Env             string
-	IsProd          bool
-	SupportTimeZone []string
-	SupportCurrency []*SupportCurrency
+	Env             string             `description:"System Env, em: daily|stage|local|prod" `
+	IsProd          bool               `description:"Check System Env Is Prod, true|false" `
+	SupportTimeZone []string           `description:"Support TimeZone List" `
+	SupportCurrency []*SupportCurrency `description:"Support Currency List" `
 	MerchantId      int64
 	MerchantInfo    *entity.MerchantInfo
-	Gateways        []*ro.OutGatewayRo
+	Gateway         []*ro.OutGatewayRo
 }
 
 type SupportCurrency struct {

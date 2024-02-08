@@ -15,26 +15,26 @@ func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *in
 	res.Env = consts.GetConfigInstance().Env
 	res.IsProd = consts.GetConfigInstance().IsProd()
 
-	var supportCurrencys []*information.SupportCurrency
-	supportCurrencys = append(supportCurrencys, &information.SupportCurrency{
+	var supportCurrency []*information.SupportCurrency
+	supportCurrency = append(supportCurrency, &information.SupportCurrency{
 		Currency: "EUR",
 		Symbol:   "€",
 		Scale:    100,
 	})
-	supportCurrencys = append(supportCurrencys, &information.SupportCurrency{
+	supportCurrency = append(supportCurrency, &information.SupportCurrency{
 		Currency: "USD",
 		Symbol:   "$",
 		Scale:    100,
 	})
-	supportCurrencys = append(supportCurrencys, &information.SupportCurrency{
+	supportCurrency = append(supportCurrency, &information.SupportCurrency{
 		Currency: "JPY",
 		Symbol:   "¥",
 		Scale:    1,
 	})
-	res.SupportCurrency = supportCurrencys
+	res.SupportCurrency = supportCurrency
 	res.MerchantId = 15621 // firstly only one
 	res.MerchantInfo = query.GetMerchantInfoById(ctx, res.MerchantId)
-	res.Gateways = query.GetListActiveOutGatewayRosByMerchantId(ctx, res.MerchantId)
+	res.Gateway = query.GetListActiveOutGatewayRosByMerchantId(ctx, res.MerchantId)
 
 	return res, nil
 }
