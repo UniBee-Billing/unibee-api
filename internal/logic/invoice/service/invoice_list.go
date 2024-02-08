@@ -84,7 +84,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 			userIdList = append(userIdList, user.Id)
 		}
 		if len(userIdList) > 0 {
-			query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
+			query = query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
 		}
 	}
 	err = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
