@@ -11,6 +11,8 @@ type MerchantInformationReq struct {
 }
 
 type MerchantInformationRes struct {
+	Env             string
+	IsProd          bool
 	SupportTimeZone []string
 	SupportCurrency []*SupportCurrency
 	MerchantId      int64

@@ -3,6 +3,7 @@ package system
 import (
 	"context"
 	"unibee-api/api/system/information"
+	"unibee-api/internal/consts"
 	"unibee-api/internal/query"
 	"unibee-api/time"
 )
@@ -11,6 +12,8 @@ func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *in
 	res = &information.MerchantInformationRes{}
 
 	res.SupportTimeZone = time.GetTimeZoneList()
+	res.Env = consts.GetConfigInstance().Env
+	res.IsProd = consts.GetConfigInstance().IsProd()
 
 	var supportCurrencys []*information.SupportCurrency
 	supportCurrencys = append(supportCurrencys, &information.SupportCurrency{
