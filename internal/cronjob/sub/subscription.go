@@ -17,7 +17,6 @@ import (
 	"unibee-api/internal/logic/subscription/handler"
 	service2 "unibee-api/internal/logic/subscription/service"
 	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
 	"unibee-api/redismq"
 	"unibee-api/utility"
 )
@@ -39,12 +38,16 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	var sortKey = "task_time asc"
 	var status = []int{consts.SubStatusCreate, consts.SubStatusActive, consts.SubStatusIncomplete}
 	// query sub which dunningTime expired
-	err := dao.Subscription.Ctx(ctx).
+	query := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
 		WhereLT(dao.Subscription.Columns().DunningTime, timeNow). //  dunning < now
 		Where(dao.Subscription.Columns().Type, consts.SubTypeUniBeeControl).
-		WhereIn(dao.Subscription.Columns().Status, status).
-		Limit(0, 10).
+		WhereIn(dao.Subscription.Columns().Status, status)
+	if !consts.GetConfigInstance().IsProd() {
+		// Test Clock Not Enable For Prod Env
+		query = query.Where(dao.Subscription.Columns().TestClock, 0)
+	}
+	err := query.Limit(0, 10).
 		Order(sortKey).
 		OmitEmpty().Scan(&subs)
 	if err != nil {

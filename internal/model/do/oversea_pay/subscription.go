@@ -57,4 +57,5 @@ type Subscription struct {
 	ResponseData                interface{} //
 	PendingUpdateId             interface{} //
 	CreateTime                  interface{} // create utc time
+	TestClock                   interface{} // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 }

@@ -26,6 +26,7 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdateSubscriptionId string // pending update unique id
 	GatewayUpdateId      string // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            string // create time
+	GmtModify            string // update time
 	Amount               string // amount of this period, cent
 	Status               string // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	ProrationAmount      string // proration amount of this pending update , cent
@@ -40,7 +41,6 @@ type SubscriptionPendingUpdateColumns struct {
 	UpdateAddonData      string // plan addon data (json) after update
 	GatewayId            string // gateway_id
 	UserId               string // userId
-	GmtModify            string // update time
 	IsDeleted            string // 0-UnDeleted，1-Deleted
 	Paid                 string // paid，0-no，1-yes
 	Link                 string // payment link
@@ -63,6 +63,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UpdateSubscriptionId: "update_subscription_id",
 	GatewayUpdateId:      "gateway_update_id",
 	GmtCreate:            "gmt_create",
+	GmtModify:            "gmt_modify",
 	Amount:               "amount",
 	Status:               "status",
 	ProrationAmount:      "proration_amount",
@@ -77,7 +78,6 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	UpdateAddonData:      "update_addon_data",
 	GatewayId:            "gateway_id",
 	UserId:               "user_id",
-	GmtModify:            "gmt_modify",
 	IsDeleted:            "is_deleted",
 	Paid:                 "paid",
 	Link:                 "link",

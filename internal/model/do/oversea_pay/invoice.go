@@ -20,6 +20,7 @@ type Invoice struct {
 	InvoiceName                    interface{} // invoice name
 	UniqueId                       interface{} // unique_id
 	GmtCreate                      *gtime.Time // create time
+	GmtModify                      *gtime.Time // update time
 	TotalAmount                    interface{} // total amount, cent
 	TaxAmount                      interface{} // tax amount,cent
 	SubscriptionAmount             interface{} // sub amount,cent
@@ -30,7 +31,6 @@ type Invoice struct {
 	SendStatus                     interface{} // email send status，0-No | 1- YES
 	SendEmail                      interface{} // email
 	SendPdf                        interface{} // pdf link
-	GmtModify                      *gtime.Time // update time
 	IsDeleted                      interface{} // 0-UnDeleted，1-Deleted
 	Link                           interface{} // invoice link
 	GatewayStatus                  interface{} //

@@ -33,6 +33,6 @@ type SubscriptionPlan struct {
 	Status                    interface{} // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 interface{} // 0-UnDeleted，1-Deleted
 	BindingAddonIds           interface{} // binded addon planIds，split with ,
-	PublishStatus             interface{} // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
+	PublishStatus             interface{} // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                interface{} // create utc time
 }

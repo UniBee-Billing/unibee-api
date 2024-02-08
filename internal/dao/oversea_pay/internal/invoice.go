@@ -28,6 +28,7 @@ type InvoiceColumns struct {
 	InvoiceName                    string // invoice name
 	UniqueId                       string // unique_id
 	GmtCreate                      string // create time
+	GmtModify                      string // update time
 	TotalAmount                    string // total amount, cent
 	TaxAmount                      string // tax amount,cent
 	SubscriptionAmount             string // sub amount,cent
@@ -38,7 +39,6 @@ type InvoiceColumns struct {
 	SendStatus                     string // email send status，0-No | 1- YES
 	SendEmail                      string // email
 	SendPdf                        string // pdf link
-	GmtModify                      string // update time
 	IsDeleted                      string // 0-UnDeleted，1-Deleted
 	Link                           string // invoice link
 	GatewayStatus                  string //
@@ -71,6 +71,7 @@ var invoiceColumns = InvoiceColumns{
 	InvoiceName:                    "invoice_name",
 	UniqueId:                       "unique_id",
 	GmtCreate:                      "gmt_create",
+	GmtModify:                      "gmt_modify",
 	TotalAmount:                    "total_amount",
 	TaxAmount:                      "tax_amount",
 	SubscriptionAmount:             "subscription_amount",
@@ -81,7 +82,6 @@ var invoiceColumns = InvoiceColumns{
 	SendStatus:                     "send_status",
 	SendEmail:                      "send_email",
 	SendPdf:                        "send_pdf",
-	GmtModify:                      "gmt_modify",
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
 	GatewayStatus:                  "gateway_status",

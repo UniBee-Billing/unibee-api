@@ -18,6 +18,7 @@ type Invoice struct {
 	InvoiceName                    string      `json:"invoiceName"                    description:"invoice name"`                                                           // invoice name
 	UniqueId                       string      `json:"uniqueId"                       description:"unique_id"`                                                              // unique_id
 	GmtCreate                      *gtime.Time `json:"gmtCreate"                      description:"create time"`                                                            // create time
+	GmtModify                      *gtime.Time `json:"gmtModify"                      description:"update time"`                                                            // update time
 	TotalAmount                    int64       `json:"totalAmount"                    description:"total amount, cent"`                                                     // total amount, cent
 	TaxAmount                      int64       `json:"taxAmount"                      description:"tax amount,cent"`                                                        // tax amount,cent
 	SubscriptionAmount             int64       `json:"subscriptionAmount"             description:"sub amount,cent"`                                                        // sub amount,cent
@@ -28,7 +29,6 @@ type Invoice struct {
 	SendStatus                     int         `json:"sendStatus"                     description:"email send status，0-No | 1- YES"`                                        // email send status，0-No | 1- YES
 	SendEmail                      string      `json:"sendEmail"                      description:"email"`                                                                  // email
 	SendPdf                        string      `json:"sendPdf"                        description:"pdf link"`                                                               // pdf link
-	GmtModify                      *gtime.Time `json:"gmtModify"                      description:"update time"`                                                            // update time
 	IsDeleted                      int         `json:"isDeleted"                      description:"0-UnDeleted，1-Deleted"`                                                  // 0-UnDeleted，1-Deleted
 	Link                           string      `json:"link"                           description:"invoice link"`                                                           // invoice link
 	GatewayStatus                  string      `json:"gatewayStatus"                  description:""`                                                                       //

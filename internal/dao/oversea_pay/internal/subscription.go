@@ -65,6 +65,7 @@ type SubscriptionColumns struct {
 	ResponseData                string //
 	PendingUpdateId             string //
 	CreateTime                  string // create utc time
+	TestClock                   string // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -114,6 +115,7 @@ var subscriptionColumns = SubscriptionColumns{
 	ResponseData:                "response_data",
 	PendingUpdateId:             "pendingUpdateId",
 	CreateTime:                  "create_time",
+	TestClock:                   "test_clock",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

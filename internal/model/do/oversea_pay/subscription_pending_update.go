@@ -18,6 +18,7 @@ type SubscriptionPendingUpdate struct {
 	UpdateSubscriptionId interface{} // pending update unique id
 	GatewayUpdateId      interface{} // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            *gtime.Time // create time
+	GmtModify            *gtime.Time // update time
 	Amount               interface{} // amount of this period, cent
 	Status               interface{} // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	ProrationAmount      interface{} // proration amount of this pending update , cent
@@ -32,7 +33,6 @@ type SubscriptionPendingUpdate struct {
 	UpdateAddonData      interface{} // plan addon data (json) after update
 	GatewayId            interface{} // gateway_id
 	UserId               interface{} // userId
-	GmtModify            *gtime.Time // update time
 	IsDeleted            interface{} // 0-UnDeleted，1-Deleted
 	Paid                 interface{} // paid，0-no，1-yes
 	Link                 interface{} // payment link

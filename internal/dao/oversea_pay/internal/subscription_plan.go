@@ -41,7 +41,7 @@ type SubscriptionPlanColumns struct {
 	Status                    string // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 string // 0-UnDeleted，1-Deleted
 	BindingAddonIds           string // binded addon planIds，split with ,
-	PublishStatus             string // 1-UnPublish,2-Publish,用于控制是否在 UserPortal 端展示
+	PublishStatus             string // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                string // create utc time
 }
 
