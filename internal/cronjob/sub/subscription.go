@@ -35,6 +35,7 @@ var (
 func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
 	g.Log().Debug(ctx, taskName, "Start......")
 	var timeNow = gtime.Now().Timestamp()
+
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
 	var status = []int{consts.SubStatusCreate, consts.SubStatusActive, consts.SubStatusIncomplete}
