@@ -38,6 +38,7 @@ type IMerchantBalance interface {
 type IMerchantInvoice interface {
 	SubscriptionInvoicePdfGenerate(ctx context.Context, req *invoice.SubscriptionInvoicePdfGenerateReq) (res *invoice.SubscriptionInvoicePdfGenerateRes, err error)
 	SubscriptionInvoiceSendEmail(ctx context.Context, req *invoice.SubscriptionInvoiceSendEmailReq) (res *invoice.SubscriptionInvoiceSendEmailRes, err error)
+	SubscriptionInvoiceDetail(ctx context.Context, req *invoice.SubscriptionInvoiceDetailReq) (res *invoice.SubscriptionInvoiceDetailRes, err error)
 	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
 	NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error)
 	NewInvoiceEdit(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error)

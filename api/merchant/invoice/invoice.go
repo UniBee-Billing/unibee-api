@@ -21,6 +21,14 @@ type SubscriptionInvoiceSendEmailReq struct {
 type SubscriptionInvoiceSendEmailRes struct {
 }
 
+type SubscriptionInvoiceDetailReq struct {
+	g.Meta    `path:"/subscription_invoice_detail" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice Detail"`
+	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
+}
+type SubscriptionInvoiceDetailRes struct {
+	Invoice *ro.InvoiceDetailRo `p:"invoice" dc:"invoice Detail"`
+}
+
 type SubscriptionInvoiceListReq struct {
 	g.Meta        `path:"/subscription_invoice_list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice List"`
 	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
