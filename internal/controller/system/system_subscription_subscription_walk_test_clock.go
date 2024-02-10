@@ -3,7 +3,7 @@ package system
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/glog"
-	"unibee-api/internal/logic/subscription/testclock"
+	"unibee-api/internal/logic/subscription/billingcycle/testclock"
 	"unibee-api/utility"
 
 	"unibee-api/api/system/subscription"

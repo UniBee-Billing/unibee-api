@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq2 "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
-	sub2 "unibee-api/internal/cronjob/sub"
 	"unibee-api/internal/logic/invoice/handler"
+	"unibee-api/internal/logic/subscription/billingcycle/expire"
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
 	"unibee-api/utility"
@@ -33,7 +33,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 
 	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= 2*24*60*60 {
 		//should expire sub
-		err := sub2.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
+		err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 		if err != nil {
 			fmt.Printf("SubscriptionCreatePaymentCheckListener SubscriptionExpire Error:%s", err.Error())
 		}

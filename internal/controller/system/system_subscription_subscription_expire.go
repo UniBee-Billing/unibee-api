@@ -2,7 +2,7 @@ package system
 
 import (
 	"context"
-	"unibee-api/internal/cronjob/sub"
+	"unibee-api/internal/logic/subscription/billingcycle/expire"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 
@@ -12,7 +12,7 @@ import (
 func (c *ControllerSubscription) SubscriptionExpire(ctx context.Context, req *subscription.SubscriptionExpireReq) (res *subscription.SubscriptionExpireRes, err error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(one != nil, "sub not found")
-	err = sub.SubscriptionExpire(ctx, one, "AdminExpire")
+	err = expire.SubscriptionExpire(ctx, one, "AdminExpire")
 	if err != nil {
 		return nil, err
 	}
