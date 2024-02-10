@@ -152,3 +152,7 @@ Data Access Data access objects, a layer of abstract objects used to interact wi
   resource Static resource Static resource file. These files can often be injected into a release file in the form of resource packaging/image compilation.
   Go.mod Dependency Management A dependency description file managed using the Go Module package.
   main.go entry file Program entry file.
+
+
+
+TODO Mark https://github.com/swaggo/gin-swagger
