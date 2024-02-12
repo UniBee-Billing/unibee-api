@@ -153,7 +153,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			payAffected, err := update.RowsAffected()
-			g.Log().Printf(ctx, "HandleRefundSuccess Blank incrTotalRefundFee, updateCount=%s", payAffected)
+			g.Log().Printf(ctx, "HandleRefundSuccess Blank incrTotalRefundFee, updateCount=%v", payAffected)
 			if err != nil || payAffected != 1 {
 				//_ = transaction.Rollback()
 				return err
@@ -176,7 +176,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			EventType: event.Refunded.Type,
 			Event:     event.Refunded.Desc,
 			OpenApiId: one.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.Status, "Refunded", one.RefundId),
+			UniqueNo:  fmt.Sprintf("%d_%s_%s", pay.Status, "Refunded", one.RefundId),
 			Message:   req.Reason,
 		})
 

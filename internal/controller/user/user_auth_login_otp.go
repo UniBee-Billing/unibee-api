@@ -30,7 +30,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	}
 
 	verificationCode := generateRandomString(6)
-	fmt.Printf("verification ", verificationCode)
+	fmt.Printf("verification %s", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)
 	if err != nil {
 		// return nil, gerror.New("internal error")

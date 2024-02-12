@@ -102,7 +102,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	verificationCode := generateRandomString(6)
-	fmt.Printf("verification ", verificationCode)
+	fmt.Printf("verification %s", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))

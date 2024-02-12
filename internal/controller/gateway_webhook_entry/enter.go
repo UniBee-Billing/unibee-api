@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"strconv"
+	"strings"
 	"unibee-api/internal/logic/gateway/util"
 	"unibee-api/internal/logic/gateway/webhook"
 	"unibee-api/utility"
-	"strconv"
-	"strings"
 )
 
 func GatewayWebhookEntrance(r *ghttp.Request) {
 	gatewayId := r.Get("gatewayId").String()
 	gatewayIdInt, err := strconv.Atoi(gatewayId)
 	if err != nil {
-		g.Log().Errorf(r.Context(), "GatewayWebhookEntrance panic gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
+		g.Log().Errorf(r.Context(), "GatewayWebhookEntrance panic url: %s gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
 		return
 	}
 	gateway := util.GetGatewayById(r.Context(), int64(gatewayIdInt))
@@ -26,7 +26,7 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 	gatewayId := r.Get("gatewayId").String()
 	gatewayIdInt, err := strconv.Atoi(gatewayId)
 	if err != nil {
-		g.Log().Errorf(r.Context(), "GatewayRedirectEntrance panic gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
+		g.Log().Errorf(r.Context(), "GatewayRedirectEntrance panic url:%s gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
 		return
 	}
 	gateway := util.GetGatewayById(r.Context(), int64(gatewayIdInt))

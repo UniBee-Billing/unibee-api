@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"strings"
 	"unibee-api/internal/consts"
 	_ "unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
@@ -9,7 +10,6 @@ import (
 	"unibee-api/internal/model"
 	"unibee-api/internal/query"
 	utility "unibee-api/utility"
-	"strings"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -52,7 +52,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 
 	utility.Try(r.Middleware.Next, func(err interface{}) {
 		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_Exception Panic Url: %s Params:%s Code:%d Error:%s", r.GetUrl(), json, err)
+		g.Log().Errorf(r.Context(), "Global_Exception Panic Url: %s Params:%s Error:%v", r.GetUrl(), json, err)
 		return
 	})
 
@@ -195,7 +195,7 @@ func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
 
 	userAccount := query.GetUserAccountById(r.Context(), u.Id)
 	if userAccount == nil {
-		g.Log().Infof(r.Context(), "TokenUserAuth user not found id:%s", u.Id)
+		g.Log().Infof(r.Context(), "TokenUserAuth user not found id:%v", u.Id)
 		utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
 		r.Exit()
 	}
@@ -245,7 +245,7 @@ func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
 
 	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
 	if merchantAccount == nil {
-		g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found id:%s", u.Id)
+		g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found id:%d", u.Id)
 		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 		r.Exit()
 	}

@@ -789,7 +789,7 @@ func (s Stripe) GatewaySubscriptionUpdate(ctx context.Context, subscriptionRo *r
 		queryParams := &stripe.InvoiceParams{}
 		newInvoice, err := invoice.Get(updateSubscription.LatestInvoice.ID, queryParams)
 		log.SaveChannelHttpLog("GatewaySubscriptionUpdate", queryParams, newInvoice, err, "GetInvoice", nil, gateway)
-		g.Log().Infof(ctx, "query new invoice:", newInvoice)
+		g.Log().Infof(ctx, "query new invoice:%v", newInvoice)
 
 		return &ro.GatewayUpdateSubscriptionInternalResp{
 			Data:            utility.FormatToJsonString(updateSubscription),

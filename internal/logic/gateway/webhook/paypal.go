@@ -8,6 +8,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/plutov/paypal/v4"
+	"net/http"
+	"strings"
 	_gateway "unibee-api/internal/logic/gateway"
 	"unibee-api/internal/logic/gateway/api"
 	"unibee-api/internal/logic/gateway/api/log"
@@ -16,8 +18,6 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"net/http"
-	"strings"
 )
 
 type PaypalWebhook struct {
@@ -183,7 +183,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription deleted for %d.", gateway.GatewayName, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription deleted for %s.", gateway.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the deleted subscription.
 				// handleSubscriptionCanceled(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
@@ -200,7 +200,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription updated for %d.", gateway.GatewayName, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription updated for %s.", gateway.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 				// handleSubscriptionUpdated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
@@ -217,7 +217,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription created for %d.", gateway.GatewayName, resource.Get("id").String())
+				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription created for %s.", gateway.GatewayName, resource.Get("id").String())
 				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 				// handleSubscriptionCreated(subscription)
 				err := p.processWebhook(r.Context(), eventType, resource)
@@ -234,7 +234,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, "", nil, gateway)
 		return
 	} else {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed. %v\n", gateway.GatewayName)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
