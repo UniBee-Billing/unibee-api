@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
+	"os"
+	"testing"
 	"unibee-api/internal/consts"
 	entity "unibee-api/internal/model/entity/oversea_pay"
-	"testing"
 )
 
 func TestGenerate(t *testing.T) {
@@ -40,5 +41,13 @@ func TestGenerate(t *testing.T) {
 	}, savePath)
 	if err != nil {
 		fmt.Printf("err :%s", err.Error())
+	}
+	err = os.Remove("f18f4fce-802b-471c-9418-9640384594f6.jpg")
+	if err != nil {
+		return
+	}
+	err = os.Remove("pdf_test.pdf")
+	if err != nil {
+		return
 	}
 }
