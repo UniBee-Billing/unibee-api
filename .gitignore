@@ -22,3 +22,4 @@ cache
 config.yaml
 publish_dev.sh
 publish_main.sh
+test/out/*.*

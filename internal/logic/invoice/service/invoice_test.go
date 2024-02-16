@@ -9,11 +9,19 @@ import (
 	_test "unibee-api/test"
 )
 
+func TestGetSubscription(t *testing.T) {
+	gtest.C(t, func(t *gtest.T) {
+		one := query.GetSubscriptionBySubscriptionId(context.Background(), "sub202402045lnIGlOvznJmSSI")
+		_test.AssertNotNil(one)
+		t.Assert(one.SubscriptionId, "sub202402045lnIGlOvznJmSSI")
+	})
+}
+
 //func TestCancelInvoice(t *testing.T) {
-//	err := service.CancelProcessingInvoice(context.Background(), "ddddd")
-//	if err != nil {
-//		return
-//	}
+//	gtest.C(t, func(t *gtest.T) {
+//		err := CancelProcessingInvoice(context.Background(), "ddddd")
+//		_test.AssertNotNil(err)
+//	})
 //}
 
 func setup() {
@@ -22,12 +30,4 @@ func setup() {
 
 func teardown() {
 	fmt.Println("After all tests")
-}
-
-func TestGetSubscription(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		one := query.GetSubscriptionBySubscriptionId(context.Background(), "sub202402045lnIGlOvznJmSSI")
-		_test.AssertNotNil(one)
-		t.Assert(one.SubscriptionId, "sub202402045lnIGlOvznJmSSI")
-	})
 }
