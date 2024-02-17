@@ -37,6 +37,18 @@ func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, er
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
+	} else {
+		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().LastName:       req.LastName,
+			dao.UserAccount.Columns().FirstName:      req.FirstName,
+			dao.UserAccount.Columns().Address:        req.Address,
+			dao.UserAccount.Columns().Phone:          req.Phone,
+			dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
+			dao.UserAccount.Columns().GmtModify:      gtime.Now(),
+		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			return nil, err
+		}
 	}
 	// create user session
 	session := utility.CreateSessionId(strconv.FormatUint(one.Id, 10))
