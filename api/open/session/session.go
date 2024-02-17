@@ -8,6 +8,7 @@ type UserPortalSessionReq struct {
 	Email          int64  `p:"email" dc:"Email" v:"required"`
 	ReturnUrl      string `p:"returnUrl" dc:"ReturnUrl"`
 }
+
 type UserPortalSessionRes struct {
 	UserId string `json:"userId" dc:"UserId"`
 	Url    string `json:"url" dc:"Url"`
