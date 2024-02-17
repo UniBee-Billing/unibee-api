@@ -22,6 +22,7 @@ var (
 	TopicSubscriptionCreate             = redismq.MQTopicEnum{"unibee_subscription", "subscription_created", "subscription created"}
 	TopicSubscriptionCreatePaymentCheck = redismq.MQTopicEnum{"unibee_subscription", "subscription_create_payment_check", "subscription create payment check"}
 	TopicSubscriptionPaymentSuccess     = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}
+	TopicMerchantWebhook                = redismq.MQTopicEnum{"unibee_merchant_webhook", "*", "merchant webhook"}
 )
 
 type SRedisMqConfig struct{}

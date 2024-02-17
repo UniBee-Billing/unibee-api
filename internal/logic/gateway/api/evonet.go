@@ -1,7 +1,6 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -10,6 +9,10 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"regexp"
+	"runtime"
+	"strings"
+	"time"
 	"unibee-api/internal/consts"
 	_gateway "unibee-api/internal/logic/gateway"
 	"unibee-api/internal/logic/gateway/log"
@@ -17,12 +20,6 @@ import (
 	"unibee-api/internal/logic/gateway/util"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
-	"io"
-	"net/http"
-	"regexp"
-	"runtime"
-	"strings"
-	"time"
 )
 
 //const DEV_ENDPOINT = "https://hkg-online-uat.everonet.com"
@@ -480,46 +477,9 @@ func sendEvonetRequest(ctx context.Context, gateway *entity.MerchantGateway, met
 		"Authorization":   sign("POST", urlPath, msgId, datetime, gateway.GatewayKey, body),
 		"Signtype":        "SHA256",
 	}
-	response, err := sendRequest(gateway.Host+urlPath, method, body, headers)
+	response, err := utility.SendRequest(gateway.Host+urlPath, method, body, headers)
 	g.Log().Infof(ctx, "\nEvonet_End %s %s response: %s error %s\n", method, urlPath, response, err)
 	return response, nil
-}
-
-func sendRequest(url string, method string, data []byte, headers map[string]string) ([]byte, error) {
-	// 创建一个字节数组读取器，用于将数据传递给请求体
-	bodyReader := bytes.NewReader(data)
-
-	// 创建一个POST请求
-	request, err := http.NewRequest(method, url, bodyReader)
-	if err != nil {
-		return nil, err
-	}
-
-	// 设置自定义头部信息
-	for key, value := range headers {
-		request.Header.Set(key, value)
-	}
-
-	// 发送请求
-	client := &http.Client{}
-	response, err := client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	// 关闭响应体
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(response.Body)
-
-	responseBody, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return responseBody, nil
 }
 
 func sign(method string, urlPath string, msgId string, dateTime string, key string, postJson []byte) (sign string) {

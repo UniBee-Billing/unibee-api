@@ -19,4 +19,5 @@ type MerchantWebhook struct {
 	GmtCreate     *gtime.Time // create time
 	GmtModify     *gtime.Time // update time
 	CreateTime    interface{} // create utc time
+	IsDeleted     interface{} // 0-UnDeleted，1-Deleted
 }

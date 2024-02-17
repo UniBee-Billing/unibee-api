@@ -16,3 +16,14 @@ func GetMerchantWebhookByUrl(ctx context.Context, url string) (one *entity.Merch
 	}
 	return one
 }
+
+func GetMerchantWebhooksByMerchantId(ctx context.Context, merchantId int64) (list []*entity.MerchantWebhook) {
+	if merchantId <= 0 {
+		return nil
+	}
+	err := dao.MerchantWebhook.Ctx(ctx).Where(entity.MerchantWebhook{MerchantId: merchantId, IsDeleted: 0}).Scan(&list)
+	if err != nil {
+		return nil
+	}
+	return list
+}

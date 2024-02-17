@@ -27,6 +27,7 @@ type MerchantWebhookColumns struct {
 	GmtCreate     string // create time
 	GmtModify     string // update time
 	CreateTime    string // create utc time
+	IsDeleted     string // 0-UnDeleted，1-Deleted
 }
 
 // merchantWebhookColumns holds the columns for table merchant_webhook.
@@ -38,6 +39,7 @@ var merchantWebhookColumns = MerchantWebhookColumns{
 	GmtCreate:     "gmt_create",
 	GmtModify:     "gmt_modify",
 	CreateTime:    "create_time",
+	IsDeleted:     "is_deleted",
 }
 
 // NewMerchantWebhookDao creates and returns a new DAO object for table data access.
