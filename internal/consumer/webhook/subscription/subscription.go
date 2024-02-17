@@ -19,7 +19,7 @@ func printPanic(ctx context.Context, err error) {
 	}
 }
 
-func SendSubscriptionCreatedMerchantWebhook(one *entity.Subscription) {
+func SendSubscriptionCreatedMerchantWebhookBackground(one *entity.Subscription) {
 	go func() {
 		ctx := context.Background()
 		var err error

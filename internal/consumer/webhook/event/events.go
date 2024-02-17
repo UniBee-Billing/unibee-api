@@ -1,10 +1,7 @@
 package event
 
 import (
-	"fmt"
 	"sort"
-	"unibee-api/redismq"
-	"unibee-api/utility"
 )
 
 const (
@@ -14,31 +11,38 @@ const (
 	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_EXPIRED   = "subscription.expired"
 )
 
-var ListeningEvents []string
+var ListeningEvents = []string{
+	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED,
+	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED,
+	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CANCELLED,
+	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_EXPIRED,
+}
 
+// var ListeningEvents []string
 func initListeningEvents() {
-	if ListeningEvents == nil {
-		ListeningEvents = make([]string, 0, 100)
-	}
+	//if ListeningEvents == nil {
+	//	ListeningEvents = make([]string, 0, 100)
+	//}
 }
 
-func RegisterListenerEvent(i redismq.IMessageListener) {
-	if i == nil {
-		return
-	}
-	initListeningEvents()
-	if len(ListeningEvents) > 100 {
-		fmt.Println("Project Register Events Too Much ，Merge Please")
-		return
-	}
-
-	e := i.GetTag()
-	utility.Assert(!EventInListeningEvents(e), fmt.Sprintf("duplicated listener, event:%s already listened\n", e))
-
-	ListeningEvents = append(ListeningEvents, e)
-	sort.Strings(ListeningEvents)
-	fmt.Printf("Merchant_Webhook_Subscription Register Event:%s\n", e)
-}
+//
+//func RegisterListenerEvent(i redismq.IMessageListener) {
+//	if i == nil {
+//		return
+//	}
+//	initListeningEvents()
+//	if len(ListeningEvents) > 100 {
+//		fmt.Println("Project Register Events Too Much ，Merge Please")
+//		return
+//	}
+//
+//	e := i.GetTag()
+//	utility.Assert(!EventInListeningEvents(e), fmt.Sprintf("duplicated listener, event:%s already listened\n", e))
+//
+//	ListeningEvents = append(ListeningEvents, e)
+//	sort.Strings(ListeningEvents)
+//	fmt.Printf("Merchant_Webhook_Subscription Register Event:%s\n", e)
+//}
 
 func EventInListeningEvents(target string) bool {
 	if len(target) <= 0 {

@@ -1,5 +1,5 @@
 package webhook
 
 import (
-	_ "unibee-api/internal/consumer/webhook/subscription"
+	_ "unibee-api/internal/consumer/webhook/message"
 )

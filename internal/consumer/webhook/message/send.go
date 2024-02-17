@@ -28,7 +28,7 @@ func SendWebhookMessage(ctx context.Context, event string, merchantId int64, dat
 			if strings.Contains(merchantWebhook.WebhookEvents, event) {
 				send, err := redismq.Send(&redismq.Message{
 					Topic: redismq2.TopicMerchantWebhook.Topic,
-					Tag:   event,
+					Tag:   redismq2.TopicMerchantWebhook.Tag,
 					Body: utility.MarshalToJsonString(&WebhookMessage{
 						Event:      event,
 						Url:        merchantWebhook.WebhookUrl,

@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"time"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
 )
 
-func SendWebhookRequest(ctx context.Context, url string, param *gjson.Json) bool {
+func SendWebhookRequest(ctx context.Context, url string, param *gjson.Json, merchantId int64, event string) bool {
 	utility.Assert(param != nil, "param is nil")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
@@ -26,6 +29,20 @@ func SendWebhookRequest(ctx context.Context, url string, param *gjson.Json) bool
 	}
 	response, err := utility.SendRequest(url, "POST", body, headers)
 	g.Log().Infof(ctx, "\nWebhook_End %s %s response: %s error %s\n", "POST", url, response, err)
+
+	one := &entity.MerchantWebhookLog{
+		MerchantId:   merchantId,
+		WebhookUrl:   url,
+		WebhookEvent: event,
+		RequestId:    msgId,
+		Body:         jsonString,
+		Response:     string(response),
+		Mamo:         utility.MarshalToJsonString(err),
+		CreateTime:   gtime.Now().Timestamp(),
+	}
+	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	g.Log().Infof(ctx, "\nWebhook_SaveLog error %s\n", saveErr)
+
 	return err == nil && strings.Compare(string(response), "success") == 0
 }
 
