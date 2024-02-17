@@ -9,4 +9,6 @@ type UserPortalSessionReq struct {
 	ReturnUrl      string `p:"returnUrl" dc:"ReturnUrl"`
 }
 type UserPortalSessionRes struct {
+	UserId string `json:"userId" dc:"UserId"`
+	Url    string `json:"url" dc:"Url"`
 }
