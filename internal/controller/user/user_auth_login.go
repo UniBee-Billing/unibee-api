@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"fmt"
-	"time"
 	"unibee-api/api/user/auth"
 	auth2 "unibee-api/internal/logic/auth"
 	entity "unibee-api/internal/model/entity/oversea_pay"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,41 +24,6 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 		return false
 	}
 	return true
-}
-
-var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
-
-func createToken(email string, userId uint64) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		jwt.MapClaims{
-			"email": email,
-			"id":    userId,
-			"exp":   time.Now().Add(time.Hour * 1).Unix(),
-		})
-
-	tokenString, err := token.SignedString(secretKey)
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func verifyToken(tokenString string) error {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	utility.Assert(token.Valid, "Invalid Code")
-	//if !token.Valid {
-	//	return fmt.Errorf("invalid token")
-	//}
-
-	return nil
 }
 
 func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error) {
@@ -87,7 +50,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	//	return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
 	//}
 
-	token, err := createToken(req.Email, newOne.Id)
+	token, err := auth2.CreateToken(req.Email, newOne.Id)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))

@@ -37,7 +37,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	//	return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
 	//}
 
-	token, err := createToken(req.Email, newOne.Id)
+	token, err := auth2.CreateToken(req.Email, newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

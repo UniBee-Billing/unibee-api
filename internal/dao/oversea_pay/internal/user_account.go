@@ -63,6 +63,7 @@ type UserAccountColumns struct {
 	BillingType        string // 1-recurring,2-one-time
 	TimeZone           string //
 	CreateTime         string // create utc time
+	ExternalUserId     string // external_user_id
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -110,6 +111,7 @@ var userAccountColumns = UserAccountColumns{
 	BillingType:        "billing_type",
 	TimeZone:           "time_zone",
 	CreateTime:         "create_time",
+	ExternalUserId:     "external_user_id",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

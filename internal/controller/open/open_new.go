@@ -1,5 +1,5 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package open
@@ -19,4 +19,3 @@ type ControllerPayment struct{}
 func NewPayment() open.IOpenPayment {
 	return &ControllerPayment{}
 }
-

@@ -53,4 +53,5 @@ type UserAccount struct {
 	BillingType        int         `json:"billingType"        description:"1-recurring,2-one-time"`                                                                                   // 1-recurring,2-one-time
 	TimeZone           string      `json:"timeZone"           description:""`                                                                                                         //
 	CreateTime         int64       `json:"createTime"         description:"create utc time"`                                                                                          // create utc time
+	ExternalUserId     string      `json:"externalUserId"     description:"external_user_id"`                                                                                         // external_user_id
 }

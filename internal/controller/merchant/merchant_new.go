@@ -1,5 +1,5 @@
 // =================================================================================
-// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT. 
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
 package merchant
@@ -14,13 +14,6 @@ func NewPlan() merchant.IMerchantPlan {
 	return &ControllerPlan{}
 }
 
-type ControllerWebhook struct{}
-
-func NewWebhook() merchant.IMerchantWebhook {
-	return &ControllerWebhook{}
-}
-
-
 type ControllerAuth struct{}
 
 func NewAuth() merchant.IMerchantAuth {
@@ -32,6 +25,7 @@ type ControllerProfile struct{}
 func NewProfile() merchant.IMerchantProfile {
 	return &ControllerProfile{}
 }
+
 type ControllerSubscription struct{}
 
 func NewSubscription() merchant.IMerchantSubscription {
@@ -86,3 +80,8 @@ func NewMerchantinfo() merchant.IMerchantMerchantinfo {
 	return &ControllerMerchantinfo{}
 }
 
+type ControllerGateway struct{}
+
+func NewGateway() merchant.IMerchantGateway {
+	return &ControllerGateway{}
+}

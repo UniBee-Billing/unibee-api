@@ -4,8 +4,28 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/golang-jwt/jwt/v5"
+	"time"
 	"unibee-api/internal/consts"
 )
+
+var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
+
+func CreateToken(email string, userId uint64) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"email": email,
+			"id":    userId,
+			"exp":   time.Now().Add(time.Hour * 1).Unix(),
+		})
+
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
+}
 
 func getAuthTokenRedisKey(token string) string {
 	return fmt.Sprintf("auth#%s#%s", consts.GetConfigInstance().Env, token)

@@ -9,6 +9,7 @@ import (
 	
 	"unibee-api/api/merchant/auth"
 	"unibee-api/api/merchant/balance"
+	"unibee-api/api/merchant/gateway"
 	"unibee-api/api/merchant/invoice"
 	"unibee-api/api/merchant/merchantinfo"
 	"unibee-api/api/merchant/oss"
@@ -19,7 +20,6 @@ import (
 	"unibee-api/api/merchant/subscription"
 	"unibee-api/api/merchant/user"
 	"unibee-api/api/merchant/vat"
-	"unibee-api/api/merchant/webhook"
 )
 
 type IMerchantAuth interface {
@@ -33,6 +33,10 @@ type IMerchantAuth interface {
 type IMerchantBalance interface {
 	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
 	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
+}
+
+type IMerchantGateway interface {
+	CheckAndSetup(ctx context.Context, req *gateway.CheckAndSetupReq) (res *gateway.CheckAndSetupRes, err error)
 }
 
 type IMerchantInvoice interface {
@@ -112,10 +116,6 @@ type IMerchantUser interface {
 type IMerchantVat interface {
 	SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error)
 	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
-}
-
-type IMerchantWebhook interface {
-	SubscriptionWebhookCheckAndSetup(ctx context.Context, req *webhook.SubscriptionWebhookCheckAndSetupReq) (res *webhook.SubscriptionWebhookCheckAndSetupRes, err error)
 }
 
 

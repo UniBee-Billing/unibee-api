@@ -11,6 +11,7 @@ import (
 	"unibee-api/internal/controller/gateway_webhook_entry"
 	"unibee-api/internal/cronjob"
 	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/session"
 	"unibee-api/utility"
 	"unibee-api/utility/liberr"
 
@@ -39,6 +40,22 @@ var (
 				//)
 			})
 
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/session", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreOpenApiAuth,
+				)
+				router.UserSession(ctx, group)
+			})
+
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/webhook", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().PreOpenApiAuth,
+				)
+				router.Webhook(ctx, group)
+			})
+
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
@@ -55,7 +72,7 @@ var (
 					_interface.Middleware().TokenMerchantAuth,
 				)
 				router.MerchantPlan(ctx, group)
-				router.MerchantWebhook(ctx, group)
+				router.MerchantGateway(ctx, group)
 				router.MerchantProfile(ctx, group)
 				router.MerchantSubscrption(ctx, group)
 				router.MerchantInvoice(ctx, group)
@@ -122,12 +139,13 @@ var (
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
+			// Session Redirect
+			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/session/redirect/{session}/forward", session.UserSessionRedirectEntrance)
+
 			// Gateway Redirect
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
-			//// Gateway Webhook Setup
-			//gateway.CheckAndSetupGatewayWebhooks(ctx)
 
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)

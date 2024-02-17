@@ -55,11 +55,11 @@ func MerchantInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
+func MerchantGateway(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth
-	group.Group("/webhook", func(group *ghttp.RouterGroup) {
+	group.Group("/gateway", func(group *ghttp.RouterGroup) {
 		group.Bind(
-			merchant.NewWebhook(), //Webhook接口-Go Server使用
+			merchant.NewGateway(), //Gateway
 		)
 	})
 }

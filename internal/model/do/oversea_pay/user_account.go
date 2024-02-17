@@ -55,4 +55,5 @@ type UserAccount struct {
 	BillingType        interface{} // 1-recurring,2-one-time
 	TimeZone           interface{} //
 	CreateTime         interface{} // create utc time
+	ExternalUserId     interface{} // external_user_id
 }
