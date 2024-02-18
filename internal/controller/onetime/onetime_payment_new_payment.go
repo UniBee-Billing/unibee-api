@@ -1,10 +1,10 @@
-package open
+package onetime
 
 import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee-api/api/open/payment"
+	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/payment/service"
@@ -13,7 +13,7 @@ import (
 	"unibee-api/utility"
 )
 
-func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsReq) (res *payment.PaymentsRes, err error) {
+func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaymentReq) (res *payment.NewPaymentRes, err error) {
 	utility.Assert(req != nil, "request req is nil")
 	utility.Assert(req.TotalAmount != nil, "amount is nil")
 	utility.Assert(req.TotalAmount.Amount > 0, "amount value is nil")
@@ -103,7 +103,7 @@ func (c *ControllerPayment) Payments(ctx context.Context, req *payment.PaymentsR
 
 	resp, err := service.GatewayPaymentCreate(ctx, createPayContext)
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
-	res = &payment.PaymentsRes{
+	res = &payment.NewPaymentRes{
 		Status:            "Pending",
 		PaymentId:         resp.PaymentId,
 		MerchantPaymentId: req.MerchantPaymentId,

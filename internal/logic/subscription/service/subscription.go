@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	v1 "unibee-api/api/open/payment"
+	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/api/user/subscription"
 	"unibee-api/api/user/vat"
 	redismq2 "unibee-api/internal/cmd/redismq"

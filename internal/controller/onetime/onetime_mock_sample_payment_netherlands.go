@@ -1,10 +1,10 @@
-package open
+package onetime
 
 import (
 	"context"
 	"github.com/google/uuid"
-	"unibee-api/api/open/mock"
-	v12 "unibee-api/api/open/payment"
+	"unibee-api/api/onetime/mock"
+	v12 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/query"
@@ -14,14 +14,14 @@ import (
 func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock.SamplePaymentNetherlandsReq) (res *mock.SamplePaymentNetherlandsRes, err error) {
 	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, req.MerchantId)
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
-	outPayVo := &v12.PaymentsReq{
+	outPayVo := &v12.NewPaymentReq{
 		MerchantId:        req.MerchantId,
 		MerchantPaymentId: uuid.New().String(),
 		TotalAmount: &v12.AmountVo{
 			Currency: req.Currency,
 			Amount:   req.Amount,
 		},
-		PaymentMethod: &v12.PaymentMethodsReq{
+		PaymentMethod: &v12.MethodListReq{
 			TokenId: "",
 			Gateway: req.GatewayName,
 		},
@@ -63,7 +63,7 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 
-	payments, err := NewPayment().Payments(ctx, outPayVo)
+	payments, err := NewPayment().NewPayment(ctx, outPayVo)
 	if err != nil {
 		return nil, err
 	}

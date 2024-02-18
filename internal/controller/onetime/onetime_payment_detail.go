@@ -1,13 +1,13 @@
-package open
+package onetime
 
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee-api/api/open/payment"
+	"unibee-api/api/onetime/payment"
 )
 
-func (c *ControllerPayment) PaymentDetails(ctx context.Context, req *payment.PaymentDetailsReq) (res *payment.PaymentDetailsRes, err error) {
+func (c *ControllerPayment) PaymentDetail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error) {
 	panic("capture panic error moke")
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

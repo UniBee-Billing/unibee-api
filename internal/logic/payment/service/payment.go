@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
-	v1 "unibee-api/api/open/payment"
+	v1 "unibee-api/api/onetime/payment"
 	redismqcmd "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"

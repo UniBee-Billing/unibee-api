@@ -1,14 +1,14 @@
-package open
+package onetime
 
 import (
 	"context"
-	"unibee-api/api/open/payment"
+	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/logic/payment/service"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 )
 
-func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesReq) (res *payment.CapturesRes, err error) {
+func (c *ControllerPayment) Capture(ctx context.Context, req *payment.CaptureReq) (res *payment.CaptureRes, err error) {
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantId)
 
@@ -20,5 +20,5 @@ func (c *ControllerPayment) Captures(ctx context.Context, req *payment.CapturesR
 	if err != nil {
 		return nil, err
 	}
-	return &payment.CapturesRes{}, nil
+	return &payment.CaptureRes{}, nil
 }

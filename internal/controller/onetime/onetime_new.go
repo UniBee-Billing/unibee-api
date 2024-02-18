@@ -2,20 +2,20 @@
 // Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
 // =================================================================================
 
-package open
+package onetime
 
 import (
-	"unibee-api/api/open"
+	"unibee-api/api/onetime"
 )
 
 type ControllerMock struct{}
 
-func NewMock() open.IOpenMock {
+func NewMock() onetime.IOpenMock {
 	return &ControllerMock{}
 }
 
 type ControllerPayment struct{}
 
-func NewPayment() open.IOpenPayment {
+func NewPayment() onetime.IOpenPayment {
 	return &ControllerPayment{}
 }

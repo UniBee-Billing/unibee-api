@@ -1,14 +1,14 @@
-package open
+package onetime
 
 import (
 	"context"
-	"unibee-api/api/open/payment"
+	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	"unibee-api/internal/logic/payment/service"
 	"unibee-api/utility"
 )
 
-func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq) (res *payment.RefundsRes, err error) {
+func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.NewPaymentRefundReq) (res *payment.NewPaymentRefundRes, err error) {
 	utility.Assert(req != nil, "req should not be nil")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId should not be nil")
 	utility.Assert(req.Amount != nil, "Amount should not be nil")
@@ -22,7 +22,7 @@ func (c *ControllerPayment) Refunds(ctx context.Context, req *payment.RefundsReq
 	if err != nil {
 		return nil, err
 	}
-	res = &payment.RefundsRes{
+	res = &payment.NewPaymentRefundRes{
 		Status:           "SentForRefund",
 		RefundId:         resp.RefundId,
 		MerchantRefundId: req.MerchantRefundId,

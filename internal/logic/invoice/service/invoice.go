@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee-api/api/merchant/invoice"
-	v1 "unibee-api/api/open/payment"
+	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/email"
@@ -344,7 +344,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
-	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.RefundsReq{
+	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.NewPaymentRefundReq{
 		PaymentId:        one.PaymentId,
 		MerchantId:       one.MerchantId,
 		MerchantRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),

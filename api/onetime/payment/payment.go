@@ -5,26 +5,26 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-type PaymentsReq struct {
-	g.Meta                   `path:"/create_payment" tags:"Open-Payment-Controller" method:"post" summary:"Payment Create"`
-	MerchantId               int64              `p:"merchantId" dc:"MerchantId" v:"required"`
-	MerchantPaymentId        string             `p:"merchantPaymentId" dc:"MerchantPaymentId" v:"required"`
-	TotalAmount              *AmountVo          `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
-	PaymentMethod            *PaymentMethodsReq `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
-	RedirectUrl              string             `p:"redirectUrl" dc:"Redirect Url" v:"required"`
-	CountryCode              string             `p:"countryCode" dc:"CountryCode" v:"required"`
-	ShopperLocale            string             `p:"shopperLocale" dc:"Shopper Locale" v:"required"`
-	ShopperEmail             string             `p:"shopperEmail" dc:"Shopper Email" v:"required"`
-	ShopperUserId            string             `p:"shopperUserId" dc:"shopper Id, Unique" v:"required"`
-	LineItems                []*OutLineItem     `p:"lineItems" dc:"LineItems" v:"required"`
-	DeviceType               string             `p:"deviceType" dc:"DeviceType,Android|iOS|Web"`
-	Platform                 string             `p:"platform" dc:"Platform（WEB，WAP，APP, MINI, WALLET）"`
-	ShopperIP                string             `p:"shopperIP" dc:"Shopper IP（v4，v6）"`
-	TelephoneNumber          string             `p:"telephoneNumber" dc:"TelephoneNumber"`
-	BrowserInfo              string             `p:"browserInfo" dc:"browserInfo" v:""`
-	ShopperInteraction       string             `p:"shopperInteraction" dc:"ShopperInteraction" v:""`
-	RecurringProcessingToken string             `p:"recurringProcessingToken" dc:"RecurringProcessingToken" v:""`
-	ShopperName              *OutShopperName    `p:"shopperName" dc:"shopperName" v:""`
+type NewPaymentReq struct {
+	g.Meta                   `path:"/new_payment" tags:"OneTime-Payment-Controller" method:"post" summary:"New Payment"`
+	MerchantId               int64           `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantPaymentId        string          `p:"merchantPaymentId" dc:"MerchantPaymentId" v:"required"`
+	TotalAmount              *AmountVo       `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
+	PaymentMethod            *MethodListReq  `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
+	RedirectUrl              string          `p:"redirectUrl" dc:"Redirect Url" v:"required"`
+	CountryCode              string          `p:"countryCode" dc:"CountryCode" v:"required"`
+	ShopperLocale            string          `p:"shopperLocale" dc:"Shopper Locale" v:"required"`
+	ShopperEmail             string          `p:"shopperEmail" dc:"Shopper Email" v:"required"`
+	ShopperUserId            string          `p:"shopperUserId" dc:"shopper Id, Unique" v:"required"`
+	LineItems                []*OutLineItem  `p:"lineItems" dc:"LineItems" v:"required"`
+	DeviceType               string          `p:"deviceType" dc:"DeviceType,Android|iOS|Web"`
+	Platform                 string          `p:"platform" dc:"Platform（WEB，WAP，APP, MINI, WALLET）"`
+	ShopperIP                string          `p:"shopperIP" dc:"Shopper IP（v4，v6）"`
+	TelephoneNumber          string          `p:"telephoneNumber" dc:"TelephoneNumber"`
+	BrowserInfo              string          `p:"browserInfo" dc:"browserInfo" v:""`
+	ShopperInteraction       string          `p:"shopperInteraction" dc:"ShopperInteraction" v:""`
+	RecurringProcessingToken string          `p:"recurringProcessingToken" dc:"RecurringProcessingToken" v:""`
+	ShopperName              *OutShopperName `p:"shopperName" dc:"shopperName" v:""`
 	//BillingAddress           *OutPayAddress     `p:"billingAddress" dc:"账单地址" v:""`
 	//DetailAddress            *OutPayAddress     `p:"detailAddress" dc:"邮寄地址" v:""`
 	Capture                bool              `p:"capture" dc:"Capture Immediate" v:""`
@@ -33,7 +33,7 @@ type PaymentsReq struct {
 	Metadata               map[string]string `p:"reference" dc:"Metadata，Map" v:""`
 	DateOfBrith            string            `p:"dateOfBrith" dc:"DateOfBrith，Format YYYY-MM-DD" v:""`
 }
-type PaymentsRes struct {
+type NewPaymentRes struct {
 	Status            string      `p:"status" dc:"Status"`
 	PaymentId         string      `p:"paymentId" dc:"PaymentId"`
 	MerchantPaymentId string      `p:"merchantPaymentId" dc:"MerchantPaymentId"`
@@ -65,23 +65,23 @@ type OutLineItem struct {
 	// todo mark discount need
 }
 
-type PaymentMethodsReq struct {
-	g.Meta  `path:"/paymentMethods" tags:"Open-Payment-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
+type MethodListReq struct {
+	g.Meta  `path:"/paymentMethodList" tags:"OneTime-Payment-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
 	TokenId string `p:"tokenId" dc:"TokenId" v:""`
 	Gateway string `p:"type" dc:"Gateway" v:"required"`
 }
-type PaymentMethodsRes struct {
+type MethodListRes struct {
 }
 
-type OutPaymentMethodIssur struct {
+type MethodIssur struct {
 	Name     string `p:"name" dc:"Name" v:""`
 	Id       string `p:"id" dc:"Method Id" v:""`
 	Disabled string `p:"disabled" dc:"" v:""`
 }
 
-type PaymentDetailsReq struct {
-	g.Meta    `path:"/paymentDetails/{PaymentId}" tags:"Open-Payment-Controller" method:"post" summary:"Query Payment Detail"`
+type DetailReq struct {
+	g.Meta    `path:"/paymentDetail/{PaymentId}" tags:"OneTime-Payment-Controller" method:"post" summary:"Query Payment Detail"`
 	PaymentId string `in:"path" dc:"PaymentId" v:"required"`
 }
-type PaymentDetailsRes struct {
+type DetailRes struct {
 }

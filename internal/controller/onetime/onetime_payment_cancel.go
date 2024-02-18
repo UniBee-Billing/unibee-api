@@ -1,14 +1,14 @@
-package open
+package onetime
 
 import (
 	"context"
-	"unibee-api/api/open/payment"
+	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/logic/payment/service"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 )
 
-func (c *ControllerPayment) Cancels(ctx context.Context, req *payment.CancelsReq) (res *payment.CancelsRes, err error) {
+func (c *ControllerPayment) Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error) {
 	//参数有效性校验 todo mark
 	merchantCheck(ctx, req.MerchantId)
 
@@ -18,5 +18,5 @@ func (c *ControllerPayment) Cancels(ctx context.Context, req *payment.CancelsReq
 	if err != nil {
 		return nil, err
 	}
-	return &payment.CancelsRes{}, nil
+	return &payment.CancelRes{}, nil
 }

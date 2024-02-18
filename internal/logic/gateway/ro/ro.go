@@ -3,7 +3,7 @@ package ro
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "unibee-api/api/open/payment"
+	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )

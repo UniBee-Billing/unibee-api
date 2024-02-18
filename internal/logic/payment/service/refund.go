@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	v1 "unibee-api/api/open/payment"
+	v1 "unibee-api/api/onetime/payment"
 	redismqcmd "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -20,7 +20,7 @@ import (
 	"unibee-api/utility"
 )
 
-func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.RefundsReq, openApiId int64) (refund *entity.Refund, err error) {
+func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPaymentRefundReq, openApiId int64) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
 	utility.Assert(len(req.MerchantRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
