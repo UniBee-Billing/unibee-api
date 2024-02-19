@@ -1232,7 +1232,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		if err != nil {
 			return nil, err
 		}
-		log.SaveChannelHttpLog("GatewayPayment", params, result, err, "New", nil, createPayContext.Gateway)
+		log.SaveChannelHttpLog("GatewayPayment", params, result, err, "NewInvoice", nil, createPayContext.Gateway)
 
 		for _, line := range createPayContext.Invoice.Lines {
 			ItemParams := &stripe.InvoiceItemParams{

@@ -119,7 +119,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("invoice.will_be_due"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
-				stripe.String("payment_intent.created"),
+				//stripe.String("payment_intent.created"),//Payment Under UniBee Control, Created Webhook Not Needed
 				stripe.String("payment_intent.succeeded"),
 				stripe.String("payment_intent.canceled"),
 				stripe.String("payment_intent.partially_funded"),
@@ -527,6 +527,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			return gerror.New("Payment Not Found")
 		}
 	} else {
+		//Maybe Payment Create By Invoice
 		return gerror.New("No PaymentId Metadata")
 	}
 	return nil
