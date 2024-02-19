@@ -12,6 +12,7 @@ import (
 type MerchantWebhookLog struct {
 	Id           uint64      `json:"id"           description:"id"`              // id
 	MerchantId   int64       `json:"merchantId"   description:"webhook url"`     // webhook url
+	EndpointId   int64       `json:"endpointId"   description:""`                //
 	WebhookUrl   string      `json:"webhookUrl"   description:"webhook url"`     // webhook url
 	WebhookEvent string      `json:"webhookEvent" description:"webhook_event"`   // webhook_event
 	RequestId    string      `json:"requestId"    description:"request_id"`      // request_id

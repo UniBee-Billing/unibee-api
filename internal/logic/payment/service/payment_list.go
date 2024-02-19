@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
+	"strings"
 	dao "unibee-api/internal/dao/oversea_pay"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
-	"strings"
 )
 
 type PaymentListInternalReq struct {
@@ -24,7 +24,7 @@ type PaymentListInternalRes struct {
 func PaymentList(ctx context.Context, req *PaymentListInternalReq) (res *PaymentListInternalRes, err error) {
 	var mainList []*entity.Payment
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

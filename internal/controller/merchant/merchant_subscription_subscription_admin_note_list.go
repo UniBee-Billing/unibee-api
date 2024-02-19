@@ -11,7 +11,7 @@ import (
 func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, req *subscription.SubscriptionAdminNoteListReq) (res *subscription.SubscriptionAdminNoteListRes, err error) {
 	var mainList []*entity.SubscriptionAdminNote
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

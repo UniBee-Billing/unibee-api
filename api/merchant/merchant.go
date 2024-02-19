@@ -21,6 +21,7 @@ import (
 	"unibee-api/api/merchant/subscription"
 	"unibee-api/api/merchant/user"
 	"unibee-api/api/merchant/vat"
+	"unibee-api/api/merchant/webhook"
 )
 
 type IMerchantAuth interface {
@@ -128,6 +129,15 @@ type IMerchantUser interface {
 type IMerchantVat interface {
 	SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error)
 	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
+}
+
+type IMerchantWebhook interface {
+	EventList(ctx context.Context, req *webhook.EventListReq) (res *webhook.EventListRes, err error)
+	EndpointList(ctx context.Context, req *webhook.EndpointListReq) (res *webhook.EndpointListRes, err error)
+	EndpointLogList(ctx context.Context, req *webhook.EndpointLogListReq) (res *webhook.EndpointLogListRes, err error)
+	NewEndpoint(ctx context.Context, req *webhook.NewEndpointReq) (res *webhook.NewEndpointRes, err error)
+	UpdateEndpoint(ctx context.Context, req *webhook.UpdateEndpointReq) (res *webhook.UpdateEndpointRes, err error)
+	DeleteEndpoint(ctx context.Context, req *webhook.DeleteEndpointReq) (res *webhook.DeleteEndpointRes, err error)
 }
 
 

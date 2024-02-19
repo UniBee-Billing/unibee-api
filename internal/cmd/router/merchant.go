@@ -130,3 +130,11 @@ func MerchantEmailTemplate(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/merchant_webhook", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewWebhook(),
+		)
+	})
+}

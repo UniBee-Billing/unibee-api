@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "unibee-api/internal/cmd/redismq"
-	"unibee-api/internal/consumer/webhook/http"
 	"unibee-api/redismq"
 	"unibee-api/utility"
 )
@@ -32,7 +31,7 @@ func (t MerchantWebhookListener) Consume(ctx context.Context, message *redismq.M
 		return redismq.ReconsumeLater
 	}
 
-	if http.SendWebhookRequest(ctx, webhookMessage.Url, webhookMessage.Data, webhookMessage.MerchantId, webhookMessage.Event) {
+	if SendWebhookRequest(ctx, webhookMessage) {
 		return redismq.CommitMessage
 	}
 

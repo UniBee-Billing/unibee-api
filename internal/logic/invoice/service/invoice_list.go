@@ -34,7 +34,7 @@ type SubscriptionInvoiceListInternalRes struct {
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
 	var mainList []*entity.Invoice
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

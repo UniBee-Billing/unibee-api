@@ -22,6 +22,7 @@ type MerchantWebhookLogDao struct {
 type MerchantWebhookLogColumns struct {
 	Id           string // id
 	MerchantId   string // webhook url
+	EndpointId   string //
 	WebhookUrl   string // webhook url
 	WebhookEvent string // webhook_event
 	RequestId    string // request_id
@@ -37,6 +38,7 @@ type MerchantWebhookLogColumns struct {
 var merchantWebhookLogColumns = MerchantWebhookLogColumns{
 	Id:           "id",
 	MerchantId:   "merchant_id",
+	EndpointId:   "endpoint_id",
 	WebhookUrl:   "webhook_url",
 	WebhookEvent: "webhook_event",
 	RequestId:    "request_id",

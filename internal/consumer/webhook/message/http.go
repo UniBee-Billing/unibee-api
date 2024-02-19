@@ -1,9 +1,8 @@
-package http
+package message
 
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
@@ -13,27 +12,28 @@ import (
 	"unibee-api/utility"
 )
 
-func SendWebhookRequest(ctx context.Context, url string, param *gjson.Json, merchantId int64, event string) bool {
-	utility.Assert(param != nil, "param is nil")
+func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) bool {
+	utility.Assert(webhookMessage.Data != nil, "param is nil")
 	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
-	jsonString, err := param.ToJsonString()
-	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
-	g.Log().Infof(ctx, "\nWebhook_Start %s %s %s\n", "POST", url, jsonString)
+	jsonString, err := webhookMessage.Data.ToJsonString()
+	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
+	g.Log().Infof(ctx, "\nWebhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Gateway": "application/json",
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
 	}
-	response, err := utility.SendRequest(url, "POST", body, headers)
-	g.Log().Infof(ctx, "\nWebhook_End %s %s response: %s error %s\n", "POST", url, response, err)
+	response, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
+	g.Log().Infof(ctx, "\nWebhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err)
 
 	one := &entity.MerchantWebhookLog{
-		MerchantId:   merchantId,
-		WebhookUrl:   url,
-		WebhookEvent: event,
+		MerchantId:   webhookMessage.MerchantId,
+		EndpointId:   int64(webhookMessage.EndpointId),
+		WebhookUrl:   webhookMessage.Url,
+		WebhookEvent: webhookMessage.Event,
 		RequestId:    msgId,
 		Body:         jsonString,
 		Response:     string(response),

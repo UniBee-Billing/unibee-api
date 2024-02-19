@@ -32,7 +32,7 @@ type UserListInternalRes struct {
 func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserListInternalRes, err error) {
 	var mainList []*entity.UserAccount
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

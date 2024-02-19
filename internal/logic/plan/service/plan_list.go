@@ -22,8 +22,8 @@ type SubscriptionPlanListInternalReq struct {
 	Currency      string `p:"currency" dc:"Currency"  `
 	SortField     string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
-	Count         int    `p:"count" d:"20"  dc:"Count Of Page" `
+	Page          int    `p:"page" dc:"Page, Start WIth 0" `
+	Count         int    `p:"count" dc:"Count Of Page" `
 }
 
 func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.SubscriptionPlanDetailRes, error) {
@@ -41,7 +41,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro2.PlanDetailRo) {
 	var mainList []*entity.SubscriptionPlan
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

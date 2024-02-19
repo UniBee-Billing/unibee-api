@@ -2,13 +2,13 @@ package service
 
 import (
 	"context"
+	"strings"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strings"
 )
 
 type SubscriptionPendingUpdateListInternalReq struct {
@@ -75,7 +75,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPendingUpdateListInternalReq) (res *SubscriptionPendingUpdateListInternalRes, err error) {
 	var mainList []*entity.SubscriptionPendingUpdate
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

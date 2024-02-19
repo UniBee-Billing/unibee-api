@@ -91,3 +91,9 @@ func NewEmail() merchant.IMerchantEmail {
 	return &ControllerEmail{}
 }
 
+type ControllerWebhook struct{}
+
+func NewWebhook() merchant.IMerchantWebhook {
+	return &ControllerWebhook{}
+}
+

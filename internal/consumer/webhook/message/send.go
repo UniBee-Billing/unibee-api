@@ -15,6 +15,7 @@ import (
 
 type WebhookMessage struct {
 	Event      string
+	EndpointId uint64
 	Url        string
 	MerchantId int64
 	Data       *gjson.Json
@@ -31,6 +32,7 @@ func SendWebhookMessage(ctx context.Context, event string, merchantId int64, dat
 					Tag:   redismq2.TopicMerchantWebhook.Tag,
 					Body: utility.MarshalToJsonString(&WebhookMessage{
 						Event:      event,
+						EndpointId: merchantWebhook.Id,
 						Url:        merchantWebhook.WebhookUrl,
 						MerchantId: merchantId,
 						Data:       data,

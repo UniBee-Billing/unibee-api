@@ -24,8 +24,8 @@ type SubscriptionListInternalReq struct {
 	Status     []int  `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page       int    `p:"page" d:"0"  dc:"Page, Start WIth 0" `
-	Count      int    `p:"count" d:"20" dc:"Count Of Page" `
+	Page       int    `p:"page" dc:"Page, Start WIth 0" `
+	Count      int    `p:"count" dc:"Count Of Page" `
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscription.SubscriptionDetailRes, error) {
@@ -83,7 +83,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*ro.SubscriptionDetailRo) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

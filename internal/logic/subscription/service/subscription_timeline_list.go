@@ -24,7 +24,7 @@ type SubscriptionTimeLineListInternalRes struct {
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
 	var mainList []*entity.SubscriptionTimeline
 	if req.Count <= 0 {
-		req.Count = 10 //每页数量Default 10
+		req.Count = 20
 	}
 	if req.Page < 0 {
 		req.Page = 0

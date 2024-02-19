@@ -15,7 +15,69 @@ import (
 	"unibee-api/utility"
 )
 
-func SetupMerchantWebhook(ctx context.Context, merchantId int64, url string, events []string) error {
+const SplitSep = ","
+
+type MerchantWebhookEndpointVo struct {
+	Id            uint64   `json:"id"            description:"id"`                       // id
+	MerchantId    int64    `json:"merchantId"    description:"webhook url"`              // webhook url
+	WebhookUrl    string   `json:"webhookUrl"    description:"webhook url"`              // webhook url
+	WebhookEvents []string `json:"webhookEvents" description:"webhook_events,split dot"` // webhook_events,split dot
+	UpdateTime    int64    `json:"gmtModify"     description:"update time"`              // update time
+	CreateTime    int64    `json:"createTime"    description:"create utc time"`          // create utc time
+}
+
+func MerchantWebhookEndpointList(ctx context.Context, merchantId int64) []*MerchantWebhookEndpointVo {
+	var list = make([]*MerchantWebhookEndpointVo, 0)
+	if merchantId > 0 {
+		var webhooks []*entity.MerchantWebhook
+		err := dao.MerchantWebhook.Ctx(ctx).
+			Where(entity.MerchantWebhook{MerchantId: merchantId}).
+			Where(entity.MerchantWebhook{IsDeleted: 0}).
+			Scan(&webhooks)
+		if err == nil && len(webhooks) > 0 {
+			for _, webhook := range webhooks {
+				list = append(list, &MerchantWebhookEndpointVo{
+					Id:            webhook.Id,
+					MerchantId:    webhook.MerchantId,
+					WebhookUrl:    webhook.WebhookUrl,
+					WebhookEvents: strings.Split(webhook.WebhookEvents, SplitSep),
+					UpdateTime:    webhook.GmtModify.Timestamp(),
+					CreateTime:    webhook.CreateTime,
+				})
+			}
+		}
+	}
+	return list
+}
+
+type EndpointLogListInternalReq struct {
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
+	Page       int   `p:"page" dc:"Page, Start WIth 0" `
+	Count      int   `p:"count" dc:"Count Of Page" `
+}
+
+func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*entity.MerchantWebhookLog {
+	var mainList []*entity.MerchantWebhookLog
+	if req.Count <= 0 {
+		req.Count = 20
+	}
+	if req.Page < 0 {
+		req.Page = 0
+	}
+	utility.Assert(req.MerchantId > 0, "merchantId not found")
+	utility.Assert(req.EndpointId > 0, "endpointId not found")
+	var sortKey = "create_time desc"
+	_ = dao.MerchantWebhookLog.Ctx(ctx).
+		Where(dao.MerchantWebhookLog.Columns().MerchantId, req.MerchantId).
+		Where(dao.MerchantWebhookLog.Columns().EndpointId, req.EndpointId).
+		Order(sortKey).
+		Limit(req.Page*req.Count, req.Count).
+		OmitEmpty().Scan(&mainList)
+	return mainList
+}
+
+func NewMerchantWebhookEndpoint(ctx context.Context, merchantId int64, url string, events []string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(url) > 0, "url is nil")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
@@ -24,31 +86,56 @@ func SetupMerchantWebhook(ctx context.Context, merchantId int64, url string, eve
 		utility.Assert(event.EventInListeningEvents(e), fmt.Sprintf("Event:%s Not In Event List", e))
 	}
 	one := query.GetMerchantWebhookByUrl(ctx, url)
-	if one == nil {
-		one = &entity.MerchantWebhook{
-			MerchantId:    merchantId,
-			WebhookUrl:    url,
-			WebhookEvents: strings.Join(events, ","),
-			CreateTime:    gtime.Now().Timestamp(),
-		}
-		result, err := dao.MerchantWebhook.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			g.Log().Errorf(ctx, "SetupMerchantWebhook Insert err:%s", err.Error())
-			return gerror.NewCode(gcode.New(500, "server error", nil))
-		}
-		id, _ := result.LastInsertId()
-		one.Id = uint64(id)
-	} else {
-		_, err := dao.MerchantWebhook.Ctx(ctx).Data(g.Map{
-			dao.MerchantWebhook.Columns().MerchantId:    merchantId,
-			dao.MerchantWebhook.Columns().WebhookUrl:    url,
-			dao.MerchantWebhook.Columns().WebhookEvents: strings.Join(events, ","),
-			dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
-		}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			g.Log().Errorf(ctx, "SetupMerchantWebhook Update err:%s", err.Error())
-			return gerror.NewCode(gcode.New(500, "server error", nil))
-		}
+	utility.Assert(one == nil, "endpoint already exsit")
+	one = &entity.MerchantWebhook{
+		MerchantId:    merchantId,
+		WebhookUrl:    url,
+		WebhookEvents: strings.Join(events, SplitSep),
+		CreateTime:    gtime.Now().Timestamp(),
 	}
+	result, err := dao.MerchantWebhook.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		g.Log().Errorf(ctx, "NewMerchantWebhookEndpoint Insert err:%s", err.Error())
+		return gerror.NewCode(gcode.New(500, "server error", nil))
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
+
 	return nil
+}
+
+func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId int64, endpointId int64, url string, events []string) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(endpointId > 0, "invalid endpointId")
+	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
+	// events valid check
+	for _, e := range events {
+		utility.Assert(event.EventInListeningEvents(e), fmt.Sprintf("Event:%s Not In Event List", e))
+	}
+	one := query.GetMerchantWebhook(ctx, endpointId)
+	utility.Assert(one != nil, "endpoint not found")
+	_, err := dao.MerchantWebhook.Ctx(ctx).Data(g.Map{
+		dao.MerchantWebhook.Columns().MerchantId:    merchantId,
+		dao.MerchantWebhook.Columns().WebhookUrl:    url,
+		dao.MerchantWebhook.Columns().WebhookEvents: strings.Join(events, SplitSep),
+		dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(ctx, "UpdateMerchantWebhookEndpoint Update err:%s", err.Error())
+		return gerror.NewCode(gcode.New(500, "server error", nil))
+	}
+
+	return nil
+}
+
+func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId int64, endpointId int64) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(endpointId > 0, "invalid endpointId")
+	one := query.GetMerchantWebhook(ctx, endpointId)
+	utility.Assert(one != nil, "endpoint not found")
+	_, err := dao.MerchantWebhook.Ctx(ctx).Data(g.Map{
+		dao.MerchantWebhook.Columns().IsDeleted: 1,
+		dao.MerchantWebhook.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
+	return err
 }

@@ -45,14 +45,6 @@ var (
 				router.UserSession(ctx, group)
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/webhook", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
-				)
-				router.Webhook(ctx, group)
-			})
-
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
@@ -81,6 +73,7 @@ var (
 				router.MerchantSearch(ctx, group)
 				router.MerchantInfo(ctx, group)
 				router.MerchantEmailTemplate(ctx, group)
+				router.MerchantWebhook(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {

@@ -14,6 +14,7 @@ type MerchantWebhookLog struct {
 	g.Meta       `orm:"table:merchant_webhook_log, do:true"`
 	Id           interface{} // id
 	MerchantId   interface{} // webhook url
+	EndpointId   interface{} //
 	WebhookUrl   interface{} // webhook url
 	WebhookEvent interface{} // webhook_event
 	RequestId    interface{} // request_id
