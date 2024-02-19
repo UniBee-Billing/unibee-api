@@ -85,3 +85,9 @@ type ControllerGateway struct{}
 func NewGateway() merchant.IMerchantGateway {
 	return &ControllerGateway{}
 }
+type ControllerEmail struct{}
+
+func NewEmail() merchant.IMerchantEmail {
+	return &ControllerEmail{}
+}
+

@@ -32,7 +32,6 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	//email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from UniBee", verificationCode)
 	user := query.GetUserAccountByEmail(ctx, req.Email)
 	utility.Assert(user != nil, "user not found")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{

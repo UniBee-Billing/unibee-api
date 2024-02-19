@@ -4,13 +4,13 @@ import (
 	"context"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/invoice/service"
+	email2 "unibee-api/internal/logic/email"
 	"unibee-api/utility"
 
-	"unibee-api/api/merchant/invoice"
+	"unibee-api/api/merchant/email"
 )
 
-func (c *ControllerInvoice) NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error) {
+func (c *ControllerEmail) MerchantEmailTemplateList(ctx context.Context, req *email.MerchantEmailTemplateListReq) (res *email.MerchantEmailTemplateListRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
@@ -18,6 +18,6 @@ func (c *ControllerInvoice) NewInvoiceCreate(ctx context.Context, req *invoice.N
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-
-	return service.CreateInvoice(ctx, req)
+	list := email2.GetMerchantEmailTemplateList(ctx, req.MerchantId)
+	return &email.MerchantEmailTemplateListRes{EmailTemplateList: list}, nil
 }

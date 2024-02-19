@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// EmailTemplate is the golang structure for table email_template.
-type EmailTemplate struct {
+// MerchantEmailTemplate is the golang structure for table merchant_email_template.
+type MerchantEmailTemplate struct {
 	Id                 int64       `json:"id"                 description:""`                      //
 	MerchantId         int64       `json:"merchantId"         description:""`                      //
 	TemplateName       string      `json:"templateName"       description:""`                      //
@@ -20,4 +20,5 @@ type EmailTemplate struct {
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`           // update time
 	IsDeleted          int         `json:"isDeleted"          description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	CreateTime         int64       `json:"createTime"         description:"create utc time"`       // create utc time
+	Status             int64       `json:"status"             description:"0-Active,1-InActive"`   // 0-Active,1-InActive
 }

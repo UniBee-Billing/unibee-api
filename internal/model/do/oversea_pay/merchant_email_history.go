@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// EmailHistory is the golang structure of table email_history for DAO operations like Where/Data.
-type EmailHistory struct {
-	g.Meta     `orm:"table:email_history, do:true"`
+// MerchantEmailHistory is the golang structure of table merchant_email_history for DAO operations like Where/Data.
+type MerchantEmailHistory struct {
+	g.Meta     `orm:"table:merchant_email_history, do:true"`
 	Id         interface{} //
 	MerchantId interface{} //
 	Email      interface{} //

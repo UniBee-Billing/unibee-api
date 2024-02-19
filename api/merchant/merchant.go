@@ -9,6 +9,7 @@ import (
 	
 	"unibee-api/api/merchant/auth"
 	"unibee-api/api/merchant/balance"
+	"unibee-api/api/merchant/email"
 	"unibee-api/api/merchant/gateway"
 	"unibee-api/api/merchant/invoice"
 	"unibee-api/api/merchant/merchantinfo"
@@ -35,6 +36,14 @@ type IMerchantAuth interface {
 type IMerchantBalance interface {
 	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
 	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
+}
+
+type IMerchantEmail interface {
+	MerchantEmailTemplateList(ctx context.Context, req *email.MerchantEmailTemplateListReq) (res *email.MerchantEmailTemplateListRes, err error)
+	MerchantEmailTemplateUpdate(ctx context.Context, req *email.MerchantEmailTemplateUpdateReq) (res *email.MerchantEmailTemplateUpdateRes, err error)
+	MerchantEmailTemplateSetDefault(ctx context.Context, req *email.MerchantEmailTemplateSetDefaultReq) (res *email.MerchantEmailTemplateSetDefaultRes, err error)
+	MerchantEmailTemplateActivate(ctx context.Context, req *email.MerchantEmailTemplateActivateReq) (res *email.MerchantEmailTemplateActivateRes, err error)
+	MerchantEmailTemplateDeactivate(ctx context.Context, req *email.MerchantEmailTemplateDeactivateReq) (res *email.MerchantEmailTemplateDeactivateRes, err error)
 }
 
 type IMerchantGateway interface {

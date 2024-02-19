@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// EmailHistory is the golang structure for table email_history.
-type EmailHistory struct {
+// MerchantEmailHistory is the golang structure for table merchant_email_history.
+type MerchantEmailHistory struct {
 	Id         int64       `json:"id"         description:""`                //
 	MerchantId int64       `json:"merchantId" description:""`                //
 	Email      string      `json:"email"      description:""`                //

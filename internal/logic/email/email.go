@@ -133,12 +133,13 @@ type TemplateVariable struct {
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
-	var template *entity.EmailTemplate
+	var template *query.EmailTemplateVo
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
 	} else {
-		template = query.GetEmailTemplateByTemplateName(ctx, templateName)
+		template = query.GetEmailDefaultTemplateByTemplateName(ctx, templateName)
 	}
+	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(templateVariables != nil, "templateVariables not found")
 	variableMap, err := utility.ReflectTemplateStructToMap(templateVariables, timezone)
@@ -198,7 +199,7 @@ func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title str
 			return
 		}
 	}()
-	one := &entity.EmailHistory{
+	one := &entity.MerchantEmailHistory{
 		MerchantId: merchantId,
 		Email:      mailTo,
 		Title:      title,
@@ -207,5 +208,5 @@ func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title str
 		Response:   response,
 		CreateTime: gtime.Now().Timestamp(),
 	}
-	_, _ = dao.EmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	_, _ = dao.MerchantEmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 }

@@ -15,12 +15,6 @@ import (
 
 func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {
 	redisKey := fmt.Sprintf("MerchantAuth-Login-Email:%s", req.Email)
-	//isDuplicatedInvoke := false
-	//defer func() {
-	//	if !isDuplicatedInvoke {
-	//		utility.ReleaseLock(ctx, redisKey)
-	//	}
-	//}()
 
 	if !utility.TryLock(ctx, redisKey, 10) {
 		//isDuplicatedInvoke = true
@@ -39,7 +33,6 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	//email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from UniBee", verificationCode)
 	merchantUser := query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(merchantUser != nil, "merchant user not found")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{

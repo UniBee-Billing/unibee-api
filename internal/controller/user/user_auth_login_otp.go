@@ -18,7 +18,6 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 
 	redisKey := fmt.Sprintf("UserAuth-Login-Email:%s", req.Email)
 	if !utility.TryLock(ctx, redisKey, 10) {
-		//isDuplicatedInvoke = true
 		utility.Assert(false, "click too fast, please wait for second")
 	}
 
@@ -34,7 +33,6 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	//email.SendEmailToUser(req.Email, "Login Code for "+req.Email+" from UniBee", verificationCode)
 	user := query.GetUserAccountByEmail(ctx, req.Email)
 	utility.Assert(user != nil, "user not found")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
