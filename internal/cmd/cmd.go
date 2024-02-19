@@ -22,22 +22,19 @@ import (
 
 var (
 	Main = gcmd.Command{
-		Name:  "go_oversea_pay",
+		Name:  "UniBee Api",
 		Usage: "main",
-		Brief: "start http server",
+		Brief: "start server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
-					r.Response.Write(swagger.SwaggerUIPageContent)
+					r.Response.Write(swagger.LatestSwaggerUIPageContent)
 				})
 				group.Middleware(
 					_interface.Middleware().ResponseHandler,
 					// _interface.Middleware().PreOpenApiAuth,
 				)
-				//group.Bind(
-				//	hello.NewV1(),
-				//)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/session", func(group *ghttp.RouterGroup) {

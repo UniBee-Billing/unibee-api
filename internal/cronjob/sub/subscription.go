@@ -48,7 +48,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk error:%s", err.Error())
 		}
-		g.Log().Errorf(ctx, "SubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk WalkResult:%s", utility.MarshalToJsonString(walk))
+		g.Log().Infof(ctx, "SubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk WalkResult:%s", utility.MarshalToJsonString(walk))
 		time.Sleep(10 * time.Second)
 	}
 
