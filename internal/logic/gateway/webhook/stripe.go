@@ -459,6 +459,7 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 
 func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType string, stripePayment stripe.PaymentIntent, gateway *entity.MerchantGateway) error {
 	if paymentId, ok := stripePayment.Metadata["PaymentId"]; ok {
+		// PaymentIntent Under UniBee Control
 		payment := query.GetPaymentByPaymentId(ctx, paymentId)
 		if payment != nil {
 			paymentIntentDetail, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPaymentDetail(ctx, gateway, stripePayment.ID)
@@ -527,8 +528,9 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			return gerror.New("Payment Not Found")
 		}
 	} else {
-		//Maybe Payment Create By Invoice
-		return gerror.New("No PaymentId Metadata")
+		//Maybe PaymentIntent Create By Invoice
+		g.Log().Errorf(ctx, "No PaymentId Metadata PaymentIntentId:%s", stripePayment.ID)
+		return nil
 	}
 	return nil
 }
