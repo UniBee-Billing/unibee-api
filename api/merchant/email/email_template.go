@@ -6,7 +6,7 @@ import (
 )
 
 type MerchantEmailTemplateListReq struct {
-	g.Meta     `path:"/merchant_email_template_list" tags:"Merchant-Email-Template-Controller" method:"post" summary:"Merchant Email Template List"`
+	g.Meta     `path:"/merchant_email_template_list" tags:"Merchant-Email-Template-Controller" method:"get" summary:"Merchant Email Template List"`
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
