@@ -122,3 +122,11 @@ func MerchantSearch(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantEmailTemplate(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/email_template", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewEmail(),
+		)
+	})
+}
