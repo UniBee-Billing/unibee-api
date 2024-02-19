@@ -53,7 +53,7 @@ type ProfileUpdateRes struct {
 }
 
 type PasswordResetReq struct {
-	g.Meta      `path:"/passwordReset" tags:"User-Auth-Controller" method:"post" summary:"User Reset Password"`
+	g.Meta      `path:"/passwordReset" tags:"User-Profile-Controller" method:"post" summary:"User Reset Password"`
 	OldPassword string `p:"oldPassword" dc:"OldPassword" v:"required"`
 	NewPassword string `p:"newPassword" dc:"NewPassword" v:"required"`
 }
