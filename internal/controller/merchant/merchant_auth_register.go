@@ -4,10 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
-	"math/rand"
-	"regexp"
-	"time"
 	"unibee-api/api/merchant/auth"
 	"unibee-api/internal/logic/email"
 	"unibee-api/utility"
@@ -19,55 +15,18 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"golang.org/x/crypto/bcrypt"
 )
-
-const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-
-var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-func generateRandomString(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
-	}
-	return string(b)
-}
-
-func hashAndSalt(pwd []byte) string {
-	hash, err := bcrypt.GenerateFromPassword(pwd, bcrypt.MinCost)
-	if err != nil {
-		log.Println(err)
-	}
-	return string(hash)
-}
-
-func IsEmailValid(email string) bool {
-	emailRegex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
-	validEmail := regexp.MustCompile(emailRegex)
-	return validEmail.MatchString(email)
-}
 
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
 	utility.Assert(len(req.Email) > 0, "Email Needed")
-	utility.Assert(IsEmailValid(req.Email), "Invalid Email")
+	utility.Assert(utility.IsEmailValid(req.Email), "Invalid Email")
 	var newOne *entity.MerchantUserAccount
 	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne == nil, "Email already existed")
-	//if newOne != nil {
-	//	return nil, gerror.NewCode(gcode.New(400, "Email already existed", nil))
-	//}
 
 	redisKey := fmt.Sprintf("MerchantAuth-Regist-Email:%s", req.Email)
-	//isDuplicatedInvoke := false
-	//defer func() {
-	//	if !isDuplicatedInvoke {
-	//		utility.ReleaseLock(ctx, redisKey)
-	//	}
-	//}()
 
 	if !utility.TryLock(ctx, redisKey, 10) {
-		//isDuplicatedInvoke = true
 		utility.Assert(false, "click too fast, please wait for second")
 	}
 
@@ -79,7 +38,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 			FirstName:  req.FirstName,
 			LastName:   req.LastName,
 			Email:      req.Email,
-			Password:   hashAndSalt([]byte(req.Password)),
+			Password:   utility.PasswordEncrypt(req.Password),
 			Phone:      req.Phone,
 			MerchantId: req.MerchantId,
 			// Address:   req.Address,
@@ -100,7 +59,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	verificationCode := generateRandomString(6)
+	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Println("verification ", verificationCode)
 	// add merchant-verify, user-verify
 	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)
@@ -112,7 +71,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	//email.SendEmailToUser(req.Email, "Verification Code from UniBee", verificationCode)
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",
 		Code:             verificationCode,

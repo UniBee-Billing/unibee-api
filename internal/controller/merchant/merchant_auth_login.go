@@ -11,45 +11,16 @@ import (
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"golang.org/x/crypto/bcrypt"
 )
 
-func comparePasswords(hashedPwd string, plainPwd []byte) bool {
-	// Since we'll be getting the hashed password from the DB it
-	// will be a string so we'll need to convert it to a byte slice
-	byteHash := []byte(hashedPwd)
-	err := bcrypt.CompareHashAndPassword(byteHash, plainPwd)
-	if err != nil {
-		fmt.Printf("comparePasswords err:%s\n", err.Error())
-		return false
-	}
-	return true
-}
-
 func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error) {
-	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 	utility.Assert(req.Email != "", "email cannot be empty")
 	utility.Assert(req.Password != "", "password cannot be empty")
-	//if req.Email == "" {
-	//	// return nil, gerror.New("email empty")
-	//	return nil, gerror.NewCode(gcode.New(400, "email cannot be empty", nil))
-	//}
-	//
-	//if req.Password == "" {
-	//	return nil, gerror.NewCode(gcode.New(400, "password cannot be empty", nil))
-	//}
 
 	var newOne *entity.MerchantUserAccount
 	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "Login Failed")
-	//if newOne == nil {
-	//	// return nil, gerror.New("internal err: user not found")
-	//	return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
-	//}
-	utility.Assert(comparePasswords(newOne.Password, []byte(req.Password)), "Login Failed, Password Not Match")
-	//if !comparePasswords(newOne.Password, []byte(req.Password)) { // wrong password
-	//	return nil, gerror.NewCode(gcode.New(400, "Login failed", nil))
-	//}
+	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
 
 	token, err := auth2.CreateToken(req.Email, newOne.Id)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)

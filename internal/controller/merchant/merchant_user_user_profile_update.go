@@ -5,13 +5,17 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/utility"
 
 	"unibee-api/api/merchant/user"
 )
 
 func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error) {
+	utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "Merchant User Not Found")
+	utility.Assert(len(_interface.BizCtx().Get(ctx).MerchantUser.Token) > 0, "Merchant Token Not Found")
+
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-		// dao.UserAccount.Columns().Email :        req.Email,
 		dao.UserAccount.Columns().LastName:        req.LastName,
 		dao.UserAccount.Columns().FirstName:       req.FirstName,
 		dao.UserAccount.Columns().Address:         req.Address,
@@ -33,11 +37,5 @@ func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserPr
 	if err != nil {
 		return nil, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	//}
-
-	// TODO: return the updated user account
 	return &user.UserProfileUpdateRes{}, nil
 }

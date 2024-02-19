@@ -1254,7 +1254,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			return err
 		}
 		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment:", utility.MarshalToJsonString(createRes))
-		err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
+		err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual SubscriptionIncomplete err:", err.Error())
 			return err

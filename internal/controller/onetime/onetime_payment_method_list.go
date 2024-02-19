@@ -7,6 +7,6 @@ import (
 	"unibee-api/api/onetime/payment"
 )
 
-func (c *ControllerPayment) PaymentMethodList(ctx context.Context, req *payment.MethodListReq) (res *payment.MethodListRes, err error) {
+func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodListReq) (res *payment.MethodListRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

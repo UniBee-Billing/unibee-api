@@ -128,11 +128,11 @@ func ChangeTrialEnd(ctx context.Context, newTrialEnd int64, subscriptionId strin
 	return nil
 }
 
-func SubscriptionIncomplete(ctx context.Context, subscriptionId string) error {
+func SubscriptionIncomplete(ctx context.Context, subscriptionId string, nowTimeStamp int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < gtime.Now().Timestamp(), "subscription not incomplete")
+	utility.Assert(utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < nowTimeStamp, "subscription not incomplete base on time now")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:    consts.SubStatusIncomplete,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),

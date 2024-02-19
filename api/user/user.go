@@ -20,6 +20,8 @@ type IUserAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
+	PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error)
+	PasswordForgetOtpVerify(ctx context.Context, req *auth.PasswordForgetOtpVerifyReq) (res *auth.PasswordForgetOtpVerifyRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
 }
@@ -40,6 +42,7 @@ type IUserProfile interface {
 	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 	ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error)
+	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
 }
 
 type IUserSubscription interface {

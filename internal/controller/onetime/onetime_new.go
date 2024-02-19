@@ -10,12 +10,12 @@ import (
 
 type ControllerMock struct{}
 
-func NewMock() onetime.IOpenMock {
+func NewMock() onetime.IOnetimeMock {
 	return &ControllerMock{}
 }
 
 type ControllerPayment struct{}
 
-func NewPayment() onetime.IOpenPayment {
+func NewPayment() onetime.IOnetimePayment {
 	return &ControllerPayment{}
 }

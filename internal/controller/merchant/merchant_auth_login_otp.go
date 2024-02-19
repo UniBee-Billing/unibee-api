@@ -27,14 +27,14 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		utility.Assert(false, "click too fast, please wait for second")
 	}
 
-	verificationCode := generateRandomString(6)
+	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification :%s", verificationCode)
-	_, err = g.Redis().Set(ctx, req.Email+"-merchant-verify", verificationCode)
+	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-Verify", verificationCode)
 	if err != nil {
 		// return nil, gerror.New("internal error")
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	_, err = g.Redis().Expire(ctx, req.Email+"-merchant-verify", 3*60)
+	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-Verify", 3*60)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

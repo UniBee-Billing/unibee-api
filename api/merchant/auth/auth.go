@@ -26,7 +26,7 @@ type LoginOtpRes struct {
 }
 
 type LoginOtpVerifyReq struct {
-	g.Meta           `path:"/sso/loginOTPVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"User OTP Login Verify Code"`
+	g.Meta           `path:"/sso/loginOTPVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant User OTP Login Verify"`
 	Email            string `p:"email" dc:"Email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }
@@ -36,8 +36,26 @@ type LoginOtpVerifyRes struct {
 	Token        string                      `p:"token" dc:"Token"`
 }
 
+type PasswordForgetOtpReq struct {
+	g.Meta `path:"/sso/passwordForgetOTP" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant Password Forget OTP"`
+	Email  string `p:"email" dc:"email" v:"required"`
+}
+
+type PasswordForgetOtpRes struct {
+}
+
+type PasswordForgetOtpVerifyReq struct {
+	g.Meta           `path:"/sso/passwordForgetOTPVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant Password Forget OTP Verify"`
+	Email            string `p:"email" dc:"email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"verificationCode" v:"required"`
+	NewPassword      string `p:"newPassword" dc:"NewPassword" v:"required"`
+}
+
+type PasswordForgetOtpVerifyRes struct {
+}
+
 type RegisterReq struct {
-	g.Meta     `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"User Register"`
+	g.Meta     `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant User Register"`
 	FirstName  string `p:"firstName" dc:"First Name" v:"required"`
 	LastName   string `p:"lastName" dc:"Last Name" v:"required"`
 	Email      string `p:"email" dc:"Email" v:"required"`
@@ -52,12 +70,11 @@ type RegisterRes struct {
 }
 
 type RegisterVerifyReq struct {
-	g.Meta           `path:"/sso/registerVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"Verify Email"`
+	g.Meta           `path:"/sso/registerVerify" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant Register Verify"`
 	Email            string `p:"email" dc:"Email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"VerificationCode" v:"required"`
 }
 
-// NO, after successful signup, res should be empty, front-end should be redirectd to /login
 type RegisterVerifyRes struct {
 	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"MerchantUser"`
 }

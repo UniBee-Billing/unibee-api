@@ -51,3 +51,12 @@ type ProfileUpdateReq struct {
 type ProfileUpdateRes struct {
 	User *entity.UserAccount `p:"user" dc:"User"`
 }
+
+type PasswordResetReq struct {
+	g.Meta      `path:"/passwordReset" tags:"User-Auth-Controller" method:"post" summary:"User Reset Password"`
+	OldPassword string `p:"oldPassword" dc:"OldPassword" v:"required"`
+	NewPassword string `p:"newPassword" dc:"NewPassword" v:"required"`
+}
+
+type PasswordResetRes struct {
+}

@@ -26,7 +26,7 @@ type LoginOtpRes struct {
 }
 
 type LoginOtpVerifyReq struct {
-	g.Meta           `path:"/sso/loginOTPVerify" tags:"User-Auth-Controller" method:"post" summary:"User OTP Login"`
+	g.Meta           `path:"/sso/loginOTPVerify" tags:"User-Auth-Controller" method:"post" summary:"User OTP Login Verify"`
 	Email            string `p:"email" dc:"email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"verificationCode" v:"required"`
 }
@@ -34,6 +34,24 @@ type LoginOtpVerifyReq struct {
 type LoginOtpVerifyRes struct {
 	User  *entity.UserAccount `p:"user" dc:"user"`
 	Token string              `p:"token" dc:"token"`
+}
+
+type PasswordForgetOtpReq struct {
+	g.Meta `path:"/sso/passwordForgetOTP" tags:"User-Auth-Controller" method:"post" summary:"User Password Forget OTP"`
+	Email  string `p:"email" dc:"email" v:"required"`
+}
+
+type PasswordForgetOtpRes struct {
+}
+
+type PasswordForgetOtpVerifyReq struct {
+	g.Meta           `path:"/sso/passwordForgetOTPVerify" tags:"User-Auth-Controller" method:"post" summary:"User Password Forget OTP Verify"`
+	Email            string `p:"email" dc:"email" v:"required"`
+	VerificationCode string `p:"verificationCode" dc:"verificationCode" v:"required"`
+	NewPassword      string `p:"newPassword" dc:"NewPassword" v:"required"`
+}
+
+type PasswordForgetOtpVerifyRes struct {
 }
 
 type RegisterReq struct {
@@ -53,7 +71,7 @@ type RegisterRes struct {
 }
 
 type RegisterVerifyReq struct {
-	g.Meta           `path:"/sso/registerVerify" tags:"User-Auth-Controller" method:"post" summary:"User Register Via Email"`
+	g.Meta           `path:"/sso/registerVerify" tags:"User-Auth-Controller" method:"post" summary:"User Register Verify"`
 	Email            string `p:"email" dc:"Email" v:"required"`
 	VerificationCode string `p:"verificationCode" dc:"Verification Code" v:"required"`
 }

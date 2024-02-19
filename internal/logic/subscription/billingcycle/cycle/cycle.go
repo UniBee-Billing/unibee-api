@@ -82,7 +82,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 			} else {
 				// Not Paid To Incomplete
-				err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId)
+				err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionIncomplete err:", err.Error())
 					return nil, err

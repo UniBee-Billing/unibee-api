@@ -1,35 +1,33 @@
-package user
+package merchant
 
 import (
 	"context"
 	"fmt"
-	"unibee-api/api/user/auth"
+	"github.com/gogf/gf/v2/frame/g"
 	"unibee-api/internal/logic/email"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 
-	// "github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
+
+	"unibee-api/api/merchant/auth"
 )
 
-func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {
-
-	redisKey := fmt.Sprintf("UserAuth-Login-Email:%s", req.Email)
+func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error) {
+	redisKey := fmt.Sprintf("MerchantAuth-PasswordForgetOtp-Email:%s", req.Email)
 	if !utility.TryLock(ctx, redisKey, 10) {
-		//isDuplicatedInvoke = true
 		utility.Assert(false, "click too fast, please wait for second")
 	}
 
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification %s", verificationCode)
-	_, err = g.Redis().Set(ctx, req.Email+"-Verify", verificationCode)
+	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-PasswordForgetOtp-Verify", verificationCode)
 	if err != nil {
 		// return nil, gerror.New("internal error")
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	_, err = g.Redis().Expire(ctx, req.Email+"-verify", 3*60)
+	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-PasswordForgetOtp-Verify", 3*60)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
@@ -45,5 +43,5 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	if err != nil {
 		return nil, err
 	}
-	return &auth.LoginOtpRes{}, nil
+	return &auth.PasswordForgetOtpRes{}, nil
 }

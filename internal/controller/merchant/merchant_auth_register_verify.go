@@ -78,14 +78,4 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	// TODO: return &{} is enough, front-end need to re-login, so don't need to return the whole user obj
 	newOne.Password = ""
 	return &auth.RegisterVerifyRes{MerchantUser: newOne}, nil
-	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
-
-/*
-
-func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error) {
-	// utility.Assert(len(req.Phone) > 0, "phone not null")
-
-}
-
-*/

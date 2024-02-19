@@ -23,3 +23,12 @@ type LogoutReq struct {
 
 type LogoutRes struct {
 }
+
+type PasswordResetReq struct {
+	g.Meta      `path:"/passwordReset" tags:"Merchant-User-Auth-Controller" method:"post" summary:"Merchant User Reset Password"`
+	OldPassword string `p:"oldPassword" dc:"OldPassword" v:"required"`
+	NewPassword string `p:"newPassword" dc:"NewPassword" v:"required"`
+}
+
+type PasswordResetRes struct {
+}

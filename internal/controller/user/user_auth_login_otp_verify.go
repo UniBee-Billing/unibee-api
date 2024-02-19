@@ -17,7 +17,7 @@ import (
 )
 
 func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error) {
-	verificationCode, err := g.Redis().Get(ctx, req.Email+"-verify")
+	verificationCode, err := g.Redis().Get(ctx, req.Email+"-Verify")
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

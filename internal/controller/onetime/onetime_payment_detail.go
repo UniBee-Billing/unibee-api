@@ -7,7 +7,7 @@ import (
 	"unibee-api/api/onetime/payment"
 )
 
-func (c *ControllerPayment) PaymentDetail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error) {
+func (c *ControllerPayment) Detail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error) {
 	panic("capture panic error moke")
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }
