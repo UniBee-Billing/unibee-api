@@ -11,7 +11,7 @@ package subscription
 // case: upgrade|downgrade subscription after periodEnd and before trialEnd
 // case: cancel subscription immediately
 
-// failure testcase
+// failure testcases
 // case1: create subscription with payment failure and check expired cycle
 // case2: billing cycle with payment failure after periodEnd, sub should change to incomplete, else may set trialEnd
 // case3: incomplete status situations todo
