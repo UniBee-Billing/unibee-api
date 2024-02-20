@@ -4,9 +4,7 @@ import (
 	"context"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
 )
 
 //func GetSubscriptionById(ctx context.Context, id int64) (one *entity.Subscription) {
@@ -54,25 +52,6 @@ func GetSubscriptionByGatewaySubscriptionId(ctx context.Context, gatewaySubscrip
 		one = nil
 	}
 	return
-}
-
-func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*ro.SubscriptionPlanAddonRo {
-	if len(addonJson) == 0 {
-		return nil
-	}
-	var addonParams []*ro.SubscriptionPlanAddonParamRo
-	err := utility.UnmarshalFromJsonString(addonJson, &addonParams)
-	if err != nil {
-		return nil
-	}
-	var addons []*ro.SubscriptionPlanAddonRo
-	for _, param := range addonParams {
-		addons = append(addons, &ro.SubscriptionPlanAddonRo{
-			Quantity:  param.Quantity,
-			AddonPlan: GetPlanById(ctx, param.AddonPlanId),
-		})
-	}
-	return addons
 }
 
 func GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {

@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"unibee-api/internal/logic/gateway"
 	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
+	addon2 "unibee-api/internal/logic/subscription/addon"
 )
 
 func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.InvoiceDetailRo {
@@ -54,7 +56,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.Invoic
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
-		Gateway:                        query.GetOutGatewayRoById(ctx, invoice.GatewayId),
+		Gateway:                        gateway.GetOutGatewayRoById(ctx, invoice.GatewayId),
 		MerchantInfo:                   query.GetMerchantInfoById(ctx, invoice.MerchantId),
 		UserAccount:                    query.GetUserAccountById(ctx, uint64(invoice.UserId)),
 		Subscription:                   query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId),
@@ -76,7 +78,7 @@ type CalculateInvoiceReq struct {
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *ro.InvoiceDetailSimplify {
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, fmt.Sprintf("plan not found:%d", req.PlanId))
-	addons := query.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
+	addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, req.AddonJsonData)
 	var totalAmountExcludingTax = plan.Amount * req.Quantity
 	for _, addon := range addons {
 		totalAmountExcludingTax = totalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity

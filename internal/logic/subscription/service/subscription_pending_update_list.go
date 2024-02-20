@@ -6,6 +6,7 @@ import (
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/ro"
+	addon2 "unibee-api/internal/logic/subscription/addon"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -66,9 +67,9 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		EffectTime:           one.EffectTime,
 		Note:                 one.Note,
 		Plan:                 query.GetPlanById(ctx, one.PlanId),
-		Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
-		UpdateAddons:         query.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+		UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 	}
 }
 
@@ -132,9 +133,9 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			EffectTime:           one.EffectTime,
 			Note:                 one.Note,
 			Plan:                 query.GetPlanById(ctx, one.PlanId),
-			Addons:               query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
-			UpdateAddons:         query.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 		})
 	}
 

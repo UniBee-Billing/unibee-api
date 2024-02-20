@@ -8,6 +8,7 @@ import (
 	"unibee-api/api/merchant/plan"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway"
 	ro2 "unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/metric"
 	entity "unibee-api/internal/model/entity/oversea_pay"
@@ -34,7 +35,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 		Plan: &ro2.PlanDetailRo{
 			Plan:             one,
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, int64(one.Id), false),
-			Gateways:         query.GetListActiveOutGatewayRos(ctx, planId),
+			Gateways:         gateway.GetListActiveOutGatewayRos(ctx, planId),
 			Addons:           query.GetPlanBindingAddonsByPlanId(ctx, planId),
 		},
 	}, nil

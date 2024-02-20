@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -18,23 +19,10 @@ const (
 	MetricTypeChargeRecurring = 3
 )
 
-type MerchantMetricVo struct {
-	Id                  uint64 `json:"id"            description:"id"`                                                                                // id
-	MerchantId          int64  `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
-	Code                string `json:"code"                description:"code"`                                                                        // code
-	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name
-	MetricDescription   string `json:"metricDescription"   description:"metric description"`                                                          // metric description
-	Type                int    `json:"type"                description:"1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)"` // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
-	AggregationType     int    `json:"aggregationType"     description:"0-count，1-count unique, 2-latest, 3-max, 4-sum"`                              // 0-count，1-count unique, 2-latest, 3-max, 4-sum
-	AggregationProperty string `json:"aggregationProperty" description:"aggregation property"`
-	UpdateTime          int64  `json:"gmtModify"     description:"update time"`     // update time
-	CreateTime          int64  `json:"createTime"    description:"create utc time"` // create utc time
-}
-
-func GetMerchantMetricVo(ctx context.Context, id int64) *MerchantMetricVo {
+func GetMerchantMetricVo(ctx context.Context, id int64) *ro.MerchantMetricVo {
 	one := query.GetMerchantMetric(ctx, id)
 	if one != nil {
-		return &MerchantMetricVo{
+		return &ro.MerchantMetricVo{
 			Id:                  one.Id,
 			MerchantId:          one.MerchantId,
 			Code:                one.Code,
@@ -50,9 +38,9 @@ func GetMerchantMetricVo(ctx context.Context, id int64) *MerchantMetricVo {
 	return nil
 }
 
-func MerchantMetricList(ctx context.Context, merchantId int64) []*MerchantMetricVo {
+func MerchantMetricList(ctx context.Context, merchantId int64) []*ro.MerchantMetricVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*MerchantMetricVo, 0)
+	var list = make([]*ro.MerchantMetricVo, 0)
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetric
 		err := dao.MerchantMetric.Ctx(ctx).
@@ -61,7 +49,7 @@ func MerchantMetricList(ctx context.Context, merchantId int64) []*MerchantMetric
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &MerchantMetricVo{
+				list = append(list, &ro.MerchantMetricVo{
 					Id:                  one.Id,
 					MerchantId:          one.MerchantId,
 					Code:                one.Code,
@@ -88,7 +76,7 @@ type NewMerchantMetricInternalReq struct {
 	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
-func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*MerchantMetricVo, error) {
+func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*ro.MerchantMetricVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.Code) > 0, "code is nil")
 
@@ -112,7 +100,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 
-	return &MerchantMetricVo{
+	return &ro.MerchantMetricVo{
 		Id:                  one.Id,
 		MerchantId:          one.MerchantId,
 		Code:                one.Code,
@@ -125,7 +113,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	}, nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId int64, metricId int64, name string, description string) (*MerchantMetricVo, error) {
+func EditMerchantMetric(ctx context.Context, merchantId int64, metricId int64, name string, description string) (*ro.MerchantMetricVo, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
@@ -142,7 +130,7 @@ func EditMerchantMetric(ctx context.Context, merchantId int64, metricId int64, n
 	one.MetricName = name
 	one.MetricDescription = description
 
-	return &MerchantMetricVo{
+	return &ro.MerchantMetricVo{
 		Id:                  one.Id,
 		MerchantId:          one.MerchantId,
 		Code:                one.Code,

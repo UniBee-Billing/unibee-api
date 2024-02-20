@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
-	"unibee-api/internal/logic/metric"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
@@ -368,11 +367,11 @@ type InvoiceDetailRo struct {
 }
 
 type PlanDetailRo struct {
-	Plan             *entity.SubscriptionPlan            `p:"plan" json:"plan" dc:"Plan"`
-	MetricPlanLimits []*metric.MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Gateways         []*OutGatewayRo                     `p:"gateways" json:"gateways" dc:"Gateways"`
-	Addons           []*entity.SubscriptionPlan          `p:"addons" json:"addons" dc:"Addons"`
-	AddonIds         []int64                             `p:"addonIds" json:"addonIds" dc:"AddonIds"`
+	Plan             *entity.SubscriptionPlan     `p:"plan" json:"plan" dc:"Plan"`
+	MetricPlanLimits []*MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
+	Gateways         []*OutGatewayRo              `p:"gateways" json:"gateways" dc:"Gateways"`
+	Addons           []*entity.SubscriptionPlan   `p:"addons" json:"addons" dc:"Addons"`
+	AddonIds         []int64                      `p:"addonIds" json:"addonIds" dc:"AddonIds"`
 }
 
 type SubscriptionPlanAddonParamRo struct {
@@ -444,4 +443,28 @@ type VatCountryRate struct {
 	CountryName           string `json:"countryName"           `                                      // country_name
 	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
 	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
+}
+
+type MerchantMetricVo struct {
+	Id                  uint64 `json:"id"            description:"id"`                                                                                // id
+	MerchantId          int64  `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
+	Code                string `json:"code"                description:"code"`                                                                        // code
+	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name
+	MetricDescription   string `json:"metricDescription"   description:"metric description"`                                                          // metric description
+	Type                int    `json:"type"                description:"1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)"` // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
+	AggregationType     int    `json:"aggregationType"     description:"0-count，1-count unique, 2-latest, 3-max, 4-sum"`                              // 0-count，1-count unique, 2-latest, 3-max, 4-sum
+	AggregationProperty string `json:"aggregationProperty" description:"aggregation property"`
+	UpdateTime          int64  `json:"gmtModify"     description:"update time"`     // update time
+	CreateTime          int64  `json:"createTime"    description:"create utc time"` // create utc time
+}
+
+type MerchantMetricPlanLimitVo struct {
+	Id          uint64            `json:"id"            description:"id"`                     // id
+	MerchantId  int64             `json:"merchantId"          description:"merchantId"`       // merchantId
+	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
+	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
+	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id
+	MetricLimit int64             `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
+	UpdateTime  int64             `json:"gmtModify"     description:"update time"`            // update time
+	CreateTime  int64             `json:"createTime"    description:"create utc time"`        // create utc time
 }

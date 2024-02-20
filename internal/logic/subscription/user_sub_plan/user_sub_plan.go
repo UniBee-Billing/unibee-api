@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
+	addon2 "unibee-api/internal/logic/subscription/addon"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -63,7 +64,7 @@ func UserSubPlanCacheList(ctx context.Context, merchantId int64, userId int64, r
 					})
 				}
 				//append addons
-				addons := query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData)
+				addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData)
 				for _, addon := range addons {
 					list = append(list, &UserSubPlan{
 						MerchantId: one.MerchantId,

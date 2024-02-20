@@ -12,6 +12,7 @@ import (
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/api"
 	"unibee-api/internal/logic/gateway/ro"
+	addon2 "unibee-api/internal/logic/subscription/addon"
 	"unibee-api/internal/logic/subscription/handler"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
@@ -75,7 +76,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 		Subscription:                        one,
 		Gateway:                             ConvertGatewayToRo(query.GetGatewayById(ctx, one.GatewayId)),
 		Plan:                                query.GetPlanById(ctx, one.PlanId),
-		Addons:                              query.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
 	}, nil
 }

@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/metric"
+	"unibee-api/internal/logic/gateway/ro"
 )
 
 type NewMerchantMetricPlanLimitReq struct {
@@ -14,7 +14,7 @@ type NewMerchantMetricPlanLimitReq struct {
 }
 
 type NewMerchantMetricPlanLimitRes struct {
-	MerchantMetric *metric.MerchantMetricPlanLimitVo
+	MerchantMetric *ro.MerchantMetricPlanLimitVo
 }
 
 type EditMerchantMetricPlanLimitReq struct {
@@ -25,7 +25,7 @@ type EditMerchantMetricPlanLimitReq struct {
 }
 
 type EditMerchantMetricPlanLimitRes struct {
-	MerchantMetric *metric.MerchantMetricPlanLimitVo
+	MerchantMetric *ro.MerchantMetricPlanLimitVo
 }
 
 type DelMerchantMetricPlanLimitReq struct {
@@ -35,5 +35,5 @@ type DelMerchantMetricPlanLimitReq struct {
 }
 
 type DelMerchantMetricPlanLimitRes struct {
-	MerchantMetric *metric.MerchantMetricPlanLimitVo
+	MerchantMetric *ro.MerchantMetricPlanLimitVo
 }

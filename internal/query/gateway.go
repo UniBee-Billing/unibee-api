@@ -7,21 +7,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
-
-func GetOutGatewayRoById(ctx context.Context, id int64) (one *ro.OutGatewayRo) {
-	if id <= 0 {
-		return nil
-	}
-	m := dao.MerchantGateway.Ctx(ctx)
-	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).OmitEmpty().Scan(&one)
-	if err != nil || one == nil {
-		return nil
-	}
-	return one
-}
 
 func GetGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
 	if id <= 0 {

@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/metric"
+	"unibee-api/internal/logic/gateway/ro"
 )
 
 type MerchantMetricListReq struct {
@@ -11,7 +11,7 @@ type MerchantMetricListReq struct {
 }
 
 type MerchantMetricListRes struct {
-	MerchantMetrics []*metric.MerchantMetricVo
+	MerchantMetrics []*ro.MerchantMetricVo
 }
 
 type NewMerchantMetricReq struct {
@@ -25,7 +25,7 @@ type NewMerchantMetricReq struct {
 }
 
 type NewMerchantMetricRes struct {
-	MerchantMetric *metric.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo
 }
 
 type EditMerchantMetricReq struct {
@@ -37,7 +37,7 @@ type EditMerchantMetricReq struct {
 }
 
 type EditMerchantMetricRes struct {
-	MerchantMetric *metric.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo
 }
 
 type DelMerchantMetricReq struct {
@@ -47,5 +47,5 @@ type DelMerchantMetricReq struct {
 }
 
 type DelMerchantMetricRes struct {
-	MerchantMetric *metric.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo
 }

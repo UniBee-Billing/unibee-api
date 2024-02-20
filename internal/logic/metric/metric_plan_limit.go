@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -18,21 +19,10 @@ const (
 	MerchantMetricPlanLimitCacheExpire    = 24 * 60 * 60
 )
 
-type MerchantMetricPlanLimitVo struct {
-	Id          uint64            `json:"id"            description:"id"`                     // id
-	MerchantId  int64             `json:"merchantId"          description:"merchantId"`       // merchantId
-	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
-	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
-	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id
-	MetricLimit int64             `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
-	UpdateTime  int64             `json:"gmtModify"     description:"update time"`            // update time
-	CreateTime  int64             `json:"createTime"    description:"create utc time"`        // create utc time
-}
-
-func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, planId int64, reloadCache bool) []*MerchantMetricPlanLimitVo {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, planId int64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
-	var list = make([]*MerchantMetricPlanLimitVo, 0)
+	var list = make([]*ro.MerchantMetricPlanLimitVo, 0)
 	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
 	if !reloadCache {
 		get, _ := g.Redis().Get(ctx, cacheKey)
@@ -53,7 +43,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &MerchantMetricPlanLimitVo{
+				list = append(list, &ro.MerchantMetricPlanLimitVo{
 					Id:          one.Id,
 					MerchantId:  one.MerchantId,
 					MetricId:    one.MetricId,
@@ -81,7 +71,7 @@ type MerchantMetricPlanLimitInternalReq struct {
 	Limit      int64  `p:"limit" dc:"Limit" `
 }
 
-func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*MerchantMetricPlanLimitVo, error) {
+func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
 	utility.Assert(req.MetricId > 0, "invalid metricId")
@@ -119,7 +109,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	one.Id = uint64(id)
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
-	return &MerchantMetricPlanLimitVo{
+	return &ro.MerchantMetricPlanLimitVo{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
@@ -130,7 +120,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	}, nil
 }
 
-func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*MerchantMetricPlanLimitVo, error) {
+func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.LimitId > 0, "invalid limitId")
 	var one *entity.MerchantMetricPlanLimit
@@ -152,7 +142,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	one.MetricLimit = req.Limit
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
-	return &MerchantMetricPlanLimitVo{
+	return &ro.MerchantMetricPlanLimitVo{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
