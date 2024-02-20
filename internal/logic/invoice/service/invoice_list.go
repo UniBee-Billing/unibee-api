@@ -57,8 +57,11 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	}
 	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
-		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency)).
-		Where(dao.Invoice.Columns().SendEmail, req.SendEmail)
+		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency))
+	//Where(dao.Invoice.Columns().SendEmail, req.SendEmail)
+	if len(req.SendEmail) > 0 {
+		query = query.WhereLike(dao.Invoice.Columns().SendEmail, "%"+req.SendEmail+"%")
+	}
 	if req.UserId > 0 {
 		query = query.Where(dao.Invoice.Columns().UserId, req.UserId)
 	}
@@ -74,10 +77,10 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 		var list []*entity.UserAccount
 		userQuery := dao.UserAccount.Ctx(ctx)
 		if len(req.FirstName) > 0 {
-			userQuery = userQuery.WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
 		}
 		if len(req.LastName) > 0 {
-			userQuery = userQuery.WhereOrLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
 		}
 		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&list)
 		for _, user := range list {

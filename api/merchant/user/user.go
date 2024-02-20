@@ -6,20 +6,23 @@ import (
 )
 
 type ListReq struct {
-	g.Meta             `path:"/user_list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
-	MerchantId         int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId             int    `p:"userId" dc:"Filter UserId, Default All" `
-	Email              int    `p:"email" dc:"Filter Email, Default All" `
-	UserName           int    `p:"userName" dc:"Filter UserName, Default All" `
-	SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
-	SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
-	PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
-	BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
-	DeleteInclude      bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField          string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType           string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page               int    `p:"page"  dc:"Page,Start 0" `
-	Count              int    `p:"count" dc:"Count OF Page" `
+	g.Meta     `path:"/user_list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `p:"userId" dc:"Filter UserId" `
+	FirstName  string `p:"firstName" dc:"Search FirstName" `
+	LastName   string `p:"lastName" dc:"Search LastName" `
+	Email      string `p:"email" dc:"Search Filter Email" `
+	Status     []int  `p:"status" dc:"Status, 0-Active｜2-Frozen" `
+	//UserName           int    `p:"userName" dc:"Filter UserName, Default All" `
+	//SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
+	//SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
+	//PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
+	//BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
+	DeleteInclude bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField     string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int    `p:"page"  dc:"Page,Start 0" `
+	Count         int    `p:"count" dc:"Count OF Page" `
 }
 
 type ListRes struct {
@@ -33,6 +36,22 @@ type GetReq struct {
 
 type GetRes struct {
 	User *entity.UserAccount `p:"user" dc:"User"`
+}
+
+type FrozenReq struct {
+	g.Meta `path:"/frozen_user" tags:"Merchant-User-Controller" method:"get" summary:"Merchant Frozen User"`
+	UserId int64 `p:"userId" dc:"UserId" `
+}
+
+type FrozenRes struct {
+}
+
+type ReleaseReq struct {
+	g.Meta `path:"/release_user" tags:"Merchant-User-Controller" method:"get" summary:"Merchant Release User"`
+	UserId int64 `p:"userId" dc:"UserId" `
+}
+
+type ReleaseRes struct {
 }
 
 type SearchReq struct {

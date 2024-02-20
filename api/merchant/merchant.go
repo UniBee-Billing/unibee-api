@@ -122,6 +122,8 @@ type IMerchantSubscription interface {
 type IMerchantUser interface {
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
 	Get(ctx context.Context, req *user.GetReq) (res *user.GetRes, err error)
+	Frozen(ctx context.Context, req *user.FrozenReq) (res *user.FrozenRes, err error)
+	Release(ctx context.Context, req *user.ReleaseReq) (res *user.ReleaseRes, err error)
 	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
 	UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error)
 }

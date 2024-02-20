@@ -64,6 +64,7 @@ type UserAccountColumns struct {
 	TimeZone           string //
 	CreateTime         string // create utc time
 	ExternalUserId     string // external_user_id
+	Status             string // 0-Active, 2-Frozen
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -112,6 +113,7 @@ var userAccountColumns = UserAccountColumns{
 	TimeZone:           "time_zone",
 	CreateTime:         "create_time",
 	ExternalUserId:     "external_user_id",
+	Status:             "status",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

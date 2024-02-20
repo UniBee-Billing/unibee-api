@@ -29,3 +29,23 @@ func ChangeUserPassword(ctx context.Context, email string, oldPassword string, n
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "server error")
 }
+
+func FrozenUser(ctx context.Context, userId int64) {
+	one := query.GetUserAccountById(ctx, uint64(userId))
+	utility.Assert(one != nil, "user not found")
+	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+		dao.UserAccount.Columns().Status:    2,
+		dao.UserAccount.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+	utility.AssertError(err, "server error")
+}
+
+func ReleaseUser(ctx context.Context, userId int64) {
+	one := query.GetUserAccountById(ctx, uint64(userId))
+	utility.Assert(one != nil, "user not found")
+	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+		dao.UserAccount.Columns().Status:    0,
+		dao.UserAccount.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+	utility.AssertError(err, "server error")
+}

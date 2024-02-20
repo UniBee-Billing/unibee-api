@@ -56,4 +56,5 @@ type UserAccount struct {
 	TimeZone           interface{} //
 	CreateTime         interface{} // create utc time
 	ExternalUserId     interface{} // external_user_id
+	Status             interface{} // 0-Active, 2-Frozen
 }

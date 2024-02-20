@@ -10,19 +10,22 @@ import (
 )
 
 type UserListInternalReq struct {
-	MerchantId         int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId             int    `p:"userId" dc:"Filter UserId, Default All" `
-	Email              int    `p:"email" dc:"Filter Email, Default All" `
-	UserName           int    `p:"userName" dc:"Filter UserName, Default All" `
-	SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
-	SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
-	PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
-	BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
-	DeleteInclude      bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField          string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType           string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page               int    `p:"page"  dc:"Page,Start 0" `
-	Count              int    `p:"count" dc:"Count Of Page" `
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `p:"userId" dc:"Filter UserId, Default All" `
+	Email      string `p:"email" dc:"Search Email" `
+	FirstName  string `p:"firstName" dc:"Search FirstName" `
+	LastName   string `p:"lastName" dc:"Search LastName" `
+	Status     []int  `p:"status" dc:"Status, 0-Active｜2-Frozen" `
+	//UserName   int    `p:"userName" dc:"Filter UserName, Default All" `
+	//SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
+	//SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
+	//PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
+	//BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
+	DeleteInclude bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField     string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int    `p:"page"  dc:"Page,Start 0" `
+	Count         int    `p:"count" dc:"Count Of Page" `
 }
 
 type UserListInternalRes struct {
@@ -53,16 +56,30 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 			sortKey = req.SortField + " desc"
 		}
 	}
-	err = dao.UserAccount.Ctx(ctx).
-		Where(dao.UserAccount.Columns().Id, req.UserId).
-		Where(dao.UserAccount.Columns().Email, req.Email).
-		Where(dao.UserAccount.Columns().UserName, req.UserName).
-		Where(dao.UserAccount.Columns().SubscriptionName, req.SubscriptionName).
-		Where(dao.UserAccount.Columns().SubscriptionStatus, req.SubscriptionStatus).
-		Where(dao.UserAccount.Columns().PaymentMethod, req.PaymentMethod).
-		Where(dao.UserAccount.Columns().BillingType, req.BillingType).
-		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
-		Order(sortKey).
+	query := dao.UserAccount.Ctx(ctx).
+		//Where(dao.UserAccount.Columns().Email, req.Email).
+		//Where(dao.UserAccount.Columns().UserName, req.UserName).
+		//Where(dao.UserAccount.Columns().SubscriptionName, req.SubscriptionName).
+		//Where(dao.UserAccount.Columns().SubscriptionStatus, req.SubscriptionStatus).
+		//Where(dao.UserAccount.Columns().PaymentMethod, req.PaymentMethod).
+		//Where(dao.UserAccount.Columns().BillingType, req.BillingType).
+		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes)
+	if req.UserId > 0 {
+		query = query.Where(dao.UserAccount.Columns().Id, req.UserId)
+	}
+	if len(req.Email) > 0 {
+		query = query.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
+	}
+	if len(req.FirstName) > 0 {
+		query = query.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+	}
+	if len(req.LastName) > 0 {
+		query = query.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+	}
+	if len(req.Status) > 0 {
+		query = query.WhereIn(dao.UserAccount.Columns().Status, req.Status)
+	}
+	err = query.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
