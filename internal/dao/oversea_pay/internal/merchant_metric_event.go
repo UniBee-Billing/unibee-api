@@ -23,7 +23,7 @@ type MerchantMetricEventColumns struct {
 	Id                          string // Id
 	MerchantId                  string // merchantId
 	MetricId                    string // metric_id
-	EventId                     string //
+	ExternalEventId             string //
 	UserId                      string // metric_id
 	AggregationPropertyInt      string // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   string // aggregation property string, use for metric of count|count_unique type
@@ -43,7 +43,7 @@ var merchantMetricEventColumns = MerchantMetricEventColumns{
 	Id:                          "id",
 	MerchantId:                  "merchant_id",
 	MetricId:                    "metric_id",
-	EventId:                     "event_id",
+	ExternalEventId:             "external_event_id",
 	UserId:                      "user_id",
 	AggregationPropertyInt:      "aggregation_property_int",
 	AggregationPropertyString:   "aggregation_property_string",

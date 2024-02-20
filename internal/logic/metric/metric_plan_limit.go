@@ -1,0 +1,139 @@
+package metric
+
+import (
+	"context"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
+	"unibee-api/utility"
+)
+
+type MerchantMetricPlanLimitVo struct {
+	Id          uint64 `json:"id"            description:"id"`               // id
+	MerchantId  int64  `json:"merchantId"          description:"merchantId"` // merchantId
+	MetricId    int64  `json:"metricId"    description:"metricId"`           // metricId
+	PlanId      int64  `json:"planId"      description:"plan_id"`            // plan_id
+	MetricLimit int64  `json:"metricLimit" description:"plan metric limit"`  // plan metric limit
+	UpdateTime  int64  `json:"gmtModify"     description:"update time"`      // update time
+	CreateTime  int64  `json:"createTime"    description:"create utc time"`  // create utc time
+}
+
+func MerchantMetricPlanLimitList(ctx context.Context, merchantId int64, planId int64) []*MerchantMetricPlanLimitVo {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(planId > 0, "invalid planId")
+	var list = make([]*MerchantMetricPlanLimitVo, 0)
+	if merchantId > 0 {
+		var entities []*entity.MerchantMetricPlanLimit
+		err := dao.MerchantMetric.Ctx(ctx).
+			Where(entity.MerchantMetricPlanLimit{MerchantId: merchantId}).
+			Where(entity.MerchantMetricPlanLimit{PlanId: planId}).
+			Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+			Scan(&entities)
+		if err == nil && len(entities) > 0 {
+			for _, one := range entities {
+				list = append(list, &MerchantMetricPlanLimitVo{
+					Id:          one.Id,
+					MerchantId:  one.MerchantId,
+					MetricId:    one.MetricId,
+					PlanId:      one.PlanId,
+					MetricLimit: one.MetricLimit,
+					UpdateTime:  one.GmtModify.Timestamp(),
+					CreateTime:  one.CreateTime,
+				})
+			}
+		}
+	}
+	return list
+}
+
+type MerchantMetricPlanLimitInternalReq struct {
+	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	LimitId    uint64 `p:"limitId" dc:"LimitId" `
+	MetricId   int64  `p:"metricId" dc:"MetricId" `
+	PlanId     int64  `p:"planId" dc:"PlanId" `
+	Limit      int64  `p:"limit" dc:"Limit" `
+}
+
+func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*MerchantMetricPlanLimitVo, error) {
+	utility.Assert(req.MerchantId > 0, "invalid merchantId")
+	utility.Assert(req.PlanId > 0, "invalid planId")
+	utility.Assert(req.MetricId > 0, "invalid metricId")
+
+	var one *entity.MerchantMetricPlanLimit
+	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
+		Where(entity.MerchantMetricPlanLimit{MerchantId: req.MerchantId}).
+		Where(entity.MerchantMetricPlanLimit{PlanId: req.PlanId}).
+		Where(entity.MerchantMetricPlanLimit{MetricId: req.MetricId}).
+		Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+		Scan(&one)
+	utility.AssertError(err, "server error")
+	utility.Assert(one == nil, "metric limit already exist")
+	one = &entity.MerchantMetricPlanLimit{
+		MerchantId: req.MerchantId,
+		CreateTime: gtime.Now().Timestamp(),
+	}
+	result, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		g.Log().Errorf(ctx, "NewMerchantMetricPlanLimit Insert err:%s", err.Error())
+		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
+
+	return &MerchantMetricPlanLimitVo{
+		Id:          one.Id,
+		MerchantId:  one.MerchantId,
+		MetricId:    one.MetricId,
+		PlanId:      one.PlanId,
+		MetricLimit: one.MetricLimit,
+		CreateTime:  one.CreateTime,
+	}, nil
+}
+
+func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*MerchantMetricPlanLimitVo, error) {
+	utility.Assert(req.MerchantId > 0, "invalid merchantId")
+	utility.Assert(req.LimitId > 0, "invalid limitId")
+	var one *entity.MerchantMetricPlanLimit
+	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
+		Where(entity.MerchantMetricPlanLimit{MerchantId: req.MerchantId}).
+		Where(entity.MerchantMetricPlanLimit{Id: req.LimitId}).
+		Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+		Scan(&one)
+	utility.AssertError(err, "server error")
+	utility.Assert(one != nil, "metric limit not found")
+	_, err = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
+		dao.MerchantMetricPlanLimit.Columns().MetricLimit: req.Limit,
+		dao.MerchantMetricPlanLimit.Columns().GmtModify:   gtime.Now(),
+	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(ctx, "EditMerchantMetricPlanLimit Update err:%s", err.Error())
+		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+	}
+	one.MetricLimit = req.Limit
+
+	return &MerchantMetricPlanLimitVo{
+		Id:          one.Id,
+		MerchantId:  one.MerchantId,
+		MetricId:    one.MetricId,
+		PlanId:      one.PlanId,
+		MetricLimit: one.MetricLimit,
+		UpdateTime:  gtime.Now().Timestamp(),
+		CreateTime:  one.CreateTime,
+	}, nil
+}
+
+func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId int64, metricId int64) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(metricId > 0, "invalid metricId")
+	one := query.GetMerchantMetric(ctx, metricId)
+	utility.Assert(one != nil, "metric limit not found")
+	_, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
+		dao.MerchantMetricPlanLimit.Columns().IsDeleted: 1,
+		dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
+	return err
+}

@@ -15,7 +15,7 @@ type MerchantMetricEvent struct {
 	Id                          interface{} // Id
 	MerchantId                  interface{} // merchantId
 	MetricId                    interface{} // metric_id
-	EventId                     interface{} //
+	ExternalEventId             interface{} //
 	UserId                      interface{} // metric_id
 	AggregationPropertyInt      interface{} // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   interface{} // aggregation property string, use for metric of count|count_unique type

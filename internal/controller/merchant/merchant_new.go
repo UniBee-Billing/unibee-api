@@ -97,3 +97,9 @@ func NewWebhook() merchant.IMerchantWebhook {
 	return &ControllerWebhook{}
 }
 
+type ControllerMetric struct{}
+
+func NewMetric() merchant.IMerchantMetric {
+	return &ControllerMetric{}
+}
+

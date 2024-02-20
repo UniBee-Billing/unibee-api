@@ -10,10 +10,10 @@ import (
 
 // MerchantMetricEvent is the golang structure for table merchant_metric_event.
 type MerchantMetricEvent struct {
-	Id                          int64       `json:"id"                          description:"Id"`                                                                     // Id
+	Id                          uint64      `json:"id"                          description:"Id"`                                                                     // Id
 	MerchantId                  int64       `json:"merchantId"                  description:"merchantId"`                                                             // merchantId
 	MetricId                    int64       `json:"metricId"                    description:"metric_id"`                                                              // metric_id
-	EventId                     string      `json:"eventId"                     description:""`                                                                       //
+	ExternalEventId             string      `json:"externalEventId"             description:""`                                                                       //
 	UserId                      int64       `json:"userId"                      description:"metric_id"`                                                              // metric_id
 	AggregationPropertyInt      int64       `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   string      `json:"aggregationPropertyString"   description:"aggregation property string, use for metric of count|count_unique type"` // aggregation property string, use for metric of count|count_unique type

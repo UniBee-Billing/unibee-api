@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/logic/metric"
 )
 
 type MerchantMetricListReq struct {
@@ -11,7 +11,7 @@ type MerchantMetricListReq struct {
 }
 
 type MerchantMetricListRes struct {
-	MerchantMetrics []*entity.MerchantMetric
+	MerchantMetrics []*metric.MerchantMetricVo
 }
 
 type NewMerchantMetricReq struct {
@@ -25,7 +25,7 @@ type NewMerchantMetricReq struct {
 }
 
 type NewMerchantMetricRes struct {
-	MerchantMetric *entity.MerchantMetric
+	MerchantMetric *metric.MerchantMetricVo
 }
 
 type EditMerchantMetricReq struct {
@@ -37,5 +37,15 @@ type EditMerchantMetricReq struct {
 }
 
 type EditMerchantMetricRes struct {
-	MerchantMetric *entity.MerchantMetric
+	MerchantMetric *metric.MerchantMetricVo
+}
+
+type DelMerchantMetricReq struct {
+	g.Meta     `path:"/delete_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
+	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricId   int64 `p:"metricId" dc:"MetricId" v:"required"`
+}
+
+type DelMerchantMetricRes struct {
+	MerchantMetric *metric.MerchantMetricVo
 }

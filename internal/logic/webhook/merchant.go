@@ -27,22 +27,23 @@ type MerchantWebhookEndpointVo struct {
 }
 
 func MerchantWebhookEndpointList(ctx context.Context, merchantId int64) []*MerchantWebhookEndpointVo {
+	utility.Assert(merchantId > 0, "invalid merchantId")
 	var list = make([]*MerchantWebhookEndpointVo, 0)
 	if merchantId > 0 {
-		var webhooks []*entity.MerchantWebhook
+		var entities []*entity.MerchantWebhook
 		err := dao.MerchantWebhook.Ctx(ctx).
 			Where(entity.MerchantWebhook{MerchantId: merchantId}).
 			Where(entity.MerchantWebhook{IsDeleted: 0}).
-			Scan(&webhooks)
-		if err == nil && len(webhooks) > 0 {
-			for _, webhook := range webhooks {
+			Scan(&entities)
+		if err == nil && len(entities) > 0 {
+			for _, one := range entities {
 				list = append(list, &MerchantWebhookEndpointVo{
-					Id:            webhook.Id,
-					MerchantId:    webhook.MerchantId,
-					WebhookUrl:    webhook.WebhookUrl,
-					WebhookEvents: strings.Split(webhook.WebhookEvents, SplitSep),
-					UpdateTime:    webhook.GmtModify.Timestamp(),
-					CreateTime:    webhook.CreateTime,
+					Id:            one.Id,
+					MerchantId:    one.MerchantId,
+					WebhookUrl:    one.WebhookUrl,
+					WebhookEvents: strings.Split(one.WebhookEvents, SplitSep),
+					UpdateTime:    one.GmtModify.Timestamp(),
+					CreateTime:    one.CreateTime,
 				})
 			}
 		}
@@ -86,7 +87,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId int64, url strin
 		utility.Assert(event.EventInListeningEvents(e), fmt.Sprintf("Event:%s Not In Event List", e))
 	}
 	one := query.GetMerchantWebhookByUrl(ctx, url)
-	utility.Assert(one == nil, "endpoint already exsit")
+	utility.Assert(one == nil, "endpoint already exist")
 	one = &entity.MerchantWebhook{
 		MerchantId:    merchantId,
 		WebhookUrl:    url,

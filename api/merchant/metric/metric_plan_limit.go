@@ -2,17 +2,38 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/logic/metric"
 )
 
-type SetMerchantMetricPlanLimitReq struct {
-	g.Meta     `path:"/edit_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Set Merchant Metric Plan Limit"`
+type NewMerchantMetricPlanLimitReq struct {
+	g.Meta     `path:"/new_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric Plan Limit"`
 	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	MetricId   int64 `p:"metricId" dc:"MetricId" v:"required"`
 	PlanId     int64 `p:"planId" dc:"PlanId" v:"required"`
 	Limit      int64 `p:"limit" dc:"Limit" v:"required"`
 }
 
-type SetMerchantMetricPlanLimitRes struct {
-	MerchantMetric *entity.MerchantMetric
+type NewMerchantMetricPlanLimitRes struct {
+	MerchantMetric *metric.MerchantMetricPlanLimitVo
+}
+
+type EditMerchantMetricPlanLimitReq struct {
+	g.Meta            `path:"/edit_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric Plan Limit"`
+	MerchantId        int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricPlanLimitId int64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
+	Limit             int64 `p:"limit" dc:"Limit" v:"required"`
+}
+
+type EditMerchantMetricPlanLimitRes struct {
+	MerchantMetric *metric.MerchantMetricPlanLimitVo
+}
+
+type DelMerchantMetricPlanLimitReq struct {
+	g.Meta            `path:"/delete_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric Plan Limit"`
+	MerchantId        int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricPlanLimitId int64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
+}
+
+type DelMerchantMetricPlanLimitRes struct {
+	MerchantMetric *metric.MerchantMetricPlanLimitVo
 }

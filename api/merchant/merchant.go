@@ -13,6 +13,7 @@ import (
 	"unibee-api/api/merchant/gateway"
 	"unibee-api/api/merchant/invoice"
 	"unibee-api/api/merchant/merchantinfo"
+	"unibee-api/api/merchant/metric"
 	"unibee-api/api/merchant/oss"
 	"unibee-api/api/merchant/payment"
 	"unibee-api/api/merchant/plan"
@@ -67,6 +68,18 @@ type IMerchantInvoice interface {
 type IMerchantMerchantinfo interface {
 	MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error)
 	MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error)
+}
+
+type IMerchantMetric interface {
+	MerchantMetricList(ctx context.Context, req *metric.MerchantMetricListReq) (res *metric.MerchantMetricListRes, err error)
+	NewMerchantMetric(ctx context.Context, req *metric.NewMerchantMetricReq) (res *metric.NewMerchantMetricRes, err error)
+	EditMerchantMetric(ctx context.Context, req *metric.EditMerchantMetricReq) (res *metric.EditMerchantMetricRes, err error)
+	DelMerchantMetric(ctx context.Context, req *metric.DelMerchantMetricReq) (res *metric.DelMerchantMetricRes, err error)
+	MerchantMetricEvent(ctx context.Context, req *metric.MerchantMetricEventReq) (res *metric.MerchantMetricEventRes, err error)
+	DelMerchantMetricEvent(ctx context.Context, req *metric.DelMerchantMetricEventReq) (res *metric.DelMerchantMetricEventRes, err error)
+	NewMerchantMetricPlanLimit(ctx context.Context, req *metric.NewMerchantMetricPlanLimitReq) (res *metric.NewMerchantMetricPlanLimitRes, err error)
+	EditMerchantMetricPlanLimit(ctx context.Context, req *metric.EditMerchantMetricPlanLimitReq) (res *metric.EditMerchantMetricPlanLimitRes, err error)
+	DelMerchantMetricPlanLimit(ctx context.Context, req *metric.DelMerchantMetricPlanLimitReq) (res *metric.DelMerchantMetricPlanLimitRes, err error)
 }
 
 type IMerchantOss interface {

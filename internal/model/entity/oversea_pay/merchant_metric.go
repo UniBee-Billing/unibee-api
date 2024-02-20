@@ -10,7 +10,7 @@ import (
 
 // MerchantMetric is the golang structure for table merchant_metric.
 type MerchantMetric struct {
-	Id                  int64       `json:"id"                  description:"Id"`                                                                          // Id
+	Id                  uint64      `json:"id"                  description:"Id"`                                                                          // Id
 	MerchantId          int64       `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
 	Code                string      `json:"code"                description:"code"`                                                                        // code
 	MetricName          string      `json:"metricName"          description:"metric name"`                                                                 // metric name
