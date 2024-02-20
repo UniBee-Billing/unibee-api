@@ -2,6 +2,7 @@ package metric
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -10,6 +11,10 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
+)
+
+const (
+	MerchantMetricPlanLimitCacheKeyPrefix = "MerchantMetricPlanLimitCacheKeyPrefix_"
 )
 
 type MerchantMetricPlanLimitVo struct {
@@ -22,10 +27,21 @@ type MerchantMetricPlanLimitVo struct {
 	CreateTime  int64  `json:"createTime"    description:"create utc time"`  // create utc time
 }
 
-func MerchantMetricPlanLimitList(ctx context.Context, merchantId int64, planId int64) []*MerchantMetricPlanLimitVo {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, planId int64, reloadCache bool) []*MerchantMetricPlanLimitVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
 	var list = make([]*MerchantMetricPlanLimitVo, 0)
+	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
+	if !reloadCache {
+		get, _ := g.Redis().Get(ctx, cacheKey)
+		value := get.String()
+		if len(value) > 0 {
+			_ = utility.UnmarshalFromJsonString(value, &list)
+			if len(list) > 0 {
+				return list
+			}
+		}
+	}
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetricPlanLimit
 		err := dao.MerchantMetric.Ctx(ctx).
@@ -47,6 +63,10 @@ func MerchantMetricPlanLimitList(ctx context.Context, merchantId int64, planId i
 			}
 		}
 	}
+	if len(list) > 0 {
+		_, _ = g.Redis().Set(ctx, cacheKey, utility.MarshalToJsonString(list))
+		_, _ = g.Redis().Expire(ctx, cacheKey, 24*60*60) // one day cache expire time
+	}
 	return list
 }
 
@@ -62,6 +82,10 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
 	utility.Assert(req.MetricId > 0, "invalid metricId")
+	//Plan check
+	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan != nil, "plan not found")
+	utility.Assert(plan.MerchantId == req.MerchantId, "plan merchantId not match")
 
 	var one *entity.MerchantMetricPlanLimit
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
@@ -83,7 +107,8 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-
+	// reload Cache
+	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
 	return &MerchantMetricPlanLimitVo{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
@@ -114,7 +139,8 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	one.MetricLimit = req.Limit
-
+	// reload Cache
+	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
 	return &MerchantMetricPlanLimitVo{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
@@ -135,5 +161,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId int64, metric
 		dao.MerchantMetricPlanLimit.Columns().IsDeleted: 1,
 		dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
+	// reload Cache
+	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, metricId, true)
 	return err
 }
