@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	redismq2 "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/email"
@@ -15,6 +16,7 @@ import (
 	subscription2 "unibee-api/internal/logic/subscription"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
+	"unibee-api/redismq"
 	"unibee-api/utility"
 )
 
@@ -140,6 +142,11 @@ func SubscriptionIncomplete(ctx context.Context, subscriptionId string, nowTimeS
 	if err != nil {
 		return err
 	}
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionIncomplete.Topic,
+		Tag:   redismq2.TopicSubscriptionIncomplete.Tag,
+		Body:  sub.SubscriptionId,
+	})
 	return nil
 }
 

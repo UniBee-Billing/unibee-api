@@ -19,6 +19,7 @@ var (
 	TopicRefundFailed                   = redismq.MQTopicEnum{"unibee_refund", "refundfailed", "refund success"}
 	TopicSubscriptionCancel             = redismq.MQTopicEnum{"unibee_subscription", "subscription_cancelled", "subscription cancelled"}
 	TopicSubscriptionExpire             = redismq.MQTopicEnum{"unibee_subscription", "subscription_expired", "subscription expired"}
+	TopicSubscriptionIncomplete         = redismq.MQTopicEnum{"unibee_subscription", "subscription_incomplete", "subscription incomplete"}
 	TopicSubscriptionCreate             = redismq.MQTopicEnum{"unibee_subscription", "subscription_created", "subscription created"}
 	TopicSubscriptionCreatePaymentCheck = redismq.MQTopicEnum{"unibee_subscription", "subscription_create_payment_check", "subscription create payment check"}
 	TopicSubscriptionPaymentSuccess     = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}

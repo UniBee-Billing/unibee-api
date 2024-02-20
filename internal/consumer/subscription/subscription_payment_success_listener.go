@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/logic/subscription/user_sub_plan"
 	"unibee-api/internal/logic/user"
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
@@ -33,6 +34,7 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 			user.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
 		}
 	}
+	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	return redismq.CommitMessage
 }
 

@@ -15,6 +15,7 @@ import (
 
 const (
 	MerchantMetricPlanLimitCacheKeyPrefix = "MerchantMetricPlanLimitCacheKeyPrefix_"
+	MerchantMetricPlanLimitCacheExpire    = 24 * 60 * 60
 )
 
 type MerchantMetricPlanLimitVo struct {
@@ -67,7 +68,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 	}
 	if len(list) > 0 {
 		_, _ = g.Redis().Set(ctx, cacheKey, utility.MarshalToJsonString(list))
-		_, _ = g.Redis().Expire(ctx, cacheKey, 24*60*60) // one day cache expire time
+		_, _ = g.Redis().Expire(ctx, cacheKey, MerchantMetricPlanLimitCacheExpire) // one day cache expire time
 	}
 	return list
 }

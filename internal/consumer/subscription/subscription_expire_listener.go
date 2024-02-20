@@ -15,21 +15,21 @@ import (
 	"unibee-api/utility"
 )
 
-type SubscriptionCancelListener struct {
+type SubscriptionExpireListener struct {
 }
 
-func (t SubscriptionCancelListener) GetTopic() string {
-	return redismq2.TopicSubscriptionCancel.Topic
+func (t SubscriptionExpireListener) GetTopic() string {
+	return redismq2.TopicSubscriptionExpire.Topic
 }
 
-func (t SubscriptionCancelListener) GetTag() string {
-	return redismq2.TopicSubscriptionCancel.Tag
+func (t SubscriptionExpireListener) GetTag() string {
+	return redismq2.TopicSubscriptionExpire.Tag
 }
 
-func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
+func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Infof(ctx, "SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Infof(ctx, "SubscriptionExpireListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	//Cancelled SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate
@@ -42,7 +42,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 		return redismq.ReconsumeLater
 	}
 	for _, p := range pendingUpdates {
-		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionCancelled")
+		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionExpire")
 		if err != nil {
 			fmt.Printf("MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}
@@ -52,10 +52,10 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 }
 
 func init() {
-	redismq.RegisterListener(NewSubscriptionCancelListener())
-	fmt.Println("SubscriptionCancelListener RegisterListener")
+	redismq.RegisterListener(NewSubscriptionExpireListener())
+	fmt.Println("SubscriptionExpireListener RegisterListener")
 }
 
-func NewSubscriptionCancelListener() *SubscriptionCancelListener {
-	return &SubscriptionCancelListener{}
+func NewSubscriptionExpireListener() *SubscriptionExpireListener {
+	return &SubscriptionExpireListener{}
 }
