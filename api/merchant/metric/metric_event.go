@@ -7,12 +7,12 @@ import (
 )
 
 type MerchantMetricEventReq struct {
-	g.Meta          `path:"/merchant_metric_event" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Event"`
-	MerchantId      int64       `p:"merchantId" dc:"MerchantId" v:"required"`
-	MetricCode      string      `p:"metricCode" dc:"MetricCode" v:"required"`
-	ExternalUserId  string      `p:"externalUserId" dc:"ExternalUserId" v:"required"`
-	ExternalEventId string      `p:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
-	MetricProperty  *gjson.Json `p:"metricProperty" dc:"MetricProperty"`
+	g.Meta           `path:"/merchant_metric_event" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Event"`
+	MerchantId       int64       `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricCode       string      `p:"metricCode" dc:"MetricCode" v:"required"`
+	ExternalUserId   string      `p:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalEventId  string      `p:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
+	MetricProperties *gjson.Json `p:"metricProperties" dc:"MetricProperties"`
 }
 
 type MerchantMetricEventRes struct {
