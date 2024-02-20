@@ -28,3 +28,15 @@ func GetUserAccountByEmail(ctx context.Context, email string) (one *entity.UserA
 	}
 	return one
 }
+
+func GetUserAccountByExternalUserId(ctx context.Context, externalUserId string) (one *entity.UserAccount) {
+	if len(externalUserId) <= 0 {
+		return nil
+	}
+	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{ExternalUserId: externalUserId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		return nil
+	}
+	one.Password = ""
+	return one
+}

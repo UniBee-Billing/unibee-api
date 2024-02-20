@@ -150,7 +150,7 @@ func DeleteMerchantMetric(ctx context.Context, merchantId int64, metricId int64)
 	one := query.GetMerchantMetric(ctx, metricId)
 	utility.Assert(one != nil, "endpoint not found")
 	_, err := dao.MerchantMetric.Ctx(ctx).Data(g.Map{
-		dao.MerchantMetric.Columns().IsDeleted: 1,
+		dao.MerchantMetric.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetric.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
 	return err

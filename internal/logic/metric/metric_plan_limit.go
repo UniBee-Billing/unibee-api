@@ -160,7 +160,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId int64, metric
 	one := query.GetMerchantMetric(ctx, metricId)
 	utility.Assert(one != nil, "metric limit not found")
 	_, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
-		dao.MerchantMetricPlanLimit.Columns().IsDeleted: 1,
+		dao.MerchantMetricPlanLimit.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
 	// reload Cache

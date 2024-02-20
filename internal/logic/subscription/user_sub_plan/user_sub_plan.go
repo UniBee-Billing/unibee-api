@@ -20,11 +20,14 @@ const (
 )
 
 type UserSubPlan struct {
-	MerchantId int64
-	UserId     int64
-	PlanId     int64
-	PlanType   int
-	Quantity   int64
+	MerchantId              int64
+	UserId                  int64
+	PlanId                  int64
+	PlanType                int
+	Quantity                int64
+	SubscriptionIds         string
+	SubscriptionPeriodStart int64
+	SubscriptionPeriodEnd   int64
 }
 
 func UserSubPlanCacheList(ctx context.Context, merchantId int64, userId int64, reloadCache bool) []*UserSubPlan {
@@ -56,22 +59,28 @@ func UserSubPlanCacheList(ctx context.Context, merchantId int64, userId int64, r
 				plan := query.GetPlanById(ctx, one.PlanId)
 				if plan != nil {
 					list = append(list, &UserSubPlan{
-						MerchantId: one.MerchantId,
-						UserId:     userId,
-						PlanId:     one.PlanId,
-						PlanType:   plan.Type,
-						Quantity:   one.Quantity,
+						MerchantId:              one.MerchantId,
+						UserId:                  userId,
+						PlanId:                  one.PlanId,
+						PlanType:                plan.Type,
+						Quantity:                one.Quantity,
+						SubscriptionIds:         one.SubscriptionId,
+						SubscriptionPeriodStart: one.CurrentPeriodStart,
+						SubscriptionPeriodEnd:   one.CurrentPeriodEnd,
 					})
 				}
 				//append addons
 				addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData)
 				for _, addon := range addons {
 					list = append(list, &UserSubPlan{
-						MerchantId: one.MerchantId,
-						UserId:     userId,
-						PlanId:     int64(addon.AddonPlan.Id),
-						PlanType:   addon.AddonPlan.Type,
-						Quantity:   addon.Quantity,
+						MerchantId:              one.MerchantId,
+						UserId:                  userId,
+						PlanId:                  int64(addon.AddonPlan.Id),
+						PlanType:                addon.AddonPlan.Type,
+						Quantity:                addon.Quantity,
+						SubscriptionIds:         one.SubscriptionId,
+						SubscriptionPeriodStart: one.CurrentPeriodStart,
+						SubscriptionPeriodEnd:   one.CurrentPeriodEnd,
 					})
 				}
 			}
