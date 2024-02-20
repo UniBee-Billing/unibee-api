@@ -31,6 +31,25 @@ type MerchantMetricVo struct {
 	CreateTime          int64  `json:"createTime"    description:"create utc time"` // create utc time
 }
 
+func GetMerchantMetricVo(ctx context.Context, id int64) *MerchantMetricVo {
+	one := query.GetMerchantMetric(ctx, id)
+	if one != nil {
+		return &MerchantMetricVo{
+			Id:                  one.Id,
+			MerchantId:          one.MerchantId,
+			Code:                one.Code,
+			MetricName:          one.MetricName,
+			MetricDescription:   one.MetricDescription,
+			Type:                one.Type,
+			AggregationType:     one.AggregationType,
+			AggregationProperty: one.AggregationProperty,
+			UpdateTime:          one.GmtModify.Timestamp(),
+			CreateTime:          one.CreateTime,
+		}
+	}
+	return nil
+}
+
 func MerchantMetricList(ctx context.Context, merchantId int64) []*MerchantMetricVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	var list = make([]*MerchantMetricVo, 0)

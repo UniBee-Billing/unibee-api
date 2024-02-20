@@ -18,13 +18,14 @@ const (
 )
 
 type MerchantMetricPlanLimitVo struct {
-	Id          uint64 `json:"id"            description:"id"`               // id
-	MerchantId  int64  `json:"merchantId"          description:"merchantId"` // merchantId
-	MetricId    int64  `json:"metricId"    description:"metricId"`           // metricId
-	PlanId      int64  `json:"planId"      description:"plan_id"`            // plan_id
-	MetricLimit int64  `json:"metricLimit" description:"plan metric limit"`  // plan metric limit
-	UpdateTime  int64  `json:"gmtModify"     description:"update time"`      // update time
-	CreateTime  int64  `json:"createTime"    description:"create utc time"`  // create utc time
+	Id          uint64            `json:"id"            description:"id"`                     // id
+	MerchantId  int64             `json:"merchantId"          description:"merchantId"`       // merchantId
+	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
+	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
+	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id
+	MetricLimit int64             `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
+	UpdateTime  int64             `json:"gmtModify"     description:"update time"`            // update time
+	CreateTime  int64             `json:"createTime"    description:"create utc time"`        // create utc time
 }
 
 func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, planId int64, reloadCache bool) []*MerchantMetricPlanLimitVo {
@@ -55,6 +56,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 					Id:          one.Id,
 					MerchantId:  one.MerchantId,
 					MetricId:    one.MetricId,
+					Metric:      GetMerchantMetricVo(ctx, one.MetricId),
 					PlanId:      one.PlanId,
 					MetricLimit: one.MetricLimit,
 					UpdateTime:  one.GmtModify.Timestamp(),
@@ -82,6 +84,10 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
 	utility.Assert(req.MetricId > 0, "invalid metricId")
+	//metric check
+	metric := query.GetMerchantMetric(ctx, req.MetricId)
+	utility.Assert(metric != nil, "metric not found")
+	utility.Assert(metric.Type == MetricTypeLimitMetered, "Metric Not MetricTypeLimitMetered Type")
 	//Plan check
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
@@ -97,8 +103,11 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	utility.AssertError(err, "server error")
 	utility.Assert(one == nil, "metric limit already exist")
 	one = &entity.MerchantMetricPlanLimit{
-		MerchantId: req.MerchantId,
-		CreateTime: gtime.Now().Timestamp(),
+		MerchantId:  req.MerchantId,
+		MetricId:    req.MetricId,
+		PlanId:      req.PlanId,
+		MetricLimit: req.Limit,
+		CreateTime:  gtime.Now().Timestamp(),
 	}
 	result, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -113,6 +122,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
+		Metric:      GetMerchantMetricVo(ctx, one.MetricId),
 		PlanId:      one.PlanId,
 		MetricLimit: one.MetricLimit,
 		CreateTime:  one.CreateTime,
@@ -145,6 +155,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
+		Metric:      GetMerchantMetricVo(ctx, one.MetricId),
 		PlanId:      one.PlanId,
 		MetricLimit: one.MetricLimit,
 		UpdateTime:  gtime.Now().Timestamp(),

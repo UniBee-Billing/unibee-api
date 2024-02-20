@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
+	"unibee-api/internal/logic/metric"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
@@ -367,10 +368,11 @@ type InvoiceDetailRo struct {
 }
 
 type PlanDetailRo struct {
-	Plan     *entity.SubscriptionPlan   `p:"plan" json:"plan" dc:"Plan"`
-	Gateways []*OutGatewayRo            `p:"gateways" json:"gateways" dc:"Gateways"`
-	Addons   []*entity.SubscriptionPlan `p:"addons" json:"addons" dc:"Addons"`
-	AddonIds []int64                    `p:"addonIds" json:"addonIds" dc:"AddonIds"`
+	Plan             *entity.SubscriptionPlan            `p:"plan" json:"plan" dc:"Plan"`
+	MetricPlanLimits []*metric.MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
+	Gateways         []*OutGatewayRo                     `p:"gateways" json:"gateways" dc:"Gateways"`
+	Addons           []*entity.SubscriptionPlan          `p:"addons" json:"addons" dc:"Addons"`
+	AddonIds         []int64                             `p:"addonIds" json:"addonIds" dc:"AddonIds"`
 }
 
 type SubscriptionPlanAddonParamRo struct {

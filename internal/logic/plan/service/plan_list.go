@@ -9,6 +9,7 @@ import (
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	ro2 "unibee-api/internal/logic/gateway/ro"
+	"unibee-api/internal/logic/metric"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -31,9 +32,10 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	utility.Assert(one != nil, "plan not found")
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro2.PlanDetailRo{
-			Plan:     one,
-			Gateways: query.GetListActiveOutGatewayRos(ctx, planId),
-			Addons:   query.GetPlanBindingAddonsByPlanId(ctx, planId),
+			Plan:             one,
+			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, int64(one.Id), false),
+			Gateways:         query.GetListActiveOutGatewayRos(ctx, planId),
+			Addons:           query.GetPlanBindingAddonsByPlanId(ctx, planId),
 		},
 	}, nil
 }
@@ -77,10 +79,11 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
 			list = append(list, &ro2.PlanDetailRo{
-				Plan:     p,
-				Gateways: []*ro2.OutGatewayRo{},
-				Addons:   nil,
-				AddonIds: nil,
+				Plan:             p,
+				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
+				Gateways:         []*ro2.OutGatewayRo{},
+				Addons:           nil,
+				AddonIds:         nil,
 			})
 			continue
 		}
@@ -100,10 +103,11 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			}
 		}
 		list = append(list, &ro2.PlanDetailRo{
-			Plan:     p,
-			Gateways: []*ro2.OutGatewayRo{},
-			Addons:   nil,
-			AddonIds: addonIds,
+			Plan:             p,
+			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
+			Gateways:         []*ro2.OutGatewayRo{},
+			Addons:           nil,
+			AddonIds:         addonIds,
 		})
 	}
 	if len(totalAddonIds) > 0 {
