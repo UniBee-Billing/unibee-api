@@ -20,30 +20,42 @@ type MerchantMetricEventDao struct {
 
 // MerchantMetricEventColumns defines and stores column names for table merchant_metric_event.
 type MerchantMetricEventColumns struct {
-	Id                        string // Id
-	MerchantId                string // merchantId
-	MetricId                  string // metric_id
-	EventId                   string //
-	AggregationPropertyInt    string // aggregation property int, use for metric of max|sum type
-	AggregationPropertyString string // aggregation property string, use for metric of count|count_unique type
-	GmtCreate                 string // create time
-	GmtModify                 string // update time
-	IsDeleted                 string // 0-UnDeleted，1-Deleted
-	CreateTime                string // create utc time
+	Id                          string // Id
+	MerchantId                  string // merchantId
+	MetricId                    string // metric_id
+	EventId                     string //
+	UserId                      string // metric_id
+	AggregationPropertyInt      string // aggregation property int, use for metric of max|sum type
+	AggregationPropertyString   string // aggregation property string, use for metric of count|count_unique type
+	GmtCreate                   string // create time
+	GmtModify                   string // update time
+	IsDeleted                   string // 0-UnDeleted，1-Deleted
+	CreateTime                  string // create utc time
+	AggregationPropertyData     string // aggregation property data (Json)
+	AggregationPropertyUniqueId string //
+	SubscriptionIds             string //
+	SubscriptionPeriodStart     string // matched subscription's current_period_start
+	SubscriptionPeriodEnd       string // matched subscription's current_period_end
 }
 
 // merchantMetricEventColumns holds the columns for table merchant_metric_event.
 var merchantMetricEventColumns = MerchantMetricEventColumns{
-	Id:                        "id",
-	MerchantId:                "merchant_id",
-	MetricId:                  "metric_id",
-	EventId:                   "event_id",
-	AggregationPropertyInt:    "aggregation_property_int",
-	AggregationPropertyString: "aggregation_property_string",
-	GmtCreate:                 "gmt_create",
-	GmtModify:                 "gmt_modify",
-	IsDeleted:                 "is_deleted",
-	CreateTime:                "create_time",
+	Id:                          "id",
+	MerchantId:                  "merchant_id",
+	MetricId:                    "metric_id",
+	EventId:                     "event_id",
+	UserId:                      "user_id",
+	AggregationPropertyInt:      "aggregation_property_int",
+	AggregationPropertyString:   "aggregation_property_string",
+	GmtCreate:                   "gmt_create",
+	GmtModify:                   "gmt_modify",
+	IsDeleted:                   "is_deleted",
+	CreateTime:                  "create_time",
+	AggregationPropertyData:     "aggregation_property_data",
+	AggregationPropertyUniqueId: "aggregation_property_unique_id",
+	SubscriptionIds:             "subscription_ids",
+	SubscriptionPeriodStart:     "subscription_period_start",
+	SubscriptionPeriodEnd:       "subscription_period_end",
 }
 
 // NewMerchantMetricEventDao creates and returns a new DAO object for table data access.
