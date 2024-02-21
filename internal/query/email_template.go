@@ -60,7 +60,7 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 	var one *entity.EmailDefaultTemplate
 	err := dao.EmailDefaultTemplate.Ctx(ctx).
 		Where(entity.EmailDefaultTemplate{TemplateName: templateName}).
-		Scan(&one)
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -79,7 +79,7 @@ func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId int6
 	err := dao.MerchantEmailTemplate.Ctx(ctx).
 		Where(entity.MerchantEmailTemplate{TemplateName: templateName}).
 		Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
-		Scan(&one)
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
