@@ -60,7 +60,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId int64, userId int6
 						Type:                planLimit.Metric.Type,
 						AggregationType:     planLimit.Metric.AggregationType,
 						AggregationProperty: planLimit.Metric.AggregationProperty,
-						TotalLimit:          uint64(planLimit.MetricLimit),
+						TotalLimit:          planLimit.MetricLimit,
 						PlanLimits:          []*ro.MerchantMetricPlanLimitVo{planLimit},
 					}
 				}
@@ -89,6 +89,16 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 		// count useValue from database
 		if met.AggregationType == metric.MetricAggregationTypeLatest {
 			useValue = 0 // type of this not need to compute from db
+			var latestOne *entity.MerchantMetricEvent
+			err := dao.MerchantMetricEvent.Ctx(ctx).
+				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
+				Where(entity.MerchantMetricEvent{UserId: userId}).
+				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate).
+				Scan(&latestOne)
+			if err == nil && latestOne != nil {
+				useValue = latestOne.AggregationPropertyInt
+			}
 		} else if met.AggregationType == metric.MetricAggregationTypeMax {
 			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
 				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).

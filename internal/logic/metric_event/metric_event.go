@@ -87,7 +87,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		ExternalEventId:             req.ExternalEventId,
 		UserId:                      int64(user.Id),
 		AggregationPropertyData:     req.MetricProperties.String(),
-		AggregationPropertyInt:      int64(aggregationPropertyInt),
+		AggregationPropertyInt:      aggregationPropertyInt,
 		AggregationPropertyString:   aggregationPropertyString,
 		AggregationPropertyUniqueId: aggregationPropertyUniqueId,
 		SubscriptionIds:             "", //todo mark
