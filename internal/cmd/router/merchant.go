@@ -138,3 +138,11 @@ func MerchantWebhook(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func MerchantMetric(ctx context.Context, group *ghttp.RouterGroup) {
+	group.Group("/merchant_metric", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			merchant.NewMetric(),
+		)
+	})
+}

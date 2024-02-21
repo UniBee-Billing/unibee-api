@@ -74,6 +74,7 @@ var (
 				router.MerchantInfo(ctx, group)
 				router.MerchantEmailTemplate(ctx, group)
 				router.MerchantWebhook(ctx, group)
+				router.MerchantMetric(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
