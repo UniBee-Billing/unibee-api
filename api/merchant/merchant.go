@@ -80,6 +80,7 @@ type IMerchantMetric interface {
 	NewMerchantMetricPlanLimit(ctx context.Context, req *metric.NewMerchantMetricPlanLimitReq) (res *metric.NewMerchantMetricPlanLimitRes, err error)
 	EditMerchantMetricPlanLimit(ctx context.Context, req *metric.EditMerchantMetricPlanLimitReq) (res *metric.EditMerchantMetricPlanLimitRes, err error)
 	DelMerchantMetricPlanLimit(ctx context.Context, req *metric.DelMerchantMetricPlanLimitReq) (res *metric.DelMerchantMetricPlanLimitRes, err error)
+	UserMerchantMetricStat(ctx context.Context, req *metric.UserMerchantMetricStatReq) (res *metric.UserMerchantMetricStatRes, err error)
 }
 
 type IMerchantOss interface {

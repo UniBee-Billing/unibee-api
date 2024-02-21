@@ -2,13 +2,30 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/metric_event"
+	"unibee-api/utility"
 
 	"unibee-api/api/merchant/metric"
 )
 
 func (c *ControllerMetric) DelMerchantMetricEvent(ctx context.Context, req *metric.DelMerchantMetricEventReq) (res *metric.DelMerchantMetricEventRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	if !consts.GetConfigInstance().IsLocal() {
+		//Merchant User Check
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
+	}
+	err = metric_event.DelMerchantMetricEvent(ctx, &metric_event.MerchantMetricEventInternalReq{
+		MerchantId:      req.MerchantId,
+		MetricCode:      req.MetricCode,
+		ExternalUserId:  req.ExternalUserId,
+		ExternalEventId: req.ExternalEventId,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &metric.DelMerchantMetricEventRes{}, nil
 }

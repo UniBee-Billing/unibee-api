@@ -3,14 +3,37 @@ package metric_event
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/metric"
 	"unibee-api/internal/logic/subscription/user_sub_plan"
 	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee-api/internal/query"
 	"unibee-api/utility"
 )
+
+type UserMerchantMetricStat struct {
+	MetricLimit     *MetricLimitVo
+	CurrentUseValue uint64
+}
+
+func GetUserMetricLimitStat(ctx context.Context, merchantId int64, user *entity.UserAccount) []*UserMerchantMetricStat {
+	var list = make([]*UserMerchantMetricStat, 0)
+	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id))
+	for _, metricLimit := range limitMap {
+		met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
+		if met != nil {
+			list = append(list, &UserMerchantMetricStat{
+				MetricLimit:     metricLimit,
+				CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, false),
+			})
+		}
+	}
+	return list
+}
 
 type MetricLimitVo struct {
 	MerchantId          int64
@@ -75,6 +98,28 @@ const (
 	UserMetricCacheKeyExpire = 15 * 24 * 60 * 60 // 15 days cache expire
 )
 
+func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId int64, userId int64, metricId int64) {
+	go func() {
+		ctx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				g.Log().Errorf(ctx, "ReloadUserSubPlanCacheListBackground panic error:%s", err.Error())
+				return
+			}
+		}()
+		met := query.GetMerchantMetric(ctx, metricId)
+		if met != nil {
+			GetUserMetricLimitCachedUseValue(ctx, merchantId, userId, met, true)
+		}
+	}()
+}
+
 func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, userId int64, met *entity.MerchantMetric, reloadCache bool) uint64 {
 	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, userId, met.Id)
 	if !reloadCache {
@@ -94,6 +139,7 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
 				Where(entity.MerchantMetricEvent{UserId: userId}).
 				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
 				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate).
 				Scan(&latestOne)
 			if err == nil && latestOne != nil {
@@ -104,6 +150,7 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
 				Where(entity.MerchantMetricEvent{UserId: userId}).
 				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
 				Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "server err")
 			useValue = uint64(useValueFloat)
@@ -112,6 +159,7 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
 				Where(entity.MerchantMetricEvent{UserId: userId}).
 				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
 				Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "server err")
 			useValue = uint64(useValueFloat)

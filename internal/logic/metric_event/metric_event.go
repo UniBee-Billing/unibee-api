@@ -110,3 +110,37 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	return one, nil
 }
+
+func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) error {
+	utility.Assert(req.MerchantId > 0, "invalid merchantId")
+	utility.Assert(len(req.MetricCode) > 0, "invalid metricCode")
+	utility.Assert(len(req.ExternalEventId) > 0, "invalid externalEventId")
+	utility.Assert(len(req.ExternalUserId) > 0, "invalid externalUserId")
+	// user check
+	user := query.GetUserAccountByExternalUserId(ctx, req.ExternalUserId)
+	utility.Assert(user != nil, "user not found")
+	// merchant check
+	// metric check
+	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
+	utility.Assert(met != nil, "metric not found")
+	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
+	var list []*entity.MerchantMetricEvent
+	err := dao.MerchantMetricEvent.Ctx(ctx).
+		Where(entity.MerchantMetricEvent{MerchantId: req.MerchantId}).
+		Where(entity.MerchantMetricEvent{MetricId: met.MerchantId}).
+		Where(entity.MerchantMetricEvent{UserId: int64(user.Id)}).
+		Where(entity.MerchantMetricEvent{ExternalEventId: req.ExternalEventId}).
+		Scan(&list)
+	if err != nil {
+		return err
+	}
+	utility.Assert(len(list) == 1, "event not found")
+	_, err = dao.MerchantMetricEvent.Ctx(ctx).Data(g.Map{
+		dao.MerchantMetricEvent.Columns().IsDeleted: gtime.Now().Timestamp(),
+		dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.MerchantMetricEvent.Columns().Id, list[0].Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
