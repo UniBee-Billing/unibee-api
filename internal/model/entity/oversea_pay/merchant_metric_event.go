@@ -13,8 +13,8 @@ type MerchantMetricEvent struct {
 	Id                          uint64      `json:"id"                          description:"Id"`                                                                     // Id
 	MerchantId                  int64       `json:"merchantId"                  description:"merchantId"`                                                             // merchantId
 	MetricId                    int64       `json:"metricId"                    description:"metric_id"`                                                              // metric_id
-	ExternalEventId             string      `json:"externalEventId"             description:""`                                                                       //
-	UserId                      int64       `json:"userId"                      description:"metric_id"`                                                              // metric_id
+	ExternalEventId             string      `json:"externalEventId"             description:"external_event_id, should be unique"`                                    // external_event_id, should be unique
+	UserId                      int64       `json:"userId"                      description:"user_id"`                                                                // user_id
 	AggregationPropertyInt      int64       `json:"aggregationPropertyInt"      description:"aggregation property int, use for metric of max|sum type"`               // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   string      `json:"aggregationPropertyString"   description:"aggregation property string, use for metric of count|count_unique type"` // aggregation property string, use for metric of count|count_unique type
 	GmtCreate                   *gtime.Time `json:"gmtCreate"                   description:"create time"`                                                            // create time

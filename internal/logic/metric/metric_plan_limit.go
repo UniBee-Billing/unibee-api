@@ -25,9 +25,9 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 	var list = make([]*ro.MerchantMetricPlanLimitVo, 0)
 	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
 	if !reloadCache {
-		get, _ := g.Redis().Get(ctx, cacheKey)
-		value := get.String()
-		if len(value) > 0 {
+		get, err := g.Redis().Get(ctx, cacheKey)
+		if err == nil && !get.IsNil() && !get.IsEmpty() {
+			value := get.String()
 			_ = utility.UnmarshalFromJsonString(value, &list)
 			if len(list) > 0 {
 				return list
@@ -64,17 +64,19 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 }
 
 type MerchantMetricPlanLimitInternalReq struct {
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
-	LimitId    uint64 `p:"limitId" dc:"LimitId" `
-	MetricId   int64  `p:"metricId" dc:"MetricId" `
-	PlanId     int64  `p:"planId" dc:"PlanId" `
-	Limit      int64  `p:"limit" dc:"Limit" `
+	MerchantId        int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricId          int64  `p:"metricId" dc:"MetricId" `
+	MetricPlanLimitId uint64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
+	PlanId            int64  `p:"planId" dc:"PlanId" `
+	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" `
 }
 
 func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
-	utility.Assert(req.MetricId > 0, "invalid metricId")
+	utility.Assert(req.MetricId == 0, "invalid metricId")
+	utility.Assert(req.MetricPlanLimitId == 0, "invalid MetricPlanLimitId, should not enter in")
+	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
 	//metric check
 	metric := query.GetMerchantMetric(ctx, req.MetricId)
 	utility.Assert(metric != nil, "metric not found")
@@ -97,7 +99,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 		MerchantId:  req.MerchantId,
 		MetricId:    req.MetricId,
 		PlanId:      req.PlanId,
-		MetricLimit: req.Limit,
+		MetricLimit: req.MetricLimit,
 		CreateTime:  gtime.Now().Timestamp(),
 	}
 	result, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -122,24 +124,25 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 
 func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
-	utility.Assert(req.LimitId > 0, "invalid limitId")
+	utility.Assert(req.MetricPlanLimitId > 0, "invalid MetricPlanLimitId")
+	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
 	var one *entity.MerchantMetricPlanLimit
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
 		Where(entity.MerchantMetricPlanLimit{MerchantId: req.MerchantId}).
-		Where(entity.MerchantMetricPlanLimit{Id: req.LimitId}).
+		Where(entity.MerchantMetricPlanLimit{Id: req.MetricPlanLimitId}).
 		Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
 		Scan(&one)
 	utility.AssertError(err, "server error")
 	utility.Assert(one != nil, "metric limit not found")
 	_, err = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
-		dao.MerchantMetricPlanLimit.Columns().MetricLimit: req.Limit,
+		dao.MerchantMetricPlanLimit.Columns().MetricLimit: req.MetricLimit,
 		dao.MerchantMetricPlanLimit.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		g.Log().Errorf(ctx, "EditMerchantMetricPlanLimit Update err:%s", err.Error())
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	one.MetricLimit = req.Limit
+	one.MetricLimit = req.MetricLimit
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
 	return &ro.MerchantMetricPlanLimitVo{

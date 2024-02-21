@@ -26,10 +26,10 @@ func (c *ControllerMetric) NewMerchantMetricPlanLimit(ctx context.Context, req *
 		return nil, gerror.New("Merchant Check Error")
 	}
 	me, err := metric2.NewMerchantMetricPlanLimit(ctx, &metric2.MerchantMetricPlanLimitInternalReq{
-		MerchantId: req.MerchantId,
-		PlanId:     req.PlanId,
-		MetricId:   req.MetricId,
-		Limit:      req.Limit,
+		MerchantId:  req.MerchantId,
+		PlanId:      req.PlanId,
+		MetricId:    req.MetricId,
+		MetricLimit: req.MetricLimit,
 	})
 	if err != nil {
 		return nil, err

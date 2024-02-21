@@ -464,7 +464,7 @@ type MerchantMetricPlanLimitVo struct {
 	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
 	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
 	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id
-	MetricLimit int64             `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
+	MetricLimit uint64            `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
 	UpdateTime  int64             `json:"gmtModify"     description:"update time"`            // update time
 	CreateTime  int64             `json:"createTime"    description:"create utc time"`        // create utc time
 }

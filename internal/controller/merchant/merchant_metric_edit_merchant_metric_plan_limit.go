@@ -26,9 +26,9 @@ func (c *ControllerMetric) EditMerchantMetricPlanLimit(ctx context.Context, req 
 		return nil, gerror.New("Merchant Check Error")
 	}
 	me, err := metric2.EditMerchantMetricPlanLimit(ctx, &metric2.MerchantMetricPlanLimitInternalReq{
-		MerchantId: req.MerchantId,
-		LimitId:    uint64(req.MetricPlanLimitId),
-		Limit:      req.Limit,
+		MerchantId:        req.MerchantId,
+		MetricPlanLimitId: uint64(req.MetricPlanLimitId),
+		MetricLimit:       req.MetricLimit,
 	})
 	if err != nil {
 		return nil, err

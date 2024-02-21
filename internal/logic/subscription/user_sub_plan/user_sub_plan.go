@@ -30,15 +30,15 @@ type UserSubPlan struct {
 	SubscriptionPeriodEnd   int64
 }
 
-func UserSubPlanCacheList(ctx context.Context, merchantId int64, userId int64, reloadCache bool) []*UserSubPlan {
+func UserSubPlanCachedList(ctx context.Context, merchantId int64, userId int64, reloadCache bool) []*UserSubPlan {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(userId > 0, "invalid userId")
 	var list = make([]*UserSubPlan, 0)
 	cacheKey := fmt.Sprintf("%s_%d_%d", UserSubPlanCacheKeyPrefix, merchantId, userId)
 	if !reloadCache {
-		get, _ := g.Redis().Get(ctx, cacheKey)
-		value := get.String()
-		if len(value) > 0 {
+		get, err := g.Redis().Get(ctx, cacheKey)
+		if err == nil && !get.IsNil() && !get.IsEmpty() {
+			value := get.String()
 			_ = utility.UnmarshalFromJsonString(value, &list)
 			if len(list) > 0 {
 				return list
@@ -108,6 +108,6 @@ func ReloadUserSubPlanCacheListBackground(merchantId int64, userId int64) {
 				return
 			}
 		}()
-		UserSubPlanCacheList(ctx, merchantId, userId, true)
+		UserSubPlanCachedList(ctx, merchantId, userId, true)
 	}()
 }

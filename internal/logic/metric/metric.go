@@ -14,9 +14,14 @@ import (
 )
 
 const (
-	MetricTypeLimitMetered    = 1
-	MetricTypeChargeMetered   = 2
-	MetricTypeChargeRecurring = 3
+	MetricTypeLimitMetered           = 1
+	MetricTypeChargeMetered          = 2
+	MetricTypeChargeRecurring        = 3
+	MetricAggregationTypeCount       = 1
+	MetricAggregationTypeCountUnique = 2
+	MetricAggregationTypeLatest      = 3
+	MetricAggregationTypeMax         = 4
+	MetricAggregationTypeSum         = 5
 )
 
 func GetMerchantMetricVo(ctx context.Context, id int64) *ro.MerchantMetricVo {
@@ -79,6 +84,11 @@ type NewMerchantMetricInternalReq struct {
 func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*ro.MerchantMetricVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.Code) > 0, "code is nil")
+	utility.Assert(req.AggregationType > 0 && req.AggregationType < 6, "aggregationType should be one of 1-count，2-count unique, 3-latest, 4-max, 5-sum")
+	if req.AggregationType > 1 {
+		//check property should contain
+		utility.Assert(len(req.AggregationProperty) > 0, "aggregationProperty should be set when aggregationType not count Type")
+	}
 
 	one := query.GetMerchantMetricByCode(ctx, req.Code)
 	utility.Assert(one == nil, "metric already exist")

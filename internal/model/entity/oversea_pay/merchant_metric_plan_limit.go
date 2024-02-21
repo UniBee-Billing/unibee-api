@@ -14,7 +14,7 @@ type MerchantMetricPlanLimit struct {
 	MerchantId  int64       `json:"merchantId"  description:"merchantId"`            // merchantId
 	MetricId    int64       `json:"metricId"    description:"metricId"`              // metricId
 	PlanId      int64       `json:"planId"      description:"plan_id"`               // plan_id
-	MetricLimit int64       `json:"metricLimit" description:"plan metric limit"`     // plan metric limit
+	MetricLimit uint64      `json:"metricLimit" description:"plan metric limit"`     // plan metric limit
 	GmtCreate   *gtime.Time `json:"gmtCreate"   description:"create time"`           // create time
 	GmtModify   *gtime.Time `json:"gmtModify"   description:"update time"`           // update time
 	IsDeleted   int         `json:"isDeleted"   description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted

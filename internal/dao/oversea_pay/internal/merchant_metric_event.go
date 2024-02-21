@@ -23,8 +23,8 @@ type MerchantMetricEventColumns struct {
 	Id                          string // Id
 	MerchantId                  string // merchantId
 	MetricId                    string // metric_id
-	ExternalEventId             string //
-	UserId                      string // metric_id
+	ExternalEventId             string // external_event_id, should be unique
+	UserId                      string // user_id
 	AggregationPropertyInt      string // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   string // aggregation property string, use for metric of count|count_unique type
 	GmtCreate                   string // create time

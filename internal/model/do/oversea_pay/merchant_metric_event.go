@@ -15,8 +15,8 @@ type MerchantMetricEvent struct {
 	Id                          interface{} // Id
 	MerchantId                  interface{} // merchantId
 	MetricId                    interface{} // metric_id
-	ExternalEventId             interface{} //
-	UserId                      interface{} // metric_id
+	ExternalEventId             interface{} // external_event_id, should be unique
+	UserId                      interface{} // user_id
 	AggregationPropertyInt      interface{} // aggregation property int, use for metric of max|sum type
 	AggregationPropertyString   interface{} // aggregation property string, use for metric of count|count_unique type
 	GmtCreate                   *gtime.Time // create time
