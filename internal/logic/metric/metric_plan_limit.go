@@ -36,10 +36,10 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 	}
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetricPlanLimit
-		err := dao.MerchantMetric.Ctx(ctx).
-			Where(entity.MerchantMetricPlanLimit{MerchantId: merchantId}).
-			Where(entity.MerchantMetricPlanLimit{PlanId: planId}).
-			Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+		err := dao.MerchantMetricPlanLimit.Ctx(ctx).
+			Where(dao.MerchantMetricPlanLimit.Columns().MerchantId, merchantId).
+			Where(dao.MerchantMetricPlanLimit.Columns().PlanId, planId).
+			Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
@@ -88,10 +88,10 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 
 	var one *entity.MerchantMetricPlanLimit
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
-		Where(entity.MerchantMetricPlanLimit{MerchantId: req.MerchantId}).
-		Where(entity.MerchantMetricPlanLimit{PlanId: req.PlanId}).
-		Where(entity.MerchantMetricPlanLimit{MetricId: req.MetricId}).
-		Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+		Where(dao.MerchantMetricPlanLimit.Columns().MerchantId, req.MerchantId).
+		Where(dao.MerchantMetricPlanLimit.Columns().PlanId, req.PlanId).
+		Where(dao.MerchantMetricPlanLimit.Columns().MetricId, req.MetricId).
+		Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
 		Scan(&one)
 	utility.AssertError(err, "server error")
 	utility.Assert(one == nil, "metric limit already exist")
@@ -128,9 +128,9 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
 	var one *entity.MerchantMetricPlanLimit
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
-		Where(entity.MerchantMetricPlanLimit{MerchantId: req.MerchantId}).
-		Where(entity.MerchantMetricPlanLimit{Id: req.MetricPlanLimitId}).
-		Where(entity.MerchantMetricPlanLimit{IsDeleted: 0}).
+		Where(dao.MerchantMetricPlanLimit.Columns().MerchantId, req.MerchantId).
+		Where(dao.MerchantMetricPlanLimit.Columns().Id, req.MetricPlanLimitId).
+		Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
 		Scan(&one)
 	utility.AssertError(err, "server error")
 	utility.Assert(one != nil, "metric limit not found")

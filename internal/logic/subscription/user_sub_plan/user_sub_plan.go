@@ -49,10 +49,10 @@ func UserSubPlanCachedList(ctx context.Context, merchantId int64, userId int64, 
 		var entities []*entity.Subscription
 		var status = []int{consts.SubStatusActive, consts.SubStatusIncomplete, consts.SubStatusPendingInActive}
 		err := dao.MerchantMetric.Ctx(ctx).
-			Where(entity.Subscription{MerchantId: merchantId}).
-			Where(entity.Subscription{UserId: userId}).
+			Where(dao.Subscription.Columns().MerchantId, merchantId).
+			Where(dao.Subscription.Columns().UserId, userId).
 			WhereIn(dao.Subscription.Columns().Status, status).
-			Where(entity.Subscription{IsDeleted: 0}).
+			Where(dao.Subscription.Columns().IsDeleted, 0).
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {

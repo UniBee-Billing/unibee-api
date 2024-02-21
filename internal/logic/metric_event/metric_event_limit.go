@@ -137,10 +137,10 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 			useValue = 0 // type of this not need to compute from db
 			var latestOne *entity.MerchantMetricEvent
 			err := dao.MerchantMetricEvent.Ctx(ctx).
-				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
-				Where(entity.MerchantMetricEvent{UserId: userId}).
-				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
-				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
+				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
+				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
+				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate).
 				Scan(&latestOne)
 			if err == nil && latestOne != nil {
@@ -148,19 +148,19 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 			}
 		} else if met.AggregationType == metric.MetricAggregationTypeMax {
 			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
-				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
-				Where(entity.MerchantMetricEvent{UserId: userId}).
-				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
-				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
+				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
+				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
+				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "server err")
 			useValue = uint64(useValueFloat)
 		} else {
 			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
-				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
-				Where(entity.MerchantMetricEvent{UserId: userId}).
-				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
-				Where(entity.MerchantMetricEvent{IsDeleted: 0}).
+				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
+				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
+				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
 			utility.AssertError(err, "server err")
 			useValue = uint64(useValueFloat)

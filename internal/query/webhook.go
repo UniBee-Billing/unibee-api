@@ -32,7 +32,7 @@ func GetMerchantWebhooksByMerchantId(ctx context.Context, merchantId int64) (lis
 	if merchantId <= 0 {
 		return nil
 	}
-	err := dao.MerchantWebhook.Ctx(ctx).Where(entity.MerchantWebhook{MerchantId: merchantId, IsDeleted: 0}).Scan(&list)
+	err := dao.MerchantWebhook.Ctx(ctx).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).Where(dao.MerchantWebhook.Columns().IsDeleted, 0).Scan(&list)
 	if err != nil {
 		return nil
 	}

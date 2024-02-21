@@ -49,8 +49,8 @@ func MerchantMetricList(ctx context.Context, merchantId int64) []*ro.MerchantMet
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetric
 		err := dao.MerchantMetric.Ctx(ctx).
-			Where(entity.MerchantMetric{MerchantId: merchantId}).
-			Where(entity.MerchantMetric{IsDeleted: 0}).
+			Where(dao.MerchantMetric.Columns().MerchantId, merchantId).
+			Where(dao.MerchantMetric.Columns().IsDeleted, 0).
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {

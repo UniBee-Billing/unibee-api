@@ -10,7 +10,10 @@ func GetMerchantMetric(ctx context.Context, id int64) (one *entity.MerchantMetri
 	if id <= 0 {
 		return nil
 	}
-	err := dao.MerchantMetric.Ctx(ctx).Where(entity.MerchantMetric{Id: uint64(id), IsDeleted: 0}).Scan(&one)
+	err := dao.MerchantMetric.Ctx(ctx).
+		Where(dao.MerchantMetric.Columns().Id, id).
+		Where(dao.MerchantMetric.Columns().IsDeleted, 0).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}
@@ -21,7 +24,10 @@ func GetMerchantMetricByCode(ctx context.Context, code string) (one *entity.Merc
 	if len(code) <= 0 {
 		return nil
 	}
-	err := dao.MerchantMetric.Ctx(ctx).Where(entity.MerchantMetric{Code: code, IsDeleted: 0}).Scan(&one)
+	err := dao.MerchantMetric.Ctx(ctx).
+		Where(dao.MerchantMetric.Columns().Code, code).
+		Where(dao.MerchantMetric.Columns().IsDeleted, 0).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}

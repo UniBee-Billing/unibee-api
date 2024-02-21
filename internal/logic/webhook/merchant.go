@@ -32,8 +32,8 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId int64) []*Merch
 	if merchantId > 0 {
 		var entities []*entity.MerchantWebhook
 		err := dao.MerchantWebhook.Ctx(ctx).
-			Where(entity.MerchantWebhook{MerchantId: merchantId}).
-			Where(entity.MerchantWebhook{IsDeleted: 0}).
+			Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).
+			Where(dao.MerchantWebhook.Columns().IsDeleted, 0).
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {

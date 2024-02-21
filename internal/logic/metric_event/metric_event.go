@@ -76,7 +76,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	var one *entity.MerchantMetricEvent
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
-		Where(entity.MerchantMetricEvent{AggregationPropertyUniqueId: aggregationPropertyUniqueId}).
+		Where(dao.MerchantMetricEvent.Columns().AggregationPropertyUniqueId, aggregationPropertyUniqueId).
 		Scan(&one)
 	utility.AssertError(err, "server error")
 	utility.Assert(one == nil, "same event with externalEventId or uniqueProperty exist")
@@ -126,10 +126,10 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
 	var list []*entity.MerchantMetricEvent
 	err := dao.MerchantMetricEvent.Ctx(ctx).
-		Where(entity.MerchantMetricEvent{MerchantId: req.MerchantId}).
-		Where(entity.MerchantMetricEvent{MetricId: met.MerchantId}).
-		Where(entity.MerchantMetricEvent{UserId: int64(user.Id)}).
-		Where(entity.MerchantMetricEvent{ExternalEventId: req.ExternalEventId}).
+		Where(dao.MerchantMetricEvent.Columns().MerchantId, req.MerchantId).
+		Where(dao.MerchantMetricEvent.Columns().MetricId, met.MerchantId).
+		Where(dao.MerchantMetricEvent.Columns().UserId, int64(user.Id)).
+		Where(dao.MerchantMetricEvent.Columns().ExternalEventId, req.ExternalEventId).
 		Scan(&list)
 	if err != nil {
 		return err
