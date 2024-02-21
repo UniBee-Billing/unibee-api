@@ -15,6 +15,7 @@ import (
 	"unibee-api/utility"
 )
 
+// todo mark take the subscription cycle into account
 type UserMerchantMetricStat struct {
 	MetricLimit     *MetricLimitVo
 	CurrentUseValue uint64
