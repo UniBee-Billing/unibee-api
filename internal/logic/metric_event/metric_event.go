@@ -180,16 +180,35 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 			return get.Uint64()
 		}
 	}
-	useValue := 0
+	var useValue uint64 = 0
 
 	if merchantId > 0 {
-		// count useValue from database todo mark
+		// count useValue from database
+		if met.AggregationType == metric.MetricAggregationTypeLatest {
+			useValue = 0
+		} else if met.AggregationType == metric.MetricAggregationTypeMax {
+			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
+				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
+				Where(entity.MerchantMetricEvent{UserId: userId}).
+				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
+			utility.AssertError(err, "server err")
+			useValue = uint64(useValueFloat)
+		} else {
+			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
+				Where(entity.MerchantMetricEvent{MerchantId: merchantId}).
+				Where(entity.MerchantMetricEvent{UserId: userId}).
+				Where(entity.MerchantMetricEvent{MetricId: int64(met.Id)}).
+				Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
+			utility.AssertError(err, "server err")
+			useValue = uint64(useValueFloat)
+		}
 	}
 
 	_, _ = g.Redis().Set(ctx, cacheKey, useValue)
 	_, _ = g.Redis().Expire(ctx, cacheKey, UserMetricCacheKeyExpire)
 
-	return 0
+	return useValue
 }
 
 func appendMetricLimitCachedUseValue(ctx context.Context, user *entity.UserAccount, merchantId int64, met *entity.MerchantMetric, append uint64) {
