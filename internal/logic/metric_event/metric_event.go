@@ -82,7 +82,12 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		Where(dao.MerchantMetricEvent.Columns().AggregationPropertyUniqueId, aggregationPropertyUniqueId).
 		Scan(&one)
 	utility.AssertError(err, "server error")
-	utility.Assert(one == nil, "same event with externalEventId or uniqueProperty exist")
+	if one != nil && one.AggregationPropertyInt == aggregationPropertyInt {
+		// same event
+		return one, nil
+	} else {
+		utility.Assert(one == nil, "same event with externalEventId or uniqueProperty exist")
+	}
 
 	one = &entity.MerchantMetricEvent{
 		MerchantId:                  req.MerchantId,
