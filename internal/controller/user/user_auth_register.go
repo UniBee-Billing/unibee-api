@@ -29,7 +29,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	var newOne *entity.UserAccount
-	newOne = query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email) //Id(ctx, user.Id)
+	newOne = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email) //Id(ctx, user.Id)
 	utility.Assert(newOne == nil, "Email already existed")
 
 	userStr, err := json.Marshal(
@@ -72,7 +72,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, _interface.GetMerchantId(ctx), req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

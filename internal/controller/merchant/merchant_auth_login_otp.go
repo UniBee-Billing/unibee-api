@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/email"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -34,9 +33,9 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	merchantUser := query.GetMerchantUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	merchantUser := query.GetMerchantUserAccountByEmail(ctx, req.Email)
 	utility.Assert(merchantUser != nil, "merchant user not found")
-	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, merchantUser.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
 		UserName:         merchantUser.FirstName + " " + merchantUser.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,

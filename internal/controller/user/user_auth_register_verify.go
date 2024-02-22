@@ -57,7 +57,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		Phone:       u.Phone,
 		Address:     u.Address,
 		UserName:    u.UserName,
-		MerchantId:  _interface.BizCtx().Get(ctx).MerchantId,
+		MerchantId:  _interface.GetMerchantId(ctx),
 		CreateTime:  gtime.Now().Timestamp(),
 	}
 

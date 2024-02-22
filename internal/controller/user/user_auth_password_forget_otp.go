@@ -33,10 +33,10 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	user := query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	user := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.Status == 0, "account status abnormal")
-	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+	err = email.SendTemplateEmail(ctx, user.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
 		UserName:         user.FirstName + " " + user.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,

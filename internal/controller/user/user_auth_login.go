@@ -19,7 +19,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(req.Password != "", "password cannot be empty")
 
 	var one *entity.UserAccount
-	one = query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(one != nil, "Login Failed")
 	utility.Assert(one.Status == 0, "account status abnormal")
 	utility.Assert(utility.ComparePasswords(one.Password, req.Password), "Login Failed, Password Not Match")

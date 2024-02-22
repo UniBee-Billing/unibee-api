@@ -25,7 +25,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	utility.Assert(verificationCode != nil, "code expired")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 	var one *entity.UserAccount
-	one = query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(one != nil, "Login Failed")
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
 	if err != nil {

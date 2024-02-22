@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee-api/api/merchant/auth"
-	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/email"
 	"unibee-api/utility"
 
@@ -22,7 +21,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	utility.Assert(len(req.Email) > 0, "Email Needed")
 	utility.Assert(utility.IsEmailValid(req.Email), "Invalid Email")
 	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	newOne = query.GetMerchantUserAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne == nil, "Email already existed")
 
 	redisKey := fmt.Sprintf("MerchantAuth-Regist-Email:%s", req.Email)

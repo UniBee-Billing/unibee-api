@@ -20,7 +20,7 @@ import (
 )
 
 func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error) {
-	one := query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	one := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	if one == nil {
 		one = &entity.UserAccount{
 			FirstName:      req.FirstName,
@@ -29,7 +29,7 @@ func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, er
 			Phone:          req.Phone,
 			Address:        req.Address,
 			ExternalUserId: req.ExternalUserId,
-			MerchantId:     _interface.BizCtx().Get(ctx).MerchantId,
+			MerchantId:     _interface.GetMerchantId(ctx),
 			CreateTime:     gtime.Now().Timestamp(),
 		}
 		result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)

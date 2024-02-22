@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
@@ -25,7 +24,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 
 	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
+	newOne = query.GetMerchantUserAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "Login Failed")
 
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTUSER, newOne.MerchantId, newOne.Id, req.Email)

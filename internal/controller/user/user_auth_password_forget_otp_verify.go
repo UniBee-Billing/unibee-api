@@ -21,7 +21,7 @@ func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.
 	utility.Assert(verificationCode != nil, "code expired")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 
-	auth2.ChangeUserPasswordWithOutOldVerify(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email, req.NewPassword)
+	auth2.ChangeUserPasswordWithOutOldVerify(ctx, _interface.GetMerchantId(ctx), req.Email, req.NewPassword)
 
 	return &auth.PasswordForgetOtpVerifyRes{}, nil
 }
