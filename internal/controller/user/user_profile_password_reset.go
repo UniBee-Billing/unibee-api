@@ -13,6 +13,6 @@ func (c *ControllerProfile) PasswordReset(ctx context.Context, req *profile.Pass
 	//User 检查
 	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 	utility.Assert(_interface.BizCtx().Get(ctx).User.Id > 0, "userId invalid")
-	auth.ChangeUserPassword(ctx, _interface.BizCtx().Get(ctx).User.Email, req.OldPassword, req.NewPassword)
+	auth.ChangeUserPassword(ctx, _interface.BizCtx().Get(ctx).MerchantId, _interface.BizCtx().Get(ctx).User.Email, req.OldPassword, req.NewPassword)
 	return &profile.PasswordResetRes{}, nil
 }

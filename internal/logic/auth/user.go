@@ -9,8 +9,8 @@ import (
 	"unibee-api/utility"
 )
 
-func ChangeUserPasswordWithOutOldVerify(ctx context.Context, email string, newPassword string) {
-	one := query.GetUserAccountByEmail(ctx, email)
+func ChangeUserPasswordWithOutOldVerify(ctx context.Context, merchantId uint64, email string, newPassword string) {
+	one := query.GetUserAccountByEmail(ctx, merchantId, email)
 	utility.Assert(one != nil, "user not found")
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Password:  utility.PasswordEncrypt(newPassword),
@@ -19,8 +19,8 @@ func ChangeUserPasswordWithOutOldVerify(ctx context.Context, email string, newPa
 	utility.AssertError(err, "server error")
 }
 
-func ChangeUserPassword(ctx context.Context, email string, oldPassword string, newPassword string) {
-	one := query.GetUserAccountByEmail(ctx, email)
+func ChangeUserPassword(ctx context.Context, merchantId uint64, email string, oldPassword string, newPassword string) {
+	one := query.GetUserAccountByEmail(ctx, merchantId, email)
 	utility.Assert(one != nil, "user not found")
 	utility.Assert(utility.ComparePasswords(one.Password, oldPassword), "password not match")
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{

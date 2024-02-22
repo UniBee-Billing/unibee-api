@@ -176,7 +176,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = userAccount.MerchantId
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTUSER {
-			merchantAccount := query.GetMerchantAccountById(r.Context(), token.Id)
+			merchantAccount := query.GetMerchantUserAccountById(r.Context(), token.Id)
 			if merchantAccount == nil {
 				g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
 				utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)

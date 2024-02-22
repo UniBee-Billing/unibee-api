@@ -55,7 +55,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	id, _ := result.LastInsertId()
 	user.Id = uint64(id)
 	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantAccountById(ctx, user.Id)
+	newOne = query.GetMerchantUserAccountById(ctx, user.Id)
 	if newOne == nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}

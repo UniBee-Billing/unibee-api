@@ -55,7 +55,7 @@ func GetActiveMerchantInfoList(ctx context.Context) (list []*entity.MerchantInfo
 	return
 }
 
-func GetMerchantAccountById(ctx context.Context, id uint64) (one *entity.MerchantUserAccount) {
+func GetMerchantUserAccountById(ctx context.Context, id uint64) (one *entity.MerchantUserAccount) {
 	if id <= 0 {
 		return nil
 	}
@@ -69,11 +69,12 @@ func GetMerchantAccountById(ctx context.Context, id uint64) (one *entity.Merchan
 	return one
 }
 
-func GetMerchantAccountByEmail(ctx context.Context, email string) (one *entity.MerchantUserAccount) {
+func GetMerchantUserAccountByEmail(ctx context.Context, merchantId uint64, email string) (one *entity.MerchantUserAccount) {
 	if len(email) == 0 {
 		return nil
 	}
 	err := dao.MerchantUserAccount.Ctx(ctx).
+		Where(dao.MerchantUserAccount.Columns().MerchantId, merchantId).
 		Where(dao.MerchantUserAccount.Columns().Email, email).
 		Scan(&one)
 	if err != nil {

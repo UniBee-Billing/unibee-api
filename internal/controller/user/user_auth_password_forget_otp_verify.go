@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
+	_interface "unibee-api/internal/interface"
 	auth2 "unibee-api/internal/logic/auth"
 	"unibee-api/utility"
 
@@ -20,7 +21,7 @@ func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.
 	utility.Assert(verificationCode != nil, "code expired")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 
-	auth2.ChangeUserPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
+	auth2.ChangeUserPasswordWithOutOldVerify(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email, req.NewPassword)
 
 	return &auth.PasswordForgetOtpVerifyRes{}, nil
 }

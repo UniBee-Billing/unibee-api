@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/email"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -32,7 +33,7 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	user := query.GetUserAccountByEmail(ctx, req.Email)
+	user := query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(user.Status == 0, "account status abnormal")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{

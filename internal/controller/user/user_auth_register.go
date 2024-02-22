@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee-api/api/user/auth"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/email"
 	"unibee-api/utility"
 
@@ -28,7 +29,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	var newOne *entity.UserAccount
-	newOne = query.GetUserAccountByEmail(ctx, req.Email) //Id(ctx, user.Id)
+	newOne = query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email) //Id(ctx, user.Id)
 	utility.Assert(newOne == nil, "Email already existed")
 
 	userStr, err := json.Marshal(

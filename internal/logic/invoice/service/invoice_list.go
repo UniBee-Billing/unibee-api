@@ -75,7 +75,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
 		var userIdList []uint64
 		var list []*entity.UserAccount
-		userQuery := dao.UserAccount.Ctx(ctx)
+		userQuery := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().MerchantId, req.MerchantId)
 		if len(req.FirstName) > 0 {
 			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee-api/api/user/auth"
 	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -56,6 +57,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		Phone:       u.Phone,
 		Address:     u.Address,
 		UserName:    u.UserName,
+		MerchantId:  _interface.BizCtx().Get(ctx).MerchantId,
 		CreateTime:  gtime.Now().Timestamp(),
 	}
 

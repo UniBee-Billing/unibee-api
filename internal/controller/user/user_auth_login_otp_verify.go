@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"unibee-api/api/user/auth"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/jwt"
 	"unibee-api/utility"
 
@@ -24,7 +25,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	utility.Assert(verificationCode != nil, "code expired")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 	var one *entity.UserAccount
-	one = query.GetUserAccountByEmail(ctx, req.Email)
+	one = query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
 	utility.Assert(one != nil, "Login Failed")
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
 	if err != nil {

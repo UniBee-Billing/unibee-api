@@ -10,7 +10,9 @@ func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount
 	if id <= 0 {
 		return nil
 	}
-	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().Id, id).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}
@@ -18,22 +20,28 @@ func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount
 	return one
 }
 
-func GetUserAccountByEmail(ctx context.Context, email string) (one *entity.UserAccount) {
+func GetUserAccountByEmail(ctx context.Context, merchantId uint64, email string) (one *entity.UserAccount) {
 	if len(email) == 0 {
 		return nil
 	}
-	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{Email: email}).OmitEmpty().Scan(&one)
+	err := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().Email, email).
+		Where(dao.UserAccount.Columns().MerchantId, merchantId).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
 }
 
-func GetUserAccountByExternalUserId(ctx context.Context, externalUserId string) (one *entity.UserAccount) {
+func GetUserAccountByExternalUserId(ctx context.Context, merchantId uint64, externalUserId string) (one *entity.UserAccount) {
 	if len(externalUserId) <= 0 {
 		return nil
 	}
-	err := dao.UserAccount.Ctx(ctx).Where(entity.UserAccount{ExternalUserId: externalUserId}).OmitEmpty().Scan(&one)
+	err := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().ExternalUserId, externalUserId).
+		Where(dao.UserAccount.Columns().MerchantId, merchantId).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"unibee-api/api/merchant/auth"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
@@ -18,7 +19,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(req.Password != "", "password cannot be empty")
 
 	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantAccountByEmail(ctx, req.Email)
+	newOne = query.GetMerchantUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
 	utility.Assert(newOne != nil, "Login Failed")
 	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
 

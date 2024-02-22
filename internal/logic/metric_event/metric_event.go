@@ -29,7 +29,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(len(req.ExternalEventId) > 0, "invalid externalEventId")
 	utility.Assert(len(req.ExternalUserId) > 0, "invalid externalUserId")
 	// user check
-	user := query.GetUserAccountByExternalUserId(ctx, req.ExternalUserId)
+	user := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 	utility.Assert(user != nil, "user not found")
 	// merchant check
 	// metric check
@@ -120,7 +120,7 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	utility.Assert(len(req.ExternalEventId) > 0, "invalid externalEventId")
 	utility.Assert(len(req.ExternalUserId) > 0, "invalid externalUserId")
 	// user check
-	user := query.GetUserAccountByExternalUserId(ctx, req.ExternalUserId)
+	user := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 	utility.Assert(user != nil, "user not found")
 	// merchant check
 	// metric check

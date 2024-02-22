@@ -62,7 +62,7 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 		//Where(dao.UserAccount.Columns().SubscriptionName, req.SubscriptionName).
 		//Where(dao.UserAccount.Columns().SubscriptionStatus, req.SubscriptionStatus).
 		//Where(dao.UserAccount.Columns().PaymentMethod, req.PaymentMethod).
-		//Where(dao.UserAccount.Columns().BillingType, req.BillingType).
+		Where(dao.UserAccount.Columns().MerchantId, req.MerchantId).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes)
 	if req.UserId > 0 {
 		query = query.Where(dao.UserAccount.Columns().Id, req.UserId)
@@ -91,13 +91,14 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 	return &UserListInternalRes{UserAccounts: mainList}, nil
 }
 
-func SearchUser(ctx context.Context, searchKey string) (list []*entity.UserAccount, err error) {
+func SearchUser(ctx context.Context, merchantId int64, searchKey string) (list []*entity.UserAccount, err error) {
 	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
 	var mainList []*entity.UserAccount
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
 	_ = dao.UserAccount.Ctx(ctx).
 		WhereOr(dao.UserAccount.Columns().Id, searchKey).
+		WhereOr(dao.UserAccount.Columns().MerchantId, merchantId).
 		WhereOr(dao.UserAccount.Columns().SubscriptionId, searchKey).
 		WhereOr(dao.UserAccount.Columns().VATNumber, searchKey).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).

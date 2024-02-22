@@ -25,7 +25,7 @@ func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metr
 	if req.UserId > 0 {
 		user = query.GetUserAccountById(ctx, uint64(req.UserId))
 	} else if len(req.ExternalUserId) > 0 {
-		user = query.GetUserAccountByExternalUserId(ctx, req.ExternalUserId)
+		user = query.GetUserAccountByExternalUserId(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.ExternalUserId)
 	}
 	utility.Assert(user != nil, "user not found")
 	list := metric_event.GetUserMetricLimitStat(ctx, req.MerchantId, user)

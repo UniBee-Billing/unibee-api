@@ -12,6 +12,7 @@ import (
 	"unibee-api/api/session/user"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
@@ -19,7 +20,7 @@ import (
 )
 
 func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error) {
-	one := query.GetUserAccountByEmail(ctx, req.Email)
+	one := query.GetUserAccountByEmail(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.Email)
 	if one == nil {
 		one = &entity.UserAccount{
 			FirstName:      req.FirstName,
@@ -28,6 +29,7 @@ func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, er
 			Phone:          req.Phone,
 			Address:        req.Address,
 			ExternalUserId: req.ExternalUserId,
+			MerchantId:     _interface.BizCtx().Get(ctx).MerchantId,
 			CreateTime:     gtime.Now().Timestamp(),
 		}
 		result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
