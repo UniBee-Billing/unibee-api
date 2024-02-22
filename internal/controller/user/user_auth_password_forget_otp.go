@@ -9,9 +9,6 @@ import (
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-
 	"unibee-api/api/user/auth"
 )
 
@@ -24,14 +21,9 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification %s", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-PasswordForgetOtp-Verify", verificationCode)
-	if err != nil {
-		// return nil, gerror.New("internal error")
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, req.Email+"-PasswordForgetOtp-Verify", 3*60)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 
 	user := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
 	utility.Assert(user != nil, "user not found")

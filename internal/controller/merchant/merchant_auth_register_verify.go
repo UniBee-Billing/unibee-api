@@ -2,11 +2,9 @@ package merchant
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee-api/utility"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 
 	"encoding/json"
 	"unibee-api/api/merchant/auth"
@@ -18,17 +16,12 @@ import (
 )
 
 func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error) {
-	verificationCode, err := g.Redis().Get(ctx, req.Email+"-verify")
-	if err != nil {
-		// return nil, gerror.New("internal error")
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	verificationCode, err := g.Redis().Get(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify")
+	utility.AssertError(err, "Server Error")
 	utility.Assert(verificationCode != nil, "Invalid Code")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "Invalid Code")
-	userStr, err := g.Redis().Get(ctx, req.Email)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	userStr, err := g.Redis().Get(ctx, CacheKeyMerchantRegisterPrefix+req.Email)
+	utility.AssertError(err, "Server Error")
 	utility.Assert(userStr != nil, "Invalid Code")
 	u := struct {
 		FirstName, LastName, Email, Password, Phone, Address, UserName string
@@ -36,7 +29,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}{}
 	err = json.Unmarshal([]byte(userStr.String()), &u)
 
-	user := &entity.MerchantUserAccount{
+	merchantUser := &entity.MerchantUserAccount{
 		FirstName:  u.FirstName,
 		LastName:   u.LastName,
 		Email:      u.Email,
@@ -46,20 +39,48 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		CreateTime: gtime.Now().Timestamp(),
 	}
 
-	// race condition: email exist checking is too earlier
-	result, err := dao.MerchantUserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
-	if err != nil {
-		// err = gerror.Newf(`record insert failure %s`, err)
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	id, _ := result.LastInsertId()
-	user.Id = uint64(id)
+	// transaction create Merchant
+	err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+		insert, err := dao.MerchantUserAccount.Ctx(ctx).Data(merchantUser).OmitNil().Insert(merchantUser)
+		if err != nil {
+			return err
+		}
+		id, err := insert.LastInsertId()
+		if err != nil {
+			return err
+		}
+		merchantUser.Id = uint64(id)
+
+		//create MerchantInfo
+		merchantInfo := &entity.MerchantInfo{
+			CompanyId: 0,
+			UserId:    id,
+			ApiKey:    utility.GenerateRandomAlphanumeric(32), //32 bit open api key
+		}
+
+		insert, err = dao.MerchantInfo.Ctx(ctx).Data(merchantInfo).OmitNil().Insert(merchantInfo)
+		if err != nil {
+			return err
+		}
+		merchantId, err := insert.LastInsertId()
+		if err != nil {
+			return err
+		}
+		// bind merchantUserAccount
+		_, err = dao.MerchantUserAccount.Ctx(ctx).Data(g.Map{
+			dao.MerchantUserAccount.Columns().MerchantId: merchantId,
+			dao.MerchantUserAccount.Columns().GmtModify:  gtime.Now(),
+		}).Where(dao.MerchantUserAccount.Columns().Id, id).OmitNil().Update()
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	utility.AssertError(err, "Server Error")
 	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountById(ctx, user.Id)
-	if newOne == nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	// TODO: return &{} is enough, front-end need to re-login, so don't need to return the whole user obj
+	newOne = query.GetMerchantUserAccountById(ctx, merchantUser.Id)
+	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
 	return &auth.RegisterVerifyRes{MerchantUser: newOne}, nil
 }

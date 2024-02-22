@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"encoding/base64"
 	"fmt"
 	"math/rand"
 	"runtime"
@@ -100,4 +101,22 @@ func GenerateRandomCode(length int) string {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+func GenerateRandomOpenApiKey(length int) (string, error) {
+	// Create a byte slice to hold the random bytes
+	key := make([]byte, length)
+
+	// Read random bytes from crypto/rand into the byte slice
+	_, err := rand.Read(key)
+	if err != nil {
+		return "", err
+	}
+
+	// Encode the random bytes to base64 to get a string representation
+	encodedKey := base64.URLEncoding.EncodeToString(key)
+
+	// Truncate the encoded string to the desired length
+	// (base64 encoding increases the length by approximately 33%)
+	return encodedKey[:length], nil
 }

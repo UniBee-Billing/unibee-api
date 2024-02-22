@@ -26,8 +26,6 @@ type MerchantInfo struct {
 	IsDeleted   int         `json:"isDeleted"   description:"0-UnDeleted，1-Deleted"`      // 0-UnDeleted，1-Deleted
 	CompanyLogo string      `json:"companyLogo" description:"company_logo"`               // company_logo
 	HomeUrl     string      `json:"homeUrl"     description:""`                           //
-	FirstName   string      `json:"firstName"   description:"first_name"`                 // first_name
-	LastName    string      `json:"lastName"    description:"last_name"`                  // last_name
 	Phone       string      `json:"phone"       description:"phone"`                      // phone
 	CreateTime  int64       `json:"createTime"  description:"create utc time"`            // create utc time
 	TimeZone    string      `json:"timeZone"    description:"merchant default time zone"` // merchant default time zone

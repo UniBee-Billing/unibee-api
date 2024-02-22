@@ -11,37 +11,18 @@ import (
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 )
 
 func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error) {
-	// utility.Assert(len(req.Phone) > 0, "phone not null")
-	verificationCode, err := g.Redis().Get(ctx, req.Email+"-verify")
-	if err != nil {
-		// return nil, gerror.New("internal error")
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	verificationCode, err := g.Redis().Get(ctx, CacheKeyUserRegisterPrefix+req.Email+"-verify")
+	utility.AssertError(err, "Server Error")
 	utility.Assert(verificationCode != nil, "Invalid Code")
-	//if verificationCode == nil {
-	//	return nil, gerror.NewCode(gcode.New(400, "invalid code", nil))
-	//}
-
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "Invalid Code")
-	//if (verificationCode.String()) != req.VerificationCode {
-	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	//}
 
-	userStr, err := g.Redis().Get(ctx, req.Email)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	userStr, err := g.Redis().Get(ctx, CacheKeyUserRegisterPrefix+req.Email)
+	utility.AssertError(err, "Server Error")
 	utility.Assert(userStr != nil, "Invalid Code")
-	//if userStr == nil {
-	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	//}
-
 	u := struct {
 		FirstName, LastName, Email, Password, Phone, Address, UserName, CountryCode, CountryName string
 	}{}
@@ -62,19 +43,12 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}
 
 	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
-	// dao.UserAccount.Ctx(ctx).Data(user).OmitEmpty().Update()
-	if err != nil {
-		// err = gerror.Newf(`record insert failure %s`, err)
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 	id, _ := result.LastInsertId()
 	user.Id = uint64(id)
 	var newOne *entity.UserAccount
 	newOne = query.GetUserAccountById(ctx, user.Id)
-	if newOne == nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
 	return &auth.RegisterVerifyRes{User: newOne}, nil
-	// return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

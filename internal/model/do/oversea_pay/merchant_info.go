@@ -28,8 +28,6 @@ type MerchantInfo struct {
 	IsDeleted   interface{} // 0-UnDeleted，1-Deleted
 	CompanyLogo interface{} // company_logo
 	HomeUrl     interface{} //
-	FirstName   interface{} // first_name
-	LastName    interface{} // last_name
 	Phone       interface{} // phone
 	CreateTime  interface{} // create utc time
 	TimeZone    interface{} // merchant default time zone

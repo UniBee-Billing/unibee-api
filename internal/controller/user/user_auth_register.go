@@ -13,10 +13,9 @@ import (
 
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 )
+
+const CacheKeyUserRegisterPrefix = "CacheKeyUserRegisterPrefix-"
 
 func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error) {
 	utility.Assert(len(req.Email) > 0, "Email Needed")
@@ -47,30 +46,17 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 			UserName:    req.UserName,
 		},
 	)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-
-	_, err = g.Redis().Set(ctx, req.Email, userStr)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-
-	_, err = g.Redis().Expire(ctx, req.Email, 3*60)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-
+	utility.AssertError(err, "Server Error")
+	_, err = g.Redis().Set(ctx, CacheKeyUserRegisterPrefix+req.Email, userStr)
+	utility.AssertError(err, "Server Error")
+	_, err = g.Redis().Expire(ctx, CacheKeyUserRegisterPrefix+req.Email, 3*60)
+	utility.AssertError(err, "Server Error")
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification %s", verificationCode)
-	_, err = g.Redis().Set(ctx, req.Email+"-verify", verificationCode)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	_, err = g.Redis().Expire(ctx, req.Email+"-verify", 3*60)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	_, err = g.Redis().Set(ctx, CacheKeyUserRegisterPrefix+req.Email+"-verify", verificationCode)
+	utility.AssertError(err, "Server Error")
+	_, err = g.Redis().Expire(ctx, CacheKeyUserRegisterPrefix+req.Email+"-verify", 3*60)
+	utility.AssertError(err, "Server Error")
 
 	err = email.SendTemplateEmail(ctx, _interface.GetMerchantId(ctx), req.Email, "", email.TemplateUserRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",

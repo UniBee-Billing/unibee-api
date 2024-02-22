@@ -55,18 +55,15 @@ type PasswordForgetOtpVerifyRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta     `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant User Register"`
-	FirstName  string `p:"firstName" dc:"First Name" v:"required"`
-	LastName   string `p:"lastName" dc:"Last Name" v:"required"`
-	Email      string `p:"email" dc:"Email" v:"required"`
-	Password   string `p:"password" dc:"Password" v:"required"`
-	Phone      string `p:"phone" dc:"Phone"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserName   string `p:"userName" dc:"UserName"`
-	// Address   string `p:"address" dc:"adderss"`
+	g.Meta    `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant User Register"`
+	FirstName string `p:"firstName" dc:"First Name" v:"required"`
+	LastName  string `p:"lastName" dc:"Last Name" v:"required"`
+	Email     string `p:"email" dc:"Email" v:"required"`
+	Password  string `p:"password" dc:"Password" v:"required"`
+	Phone     string `p:"phone" dc:"Phone"`
+	UserName  string `p:"userName" dc:"UserName"`
 }
 type RegisterRes struct {
-	// User *entity.MerchantUserAccount `p:"user" dc:"user"`
 }
 
 type RegisterVerifyReq struct {

@@ -35,13 +35,12 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 	}
 	_, err = dao.MerchantInfo.Ctx(ctx).Data(g.Map{
 		dao.MerchantInfo.Columns().Email:       req.Email,
-		dao.MerchantInfo.Columns().LastName:    req.LastName,
-		dao.MerchantInfo.Columns().FirstName:   req.FirstName,
 		dao.MerchantInfo.Columns().Address:     req.Address,
 		dao.MerchantInfo.Columns().CompanyName: req.CompanyName,
 		dao.MerchantInfo.Columns().CompanyLogo: companyLogo,
 		dao.MerchantInfo.Columns().Phone:       req.Phone,
 		dao.MerchantInfo.Columns().TimeZone:    req.TimeZone,
+		dao.MerchantInfo.Columns().Host:        req.Host,
 		dao.MerchantInfo.Columns().GmtModify:   gtime.Now(),
 	}).Where(dao.MerchantInfo.Columns().Id, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId).OmitEmpty().Update()
 	if err != nil {

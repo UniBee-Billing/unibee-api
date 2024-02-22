@@ -36,8 +36,6 @@ type MerchantInfoColumns struct {
 	IsDeleted   string // 0-UnDeleted，1-Deleted
 	CompanyLogo string // company_logo
 	HomeUrl     string //
-	FirstName   string // first_name
-	LastName    string // last_name
 	Phone       string // phone
 	CreateTime  string // create utc time
 	TimeZone    string // merchant default time zone
@@ -63,8 +61,6 @@ var merchantInfoColumns = MerchantInfoColumns{
 	IsDeleted:   "is_deleted",
 	CompanyLogo: "company_logo",
 	HomeUrl:     "home_url",
-	FirstName:   "first_name",
-	LastName:    "last_name",
 	Phone:       "phone",
 	CreateTime:  "create_time",
 	TimeZone:    "time_zone",

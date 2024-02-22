@@ -6,9 +6,8 @@ import (
 )
 
 type DetailQueryReq struct {
-	g.Meta     `path:"/merchant_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query Merchant Gateway Balance"`
-	GatewayId  int64  `p:"gatewayId" dc:"gatewayId" v:"required"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	g.Meta    `path:"/merchant_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query Merchant Gateway Balance"`
+	GatewayId int64 `p:"gatewayId" dc:"gatewayId" v:"required"`
 }
 
 type DetailQueryRes struct {
