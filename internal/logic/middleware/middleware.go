@@ -135,7 +135,9 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
+	customCtx := _interface.BizCtx().Get(r.Context())
 	if consts.GetConfigInstance().IsServerDev() {
+		customCtx.MerchantId = 15621
 		r.Middleware.Next()
 		return
 	}
@@ -145,8 +147,6 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
-
-	customCtx := _interface.BizCtx().Get(r.Context())
 	if strings.HasPrefix(tokenString, "Bearer ") {
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1) // remove Bearer
 	}

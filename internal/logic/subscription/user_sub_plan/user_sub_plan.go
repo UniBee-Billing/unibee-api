@@ -48,7 +48,7 @@ func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64,
 	if merchantId > 0 {
 		var entities []*entity.Subscription
 		var status = []int{consts.SubStatusActive, consts.SubStatusIncomplete, consts.SubStatusPendingInActive}
-		err := dao.MerchantMetric.Ctx(ctx).
+		err := dao.Subscription.Ctx(ctx).
 			Where(dao.Subscription.Columns().MerchantId, merchantId).
 			Where(dao.Subscription.Columns().UserId, userId).
 			WhereIn(dao.Subscription.Columns().Status, status).
