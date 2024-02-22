@@ -99,6 +99,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		r.Exit()
 	} else if len(list) == 1 {
 		//SingleMerchant
+		g.Log().Infof(r.Context(), "UserPortalPreAuth SingleMerchant")
 		customCtx.MerchantId = list[0].Id
 		r.Middleware.Next()
 		return
@@ -127,6 +128,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 			utility.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
 			r.Exit()
 		} else {
+			g.Log().Infof(r.Context(), "UserPortalPreAuth Checked Merchant:%d", one.Id)
 			customCtx.MerchantId = one.Id
 			r.Middleware.Next()
 			return
