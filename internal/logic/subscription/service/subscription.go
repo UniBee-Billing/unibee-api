@@ -97,14 +97,13 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 
 func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId int64) (*vat.NumberValidateRes, error) {
 	utility.Assert(req != nil, "req not found")
-	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	utility.Assert(len(req.VatNumber) > 0, "vatNumber invalid")
-	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, req.MerchantId, userId, req.VatNumber, "")
+	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), userId, req.VatNumber, "")
 	if err != nil {
 		return nil, err
 	}
 	if vatNumberValidate.Valid {
-		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, req.MerchantId, vatNumberValidate.CountryCode)
+		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, _interface.GetMerchantId(ctx), vatNumberValidate.CountryCode)
 		utility.Assert(err == nil, fmt.Sprintf("vatNumber vatCountryCode check error:%s", err))
 		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
 	}

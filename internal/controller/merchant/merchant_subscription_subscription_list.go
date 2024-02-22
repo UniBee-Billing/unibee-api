@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/subscription/service"
 
 	"unibee-api/api/merchant/subscription"
@@ -9,7 +10,7 @@ import (
 
 func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error) {
 	return &subscription.SubscriptionListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
-		MerchantId: req.MerchantId,
+		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		Status:     req.Status,
 		SortField:  req.SortField,

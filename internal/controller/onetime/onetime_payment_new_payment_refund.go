@@ -4,6 +4,7 @@ import (
 	"context"
 	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/payment/service"
 	"unibee-api/utility"
 )
@@ -16,7 +17,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 	utility.Assert(len(req.Amount.Currency) > 0, "refund currency should not be nil")
 	currencyNumberCheck(req.Amount)
 	//参数有效性校验 todo mark
-	openApiConfig, _ := merchantCheck(ctx, req.MerchantId)
+	openApiConfig, _ := merchantCheck(ctx, _interface.GetMerchantId(ctx))
 
 	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BIZ_TYPE_ONE_TIME, req, int64(openApiConfig.Id))
 	if err != nil {

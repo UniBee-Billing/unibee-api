@@ -13,7 +13,7 @@ import (
 )
 
 type SubscriptionPendingUpdateListInternalReq struct {
-	MerchantId     int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId     uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	SubscriptionId string `p:"subscriptionId" `
 	SortField      string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
 	SortType       string `p:"sortType" dc:"Sort Type，asc|desc" `

@@ -15,11 +15,9 @@ func (c *ControllerMetric) DelMerchantMetricEvent(ctx context.Context, req *metr
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
 	err = metric_event.DelMerchantMetricEvent(ctx, &metric_event.MerchantMetricEventInternalReq{
-		MerchantId:      req.MerchantId,
+		MerchantId:      _interface.GetMerchantId(ctx),
 		MetricCode:      req.MetricCode,
 		ExternalUserId:  req.ExternalUserId,
 		ExternalEventId: req.ExternalEventId,

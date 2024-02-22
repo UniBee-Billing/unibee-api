@@ -3,12 +3,13 @@ package user
 import (
 	"context"
 	"unibee-api/api/user/subscription"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/subscription/service"
 )
 
 func (c *ControllerSubscription) SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error) {
 	result, err := service.SubscriptionTimeLineList(ctx, &service.SubscriptionTimeLineListInternalReq{
-		MerchantId: req.MerchantId,
+		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		SortField:  req.SortField,
 		SortType:   req.SortType,

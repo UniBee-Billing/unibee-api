@@ -91,7 +91,7 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 	return &UserListInternalRes{UserAccounts: mainList}, nil
 }
 
-func SearchUser(ctx context.Context, merchantId int64, searchKey string) (list []*entity.UserAccount, err error) {
+func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*entity.UserAccount, err error) {
 	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
 	var mainList []*entity.UserAccount
 	var isDeletes = []int{0}

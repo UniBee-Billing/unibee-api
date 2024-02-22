@@ -17,8 +17,6 @@ func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metr
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
 	utility.Assert(req.UserId > 0 || len(req.ExternalUserId) > 0, "UserId or ExternalUserId Needed")
 	var user *entity.UserAccount
@@ -28,6 +26,6 @@ func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metr
 		user = query.GetUserAccountByExternalUserId(ctx, _interface.BizCtx().Get(ctx).MerchantId, req.ExternalUserId)
 	}
 	utility.Assert(user != nil, "user not found")
-	list := metric_event.GetUserMetricLimitStat(ctx, req.MerchantId, user)
+	list := metric_event.GetUserMetricLimitStat(ctx, _interface.GetMerchantId(ctx), user)
 	return &metric.UserMerchantMetricStatRes{UserMerchantMetricStats: list}, nil
 }

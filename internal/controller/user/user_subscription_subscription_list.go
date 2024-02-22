@@ -22,7 +22,7 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 	}
 	// return one latest user subscription list as unique subscription
 	var subDetails []*ro.SubscriptionDetailRo
-	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), req.MerchantId)
+	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
 	if sub != nil {
 		subDetailRes, err := service.SubscriptionDetail(ctx, sub.SubscriptionId)
 		if err == nil {

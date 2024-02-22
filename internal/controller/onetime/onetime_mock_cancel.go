@@ -12,13 +12,12 @@ import (
 )
 
 func (c *ControllerMock) Cancel(ctx context.Context, req *mock.CancelReq) (res *mock.CancelRes, err error) {
-	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, req.MerchantId)
+	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 	cancelsReq := &v12.CancelReq{
 		PaymentId:        req.PaymentId,
-		MerchantId:       req.MerchantId,
 		MerchantCancelId: uuid.New().String(),
 	}
 	_, err = NewPayment().Cancel(ctx, cancelsReq)

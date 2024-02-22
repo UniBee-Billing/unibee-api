@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/payment/service"
 	entity "unibee-api/internal/model/entity/oversea_pay"
@@ -21,7 +22,6 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	//类似日元的小数尾数必须为 0 检查
 	currencyNumberCheck(req.TotalAmount)
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
-	utility.Assert(req.MerchantId > 0, "merchantId is nil")
 	utility.Assert(req.PaymentMethod != nil, "payment method is nil")
 	utility.Assert(len(req.PaymentMethod.Gateway) > 0, "payment method type is nil")
 	utility.Assert(len(req.MerchantPaymentId) > 0, "MerchantPaymentId is nil")
@@ -29,7 +29,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
 
-	openApiConfig, merchantInfo := merchantCheck(ctx, req.MerchantId)
+	openApiConfig, merchantInfo := merchantCheck(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayByGatewayName(ctx, req.PaymentMethod.Gateway)
 	utility.Assert(gateway != nil, "type not found:"+req.PaymentMethod.Gateway)
 	//支付方式绑定校验 todo mark

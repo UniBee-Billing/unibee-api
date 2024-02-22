@@ -6,17 +6,15 @@ import (
 )
 
 type CountryVatListReq struct {
-	g.Meta     `path:"/vat_country_list" tags:"User-Vat-Controller" method:"post" summary:"Vat Country List"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	g.Meta `path:"/vat_country_list" tags:"User-Vat-Controller" method:"post" summary:"Vat Country List"`
 }
 type CountryVatListRes struct {
 	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }
 
 type NumberValidateReq struct {
-	g.Meta     `path:"/vat_number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	VatNumber  string `p:"vatNumber" dc:"VatNumber" v:"required"`
+	g.Meta    `path:"/vat_number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
+	VatNumber string `p:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
 	VatNumberValidate *ro.ValidResult `json:"vatNumberValidate"`

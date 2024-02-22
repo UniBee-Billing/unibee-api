@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/payment/service"
 
 	"unibee-api/api/merchant/payment"
@@ -9,7 +10,7 @@ import (
 
 func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error) {
 	result, err := service.PaymentTimeLineList(ctx, &service.PaymentTimelineListInternalReq{
-		MerchantId: req.MerchantId,
+		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		SortField:  req.SortField,
 		SortType:   req.SortType,

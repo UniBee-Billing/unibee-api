@@ -19,7 +19,7 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 	}
 
 	publishPlans := service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
-		MerchantId:    req.MerchantId,
+		MerchantId:    _interface.GetMerchantId(ctx),
 		Type:          req.Type,
 		Status:        consts.PlanStatusActive,
 		PublishStatus: consts.PlanPublishStatusPublished,
@@ -29,7 +29,7 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 		Page:  0,
 		Count: 10,
 	})
-	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), req.MerchantId)
+	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
 	if sub != nil {
 		subPlan := query.GetPlanById(ctx, sub.PlanId)
 		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {

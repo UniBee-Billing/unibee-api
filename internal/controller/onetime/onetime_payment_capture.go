@@ -3,6 +3,7 @@ package onetime
 import (
 	"context"
 	"unibee-api/api/onetime/payment"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/payment/service"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -10,7 +11,7 @@ import (
 
 func (c *ControllerPayment) Capture(ctx context.Context, req *payment.CaptureReq) (res *payment.CaptureRes, err error) {
 	//参数有效性校验 todo mark
-	merchantCheck(ctx, req.MerchantId)
+	merchantCheck(ctx, _interface.GetMerchantId(ctx))
 
 	one := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(one != nil, "payment not found")

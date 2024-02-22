@@ -2,10 +2,9 @@ package _interface
 
 import (
 	"context"
-	"unibee-api/internal/model"
-
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"unibee-api/internal/model"
 )
 
 type IBizCtx interface {
@@ -23,6 +22,17 @@ func BizCtx() IBizCtx {
 		panic("implement not found for interface IBizCtx, forgot register?")
 	}
 	return localBizCtx
+}
+
+const (
+	SystemAssertPrefix = "system_assert: "
+)
+
+func GetMerchantId(ctx context.Context) uint64 {
+	if BizCtx().Get(ctx).MerchantId <= 0 {
+		panic(SystemAssertPrefix + "Invalid Merchant")
+	}
+	return BizCtx().Get(ctx).MerchantId
 }
 
 func RegisterBizCtx(i IBizCtx) {

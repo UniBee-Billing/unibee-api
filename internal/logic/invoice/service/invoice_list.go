@@ -11,7 +11,7 @@ import (
 )
 
 type SubscriptionInvoiceListInternalReq struct {
-	MerchantId    int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId    uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	FirstName     string `p:"firstName" dc:"FirstName" `
 	LastName      string `p:"lastName" dc:"LastName" `
 	Currency      string `p:"Currency" dc:"Currency" `

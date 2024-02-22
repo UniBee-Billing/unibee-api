@@ -12,10 +12,9 @@ import (
 )
 
 func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock.SamplePaymentNetherlandsReq) (res *mock.SamplePaymentNetherlandsRes, err error) {
-	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, req.MerchantId)
+	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
 	outPayVo := &v12.NewPaymentReq{
-		MerchantId:        req.MerchantId,
 		MerchantPaymentId: uuid.New().String(),
 		TotalAmount: &v12.AmountVo{
 			Currency: req.Currency,

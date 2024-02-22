@@ -30,8 +30,7 @@ type SubscriptionPayCheckRes struct {
 }
 
 type SubscriptionChannelsReq struct {
-	g.Meta     `path:"/subscription_pay_gateways" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	g.Meta `path:"/subscription_pay_gateways" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway"`
 }
 type SubscriptionChannelsRes struct {
 	Gateways []*ro.OutGatewayRo `json:"Gateways"`
@@ -119,9 +118,8 @@ type SubscriptionUpdateRes struct {
 }
 
 type SubscriptionListReq struct {
-	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int64  `p:"userId" dc:"UserId" v:"required|length:4,30" `
+	g.Meta `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
+	UserId int64 `p:"userId" dc:"UserId" v:"required|length:4,30" `
 	//Status     int   `p:"status" dc:"Filter Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	//SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	//SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -168,13 +166,12 @@ type SubscriptionResumeRes struct {
 }
 
 type SubscriptionTimeLineListReq struct {
-	g.Meta     `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User Subscription TimeLine List"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
-	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count      int    `p:"count" dc:"Count Of Page" `
+	g.Meta    `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User Subscription TimeLine List"`
+	UserId    int    `p:"userId" dc:"Filter UserId, Default All " `
+	SortField string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType  string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page      int    `p:"page"  dc:"Page, Start WIth 0" `
+	Count     int    `p:"count" dc:"Count Of Page" `
 }
 
 type SubscriptionTimeLineListRes struct {

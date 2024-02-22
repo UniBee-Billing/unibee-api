@@ -18,14 +18,12 @@ func (c *ControllerMetric) DelMerchantMetricPlanLimit(ctx context.Context, req *
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-	one := query.GetMerchantInfoById(ctx, req.MerchantId)
+	one := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	err = metric2.DeleteMerchantMetricPlanLimit(ctx, req.MerchantId, req.MetricPlanLimitId)
+	err = metric2.DeleteMerchantMetricPlanLimit(ctx, _interface.GetMerchantId(ctx), req.MetricPlanLimitId)
 	if err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 	}
 	result, err := auth.UserAccountList(ctx, &auth.UserListInternalReq{
-		MerchantId: req.MerchantId,
+		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		Email:      req.Email,
 		FirstName:  req.FirstName,

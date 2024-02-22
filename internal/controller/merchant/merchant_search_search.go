@@ -2,12 +2,13 @@ package merchant
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	"unibee-api/api/merchant/search"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/auth"
 	"unibee-api/internal/logic/invoice/service"
 	"unibee-api/internal/query"
-	"strconv"
-	"strings"
 )
 
 func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (res *search.SearchRes, err error) {
@@ -41,7 +42,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 			}
 		}
 	}
-	searchUser, err := auth.SearchUser(ctx, req.SearchKey)
+	searchUser, err := auth.SearchUser(ctx, _interface.GetMerchantId(ctx), req.SearchKey)
 	if err == nil {
 		searchResult.UserAccounts = searchUser
 	}

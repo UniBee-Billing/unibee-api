@@ -18,10 +18,9 @@ type DetailQueryRes struct {
 }
 
 type UserDetailQueryReq struct {
-	g.Meta     `path:"/user_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query User Balance"`
-	UserId     int64  `p:"userId" dc:"userId" v:"required"`
-	GatewayId  int64  `p:"gatewayId" dc:"gatewayId" v:"required"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	g.Meta    `path:"/user_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query User Balance"`
+	UserId    int64 `p:"userId" dc:"userId" v:"required"`
+	GatewayId int64 `p:"gatewayId" dc:"gatewayId" v:"required"`
 }
 
 type UserDetailQueryRes struct {

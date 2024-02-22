@@ -20,7 +20,7 @@ func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *in
 	}
 
 	internalResult, err := service.SubscriptionInvoiceList(ctx, &service.SubscriptionInvoiceListInternalReq{
-		MerchantId:    req.MerchantId,
+		MerchantId:    _interface.GetMerchantId(ctx),
 		UserId:        req.UserId,
 		SendEmail:     req.SendEmail,
 		SortField:     req.SortField,

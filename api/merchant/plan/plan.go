@@ -8,7 +8,6 @@ import (
 
 type SubscriptionPlanCreateReq struct {
 	g.Meta             `path:"/subscription_plan_create" tags:"Merchant-Plan-Controller" method:"post" summary:"Create Plan"`
-	MerchantId         uint64  `p:"merchantId" dc:"MerchantId" v:"required"`
 	PlanName           string  `p:"planName" dc:"Plan Name"   v:"required" `
 	Amount             int64   `p:"amount"   dc:"Plan Amount"   v:"required" `
 	Currency           string  `p:"currency"   dc:"Plan Currency" v:"required" `

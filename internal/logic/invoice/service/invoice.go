@@ -12,6 +12,7 @@ import (
 	v1 "unibee-api/api/onetime/payment"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
+	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/email"
 	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/invoice/invoice_compute"
@@ -72,7 +73,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
 		BizType:                        consts.BIZ_TYPE_SUBSCRIPTION,
-		MerchantId:                     req.MerchantId,
+		MerchantId:                     _interface.GetMerchantId(ctx),
 		InvoiceId:                      invoiceId,
 		InvoiceName:                    req.Name,
 		UniqueId:                       invoiceId,
@@ -346,7 +347,6 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	utility.Assert(payment != nil, "payment not found")
 	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.NewPaymentRefundReq{
 		PaymentId:        one.PaymentId,
-		MerchantId:       one.MerchantId,
 		MerchantRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
 		Amount: &v1.AmountVo{

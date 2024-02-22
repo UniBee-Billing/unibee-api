@@ -18,15 +18,13 @@ func (c *ControllerMetric) NewMerchantMetric(ctx context.Context, req *metric.Ne
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-	one := query.GetMerchantInfoById(ctx, req.MerchantId)
+	one := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
 	me, err := metric2.NewMerchantMetric(ctx, &metric2.NewMerchantMetricInternalReq{
-		MerchantId:          req.MerchantId,
+		MerchantId:          _interface.GetMerchantId(ctx),
 		Code:                req.Code,
 		Name:                req.Name,
 		Description:         req.Description,

@@ -6,9 +6,8 @@ import (
 )
 
 type SearchReq struct {
-	g.Meta     `path:"/key_search" tags:"Merchant-Search-Controller" method:"post" summary:"Merchant Search"`
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
+	g.Meta    `path:"/key_search" tags:"Merchant-Search-Controller" method:"post" summary:"Merchant Search"`
+	SearchKey string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
 type PrecisionMatchObject struct {

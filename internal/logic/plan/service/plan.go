@@ -129,7 +129,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(len(req.Description) > 0, "description should not blank")
 
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
-	merchantInfo := query.GetMerchantInfoById(ctx, req.MerchantId)
+	merchantInfo := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
 	if len(req.ImageUrl) == 0 {
 		req.ImageUrl = merchantInfo.CompanyLogo
 	}
@@ -172,7 +172,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 
 	one = &entity.SubscriptionPlan{
 		CompanyId:                 merchantInfo.CompanyId,
-		MerchantId:                req.MerchantId,
+		MerchantId:                _interface.GetMerchantId(ctx),
 		PlanName:                  req.PlanName,
 		Amount:                    req.Amount,
 		Currency:                  strings.ToUpper(req.Currency),

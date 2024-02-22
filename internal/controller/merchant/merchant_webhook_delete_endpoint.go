@@ -18,14 +18,12 @@ func (c *ControllerWebhook) DeleteEndpoint(ctx context.Context, req *webhook.Del
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-	one := query.GetMerchantInfoById(ctx, req.MerchantId)
+	one := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	err = _webhook.DeleteMerchantWebhookEndpoint(ctx, req.MerchantId, req.EndpointId)
+	err = _webhook.DeleteMerchantWebhookEndpoint(ctx, _interface.GetMerchantId(ctx), req.EndpointId)
 	if err != nil {
 		return nil, err
 	}

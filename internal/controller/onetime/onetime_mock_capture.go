@@ -12,13 +12,12 @@ import (
 )
 
 func (c *ControllerMock) Capture(ctx context.Context, req *mock.CaptureReq) (res *mock.CaptureRes, err error) {
-	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, req.MerchantId)
+	oneOpenApiConfig := query.GetOneOpenApiConfigByMerchant(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
 	_interface.BizCtx().Get(ctx).Data[consts.ApiKey] = oneOpenApiConfig.ApiKey
 	_interface.BizCtx().Get(ctx).OpenApiConfig = oneOpenApiConfig
 	capturesReq := &v12.CaptureReq{
 		PaymentId:         req.PaymentId,
-		MerchantId:        req.MerchantId,
 		MerchantCaptureId: uuid.New().String(),
 		Amount: &v12.AmountVo{
 			Currency: req.Currency,

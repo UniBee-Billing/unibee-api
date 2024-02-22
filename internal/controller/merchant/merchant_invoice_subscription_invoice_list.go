@@ -26,7 +26,7 @@ func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *me
 		Status:        req.Status,
 		AmountStart:   req.AmountStart,
 		AmountEnd:     req.AmountEnd,
-		MerchantId:    req.MerchantId,
+		MerchantId:    _interface.GetMerchantId(ctx),
 		UserId:        req.UserId,
 		SendEmail:     req.SendEmail,
 		SortField:     req.SortField,

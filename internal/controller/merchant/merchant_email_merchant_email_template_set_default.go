@@ -15,10 +15,8 @@ func (c *ControllerEmail) MerchantEmailTemplateSetDefault(ctx context.Context, r
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
 	}
-	err = email2.SetMerchantEmailTemplateDefault(ctx, req.MerchantId, req.TemplateName)
+	err = email2.SetMerchantEmailTemplateDefault(ctx, _interface.GetMerchantId(ctx), req.TemplateName)
 	if err != nil {
 		return nil, err
 	} else {
