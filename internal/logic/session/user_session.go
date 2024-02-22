@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee-api/api/user/session"
+	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	_interface "unibee-api/internal/interface"
 	entity "unibee-api/internal/model/entity/oversea_pay"
@@ -78,10 +79,11 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 	merchantInfo := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
+
 	return &session.NewRes{
 		UserId:         strconv.FormatUint(one.Id, 10),
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
-		Url:            fmt.Sprintf("https://%s/session-result?session=%s", merchantInfo.Host, ss),
+		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", consts.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
 	}, nil
 }

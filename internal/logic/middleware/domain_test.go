@@ -19,4 +19,5 @@ func Test_Domain(t *testing.T) {
 	domain := parsedURL.Hostname()
 
 	fmt.Println("Domain:", domain)
+	fmt.Println("Scheme:", parsedURL.Scheme)
 }

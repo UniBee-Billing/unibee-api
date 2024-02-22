@@ -1,6 +1,7 @@
 package consts
 
 import (
+	"net/url"
 	"strings"
 	"sync"
 )
@@ -17,6 +18,14 @@ type Server struct {
 	Address    string `yaml:"address"`
 	Name       string `yaml:"name"`
 	DomainPath string `yaml:"domainPath"`
+}
+
+func (s *Server) GetDomainScheme() string {
+	parsedURL, err := url.Parse(s.DomainPath)
+	if err == nil {
+		return parsedURL.Scheme
+	}
+	return "https"
 }
 
 type RedisConfig struct {
