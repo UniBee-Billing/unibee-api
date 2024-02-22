@@ -44,7 +44,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		if strings.Compare(one.Email, req.Email) != 0 {
 			//email changed, update email
 			emailOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
-			utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email exist")
+			utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email of other externalUserId exist")
 			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().Email:     req.Email,
 				dao.UserAccount.Columns().GmtModify: gtime.Now(),
@@ -54,7 +54,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		if strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
 			//externalUserId not match, update externalUserId
 			otherOne := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
-			utility.Assert(otherOne == nil || otherOne.Id == one.Id, "externalUserId exist")
+			utility.Assert(otherOne == nil || otherOne.Id == one.Id, "externalUserId of other email exist")
 			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
 				dao.UserAccount.Columns().GmtModify:      gtime.Now(),
