@@ -159,7 +159,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		}
 
 		token := jwt.ParsePortalToken(tokenString)
-		g.Log().Infof(r.Context(), "Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
+		g.Log().Infof(r.Context(), "TokenAuth Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
 
 		if token.TokenType == jwt.TOKENTYPEUSER {
 			userAccount := query.GetUserAccountById(r.Context(), token.Id)
@@ -178,7 +178,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTUSER {
 			merchantAccount := query.GetMerchantUserAccountById(r.Context(), token.Id)
 			if merchantAccount == nil {
-				g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "TokenAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
 				utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 				r.Exit()
 			}
@@ -200,8 +200,12 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	} else {
 		// Api Call
 		merchantInfo := query.GetMerchantInfoByApiKey(r.Context(), tokenString)
-		utility.Assert(merchantInfo != nil, "invalid api key")
-		customCtx.MerchantId = merchantInfo.Id
+		if merchantInfo == nil {
+			g.Log().Infof(r.Context(), "TokenAuth invalid api token :%v", tokenString)
+			utility.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
+		} else {
+			customCtx.MerchantId = merchantInfo.Id
+		}
 	}
 
 	r.Middleware.Next()
