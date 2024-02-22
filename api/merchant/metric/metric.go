@@ -45,3 +45,12 @@ type DelMerchantMetricReq struct {
 type DelMerchantMetricRes struct {
 	MerchantMetric *ro.MerchantMetricVo
 }
+
+type MerchantMetricDetailReq struct {
+	g.Meta   `path:"/merchant_metric_detail" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Detail"`
+	MetricId uint64 `p:"metricId" dc:"MetricId" v:"required"`
+}
+
+type MerchantMetricDetailRes struct {
+	MerchantMetric *ro.MerchantMetricVo
+}

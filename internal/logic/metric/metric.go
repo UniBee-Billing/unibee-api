@@ -72,6 +72,31 @@ func MerchantMetricList(ctx context.Context, merchantId uint64) []*ro.MerchantMe
 	return list
 }
 
+func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *ro.MerchantMetricVo {
+	utility.Assert(merchantMetricId > 0, "invalid merchantMetricId")
+	if merchantMetricId > 0 {
+		var one *entity.MerchantMetric
+		err := dao.MerchantMetric.Ctx(ctx).
+			Where(dao.MerchantMetric.Columns().Id, merchantMetricId).
+			Scan(&one)
+		if err == nil && one != nil {
+			return &ro.MerchantMetricVo{
+				Id:                  one.Id,
+				MerchantId:          one.MerchantId,
+				Code:                one.Code,
+				MetricName:          one.MetricName,
+				MetricDescription:   one.MetricDescription,
+				Type:                one.Type,
+				AggregationType:     one.AggregationType,
+				AggregationProperty: one.AggregationProperty,
+				UpdateTime:          one.GmtModify.Timestamp(),
+				CreateTime:          one.CreateTime,
+			}
+		}
+	}
+	return nil
+}
+
 type NewMerchantMetricInternalReq struct {
 	MerchantId          uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	Code                string `p:"code" dc:"Code" v:"required"`

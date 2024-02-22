@@ -75,6 +75,7 @@ type IMerchantMetric interface {
 	NewMerchantMetric(ctx context.Context, req *metric.NewMerchantMetricReq) (res *metric.NewMerchantMetricRes, err error)
 	EditMerchantMetric(ctx context.Context, req *metric.EditMerchantMetricReq) (res *metric.EditMerchantMetricRes, err error)
 	DelMerchantMetric(ctx context.Context, req *metric.DelMerchantMetricReq) (res *metric.DelMerchantMetricRes, err error)
+	MerchantMetricDetail(ctx context.Context, req *metric.MerchantMetricDetailReq) (res *metric.MerchantMetricDetailRes, err error)
 	MerchantMetricEvent(ctx context.Context, req *metric.MerchantMetricEventReq) (res *metric.MerchantMetricEventRes, err error)
 	DelMerchantMetricEvent(ctx context.Context, req *metric.DelMerchantMetricEventReq) (res *metric.DelMerchantMetricEventRes, err error)
 	NewMerchantMetricPlanLimit(ctx context.Context, req *metric.NewMerchantMetricPlanLimitReq) (res *metric.NewMerchantMetricPlanLimitRes, err error)
