@@ -111,7 +111,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		}
 		one := query.GetMerchantInfoByHost(r.Context(), r.GetHost())
 		if one == nil {
-			//try match merchant from origin
+			//try match merchant from Http Origin
 			origin := r.GetHeader("Origin")
 			if len(origin) > 0 {
 				g.Log().Infof(r.Context(), "UserPortalPreAuth Try Extract Domain From Origin:%s", origin)
@@ -125,7 +125,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		}
 		if one == nil {
 			g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Not Found For Host:%s", r.GetHost())
-			utility.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
+			utility.JsonRedirectExit(r, 61, "Merchant Not Ready", s.LoginUrl)
 			r.Exit()
 		} else {
 			g.Log().Infof(r.Context(), "UserPortalPreAuth Checked Merchant:%d", one.Id)
