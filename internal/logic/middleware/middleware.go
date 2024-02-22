@@ -79,7 +79,9 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		r.Response.ClearBuffer() // inner panic will contain json data，need clean
 		r.Response.Status = 200  // error reply in json code, http code always 200
 		message := err.Error()
-		if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
+		if strings.Contains(message, "Session Expired") {
+			utility.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
+		} else if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
 			utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 		} else {
 			utility.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
