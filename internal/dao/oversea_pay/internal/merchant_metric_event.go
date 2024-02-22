@@ -36,6 +36,8 @@ type MerchantMetricEventColumns struct {
 	SubscriptionIds             string //
 	SubscriptionPeriodStart     string // matched subscription's current_period_start
 	SubscriptionPeriodEnd       string // matched subscription's current_period_end
+	MetricLimit                 string //
+	Used                        string //
 }
 
 // merchantMetricEventColumns holds the columns for table merchant_metric_event.
@@ -56,6 +58,8 @@ var merchantMetricEventColumns = MerchantMetricEventColumns{
 	SubscriptionIds:             "subscription_ids",
 	SubscriptionPeriodStart:     "subscription_period_start",
 	SubscriptionPeriodEnd:       "subscription_period_end",
+	MetricLimit:                 "metric_limit",
+	Used:                        "used",
 }
 
 // NewMerchantMetricEventDao creates and returns a new DAO object for table data access.

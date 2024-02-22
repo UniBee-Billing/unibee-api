@@ -15,7 +15,6 @@ import (
 	"unibee-api/utility"
 )
 
-// todo mark take the subscription cycle into account
 type UserMerchantMetricStat struct {
 	MetricLimit     *MetricLimitVo
 	CurrentUseValue uint64
@@ -23,14 +22,17 @@ type UserMerchantMetricStat struct {
 
 func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*UserMerchantMetricStat {
 	var list = make([]*UserMerchantMetricStat, 0)
-	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id))
-	for _, metricLimit := range limitMap {
-		met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
-		if met != nil {
-			list = append(list, &UserMerchantMetricStat{
-				MetricLimit:     metricLimit,
-				CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, false),
-			})
+	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), merchantId)
+	if sub != nil {
+		limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
+		for _, metricLimit := range limitMap {
+			met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
+			if met != nil {
+				list = append(list, &UserMerchantMetricStat{
+					MetricLimit:     metricLimit,
+					CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, sub, false),
+				})
+			}
 		}
 	}
 	return list
@@ -49,10 +51,10 @@ type MetricLimitVo struct {
 	PlanLimits          []*ro.MerchantMetricPlanLimitVo // ?
 }
 
-func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
-	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id))
+func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
+	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
 	if metricLimit, ok := limitMap[int64(met.Id)]; ok {
-		useValue := GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, false)
+		useValue := GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, sub, false)
 		if met.AggregationType == metric.MetricAggregationTypeLatest || met.AggregationType == metric.MetricAggregationTypeMax {
 			return useValue, metricLimit.TotalLimit, append <= metricLimit.TotalLimit
 		} else {
@@ -64,9 +66,9 @@ func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entit
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64) map[int64]*MetricLimitVo {
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*MetricLimitVo {
 	var limitMap = make(map[int64]*MetricLimitVo)
-	userSubPlans := user_sub_plan.UserSubPlanCachedList(ctx, merchantId, userId, false)
+	userSubPlans := user_sub_plan.UserSubPlanCachedList(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
 		for _, subPlan := range userSubPlans {
 			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, false)
@@ -116,13 +118,16 @@ func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64
 		}()
 		met := query.GetMerchantMetric(ctx, metricId)
 		if met != nil {
-			GetUserMetricLimitCachedUseValue(ctx, merchantId, userId, met, true)
+			sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, userId, merchantId)
+			if sub != nil {
+				GetUserMetricLimitCachedUseValue(ctx, merchantId, userId, met, sub, true)
+			}
 		}
 	}()
 }
 
-func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, userId int64, met *entity.MerchantMetric, reloadCache bool) uint64 {
-	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, userId, met.Id)
+func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, userId int64, met *entity.MerchantMetric, sub *entity.Subscription, reloadCache bool) uint64 {
+	cacheKey := fmt.Sprintf("%s_%d_%d_%d_%s_%d", UserMetricCacheKeyPrefix, merchantId, userId, met.Id, sub.SubscriptionId, sub.CurrentPeriodStart)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
 		if err == nil && !get.IsNil() && !get.IsEmpty() && (get.IsUint() || get.IsInt()) {
@@ -140,10 +145,14 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, us
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
 				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				OrderDesc(dao.MerchantMetricEvent.Columns().GmtCreate).
 				Scan(&latestOne)
-			if err == nil && latestOne != nil {
+			utility.AssertError(err, "Server Error")
+			if latestOne != nil {
 				useValue = latestOne.AggregationPropertyInt
 			}
 		} else if met.AggregationType == metric.MetricAggregationTypeMax {
@@ -151,18 +160,24 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, us
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
 				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				Max(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
-			utility.AssertError(err, "server err")
+			utility.AssertError(err, "Server Error")
 			useValue = uint64(useValueFloat)
 		} else {
 			useValueFloat, err := dao.MerchantMetricEvent.Ctx(ctx).
 				Where(dao.MerchantMetricEvent.Columns().MerchantId, merchantId).
 				Where(dao.MerchantMetricEvent.Columns().UserId, userId).
 				Where(dao.MerchantMetricEvent.Columns().MetricId, int64(met.Id)).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionIds, sub.SubscriptionId).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodStart, sub.CurrentPeriodStart).
+				Where(dao.MerchantMetricEvent.Columns().SubscriptionPeriodEnd, sub.CurrentPeriodEnd).
 				Where(dao.MerchantMetricEvent.Columns().IsDeleted, 0).
 				Sum(dao.MerchantMetricEvent.Columns().AggregationPropertyInt)
-			utility.AssertError(err, "server err")
+			utility.AssertError(err, "Server Error")
 			useValue = uint64(useValueFloat)
 		}
 	}
@@ -173,7 +188,7 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, us
 	return useValue
 }
 
-func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) {
+func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) uint64 {
 	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, user.Id, met.Id)
 	get, err := g.Redis().Get(ctx, cacheKey)
 	if err == nil && !get.IsNil() && !get.IsEmpty() && (get.IsUint() || get.IsInt()) {
@@ -185,8 +200,10 @@ func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, use
 		}
 		_, _ = g.Redis().Set(ctx, cacheKey, newValue)
 		_, _ = g.Redis().Expire(ctx, cacheKey, UserMetricCacheKeyExpire)
+		return newValue
 	} else {
 		_, _ = g.Redis().Set(ctx, cacheKey, append)
 		_, _ = g.Redis().Expire(ctx, cacheKey, UserMetricCacheKeyExpire)
+		return append
 	}
 }

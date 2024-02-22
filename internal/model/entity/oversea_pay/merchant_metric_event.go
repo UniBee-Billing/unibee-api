@@ -26,4 +26,6 @@ type MerchantMetricEvent struct {
 	SubscriptionIds             string      `json:"subscriptionIds"             description:""`                                                                       //
 	SubscriptionPeriodStart     int64       `json:"subscriptionPeriodStart"     description:"matched subscription's current_period_start"`                            // matched subscription's current_period_start
 	SubscriptionPeriodEnd       int64       `json:"subscriptionPeriodEnd"       description:"matched subscription's current_period_end"`                              // matched subscription's current_period_end
+	MetricLimit                 uint64      `json:"metricLimit"                 description:""`                                                                       //
+	Used                        uint64      `json:"used"                        description:""`                                                                       //
 }

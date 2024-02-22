@@ -36,7 +36,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
-	// check the only subscription, todo mark limit add subscription and cycle reset metric support
+	// check the only subscription
 	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), req.MerchantId)
 	utility.Assert(sub != nil, "user has no subscription")
 
@@ -71,17 +71,19 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		aggregationPropertyInt = req.MetricProperties.Get(met.AggregationProperty).Uint64()
 	}
 
+	var metricLimit uint64 = 0
+	var usedValue uint64 = 0
 	if met.Type == metric.MetricTypeLimitMetered {
 		// need check if metric limit reached and reject it
-		useValue, metricLimit, check := checkMetricLimitReached(ctx, req.MerchantId, user, met, aggregationPropertyInt)
-		utility.Assert(check, fmt.Sprintf("metric limit reached, current use: %d, limit: %d", useValue, metricLimit))
+		usedValue, metricLimit, check := checkMetricLimitReached(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
+		utility.Assert(check, fmt.Sprintf("metric limit reached, current used: %d, limit: %d", usedValue, metricLimit))
 	}
 
 	var one *entity.MerchantMetricEvent
 	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
 		Where(dao.MerchantMetricEvent.Columns().AggregationPropertyUniqueId, aggregationPropertyUniqueId).
 		Scan(&one)
-	utility.AssertError(err, "server error")
+	utility.AssertError(err, "Server Error")
 	if one != nil && one.AggregationPropertyInt == aggregationPropertyInt {
 		// same event
 		return one, nil
@@ -98,10 +100,12 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		AggregationPropertyInt:      aggregationPropertyInt,
 		AggregationPropertyString:   aggregationPropertyString,
 		AggregationPropertyUniqueId: aggregationPropertyUniqueId,
-		SubscriptionIds:             "", //todo mark
-		SubscriptionPeriodEnd:       0,  //todo mark
-		SubscriptionPeriodStart:     0,  //todo mark
+		SubscriptionIds:             sub.SubscriptionId,
+		SubscriptionPeriodStart:     sub.CurrentPeriodStart,
+		SubscriptionPeriodEnd:       sub.CurrentPeriodEnd,
 		CreateTime:                  gtime.Now().Timestamp(),
+		MetricLimit:                 metricLimit,
+		Used:                        usedValue,
 	}
 	result, err := dao.MerchantMetricEvent.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -113,8 +117,37 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	if met.Type == metric.MetricTypeLimitMetered {
 		// append the metric limit usage
-		appendMetricLimitCachedUseValue(ctx, req.MerchantId, user, met, aggregationPropertyInt)
+		usedValue = appendMetricLimitCachedUseValue(ctx, req.MerchantId, user, met, aggregationPropertyInt)
 	}
+	one.Used = usedValue
+
+	go func() {
+		// update background
+		backgroundCtx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				if err != nil {
+					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err.Error())
+				} else {
+					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err)
+				}
+				return
+			}
+		}()
+		_, err = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
+			dao.MerchantMetricEvent.Columns().Used:      usedValue,
+			dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())
+		}
+	}()
 
 	return one, nil
 }

@@ -6,8 +6,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
 	addon2 "unibee-api/internal/logic/subscription/addon"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
@@ -30,9 +28,12 @@ type UserSubPlan struct {
 	SubscriptionPeriodEnd   int64
 }
 
-func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64, reloadCache bool) []*UserSubPlan {
+func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription, reloadCache bool) []*UserSubPlan {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(userId > 0, "invalid userId")
+	if sub == nil {
+		return make([]*UserSubPlan, 0)
+	}
 	var list = make([]*UserSubPlan, 0)
 	cacheKey := fmt.Sprintf("%s_%d_%d", UserSubPlanCacheKeyPrefix, merchantId, userId)
 	if !reloadCache {
@@ -46,44 +47,32 @@ func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64,
 		}
 	}
 	if merchantId > 0 {
-		var entities []*entity.Subscription
-		var status = []int{consts.SubStatusActive, consts.SubStatusIncomplete, consts.SubStatusPendingInActive}
-		err := dao.Subscription.Ctx(ctx).
-			Where(dao.Subscription.Columns().MerchantId, merchantId).
-			Where(dao.Subscription.Columns().UserId, userId).
-			WhereIn(dao.Subscription.Columns().Status, status).
-			Where(dao.Subscription.Columns().IsDeleted, 0).
-			Scan(&entities)
-		if err == nil && len(entities) > 0 {
-			for _, one := range entities {
-				plan := query.GetPlanById(ctx, one.PlanId)
-				if plan != nil {
-					list = append(list, &UserSubPlan{
-						MerchantId:              one.MerchantId,
-						UserId:                  userId,
-						PlanId:                  one.PlanId,
-						PlanType:                plan.Type,
-						Quantity:                one.Quantity,
-						SubscriptionIds:         one.SubscriptionId,
-						SubscriptionPeriodStart: one.CurrentPeriodStart,
-						SubscriptionPeriodEnd:   one.CurrentPeriodEnd,
-					})
-				}
-				//append addons
-				addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData)
-				for _, addon := range addons {
-					list = append(list, &UserSubPlan{
-						MerchantId:              one.MerchantId,
-						UserId:                  userId,
-						PlanId:                  int64(addon.AddonPlan.Id),
-						PlanType:                addon.AddonPlan.Type,
-						Quantity:                addon.Quantity,
-						SubscriptionIds:         one.SubscriptionId,
-						SubscriptionPeriodStart: one.CurrentPeriodStart,
-						SubscriptionPeriodEnd:   one.CurrentPeriodEnd,
-					})
-				}
-			}
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		if plan != nil {
+			list = append(list, &UserSubPlan{
+				MerchantId:              sub.MerchantId,
+				UserId:                  userId,
+				PlanId:                  sub.PlanId,
+				PlanType:                plan.Type,
+				Quantity:                sub.Quantity,
+				SubscriptionIds:         sub.SubscriptionId,
+				SubscriptionPeriodStart: sub.CurrentPeriodStart,
+				SubscriptionPeriodEnd:   sub.CurrentPeriodEnd,
+			})
+		}
+		//append addons
+		addons := addon2.GetSubscriptionAddonsByAddonJson(ctx, sub.AddonData)
+		for _, addon := range addons {
+			list = append(list, &UserSubPlan{
+				MerchantId:              sub.MerchantId,
+				UserId:                  userId,
+				PlanId:                  int64(addon.AddonPlan.Id),
+				PlanType:                addon.AddonPlan.Type,
+				Quantity:                addon.Quantity,
+				SubscriptionIds:         sub.SubscriptionId,
+				SubscriptionPeriodStart: sub.CurrentPeriodStart,
+				SubscriptionPeriodEnd:   sub.CurrentPeriodEnd,
+			})
 		}
 	}
 	if len(list) > 0 {
@@ -108,6 +97,9 @@ func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId int64) {
 				return
 			}
 		}()
-		UserSubPlanCachedList(ctx, merchantId, userId, true)
+		sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, userId, merchantId)
+		if sub != nil {
+			UserSubPlanCachedList(ctx, merchantId, userId, sub, true)
+		}
 	}()
 }
