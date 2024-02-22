@@ -11,7 +11,7 @@ import (
 // Invoice is the golang structure for table invoice.
 type Invoice struct {
 	Id                             uint64      `json:"id"                             description:""`                                                                       //
-	MerchantId                     int64       `json:"merchantId"                     description:"merchant_id"`                                                            // merchant_id
+	MerchantId                     uint64      `json:"merchantId"                     description:"merchant_id"`                                                            // merchant_id
 	UserId                         int64       `json:"userId"                         description:"userId"`                                                                 // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 description:"subscription_id"`                                                        // subscription_id
 	InvoiceId                      string      `json:"invoiceId"                      description:"invoice_id"`                                                             // invoice_id

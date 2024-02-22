@@ -1326,7 +1326,7 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		status = consts.PAY_FAILED
 	}
 	return &ro.OutPayCancelRo{
-		MerchantId:      strconv.FormatInt(payment.MerchantId, 10),
+		MerchantId:      strconv.FormatUint(payment.MerchantId, 10),
 		GatewayCancelId: result.ID,
 		Reference:       payment.PaymentId,
 		Status:          strconv.Itoa(status),

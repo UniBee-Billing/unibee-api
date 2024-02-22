@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"unibee-api/api/user/auth"
-	auth2 "unibee-api/internal/logic/auth"
+	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -17,17 +17,18 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(req.Email != "", "email cannot be empty")
 	utility.Assert(req.Password != "", "password cannot be empty")
 
-	var newOne *entity.UserAccount
-	newOne = query.GetUserAccountByEmail(ctx, req.Email)
-	utility.Assert(newOne != nil, "Login Failed")
-	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
+	var one *entity.UserAccount
+	one = query.GetUserAccountByEmail(ctx, req.Email)
+	utility.Assert(one != nil, "Login Failed")
+	utility.Assert(one.Status == 0, "account status abnormal")
+	utility.Assert(utility.ComparePasswords(one.Password, req.Password), "Login Failed, Password Not Match")
 
-	token, err := auth2.CreateToken(req.Email, newOne.Id)
-	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
+	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", one.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", newOne.Id)), "Cache Error")
-	newOne.Password = ""
-	return &auth.LoginRes{User: newOne, Token: token}, nil
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
+	one.Password = ""
+	return &auth.LoginRes{User: one, Token: token}, nil
 }

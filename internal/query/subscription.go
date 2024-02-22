@@ -15,17 +15,17 @@ import (
 //	return
 //}
 
-func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId int64) (one *entity.Subscription) {
+func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil
 	}
 	err := dao.Subscription.Ctx(ctx).
-		Where(entity.Subscription{UserId: userId}).
-		Where(entity.Subscription{MerchantId: merchantId}).
-		Where(entity.Subscription{IsDeleted: 0}).
+		Where(dao.Subscription.Columns().UserId, userId).
+		Where(dao.Subscription.Columns().MerchantId, merchantId).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
 		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusCreate, consts.SubStatusActive}).
 		OrderDesc(dao.Subscription.Columns().GmtModify).
-		OmitEmpty().Scan(&one)
+		Scan(&one)
 	if err != nil {
 		one = nil
 	}

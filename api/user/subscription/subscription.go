@@ -31,7 +31,7 @@ type SubscriptionPayCheckRes struct {
 
 type SubscriptionChannelsReq struct {
 	g.Meta     `path:"/subscription_pay_gateways" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 type SubscriptionChannelsRes struct {
 	Gateways []*ro.OutGatewayRo `json:"Gateways"`
@@ -120,8 +120,8 @@ type SubscriptionUpdateRes struct {
 
 type SubscriptionListReq struct {
 	g.Meta     `path:"/subscription_list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int64 `p:"userId" dc:"UserId" v:"required|length:4,30" `
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int64  `p:"userId" dc:"UserId" v:"required|length:4,30" `
 	//Status     int   `p:"status" dc:"Filter Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	//SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	//SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -169,7 +169,7 @@ type SubscriptionResumeRes struct {
 
 type SubscriptionTimeLineListReq struct {
 	g.Meta     `path:"/user_subscription_timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"User Subscription TimeLine List"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `

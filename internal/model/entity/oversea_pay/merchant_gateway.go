@@ -11,7 +11,7 @@ import (
 // MerchantGateway is the golang structure for table merchant_gateway.
 type MerchantGateway struct {
 	Id               uint64      `json:"id"               description:"gateway_id"`                                                // gateway_id
-	MerchantId       int64       `json:"merchantId"       description:"merchant_id"`                                               // merchant_id
+	MerchantId       uint64      `json:"merchantId"       description:"merchant_id"`                                               // merchant_id
 	EnumKey          int64       `json:"enumKey"          description:"enum key , match in gateway implementation"`                // enum key , match in gateway implementation
 	GatewayType      int         `json:"gatewayType"      description:"gateway type，null or 0-Payment Type ｜ 1-Subscription Type"` // gateway type，null or 0-Payment Type ｜ 1-Subscription Type
 	GatewayName      string      `json:"gatewayName"      description:"gateway name"`                                              // gateway name

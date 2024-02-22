@@ -14,7 +14,7 @@ type SubscriptionPlan struct {
 	GmtCreate                 *gtime.Time `json:"gmtCreate"                 description:"create time"`                                               // create time
 	GmtModify                 *gtime.Time `json:"gmtModify"                 description:"update time"`                                               // update time
 	CompanyId                 int64       `json:"companyId"                 description:"company id"`                                                // company id
-	MerchantId                int64       `json:"merchantId"                description:"merchant id"`                                               // merchant id
+	MerchantId                uint64      `json:"merchantId"                description:"merchant id"`                                               // merchant id
 	PlanName                  string      `json:"planName"                  description:"PlanName"`                                                  // PlanName
 	Amount                    int64       `json:"amount"                    description:"amount, cent, without tax"`                                 // amount, cent, without tax
 	Currency                  string      `json:"currency"                  description:"currency"`                                                  // currency

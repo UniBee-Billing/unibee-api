@@ -132,7 +132,7 @@ type TemplateVariable struct {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	var template *query.EmailTemplateVo
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
@@ -186,7 +186,7 @@ func SendTemplateEmail(ctx context.Context, merchantId int64, mailTo string, tim
 	}
 }
 
-func SaveHistory(ctx context.Context, merchantId int64, mailTo string, title string, content string, attachFilePath string, response string) {
+func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title string, content string, attachFilePath string, response string) {
 	var err error
 	defer func() {
 		if exception := recover(); exception != nil {

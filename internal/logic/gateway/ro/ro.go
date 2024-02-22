@@ -82,7 +82,7 @@ type GatewayPaymentListReq struct {
 
 // GatewayPaymentRo is the golang structure for table oversea_pay.
 type GatewayPaymentRo struct {
-	MerchantId                  int64                                  `json:"merchantId"         `
+	MerchantId                  uint64                                 `json:"merchantId"         `
 	Status                      int                                    `json:"status"`
 	AuthorizeStatus             int                                    `json:"captureStatus"`
 	AuthorizeReason             string                                 `json:"authorizeReason" `
@@ -322,7 +322,7 @@ type InvoiceDetailSimplify struct {
 
 type InvoiceDetailRo struct {
 	Id                             uint64                 `json:"id"                             description:""`
-	MerchantId                     int64                  `json:"merchantId"                     description:"MerchantId"`
+	MerchantId                     uint64                 `json:"merchantId"                     description:"MerchantId"`
 	UserId                         int64                  `json:"userId"                         description:"UserId"`
 	SubscriptionId                 string                 `json:"subscriptionId"                 description:"SubscriptionId"`
 	InvoiceName                    string                 `json:"invoiceName"                    description:"InvoiceName"`
@@ -396,7 +396,7 @@ type SubscriptionDetailRo struct {
 }
 
 type SubscriptionPendingUpdateDetail struct {
-	MerchantId           int64                       `json:"merchantId"           description:"MerchantId"`
+	MerchantId           uint64                      `json:"merchantId"           description:"MerchantId"`
 	SubscriptionId       string                      `json:"subscriptionId"       description:"SubscriptionId"`
 	UpdateSubscriptionId string                      `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
 	GmtCreate            *gtime.Time                 `json:"gmtCreate"            description:"GmtCreate"`
@@ -447,7 +447,7 @@ type VatCountryRate struct {
 
 type MerchantMetricVo struct {
 	Id                  uint64 `json:"id"            description:"id"`                                                                                // id
-	MerchantId          int64  `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
+	MerchantId          uint64 `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
 	Code                string `json:"code"                description:"code"`                                                                        // code
 	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name
 	MetricDescription   string `json:"metricDescription"   description:"metric description"`                                                          // metric description
@@ -460,7 +460,7 @@ type MerchantMetricVo struct {
 
 type MerchantMetricPlanLimitVo struct {
 	Id          uint64            `json:"id"            description:"id"`                     // id
-	MerchantId  int64             `json:"merchantId"          description:"merchantId"`       // merchantId
+	MerchantId  uint64            `json:"merchantId"          description:"merchantId"`       // merchantId
 	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
 	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
 	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id

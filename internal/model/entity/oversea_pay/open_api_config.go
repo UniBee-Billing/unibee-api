@@ -14,7 +14,7 @@ type OpenApiConfig struct {
 	Qps                     int         `json:"qps"                     description:"total qps control"`        // total qps control
 	GmtCreate               *gtime.Time `json:"gmtCreate"               description:"create time"`              // create time
 	GmtModify               *gtime.Time `json:"gmtModify"               description:"update time"`              // update time
-	MerchantId              int64       `json:"merchantId"              description:"merchant id"`              // merchant id
+	MerchantId              uint64      `json:"merchantId"              description:"merchant id"`              // merchant id
 	Hmac                    string      `json:"hmac"                    description:"webhook hmac key"`         // webhook hmac key
 	Callback                string      `json:"callback"                description:"callback url"`             // callback url
 	ApiKey                  string      `json:"apiKey"                  description:"api key"`                  // api key

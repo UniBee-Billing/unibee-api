@@ -11,7 +11,7 @@ import (
 // SubscriptionTimeline is the golang structure for table subscription_timeline.
 type SubscriptionTimeline struct {
 	Id              uint64      `json:"id"              description:""`                        //
-	MerchantId      int64       `json:"merchantId"      description:"merchant id"`             // merchant id
+	MerchantId      uint64      `json:"merchantId"      description:"merchant id"`             // merchant id
 	UserId          int64       `json:"userId"          description:"userId"`                  // userId
 	SubscriptionId  string      `json:"subscriptionId"  description:"subscription id"`         // subscription id
 	PeriodStart     int64       `json:"periodStart"     description:"period_start"`            // period_start

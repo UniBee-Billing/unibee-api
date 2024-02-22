@@ -28,7 +28,7 @@ func GetMerchantWebhookByUrl(ctx context.Context, url string) (one *entity.Merch
 	return one
 }
 
-func GetMerchantWebhooksByMerchantId(ctx context.Context, merchantId int64) (list []*entity.MerchantWebhook) {
+func GetMerchantWebhooksByMerchantId(ctx context.Context, merchantId uint64) (list []*entity.MerchantWebhook) {
 	if merchantId <= 0 {
 		return nil
 	}

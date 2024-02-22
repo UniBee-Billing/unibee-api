@@ -53,7 +53,7 @@ type SubscriptionInvoiceListRes struct {
 
 type NewInvoiceCreateReq struct {
 	g.Meta     `path:"/new_invoice_create" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
-	MerchantId int64                  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64                 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int64                  `p:"userId" dc:"UserId" v:"required"`
 	TaxScale   int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
 	GatewayId  int64                  `p:"gatewayId" dc:"Gateway Id"   v:"required" `

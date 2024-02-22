@@ -35,6 +35,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 
 	user := query.GetUserAccountByEmail(ctx, req.Email)
 	utility.Assert(user != nil, "user not found")
+	utility.Assert(user.Status == 0, "account status abnormal")
 	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
 		UserName:         user.FirstName + " " + user.LastName,
 		CodeExpireMinute: "3",

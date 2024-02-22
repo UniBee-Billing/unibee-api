@@ -7,7 +7,7 @@ import (
 
 type NewPaymentReq struct {
 	g.Meta                   `path:"/new_payment" tags:"OneTime-Payment-Controller" method:"post" summary:"New Payment"`
-	MerchantId               int64           `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId               uint64          `p:"merchantId" dc:"MerchantId" v:"required"`
 	MerchantPaymentId        string          `p:"merchantPaymentId" dc:"MerchantPaymentId" v:"required"`
 	TotalAmount              *AmountVo       `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
 	PaymentMethod            *MethodListReq  `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`

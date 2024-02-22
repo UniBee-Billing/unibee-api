@@ -6,7 +6,7 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func GetVatNumberValidateHistory(ctx context.Context, merchantId int64, vatNumber string) (res *entity.MerchantVatNumberVerifyHistory) {
+func GetVatNumberValidateHistory(ctx context.Context, merchantId uint64, vatNumber string) (res *entity.MerchantVatNumberVerifyHistory) {
 	if merchantId <= 0 || len(vatNumber) == 0 {
 		return nil
 	}

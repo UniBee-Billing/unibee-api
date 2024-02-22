@@ -11,7 +11,7 @@ import (
 // MerchantWebhookLog is the golang structure for table merchant_webhook_log.
 type MerchantWebhookLog struct {
 	Id           uint64      `json:"id"           description:"id"`              // id
-	MerchantId   int64       `json:"merchantId"   description:"webhook url"`     // webhook url
+	MerchantId   uint64      `json:"merchantId"   description:"webhook url"`     // webhook url
 	EndpointId   int64       `json:"endpointId"   description:""`                //
 	WebhookUrl   string      `json:"webhookUrl"   description:"webhook url"`     // webhook url
 	WebhookEvent string      `json:"webhookEvent" description:"webhook_event"`   // webhook_event

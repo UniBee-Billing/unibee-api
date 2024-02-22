@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"unibee-api/api/merchant/auth"
-	auth2 "unibee-api/internal/logic/auth"
+	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -22,12 +22,12 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(newOne != nil, "Login Failed")
 	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
 
-	token, err := auth2.CreateToken(req.Email, newOne.Id)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTUSER, newOne.MerchantId, newOne.Id, req.Email)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
-	utility.Assert(auth2.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id)), "Cache Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id)), "Cache Error")
 	newOne.Password = ""
 	return &auth.LoginRes{MerchantUser: newOne, Token: token}, nil
 

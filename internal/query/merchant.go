@@ -6,22 +6,62 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantInfoById(ctx context.Context, id int64) (one *entity.MerchantInfo) {
-	if id <= 0 {
+func GetMerchantInfoByApiKey(ctx context.Context, apiKey string) (one *entity.MerchantInfo) {
+	if len(apiKey) <= 0 {
 		return nil
 	}
-	err := dao.MerchantInfo.Ctx(ctx).Where(entity.MerchantInfo{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.MerchantInfo.Ctx(ctx).
+		Where(dao.MerchantInfo.Columns().ApiKey, apiKey).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
 }
 
+func GetMerchantInfoById(ctx context.Context, id uint64) (one *entity.MerchantInfo) {
+	if id <= 0 {
+		return nil
+	}
+	err := dao.MerchantInfo.Ctx(ctx).
+		Where(dao.MerchantInfo.Columns().Id, id).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetMerchantInfoByHost(ctx context.Context, host string) (one *entity.MerchantInfo) {
+	if len(host) <= 0 {
+		return nil
+	}
+	err := dao.MerchantInfo.Ctx(ctx).
+		Where(dao.MerchantInfo.Columns().Host, host).
+		Scan(&one)
+	if err != nil {
+		return nil
+	}
+	return one
+}
+
+func GetActiveMerchantInfoList(ctx context.Context) (list []*entity.MerchantInfo) {
+	err := dao.MerchantInfo.Ctx(ctx).
+		Where(dao.MerchantInfo.Columns().IsDeleted, 0).
+		Scan(&list)
+	if err != nil {
+		return make([]*entity.MerchantInfo, 0)
+	}
+	return
+}
+
 func GetMerchantAccountById(ctx context.Context, id uint64) (one *entity.MerchantUserAccount) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.MerchantUserAccount.Ctx(ctx).Where(entity.MerchantUserAccount{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.MerchantUserAccount.Ctx(ctx).
+		Where(dao.MerchantUserAccount.Columns().Id, id).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}
@@ -33,7 +73,9 @@ func GetMerchantAccountByEmail(ctx context.Context, email string) (one *entity.M
 	if len(email) == 0 {
 		return nil
 	}
-	err := dao.MerchantUserAccount.Ctx(ctx).Where(entity.MerchantUserAccount{Email: email}).OmitEmpty().Scan(&one)
+	err := dao.MerchantUserAccount.Ctx(ctx).
+		Where(dao.MerchantUserAccount.Columns().Email, email).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}

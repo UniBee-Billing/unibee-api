@@ -26,7 +26,7 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}
-	info := query.GetMerchantInfoById(ctx, int64(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId))
+	info := query.GetMerchantInfoById(ctx, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId)
 	utility.Assert(info != nil, "merchantInfo not found")
 	var companyLogo = info.CompanyLogo
 	if len(req.CompanyLogo) > 0 {
@@ -48,5 +48,5 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		return nil, err
 	}
 
-	return &merchantinfo.MerchantInfoUpdateRes{MerchantInfo: query.GetMerchantInfoById(ctx, int64(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId))}, nil
+	return &merchantinfo.MerchantInfoUpdateRes{MerchantInfo: query.GetMerchantInfoById(ctx, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId)}, nil
 }

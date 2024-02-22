@@ -43,7 +43,7 @@ func GetMerchantMetricVo(ctx context.Context, id int64) *ro.MerchantMetricVo {
 	return nil
 }
 
-func MerchantMetricList(ctx context.Context, merchantId int64) []*ro.MerchantMetricVo {
+func MerchantMetricList(ctx context.Context, merchantId uint64) []*ro.MerchantMetricVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	var list = make([]*ro.MerchantMetricVo, 0)
 	if merchantId > 0 {
@@ -73,7 +73,7 @@ func MerchantMetricList(ctx context.Context, merchantId int64) []*ro.MerchantMet
 }
 
 type NewMerchantMetricInternalReq struct {
-	MerchantId          int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId          uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	Code                string `p:"code" dc:"Code" v:"required"`
 	Name                string `p:"name" dc:"Name" v:"required"`
 	Description         string `p:"description" dc:"Description"`
@@ -123,7 +123,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	}, nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId int64, metricId int64, name string, description string) (*ro.MerchantMetricVo, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, name string, description string) (*ro.MerchantMetricVo, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
@@ -154,7 +154,7 @@ func EditMerchantMetric(ctx context.Context, merchantId int64, metricId int64, n
 	}, nil
 }
 
-func DeleteMerchantMetric(ctx context.Context, merchantId int64, metricId int64) error {
+func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId int64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)

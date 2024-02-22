@@ -11,7 +11,7 @@ import (
 // MerchantWebhook is the golang structure for table merchant_webhook.
 type MerchantWebhook struct {
 	Id            uint64      `json:"id"            description:"id"`                       // id
-	MerchantId    int64       `json:"merchantId"    description:"webhook url"`              // webhook url
+	MerchantId    uint64      `json:"merchantId"    description:"webhook url"`              // webhook url
 	WebhookUrl    string      `json:"webhookUrl"    description:"webhook url"`              // webhook url
 	WebhookEvents string      `json:"webhookEvents" description:"webhook_events,split dot"` // webhook_events,split dot
 	GmtCreate     *gtime.Time `json:"gmtCreate"     description:"create time"`              // create time

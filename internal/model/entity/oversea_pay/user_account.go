@@ -11,6 +11,7 @@ import (
 // UserAccount is the golang structure for table user_account.
 type UserAccount struct {
 	Id                 uint64      `json:"id"                 description:"userId"`                                                                                                   // userId
+	MerchantId         uint64      `json:"merchantId"         description:"merchant_id"`                                                                                              // merchant_id
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"create time"`                                                                                              // create time
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`                                                                                              // update time
 	IsDeleted          int         `json:"isDeleted"          description:"0-UnDeleted，1-Deleted"`                                                                                    // 0-UnDeleted，1-Deleted

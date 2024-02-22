@@ -33,4 +33,6 @@ type MerchantInfo struct {
 	Phone       interface{} // phone
 	CreateTime  interface{} // create utc time
 	TimeZone    interface{} // merchant default time zone
+	Host        interface{} // merchant user portal host
+	ApiKey      interface{} // merchant open api key
 }

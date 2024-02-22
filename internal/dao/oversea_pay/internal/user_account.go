@@ -21,6 +21,7 @@ type UserAccountDao struct {
 // UserAccountColumns defines and stores column names for table user_account.
 type UserAccountColumns struct {
 	Id                 string // userId
+	MerchantId         string // merchant_id
 	GmtCreate          string // create time
 	GmtModify          string // update time
 	IsDeleted          string // 0-UnDeleted，1-Deleted
@@ -70,6 +71,7 @@ type UserAccountColumns struct {
 // userAccountColumns holds the columns for table user_account.
 var userAccountColumns = UserAccountColumns{
 	Id:                 "id",
+	MerchantId:         "merchant_id",
 	GmtCreate:          "gmt_create",
 	GmtModify:          "gmt_modify",
 	IsDeleted:          "is_deleted",

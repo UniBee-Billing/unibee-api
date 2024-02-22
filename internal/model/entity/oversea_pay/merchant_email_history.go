@@ -10,8 +10,8 @@ import (
 
 // MerchantEmailHistory is the golang structure for table merchant_email_history.
 type MerchantEmailHistory struct {
-	Id         int64       `json:"id"         description:""`                //
-	MerchantId int64       `json:"merchantId" description:""`                //
+	Id         uint64      `json:"id"         description:""`                //
+	MerchantId uint64      `json:"merchantId" description:""`                //
 	Email      string      `json:"email"      description:""`                //
 	Title      string      `json:"title"      description:""`                //
 	Content    string      `json:"content"    description:""`                //

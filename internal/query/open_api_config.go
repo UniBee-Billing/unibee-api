@@ -17,7 +17,7 @@ func GetOpenApiConfigByKey(ctx context.Context, key string) (res *entity.OpenApi
 	return res
 }
 
-func GetOneOpenApiConfigByMerchant(ctx context.Context, merchantId int64) (res *entity.OpenApiConfig) {
+func GetOneOpenApiConfigByMerchant(ctx context.Context, merchantId uint64) (res *entity.OpenApiConfig) {
 	if merchantId <= 0 {
 		return nil
 	}

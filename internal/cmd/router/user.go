@@ -6,7 +6,6 @@ import (
 	"unibee-api/internal/controller/user"
 )
 
-// UserAuth 工具类
 func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 	// auth
 	group.Group("/", func(group *ghttp.RouterGroup) {
@@ -16,7 +15,6 @@ func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-// UserPlan 工具类
 func UserPlan(ctx context.Context, group *ghttp.RouterGroup) {
 	// subscription
 	group.Group("/plan", func(group *ghttp.RouterGroup) {
@@ -26,7 +24,6 @@ func UserPlan(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-// UserSubscription 工具类
 func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 	// subscription
 	group.Group("/subscription", func(group *ghttp.RouterGroup) {
@@ -36,7 +33,6 @@ func UserSubscription(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-// UserProfile 工具类
 func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 	// profile
 	group.Group("/", func(group *ghttp.RouterGroup) {
@@ -46,7 +42,6 @@ func UserProfile(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-// UserVat 工具类
 func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
 	// vat
 	group.Group("/", func(group *ghttp.RouterGroup) {
@@ -56,7 +51,6 @@ func UserVat(ctx context.Context, group *ghttp.RouterGroup) {
 	})
 }
 
-// UserInvoice 工具类
 func UserInvoice(ctx context.Context, group *ghttp.RouterGroup) {
 	// invoice
 	group.Group("/invoice", func(group *ghttp.RouterGroup) {

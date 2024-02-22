@@ -11,7 +11,7 @@ import (
 // SubscriptionPendingUpdate is the golang structure for table subscription_pending_update.
 type SubscriptionPendingUpdate struct {
 	Id                   uint64      `json:"id"                   description:"id"`                                                                        // id
-	MerchantId           int64       `json:"merchantId"           description:"merchant id"`                                                               // merchant id
+	MerchantId           uint64      `json:"merchantId"           description:"merchant id"`                                                               // merchant id
 	SubscriptionId       string      `json:"subscriptionId"       description:"subscription id"`                                                           // subscription id
 	UpdateSubscriptionId string      `json:"updateSubscriptionId" description:"pending update unique id"`                                                  // pending update unique id
 	GatewayUpdateId      string      `json:"gatewayUpdateId"      description:"gateway update payment id assosiate to this update, use payment.paymentId"` // gateway update payment id assosiate to this update, use payment.paymentId

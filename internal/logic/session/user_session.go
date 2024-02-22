@@ -12,7 +12,7 @@ import (
 	"unibee-api/api/session/user"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
-	auth2 "unibee-api/internal/logic/auth"
+	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -82,8 +82,8 @@ func UserSessionRedirectEntrance(r *ghttp.Request) {
 	}
 	one := query.GetUserAccountById(r.Context(), uint64(userId))
 	utility.Assert(one != nil, "Invalid Session, User Not Found")
-	token, err := auth2.CreateToken(one.Email, one.Id)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, one.Email)
 	utility.AssertError(err, "Generate Session")
-	utility.Assert(auth2.PutAuthTokenToCache(r.Context(), token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
+	utility.Assert(jwt.PutAuthTokenToCache(r.Context(), token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	// todo mark Redirect to UserPortal
 }

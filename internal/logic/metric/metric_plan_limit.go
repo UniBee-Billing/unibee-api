@@ -19,7 +19,7 @@ const (
 	MerchantMetricPlanLimitCacheExpire    = 24 * 60 * 60
 )
 
-func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, planId int64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId int64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
 	var list = make([]*ro.MerchantMetricPlanLimitVo, 0)
@@ -64,7 +64,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId int64, pl
 }
 
 type MerchantMetricPlanLimitInternalReq struct {
-	MerchantId        int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId        uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	MetricId          int64  `p:"metricId" dc:"MetricId" `
 	MetricPlanLimitId uint64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
 	PlanId            int64  `p:"planId" dc:"PlanId" `
@@ -157,7 +157,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	}, nil
 }
 
-func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId int64, metricId int64) error {
+func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricId int64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)

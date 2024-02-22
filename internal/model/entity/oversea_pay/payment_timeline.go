@@ -11,7 +11,7 @@ import (
 // PaymentTimeline is the golang structure for table payment_timeline.
 type PaymentTimeline struct {
 	Id             uint64      `json:"id"             description:""`                                //
-	MerchantId     int64       `json:"merchantId"     description:"merchant id"`                     // merchant id
+	MerchantId     uint64      `json:"merchantId"     description:"merchant id"`                     // merchant id
 	UserId         int64       `json:"userId"         description:"userId"`                          // userId
 	SubscriptionId string      `json:"subscriptionId" description:"subscription id"`                 // subscription id
 	InvoiceId      string      `json:"invoiceId"      description:"invoice id"`                      // invoice id

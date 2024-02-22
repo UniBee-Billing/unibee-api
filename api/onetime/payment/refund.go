@@ -7,7 +7,7 @@ import (
 type NewPaymentRefundReq struct {
 	g.Meta           `path:"/refund/new/{PaymentId}" tags:"OneTime-Payment-Controller" method:"post" summary:"New Payment Refund"`
 	PaymentId        string    `in:"path" dc:"PaymentId" v:"required"`
-	MerchantId       int64     `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId       uint64    `p:"merchantId" dc:"MerchantId" v:"required"`
 	MerchantRefundId string    `p:"merchantRefundId" dc:"MerchantRefundId" v:"required"`
 	Reason           string    `p:"reason" dc:"Reason"`
 	Amount           *AmountVo `json:"amount"   in:"query" dc:"Amount, Cent" v:"required"`

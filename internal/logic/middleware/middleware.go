@@ -2,11 +2,12 @@ package middleware
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"unibee-api/internal/consts"
 	_ "unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/auth"
+	"unibee-api/internal/logic/jwt"
 	"unibee-api/internal/model"
 	"unibee-api/internal/query"
 	utility "unibee-api/utility"
@@ -16,7 +17,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	_ "github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type SMiddleware struct {
@@ -34,11 +34,14 @@ func New() *SMiddleware {
 }
 
 func (s *SMiddleware) CORS(r *ghttp.Request) {
+	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header Host:%s", r.GetHost())
+	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header Origin:%s", r.GetHeader("Origin"))
+	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header Referer:%s", r.GetHeader("Referer"))
+	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header User-Agent:%s", r.GetHeader("User-Agent"))
 	r.Response.CORSDefault()
 	r.Middleware.Next()
 }
 
-// ResponseHandler 返回处理中间件
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	customCtx := &model.Context{
 		Session: r.Session,
@@ -73,13 +76,13 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		}
 		json, _ := r.GetJson()
 		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.BizCtx().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
-		r.Response.ClearBuffer() // 出现 panic 情况框架会自己写入非 json 的返回，需先清除
-		r.Response.Status = 200  // 发生错误时候错误码Http 状态吗设置成 200，错误以 Json 形式返回
+		r.Response.ClearBuffer() // inner panic will contain json data，need clean
+		r.Response.Status = 200  // error reply in json code, http code always 200
 		message := err.Error()
 		if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
 			utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 		} else {
-			utility.JsonExit(r, code.Code(), fmt.Sprintf("System Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+			utility.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
 		}
 	} else {
 		r.Response.Status = 200
@@ -87,190 +90,119 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
-// PreAuth 从 Session 中获取用户
-func (s *SMiddleware) PreAuth(r *ghttp.Request) {
+func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
-	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
-		customCtx.User = &model.ContextUser{
-			Id: userEntity.Id,
-			// MobilePhone: userEntity.Mobile,
-			// UserName:    userEntity.UserName,
-			// AvatarUrl:   userEntity.AvatarUrl,
-			// IsAdmin:     false,
+	list := query.GetActiveMerchantInfoList(r.Context())
+	if len(list) == 0 {
+		g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Need Init")
+		utility.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
+		r.Exit()
+	} else if len(list) == 1 {
+		//SingleMerchant
+		customCtx.MerchantId = list[0].Id
+		r.Middleware.Next()
+		return
+	} else {
+		if consts.GetConfigInstance().IsServerDev() || consts.GetConfigInstance().IsLocal() {
+			customCtx.MerchantId = 15621
+			r.Middleware.Next()
+			return
 		}
-	}
-	r.Middleware.Next()
-}
-
-// PreOpenApiAuth 从 Session 中获取用户 (obsolete)
-func (s *SMiddleware) PreOpenApiAuth(r *ghttp.Request) {
-
-	customCtx := _interface.BizCtx().Get(r.Context())
-	if userEntity := _interface.Session().GetUser(r.Context()); userEntity != nil {
-		customCtx.User = &model.ContextUser{
-			Id: userEntity.Id,
-			// MobilePhone: userEntity.Mobile,
-			// UserName:    userEntity.UserName,
-			// AvatarUrl:   userEntity.AvatarUrl,
-			// IsAdmin:     false,
+		one := query.GetMerchantInfoByHost(r.Context(), r.GetHost())
+		if one == nil {
+			//try match merchant from origin
+			origin := r.GetHeader("Origin")
+			if len(origin) > 0 {
+				g.Log().Infof(r.Context(), "UserPortalPreAuth Try Extract Domain From Origin:%s", origin)
+				parsedURL, err := url.Parse(origin)
+				if err == nil {
+					// Extract the host (domain) from the parsed URL
+					domain := parsedURL.Hostname()
+					one = query.GetMerchantInfoByHost(r.Context(), domain)
+				}
+			}
 		}
-	}
-	if key := r.GetHeader(consts.ApiKey); len(key) > 0 {
-		//openapikey 转化为 api 用户
-		customCtx.Data[consts.ApiKey] = key
-		customCtx.OpenApiConfig = _interface.OpenApi().GetOpenApiConfig(r.Context(), key)
-	}
-
-	r.Middleware.Next()
-}
-
-// Auth 前台系统权限控制，用户必须登录才能访问
-func (s *SMiddleware) Auth(r *ghttp.Request) {
-	user := _interface.Session().GetUser(r.Context())
-	if user == nil {
-		_ = _interface.Session().SetNotice(r.Context(), &model.SessionNotice{
-			Type:    consts.SessionNoticeTypeWarn,
-			Content: "未登录或会话已过期，请您登录后再继续",
-		})
-		// 只有GET请求才支持保存当前URL，以便后续登录后再跳转回来。
-		if r.Method == "GET" {
-			_ = _interface.Session().SetLoginReferer(r.Context(), r.GetUrl())
-		}
-		// 根据当前请求方式执行不同的返回数据结构
-		if r.IsAjaxRequest() {
-			utility.JsonRedirectExit(r, 1, "", s.LoginUrl)
+		if one == nil {
+			g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Not Found For Host:%s", r.GetHost())
+			utility.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
+			r.Exit()
 		} else {
-			r.Response.RedirectTo(s.LoginUrl)
+			customCtx.MerchantId = one.Id
+			r.Middleware.Next()
+			return
 		}
 	}
-	r.Middleware.Next()
 }
 
-// later define a merchantClaim
-type UserClaims struct {
-	Id    uint64 `json:"id"`
-	Email string `json:"email"`
-	jwt.RegisteredClaims
-}
-
-// Token Auth, 和上面的 Auth() 重复了, 但上面的Auth并非用在unibee项目中
-var secretKey = []byte("3^&secret-key-for-UniBee*1!8*") // pass this as ENV, user_auth_login.go also uses this
-func parseAccessToken(accessToken string) *UserClaims {
-	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-	return parsedAccessToken.Claims.(*UserClaims)
-}
-
-func (s *SMiddleware) TokenUserAuth(r *ghttp.Request) {
+func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	if consts.GetConfigInstance().IsServerDev() {
 		r.Middleware.Next()
 		return
 	}
 	tokenString := r.Header.Get("Authorization")
 	if tokenString == "" {
-		g.Log().Infof(r.Context(), "TokenUserAuth empty token string of auth header")
+		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
 	}
-
-	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	if err != nil {
-		g.Log().Infof(r.Context(), "TokenUserAuth parse error:%s", err.Error())
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
-		r.Exit()
-	}
-
-	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
-		g.Log().Infof(r.Context(), "TokenUserAuth Invalid Token:%s", tokenString)
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
-		r.Exit()
-	}
-
-	u := parseAccessToken(tokenString)
-	g.Log().Infof(r.Context(), "Parsed User Token: %s, Email: %s, UserId: %d URL: %s", tokenString, u.Email, u.Id, r.GetUrl())
-
-	userAccount := query.GetUserAccountById(r.Context(), u.Id)
-	if userAccount == nil {
-		g.Log().Infof(r.Context(), "TokenUserAuth user not found id:%v", u.Id)
-		utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
-		r.Exit()
-	}
-	//有接口调用，顺延 5 分钟失效时间
-	auth.ResetAuthTokenTTL(r.Context(), tokenString)
 
 	customCtx := _interface.BizCtx().Get(r.Context())
-	customCtx.User = &model.ContextUser{
-		Id:    u.Id,
-		Token: tokenString,
-		Email: u.Email,
+	if strings.HasPrefix(tokenString, "Bearer ") {
+		tokenString = strings.Replace(tokenString, "Bearer ", "", 1) // remove Bearer
 	}
-
-	r.Middleware.Next()
-}
-
-func (s *SMiddleware) TokenMerchantAuth(r *ghttp.Request) {
-	if consts.GetConfigInstance().IsServerDev() {
-		r.Middleware.Next()
-		return
-	}
-	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
-		g.Log().Infof(r.Context(), "TokenMerchantAuth empty token string of auth header")
-		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
-		r.Exit()
-	}
-	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
-	})
-
-	if err != nil {
-		g.Log().Infof(r.Context(), "TokenMerchantAuth parse error:%s", err.Error())
-		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
-		r.Exit()
-	}
-
-	if !auth.IsAuthTokenExpired(r.Context(), tokenString) {
-		g.Log().Infof(r.Context(), "TokenMerchantAuth Invalid Token :%s", tokenString)
-		utility.JsonRedirectExit(r, 61, "invalid merchant token", s.LoginUrl)
-		r.Exit()
-	}
-
-	u := parseAccessToken(tokenString)
-
-	g.Log().Infof(r.Context(), "Parsed Merchant Token: %s, Email: %s, merchantUserId: %d URL: %s", tokenString, u.Email, u.Id, r.GetUrl())
-
-	merchantAccount := query.GetMerchantAccountById(r.Context(), u.Id)
-	if merchantAccount == nil {
-		g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found id:%d", u.Id)
-		utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
-		r.Exit()
-	}
-	//有接口调用，顺延 5 分钟失效时间
-	auth.ResetAuthTokenTTL(r.Context(), tokenString)
-
-	customCtx := _interface.BizCtx().Get(r.Context())
-	customCtx.MerchantUser = &model.ContextMerchantUser{
-		Id:         u.Id,
-		MerchantId: uint64(merchantAccount.MerchantId),
-		Token:      tokenString,
-		Email:      u.Email,
-	}
-
-	r.Middleware.Next()
-}
-
-func (s *SMiddleware) ApiAuth(r *ghttp.Request) {
-	openApiConfig := _interface.BizCtx().Get(r.Context()).OpenApiConfig
-	if openApiConfig == nil {
-		if key := _interface.BizCtx().Get(r.Context()).Data[consts.ApiKey]; key == nil {
-			utility.Json(r, 401, "key require in header")
-		} else {
-			utility.Json(r, 401, "invalid key")
+	if jwt.IsPortalToken(tokenString) {
+		// Portal Call
+		if !jwt.IsAuthTokenExpired(r.Context(), tokenString) {
+			g.Log().Infof(r.Context(), "TokenAuth Invalid Token:%s", tokenString)
+			utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+			r.Exit()
 		}
+
+		token := jwt.ParsePortalToken(tokenString)
+		g.Log().Infof(r.Context(), "Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
+
+		if token.TokenType == jwt.TOKENTYPEUSER {
+			userAccount := query.GetUserAccountById(r.Context(), token.Id)
+			if userAccount == nil {
+				g.Log().Infof(r.Context(), "TokenAuth user not found :%v", utility.MarshalToJsonString(token))
+				utility.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
+				r.Exit()
+			}
+			customCtx.User = &model.ContextUser{
+				Id:         token.Id,
+				Token:      tokenString,
+				MerchantId: userAccount.MerchantId,
+				Email:      token.Email,
+			}
+			customCtx.MerchantId = userAccount.MerchantId
+		} else if token.TokenType == jwt.TOKENTYPEMERCHANTUSER {
+			merchantAccount := query.GetMerchantAccountById(r.Context(), token.Id)
+			if merchantAccount == nil {
+				g.Log().Infof(r.Context(), "TokenMerchantAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
+				utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
+				r.Exit()
+			}
+
+			customCtx.MerchantUser = &model.ContextMerchantUser{
+				Id:         token.Id,
+				MerchantId: merchantAccount.MerchantId,
+				Token:      tokenString,
+				Email:      token.Email,
+			}
+			customCtx.MerchantId = merchantAccount.MerchantId
+		} else {
+			g.Log().Infof(r.Context(), "TokenAuth invalid token type token:%v", utility.MarshalToJsonString(token))
+			utility.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
+			r.Exit()
+		}
+		//Reset Expire Time
+		jwt.ResetAuthTokenTTL(r.Context(), tokenString)
+	} else {
+		// Api Call
+		merchantInfo := query.GetMerchantInfoByApiKey(r.Context(), tokenString)
+		utility.Assert(merchantInfo != nil, "invalid api key")
+		customCtx.MerchantId = merchantInfo.Id
 	}
+
 	r.Middleware.Next()
 }

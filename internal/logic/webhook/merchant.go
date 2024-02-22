@@ -19,14 +19,14 @@ const SplitSep = ","
 
 type MerchantWebhookEndpointVo struct {
 	Id            uint64   `json:"id"            description:"id"`                       // id
-	MerchantId    int64    `json:"merchantId"    description:"webhook url"`              // webhook url
+	MerchantId    uint64   `json:"merchantId"    description:"webhook url"`              // webhook url
 	WebhookUrl    string   `json:"webhookUrl"    description:"webhook url"`              // webhook url
 	WebhookEvents []string `json:"webhookEvents" description:"webhook_events,split dot"` // webhook_events,split dot
 	UpdateTime    int64    `json:"gmtModify"     description:"update time"`              // update time
 	CreateTime    int64    `json:"createTime"    description:"create utc time"`          // create utc time
 }
 
-func MerchantWebhookEndpointList(ctx context.Context, merchantId int64) []*MerchantWebhookEndpointVo {
+func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*MerchantWebhookEndpointVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	var list = make([]*MerchantWebhookEndpointVo, 0)
 	if merchantId > 0 {
@@ -52,10 +52,10 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId int64) []*Merch
 }
 
 type EndpointLogListInternalReq struct {
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
-	Page       int   `p:"page" dc:"Page, Start WIth 0" `
-	Count      int   `p:"count" dc:"Count Of Page" `
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	EndpointId int64  `p:"endpointId" dc:"EndpointId" v:"required"`
+	Page       int    `p:"page" dc:"Page, Start WIth 0" `
+	Count      int    `p:"count" dc:"Count Of Page" `
 }
 
 func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*entity.MerchantWebhookLog {
@@ -78,7 +78,7 @@ func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInt
 	return mainList
 }
 
-func NewMerchantWebhookEndpoint(ctx context.Context, merchantId int64, url string, events []string) error {
+func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url string, events []string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(url) > 0, "url is nil")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
@@ -105,7 +105,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId int64, url strin
 	return nil
 }
 
-func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId int64, endpointId int64, url string, events []string) error {
+func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId int64, url string, events []string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(endpointId > 0, "invalid endpointId")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
@@ -129,7 +129,7 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId int64, endpoi
 	return nil
 }
 
-func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId int64, endpointId int64) error {
+func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId int64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(endpointId > 0, "invalid endpointId")
 	one := query.GetMerchantWebhook(ctx, endpointId)

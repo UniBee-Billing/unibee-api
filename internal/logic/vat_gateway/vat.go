@@ -24,7 +24,7 @@ const (
 	VAT_IMPLEMENT_NAMES = "vatsense|github"
 )
 
-func GetDefaultVatGateway(ctx context.Context, merchantId int64) _interface.VATGateway {
+func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VATGateway {
 	vatName, vatData := getDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
 		return nil
@@ -39,7 +39,7 @@ func GetDefaultVatGateway(ctx context.Context, merchantId int64) _interface.VATG
 	return nil
 }
 
-func getDefaultMerchantVatConfig(ctx context.Context, merchantId int64) (vatName string, data string) {
+func getDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatName string, data string) {
 	nameConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantVatName)
 	if nameConfig != nil {
 		vatName = nameConfig.ConfigValue
@@ -51,7 +51,7 @@ func getDefaultMerchantVatConfig(ctx context.Context, merchantId int64) (vatName
 	return
 }
 
-func SetupMerchantVatConfig(ctx context.Context, merchantId int64, vatName string, data string, isDefault bool) error {
+func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName string, data string, isDefault bool) error {
 	if !strings.Contains(VAT_IMPLEMENT_NAMES, vatName) {
 		return gerror.New("Vat gateway not support")
 	}
@@ -65,7 +65,7 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId int64, vatName strin
 	return err
 }
 
-func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error {
+func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
@@ -108,7 +108,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId int64) error 
 	return nil
 }
 
-func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, userId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
+func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
@@ -155,7 +155,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId int64, us
 	return result, nil
 }
 
-func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*ro.VatCountryRate, error) {
+func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
@@ -188,7 +188,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId int64) ([]*ro.VatCo
 	return list, nil
 }
 
-func QueryVatCountryRateByMerchant(ctx context.Context, merchantId int64, countryCode string) (*ro.VatCountryRate, error) {
+func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	if gateway == nil {
 		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())

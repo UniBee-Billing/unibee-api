@@ -20,7 +20,7 @@ import (
 )
 
 type SubscriptionListInternalReq struct {
-	MerchantId int64  `p:"merchantId" dc:"MerchantId"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId"`
 	UserId     int64  `p:"userId"  dc:"UserId" `
 	Status     []int  `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `

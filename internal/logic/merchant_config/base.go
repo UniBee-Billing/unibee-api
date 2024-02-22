@@ -7,7 +7,7 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func SetMerchantConfig(ctx context.Context, merchantId int64, configKey string, configValue string) error {
+func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string, configValue string) error {
 	one := &entity.MerchantConfig{
 		MerchantId:  merchantId,
 		ConfigKey:   configKey,
@@ -21,7 +21,7 @@ func SetMerchantConfig(ctx context.Context, merchantId int64, configKey string, 
 	return nil
 }
 
-func GetMerchantConfig(ctx context.Context, merchantId int64, configKey string) *entity.MerchantConfig {
+func GetMerchantConfig(ctx context.Context, merchantId uint64, configKey string) *entity.MerchantConfig {
 	var one *entity.MerchantConfig
 	err := dao.MerchantConfig.Ctx(ctx).
 		Where(entity.MerchantConfig{MerchantId: merchantId}).

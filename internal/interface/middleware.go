@@ -3,13 +3,10 @@ package _interface
 import "github.com/gogf/gf/v2/net/ghttp"
 
 type IMiddleware interface {
-	ResponseHandler(r *ghttp.Request)
-	PreAuth(r *ghttp.Request)
-	PreOpenApiAuth(r *ghttp.Request)
-	Auth(r *ghttp.Request)
 	CORS(r *ghttp.Request)
-	TokenUserAuth(r *ghttp.Request)
-	TokenMerchantAuth(r *ghttp.Request)
+	ResponseHandler(r *ghttp.Request)
+	TokenAuth(r *ghttp.Request)
+	UserPortalPreAuth(r *ghttp.Request)
 }
 
 var localMiddleware IMiddleware

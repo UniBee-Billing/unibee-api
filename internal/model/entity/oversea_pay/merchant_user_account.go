@@ -13,7 +13,7 @@ type MerchantUserAccount struct {
 	Id         uint64      `json:"id"         description:"userId"`                // userId
 	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`           // create time
 	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`           // update time
-	MerchantId int64       `json:"merchantId" description:"merchant id"`           // merchant id
+	MerchantId uint64      `json:"merchantId" description:"merchant id"`           // merchant id
 	IsDeleted  int         `json:"isDeleted"  description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	Password   string      `json:"password"   description:"password"`              // password
 	UserName   string      `json:"userName"   description:"user name"`             // user name

@@ -21,7 +21,7 @@ func GetOutGatewayRoById(ctx context.Context, id int64) (one *ro.OutGatewayRo) {
 	return one
 }
 
-func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId int64) []*ro.OutGatewayRo {
+func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId uint64) []*ro.OutGatewayRo {
 	if merchantId <= 0 {
 		return nil
 	}

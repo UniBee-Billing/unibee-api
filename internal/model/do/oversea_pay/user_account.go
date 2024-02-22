@@ -13,6 +13,7 @@ import (
 type UserAccount struct {
 	g.Meta             `orm:"table:user_account, do:true"`
 	Id                 interface{} // userId
+	MerchantId         interface{} // merchant_id
 	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // update time
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted

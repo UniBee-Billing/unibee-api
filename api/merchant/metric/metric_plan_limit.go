@@ -7,7 +7,7 @@ import (
 
 type NewMerchantMetricPlanLimitReq struct {
 	g.Meta      `path:"/new_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric Plan TotalLimit"`
-	MerchantId  int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId  uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
 	PlanId      int64  `p:"planId" dc:"PlanId" v:"required"`
 	MetricLimit uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
@@ -19,7 +19,7 @@ type NewMerchantMetricPlanLimitRes struct {
 
 type EditMerchantMetricPlanLimitReq struct {
 	g.Meta            `path:"/edit_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric Plan TotalLimit"`
-	MerchantId        int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId        uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	MetricPlanLimitId int64  `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
 	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
 }
@@ -30,8 +30,8 @@ type EditMerchantMetricPlanLimitRes struct {
 
 type DelMerchantMetricPlanLimitReq struct {
 	g.Meta            `path:"/delete_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric Plan TotalLimit"`
-	MerchantId        int64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	MetricPlanLimitId int64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
+	MerchantId        uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	MetricPlanLimitId int64  `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
 }
 
 type DelMerchantMetricPlanLimitRes struct {

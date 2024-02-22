@@ -19,7 +19,7 @@ func (c *ControllerWebhook) UpdateEndpoint(ctx context.Context, req *webhook.Upd
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "merchantUserId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == uint64(req.MerchantId), "merchantId not match")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId == req.MerchantId, "merchantId not match")
 	}
 	one := query.GetMerchantInfoById(ctx, req.MerchantId)
 	if one == nil {

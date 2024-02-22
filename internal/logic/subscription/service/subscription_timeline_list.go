@@ -9,7 +9,7 @@ import (
 )
 
 type SubscriptionTimeLineListInternalReq struct {
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `

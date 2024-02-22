@@ -8,7 +8,7 @@ import (
 
 type EmailTemplateVo struct {
 	Id                  int64  `json:"id"                 description:""`                //
-	MerchantId          int64  `json:"merchantId"         description:""`                //
+	MerchantId          uint64 `json:"merchantId"         description:""`                //
 	TemplateName        string `json:"templateName"       description:""`                //
 	TemplateDescription string `json:"templateDescription" description:""`               //
 	TemplateTitle       string `json:"templateTitle"      description:""`                //
@@ -71,7 +71,7 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 	}
 }
 
-func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId int64, templateName string) *EmailTemplateVo {
+func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *EmailTemplateVo {
 	if len(templateName) == 0 || merchantId <= 0 {
 		return nil
 	}

@@ -22,7 +22,7 @@ type SubscriptionDetailRes struct {
 
 type SubscriptionListReq struct {
 	g.Meta     `path:"/subscription_list" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription List"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int64  `p:"userId"  dc:"UserId" `
 	Status     []int  `p:"status" dc:"Filter, Default All，Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
@@ -115,8 +115,8 @@ type SubscriptionUpdateRes struct {
 
 type UserSubscriptionDetailReq struct {
 	g.Meta     `path:"/user_subscription_detail" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription Detail"`
-	UserId     int64 `p:"userId" dc:"UserId" v:"required"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int64  `p:"userId" dc:"UserId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
 type UserSubscriptionDetailRes struct {
@@ -130,7 +130,7 @@ type UserSubscriptionDetailRes struct {
 
 type SubscriptionTimeLineListReq struct {
 	g.Meta     `path:"/subscription_timeline_list" tags:"Merchant-Subscription-Timeline-Controller" method:"post" summary:"Merchant Subscription TimeLine List"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `

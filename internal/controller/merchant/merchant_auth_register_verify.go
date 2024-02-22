@@ -24,30 +24,17 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	utility.Assert(verificationCode != nil, "Invalid Code")
-	//if verificationCode == nil {
-	//	return nil, gerror.NewCode(gcode.New(400, "invalid code", nil))
-	//}
-
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "Invalid Code")
-	//if (verificationCode.String()) != req.VerificationCode {
-	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	//}
-
 	userStr, err := g.Redis().Get(ctx, req.Email)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	utility.Assert(userStr != nil, "Invalid Code")
-	//if userStr == nil {
-	//	return nil, gerror.NewCode(gcode.New(401, "invalid code", nil))
-	//}
-
 	u := struct {
 		FirstName, LastName, Email, Password, Phone, Address, UserName string
-		MerchantId                                                     int64
+		MerchantId                                                     uint64
 	}{}
 	err = json.Unmarshal([]byte(userStr.String()), &u)
-	// TOO: check err != nil
 
 	user := &entity.MerchantUserAccount{
 		FirstName:  u.FirstName,
@@ -55,15 +42,12 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		Email:      u.Email,
 		Password:   u.Password,
 		MerchantId: u.MerchantId,
-		// Phone:     u.Phone,
-		// Address:   u.Address,
 		UserName:   u.UserName,
 		CreateTime: gtime.Now().Timestamp(),
 	}
 
 	// race condition: email exist checking is too earlier
 	result, err := dao.MerchantUserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
-	// dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Update()
 	if err != nil {
 		// err = gerror.Newf(`record insert failure %s`, err)
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))

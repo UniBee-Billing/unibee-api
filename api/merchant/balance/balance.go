@@ -7,8 +7,8 @@ import (
 
 type DetailQueryReq struct {
 	g.Meta     `path:"/merchant_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query Merchant Gateway Balance"`
-	GatewayId  int64 `p:"gatewayId" dc:"gatewayId" v:"required"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	GatewayId  int64  `p:"gatewayId" dc:"gatewayId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
 type DetailQueryRes struct {
@@ -19,9 +19,9 @@ type DetailQueryRes struct {
 
 type UserDetailQueryReq struct {
 	g.Meta     `path:"/user_balance_query" tags:"Merchant-Balance-Controller" method:"post" summary:"Query User Balance"`
-	UserId     int64 `p:"userId" dc:"userId" v:"required"`
-	GatewayId  int64 `p:"gatewayId" dc:"gatewayId" v:"required"`
-	MerchantId int64 `p:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int64  `p:"userId" dc:"userId" v:"required"`
+	GatewayId  int64  `p:"gatewayId" dc:"gatewayId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
 
 type UserDetailQueryRes struct {

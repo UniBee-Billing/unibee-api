@@ -15,7 +15,7 @@ type MerchantInformationRes struct {
 	IsProd          bool               `description:"Check System Env Is Prod, true|false" `
 	SupportTimeZone []string           `description:"Support TimeZone List" `
 	SupportCurrency []*SupportCurrency `description:"Support Currency List" `
-	MerchantId      int64
+	MerchantId      uint64
 	MerchantInfo    *entity.MerchantInfo
 	Gateway         []*ro.OutGatewayRo
 }

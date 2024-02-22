@@ -12,7 +12,7 @@ import (
 type Refund struct {
 	Id                   int64       `json:"id"                   description:"id"`                                                 // id
 	CompanyId            int64       `json:"companyId"            description:"company id"`                                         // company id
-	MerchantId           int64       `json:"merchantId"           description:"merchant id"`                                        // merchant id
+	MerchantId           uint64      `json:"merchantId"           description:"merchant id"`                                        // merchant id
 	UserId               int64       `json:"userId"               description:"user_id"`                                            // user_id
 	OpenApiId            int64       `json:"openApiId"            description:"open api id"`                                        // open api id
 	GatewayId            int64       `json:"gatewayId"            description:"gateway_id"`                                         // gateway_id

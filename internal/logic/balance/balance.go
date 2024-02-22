@@ -8,7 +8,7 @@ import (
 	"unibee-api/utility"
 )
 
-func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64, gatewayId int64) (*ro.GatewayUserDetailQueryInternalResp, error) {
+func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId int64, gatewayId int64) (*ro.GatewayUserDetailQueryInternalResp, error) {
 	user := query.GetUserAccountById(ctx, uint64(userId))
 	merchant := query.GetMerchantInfoById(ctx, merchantId)
 	gateway := query.GetGatewayById(ctx, gatewayId)
@@ -22,7 +22,7 @@ func UserBalanceDetailQuery(ctx context.Context, merchantId int64, userId int64,
 	return queryResult, nil
 }
 
-func MerchantBalanceDetailQuery(ctx context.Context, merchantId int64, gatewayId int64) (*ro.GatewayMerchantBalanceQueryInternalResp, error) {
+func MerchantBalanceDetailQuery(ctx context.Context, merchantId uint64, gatewayId int64) (*ro.GatewayMerchantBalanceQueryInternalResp, error) {
 	merchant := query.GetMerchantInfoById(ctx, merchantId)
 	gateway := query.GetGatewayById(ctx, gatewayId) // todo mark 根据 MerchantId 配置 Gateway
 	utility.Assert(merchant != nil, "merchant not found")

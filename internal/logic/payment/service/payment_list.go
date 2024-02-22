@@ -9,7 +9,7 @@ import (
 )
 
 type PaymentListInternalReq struct {
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `p:"sortField" dc:"Sort Field，merchant_id|user_id|gmt_create|status" `
 	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `

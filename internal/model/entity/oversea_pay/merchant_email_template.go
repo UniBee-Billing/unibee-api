@@ -11,7 +11,7 @@ import (
 // MerchantEmailTemplate is the golang structure for table merchant_email_template.
 type MerchantEmailTemplate struct {
 	Id                 int64       `json:"id"                 description:""`                      //
-	MerchantId         int64       `json:"merchantId"         description:""`                      //
+	MerchantId         uint64      `json:"merchantId"         description:""`                      //
 	TemplateName       string      `json:"templateName"       description:""`                      //
 	TemplateTitle      string      `json:"templateTitle"      description:""`                      //
 	TemplateContent    string      `json:"templateContent"    description:""`                      //

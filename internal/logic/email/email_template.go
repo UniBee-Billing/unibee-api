@@ -10,7 +10,7 @@ import (
 	"unibee-api/utility"
 )
 
-func GetMerchantEmailTemplateList(ctx context.Context, merchantId int64) []*query.EmailTemplateVo {
+func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*query.EmailTemplateVo {
 	var list = make([]*query.EmailTemplateVo, 0)
 	if merchantId > 0 {
 		var defaultTemplateList []*entity.EmailDefaultTemplate
@@ -54,7 +54,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId int64) []*quer
 	return list
 }
 
-func UpdateMerchantEmailTemplate(ctx context.Context, merchantId int64, templateName string, templateTitle string, templateContent string) error {
+func UpdateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templateName string, templateTitle string, templateContent string) error {
 	utility.Assert(merchantId > 0, "Invalid MerchantId")
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	utility.Assert(len(templateTitle) > 0, "Invalid TemplateTitle")
@@ -99,7 +99,7 @@ func UpdateMerchantEmailTemplate(ctx context.Context, merchantId int64, template
 	}
 }
 
-func SetMerchantEmailTemplateDefault(ctx context.Context, merchantId int64, templateName string) error {
+func SetMerchantEmailTemplateDefault(ctx context.Context, merchantId uint64, templateName string) error {
 	utility.Assert(merchantId > 0, "Invalid MerchantId")
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate
@@ -142,7 +142,7 @@ func SetMerchantEmailTemplateDefault(ctx context.Context, merchantId int64, temp
 	}
 }
 
-func ActivateMerchantEmailTemplate(ctx context.Context, merchantId int64, templateName string) error {
+func ActivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templateName string) error {
 	utility.Assert(merchantId > 0, "Invalid MerchantId")
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate
@@ -184,7 +184,7 @@ func ActivateMerchantEmailTemplate(ctx context.Context, merchantId int64, templa
 	}
 }
 
-func DeactivateMerchantEmailTemplate(ctx context.Context, merchantId int64, templateName string) error {
+func DeactivateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templateName string) error {
 	utility.Assert(merchantId > 0, "Invalid MerchantId")
 	utility.Assert(len(templateName) > 0, "Invalid TemplateName")
 	var defaultTemplate *entity.EmailDefaultTemplate

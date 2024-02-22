@@ -20,7 +20,7 @@ const (
 )
 
 type UserSubPlan struct {
-	MerchantId              int64
+	MerchantId              uint64
 	UserId                  int64
 	PlanId                  int64
 	PlanType                int
@@ -30,7 +30,7 @@ type UserSubPlan struct {
 	SubscriptionPeriodEnd   int64
 }
 
-func UserSubPlanCachedList(ctx context.Context, merchantId int64, userId int64, reloadCache bool) []*UserSubPlan {
+func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64, reloadCache bool) []*UserSubPlan {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(userId > 0, "invalid userId")
 	var list = make([]*UserSubPlan, 0)
@@ -93,7 +93,7 @@ func UserSubPlanCachedList(ctx context.Context, merchantId int64, userId int64, 
 	return list
 }
 
-func ReloadUserSubPlanCacheListBackground(merchantId int64, userId int64) {
+func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId int64) {
 	go func() {
 		ctx := context.Background()
 		var err error

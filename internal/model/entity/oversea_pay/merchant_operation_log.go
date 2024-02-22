@@ -12,7 +12,7 @@ import (
 type MerchantOperationLog struct {
 	Id                 uint64      `json:"id"                 description:"id"`                        // id
 	CompanyId          int64       `json:"companyId"          description:"company id"`                // company id
-	MerchantId         int64       `json:"merchantId"         description:"merchant Id"`               // merchant Id
+	MerchantId         uint64      `json:"merchantId"         description:"merchant Id"`               // merchant Id
 	UserId             int64       `json:"userId"             description:"user_id"`                   // user_id
 	OptAccount         string      `json:"optAccount"         description:"admin account"`             // admin account
 	ClientType         int         `json:"clientType"         description:"client type"`               // client type

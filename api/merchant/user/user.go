@@ -7,7 +7,7 @@ import (
 
 type ListReq struct {
 	g.Meta     `path:"/user_list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	UserId     int    `p:"userId" dc:"Filter UserId" `
 	FirstName  string `p:"firstName" dc:"Search FirstName" `
 	LastName   string `p:"lastName" dc:"Search LastName" `
@@ -56,7 +56,7 @@ type ReleaseRes struct {
 
 type SearchReq struct {
 	g.Meta     `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
-	MerchantId int64  `p:"merchantId" dc:"MerchantId" v:"required"`
+	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	SearchKey  string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 

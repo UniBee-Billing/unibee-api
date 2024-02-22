@@ -21,7 +21,7 @@ type UserMerchantMetricStat struct {
 	CurrentUseValue uint64
 }
 
-func GetUserMetricLimitStat(ctx context.Context, merchantId int64, user *entity.UserAccount) []*UserMerchantMetricStat {
+func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*UserMerchantMetricStat {
 	var list = make([]*UserMerchantMetricStat, 0)
 	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id))
 	for _, metricLimit := range limitMap {
@@ -37,7 +37,7 @@ func GetUserMetricLimitStat(ctx context.Context, merchantId int64, user *entity.
 }
 
 type MetricLimitVo struct {
-	MerchantId          int64
+	MerchantId          uint64
 	UserId              int64
 	MetricId            int64
 	Code                string `json:"code"                description:"code"`                                                                        // code
@@ -49,7 +49,7 @@ type MetricLimitVo struct {
 	PlanLimits          []*ro.MerchantMetricPlanLimitVo // ?
 }
 
-func checkMetricLimitReached(ctx context.Context, merchantId int64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
+func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
 	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id))
 	if metricLimit, ok := limitMap[int64(met.Id)]; ok {
 		useValue := GetUserMetricLimitCachedUseValue(ctx, merchantId, int64(user.Id), met, false)
@@ -64,7 +64,7 @@ func checkMetricLimitReached(ctx context.Context, merchantId int64, user *entity
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId int64, userId int64) map[int64]*MetricLimitVo {
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64) map[int64]*MetricLimitVo {
 	var limitMap = make(map[int64]*MetricLimitVo)
 	userSubPlans := user_sub_plan.UserSubPlanCachedList(ctx, merchantId, userId, false)
 	if len(userSubPlans) > 0 {
@@ -99,7 +99,7 @@ const (
 	UserMetricCacheKeyExpire = 15 * 24 * 60 * 60 // 15 days cache expire
 )
 
-func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId int64, userId int64, metricId int64) {
+func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64, userId int64, metricId int64) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -121,7 +121,7 @@ func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId int64,
 	}()
 }
 
-func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, userId int64, met *entity.MerchantMetric, reloadCache bool) uint64 {
+func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, userId int64, met *entity.MerchantMetric, reloadCache bool) uint64 {
 	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, userId, met.Id)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
@@ -173,7 +173,7 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId int64, use
 	return useValue
 }
 
-func appendMetricLimitCachedUseValue(ctx context.Context, merchantId int64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) {
+func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) {
 	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, user.Id, met.Id)
 	get, err := g.Redis().Get(ctx, cacheKey)
 	if err == nil && !get.IsNil() && !get.IsEmpty() && (get.IsUint() || get.IsInt()) {

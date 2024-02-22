@@ -32,23 +32,25 @@ var (
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
 				})
 				group.Middleware(
+					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					// _interface.Middleware().PreOpenApiAuth,
 				)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/session", func(group *ghttp.RouterGroup) {
 				group.Middleware(
+					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.UserSession(ctx, group)
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/open", func(group *ghttp.RouterGroup) {
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/onetime", func(group *ghttp.RouterGroup) {
 				group.Middleware(
+					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().PreOpenApiAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.OpenPayment(ctx, group)
 				router.OpenMocks(ctx, group)
@@ -58,7 +60,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenMerchantAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.MerchantPlan(ctx, group)
 				router.MerchantGateway(ctx, group)
@@ -78,6 +80,7 @@ var (
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
+				// No Merchant Check, Use For Merchant Created
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -89,7 +92,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenUserAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.UserPlan(ctx, group)
 				router.UserSubscription(ctx, group)
@@ -102,6 +105,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().UserPortalPreAuth,
 				)
 				router.UserAuth(ctx, group)
 			})
@@ -110,24 +114,25 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenUserAuth,
+					_interface.Middleware().TokenAuth,
 				)
 				router.UserVat(ctx, group)
 			})
 
-			if !consts.GetConfigInstance().IsProd() {
-				s.Group("/"+consts.GetConfigInstance().Server.Name+"/system", func(group *ghttp.RouterGroup) {
-					group.Middleware(
-						_interface.Middleware().CORS,
-						_interface.Middleware().ResponseHandler,
-					)
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/system", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().UserPortalPreAuth,
+				)
+				if !consts.GetConfigInstance().IsProd() {
 					router.SystemSubscription(ctx, group)
 					router.SystemInvoice(ctx, group)
 					router.SystemPayment(ctx, group)
 					router.SystemRefund(ctx, group)
-					router.SystemMerchantInformation(ctx, group)
-				})
-			}
+				}
+				router.SystemMerchantInformation(ctx, group)
+			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 

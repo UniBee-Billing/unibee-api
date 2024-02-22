@@ -10,7 +10,7 @@ import (
 
 // MerchantInfo is the golang structure for table merchant_info.
 type MerchantInfo struct {
-	Id          int64       `json:"id"          description:"merchant_id"`                // merchant_id
+	Id          uint64      `json:"id"          description:"merchant_id"`                // merchant_id
 	CompanyId   int64       `json:"companyId"   description:"company_id"`                 // company_id
 	UserId      int64       `json:"userId"      description:"create_user_id"`             // create_user_id
 	Type        int         `json:"type"        description:"type"`                       // type
@@ -31,4 +31,6 @@ type MerchantInfo struct {
 	Phone       string      `json:"phone"       description:"phone"`                      // phone
 	CreateTime  int64       `json:"createTime"  description:"create utc time"`            // create utc time
 	TimeZone    string      `json:"timeZone"    description:"merchant default time zone"` // merchant default time zone
+	Host        string      `json:"host"        description:"merchant user portal host"`  // merchant user portal host
+	ApiKey      string      `json:"apiKey"      description:"merchant open api key"`      // merchant open api key
 }

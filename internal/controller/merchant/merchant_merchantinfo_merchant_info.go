@@ -17,5 +17,5 @@ func (c *ControllerMerchantinfo) MerchantInfo(ctx context.Context, req *merchant
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId > 0, "MerchantId invalid")
 	}
-	return &merchantinfo.MerchantInfoRes{MerchantInfo: query.GetMerchantInfoById(ctx, int64(_interface.BizCtx().Get(ctx).MerchantUser.MerchantId))}, nil
+	return &merchantinfo.MerchantInfoRes{MerchantInfo: query.GetMerchantInfoById(ctx, _interface.BizCtx().Get(ctx).MerchantUser.MerchantId)}, nil
 }

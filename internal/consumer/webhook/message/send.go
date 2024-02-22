@@ -17,11 +17,11 @@ type WebhookMessage struct {
 	Event      string
 	EndpointId uint64
 	Url        string
-	MerchantId int64
+	MerchantId uint64
 	Data       *gjson.Json
 }
 
-func SendWebhookMessage(ctx context.Context, event string, merchantId int64, data *gjson.Json) {
+func SendWebhookMessage(ctx context.Context, event string, merchantId uint64, data *gjson.Json) {
 	utility.Assert(event2.EventInListeningEvents(event), fmt.Sprintf("Event:%s Not In Event List", event))
 	list := query.GetMerchantWebhooksByMerchantId(ctx, merchantId)
 	if list != nil {

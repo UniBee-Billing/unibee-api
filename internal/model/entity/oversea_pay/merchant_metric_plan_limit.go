@@ -11,7 +11,7 @@ import (
 // MerchantMetricPlanLimit is the golang structure for table merchant_metric_plan_limit.
 type MerchantMetricPlanLimit struct {
 	Id          uint64      `json:"id"          description:"Id"`                    // Id
-	MerchantId  int64       `json:"merchantId"  description:"merchantId"`            // merchantId
+	MerchantId  uint64      `json:"merchantId"  description:"merchantId"`            // merchantId
 	MetricId    int64       `json:"metricId"    description:"metricId"`              // metricId
 	PlanId      int64       `json:"planId"      description:"plan_id"`               // plan_id
 	MetricLimit uint64      `json:"metricLimit" description:"plan metric limit"`     // plan metric limit
