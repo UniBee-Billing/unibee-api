@@ -11,7 +11,6 @@ import (
 	"unibee-api/internal/controller/gateway_webhook_entry"
 	"unibee-api/internal/cronjob"
 	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/session"
 	"unibee-api/utility"
 	"unibee-api/utility/liberr"
 
@@ -35,15 +34,6 @@ var (
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 				)
-			})
-
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/session", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenAuth,
-				)
-				router.UserSession(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/onetime", func(group *ghttp.RouterGroup) {
@@ -99,6 +89,7 @@ var (
 				router.UserInvoice(ctx, group)
 				router.UserProfile(ctx, group)
 				router.UserPayment(ctx, group)
+				router.UserSession(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {
@@ -136,8 +127,8 @@ var (
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
-			// Session Redirect
-			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/session/redirect/{session}/forward", session.UserSessionRedirectEntrance)
+			//// Session Redirect
+			//s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/session/redirect/{session}/forward", session.UserSessionRedirectEntrance)
 
 			// Gateway Redirect
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)

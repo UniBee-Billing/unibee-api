@@ -3,28 +3,31 @@ package session
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
-	"unibee-api/api/session/user"
-	"unibee-api/internal/consts"
+	"strings"
+	"unibee-api/api/user/session"
 	dao "unibee-api/internal/dao/oversea_pay"
 	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/jwt"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 )
 
-func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error) {
-	one := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error) {
+	one := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
 	if one == nil {
+		one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+	}
+	if one == nil {
+		// check email not exsit
+		emailOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+		utility.Assert(emailOne == nil, "email exist")
 		one = &entity.UserAccount{
 			FirstName:      req.FirstName,
 			LastName:       req.LastName,
+			Password:       utility.PasswordEncrypt(req.Password),
 			Email:          req.Email,
 			Phone:          req.Phone,
 			Address:        req.Address,
@@ -33,59 +36,52 @@ func NewUserSession(ctx context.Context, req *user.NewReq) (res *user.NewRes, er
 			CreateTime:     gtime.Now().Timestamp(),
 		}
 		result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			// err = gerror.Newf(`record insert failure %s`, err)
-			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-		}
-		id, _ := result.LastInsertId()
+		utility.AssertError(err, "Server Error")
+		id, err := result.LastInsertId()
+		utility.AssertError(err, "Server Error")
 		one.Id = uint64(id)
 	} else {
-		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
-			dao.UserAccount.Columns().LastName:       req.LastName,
-			dao.UserAccount.Columns().FirstName:      req.FirstName,
-			dao.UserAccount.Columns().Address:        req.Address,
-			dao.UserAccount.Columns().Phone:          req.Phone,
-			dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
-			dao.UserAccount.Columns().GmtModify:      gtime.Now(),
-		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return nil, err
+		if strings.Compare(one.Email, req.Email) != 0 {
+			//email changed, update email
+			emailOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+			utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email exist")
+			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+				dao.UserAccount.Columns().Email:     req.Email,
+				dao.UserAccount.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+			utility.AssertError(err, "Server Error")
 		}
+		if strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
+			//externalUserId not match, update externalUserId
+			otherOne := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
+			utility.Assert(otherOne == nil || otherOne.Id == one.Id, "externalUserId exist")
+			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+				dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
+				dao.UserAccount.Columns().GmtModify:      gtime.Now(),
+			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+			utility.AssertError(err, "Server Error")
+		}
+		utility.Assert(one.Status == 0, "account status abnormal")
+		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().Address:   req.Address,
+			dao.UserAccount.Columns().Phone:     req.Phone,
+			dao.UserAccount.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+		utility.AssertError(err, "Server Error")
 	}
 	// create user session
-	session := utility.CreateSessionId(strconv.FormatUint(one.Id, 10))
-	_, err = g.Redis().Set(ctx, session, one.Id)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	_, err = g.Redis().Expire(ctx, session, 3*60)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	return &user.NewRes{
+	ss := utility.GenerateRandomAlphanumeric(40)
+	_, err = g.Redis().Set(ctx, ss, one.Id)
+	utility.AssertError(err, "Server Error")
+	_, err = g.Redis().Expire(ctx, ss, 3*60)
+	utility.AssertError(err, "Server Error")
+	merchantInfo := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
+	utility.Assert(merchantInfo != nil, "merchant not found")
+	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
+	return &session.NewRes{
 		UserId:         strconv.FormatUint(one.Id, 10),
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
-		Url:            fmt.Sprintf("%s/session/redirect/%s/forward", consts.GetConfigInstance().Server.DomainPath, session),
+		Url:            fmt.Sprintf("https://%s/session_result?session=%s", merchantInfo.Host, ss),
 	}, nil
-}
-
-func UserSessionRedirectEntrance(r *ghttp.Request) {
-	session := r.Get("session").String()
-	utility.Assert(len(session) > 0, "Session Is Nil")
-	id, err := g.Redis().Get(r.Context(), session)
-	utility.AssertError(err, "Get Session")
-	utility.Assert(id != nil, "Session Expired")
-	utility.Assert(len(id.String()) > 0, "Invalid Session")
-	userId, err := strconv.Atoi(id.String())
-	if err != nil {
-		g.Log().Errorf(r.Context(), "UserSessionRedirectEntrance panic url: %s id: %s err:%s", r.GetUrl(), id, err)
-		return
-	}
-	one := query.GetUserAccountById(r.Context(), uint64(userId))
-	utility.Assert(one != nil, "Invalid Session, User Not Found")
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, one.Email)
-	utility.AssertError(err, "Generate Session")
-	utility.Assert(jwt.PutAuthTokenToCache(r.Context(), token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
-	// todo mark Redirect to UserPortal
 }

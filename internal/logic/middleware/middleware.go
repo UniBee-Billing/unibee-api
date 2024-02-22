@@ -20,7 +20,7 @@ import (
 )
 
 type SMiddleware struct {
-	LoginUrl string // 登录路由地址
+	LoginUrl string
 }
 
 func init() {

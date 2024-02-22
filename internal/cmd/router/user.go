@@ -68,3 +68,12 @@ func UserPayment(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func UserSession(ctx context.Context, group *ghttp.RouterGroup) {
+	// auth
+	group.Group("/session", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewSession(),
+		)
+	})
+}

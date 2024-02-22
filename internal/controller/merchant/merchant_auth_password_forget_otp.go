@@ -38,8 +38,6 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})
-	if err != nil {
-		return nil, err
-	}
+	utility.AssertError(err, "Server Error")
 	return &auth.PasswordForgetOtpRes{}, nil
 }

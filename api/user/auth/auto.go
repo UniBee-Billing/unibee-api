@@ -17,6 +17,16 @@ type LoginRes struct {
 	Token string              `p:"token" dc:"token string"`
 }
 
+type SessionLoginReq struct {
+	g.Meta  `path:"/session_login" tags:"User-Auth-Controller" method:"post" summary:"User Portal Session Login"`
+	Session string `p:"session" dc:"Session" v:"required"`
+}
+
+type SessionLoginRes struct {
+	User  *entity.UserAccount `p:"user" dc:"user"`
+	Token string              `p:"token" dc:"token string"`
+}
+
 type LoginOtpReq struct {
 	g.Meta `path:"/sso/loginOTP" tags:"User-Auth-Controller" method:"post" summary:"User OTP Login"`
 	Email  string `p:"email" dc:"email" v:"required"`

@@ -34,8 +34,6 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})
-	if err != nil {
-		return nil, err
-	}
+	utility.AssertError(err, "Server Error")
 	return &auth.LoginOtpRes{}, nil
 }

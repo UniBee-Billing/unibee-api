@@ -65,7 +65,9 @@ func GetMerchantUserAccountById(ctx context.Context, id uint64) (one *entity.Mer
 	if err != nil {
 		return nil
 	}
-	one.Password = ""
+	if one != nil {
+		one.Password = ""
+	}
 	return one
 }
 

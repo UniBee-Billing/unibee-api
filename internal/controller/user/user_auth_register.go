@@ -62,9 +62,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})
-	if err != nil {
-		return nil, err
-	}
+	utility.AssertError(err, "Server Error")
 
 	return &auth.RegisterRes{}, nil
 }

@@ -12,12 +12,14 @@ import (
 	"unibee-api/api/user/payment"
 	"unibee-api/api/user/plan"
 	"unibee-api/api/user/profile"
+	"unibee-api/api/user/session"
 	"unibee-api/api/user/subscription"
 	"unibee-api/api/user/vat"
 )
 
 type IUserAuth interface {
 	Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error)
+	SessionLogin(ctx context.Context, req *auth.SessionLoginReq) (res *auth.SessionLoginRes, err error)
 	LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error)
 	LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error)
 	PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error)
@@ -43,6 +45,10 @@ type IUserProfile interface {
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 	ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error)
 	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
+}
+
+type IUserSession interface {
+	New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error)
 }
 
 type IUserSubscription interface {
