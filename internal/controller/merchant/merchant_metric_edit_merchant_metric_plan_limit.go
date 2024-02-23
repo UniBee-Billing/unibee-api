@@ -31,5 +31,5 @@ func (c *ControllerMetric) EditMerchantMetricPlanLimit(ctx context.Context, req 
 	if err != nil {
 		return nil, err
 	}
-	return &metric.EditMerchantMetricPlanLimitRes{MerchantMetric: me}, nil
+	return &metric.EditMerchantMetricPlanLimitRes{MerchantMetricPlanLimit: me}, nil
 }

@@ -13,7 +13,7 @@ type NewMerchantMetricPlanLimitReq struct {
 }
 
 type NewMerchantMetricPlanLimitRes struct {
-	MerchantMetric *ro.MerchantMetricPlanLimitVo
+	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
 type EditMerchantMetricPlanLimitReq struct {
@@ -23,7 +23,7 @@ type EditMerchantMetricPlanLimitReq struct {
 }
 
 type EditMerchantMetricPlanLimitRes struct {
-	MerchantMetric *ro.MerchantMetricPlanLimitVo
+	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
 type DelMerchantMetricPlanLimitReq struct {
@@ -32,5 +32,5 @@ type DelMerchantMetricPlanLimitReq struct {
 }
 
 type DelMerchantMetricPlanLimitRes struct {
-	MerchantMetric *ro.MerchantMetricPlanLimitVo
+	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }

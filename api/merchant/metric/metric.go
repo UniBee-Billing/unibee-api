@@ -10,7 +10,7 @@ type MerchantMetricListReq struct {
 }
 
 type MerchantMetricListRes struct {
-	MerchantMetrics []*ro.MerchantMetricVo
+	MerchantMetrics []*ro.MerchantMetricVo `json:"merchantMetrics" dc:"MerchantMetrics"`
 }
 
 type NewMerchantMetricReq struct {
@@ -23,7 +23,7 @@ type NewMerchantMetricReq struct {
 }
 
 type NewMerchantMetricRes struct {
-	MerchantMetric *ro.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type EditMerchantMetricReq struct {
@@ -34,7 +34,7 @@ type EditMerchantMetricReq struct {
 }
 
 type EditMerchantMetricRes struct {
-	MerchantMetric *ro.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type DelMerchantMetricReq struct {
@@ -43,7 +43,7 @@ type DelMerchantMetricReq struct {
 }
 
 type DelMerchantMetricRes struct {
-	MerchantMetric *ro.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type MerchantMetricDetailReq struct {
@@ -52,5 +52,5 @@ type MerchantMetricDetailReq struct {
 }
 
 type MerchantMetricDetailRes struct {
-	MerchantMetric *ro.MerchantMetricVo
+	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }

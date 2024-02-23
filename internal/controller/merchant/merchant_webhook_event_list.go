@@ -8,5 +8,5 @@ import (
 )
 
 func (c *ControllerWebhook) EventList(ctx context.Context, req *webhook.EventListReq) (res *webhook.EventListRes, err error) {
-	return &webhook.EventListRes{Events: event.ListeningEvents}, nil
+	return &webhook.EventListRes{EventList: event.ListeningEventList}, nil
 }

@@ -15,7 +15,7 @@ type MerchantMetricEventReq struct {
 }
 
 type MerchantMetricEventRes struct {
-	MerchantMetricEvent *entity.MerchantMetricEvent
+	MerchantMetricEvent *entity.MerchantMetricEvent `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
 }
 
 type DelMerchantMetricEventReq struct {

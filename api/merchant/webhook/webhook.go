@@ -11,7 +11,7 @@ type EventListReq struct {
 }
 
 type EventListRes struct {
-	Events []string
+	EventList []string `json:"eventList" dc:"EventList"`
 }
 
 type EndpointListReq struct {
@@ -19,7 +19,7 @@ type EndpointListReq struct {
 }
 
 type EndpointListRes struct {
-	EndpointList []*webhook.MerchantWebhookEndpointVo
+	EndpointList []*webhook.MerchantWebhookEndpointVo `json:"endpointList" dc:"EndpointList"`
 }
 
 type EndpointLogListReq struct {
@@ -30,7 +30,7 @@ type EndpointLogListReq struct {
 }
 
 type EndpointLogListRes struct {
-	EndpointLogList []*entity.MerchantWebhookLog
+	EndpointLogList []*entity.MerchantWebhookLog `json:"endpointLogList" dc:"EndpointLogList"`
 }
 
 type NewEndpointReq struct {

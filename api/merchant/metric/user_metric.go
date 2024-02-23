@@ -12,5 +12,5 @@ type UserMerchantMetricStatReq struct {
 }
 
 type UserMerchantMetricStatRes struct {
-	UserMerchantMetricStats []*metric_event.UserMerchantMetricStat
+	UserMerchantMetricStats []*metric_event.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }
