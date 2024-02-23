@@ -42,7 +42,7 @@ type SubscriptionSimplify struct {
 }
 
 func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
-	if one != nil {
+	if one == nil {
 		return nil
 	}
 	return &SubscriptionSimplify{
