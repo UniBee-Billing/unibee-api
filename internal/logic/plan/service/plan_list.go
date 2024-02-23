@@ -31,12 +31,27 @@ type SubscriptionPlanListInternalReq struct {
 func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.SubscriptionPlanDetailRes, error) {
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
+	var addonIds []int64
+	if len(one.BindingAddonIds) > 0 {
+		//初始化
+		strList := strings.Split(one.BindingAddonIds, ",")
+
+		for _, s := range strList {
+			num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+			if err != nil {
+				fmt.Println("Internal Error converting string to int:", err)
+			} else {
+				addonIds = append(addonIds, num) // 添加到整数列表中
+			}
+		}
+	}
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, int64(one.Id), false),
 			Gateways:         gateway.GetActiveGatewaySimplifyList(ctx, planId),
 			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
+			AddonIds:         addonIds,
 		},
 	}, nil
 }
