@@ -14,19 +14,19 @@ import (
 )
 
 type WebhookMessage struct {
-	Event      string
+	Event      event2.MerchantWebhookEvent
 	EndpointId uint64
 	Url        string
 	MerchantId uint64
 	Data       *gjson.Json
 }
 
-func SendWebhookMessage(ctx context.Context, event string, merchantId uint64, data *gjson.Json) {
+func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, merchantId uint64, data *gjson.Json) {
 	utility.Assert(event2.EventInListeningEvents(event), fmt.Sprintf("Event:%s Not In Event List", event))
 	list := query.GetMerchantWebhooksByMerchantId(ctx, merchantId)
 	if list != nil {
 		for _, merchantWebhook := range list {
-			if strings.Contains(merchantWebhook.WebhookEvents, event) {
+			if strings.Contains(merchantWebhook.WebhookEvents, string(event)) {
 				send, err := redismq.Send(&redismq.Message{
 					Topic: redismq2.TopicMerchantWebhook.Topic,
 					Tag:   redismq2.TopicMerchantWebhook.Tag,

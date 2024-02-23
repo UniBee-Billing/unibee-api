@@ -20,7 +20,7 @@ func printPanic(ctx context.Context, err error) {
 	}
 }
 
-func SendSubscriptionCreatedMerchantWebhookBackground(one *entity.Subscription) {
+func SendSubscriptionMerchantWebhookBackground(one *entity.Subscription, event event.MerchantWebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -38,6 +38,6 @@ func SendSubscriptionCreatedMerchantWebhookBackground(one *entity.Subscription) 
 		subDetailRes, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		utility.AssertError(err, "SendSubscriptionCreatedMerchantWebhookBackground SubscriptionDetail Error")
 
-		message.SendWebhookMessage(ctx, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED, one.MerchantId, utility.FormatToGJson(subDetailRes))
+		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes))
 	}()
 }

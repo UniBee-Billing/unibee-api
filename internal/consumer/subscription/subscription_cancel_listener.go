@@ -6,6 +6,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
+	"unibee-api/internal/consumer/webhook/event"
+	subscription3 "unibee-api/internal/consumer/webhook/subscription"
 	dao "unibee-api/internal/dao/oversea_pay"
 	service2 "unibee-api/internal/logic/subscription/service"
 	"unibee-api/internal/logic/subscription/user_sub_plan"
@@ -48,6 +50,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 		}
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
+	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CANCELLED)
 	return redismq.CommitMessage
 }
 

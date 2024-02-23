@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consts"
+	"unibee-api/internal/consumer/webhook/event"
+	subscription3 "unibee-api/internal/consumer/webhook/subscription"
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
 	"unibee-api/utility"
@@ -31,6 +34,12 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 		Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
 		Body:  sub.SubscriptionId,
 	}, 3*60)
+
+	{
+		sub.Status = consts.SubStatusCreate
+		subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED)
+	}
+
 	// 3min PaymentChecker
 	return redismq.CommitMessage
 }

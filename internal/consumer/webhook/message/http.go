@@ -33,7 +33,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) boo
 		MerchantId:   webhookMessage.MerchantId,
 		EndpointId:   int64(webhookMessage.EndpointId),
 		WebhookUrl:   webhookMessage.Url,
-		WebhookEvent: webhookMessage.Event,
+		WebhookEvent: string(webhookMessage.Event),
 		RequestId:    msgId,
 		Body:         jsonString,
 		Response:     string(response),

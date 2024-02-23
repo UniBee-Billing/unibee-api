@@ -4,6 +4,8 @@ import (
 	"sort"
 )
 
+type MerchantWebhookEvent string
+
 const (
 	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED   = "subscription.created"
 	MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED   = "subscription.updated"
@@ -44,14 +46,14 @@ func initListeningEvents() {
 //	fmt.Printf("Merchant_Webhook_Subscription Register Event:%s\n", e)
 //}
 
-func EventInListeningEvents(target string) bool {
+func EventInListeningEvents(target MerchantWebhookEvent) bool {
 	if len(target) <= 0 {
 		return false
 	}
 	initListeningEvents()
-	index := sort.SearchStrings(ListeningEvents, target)
+	index := sort.SearchStrings(ListeningEvents, string(target))
 	//index should in：[0,len(str_array)]
-	if index < len(ListeningEvents) && ListeningEvents[index] == target {
+	if index < len(ListeningEvents) && ListeningEvents[index] == string(target) {
 		return true
 	}
 	return false

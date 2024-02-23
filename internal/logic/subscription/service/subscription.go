@@ -1040,7 +1040,6 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		Tag:   redismq2.TopicSubscriptionCancel.Tag,
 		Body:  sub.SubscriptionId,
 	})
-
 	return nil
 }
 

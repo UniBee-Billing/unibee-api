@@ -9,12 +9,12 @@ const (
 type InvoiceStatusEnum int
 
 const (
-	InvoiceStatusInit       = 0 //
-	InvoiceStatusPending    = 1 //
-	InvoiceStatusProcessing = 2 //
-	InvoiceStatusPaid       = 3 //
-	InvoiceStatusFailed     = 4 //
-	InvoiceStatusCancelled  = 5 //
+	InvoiceStatusInit       = 0
+	InvoiceStatusPending    = 1
+	InvoiceStatusProcessing = 2
+	InvoiceStatusPaid       = 3
+	InvoiceStatusFailed     = 4
+	InvoiceStatusCancelled  = 5
 )
 
 type SubscriptionStatusEnum int
@@ -22,14 +22,14 @@ type SubscriptionStatusEnum int
 const (
 	SubTypeDefault            = 0
 	SubTypeUniBeeControl      = 1
-	SubStatusInit             = 0 //
-	SubStatusCreate           = 1 //
-	SubStatusActive           = 2 //
-	SubStatusPendingInActive  = 3 //
-	SubStatusCancelled        = 4 //
-	SubStatusExpired          = 5 //
-	SubStatusSuspended        = 6 //
-	SubStatusIncomplete       = 7 //
+	SubStatusInit             = 0
+	SubStatusCreate           = 1
+	SubStatusActive           = 2
+	SubStatusPendingInActive  = 3 // deprecated
+	SubStatusCancelled        = 4
+	SubStatusExpired          = 5
+	SubStatusSuspended        = 6
+	SubStatusIncomplete       = 7
 	PendingSubStatusInit      = 0
 	PendingSubStatusCreate    = 1
 	PendingSubStatusFinished  = 2

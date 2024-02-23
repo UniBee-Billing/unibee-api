@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	redismq2 "unibee-api/internal/cmd/redismq"
+	"unibee-api/internal/consumer/webhook/event"
+	subscription3 "unibee-api/internal/consumer/webhook/subscription"
 	"unibee-api/internal/logic/subscription/user_sub_plan"
 	"unibee-api/internal/query"
 	"unibee-api/redismq"
@@ -28,6 +30,7 @@ func (t SubscriptionIncompleteListener) Consume(ctx context.Context, message *re
 	g.Log().Infof(ctx, "SubscriptionIncompleteListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
+	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
 	return redismq.CommitMessage
 }
 
