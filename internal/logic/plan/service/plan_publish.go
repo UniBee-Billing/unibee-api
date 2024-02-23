@@ -14,7 +14,7 @@ import (
 	"unibee-api/utility"
 )
 
-func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
+func SubscriptionPlanActivate(ctx context.Context, planId uint64) error {
 	//发布 Plan
 	utility.Assert(planId > 0, "invalid planId")
 	one := query.GetPlanById(ctx, planId)
@@ -40,7 +40,7 @@ func SubscriptionPlanActivate(ctx context.Context, planId int64) error {
 	return nil
 }
 
-func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int64, gatewayId int64) error {
+func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId uint64, gatewayId int64) error {
 	intervals := []string{"day", "month", "year", "week"}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")

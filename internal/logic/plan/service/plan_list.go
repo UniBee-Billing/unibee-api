@@ -28,7 +28,7 @@ type SubscriptionPlanListInternalReq struct {
 	Count         int    `p:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.SubscriptionPlanDetailRes, error) {
+func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.SubscriptionPlanDetailRes, error) {
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
 	var addonIds []int64
@@ -48,7 +48,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(one),
-			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, int64(one.Id), false),
+			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
 			Gateways:         gateway.GetActiveGatewaySimplifyList(ctx, planId),
 			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
 			AddonIds:         addonIds,
@@ -96,7 +96,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			//非主 Plan 不查询 addons
 			list = append(list, &ro2.PlanDetailRo{
 				Plan:             ro2.SimplifyPlan(p),
-				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
+				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Gateways:         []*ro2.GatewaySimplify{},
 				Addons:           nil,
 				AddonIds:         nil,
@@ -120,7 +120,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 		list = append(list, &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(p),
-			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
+			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Gateways:         []*ro2.GatewaySimplify{},
 			Addons:           nil,
 			AddonIds:         addonIds,
@@ -155,7 +155,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	if err == nil {
 		for _, gatewayPlan := range allPlanChannelList {
 			for _, planRo := range list {
-				if int64(planRo.Plan.Id) == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
+				if planRo.Plan.Id == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
 					one := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
 					if one != nil {
 						planRo.Gateways = append(planRo.Gateways, ro2.SimplifyGateway(one))

@@ -380,7 +380,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 					Quantity: stripe.Int64(subscriptionRo.Subscription.Quantity),
 					Metadata: map[string]string{
 						"BillingPlanType": "Main",
-						"BillingPlanId":   strconv.FormatInt(subscriptionRo.GatewayPlan.PlanId, 10),
+						"BillingPlanId":   strconv.FormatUint(subscriptionRo.GatewayPlan.PlanId, 10),
 					},
 				},
 			}
@@ -390,7 +390,7 @@ func (s Stripe) GatewaySubscriptionCreate(ctx context.Context, subscriptionRo *r
 					Quantity: stripe.Int64(addon.Quantity),
 					Metadata: map[string]string{
 						"BillingPlanType": "Addon",
-						"BillingPlanId":   strconv.FormatInt(addon.AddonGatewayPlan.PlanId, 10),
+						"BillingPlanId":   strconv.FormatUint(addon.AddonGatewayPlan.PlanId, 10),
 					},
 				})
 			}
@@ -684,7 +684,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 			Quantity: stripe.Int64(subscriptionRo.Quantity),
 			Metadata: map[string]string{
 				"BillingPlanType": "Main",
-				"BillingPlanId":   strconv.FormatInt(subscriptionRo.GatewayPlan.PlanId, 10),
+				"BillingPlanId":   strconv.FormatUint(subscriptionRo.GatewayPlan.PlanId, 10),
 			},
 		})
 		for _, addon := range subscriptionRo.AddonPlans {
@@ -693,7 +693,7 @@ func (s Stripe) makeSubscriptionUpdateItems(subscriptionRo *ro.GatewayUpdateSubs
 				Quantity: stripe.Int64(addon.Quantity),
 				Metadata: map[string]string{
 					"BillingPlanType": "Addon",
-					"BillingPlanId":   strconv.FormatInt(addon.AddonGatewayPlan.PlanId, 10),
+					"BillingPlanId":   strconv.FormatUint(addon.AddonGatewayPlan.PlanId, 10),
 				},
 			})
 		}

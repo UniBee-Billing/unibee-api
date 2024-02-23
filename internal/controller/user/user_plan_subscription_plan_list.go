@@ -33,7 +33,7 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 	if sub != nil {
 		subPlan := query.GetPlanById(ctx, sub.PlanId)
 		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {
-			userPlan, _ := service.SubscriptionPlanDetail(ctx, int64(subPlan.Id))
+			userPlan, _ := service.SubscriptionPlanDetail(ctx, subPlan.Id)
 			if userPlan != nil {
 				publishPlans = append(publishPlans, userPlan.Plan)
 			}

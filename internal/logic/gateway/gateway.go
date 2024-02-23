@@ -40,7 +40,7 @@ func GetActiveGatewaySimplifyListByMerchantId(ctx context.Context, merchantId ui
 	return gateways
 }
 
-func GetActiveGatewaySimplifyList(ctx context.Context, planId int64) []*ro.GatewaySimplify {
+func GetActiveGatewaySimplifyList(ctx context.Context, planId uint64) []*ro.GatewaySimplify {
 	if planId <= 0 {
 		return nil
 	}

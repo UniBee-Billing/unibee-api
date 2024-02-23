@@ -370,8 +370,8 @@ type PlanDetailRo struct {
 }
 
 type SubscriptionPlanAddonParamRo struct {
-	Quantity    int64 `p:"quantity" json:"quantity" dc:"Quantity，Default 1" `
-	AddonPlanId int64 `p:"addonPlanId" json:"addonPlanId" dc:"AddonPlanId"`
+	Quantity    int64  `p:"quantity" json:"quantity" dc:"Quantity，Default 1" `
+	AddonPlanId uint64 `p:"addonPlanId" json:"addonPlanId" dc:"AddonPlanId"`
 }
 
 type PlanAddonVo struct {
@@ -401,8 +401,8 @@ type SubscriptionPendingUpdateDetailVo struct {
 	ProrationAmount      int64                        `json:"prorationAmount"      description:"ProrationAmount,Cents"`
 	Currency             string                       `json:"currency"             description:"Currency"`
 	UpdateCurrency       string                       `json:"updateCurrency"       description:"UpdateCurrency"`
-	PlanId               int64                        `json:"planId"               description:"PlanId"`
-	UpdatePlanId         int64                        `json:"updatePlanId"         description:"UpdatePlanId"`
+	PlanId               uint64                       `json:"planId"               description:"PlanId"`
+	UpdatePlanId         uint64                       `json:"updatePlanId"         description:"UpdatePlanId"`
 	Quantity             int64                        `json:"quantity"             description:"quantity"`
 	UpdateQuantity       int64                        `json:"updateQuantity"       description:"UpdateQuantity"`
 	AddonData            string                       `json:"addonData"            description:"plan addon json data"`
@@ -440,6 +440,11 @@ type VatCountryRate struct {
 	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
 }
 
+type BulkMetricLimitPlanBindingParam struct {
+	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
+	MetricLimit uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
+}
+
 type MerchantMetricVo struct {
 	Id                  uint64 `json:"id"            description:"id"`                                                                                // id
 	MerchantId          uint64 `json:"merchantId"          description:"merchantId"`                                                                  // merchantId
@@ -458,7 +463,7 @@ type MerchantMetricPlanLimitVo struct {
 	MerchantId  uint64            `json:"merchantId"          description:"merchantId"`       // merchantId
 	MetricId    int64             `json:"metricId"    description:"metricId"`                 // metricId
 	Metric      *MerchantMetricVo `json:"merchantMetricVo"    description:"MerchantMetricVo"` // metricId
-	PlanId      int64             `json:"planId"      description:"plan_id"`                  // plan_id
+	PlanId      uint64            `json:"planId"      description:"plan_id"`                  // plan_id
 	MetricLimit uint64            `json:"metricLimit" description:"plan metric limit"`        // plan metric limit
 	UpdateTime  int64             `json:"gmtModify"     description:"update time"`            // update time
 	CreateTime  int64             `json:"createTime"    description:"create utc time"`        // create utc time

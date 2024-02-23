@@ -67,7 +67,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.Invoic
 
 type CalculateInvoiceReq struct {
 	Currency      string `json:"currency"`
-	PlanId        int64  `json:"planId"`
+	PlanId        uint64 `json:"planId"`
 	Quantity      int64  `json:"quantity"`
 	AddonJsonData string `json:"addonJsonData"`
 	TaxScale      int64  `json:"taxScale"`
@@ -128,7 +128,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 }
 
 type ProrationPlanParam struct {
-	PlanId   int64
+	PlanId   uint64
 	Quantity int64
 }
 
@@ -149,7 +149,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	if req.NewProrationPlans == nil {
 		req.NewProrationPlans = make([]*ProrationPlanParam, 0)
 	}
-	newMap := make(map[int64]*ProrationPlanParam)
+	newMap := make(map[uint64]*ProrationPlanParam)
 	//oldMap := make(map[int64]*ProrationPlanParam)
 	//for _, planSub := range req.OldProrationPlans {
 	//	oldMap[planSub.PlanId] = planSub
@@ -166,7 +166,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	var totalAmountExcludingTax int64
 	for _, oldPlanSub := range req.OldProrationPlans {
 		plan := query.GetPlanById(ctx, oldPlanSub.PlanId)
-		utility.Assert(plan != nil, "plan not found:"+strconv.FormatInt(oldPlanSub.PlanId, 10))
+		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(oldPlanSub.PlanId, 10))
 		unitAmountExcludingTax := int64(float64(plan.Amount) * utility.ConvertTaxScaleToInternalFloat(timeScale))
 		if newPlanSub, ok := newMap[oldPlanSub.PlanId]; ok {
 			//new plan contain old
@@ -220,7 +220,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	}
 	for _, newPlanSub := range newMap {
 		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
-		utility.Assert(plan != nil, "plan not found:"+strconv.FormatInt(newPlanSub.PlanId, 10))
+		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
 		unitAmountExcludingTax := int64(float64(plan.Amount) * utility.ConvertTaxScaleToInternalFloat(timeScale))
 		quantityDiff := newPlanSub.Quantity
 		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{

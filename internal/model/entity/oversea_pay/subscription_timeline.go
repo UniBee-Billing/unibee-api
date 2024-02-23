@@ -23,7 +23,7 @@ type SubscriptionTimeline struct {
 	InvoiceId       string      `json:"invoiceId"       description:"invoice id"`              // invoice id
 	UniqueId        string      `json:"uniqueId"        description:"unique id"`               // unique id
 	Currency        string      `json:"currency"        description:"currency"`                // currency
-	PlanId          int64       `json:"planId"          description:"PlanId"`                  // PlanId
+	PlanId          uint64      `json:"planId"          description:"PlanId"`                  // PlanId
 	Quantity        int64       `json:"quantity"        description:"quantity"`                // quantity
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`    // plan addon json data
 	GatewayId       int64       `json:"gatewayId"       description:"gateway_id"`              // gateway_id

@@ -7,7 +7,7 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func GetGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *entity.GatewayPlan) {
+func GetGatewayPlan(ctx context.Context, planId uint64, gatewayId int64) (one *entity.GatewayPlan) {
 	if planId <= 0 || gatewayId <= 0 {
 		return nil
 	}
@@ -18,7 +18,7 @@ func GetGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *en
 	return
 }
 
-func GetActiveGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (one *entity.GatewayPlan) {
+func GetActiveGatewayPlan(ctx context.Context, planId uint64, gatewayId int64) (one *entity.GatewayPlan) {
 	if planId <= 0 || gatewayId <= 0 {
 		return nil
 	}
@@ -29,7 +29,7 @@ func GetActiveGatewayPlan(ctx context.Context, planId int64, gatewayId int64) (o
 	return
 }
 
-func GetListActiveGatewayPlans(ctx context.Context, planId int64) (list []*entity.GatewayPlan) {
+func GetListActiveGatewayPlans(ctx context.Context, planId uint64) (list []*entity.GatewayPlan) {
 	if planId <= 0 {
 		return nil
 	}

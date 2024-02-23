@@ -3,29 +3,29 @@ package query
 import (
 	"context"
 	"fmt"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
 	"strconv"
 	"strings"
+	dao "unibee-api/internal/dao/oversea_pay"
+	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func GetPlanById(ctx context.Context, id int64) (one *entity.SubscriptionPlan) {
+func GetPlanById(ctx context.Context, id uint64) (one *entity.SubscriptionPlan) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: id}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetPlanBindingAddonsByPlanId(ctx context.Context, id int64) (list []*entity.SubscriptionPlan) {
+func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entity.SubscriptionPlan) {
 	if id <= 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPlan
-	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: id}).OmitEmpty().Scan(&one)
 	if err != nil && one == nil {
 		return nil
 	}

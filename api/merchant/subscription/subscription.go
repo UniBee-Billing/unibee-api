@@ -81,7 +81,7 @@ type SubscriptionAddNewTrialStartRes struct {
 type SubscriptionUpdatePreviewReq struct {
 	g.Meta              `path:"/subscription_update_preview" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Preview"`
 	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           int64                              `p:"newPlanId" dc:"New PlanId" v:"required"`
+	NewPlanId           uint64                             `p:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
@@ -97,7 +97,7 @@ type SubscriptionUpdatePreviewRes struct {
 type SubscriptionUpdateReq struct {
 	g.Meta              `path:"/subscription_update_submit" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Submit"`
 	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           int64                              `p:"newPlanId" dc:"New PlanId" v:"required"`
+	NewPlanId           uint64                             `p:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `

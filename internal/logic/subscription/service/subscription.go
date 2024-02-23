@@ -54,7 +54,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.PlanAddonVo {
 	var addons []*ro.PlanAddonVo
-	var totalAddonIds []int64
+	var totalAddonIds []uint64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
 			totalAddonIds = append(totalAddonIds, s.AddonPlanId) // 添加到整数列表中
@@ -66,9 +66,9 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//整合进列表
-			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			mapPlans := make(map[uint64]*entity.SubscriptionPlan)
 			for _, pair := range allAddonList {
-				key := int64(pair.Id)
+				key := pair.Id
 				value := pair
 				mapPlans[key] = value
 			}
@@ -81,7 +81,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 gatewayId 合并查询
+				gatewayPlan := query.GetGatewayPlan(ctx, mapPlans[param.AddonPlanId].Id, gatewayId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 gatewayId 合并查询
 				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
 				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.PlanAddonVo{
@@ -256,7 +256,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	one := &entity.Subscription{
 		MerchantId:         prepare.MerchantInfo.Id,
 		Type:               subType,
-		PlanId:             int64(prepare.Plan.Id),
+		PlanId:             prepare.Plan.Id,
 		GatewayId:          prepare.GatewayPlan.GatewayId,
 		UserId:             prepare.UserId,
 		Quantity:           prepare.Quantity,
@@ -470,7 +470,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
 		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
 		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
-		var oldAddonMap = make(map[int64]int64)
+		var oldAddonMap = make(map[uint64]int64)
 		for _, oldAddon := range oldAddonParams {
 			if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
 				oldAddonMap[oldAddon.AddonPlanId] = oldAddonMap[oldAddon.AddonPlanId] + oldAddon.Quantity
@@ -478,7 +478,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
 			}
 		}
-		var newAddonMap = make(map[int64]int64)
+		var newAddonMap = make(map[uint64]int64)
 		for _, newAddon := range req.AddonParams {
 			if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {
 				newAddonMap[newAddon.AddonPlanId] = newAddonMap[newAddon.AddonPlanId] + newAddon.Quantity
@@ -789,7 +789,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UpdateAmount:         prepare.NextPeriodInvoice.TotalAmount,
 		ProrationAmount:      prepare.Invoice.TotalAmount,
 		UpdateCurrency:       prepare.Currency,
-		UpdatePlanId:         int64(prepare.Plan.Id),
+		UpdatePlanId:         prepare.Plan.Id,
 		UpdateQuantity:       prepare.Quantity,
 		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams), // addon 暂定不带上之前订阅
 		Status:               consts.PendingSubStatusInit,

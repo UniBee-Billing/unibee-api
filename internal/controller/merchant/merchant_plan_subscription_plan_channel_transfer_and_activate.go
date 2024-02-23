@@ -2,6 +2,8 @@ package merchant
 
 import (
 	"context"
+	"strconv"
+	"strings"
 	_plan "unibee-api/api/merchant/plan"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
@@ -10,8 +12,6 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	"strconv"
-	"strings"
 )
 
 func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *_plan.SubscriptionPlanChannelTransferAndActivateReq) (res *_plan.SubscriptionPlanChannelTransferAndActivateRes, err error) {
@@ -64,14 +64,14 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 			if addonPlan.Status != consts.PlanStatusActive {
 				//发布 addonPlan
 				for _, gateway := range list {
-					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, int64(addonPlan.Id), int64(gateway.Id))
+					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, addonPlan.Id, int64(gateway.Id))
 					if err != nil {
 						return nil, err
 					}
 				}
 
 				//发布 Plan
-				err = service.SubscriptionPlanActivate(ctx, int64(addonPlan.Id))
+				err = service.SubscriptionPlanActivate(ctx, addonPlan.Id)
 				if err != nil {
 					return nil, err
 				}

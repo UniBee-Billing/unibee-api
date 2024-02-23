@@ -38,7 +38,7 @@ type SubscriptionChannelsRes struct {
 
 type SubscriptionCreatePreviewReq struct {
 	g.Meta         `path:"/subscription_create_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription Preview"`
-	PlanId         int64                              `p:"planId" dc:"PlanId" v:"required"`
+	PlanId         uint64                             `p:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	GatewayId      int64                              `p:"gatewayId" dc:"Id"   v:"required" `
 	UserId         int64                              `p:"userId" dc:"UserId" v:"required"`
@@ -66,7 +66,7 @@ type SubscriptionCreatePreviewRes struct {
 
 type SubscriptionCreateReq struct {
 	g.Meta             `path:"/subscription_create_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription"`
-	PlanId             int64                              `p:"planId" dc:"PlanId" v:"required"`
+	PlanId             uint64                             `p:"planId" dc:"PlanId" v:"required"`
 	Quantity           int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          int64                              `p:"gatewayId" dc:"Id"   v:"required" `
 	UserId             int64                              `p:"userId" dc:"UserId" v:"required"`
@@ -86,7 +86,7 @@ type SubscriptionCreateRes struct {
 type SubscriptionUpdatePreviewReq struct {
 	g.Meta              `path:"/subscription_update_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription Preview"`
 	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           int64                              `p:"newPlanId" dc:"NewPlanId" v:"required"`
+	NewPlanId           uint64                             `p:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
@@ -102,7 +102,7 @@ type SubscriptionUpdatePreviewRes struct {
 type SubscriptionUpdateReq struct {
 	g.Meta              `path:"/subscription_update_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription"`
 	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           int64                              `p:"newPlanId" dc:"NewPlanId" v:"required"`
+	NewPlanId           uint64                             `p:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `

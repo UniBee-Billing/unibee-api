@@ -13,12 +13,13 @@ import (
 	dao "unibee-api/internal/dao/oversea_pay"
 	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/gateway/api"
+	"unibee-api/internal/logic/metric"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
 )
 
-func SubscriptionPlanPublish(ctx context.Context, planId int64) (err error) {
+func SubscriptionPlanPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
@@ -32,7 +33,7 @@ func SubscriptionPlanPublish(ctx context.Context, planId int64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanUnPublish(ctx context.Context, planId int64) (err error) {
+func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
@@ -46,7 +47,7 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId int64) (err error) {
 	return nil
 }
 
-func SubscriptionGatewayPlanActivate(ctx context.Context, planId int64, gatewayId int64) (err error) {
+func SubscriptionGatewayPlanActivate(ctx context.Context, planId uint64, gatewayId int64) (err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
@@ -73,15 +74,10 @@ func SubscriptionGatewayPlanActivate(ctx context.Context, planId int64, gatewayI
 	if err != nil {
 		return err
 	}
-	// todo mark update 值没变化会报错
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionGatewayPlanActivate update err:%s", update)
-	//}
 	return
 }
 
-func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, gatewayId int64) (err error) {
+func SubscriptionPlanChannelDeactivate(ctx context.Context, planId uint64, gatewayId int64) (err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
@@ -108,11 +104,6 @@ func SubscriptionPlanChannelDeactivate(ctx context.Context, planId int64, gatewa
 	if err != nil {
 		return err
 	}
-	// todo mark update 值没变化会报错
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("SubscriptionPlanChannelDeactivate update err:%s", update)
-	//}
 	return
 }
 
@@ -127,6 +118,17 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(len(req.Description) > 0, "description should not blank")
+
+	//check metricLimitList
+	if len(req.MetricLimits) > 0 {
+		for _, ml := range req.MetricLimits {
+			utility.Assert(ml.MetricId > 0, "invalid metricId")
+			utility.Assert(ml.MetricLimit > 0, "invalid MetricLimit")
+			me := query.GetMerchantMetric(ctx, ml.MetricId)
+			utility.Assert(me != nil, "metric not found")
+			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "metric type invalid")
+		}
+	}
 
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
@@ -195,6 +197,13 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
+	if len(req.MetricLimits) > 0 {
+		err = metric.BulkMetricLimitPlanBindingReplace(ctx, one, req.MetricLimits)
+		if err != nil {
+			return nil, gerror.Newf(`BulkMetricLimitPlanBindingReplace %s`, err)
+		}
+	}
+
 	return one, nil
 }
 
@@ -228,6 +237,17 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
+
+	//check metricLimitList
+	if len(req.MetricLimits) > 0 {
+		for _, ml := range req.MetricLimits {
+			utility.Assert(ml.MetricId > 0, "invalid metricId")
+			utility.Assert(ml.MetricLimit > 0, "invalid MetricLimit")
+			me := query.GetMerchantMetric(ctx, ml.MetricId)
+			utility.Assert(me != nil, "metric not found")
+			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "metric type invalid")
+		}
+	}
 
 	if len(req.ProductName) == 0 {
 		req.ProductName = req.PlanName
@@ -274,6 +294,13 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	one.BindingAddonIds = intListToString(req.AddonIds)
 	one.GatewayProductName = req.ProductName
 	one.GatewayProductDescription = req.ProductDescription
+
+	if len(req.MetricLimits) > 0 {
+		err = metric.BulkMetricLimitPlanBindingReplace(ctx, one, req.MetricLimits)
+		if err != nil {
+			return nil, gerror.Newf(`BulkMetricLimitPlanBindingReplace %s`, err)
+		}
+	}
 
 	return one, nil
 }

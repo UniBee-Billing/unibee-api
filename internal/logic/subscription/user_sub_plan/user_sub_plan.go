@@ -20,7 +20,7 @@ const (
 type UserSubPlan struct {
 	MerchantId              uint64
 	UserId                  int64
-	PlanId                  int64
+	PlanId                  uint64
 	PlanType                int
 	Quantity                int64
 	SubscriptionIds         string
@@ -66,7 +66,7 @@ func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64,
 			list = append(list, &UserSubPlan{
 				MerchantId:              sub.MerchantId,
 				UserId:                  userId,
-				PlanId:                  int64(addon.AddonPlan.Id),
+				PlanId:                  addon.AddonPlan.Id,
 				PlanType:                addon.AddonPlan.Type,
 				Quantity:                addon.Quantity,
 				SubscriptionIds:         sub.SubscriptionId,

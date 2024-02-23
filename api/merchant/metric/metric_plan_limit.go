@@ -8,7 +8,7 @@ import (
 type NewMerchantMetricPlanLimitReq struct {
 	g.Meta      `path:"/new_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric Plan TotalLimit"`
 	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
-	PlanId      int64  `p:"planId" dc:"PlanId" v:"required"`
+	PlanId      uint64 `p:"planId" dc:"PlanId" v:"required"`
 	MetricLimit uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
 }
 

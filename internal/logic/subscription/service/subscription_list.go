@@ -110,7 +110,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if err != nil {
 		return nil
 	}
-	var totalPlanIds []int64
+	var totalPlanIds []uint64
 	for _, sub := range mainList {
 		totalPlanIds = append(totalPlanIds, sub.PlanId)
 		var addonParams []*ro.SubscriptionPlanAddonParamRo
@@ -145,9 +145,9 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalPlanIds).OmitEmpty().Scan(&allPlanList)
 		if err == nil {
 			//整合进列表
-			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			mapPlans := make(map[uint64]*entity.SubscriptionPlan)
 			for _, pair := range allPlanList {
-				key := int64(pair.Id)
+				key := pair.Id
 				value := pair
 				mapPlans[key] = value
 			}

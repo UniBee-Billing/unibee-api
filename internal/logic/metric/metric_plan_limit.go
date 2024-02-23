@@ -19,7 +19,7 @@ const (
 	MerchantMetricPlanLimitCacheExpire    = 24 * 60 * 60
 )
 
-func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId int64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId uint64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
 	var list = make([]*ro.MerchantMetricPlanLimitVo, 0)
@@ -67,14 +67,14 @@ type MerchantMetricPlanLimitInternalReq struct {
 	MerchantId        uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 	MetricId          int64  `p:"metricId" dc:"MetricId" `
 	MetricPlanLimitId uint64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
-	PlanId            int64  `p:"planId" dc:"PlanId" `
+	PlanId            uint64 `p:"planId" dc:"PlanId" `
 	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" `
 }
 
 func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
-	utility.Assert(req.MetricId == 0, "invalid metricId")
+	utility.Assert(req.MetricId > 0, "invalid metricId")
 	utility.Assert(req.MetricPlanLimitId == 0, "invalid MetricPlanLimitId, should not enter in")
 	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
 	//metric check
@@ -157,16 +157,72 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	}, nil
 }
 
-func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricId int64) error {
+func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricPlanLimitId int64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	utility.Assert(metricId > 0, "invalid metricId")
-	one := query.GetMerchantMetric(ctx, metricId)
+	utility.Assert(metricPlanLimitId > 0, "invalid metricPlanLimitId")
+	one := query.GetMerchantMetricPlanLimit(ctx, metricPlanLimitId)
 	utility.Assert(one != nil, "metric limit not found")
 	_, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
 		dao.MerchantMetricPlanLimit.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
 	// reload Cache
-	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, metricId, true)
+	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.PlanId, true)
 	return err
+}
+
+func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.SubscriptionPlan, params []*ro.BulkMetricLimitPlanBindingParam) error {
+	utility.Assert(plan != nil, "invalid plan")
+	if len(params) > 0 {
+		var oldList []*entity.MerchantMetricPlanLimit
+		_ = dao.MerchantMetricPlanLimit.Ctx(ctx).
+			Where(dao.MerchantMetricPlanLimit.Columns().MerchantId, plan.MerchantId).
+			Where(dao.MerchantMetricPlanLimit.Columns().PlanId, plan.Id).
+			Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
+			Scan(&oldList)
+		var oldMap map[int64]*entity.MerchantMetricPlanLimit
+		for _, old := range oldList {
+			oldMap[old.MetricId] = old
+		}
+		for _, ml := range params {
+			utility.Assert(ml.MetricId > 0, "invalid metricId")
+			utility.Assert(ml.MetricLimit > 0, "invalid MetricLimit")
+			me := query.GetMerchantMetric(ctx, ml.MetricId)
+			utility.Assert(me != nil, "metric not found")
+			utility.Assert(me.Type == MetricTypeLimitMetered, "metric type invalid")
+
+			if old, ok := oldMap[ml.MetricId]; ok {
+				//edit
+				delete(oldMap, ml.MetricId)
+				if old.MetricLimit != ml.MetricLimit {
+					//need update
+					_, _ = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
+						dao.MerchantMetricPlanLimit.Columns().MetricLimit: ml.MetricLimit,
+						dao.MerchantMetricPlanLimit.Columns().GmtModify:   gtime.Now(),
+					}).Where(dao.MerchantMetricPlanLimit.Columns().Id, old.Id).Update()
+
+				}
+			} else {
+				//create
+				one := &entity.MerchantMetricPlanLimit{
+					MerchantId:  plan.MerchantId,
+					MetricId:    ml.MetricId,
+					PlanId:      plan.Id,
+					MetricLimit: ml.MetricLimit,
+					CreateTime:  gtime.Now().Timestamp(),
+				}
+				_, _ = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			}
+		}
+		// delete other all
+		for _, other := range oldMap {
+			_, _ = dao.MerchantMetricPlanLimit.Ctx(ctx).Data(g.Map{
+				dao.MerchantMetricPlanLimit.Columns().IsDeleted: gtime.Now().Timestamp(),
+				dao.MerchantMetricPlanLimit.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.MerchantMetricPlanLimit.Columns().Id, other.Id).Update()
+		}
+		// reload Cache
+		MerchantMetricPlanLimitCachedList(ctx, plan.MerchantId, plan.Id, true)
+	}
+	return nil
 }

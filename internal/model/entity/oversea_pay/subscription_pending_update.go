@@ -23,8 +23,8 @@ type SubscriptionPendingUpdate struct {
 	UpdateAmount         int64       `json:"updateAmount"         description:"the amount after update"`                                                   // the amount after update
 	Currency             string      `json:"currency"             description:"currency of this period"`                                                   // currency of this period
 	UpdateCurrency       string      `json:"updateCurrency"       description:"the currency after update"`                                                 // the currency after update
-	PlanId               int64       `json:"planId"               description:"the plan id of this period"`                                                // the plan id of this period
-	UpdatePlanId         int64       `json:"updatePlanId"         description:"the plan id after update"`                                                  // the plan id after update
+	PlanId               uint64      `json:"planId"               description:"the plan id of this period"`                                                // the plan id of this period
+	UpdatePlanId         uint64      `json:"updatePlanId"         description:"the plan id after update"`                                                  // the plan id after update
 	Quantity             int64       `json:"quantity"             description:"quantity of this period"`                                                   // quantity of this period
 	UpdateQuantity       int64       `json:"updateQuantity"       description:"quantity after update"`                                                     // quantity after update
 	AddonData            string      `json:"addonData"            description:"plan addon data (json) of this period"`                                     // plan addon data (json) of this period

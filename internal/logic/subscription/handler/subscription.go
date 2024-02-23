@@ -198,7 +198,7 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.PlanAddonVo {
 	var addons []*ro.PlanAddonVo
-	var totalAddonIds []int64
+	var totalAddonIds []uint64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
 			totalAddonIds = append(totalAddonIds, s.AddonPlanId) // 添加到整数列表中
@@ -210,9 +210,9 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//整合进列表
-			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			mapPlans := make(map[uint64]*entity.SubscriptionPlan)
 			for _, pair := range allAddonList {
-				key := int64(pair.Id)
+				key := pair.Id
 				value := pair
 				mapPlans[key] = value
 			}
@@ -225,7 +225,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId)
+				gatewayPlan := query.GetGatewayPlan(ctx, mapPlans[param.AddonPlanId].Id, gatewayId)
 				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
 				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v Id:%v gatewayPlanStatus not active", param.AddonPlanId, gatewayId))
 				addons = append(addons, &ro.PlanAddonVo{
