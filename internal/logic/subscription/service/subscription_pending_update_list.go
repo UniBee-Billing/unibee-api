@@ -22,10 +22,10 @@ type SubscriptionPendingUpdateListInternalReq struct {
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {
-	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetailVo `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
-func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *ro.SubscriptionPendingUpdateDetail {
+func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *ro.SubscriptionPendingUpdateDetailVo {
 	if len(pendingUpdateId) == 0 {
 		return nil
 	}
@@ -40,7 +40,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 	if one == nil {
 		return nil
 	}
-	return &ro.SubscriptionPendingUpdateDetail{
+	return &ro.SubscriptionPendingUpdateDetailVo{
 		MerchantId:           one.MerchantId,
 		SubscriptionId:       one.SubscriptionId,
 		UpdateSubscriptionId: one.UpdateSubscriptionId,
@@ -62,13 +62,13 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		GmtModify:            one.GmtModify,
 		Paid:                 one.Paid,
 		Link:                 one.Link,
-		MerchantUser:         query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId)),
+		MerchantUser:         ro.SimplifyMerchantUserAccount(query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId))),
 		EffectImmediate:      one.EffectImmediate,
 		EffectTime:           one.EffectTime,
 		Note:                 one.Note,
-		Plan:                 query.GetPlanById(ctx, one.PlanId),
+		Plan:                 ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-		UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
+		UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 		UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 	}
 }
@@ -104,9 +104,9 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		return nil, err
 	}
 
-	var updateList []*ro.SubscriptionPendingUpdateDetail
+	var updateList []*ro.SubscriptionPendingUpdateDetailVo
 	for _, one := range mainList {
-		updateList = append(updateList, &ro.SubscriptionPendingUpdateDetail{
+		updateList = append(updateList, &ro.SubscriptionPendingUpdateDetailVo{
 			MerchantId:           one.MerchantId,
 			SubscriptionId:       one.SubscriptionId,
 			UpdateSubscriptionId: one.UpdateSubscriptionId,
@@ -128,13 +128,13 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			GmtModify:            one.GmtModify,
 			Paid:                 one.Paid,
 			Link:                 one.Link,
-			MerchantUser:         query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId)),
+			MerchantUser:         ro.SimplifyMerchantUserAccount(query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId))),
 			EffectImmediate:      one.EffectImmediate,
 			EffectTime:           one.EffectTime,
 			Note:                 one.Note,
-			Plan:                 query.GetPlanById(ctx, one.PlanId),
+			Plan:                 ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-			UpdatePlan:           query.GetPlanById(ctx, one.UpdatePlanId),
+			UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 		})
 	}

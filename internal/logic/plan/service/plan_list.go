@@ -33,10 +33,10 @@ func SubscriptionPlanDetail(ctx context.Context, planId int64) (*plan.Subscripti
 	utility.Assert(one != nil, "plan not found")
 	return &plan.SubscriptionPlanDetailRes{
 		Plan: &ro2.PlanDetailRo{
-			Plan:             one,
+			Plan:             ro2.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, int64(one.Id), false),
-			Gateways:         gateway.GetListActiveOutGatewayRos(ctx, planId),
-			Addons:           query.GetPlanBindingAddonsByPlanId(ctx, planId),
+			Gateways:         gateway.GetActiveGatewaySimplifyList(ctx, planId),
+			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
 		},
 	}, nil
 }
@@ -80,9 +80,9 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
 			list = append(list, &ro2.PlanDetailRo{
-				Plan:             p,
+				Plan:             ro2.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
-				Gateways:         []*ro2.OutGatewayRo{},
+				Gateways:         []*ro2.GatewaySimplify{},
 				Addons:           nil,
 				AddonIds:         nil,
 			})
@@ -104,9 +104,9 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			}
 		}
 		list = append(list, &ro2.PlanDetailRo{
-			Plan:             p,
+			Plan:             ro2.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, int64(p.Id), false),
-			Gateways:         []*ro2.OutGatewayRo{},
+			Gateways:         []*ro2.GatewaySimplify{},
 			Addons:           nil,
 			AddonIds:         addonIds,
 		})
@@ -127,7 +127,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 				if len(planRo.AddonIds) > 0 {
 					for _, id := range planRo.AddonIds {
 						if mapPlans[id] != nil {
-							planRo.Addons = append(planRo.Addons, mapPlans[id])
+							planRo.Addons = append(planRo.Addons, ro2.SimplifyPlan(mapPlans[id]))
 						}
 					}
 				}
@@ -141,11 +141,10 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		for _, gatewayPlan := range allPlanChannelList {
 			for _, planRo := range list {
 				if int64(planRo.Plan.Id) == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
-					outChannel := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
-					planRo.Gateways = append(planRo.Gateways, &ro2.OutGatewayRo{
-						Id:          outChannel.Id,
-						GatewayName: outChannel.Name,
-					})
+					one := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
+					if one != nil {
+						planRo.Gateways = append(planRo.Gateways, ro2.SimplifyGateway(one))
+					}
 				}
 			}
 		}

@@ -17,7 +17,7 @@ type MerchantInformationRes struct {
 	SupportCurrency []*SupportCurrency `description:"Support Currency List" `
 	MerchantId      uint64
 	MerchantInfo    *entity.MerchantInfo
-	Gateway         []*ro.OutGatewayRo
+	Gateway         []*ro.GatewaySimplify
 }
 
 type SupportCurrency struct {

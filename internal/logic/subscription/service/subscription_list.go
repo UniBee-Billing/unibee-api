@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"strings"
-	"unibee-api/api/user/subscription"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	"unibee-api/internal/logic/gateway/api"
@@ -29,7 +28,7 @@ type SubscriptionListInternalReq struct {
 	Count      int    `p:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscription.SubscriptionDetailRes, error) {
+func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.SubscriptionDetailVo, error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
 
@@ -71,17 +70,17 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*subscripti
 	if user != nil {
 		user.Password = ""
 	}
-	return &subscription.SubscriptionDetailRes{
-		User:                                user,
-		Subscription:                        one,
+	return &ro.SubscriptionDetailVo{
+		User:                                ro.SimplifyUserAccount(user),
+		Subscription:                        ro.SimplifySubscription(one),
 		Gateway:                             ConvertGatewayToRo(query.GetGatewayById(ctx, one.GatewayId)),
-		Plan:                                query.GetPlanById(ctx, one.PlanId),
+		Plan:                                ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
 	}, nil
 }
 
-func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*ro.SubscriptionDetailRo) {
+func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*ro.SubscriptionDetailVo) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
 		req.Count = 20
@@ -131,9 +130,9 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		if user != nil {
 			user.Password = ""
 		}
-		list = append(list, &ro.SubscriptionDetailRo{
-			User:         user,
-			Subscription: sub,
+		list = append(list, &ro.SubscriptionDetailVo{
+			User:         ro.SimplifyUserAccount(user),
+			Subscription: ro.SimplifySubscription(sub),
 			Gateway:      ConvertGatewayToRo(query.GetGatewayById(ctx, sub.GatewayId)),
 			Plan:         nil,
 			Addons:       nil,
@@ -153,13 +152,13 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 				mapPlans[key] = value
 			}
 			for _, subRo := range list {
-				subRo.Plan = mapPlans[subRo.Subscription.PlanId]
+				subRo.Plan = ro.SimplifyPlan(mapPlans[subRo.Subscription.PlanId])
 				if len(subRo.AddonParams) > 0 {
 					for _, param := range subRo.AddonParams {
 						if mapPlans[param.AddonPlanId] != nil {
-							subRo.Addons = append(subRo.Addons, &ro.SubscriptionPlanAddonRo{
+							subRo.Addons = append(subRo.Addons, &ro.PlanAddonVo{
 								Quantity:  param.Quantity,
-								AddonPlan: mapPlans[param.AddonPlanId],
+								AddonPlan: ro.SimplifyPlan(mapPlans[param.AddonPlanId]),
 							})
 						}
 					}

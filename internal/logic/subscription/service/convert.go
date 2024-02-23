@@ -5,20 +5,20 @@ import (
 	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
-func ConvertGatewayToRo(gateway *entity.MerchantGateway) *ro.OutGatewayRo {
+func ConvertGatewayToRo(gateway *entity.MerchantGateway) *ro.GatewaySimplify {
 	if gateway == nil {
 		return nil
 	}
-	return &ro.OutGatewayRo{
+	return &ro.GatewaySimplify{
 		Id:          gateway.Id,
 		GatewayName: gateway.Name,
 	}
 }
 
-func ConvertChannelsToRos(gateways []*entity.MerchantGateway) []*ro.OutGatewayRo {
-	var outChannelRos []*ro.OutGatewayRo
+func ConvertChannelsToRos(gateways []*entity.MerchantGateway) []*ro.GatewaySimplify {
+	var outChannelRos []*ro.GatewaySimplify
 	for _, gateway := range gateways {
-		outChannelRos = append(outChannelRos, &ro.OutGatewayRo{
+		outChannelRos = append(outChannelRos, &ro.GatewaySimplify{
 			Id:          gateway.Id,
 			GatewayName: gateway.Name,
 		})

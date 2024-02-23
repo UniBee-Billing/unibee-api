@@ -196,8 +196,8 @@ type SubscriptionPaymentSuccessWebHookReq struct {
 	TrialEnd                    int64                                     `json:"trialEnd"`
 }
 
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.SubscriptionPlanAddonRo {
-	var addons []*ro.SubscriptionPlanAddonRo
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.PlanAddonVo {
+	var addons []*ro.PlanAddonVo
 	var totalAddonIds []int64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
@@ -228,9 +228,9 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId)
 				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
 				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v Id:%v gatewayPlanStatus not active", param.AddonPlanId, gatewayId))
-				addons = append(addons, &ro.SubscriptionPlanAddonRo{
+				addons = append(addons, &ro.PlanAddonVo{
 					Quantity:         param.Quantity,
-					AddonPlan:        mapPlans[param.AddonPlanId],
+					AddonPlan:        ro.SimplifyPlan(mapPlans[param.AddonPlanId]),
 					AddonGatewayPlan: gatewayPlan,
 				})
 			}

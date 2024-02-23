@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee-api/internal/consumer/webhook/event"
 	"unibee-api/internal/consumer/webhook/message"
+	"unibee-api/internal/logic/subscription/service"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
 )
@@ -34,7 +35,9 @@ func SendSubscriptionCreatedMerchantWebhookBackground(one *entity.Subscription) 
 				return
 			}
 		}()
-		// todo mark need Construct SubscriptionDetail Data
-		message.SendWebhookMessage(ctx, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED, one.MerchantId, utility.FormatToGJson(one))
+		subDetailRes, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
+		utility.AssertError(err, "SendSubscriptionCreatedMerchantWebhookBackground SubscriptionDetail Error")
+
+		message.SendWebhookMessage(ctx, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED, one.MerchantId, utility.FormatToGJson(subDetailRes))
 	}()
 }

@@ -12,12 +12,12 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionDetailRes struct {
-	User                                *entity.UserAccount                 `json:"user" dc:"user"`
-	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
-	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"Plan"`
-	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *ro.UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type SubscriptionPayCheckReq struct {
@@ -26,14 +26,14 @@ type SubscriptionPayCheckReq struct {
 }
 type SubscriptionPayCheckRes struct {
 	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"Pay Status，1-Pending，2-Paid，3-Suspend，4-Cancel, 5-Expired"`
-	Subscription *entity.Subscription          `json:"subscription" dc:"Subscription"`
+	Subscription *ro.SubscriptionSimplify      `json:"subscription" dc:"Subscription"`
 }
 
 type SubscriptionChannelsReq struct {
 	g.Meta `path:"/subscription_pay_gateways" tags:"User-Subscription-Controller" method:"post" summary:"Query Subscription Support Gateway"`
 }
 type SubscriptionChannelsRes struct {
-	Gateways []*ro.OutGatewayRo `json:"Gateways"`
+	Gateways []*ro.GatewaySimplify `json:"Gateways"`
 }
 
 type SubscriptionCreatePreviewReq struct {
@@ -49,9 +49,9 @@ type SubscriptionCreatePreviewReq struct {
 type SubscriptionCreatePreviewRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
-	Gateway           *ro.OutGatewayRo                   `json:"gateway"`
+	Gateway           *ro.GatewaySimplify                `json:"gateway"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	Addons            []*ro.PlanAddonVo                  `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
 	Currency          string                             `json:"currency"              `
 	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
@@ -127,7 +127,7 @@ type SubscriptionListReq struct {
 	//Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type SubscriptionListRes struct {
-	Subscriptions []*ro.SubscriptionDetailRo `p:"subscriptions" dc:"Subscription List"`
+	Subscriptions []*ro.SubscriptionDetailVo `p:"subscriptions" dc:"Subscription List"`
 }
 
 type SubscriptionCancelReq struct {

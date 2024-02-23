@@ -4,6 +4,7 @@ import (
 	"context"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/subscription/service"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
@@ -27,7 +28,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err == nil {
 			return &subscription.UserSubscriptionDetailRes{
-				User:                                user,
+				User:                                detail.User,
 				Subscription:                        detail.Subscription,
 				Plan:                                detail.Plan,
 				Gateway:                             detail.Gateway,
@@ -38,7 +39,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 	}
 
 	return &subscription.UserSubscriptionDetailRes{
-		User:                                user,
+		User:                                ro.SimplifyUserAccount(user),
 		Subscription:                        nil,
 		Plan:                                nil,
 		Gateway:                             nil,

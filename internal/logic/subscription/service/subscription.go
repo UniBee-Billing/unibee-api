@@ -37,7 +37,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
 	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons            []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	Addons            []*ro.PlanAddonVo                  `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
 	Currency          string                             `json:"currency"              `
 	VatCountryCode    string                             `json:"vatCountryCode"              `
@@ -52,8 +52,8 @@ type SubscriptionCreatePrepareInternalRes struct {
 	VatCountryRate    *ro.VatCountryRate                 `json:"vatCountryRate" `
 }
 
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.SubscriptionPlanAddonRo {
-	var addons []*ro.SubscriptionPlanAddonRo
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo, gatewayId int64) []*ro.PlanAddonVo {
+	var addons []*ro.PlanAddonVo
 	var totalAddonIds []int64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
@@ -84,9 +84,9 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				gatewayPlan := query.GetGatewayPlan(ctx, int64(mapPlans[param.AddonPlanId].Id), gatewayId) // todo mark for 循环内调用 需做缓存，此数据基本不会变化,或者方案 2 使用 gatewayId 合并查询
 				utility.Assert(len(gatewayPlan.GatewayPlanId) > 0, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanId invalid", param.AddonPlanId, gatewayId))
 				utility.Assert(gatewayPlan.Status == consts.GatewayPlanStatusActive, fmt.Sprintf("internal error PlanId:%v Id:%v GatewayPlanStatus not active", param.AddonPlanId, gatewayId))
-				addons = append(addons, &ro.SubscriptionPlanAddonRo{
+				addons = append(addons, &ro.PlanAddonVo{
 					Quantity:         param.Quantity,
-					AddonPlan:        mapPlans[param.AddonPlanId],
+					AddonPlan:        ro.SimplifyPlan(mapPlans[param.AddonPlanId]),
 					AddonGatewayPlan: gatewayPlan,
 				})
 			}
@@ -391,7 +391,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Gateway      *entity.MerchantGateway            `json:"gateway"`
 	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
 	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons       []*ro.SubscriptionPlanAddonRo      `json:"addons"`
+	Addons       []*ro.PlanAddonVo                  `json:"addons"`
 	TotalAmount  int64                              `json:"totalAmount"                `
 	Currency     string                             `json:"currency"              `
 	UserId       int64                              `json:"userId" `

@@ -111,11 +111,6 @@ type GatewayPaymentRo struct {
 	GatewaySubscriptionDetail   *GatewayDetailSubscriptionInternalResp `json:"gatewaySubscriptionDetail"              `
 }
 
-type OutGatewayRo struct {
-	Id          uint64 `json:"gatewayId"`
-	GatewayName string `json:"gatewayName"`
-}
-
 type GatewayCreateProductInternalResp struct {
 	GatewayProductId     string `json:"gatewayProductId"`
 	GatewayProductStatus string `json:"gatewayProductStatus"`
@@ -139,21 +134,21 @@ type GatewayCreateSubscriptionInternalResp struct {
 }
 
 type GatewayCreateSubscriptionInternalReq struct {
-	Plan           *entity.SubscriptionPlan   `json:"plan"`
-	AddonPlans     []*SubscriptionPlanAddonRo `json:"addonPlans"`
-	GatewayPlan    *entity.GatewayPlan        `json:"gatewayPlan"`
-	Subscription   *entity.Subscription       `json:"subscription"`
-	VatCountryRate *VatCountryRate            `json:"vatCountryRate"`
+	Plan           *entity.SubscriptionPlan `json:"plan"`
+	AddonPlans     []*PlanAddonVo           `json:"addonPlans"`
+	GatewayPlan    *entity.GatewayPlan      `json:"gatewayPlan"`
+	Subscription   *entity.Subscription     `json:"subscription"`
+	VatCountryRate *VatCountryRate          `json:"vatCountryRate"`
 }
 
 type GatewayUpdateSubscriptionInternalReq struct {
-	Plan            *entity.SubscriptionPlan   `json:"plan"`
-	Quantity        int64                      `json:"quantity" dc:"数量" `
-	AddonPlans      []*SubscriptionPlanAddonRo `json:"addonPlans"`
-	GatewayPlan     *entity.GatewayPlan        `json:"gatewayPlan"`
-	Subscription    *entity.Subscription       `json:"subscription"`
-	ProrationDate   int64                      `json:"prorationDate"`
-	EffectImmediate bool                       `json:"EffectImmediate"`
+	Plan            *entity.SubscriptionPlan `json:"plan"`
+	Quantity        int64                    `json:"quantity" dc:"数量" `
+	AddonPlans      []*PlanAddonVo           `json:"addonPlans"`
+	GatewayPlan     *entity.GatewayPlan      `json:"gatewayPlan"`
+	Subscription    *entity.Subscription     `json:"subscription"`
+	ProrationDate   int64                    `json:"prorationDate"`
+	EffectImmediate bool                     `json:"EffectImmediate"`
 }
 
 type GatewayCancelSubscriptionInternalReq struct {
@@ -358,7 +353,7 @@ type InvoiceDetailRo struct {
 	PeriodEnd                      int64                  `json:"periodEnd"                      description:"period_end"`
 	PaymentId                      string                 `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                 `json:"refundId"                       description:"refundId"`
-	Gateway                        *OutGatewayRo          `json:"gateway"                       description:"Gateway"`
+	Gateway                        *GatewaySimplify       `json:"gateway"                       description:"Gateway"`
 	MerchantInfo                   *entity.MerchantInfo   `json:"merchantInfo"                       description:"MerchantInfo"`
 	UserAccount                    *entity.UserAccount    `json:"userAccount"                       description:"UserAccount"`
 	Subscription                   *entity.Subscription   `json:"subscription"                       description:"Subscription"`
@@ -367,10 +362,10 @@ type InvoiceDetailRo struct {
 }
 
 type PlanDetailRo struct {
-	Plan             *entity.SubscriptionPlan     `p:"plan" json:"plan" dc:"Plan"`
+	Plan             *PlanSimplify                `p:"plan" json:"plan" dc:"Plan"`
 	MetricPlanLimits []*MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Gateways         []*OutGatewayRo              `p:"gateways" json:"gateways" dc:"Gateways"`
-	Addons           []*entity.SubscriptionPlan   `p:"addons" json:"addons" dc:"Addons"`
+	Gateways         []*GatewaySimplify           `p:"gateways" json:"gateways" dc:"Gateways"`
+	Addons           []*PlanSimplify              `p:"addons" json:"addons" dc:"Addons"`
 	AddonIds         []int64                      `p:"addonIds" json:"addonIds" dc:"AddonIds"`
 }
 
@@ -379,52 +374,52 @@ type SubscriptionPlanAddonParamRo struct {
 	AddonPlanId int64 `p:"addonPlanId" json:"addonPlanId" dc:"AddonPlanId"`
 }
 
-type SubscriptionPlanAddonRo struct {
-	Quantity         int64                    `p:"quantity"  json:"quantity" dc:"Quantity" `
-	AddonPlan        *entity.SubscriptionPlan `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
-	AddonGatewayPlan *entity.GatewayPlan      `p:"addonGatewayPlan"   json:"addonGatewayPlan" dc:"AddonGatewayPlan" `
+type PlanAddonVo struct {
+	Quantity         int64               `p:"quantity"  json:"quantity" dc:"Quantity" `
+	AddonPlan        *PlanSimplify       `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
+	AddonGatewayPlan *entity.GatewayPlan `p:"addonGatewayPlan"   json:"addonGatewayPlan" dc:"AddonGatewayPlan" `
 }
 
-type SubscriptionDetailRo struct {
-	User                                *entity.UserAccount              `json:"user" dc:"user"`
-	Subscription                        *entity.Subscription             `p:"subscription" json:"subscription" dc:"Subscription"`
-	Plan                                *entity.SubscriptionPlan         `p:"plan" json:"plan" dc:"Plan"`
-	Gateway                             *OutGatewayRo                    `p:"gateway" json:"gateway" dc:"Gateway"`
-	AddonParams                         []*SubscriptionPlanAddonParamRo  `p:"addonParams" json:"addonParams" dc:"AddonParams"`
-	Addons                              []*SubscriptionPlanAddonRo       `p:"addons" json:"addons" dc:"Addon"`
-	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+type SubscriptionDetailVo struct {
+	User                                *UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *SubscriptionSimplify              `p:"subscription" json:"subscription" dc:"Subscription"`
+	Plan                                *PlanSimplify                      `p:"plan" json:"plan" dc:"Plan"`
+	Gateway                             *GatewaySimplify                   `p:"gateway" json:"gateway" dc:"Gateway"`
+	AddonParams                         []*SubscriptionPlanAddonParamRo    `p:"addonParams" json:"addonParams" dc:"AddonParams"`
+	Addons                              []*PlanAddonVo                     `p:"addons" json:"addons" dc:"Addon"`
+	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
-type SubscriptionPendingUpdateDetail struct {
-	MerchantId           uint64                      `json:"merchantId"           description:"MerchantId"`
-	SubscriptionId       string                      `json:"subscriptionId"       description:"SubscriptionId"`
-	UpdateSubscriptionId string                      `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
-	GmtCreate            *gtime.Time                 `json:"gmtCreate"            description:"GmtCreate"`
-	Amount               int64                       `json:"amount"               description:"Amount, Cent"`
-	Status               int                         `json:"status"               description:"Status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`
-	UpdateAmount         int64                       `json:"updateAmount"         description:"UpdateAmount, Cents"`
-	ProrationAmount      int64                       `json:"prorationAmount"      description:"ProrationAmount,Cents"`
-	Currency             string                      `json:"currency"             description:"Currency"`
-	UpdateCurrency       string                      `json:"updateCurrency"       description:"UpdateCurrency"`
-	PlanId               int64                       `json:"planId"               description:"PlanId"`
-	UpdatePlanId         int64                       `json:"updatePlanId"         description:"UpdatePlanId"`
-	Quantity             int64                       `json:"quantity"             description:"quantity"`
-	UpdateQuantity       int64                       `json:"updateQuantity"       description:"UpdateQuantity"`
-	AddonData            string                      `json:"addonData"            description:"plan addon json data"`
-	UpdateAddonData      string                      `json:"updateAddonData"     description:"UpdateAddonData"`
-	GatewayId            int64                       `json:"gatewayId"            description:"Id"`
-	UserId               int64                       `json:"userId"               description:"UserId"`
-	GmtModify            *gtime.Time                 `json:"gmtModify"            description:"GmtModify"`
-	Paid                 int                         `json:"paid"                 description:"Paid"`
-	Link                 string                      `json:"link"                 description:"Link"`
-	MerchantUser         *entity.MerchantUserAccount `json:"merchantUser"       description:"merchant_user"`
-	EffectImmediate      int                         `json:"effectImmediate"      description:"EffectImmediate"`
-	EffectTime           int64                       `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
-	Note                 string                      `json:"note"            description:"Update Note"`
-	Plan                 *entity.SubscriptionPlan    `json:"plan" dc:"Plan"`
-	Addons               []*SubscriptionPlanAddonRo  `json:"addons" dc:"Addons"`
-	UpdatePlan           *entity.SubscriptionPlan    `json:"updatePlan" dc:"UpdatePlan"`
-	UpdateAddons         []*SubscriptionPlanAddonRo  `json:"updateAddons" dc:"UpdateAddons"`
+type SubscriptionPendingUpdateDetailVo struct {
+	MerchantId           uint64                       `json:"merchantId"           description:"MerchantId"`
+	SubscriptionId       string                       `json:"subscriptionId"       description:"SubscriptionId"`
+	UpdateSubscriptionId string                       `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
+	GmtCreate            *gtime.Time                  `json:"gmtCreate"            description:"GmtCreate"`
+	Amount               int64                        `json:"amount"               description:"Amount, Cent"`
+	Status               int                          `json:"status"               description:"Status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`
+	UpdateAmount         int64                        `json:"updateAmount"         description:"UpdateAmount, Cents"`
+	ProrationAmount      int64                        `json:"prorationAmount"      description:"ProrationAmount,Cents"`
+	Currency             string                       `json:"currency"             description:"Currency"`
+	UpdateCurrency       string                       `json:"updateCurrency"       description:"UpdateCurrency"`
+	PlanId               int64                        `json:"planId"               description:"PlanId"`
+	UpdatePlanId         int64                        `json:"updatePlanId"         description:"UpdatePlanId"`
+	Quantity             int64                        `json:"quantity"             description:"quantity"`
+	UpdateQuantity       int64                        `json:"updateQuantity"       description:"UpdateQuantity"`
+	AddonData            string                       `json:"addonData"            description:"plan addon json data"`
+	UpdateAddonData      string                       `json:"updateAddonData"     description:"UpdateAddonData"`
+	GatewayId            int64                        `json:"gatewayId"            description:"Id"`
+	UserId               int64                        `json:"userId"               description:"UserId"`
+	GmtModify            *gtime.Time                  `json:"gmtModify"            description:"GmtModify"`
+	Paid                 int                          `json:"paid"                 description:"Paid"`
+	Link                 string                       `json:"link"                 description:"Link"`
+	MerchantUser         *MerchantUserAccountSimplify `json:"merchantUser"       description:"merchant_user"`
+	EffectImmediate      int                          `json:"effectImmediate"      description:"EffectImmediate"`
+	EffectTime           int64                        `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
+	Note                 string                       `json:"note"            description:"Update Note"`
+	Plan                 *PlanSimplify                `json:"plan" dc:"Plan"`
+	Addons               []*PlanAddonVo               `json:"addons" dc:"Addons"`
+	UpdatePlan           *PlanSimplify                `json:"updatePlan" dc:"UpdatePlan"`
+	UpdateAddons         []*PlanAddonVo               `json:"updateAddons" dc:"UpdateAddons"`
 }
 
 type ValidResult struct {

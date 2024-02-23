@@ -68,6 +68,7 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/ulule/deepcopier v0.0.0-20200430083143-45decc6639b6 // indirect
 	github.com/unidoc/pkcs7 v0.2.0 // indirect
 	github.com/unidoc/timestamp v0.0.0-20200412005513-91597fd3793a // indirect
 	github.com/unidoc/unichart v0.1.0 // indirect

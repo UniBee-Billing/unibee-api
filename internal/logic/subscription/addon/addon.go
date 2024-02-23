@@ -7,7 +7,7 @@ import (
 	"unibee-api/utility"
 )
 
-func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*ro.SubscriptionPlanAddonRo {
+func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*ro.PlanAddonVo {
 	if len(addonJson) == 0 {
 		return nil
 	}
@@ -16,11 +16,11 @@ func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*
 	if err != nil {
 		return nil
 	}
-	var addons []*ro.SubscriptionPlanAddonRo
+	var addons []*ro.PlanAddonVo
 	for _, param := range addonParams {
-		addons = append(addons, &ro.SubscriptionPlanAddonRo{
+		addons = append(addons, &ro.PlanAddonVo{
 			Quantity:  param.Quantity,
-			AddonPlan: query.GetPlanById(ctx, param.AddonPlanId),
+			AddonPlan: ro.SimplifyPlan(query.GetPlanById(ctx, param.AddonPlanId)),
 		})
 	}
 	return addons

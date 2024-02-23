@@ -9,7 +9,7 @@ import (
 	"unibee-api/internal/query"
 )
 
-func GetOutGatewayRoById(ctx context.Context, id int64) (one *ro.OutGatewayRo) {
+func GetGatewaySimplifyById(ctx context.Context, id int64) (one *ro.GatewaySimplify) {
 	if id <= 0 {
 		return nil
 	}
@@ -21,7 +21,7 @@ func GetOutGatewayRoById(ctx context.Context, id int64) (one *ro.OutGatewayRo) {
 	return one
 }
 
-func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId uint64) []*ro.OutGatewayRo {
+func GetActiveGatewaySimplifyListByMerchantId(ctx context.Context, merchantId uint64) []*ro.GatewaySimplify {
 	if merchantId <= 0 {
 		return nil
 	}
@@ -30,9 +30,9 @@ func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId uint
 	if err != nil {
 		return nil
 	}
-	var gateways []*ro.OutGatewayRo
+	var gateways []*ro.GatewaySimplify
 	for _, one := range list {
-		gateways = append(gateways, &ro.OutGatewayRo{
+		gateways = append(gateways, &ro.GatewaySimplify{
 			Id:          one.Id,
 			GatewayName: one.Name,
 		})
@@ -40,7 +40,7 @@ func GetListActiveOutGatewayRosByMerchantId(ctx context.Context, merchantId uint
 	return gateways
 }
 
-func GetListActiveOutGatewayRos(ctx context.Context, planId int64) []*ro.OutGatewayRo {
+func GetActiveGatewaySimplifyList(ctx context.Context, planId int64) []*ro.GatewaySimplify {
 	if planId <= 0 {
 		return nil
 	}
@@ -49,12 +49,12 @@ func GetListActiveOutGatewayRos(ctx context.Context, planId int64) []*ro.OutGate
 	if err != nil {
 		return nil
 	}
-	var gateways []*ro.OutGatewayRo
+	var gateways []*ro.GatewaySimplify
 	for _, one := range list {
 		if one.Status == consts.GatewayPlanStatusActive {
 			outChannel := query.GetGatewayById(ctx, one.GatewayId)
 			if outChannel != nil {
-				gateways = append(gateways, &ro.OutGatewayRo{
+				gateways = append(gateways, &ro.GatewaySimplify{
 					Id:          outChannel.Id,
 					GatewayName: outChannel.Name,
 				})

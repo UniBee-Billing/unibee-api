@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"unibee-api/internal/logic/gateway"
 	"unibee-api/internal/logic/gateway/ro"
+	addon2 "unibee-api/internal/logic/subscription/addon"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/internal/query"
 	"unibee-api/utility"
-	addon2 "unibee-api/internal/logic/subscription/addon"
 )
 
 func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.InvoiceDetailRo {
@@ -56,7 +56,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.Invoic
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
-		Gateway:                        gateway.GetOutGatewayRoById(ctx, invoice.GatewayId),
+		Gateway:                        gateway.GetGatewaySimplifyById(ctx, invoice.GatewayId),
 		MerchantInfo:                   query.GetMerchantInfoById(ctx, invoice.MerchantId),
 		UserAccount:                    query.GetUserAccountById(ctx, uint64(invoice.UserId)),
 		Subscription:                   query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId),

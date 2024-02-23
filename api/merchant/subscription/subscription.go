@@ -12,12 +12,12 @@ type SubscriptionDetailReq struct {
 	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionDetailRes struct {
-	User                                *entity.UserAccount                 `json:"user" dc:"User"`
-	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
-	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"Plan"`
-	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *ro.UserAccountSimplify               `json:"user" dc:"User"`
+	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type SubscriptionListReq struct {
@@ -30,7 +30,7 @@ type SubscriptionListReq struct {
 	Count     int    `p:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type SubscriptionListRes struct {
-	Subscriptions []*ro.SubscriptionDetailRo `json:"subscriptions" dc:"Subscriptions"`
+	Subscriptions []*ro.SubscriptionDetailVo `json:"subscriptions" dc:"Subscriptions"`
 }
 
 type SubscriptionCancelReq struct {
@@ -118,12 +118,12 @@ type UserSubscriptionDetailReq struct {
 }
 
 type UserSubscriptionDetailRes struct {
-	User                                *entity.UserAccount                 `json:"user" dc:"user"`
-	Subscription                        *entity.Subscription                `json:"subscription" dc:"Subscription"`
-	Plan                                *entity.SubscriptionPlan            `json:"plan" dc:"Plan"`
-	Gateway                             *ro.OutGatewayRo                    `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.SubscriptionPlanAddonRo       `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
+	User                                *ro.UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }
 
 type SubscriptionTimeLineListReq struct {
@@ -149,7 +149,7 @@ type SubscriptionMerchantPendingUpdateListReq struct {
 }
 
 type SubscriptionMerchantPendingUpdateListRes struct {
-	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetailVo `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
 type SubscriptionNewAdminNoteReq struct {
