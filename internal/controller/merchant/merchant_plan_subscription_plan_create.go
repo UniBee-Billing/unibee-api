@@ -5,6 +5,7 @@ import (
 	"unibee-api/api/merchant/plan"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/plan/service"
 	"unibee-api/utility"
 )
@@ -21,5 +22,5 @@ func (c *ControllerPlan) SubscriptionPlanCreate(ctx context.Context, req *plan.S
 	if err != nil {
 		return nil, err
 	}
-	return &plan.SubscriptionPlanCreateRes{Plan: one}, nil
+	return &plan.SubscriptionPlanCreateRes{Plan: ro.SimplifyPlan(one)}, nil
 }

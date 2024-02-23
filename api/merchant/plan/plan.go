@@ -3,7 +3,6 @@ package plan
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionPlanCreateReq struct {
@@ -22,7 +21,7 @@ type SubscriptionPlanCreateReq struct {
 	AddonIds           []int64 `p:"addonIds"  dc:"Plan Ids Of Addon Type" `
 }
 type SubscriptionPlanCreateRes struct {
-	Plan *entity.SubscriptionPlan `json:"plan" dc:"Plan"`
+	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type SubscriptionPlanEditReq struct {
@@ -41,7 +40,7 @@ type SubscriptionPlanEditReq struct {
 	AddonIds           []int64 `p:"addonIds"  dc:"Plan Ids Of Addon Type" `
 }
 type SubscriptionPlanEditRes struct {
-	Plan *entity.SubscriptionPlan `json:"plan" dc:"Plan"`
+	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type SubscriptionPlanAddonsBindingReq struct {
@@ -51,7 +50,7 @@ type SubscriptionPlanAddonsBindingReq struct {
 	AddonIds []int64 `p:"addonIds"  dc:"Plan Ids Of Addon Type"  v:"required" `
 }
 type SubscriptionPlanAddonsBindingRes struct {
-	Plan *entity.SubscriptionPlan `json:"plan" dc:"Plan"`
+	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type SubscriptionPlanListReq struct {

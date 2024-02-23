@@ -5,6 +5,7 @@ import (
 	"unibee-api/api/merchant/plan"
 	"unibee-api/internal/consts"
 	_interface "unibee-api/internal/interface"
+	"unibee-api/internal/logic/gateway/ro"
 	"unibee-api/internal/logic/plan/service"
 	"unibee-api/utility"
 )
@@ -21,5 +22,5 @@ func (c *ControllerPlan) SubscriptionPlanAddonsBinding(ctx context.Context, req 
 	if err != nil {
 		return nil, err
 	}
-	return &plan.SubscriptionPlanAddonsBindingRes{Plan: one}, nil
+	return &plan.SubscriptionPlanAddonsBindingRes{Plan: ro.SimplifyPlan(one)}, nil
 }
