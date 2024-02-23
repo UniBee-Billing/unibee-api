@@ -188,8 +188,8 @@ func GetUserMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, us
 	return useValue
 }
 
-func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, append uint64) uint64 {
-	cacheKey := fmt.Sprintf("%s_%d_%d_%d", UserMetricCacheKeyPrefix, merchantId, user.Id, met.Id)
+func appendMetricLimitCachedUseValue(ctx context.Context, merchantId uint64, user *entity.UserAccount, met *entity.MerchantMetric, sub *entity.Subscription, append uint64) uint64 {
+	cacheKey := fmt.Sprintf("%s_%d_%d_%d_%s_%d", UserMetricCacheKeyPrefix, merchantId, user.Id, met.Id, sub.SubscriptionId, sub.CurrentPeriodStart)
 	get, err := g.Redis().Get(ctx, cacheKey)
 	if err == nil && !get.IsNil() && !get.IsEmpty() && (get.IsUint() || get.IsInt()) {
 		newValue := get.Uint64() + append

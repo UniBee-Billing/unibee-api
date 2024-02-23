@@ -73,14 +73,15 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	var metricLimit uint64 = 0
 	var usedValue uint64 = 0
+	var check = false
 	if met.Type == metric.MetricTypeLimitMetered {
 		// need check if metric limit reached and reject it
-		usedValue, metricLimit, check := checkMetricLimitReached(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
+		usedValue, metricLimit, check = checkMetricLimitReached(ctx, req.MerchantId, user, sub, met, aggregationPropertyInt)
 		utility.Assert(check, fmt.Sprintf("metric limit reached, current used: %d, limit: %d", usedValue, metricLimit))
 	}
 
 	var one *entity.MerchantMetricEvent
-	err := dao.MerchantMetricPlanLimit.Ctx(ctx).
+	err := dao.MerchantMetricEvent.Ctx(ctx).
 		Where(dao.MerchantMetricEvent.Columns().AggregationPropertyUniqueId, aggregationPropertyUniqueId).
 		Scan(&one)
 	utility.AssertError(err, "Server Error")
@@ -117,7 +118,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	if met.Type == metric.MetricTypeLimitMetered {
 		// append the metric limit usage
-		usedValue = appendMetricLimitCachedUseValue(ctx, req.MerchantId, user, met, aggregationPropertyInt)
+		usedValue = appendMetricLimitCachedUseValue(ctx, req.MerchantId, user, met, sub, aggregationPropertyInt)
 	}
 	one.Used = usedValue
 
