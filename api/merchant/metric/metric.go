@@ -16,8 +16,8 @@ type MerchantMetricListRes struct {
 type NewMerchantMetricReq struct {
 	g.Meta              `path:"/new_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric"`
 	Code                string `p:"code" dc:"Code" v:"required"`
-	Name                string `p:"name" dc:"Name" v:"required"`
-	Description         string `p:"description" dc:"Description"`
+	MetricName          string `p:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription   string `p:"metricDescription" dc:"MetricDescription"`
 	AggregationType     int    `p:"aggregationType" dc:"AggregationType,0-count，1-count unique, 2-latest, 3-max, 4-sum"`
 	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
@@ -27,10 +27,10 @@ type NewMerchantMetricRes struct {
 }
 
 type EditMerchantMetricReq struct {
-	g.Meta      `path:"/edit_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
-	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
-	Name        string `p:"name" dc:"Name" v:"required"`
-	Description string `p:"description" dc:"Description"`
+	g.Meta            `path:"/edit_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
+	MetricId          int64  `p:"metricId" dc:"MetricId" v:"required"`
+	MetricName        string `p:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription string `p:"metricDescription" dc:"MetricDescription"`
 }
 
 type EditMerchantMetricRes struct {

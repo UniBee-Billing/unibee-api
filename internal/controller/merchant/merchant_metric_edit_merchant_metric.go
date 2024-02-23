@@ -23,7 +23,7 @@ func (c *ControllerMetric) EditMerchantMetric(ctx context.Context, req *metric.E
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	me, err := metric2.EditMerchantMetric(ctx, _interface.GetMerchantId(ctx), req.MetricId, req.Name, req.Description)
+	me, err := metric2.EditMerchantMetric(ctx, _interface.GetMerchantId(ctx), req.MetricId, req.MetricName, req.MetricDescription)
 	if err != nil {
 		return nil, err
 	}
