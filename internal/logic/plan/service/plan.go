@@ -145,7 +145,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	} else if strings.ToLower(req.IntervalUnit) == "month" {
 		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
 	} else if strings.ToLower(req.IntervalUnit) == "year" {
-		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
 	} else if strings.ToLower(req.IntervalUnit) == "week" {
 		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 	}
@@ -217,7 +217,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	} else if strings.ToLower(req.IntervalUnit) == "month" {
 		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
 	} else if strings.ToLower(req.IntervalUnit) == "year" {
-		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
 	} else if strings.ToLower(req.IntervalUnit) == "week" {
 		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 	}

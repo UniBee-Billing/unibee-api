@@ -50,7 +50,7 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId int6
 	} else if strings.ToLower(plan.IntervalUnit) == "month" {
 		utility.Assert(plan.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
 	} else if strings.ToLower(plan.IntervalUnit) == "year" {
-		utility.Assert(plan.IntervalCount <= 1, "IntervalCount Must Lower Then 52 While IntervalUnit is year")
+		utility.Assert(plan.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
 	} else if strings.ToLower(plan.IntervalUnit) == "week" {
 		utility.Assert(plan.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 	}
