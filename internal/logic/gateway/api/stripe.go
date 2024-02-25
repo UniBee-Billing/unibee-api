@@ -1157,6 +1157,12 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			var gatewayPaymentId = ""
 			var link = ""
 			var cancelErr error
+			if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
+				if listQuery.PaymentMethods == nil {
+					listQuery.PaymentMethods = make([]string, 0)
+				}
+				listQuery.PaymentMethods = append(listQuery.PaymentMethods, gatewayUser.GatewayDefaultPaymentMethod)
+			}
 			for _, method := range listQuery.PaymentMethods {
 				params := &stripe.PaymentIntentParams{
 					Customer: stripe.String(gatewayUser.GatewayUserId),
@@ -1418,23 +1424,28 @@ func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGate
 	if item.NextAction != nil {
 		paymentData = utility.MarshalToJsonString(item.NextAction)
 	}
+	var gatewayPaymentMethod string
+	if item.PaymentMethod != nil {
+		gatewayPaymentMethod = item.PaymentMethod.ID
+	}
 	return &ro.GatewayPaymentRo{
-		GatewayId:        int64(gateway.Id),
-		MerchantId:       gateway.MerchantId,
-		GatewayInvoiceId: gatewayInvoiceId,
-		GatewayUserId:    gatewayUserId,
-		GatewayPaymentId: item.ID,
-		Status:           status,
-		AuthorizeStatus:  captureStatus,
-		AuthorizeReason:  authorizeReason,
-		CancelReason:     string(item.CancellationReason),
-		PaymentData:      paymentData,
-		TotalAmount:      item.Amount,
-		PaymentAmount:    item.AmountReceived,
-		Currency:         strings.ToUpper(string(item.Currency)),
-		PayTime:          gtime.NewFromTimeStamp(item.Created),
-		CreateTime:       gtime.NewFromTimeStamp(item.Created),
-		CancelTime:       gtime.NewFromTimeStamp(item.CanceledAt),
+		GatewayId:            int64(gateway.Id),
+		MerchantId:           gateway.MerchantId,
+		GatewayInvoiceId:     gatewayInvoiceId,
+		GatewayUserId:        gatewayUserId,
+		GatewayPaymentId:     item.ID,
+		Status:               status,
+		AuthorizeStatus:      captureStatus,
+		AuthorizeReason:      authorizeReason,
+		CancelReason:         string(item.CancellationReason),
+		PaymentData:          paymentData,
+		TotalAmount:          item.Amount,
+		PaymentAmount:        item.AmountReceived,
+		GatewayPaymentMethod: gatewayPaymentMethod,
+		Currency:             strings.ToUpper(string(item.Currency)),
+		PayTime:              gtime.NewFromTimeStamp(item.Created),
+		CreateTime:           gtime.NewFromTimeStamp(item.Created),
+		CancelTime:           gtime.NewFromTimeStamp(item.CanceledAt),
 	}
 }
 

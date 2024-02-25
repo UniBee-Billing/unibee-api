@@ -53,13 +53,13 @@ func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId int6
 			return nil, err
 		}
 		one.Id = uint64(uint(id))
-	} else {
+	} else if len(gatewayDefaultPaymentMethod) > 0 {
 		one.GatewayDefaultPaymentMethod = gatewayDefaultPaymentMethod
 		_, err := dao.GatewayUser.Ctx(ctx).Data(g.Map{
 			dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: gatewayDefaultPaymentMethod,
 		}).Where(dao.GatewayUser.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateGatewayUser record insert failure %s`, err)
+			err = gerror.Newf(`CreateOrUpdateGatewayUser update gatewayDefaultPaymentMethod failure %s`, err)
 			return nil, err
 		}
 	}

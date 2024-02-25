@@ -409,7 +409,13 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePaySuccess sendResult err=%s", err)
 
 	if err == nil {
-		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
+		{
+			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
+			if gatewayUser != nil && len(payment.GatewayPaymentMethod) > 0 {
+				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
+			}
+		}
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
