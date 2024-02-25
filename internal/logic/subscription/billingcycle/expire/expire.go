@@ -9,6 +9,7 @@ import (
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
 	handler2 "unibee-api/internal/logic/payment/handler"
+	"unibee-api/internal/logic/payment/service"
 	service2 "unibee-api/internal/logic/subscription/service"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/redismq"
@@ -42,8 +43,11 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		fmt.Printf("SubscriptionExpire GetPaymentList error:%s", err.Error())
 	}
 	for _, p := range paymentList {
-		// todo mark should use PaymentGatewayCancel
-		err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
+		err = service.PaymentGatewayCancel(ctx, p)
+		if err != nil {
+			fmt.Printf("SubscriptionExpire PaymentGatewayCancel error:%s", err.Error())
+		}
+		err = handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 			PaymentId:     p.PaymentId,
 			PayStatusEnum: consts.PAY_CANCEL,
 			Reason:        reason,
