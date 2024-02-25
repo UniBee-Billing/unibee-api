@@ -11,6 +11,7 @@ import (
 	redismqcmd "unibee-api/internal/cmd/redismq"
 	"unibee-api/internal/consts"
 	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee-api/internal/logic/gateway/api"
 	"unibee-api/internal/logic/gateway/ro"
 	handler2 "unibee-api/internal/logic/invoice/handler"
 	"unibee-api/internal/logic/payment/callback"
@@ -412,8 +413,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		{
 			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
-			if gatewayUser != nil && len(payment.GatewayPaymentMethod) > 0 {
+			gateway := query.GetGatewayById(ctx, gatewayUser.GatewayId)
+			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
 				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
+				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
 			}
 		}
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)

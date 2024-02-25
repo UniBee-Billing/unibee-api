@@ -8,6 +8,16 @@ import (
 
 type Invalid struct{}
 
+func (i Invalid) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (i Invalid) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i Invalid) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

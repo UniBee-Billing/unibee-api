@@ -13,6 +13,7 @@ import (
 	"github.com/stripe/stripe-go/v76/invoice"
 	"github.com/stripe/stripe-go/v76/invoiceitem"
 	"github.com/stripe/stripe-go/v76/paymentintent"
+	"github.com/stripe/stripe-go/v76/paymentmethod"
 	"github.com/stripe/stripe-go/v76/price"
 	"github.com/stripe/stripe-go/v76/product"
 	"github.com/stripe/stripe-go/v76/refund"
@@ -34,6 +35,33 @@ import (
 )
 
 type Stripe struct {
+}
+
+func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
+	s.setUnibeeAppInfo()
+	gatewayUser := queryAndCreateChannelUser(ctx, gateway, userId)
+	params := &stripe.PaymentMethodAttachParams{
+		Customer: stripe.String(gatewayUser.GatewayUserId),
+	}
+	_, err = paymentmethod.Attach(gatewayPaymentMethod, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.GatewayUserAttachPaymentMethodInternalResp{}, nil
+}
+
+func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
+	s.setUnibeeAppInfo()
+	params := &stripe.PaymentMethodDetachParams{}
+	_, err = paymentmethod.Detach(gatewayPaymentMethod, params)
+	if err != nil {
+		return nil, err
+	}
+	return &ro.GatewayUserDeAttachPaymentMethodInternalResp{}, nil
 }
 
 func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {

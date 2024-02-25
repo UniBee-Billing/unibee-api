@@ -9,6 +9,16 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a AutoTest) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

@@ -219,6 +219,12 @@ type GatewayUserDetailQueryInternalResp struct {
 	Description          string            `json:"description"`
 }
 
+type GatewayUserAttachPaymentMethodInternalResp struct {
+}
+
+type GatewayUserDeAttachPaymentMethodInternalResp struct {
+}
+
 type GatewayUserPaymentMethodListInternalResp struct {
 	PaymentMethods []string `json:"paymentMethods"`
 }

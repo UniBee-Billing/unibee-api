@@ -35,6 +35,16 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p Paypal) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

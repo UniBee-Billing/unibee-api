@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"time"
 	_interface "unibee-api/internal/interface"
 	"unibee-api/internal/logic/gateway/ro"
 	entity "unibee-api/internal/model/entity/oversea_pay"
 	"unibee-api/utility"
-	"time"
 )
 
 type GatewayKeyEnum struct {
@@ -19,10 +19,6 @@ type GatewayKeyEnum struct {
 }
 
 var (
-	GatewayInvalid  = GatewayKeyEnum{-1, "Invalid Gateway"}
-	GatewayGrab     = GatewayKeyEnum{0, "Grab"}
-	GatewayKlarna   = GatewayKeyEnum{1, "Klarna"}
-	GatewayEvonet   = GatewayKeyEnum{2, "Evonet"}
 	GatewayPaypal   = GatewayKeyEnum{3, "Paypal"}
 	GatewayStripe   = GatewayKeyEnum{4, "Stripe"}
 	GatewayBlank    = GatewayKeyEnum{50, "0 Payment"}
@@ -31,6 +27,50 @@ var (
 
 type GatewayProxy struct {
 	Gateway *entity.MerchantGateway
+}
+
+func (p GatewayProxy) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteGateway().GatewayUserAttachPaymentMethodQuery(ctx, gateway, userId, gatewayPaymentMethod)
+
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
+func (p GatewayProxy) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteGateway().GatewayUserDeAttachPaymentMethodQuery(ctx, gateway, userId, gatewayPaymentMethod)
+
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
 }
 
 func (p GatewayProxy) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
@@ -81,9 +121,7 @@ func (p GatewayProxy) GatewayUserCreate(ctx context.Context, gateway *entity.Mer
 
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(p.Gateway != nil, "gateway is not set")
-	if p.Gateway.EnumKey == GatewayEvonet.Code {
-		return &Evonet{}
-	} else if p.Gateway.EnumKey == GatewayPaypal.Code {
+	if p.Gateway.EnumKey == GatewayPaypal.Code {
 		return &Paypal{}
 	} else if p.Gateway.EnumKey == GatewayStripe.Code {
 		return &Stripe{}
