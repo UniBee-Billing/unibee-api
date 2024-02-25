@@ -1115,7 +1115,8 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
-				Metadata: createPayContext.MediaData,
+				Metadata:         createPayContext.MediaData,
+				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 			},
 		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
@@ -1172,8 +1173,9 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 					AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 						Enabled: stripe.Bool(true),
 					},
-					Metadata:  createPayContext.MediaData,
-					ReturnURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
+					Metadata:         createPayContext.MediaData,
+					ReturnURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
+					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				}
 				params.PaymentMethod = stripe.String(method)
 				targetIntent, err = paymentintent.New(params)

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
+	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/paymentmethod"
+	"strings"
 	"unibee-api/utility"
 
 	"github.com/gogf/gf/v2/test/gtest"
@@ -83,6 +85,36 @@ func TestStrip(t *testing.T) {
 				fmt.Println(utility.MarshalToJsonString(err))
 			}
 			fmt.Println(utility.MarshalToJsonString(paymentIntentDetail))
+		}
+		//{
+		//	params := &stripe.PaymentMethodAttachParams{
+		//		Customer: stripe.String(gatewayUser.GatewayUserId),
+		//	}
+		//	result, err := paymentmethod.Attach(gatewayUser.GatewayDefaultPaymentMethod, params)
+		//	if err != nil {
+		//		fmt.Println(utility.MarshalToJsonString(err))
+		//	}
+		//	fmt.Println(utility.MarshalToJsonString(result))
+		//}
+		{
+			params := &stripe.PaymentIntentParams{
+				Customer: stripe.String(gatewayUser.GatewayUserId),
+				Confirm:  stripe.Bool(true),
+				Amount:   stripe.Int64(101),
+				Currency: stripe.String(strings.ToLower("USD")),
+				AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+					Enabled: stripe.Bool(true),
+				},
+				//Metadata:  createPayContext.MediaData,
+				ReturnURL:        stripe.String("http://user.unibee.top"),
+				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
+			}
+			params.PaymentMethod = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
+			targetIntent, err := paymentintent.New(params)
+			if err != nil {
+				fmt.Println(utility.MarshalToJsonString(err))
+			}
+			fmt.Println(utility.MarshalToJsonString(targetIntent))
 		}
 	})
 }
