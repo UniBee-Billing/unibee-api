@@ -1296,7 +1296,6 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 	}
 }
 
-// ContainString
 func ContainString(slice []string, item string) bool {
 	for _, v := range slice {
 		if v == item {
@@ -1318,22 +1317,55 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	params := &stripe.InvoiceVoidInvoiceParams{}
-	result, err := invoice.VoidInvoice(payment.GatewayPaymentIntentId, params)
-	log.SaveChannelHttpLog("GatewayCancel", params, result, err, "VoidInvoice", nil, gateway)
-	if err != nil {
-		return nil, err
-	}
-	invoiceDetails := parseStripeInvoice(result, payment.GatewayId)
+
 	var status = consts.TO_BE_PAID
-	if invoiceDetails.Status == consts.InvoiceStatusPaid {
-		status = consts.PAY_SUCCESS
-	} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
-		status = consts.PAY_FAILED
+	var gatewayCancelId string
+	if strings.HasPrefix(payment.GatewayPaymentIntentId, "in_") {
+		params := &stripe.InvoiceVoidInvoiceParams{}
+		result, err := invoice.VoidInvoice(payment.GatewayPaymentIntentId, params)
+		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "VoidInvoice", nil, gateway)
+		if err != nil {
+			return nil, err
+		}
+		invoiceDetails := parseStripeInvoice(result, payment.GatewayId)
+		gatewayCancelId = result.ID
+		if invoiceDetails.Status == consts.InvoiceStatusPaid {
+			status = consts.PAY_SUCCESS
+		} else if invoiceDetails.Status == consts.InvoiceStatusFailed || invoiceDetails.Status == consts.InvoiceStatusCancelled {
+			status = consts.PAY_FAILED
+		}
+	} else if strings.HasPrefix(payment.GatewayPaymentIntentId, "cs_") {
+		params := &stripe.CheckoutSessionExpireParams{}
+		result, err := session.Expire(
+			payment.GatewayPaymentIntentId,
+			params,
+		)
+		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "ExpireSession", nil, gateway)
+		if err != nil {
+			return nil, err
+		}
+		if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
+		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
+			status = consts.PAY_SUCCESS
+		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
+			status = consts.PAY_FAILED
+		}
+		gatewayCancelId = result.ID
+	} else {
+		params := &stripe.PaymentIntentCancelParams{}
+		result, err := paymentintent.Cancel(payment.GatewayPaymentIntentId, params)
+		log.SaveChannelHttpLog("GatewayCancel", params, result, err, "CancelPaymentIntent", nil, gateway)
+		if err != nil {
+			return nil, err
+		}
+		paymentDetails := parseStripePayment(result, gateway)
+		status = paymentDetails.Status
+		gatewayCancelId = paymentDetails.GatewayPaymentId
 	}
+
 	return &ro.OutPayCancelRo{
 		MerchantId:      strconv.FormatUint(payment.MerchantId, 10),
-		GatewayCancelId: result.ID,
+		GatewayCancelId: gatewayCancelId,
 		Reference:       payment.PaymentId,
 		Status:          strconv.Itoa(status),
 	}, nil
