@@ -82,7 +82,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		if strings.Contains(message, "Session Expired") {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				utility.OpenApiJsonExit(r, 61, "Session Expired")
+				utility.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), "Session Expired")
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
 				utility.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
