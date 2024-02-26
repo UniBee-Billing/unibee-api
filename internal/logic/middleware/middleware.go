@@ -117,8 +117,12 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
 	list := query.GetActiveMerchantInfoList(r.Context())
+	userAgent := r.Header.Get("User-Agent")
+	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
+		customCtx.IsOpenApiCall = true
+	}
 	tokenString := r.Header.Get("Authorization")
-	if len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ") {
+	if customCtx.IsOpenApiCall == true || (len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ")) {
 		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
 		utility.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
 		r.Exit()
@@ -173,15 +177,15 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		r.Middleware.Next()
 		return
 	}
-	tokenString := r.Header.Get("Authorization")
-	clientType := r.Header.Get("ClientType")
-	if len(clientType) > 0 && strings.Contains(clientType, "sdk") {
+	userAgent := r.Header.Get("User-Agent")
+	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
 		customCtx.IsOpenApiCall = true
 	}
+	tokenString := r.Header.Get("Authorization")
 	if len(tokenString) == 0 {
 		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
 		if customCtx.IsOpenApiCall {
-			r.Response.Status = 400
+			r.Response.Status = 401
 			utility.OpenApiJsonExit(r, 61, "invalid token")
 		} else {
 			utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
@@ -192,7 +196,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1) // remove Bearer
 	}
-	if jwt.IsPortalToken(tokenString) {
+	if !customCtx.IsOpenApiCall || jwt.IsPortalToken(tokenString) {
 		// Portal Call
 		if !jwt.IsAuthTokenExpired(r.Context(), tokenString) {
 			g.Log().Infof(r.Context(), "TokenAuth Invalid Token:%s", tokenString)
@@ -244,8 +248,8 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		customCtx.IsOpenApiCall = true
 		merchantInfo := query.GetMerchantInfoByApiKey(r.Context(), tokenString)
 		if merchantInfo == nil {
-			g.Log().Infof(r.Context(), "TokenAuth invalid api token :%v", tokenString)
-			utility.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
+			r.Response.Status = 401
+			utility.OpenApiJsonExit(r, 61, "invalid token")
 		} else {
 			customCtx.MerchantId = merchantInfo.Id
 		}
