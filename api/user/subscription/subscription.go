@@ -2,9 +2,9 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/consts"
-	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/consts"
+	"unibee/internal/logic/gateway/ro"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionDetailReq struct {

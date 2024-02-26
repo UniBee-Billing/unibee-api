@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/api"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/api"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err error) {

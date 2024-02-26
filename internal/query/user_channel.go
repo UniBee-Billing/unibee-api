@@ -5,9 +5,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func GetGatewayUser(ctx context.Context, userId int64, gatewayId int64) (one *entity.GatewayUser) {

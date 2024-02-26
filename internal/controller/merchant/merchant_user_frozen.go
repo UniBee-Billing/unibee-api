@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/user"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/auth"
-	"unibee-api/utility"
+	"unibee/api/merchant/user"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/auth"
+	"unibee/utility"
 )
 
 func (c *ControllerUser) Frozen(ctx context.Context, req *user.FrozenReq) (res *user.FrozenRes, err error) {

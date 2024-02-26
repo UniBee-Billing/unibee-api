@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/interface"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/interface"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func GetGatewayWebhookServiceProvider(ctx context.Context, gatewayId int64) (one _interface.GatewayWebhookInterface) {

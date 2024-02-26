@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type TradeEventTypeEnum struct {

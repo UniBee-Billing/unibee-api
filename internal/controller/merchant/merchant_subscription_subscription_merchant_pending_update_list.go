@@ -2,10 +2,10 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
 
-	"unibee-api/api/merchant/subscription"
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionMerchantPendingUpdateList(ctx context.Context, req *subscription.SubscriptionMerchantPendingUpdateListReq) (res *subscription.SubscriptionMerchantPendingUpdateListRes, err error) {

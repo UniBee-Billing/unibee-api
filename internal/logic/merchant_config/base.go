@@ -3,8 +3,8 @@ package merchant_config
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string, configValue string) error {

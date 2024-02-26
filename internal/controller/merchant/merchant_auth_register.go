@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"unibee-api/api/merchant/auth"
-	"unibee-api/internal/logic/email"
-	"unibee-api/utility"
+	"unibee/api/merchant/auth"
+	"unibee/internal/logic/email"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 const CacheKeyMerchantRegisterPrefix = "CacheKeyMerchantRegisterPrefix-"

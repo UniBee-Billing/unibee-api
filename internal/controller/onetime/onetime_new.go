@@ -5,7 +5,7 @@
 package onetime
 
 import (
-	"unibee-api/api/onetime"
+	"unibee/api/onetime"
 )
 
 type ControllerMock struct{}

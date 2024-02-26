@@ -3,9 +3,9 @@ package api
 import (
 	"context"
 	"fmt"
-	"unibee-api/internal/interface"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/interface"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func GetGatewayServiceProvider(ctx context.Context, gatewayId int64) (one _interface.GatewayInterface) {

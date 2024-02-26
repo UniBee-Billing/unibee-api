@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/auth"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/auth"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/user"
+	"unibee/api/merchant/user"
 )
 
 func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error) {

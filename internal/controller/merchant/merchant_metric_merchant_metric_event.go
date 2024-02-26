@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/metric"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/metric_event"
+	"unibee/api/merchant/metric"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/metric_event"
 )
 
 func (c *ControllerMetric) MerchantMetricEvent(ctx context.Context, req *metric.MerchantMetricEventReq) (res *metric.MerchantMetricEventRes, err error) {

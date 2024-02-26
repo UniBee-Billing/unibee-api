@@ -2,10 +2,10 @@ package user
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/payment/service"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/payment/service"
 
-	"unibee-api/api/user/payment"
+	"unibee/api/user/payment"
 )
 
 func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error) {

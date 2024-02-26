@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee-api/internal/consts"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func GetPeriodEndFromStart(ctx context.Context, start int64, planId uint64) int64 {

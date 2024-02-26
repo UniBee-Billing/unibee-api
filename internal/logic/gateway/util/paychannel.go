@@ -2,8 +2,8 @@ package util
 
 import (
 	"context"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 func GetGatewayById(ctx context.Context, id int64) (gateway *entity.MerchantGateway) {

@@ -3,7 +3,7 @@ package utility
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	_interface "unibee-api/internal/interface"
+	_interface "unibee/internal/interface"
 )
 
 // JsonRes 数据返回通用JSON数据结构

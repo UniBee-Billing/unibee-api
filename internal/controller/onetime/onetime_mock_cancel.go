@@ -3,12 +3,12 @@ package onetime
 import (
 	"context"
 	"github.com/google/uuid"
-	"unibee-api/api/onetime/mock"
-	v12 "unibee-api/api/onetime/payment"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/onetime/mock"
+	v12 "unibee/api/onetime/payment"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerMock) Cancel(ctx context.Context, req *mock.CancelReq) (res *mock.CancelRes, err error) {

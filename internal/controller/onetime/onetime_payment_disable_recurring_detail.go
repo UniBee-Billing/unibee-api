@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee-api/api/onetime/payment"
+	"unibee/api/onetime/payment"
 )
 
 func (c *ControllerPayment) DisableRecurringDetail(ctx context.Context, req *payment.DisableRecurringDetailReq) (res *payment.DisableRecurringDetailRes, err error) {

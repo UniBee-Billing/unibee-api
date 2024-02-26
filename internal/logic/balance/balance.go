@@ -2,10 +2,10 @@ package balance
 
 import (
 	"context"
-	"unibee-api/internal/logic/gateway/api"
-	"unibee-api/internal/logic/gateway/ro"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId int64, gatewayId int64) (*ro.GatewayUserDetailQueryInternalResp, error) {

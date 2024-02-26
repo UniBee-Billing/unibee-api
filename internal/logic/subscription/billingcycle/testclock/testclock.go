@@ -4,11 +4,11 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/subscription/billingcycle/cycle"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/subscription/billingcycle/cycle"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type TestClockWalkRes struct {

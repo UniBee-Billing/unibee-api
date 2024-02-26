@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/metric_event"
+	"unibee/internal/logic/metric_event"
 )
 
 type UserMerchantMetricStatReq struct {

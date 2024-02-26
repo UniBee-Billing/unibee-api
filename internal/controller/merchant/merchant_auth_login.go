@@ -3,11 +3,11 @@ package merchant
 import (
 	"context"
 	"fmt"
-	"unibee-api/api/merchant/auth"
-	"unibee-api/internal/logic/jwt"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/merchant/auth"
+	"unibee/internal/logic/jwt"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"

@@ -7,9 +7,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"time"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) bool {

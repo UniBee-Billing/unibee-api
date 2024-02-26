@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"strings"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/ro"
-	addon2 "unibee-api/internal/logic/subscription/addon"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
+	addon2 "unibee/internal/logic/subscription/addon"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type SubscriptionPendingUpdateListInternalReq struct {

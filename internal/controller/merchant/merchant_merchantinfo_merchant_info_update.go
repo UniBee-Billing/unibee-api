@@ -6,14 +6,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/query"
-	"unibee-api/time"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
+	"unibee/internal/query"
+	"unibee/time"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/merchantinfo"
+	"unibee/api/merchant/merchantinfo"
 )
 
 func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error) {

@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/email"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/email"
+	"unibee/internal/query"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/auth"
+	"unibee/api/merchant/auth"
 )
 
 func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (res *auth.LoginOtpRes, err error) {

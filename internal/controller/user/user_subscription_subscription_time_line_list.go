@@ -2,9 +2,9 @@ package user
 
 import (
 	"context"
-	"unibee-api/api/user/subscription"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
+	"unibee/api/user/subscription"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
 )
 
 func (c *ControllerSubscription) SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error) {

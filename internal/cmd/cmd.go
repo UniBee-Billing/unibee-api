@@ -2,17 +2,18 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
-	"unibee-api/internal/cmd/router"
-	"unibee-api/internal/cmd/swagger"
-	"unibee-api/internal/consts"
-	"unibee-api/internal/controller"
-	"unibee-api/internal/controller/gateway_webhook_entry"
-	"unibee-api/internal/cronjob"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/utility"
-	"unibee-api/utility/liberr"
+	"unibee/internal/cmd/router"
+	"unibee/internal/cmd/swagger"
+	"unibee/internal/consts"
+	"unibee/internal/controller"
+	"unibee/internal/controller/gateway_webhook_entry"
+	"unibee/internal/cronjob"
+	_interface "unibee/internal/interface"
+	"unibee/utility"
+	"unibee/utility/liberr"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -158,6 +159,9 @@ var (
 			}
 			{
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
+			}
+			{
+				fmt.Println(utility.MarshalToJsonString(s.GetOpenApi()))
 			}
 
 			s.Run()

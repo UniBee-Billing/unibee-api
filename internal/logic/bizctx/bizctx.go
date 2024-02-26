@@ -2,9 +2,9 @@ package bizctx
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/model"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/model"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"

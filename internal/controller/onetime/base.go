@@ -3,11 +3,11 @@ package onetime
 import (
 	"context"
 	"strings"
-	"unibee-api/api/onetime/payment"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/interface"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/api/onetime/payment"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/interface"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func currencyNumberCheck(amount *payment.AmountVo) {

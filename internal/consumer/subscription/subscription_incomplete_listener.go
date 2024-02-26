@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	redismq2 "unibee-api/internal/cmd/redismq"
-	"unibee-api/internal/consumer/webhook/event"
-	subscription3 "unibee-api/internal/consumer/webhook/subscription"
-	"unibee-api/internal/logic/subscription/user_sub_plan"
-	"unibee-api/internal/query"
-	"unibee-api/redismq"
-	"unibee-api/utility"
+	redismq2 "unibee/internal/cmd/redismq"
+	"unibee/internal/consumer/webhook/event"
+	subscription3 "unibee/internal/consumer/webhook/subscription"
+	"unibee/internal/logic/subscription/user_sub_plan"
+	"unibee/internal/query"
+	"unibee/redismq"
+	"unibee/utility"
 )
 
 type SubscriptionIncompleteListener struct {

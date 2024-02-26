@@ -2,7 +2,7 @@ package ro
 
 import (
 	"github.com/gogf/gf/v2/os/gtime"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type SubscriptionSimplify struct {

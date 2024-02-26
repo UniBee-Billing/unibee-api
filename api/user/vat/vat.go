@@ -2,7 +2,7 @@ package vat
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/ro"
 )
 
 type CountryVatListReq struct {

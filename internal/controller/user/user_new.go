@@ -5,7 +5,7 @@
 package user
 
 import (
-	"unibee-api/api/user"
+	"unibee/api/user"
 )
 
 type ControllerAuth struct{}

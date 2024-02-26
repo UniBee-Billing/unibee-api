@@ -2,9 +2,9 @@ package user
 
 import (
 	"context"
-	"unibee-api/internal/consts"
+	"unibee/internal/consts"
 
-	"unibee-api/api/user/subscription"
+	"unibee/api/user/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionPayCheck(ctx context.Context, req *subscription.SubscriptionPayCheckReq) (res *subscription.SubscriptionPayCheckRes, err error) {

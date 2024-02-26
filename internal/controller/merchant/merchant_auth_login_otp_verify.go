@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/jwt"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/jwt"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/merchant/auth"
+	"unibee/api/merchant/auth"
 )
 
 func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error) {

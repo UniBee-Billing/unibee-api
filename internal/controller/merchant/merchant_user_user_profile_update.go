@@ -4,12 +4,12 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/user"
+	"unibee/api/merchant/user"
 )
 
 func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error) {

@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/auth"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/auth"
+	"unibee/utility"
 
-	"unibee-api/api/user/profile"
+	"unibee/api/user/profile"
 )
 
 func (c *ControllerProfile) PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error) {

@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/logic/invoice/invoice_compute"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/invoice/invoice_compute"
+	"unibee/internal/query"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/invoice"
+	"unibee/api/merchant/invoice"
 )
 
 func (c *ControllerInvoice) SubscriptionInvoiceDetail(ctx context.Context, req *invoice.SubscriptionInvoiceDetailReq) (res *invoice.SubscriptionInvoiceDetailRes, err error) {

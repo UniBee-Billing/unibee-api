@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
-	"unibee-api/api/user/vat"
+	"unibee/api/user/vat"
 )
 
 func (c *ControllerVat) NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error) {

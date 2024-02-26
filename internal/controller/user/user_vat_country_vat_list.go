@@ -2,10 +2,10 @@ package user
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/vat_gateway"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/vat_gateway"
 
-	"unibee-api/api/user/vat"
+	"unibee/api/user/vat"
 )
 
 func (c *ControllerVat) CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error) {

@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	gatewayWebhook "unibee-api/internal/logic/gateway/webhook"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	gatewayWebhook "unibee/internal/logic/gateway/webhook"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/gateway"
+	"unibee/api/merchant/gateway"
 )
 
 func (c *ControllerGateway) CheckAndSetup(ctx context.Context, req *gateway.CheckAndSetupReq) (res *gateway.CheckAndSetupRes, err error) {

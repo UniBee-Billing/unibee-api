@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	email2 "unibee-api/internal/logic/email"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	email2 "unibee/internal/logic/email"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/email"
+	"unibee/api/merchant/email"
 )
 
 func (c *ControllerEmail) MerchantEmailTemplateUpdate(ctx context.Context, req *email.MerchantEmailTemplateUpdateReq) (res *email.MerchantEmailTemplateUpdateRes, err error) {

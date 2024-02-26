@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/logic/vat_gateway"
+	"unibee/internal/logic/vat_gateway"
 
-	"unibee-api/api/merchant/vat"
+	"unibee/api/merchant/vat"
 )
 
 func (c *ControllerVat) CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error) {

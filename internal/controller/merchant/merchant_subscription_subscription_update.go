@@ -2,13 +2,13 @@ package merchant
 
 import (
 	"context"
-	subscription2 "unibee-api/api/user/subscription"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/utility"
+	subscription2 "unibee/api/user/subscription"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/subscription"
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error) {

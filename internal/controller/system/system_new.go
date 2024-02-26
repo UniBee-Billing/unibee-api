@@ -5,7 +5,7 @@
 package system
 
 import (
-	"unibee-api/api/system"
+	"unibee/api/system"
 )
 
 type ControllerSubscription struct{}

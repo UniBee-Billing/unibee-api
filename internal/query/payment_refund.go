@@ -2,8 +2,8 @@ package query
 
 import (
 	"context"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func GetRefundByRefundId(ctx context.Context, refundId string) (one *entity.Refund) {

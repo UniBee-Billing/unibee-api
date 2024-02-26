@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	v1 "unibee-api/api/merchant/plan"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/plan/service"
-	"unibee-api/utility"
+	v1 "unibee/api/merchant/plan"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/plan/service"
+	"unibee/utility"
 )
 
 func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (res *v1.SubscriptionPlanListRes, err error) {

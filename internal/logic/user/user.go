@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/query"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/query"
 )
 
 func UpdateUserDefaultSubscription(ctx context.Context, userId int64, subscriptionId string) {

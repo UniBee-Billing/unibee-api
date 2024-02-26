@@ -8,11 +8,11 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee-api/internal/consumer/webhook/event"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/consumer/webhook/event"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 const SplitSep = ","

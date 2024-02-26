@@ -3,11 +3,11 @@ package merchant
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
-	_interface "unibee-api/internal/interface"
-	metric2 "unibee-api/internal/logic/metric"
-	"unibee-api/internal/query"
+	_interface "unibee/internal/interface"
+	metric2 "unibee/internal/logic/metric"
+	"unibee/internal/query"
 
-	"unibee-api/api/merchant/metric"
+	"unibee/api/merchant/metric"
 )
 
 func (c *ControllerMetric) NewMerchantMetricPlanLimit(ctx context.Context, req *metric.NewMerchantMetricPlanLimitReq) (res *metric.NewMerchantMetricPlanLimitRes, err error) {

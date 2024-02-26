@@ -6,15 +6,15 @@ package user
 
 import (
 	"context"
-	
-	"unibee-api/api/user/auth"
-	"unibee-api/api/user/invoice"
-	"unibee-api/api/user/payment"
-	"unibee-api/api/user/plan"
-	"unibee-api/api/user/profile"
-	"unibee-api/api/user/session"
-	"unibee-api/api/user/subscription"
-	"unibee-api/api/user/vat"
+
+	"unibee/api/user/auth"
+	"unibee/api/user/invoice"
+	"unibee/api/user/payment"
+	"unibee/api/user/plan"
+	"unibee/api/user/profile"
+	"unibee/api/user/session"
+	"unibee/api/user/subscription"
+	"unibee/api/user/vat"
 )
 
 type IUserAuth interface {

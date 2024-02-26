@@ -2,8 +2,8 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/plan"
-	"unibee-api/internal/logic/plan/service"
+	"unibee/api/merchant/plan"
+	"unibee/internal/logic/plan/service"
 )
 
 func (c *ControllerPlan) SubscriptionPlanUnPublish(ctx context.Context, req *plan.SubscriptionPlanUnPublishReq) (res *plan.SubscriptionPlanUnPublishRes, err error) {

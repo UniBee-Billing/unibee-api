@@ -2,8 +2,8 @@ package gateway
 
 import (
 	"fmt"
-	"unibee-api/internal/consts"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/consts"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func GetPaymentWebhookEntranceUrl(gatewayId int64) string {

@@ -3,13 +3,13 @@ package merchant
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	subscription2 "unibee-api/api/user/subscription"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/utility"
+	subscription2 "unibee/api/user/subscription"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/subscription"
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error) {

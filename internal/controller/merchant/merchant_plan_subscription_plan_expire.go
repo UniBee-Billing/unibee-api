@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee-api/api/merchant/plan"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/utility"
+	"unibee/api/merchant/plan"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/utility"
 )
 
 func (c *ControllerPlan) SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error) {

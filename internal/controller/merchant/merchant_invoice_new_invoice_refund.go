@@ -2,8 +2,8 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/invoice"
-	"unibee-api/internal/logic/invoice/service"
+	"unibee/api/merchant/invoice"
+	"unibee/internal/logic/invoice/service"
 )
 
 func (c *ControllerInvoice) NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error) {

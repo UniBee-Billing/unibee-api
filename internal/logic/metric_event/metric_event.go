@@ -8,11 +8,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/metric"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/metric"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type MerchantMetricEventInternalReq struct {

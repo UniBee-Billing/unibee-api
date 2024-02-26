@@ -17,9 +17,9 @@ package vat
 import (
 	"errors"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/internal/logic/gateway/ro"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 // ErrServiceUnavailable will be returned when VIES VAT validation API or jsonvat.com is unreachable.

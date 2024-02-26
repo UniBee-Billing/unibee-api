@@ -2,11 +2,11 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/subscription"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/utility"
+	"unibee/api/merchant/subscription"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 )
 
 func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error) {

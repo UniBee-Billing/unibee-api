@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
-	"unibee-api/api/user/subscription"
+	"unibee/api/user/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdateCancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.SubscriptionUpdateCancelLastCancelAtPeriodEndReq) (res *subscription.SubscriptionUpdateCancelLastCancelAtPeriodEndRes, err error) {

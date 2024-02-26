@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/vat_gateway"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/vat_gateway"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/vat"
+	"unibee/api/merchant/vat"
 )
 
 func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error) {

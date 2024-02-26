@@ -5,11 +5,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/consumer/webhook/event"
-	"unibee-api/internal/consumer/webhook/message"
-	"unibee-api/internal/logic/subscription/service"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/internal/consumer/webhook/event"
+	"unibee/internal/consumer/webhook/message"
+	"unibee/internal/logic/subscription/service"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func printPanic(ctx context.Context, err error) {

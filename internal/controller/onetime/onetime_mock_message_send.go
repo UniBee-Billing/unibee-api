@@ -2,10 +2,10 @@ package onetime
 
 import (
 	"context"
-	redismq2 "unibee-api/internal/cmd/redismq"
-	"unibee-api/redismq"
+	redismq2 "unibee/internal/cmd/redismq"
+	"unibee/redismq"
 
-	"unibee-api/api/onetime/mock"
+	"unibee/api/onetime/mock"
 )
 
 func (c *ControllerMock) MockMessageSend(ctx context.Context, req *mock.MockMessageSendReq) (res *mock.MockMessageSendRes, err error) {

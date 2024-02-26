@@ -1,7 +1,7 @@
 package consumer
 
 import (
-	_ "unibee-api/internal/consumer/mock"
-	_ "unibee-api/internal/consumer/subscription"
-	_ "unibee-api/internal/consumer/webhook"
+	_ "unibee/internal/consumer/mock"
+	_ "unibee/internal/consumer/subscription"
+	_ "unibee/internal/consumer/webhook"
 )

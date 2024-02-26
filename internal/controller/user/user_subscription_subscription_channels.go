@@ -2,9 +2,9 @@ package user
 
 import (
 	"context"
-	"unibee-api/api/user/subscription"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/internal/query"
+	"unibee/api/user/subscription"
+	"unibee/internal/logic/subscription/service"
+	"unibee/internal/query"
 )
 
 func (c *ControllerSubscription) SubscriptionChannels(ctx context.Context, req *subscription.SubscriptionChannelsReq) (res *subscription.SubscriptionChannelsRes, err error) {

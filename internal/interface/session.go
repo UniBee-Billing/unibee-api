@@ -6,8 +6,8 @@ package _interface
 
 import (
 	"context"
-	"unibee-api/internal/model"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/model"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type ISession interface {

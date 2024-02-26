@@ -6,14 +6,14 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/interface"
-	"unibee-api/internal/logic/gateway/ro"
-	"unibee-api/internal/logic/merchant_config"
-	vat "unibee-api/internal/logic/vat_gateway/github"
-	"unibee-api/internal/logic/vat_gateway/vatsense"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/interface"
+	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/merchant_config"
+	vat "unibee/internal/logic/vat_gateway/github"
+	"unibee/internal/logic/vat_gateway/vatsense"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 const (

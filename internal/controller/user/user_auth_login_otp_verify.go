@@ -3,18 +3,18 @@ package user
 import (
 	"context"
 	"fmt"
-	"unibee-api/api/user/auth"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/jwt"
-	"unibee-api/utility"
+	"unibee/api/user/auth"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/jwt"
+	"unibee/utility"
 
 	// "github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpVerifyReq) (res *auth.LoginOtpVerifyRes, err error) {

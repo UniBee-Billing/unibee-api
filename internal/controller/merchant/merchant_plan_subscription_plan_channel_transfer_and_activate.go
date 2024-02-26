@@ -4,14 +4,14 @@ import (
 	"context"
 	"strconv"
 	"strings"
-	_plan "unibee-api/api/merchant/plan"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/plan/service"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	_plan "unibee/api/merchant/plan"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/plan/service"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *_plan.SubscriptionPlanChannelTransferAndActivateReq) (res *_plan.SubscriptionPlanChannelTransferAndActivateRes, err error) {

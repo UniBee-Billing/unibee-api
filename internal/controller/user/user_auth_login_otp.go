@@ -3,11 +3,11 @@ package user
 import (
 	"context"
 	"fmt"
-	"unibee-api/api/user/auth"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/email"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/user/auth"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/email"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

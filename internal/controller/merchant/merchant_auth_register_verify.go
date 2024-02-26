@@ -4,13 +4,13 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee-api/utility"
+	"unibee/utility"
 
 	"encoding/json"
-	"unibee-api/api/merchant/auth"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	"unibee/api/merchant/auth"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 
 	"github.com/gogf/gf/v2/frame/g"
 )

@@ -6,9 +6,9 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"strconv"
 	"strings"
-	"unibee-api/internal/logic/gateway/util"
-	"unibee-api/internal/logic/gateway/webhook"
-	"unibee-api/utility"
+	"unibee/internal/logic/gateway/util"
+	"unibee/internal/logic/gateway/webhook"
+	"unibee/utility"
 )
 
 func GatewayWebhookEntrance(r *ghttp.Request) {

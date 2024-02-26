@@ -2,7 +2,7 @@ package _interface
 
 import (
 	"context"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type IOpenApi interface {

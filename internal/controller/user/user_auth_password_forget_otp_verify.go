@@ -3,14 +3,14 @@ package user
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	_interface "unibee-api/internal/interface"
-	auth2 "unibee-api/internal/logic/auth"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	auth2 "unibee/internal/logic/auth"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/user/auth"
+	"unibee/api/user/auth"
 )
 
 func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.PasswordForgetOtpVerifyReq) (res *auth.PasswordForgetOtpVerifyRes, err error) {

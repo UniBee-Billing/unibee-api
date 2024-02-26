@@ -7,10 +7,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway/ro"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 	"time"
 )
 

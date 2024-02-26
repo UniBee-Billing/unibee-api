@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee-api/internal/model"
+	"unibee/internal/model"
 )
 
 type IBizCtx interface {

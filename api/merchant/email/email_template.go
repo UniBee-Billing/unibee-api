@@ -2,7 +2,7 @@ package email
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/query"
+	"unibee/internal/query"
 )
 
 type MerchantEmailTemplateListReq struct {

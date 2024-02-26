@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"unibee-api/internal/dao/oversea_pay/internal"
+	"unibee/internal/dao/oversea_pay/internal"
 )
 
 // internalMerchantWebhookLogDao is internal type for wrapping internal DAO implements.

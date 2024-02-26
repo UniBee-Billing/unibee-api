@@ -2,11 +2,11 @@ package onetime
 
 import (
 	"context"
-	"unibee-api/api/onetime/payment"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/payment/service"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/onetime/payment"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/payment/service"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerPayment) Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error) {

@@ -2,8 +2,8 @@ package webhook
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/internal/logic/webhook"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/logic/webhook"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type EventListReq struct {

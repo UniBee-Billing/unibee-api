@@ -3,12 +3,12 @@ package user
 import (
 	"context"
 	"fmt"
-	"unibee-api/api/user/auth"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/jwt"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/user/auth"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/jwt"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error) {

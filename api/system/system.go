@@ -6,12 +6,12 @@ package system
 
 import (
 	"context"
-	
-	"unibee-api/api/system/information"
-	"unibee-api/api/system/invoice"
-	"unibee-api/api/system/payment"
-	"unibee-api/api/system/refund"
-	"unibee-api/api/system/subscription"
+
+	"unibee/api/system/information"
+	"unibee/api/system/invoice"
+	"unibee/api/system/payment"
+	"unibee/api/system/refund"
+	"unibee/api/system/subscription"
 )
 
 type ISystemInformation interface {

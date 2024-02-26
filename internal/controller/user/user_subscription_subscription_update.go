@@ -2,12 +2,12 @@ package user
 
 import (
 	"context"
-	"unibee-api/api/user/subscription"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/subscription/service"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/user/subscription"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/subscription/service"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error) {

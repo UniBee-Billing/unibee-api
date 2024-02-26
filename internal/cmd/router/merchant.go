@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	"unibee-api/internal/controller/merchant"
+	"unibee/internal/controller/merchant"
 
 	"github.com/gogf/gf/v2/net/ghttp"
 )

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func GetPlanById(ctx context.Context, id uint64) (one *entity.SubscriptionPlan) {

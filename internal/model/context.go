@@ -1,7 +1,7 @@
 package model
 
 import (
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"

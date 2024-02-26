@@ -5,11 +5,11 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/subscription/billingcycle/cycle"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/subscription/billingcycle/cycle"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func mainTask(ctx context.Context) {

@@ -6,9 +6,9 @@ package onetime
 
 import (
 	"context"
-	
-	"unibee-api/api/onetime/mock"
-	"unibee-api/api/onetime/payment"
+
+	"unibee/api/onetime/mock"
+	"unibee/api/onetime/payment"
 )
 
 type IOnetimeMock interface {

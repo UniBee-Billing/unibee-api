@@ -6,14 +6,14 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee-api/api/system/subscription"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/api"
-	"unibee-api/internal/logic/subscription/handler"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/system/subscription"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/subscription/handler"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerSubscription) BulkChannelSync(ctx context.Context, req *subscription.BulkChannelSyncReq) (*subscription.BulkChannelSyncRes, error) {

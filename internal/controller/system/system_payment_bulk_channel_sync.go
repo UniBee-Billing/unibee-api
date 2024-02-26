@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/api"
-	handler2 "unibee-api/internal/logic/payment/handler"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/api"
+	handler2 "unibee/internal/logic/payment/handler"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/system/payment"
+	"unibee/api/system/payment"
 )
 
 func (c *ControllerPayment) BulkChannelSync(ctx context.Context, req *payment.BulkChannelSyncReq) (res *payment.BulkChannelSyncRes, err error) {

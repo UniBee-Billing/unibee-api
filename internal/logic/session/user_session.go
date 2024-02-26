@@ -7,13 +7,13 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
-	"unibee-api/api/user/session"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	_interface "unibee-api/internal/interface"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/api/user/session"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error) {

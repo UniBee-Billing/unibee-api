@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/test/gtest"
 	"testing"
-	"unibee-api/internal/query"
-	_test "unibee-api/test"
+	"unibee/internal/query"
+	_test "unibee/test"
 )
 
 func TestGetSubscription(t *testing.T) {

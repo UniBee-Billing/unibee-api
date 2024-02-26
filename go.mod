@@ -1,4 +1,4 @@
-module unibee-api
+module unibee
 
 go 1.21
 

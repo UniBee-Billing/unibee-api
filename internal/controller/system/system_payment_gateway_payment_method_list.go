@@ -2,13 +2,13 @@ package system
 
 import (
 	"context"
-	"unibee-api/internal/logic/gateway/api"
-	"unibee-api/internal/query"
+	"unibee/internal/logic/gateway/api"
+	"unibee/internal/query"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/system/payment"
+	"unibee/api/system/payment"
 )
 
 func (c *ControllerPayment) GatewayPaymentMethodList(ctx context.Context, req *payment.GatewayPaymentMethodListReq) (res *payment.GatewayPaymentMethodListRes, err error) {

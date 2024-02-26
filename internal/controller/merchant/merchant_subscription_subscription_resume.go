@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/merchant/subscription"
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionResume(ctx context.Context, req *subscription.SubscriptionResumeReq) (res *subscription.SubscriptionResumeRes, err error) {

@@ -3,14 +3,14 @@ package user
 import (
 	"context"
 	"fmt"
-	"unibee-api/time"
-	"unibee-api/utility"
+	"unibee/time"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 
-	"unibee-api/api/user/profile"
-	dao "unibee-api/internal/dao/oversea_pay"
+	"unibee/api/user/profile"
+	dao "unibee/internal/dao/oversea_pay"
 )
 
 func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error) {

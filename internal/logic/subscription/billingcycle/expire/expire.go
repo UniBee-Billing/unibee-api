@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	redismq2 "unibee-api/internal/cmd/redismq"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	handler2 "unibee-api/internal/logic/payment/handler"
-	"unibee-api/internal/logic/payment/service"
-	service2 "unibee-api/internal/logic/subscription/service"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/redismq"
+	redismq2 "unibee/internal/cmd/redismq"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/payment/service"
+	service2 "unibee/internal/logic/subscription/service"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/redismq"
 )
 
 func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason string) error {

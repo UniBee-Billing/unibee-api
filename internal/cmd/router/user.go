@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee-api/internal/controller/user"
+	"unibee/internal/controller/user"
 )
 
 func UserAuth(ctx context.Context, group *ghttp.RouterGroup) {

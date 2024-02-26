@@ -2,9 +2,9 @@ package addon
 
 import (
 	"context"
-	"unibee-api/internal/logic/gateway/ro"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func GetSubscriptionAddonsByAddonJson(ctx context.Context, addonJson string) []*ro.PlanAddonVo {

@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"unibee-api/api/user/auth"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/email"
-	"unibee-api/utility"
+	"unibee/api/user/auth"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/email"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
 
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 const CacheKeyUserRegisterPrefix = "CacheKeyUserRegisterPrefix-"

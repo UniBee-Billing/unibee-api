@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"strings"
-	redismq2 "unibee-api/internal/cmd/redismq"
-	event2 "unibee-api/internal/consumer/webhook/event"
-	"unibee-api/internal/query"
-	"unibee-api/redismq"
-	"unibee-api/utility"
+	redismq2 "unibee/internal/cmd/redismq"
+	event2 "unibee/internal/consumer/webhook/event"
+	"unibee/internal/query"
+	"unibee/redismq"
+	"unibee/utility"
 )
 
 type WebhookMessage struct {

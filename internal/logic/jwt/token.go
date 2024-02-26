@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"strings"
 	"time"
-	"unibee-api/internal/consts"
+	"unibee/internal/consts"
 )
 
 var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")

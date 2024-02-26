@@ -2,10 +2,10 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	balance2 "unibee-api/internal/logic/balance"
+	_interface "unibee/internal/interface"
+	balance2 "unibee/internal/logic/balance"
 
-	"unibee-api/api/merchant/balance"
+	"unibee/api/merchant/balance"
 )
 
 func (c *ControllerBalance) DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error) {

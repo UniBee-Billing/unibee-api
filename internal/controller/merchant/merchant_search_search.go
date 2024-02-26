@@ -4,11 +4,11 @@ import (
 	"context"
 	"strconv"
 	"strings"
-	"unibee-api/api/merchant/search"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/auth"
-	"unibee-api/internal/logic/invoice/service"
-	"unibee-api/internal/query"
+	"unibee/api/merchant/search"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/auth"
+	"unibee/internal/logic/invoice/service"
+	"unibee/internal/query"
 )
 
 func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (res *search.SearchRes, err error) {

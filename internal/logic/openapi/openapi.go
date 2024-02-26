@@ -2,9 +2,9 @@ package openapi
 
 import (
 	"context"
-	"unibee-api/internal/interface"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
+	"unibee/internal/interface"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
 type SOpenApi struct{}

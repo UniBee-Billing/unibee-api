@@ -3,10 +3,10 @@ package system
 import (
 	"context"
 	"github.com/gogf/gf/v2/os/glog"
-	"unibee-api/internal/logic/subscription/billingcycle/testclock"
-	"unibee-api/utility"
+	"unibee/internal/logic/subscription/billingcycle/testclock"
+	"unibee/utility"
 
-	"unibee-api/api/system/subscription"
+	"unibee/api/system/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionWalkTestClock(ctx context.Context, req *subscription.SubscriptionWalkTestClockReq) (res *subscription.SubscriptionWalkTestClockRes, err error) {

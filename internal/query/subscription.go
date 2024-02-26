@@ -2,9 +2,9 @@ package query
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/consts"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 //func GetSubscriptionById(ctx context.Context, id int64) (one *entity.Subscription) {

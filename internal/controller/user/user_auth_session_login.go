@@ -3,11 +3,11 @@ package user
 import (
 	"context"
 	"fmt"
-	auth2 "unibee-api/internal/logic/auth"
-	"unibee-api/internal/logic/jwt"
-	"unibee-api/utility"
+	auth2 "unibee/internal/logic/auth"
+	"unibee/internal/logic/jwt"
+	"unibee/utility"
 
-	"unibee-api/api/user/auth"
+	"unibee/api/user/auth"
 )
 
 func (c *ControllerAuth) SessionLogin(ctx context.Context, req *auth.SessionLoginReq) (res *auth.SessionLoginRes, err error) {

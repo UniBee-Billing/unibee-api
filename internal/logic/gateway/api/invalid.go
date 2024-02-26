@@ -2,8 +2,8 @@ package api
 
 import (
 	"context"
-	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type Invalid struct{}

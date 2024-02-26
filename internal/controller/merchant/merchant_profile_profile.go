@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 
-	"unibee-api/api/merchant/profile"
+	"unibee/api/merchant/profile"
 )
 
 func (c *ControllerProfile) Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error) {

@@ -2,15 +2,15 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	_webhook "unibee-api/internal/logic/webhook"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	_webhook "unibee/internal/logic/webhook"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gerror"
 
-	"unibee-api/api/merchant/webhook"
+	"unibee/api/merchant/webhook"
 )
 
 func (c *ControllerWebhook) UpdateEndpoint(ctx context.Context, req *webhook.UpdateEndpointReq) (res *webhook.UpdateEndpointRes, err error) {

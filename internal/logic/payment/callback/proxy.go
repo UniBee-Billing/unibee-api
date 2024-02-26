@@ -7,12 +7,12 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/order/calllback"
-	"unibee-api/internal/logic/subscription/callback"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/order/calllback"
+	"unibee/internal/logic/subscription/callback"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 type proxy struct {

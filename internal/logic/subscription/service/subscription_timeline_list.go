@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"strings"
-	dao "unibee-api/internal/dao/oversea_pay"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 type SubscriptionTimeLineListInternalReq struct {

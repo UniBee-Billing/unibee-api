@@ -2,10 +2,10 @@ package user
 
 import (
 	"context"
-	session2 "unibee-api/internal/logic/session"
-	"unibee-api/utility"
+	session2 "unibee/internal/logic/session"
+	"unibee/utility"
 
-	"unibee-api/api/user/session"
+	"unibee/api/user/session"
 )
 
 func (c *ControllerSession) New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error) {

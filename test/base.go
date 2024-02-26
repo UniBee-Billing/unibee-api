@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"
 	_ "github.com/gogf/gf/v2/test/gtest"
-	"unibee-api/utility"
+	"unibee/utility"
 )
 
 func init() {

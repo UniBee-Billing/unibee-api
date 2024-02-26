@@ -5,7 +5,7 @@
 package dao
 
 import (
-	"unibee-api/internal/dao/xin/internal"
+	"unibee/internal/dao/xin/internal"
 )
 
 // internalTestDao is internal type for wrapping internal DAO implements.

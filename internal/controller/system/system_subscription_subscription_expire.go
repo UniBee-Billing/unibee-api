@@ -2,11 +2,11 @@ package system
 
 import (
 	"context"
-	"unibee-api/internal/logic/subscription/billingcycle/expire"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	"unibee/internal/logic/subscription/billingcycle/expire"
+	"unibee/internal/query"
+	"unibee/utility"
 
-	"unibee-api/api/system/subscription"
+	"unibee/api/system/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionExpire(ctx context.Context, req *subscription.SubscriptionExpireReq) (res *subscription.SubscriptionExpireRes, err error) {

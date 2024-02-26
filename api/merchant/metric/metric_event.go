@@ -3,7 +3,7 @@ package metric
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type MerchantMetricEventReq struct {

@@ -2,9 +2,9 @@ package api
 
 import (
 	"context"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func queryAndCreateChannelUser(ctx context.Context, gateway *entity.MerchantGateway, userId int64) *entity.GatewayUser {

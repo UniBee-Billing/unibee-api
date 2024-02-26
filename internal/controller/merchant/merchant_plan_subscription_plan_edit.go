@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/api/merchant/plan"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/gateway/ro"
-	"unibee-api/internal/logic/plan/service"
-	"unibee-api/utility"
+	"unibee/api/merchant/plan"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/plan/service"
+	"unibee/utility"
 )
 
 func (c *ControllerPlan) SubscriptionPlanEdit(ctx context.Context, req *plan.SubscriptionPlanEditReq) (res *plan.SubscriptionPlanEditRes, err error) {

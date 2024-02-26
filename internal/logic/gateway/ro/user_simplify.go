@@ -1,6 +1,6 @@
 package ro
 
-import entity "unibee-api/internal/model/entity/oversea_pay"
+import entity "unibee/internal/model/entity/oversea_pay"
 
 type UserAccountSimplify struct {
 	Id             uint64 `json:"id"                 description:"userId"`             // userId

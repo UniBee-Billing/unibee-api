@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"os"
 	"testing"
-	"unibee-api/internal/consts"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/consts"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func TestGenerate(t *testing.T) {

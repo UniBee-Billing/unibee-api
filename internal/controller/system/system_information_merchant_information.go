@@ -2,12 +2,12 @@ package system
 
 import (
 	"context"
-	"unibee-api/api/system/information"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/gateway"
-	"unibee-api/internal/query"
-	"unibee-api/time"
+	"unibee/api/system/information"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway"
+	"unibee/internal/query"
+	"unibee/time"
 )
 
 func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *information.MerchantInformationReq) (res *information.MerchantInformationRes, err error) {

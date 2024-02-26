@@ -2,9 +2,9 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/service"
 
-	"unibee-api/api/merchant/subscription"
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) SubscriptionDetail(ctx context.Context, req *subscription.SubscriptionDetailReq) (res *subscription.SubscriptionDetailRes, err error) {

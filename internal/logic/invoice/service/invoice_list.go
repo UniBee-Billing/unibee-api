@@ -3,11 +3,11 @@ package service
 import (
 	"context"
 	"strings"
-	dao "unibee-api/internal/dao/oversea_pay"
-	"unibee-api/internal/logic/gateway/ro"
-	"unibee-api/internal/logic/invoice/invoice_compute"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/utility"
+	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/invoice/invoice_compute"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 type SubscriptionInvoiceListInternalReq struct {

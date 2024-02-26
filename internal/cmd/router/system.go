@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee-api/internal/controller/system"
+	"unibee/internal/controller/system"
 )
 
 func SystemSubscription(ctx context.Context, group *ghttp.RouterGroup) {

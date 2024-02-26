@@ -2,13 +2,13 @@ package merchant
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/metric_event"
-	entity "unibee-api/internal/model/entity/oversea_pay"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/metric_event"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/metric"
+	"unibee/api/merchant/metric"
 )
 
 func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metric.UserMerchantMetricStatReq) (res *metric.UserMerchantMetricStatRes, err error) {

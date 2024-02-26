@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee-api/internal/controller/onetime"
+	"unibee/internal/controller/onetime"
 )
 
 // OpenPayment 工具类的，不含业务属性的

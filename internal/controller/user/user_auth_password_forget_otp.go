@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/email"
-	"unibee-api/internal/query"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/email"
+	"unibee/internal/query"
+	"unibee/utility"
 
-	"unibee-api/api/user/auth"
+	"unibee/api/user/auth"
 )
 
 func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.PasswordForgetOtpReq) (res *auth.PasswordForgetOtpRes, err error) {

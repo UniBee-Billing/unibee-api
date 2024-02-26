@@ -6,23 +6,23 @@ package merchant
 
 import (
 	"context"
-	
-	"unibee-api/api/merchant/auth"
-	"unibee-api/api/merchant/balance"
-	"unibee-api/api/merchant/email"
-	"unibee-api/api/merchant/gateway"
-	"unibee-api/api/merchant/invoice"
-	"unibee-api/api/merchant/merchantinfo"
-	"unibee-api/api/merchant/metric"
-	"unibee-api/api/merchant/oss"
-	"unibee-api/api/merchant/payment"
-	"unibee-api/api/merchant/plan"
-	"unibee-api/api/merchant/profile"
-	"unibee-api/api/merchant/search"
-	"unibee-api/api/merchant/subscription"
-	"unibee-api/api/merchant/user"
-	"unibee-api/api/merchant/vat"
-	"unibee-api/api/merchant/webhook"
+
+	"unibee/api/merchant/auth"
+	"unibee/api/merchant/balance"
+	"unibee/api/merchant/email"
+	"unibee/api/merchant/gateway"
+	"unibee/api/merchant/invoice"
+	"unibee/api/merchant/merchantinfo"
+	"unibee/api/merchant/metric"
+	"unibee/api/merchant/oss"
+	"unibee/api/merchant/payment"
+	"unibee/api/merchant/plan"
+	"unibee/api/merchant/profile"
+	"unibee/api/merchant/search"
+	"unibee/api/merchant/subscription"
+	"unibee/api/merchant/user"
+	"unibee/api/merchant/vat"
+	"unibee/api/merchant/webhook"
 )
 
 type IMerchantAuth interface {

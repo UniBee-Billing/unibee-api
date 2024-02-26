@@ -6,12 +6,12 @@ import (
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/paymentmethod"
-	"unibee-api/utility"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/test/gtest"
 	"testing"
-	"unibee-api/internal/query"
-	_test "unibee-api/test"
+	"unibee/internal/query"
+	_test "unibee/test"
 )
 
 func setUnibeeAppInfo() {

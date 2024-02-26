@@ -3,9 +3,9 @@ package message
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	redismq2 "unibee-api/internal/cmd/redismq"
-	"unibee-api/redismq"
-	"unibee-api/utility"
+	redismq2 "unibee/internal/cmd/redismq"
+	"unibee/redismq"
+	"unibee/utility"
 )
 
 type MerchantWebhookListener struct {

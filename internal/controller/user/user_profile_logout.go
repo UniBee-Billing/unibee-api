@@ -2,11 +2,11 @@ package user
 
 import (
 	"context"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/jwt"
-	"unibee-api/utility"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/jwt"
+	"unibee/utility"
 
-	"unibee-api/api/user/profile"
+	"unibee/api/user/profile"
 )
 
 func (c *ControllerProfile) Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error) {

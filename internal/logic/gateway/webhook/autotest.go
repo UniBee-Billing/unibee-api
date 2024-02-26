@@ -3,8 +3,8 @@ package webhook
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee-api/internal/logic/gateway/ro"
-	entity "unibee-api/internal/model/entity/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type AutoTestWebhook struct {

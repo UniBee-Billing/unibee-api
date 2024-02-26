@@ -2,12 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee-api/internal/consts"
-	_interface "unibee-api/internal/interface"
-	"unibee-api/internal/logic/invoice/service"
-	"unibee-api/utility"
+	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
+	"unibee/internal/logic/invoice/service"
+	"unibee/utility"
 
-	"unibee-api/api/merchant/invoice"
+	"unibee/api/merchant/invoice"
 )
 
 func (c *ControllerInvoice) DeletePendingInvoice(ctx context.Context, req *invoice.DeletePendingInvoiceReq) (res *invoice.DeletePendingInvoiceRes, err error) {
