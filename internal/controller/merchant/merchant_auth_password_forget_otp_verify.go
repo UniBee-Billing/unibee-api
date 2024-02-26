@@ -25,5 +25,5 @@ func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.
 	newOne = query.GetMerchantUserAccountByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "User Not Found")
 	auth2.ChangeMerchantUserPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	return &auth.PasswordForgetOtpVerifyRes{}, nil
 }
