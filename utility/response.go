@@ -34,7 +34,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 func openApiJson(r *ghttp.Request, code int, message string, data ...interface{}) {
 	var responseData *gjson.Json
 	if len(data) > 0 {
-		responseData = FormatToGJson(data[0])
+		responseData = gjson.New(data[0])
 	} else {
 		responseData = gjson.New(nil)
 	}

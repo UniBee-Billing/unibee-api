@@ -20,11 +20,7 @@ func FormatToGJson(target interface{}) *gjson.Json {
 	if target == nil {
 		return nil
 	}
-	jsonData, err := gjson.DecodeToJson(target)
-	if err != nil {
-		return nil
-	}
-	return jsonData
+	return gjson.New(target)
 }
 
 func MarshalToJsonString(target interface{}) string {

@@ -81,6 +81,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		message := err.Error()
 		if strings.Contains(message, "Session Expired") {
 			if customCtx.IsOpenApiCall {
+				r.Response.Status = 400
 				utility.OpenApiJsonExit(r, 61, "Session Expired")
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
@@ -88,6 +89,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 			}
 		} else if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
 			if customCtx.IsOpenApiCall {
+				r.Response.Status = 400
 				utility.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
@@ -95,6 +97,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 			}
 		} else {
 			if customCtx.IsOpenApiCall {
+				r.Response.Status = 400
 				utility.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
@@ -171,12 +174,22 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		return
 	}
 	tokenString := r.Header.Get("Authorization")
+	clientType := r.Header.Get("ClientType")
+	if len(clientType) > 0 && strings.Contains(clientType, "sdk") {
+		customCtx.IsOpenApiCall = true
+	}
 	if len(tokenString) == 0 {
 		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
-		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		if customCtx.IsOpenApiCall {
+			r.Response.Status = 400
+			utility.OpenApiJsonExit(r, 61, "invalid token")
+		} else {
+			utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
+		}
 		r.Exit()
 	}
 	if strings.HasPrefix(tokenString, "Bearer ") {
+		customCtx.IsOpenApiCall = true
 		tokenString = strings.Replace(tokenString, "Bearer ", "", 1) // remove Bearer
 	}
 	if jwt.IsPortalToken(tokenString) {
