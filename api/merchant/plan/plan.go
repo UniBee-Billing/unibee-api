@@ -123,3 +123,10 @@ type SubscriptionPlanExpireReq struct {
 }
 type SubscriptionPlanExpireRes struct {
 }
+
+type SubscriptionPlanDeleteReq struct {
+	g.Meta `path:"/subscription_plan_delete" tags:"Merchant-Plan-Controller" method:"post" summary:"Delete A Plan Before Activate"`
+	PlanId uint64 `p:"planId" dc:"PlanId" v:"required"`
+}
+type SubscriptionPlanDeleteRes struct {
+}

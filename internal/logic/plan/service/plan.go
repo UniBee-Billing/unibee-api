@@ -305,6 +305,22 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) 
 	return one, nil
 }
 
+func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.SubscriptionPlan, err error) {
+	utility.Assert(planId > 0, "planId invlaid")
+	one = query.GetPlanById(ctx, planId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
+	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", planId))
+	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionPlan.Columns().IsDeleted: gtime.Now().Timestamp(),
+		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionPlan.Columns().Id, one.Id).Update()
+	if err != nil {
+		return nil, err
+	}
+	one.IsDeleted = int(gtime.Now().Timestamp())
+	return one, nil
+}
+
 func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查

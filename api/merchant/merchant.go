@@ -6,7 +6,7 @@ package merchant
 
 import (
 	"context"
-
+	
 	"unibee/api/merchant/auth"
 	"unibee/api/merchant/balance"
 	"unibee/api/merchant/email"
@@ -104,6 +104,7 @@ type IMerchantPlan interface {
 	SubscriptionPlanUnPublish(ctx context.Context, req *plan.SubscriptionPlanUnPublishReq) (res *plan.SubscriptionPlanUnPublishRes, err error)
 	SubscriptionPlanDetail(ctx context.Context, req *plan.SubscriptionPlanDetailReq) (res *plan.SubscriptionPlanDetailRes, err error)
 	SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error)
+	SubscriptionPlanDelete(ctx context.Context, req *plan.SubscriptionPlanDeleteReq) (res *plan.SubscriptionPlanDeleteRes, err error)
 }
 
 type IMerchantProfile interface {

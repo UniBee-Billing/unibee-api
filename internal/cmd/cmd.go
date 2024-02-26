@@ -27,6 +27,9 @@ var (
 		Brief: "start server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
+			openapi := s.GetOpenApi()
+			openapi.Config.CommonResponse = ghttp.DefaultHandlerResponse{}
+			openapi.Config.CommonResponseDataField = `Data`
 			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
