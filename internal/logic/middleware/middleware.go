@@ -77,24 +77,49 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		json, _ := r.GetJson()
 		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.BizCtx().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
 		r.Response.ClearBuffer() // inner panic will contain json data，need clean
-		r.Response.Status = 200  // error reply in json code, http code always 200
+
 		message := err.Error()
 		if strings.Contains(message, "Session Expired") {
-			utility.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
+			if customCtx.IsOpenApiCall {
+				utility.OpenApiJsonExit(r, 61, "Session Expired")
+			} else {
+				r.Response.Status = 200 // error reply in json code, http code always 200
+				utility.JsonRedirectExit(r, 61, "Session Expired", s.LoginUrl)
+			}
 		} else if strings.Contains(message, utility.SystemAssertPrefix) || code == gcode.CodeValidationFailed {
-			utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+			if customCtx.IsOpenApiCall {
+				utility.OpenApiJsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+			} else {
+				r.Response.Status = 200 // error reply in json code, http code always 200
+				utility.JsonExit(r, gcode.CodeValidationFailed.Code(), strings.Replace(message, "exception recovered: "+utility.SystemAssertPrefix, "", 1))
+			}
 		} else {
-			utility.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+			if customCtx.IsOpenApiCall {
+				utility.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+			} else {
+				r.Response.Status = 200 // error reply in json code, http code always 200
+				utility.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+			}
 		}
 	} else {
 		r.Response.Status = 200
-		utility.JsonExit(r, code.Code(), "", res)
+		if customCtx.IsOpenApiCall {
+			utility.OpenApiJsonExit(r, code.Code(), "", res)
+		} else {
+			utility.JsonExit(r, code.Code(), "", res)
+		}
 	}
 }
 
 func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
 	list := query.GetActiveMerchantInfoList(r.Context())
+	tokenString := r.Header.Get("Authorization")
+	if len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ") {
+		g.Log().Infof(r.Context(), "UserPortal Api Not Support OpenApi Call")
+		utility.JsonRedirectExit(r, 61, "UserPortal Api Not Support OpenApi Call", s.LoginUrl)
+		r.Exit()
+	}
 	if len(list) == 0 {
 		g.Log().Infof(r.Context(), "UserPortalPreAuth Merchant Need Init")
 		utility.JsonRedirectExit(r, 61, "Merchant Not Found", s.LoginUrl)
@@ -146,7 +171,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		return
 	}
 	tokenString := r.Header.Get("Authorization")
-	if tokenString == "" {
+	if len(tokenString) == 0 {
 		g.Log().Infof(r.Context(), "TokenAuth empty token string of auth header")
 		utility.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 		r.Exit()
@@ -203,6 +228,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		jwt.ResetAuthTokenTTL(r.Context(), tokenString)
 	} else {
 		// Api Call
+		customCtx.IsOpenApiCall = true
 		merchantInfo := query.GetMerchantInfoByApiKey(r.Context(), tokenString)
 		if merchantInfo == nil {
 			g.Log().Infof(r.Context(), "TokenAuth invalid api token :%v", tokenString)

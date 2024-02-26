@@ -29,7 +29,7 @@ func merchantCheck(ctx context.Context, merchantId uint64) (apiconfig *entity.Op
 	return openApiConfig, res
 }
 
-//func convertToGJson(target interface{}) (res *gjson.Json) {
+//func convertToGJson(target interface{}) (res *gjson.PortalJson) {
 //	resBytes, err := gjson.Marshal(target)
 //	if err != nil {
 //		return nil

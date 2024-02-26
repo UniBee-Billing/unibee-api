@@ -155,7 +155,7 @@ func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, res
 func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	jsonData, err := r.GetJson()
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook Get Json failed. %v\n", gateway.GatewayName, err.Error())
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook Get PortalJson failed. %v\n", gateway.GatewayName, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}

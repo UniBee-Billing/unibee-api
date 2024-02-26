@@ -180,7 +180,7 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Subscri
 			Where(dao.MerchantMetricPlanLimit.Columns().PlanId, plan.Id).
 			Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
 			Scan(&oldList)
-		var oldMap map[int64]*entity.MerchantMetricPlanLimit
+		var oldMap = make(map[int64]*entity.MerchantMetricPlanLimit)
 		for _, old := range oldList {
 			oldMap[old.MetricId] = old
 		}

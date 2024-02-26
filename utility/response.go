@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	_interface "unibee/internal/interface"
@@ -15,8 +16,7 @@ type JsonRes struct {
 	RequestId string      `json:"requestId"`
 }
 
-// Json 返回标准JSON数据。
-func Json(r *ghttp.Request, code int, message string, data ...interface{}) {
+func portalJson(r *ghttp.Request, code int, message string, data ...interface{}) {
 	var responseData interface{}
 	if len(data) > 0 {
 		responseData = data[0]
@@ -31,6 +31,19 @@ func Json(r *ghttp.Request, code int, message string, data ...interface{}) {
 	})
 }
 
+func openApiJson(r *ghttp.Request, code int, message string, data ...interface{}) {
+	var responseData *gjson.Json
+	if len(data) > 0 {
+		responseData = FormatToGJson(data[0])
+	} else {
+		responseData = gjson.New(nil)
+	}
+	_ = responseData.Set("code", code)
+	_ = responseData.Set("message", message)
+	_ = responseData.Set("requestId", _interface.BizCtx().Get(r.Context()).RequestId)
+	r.Response.WriteJson(responseData)
+}
+
 func SuccessWithMessageJsonExit(r *ghttp.Request, message string, data ...interface{}) {
 	JsonExit(r, 200, "success", data)
 }
@@ -43,13 +56,16 @@ func FailureJsonExit(r *ghttp.Request, message string) {
 	JsonExit(r, 400, message, nil)
 }
 
-// JsonExit 返回标准JSON数据并退出当前HTTP执行函数。
 func JsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
-	Json(r, code, message, data...)
+	portalJson(r, code, message, data...)
 	r.Exit()
 }
 
-// JsonRedirect 返回标准JSON数据引导客户端跳转。
+func OpenApiJsonExit(r *ghttp.Request, code int, message string, data ...interface{}) {
+	openApiJson(r, code, message, data...)
+	r.Exit()
+}
+
 func JsonRedirect(r *ghttp.Request, code int, message, redirect string, data ...interface{}) {
 	responseData := interface{}(nil)
 	if len(data) > 0 {
