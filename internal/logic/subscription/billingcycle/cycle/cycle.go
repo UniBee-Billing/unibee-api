@@ -145,7 +145,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					})
 					billingReason = "SubscriptionCycle"
 				}
-				createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, billingReason)
+				createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, billingReason, true)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateSubInvoicePayment err:", err.Error())
 					return nil, err

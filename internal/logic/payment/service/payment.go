@@ -148,7 +148,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
+func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string, automatic bool) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	var mobile = ""
 	var firstName = ""
@@ -170,6 +170,10 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
+	var automaticInt = 0
+	if automatic {
+		automaticInt = 1
+	}
 	return GatewayPaymentCreate(ctx, &ro.CreatePayContext{
 		Gateway: gateway,
 		Pay: &entity.Payment{
@@ -184,6 +188,7 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 			CountryCode:     sub.CountryCode,
 			MerchantId:      sub.MerchantId,
 			CompanyId:       merchantInfo.CompanyId,
+			Automatic:       automaticInt,
 			BillingReason:   billingReason,
 		},
 		Platform:      "WEB",

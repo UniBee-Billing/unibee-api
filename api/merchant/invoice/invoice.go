@@ -92,13 +92,13 @@ type DeletePendingInvoiceReq struct {
 type DeletePendingInvoiceRes struct {
 }
 
-type ProcessInvoiceForPayReq struct {
+type FinishInvoiceForPayReq struct {
 	g.Meta      `path:"/finish_new_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
 	InvoiceId   string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 	PayMethod   int    `p:"payMethod" dc:"PayMethod,1-manual，2-auto" v:"required"`
 	DaysUtilDue int    `p:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
 }
-type ProcessInvoiceForPayRes struct {
+type FinishInvoiceForPayRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
 }
 

@@ -1236,7 +1236,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			PeriodStart:   nextPeriodStart,
 			PeriodEnd:     nextPeriodEnd,
 		})
-		createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, "SubscriptionCycle")
+		createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, "SubscriptionCycle", true)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment err:", err.Error())
 			return err

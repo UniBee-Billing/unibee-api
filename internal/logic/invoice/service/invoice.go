@@ -102,7 +102,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
-		finishRes, err := FinishInvoice(ctx, &invoice.ProcessInvoiceForPayReq{
+		finishRes, err := FinishInvoice(ctx, &invoice.FinishInvoiceForPayReq{
 			InvoiceId:   one.InvoiceId,
 			PayMethod:   2,
 			DaysUtilDue: 3,
@@ -179,7 +179,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
-		finishRes, err := FinishInvoice(ctx, &invoice.ProcessInvoiceForPayReq{
+		finishRes, err := FinishInvoice(ctx, &invoice.FinishInvoiceForPayReq{
 			InvoiceId:   one.InvoiceId,
 			PayMethod:   2,
 			DaysUtilDue: 3,
@@ -235,7 +235,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 }
 
-func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*invoice.ProcessInvoiceForPayRes, error) {
+func FinishInvoice(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (*invoice.FinishInvoiceForPayRes, error) {
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
@@ -331,7 +331,7 @@ func FinishInvoice(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (*
 	one.Status = invoiceStatus
 	one.Link = createRes.Link
 
-	return &invoice.ProcessInvoiceForPayRes{Invoice: one}, nil
+	return &invoice.FinishInvoiceForPayRes{Invoice: one}, nil
 }
 
 func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (*entity.Refund, error) {
