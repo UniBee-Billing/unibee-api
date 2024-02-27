@@ -123,7 +123,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			req := &handler.HandlePayReq{
 				PaymentId:        merchantTradeNo,
 				GatewayPaymentId: gatewayTradeNo,
-				PayStatusEnum:    consts.PAY_FAILED,
+				PayStatusEnum:    consts.PaymentFailed,
 				Reason:           reason,
 			}
 			err := handler.HandlePayFailure(r.Context(), req)
@@ -186,7 +186,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			req := &handler.HandlePayReq{
 				PaymentId:        merchantTradeNo,
 				GatewayPaymentId: gatewayTradeNo,
-				PayStatusEnum:    consts.PAY_SUCCESS,
+				PayStatusEnum:    consts.PaymentSuccess,
 				TotalAmount:      one.TotalAmount,
 				PaymentAmount:    receiveFee,
 				PaidTime:         gtime.Now(),
@@ -229,7 +229,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
 				GatewayRefundId:  gatewayRefundId,
-				RefundStatusEnum: consts.REFUND_SUCCESS,
+				RefundStatusEnum: consts.RefundSuccess,
 				RefundTime:       gtime.Now(),
 			}
 			err := handler.HandleRefundSuccess(r.Context(), req)
@@ -270,7 +270,7 @@ func (e EvonetWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			req := &handler.HandleRefundReq{
 				RefundId:         merchantRefundId,
 				GatewayRefundId:  gatewayRefundId,
-				RefundStatusEnum: consts.REFUND_FAILED,
+				RefundStatusEnum: consts.RefundFailed,
 				RefundTime:       gtime.Now(),
 				Reason:           reason,
 			}

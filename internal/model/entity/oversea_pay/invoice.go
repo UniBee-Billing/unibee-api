@@ -31,6 +31,7 @@ type Invoice struct {
 	SendPdf                        string      `json:"sendPdf"                        description:"pdf link"`                                                               // pdf link
 	IsDeleted                      int         `json:"isDeleted"                      description:"0-UnDeleted，1-Deleted"`                                                  // 0-UnDeleted，1-Deleted
 	Link                           string      `json:"link"                           description:"invoice link"`                                                           // invoice link
+	PaymentLink                    string      `json:"paymentLink"                    description:"invoice payment link"`                                                   // invoice payment link
 	GatewayStatus                  string      `json:"gatewayStatus"                  description:""`                                                                       //
 	GatewayInvoiceId               string      `json:"gatewayInvoiceId"               description:""`                                                                       //
 	GatewayPaymentId               string      `json:"gatewayPaymentId"               description:""`                                                                       //

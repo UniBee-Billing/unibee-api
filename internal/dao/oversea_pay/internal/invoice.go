@@ -41,6 +41,7 @@ type InvoiceColumns struct {
 	SendPdf                        string // pdf link
 	IsDeleted                      string // 0-UnDeleted，1-Deleted
 	Link                           string // invoice link
+	PaymentLink                    string // invoice payment link
 	GatewayStatus                  string //
 	GatewayInvoiceId               string //
 	GatewayPaymentId               string //
@@ -84,6 +85,7 @@ var invoiceColumns = InvoiceColumns{
 	SendPdf:                        "send_pdf",
 	IsDeleted:                      "is_deleted",
 	Link:                           "link",
+	PaymentLink:                    "payment_link",
 	GatewayStatus:                  "gateway_status",
 	GatewayInvoiceId:               "gateway_invoice_id",
 	GatewayPaymentId:               "gateway_payment_id",

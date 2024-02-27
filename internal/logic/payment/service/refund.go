@@ -27,7 +27,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
-	utility.Assert(payment.Status == consts.PAY_SUCCESS, "payment not success")
+	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 
 	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -68,7 +68,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 		PaymentId:     payment.PaymentId,
 		RefundId:      utility.CreateRefundId(),
 		RefundAmount:  req.Amount.Amount,
-		Status:        consts.REFUND_ING,
+		Status:        consts.RefundIng,
 		GatewayId:     payment.GatewayId,
 		AppId:         payment.AppId,
 		Currency:      payment.Currency,
@@ -106,7 +106,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 
 			one.GatewayRefundId = gatewayResult.GatewayRefundId
 			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundIng})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err

@@ -103,7 +103,7 @@ func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *ent
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
 	var FirstPaidTime int64 = 0
-	if sub.FirstPaidTime == 0 && payment.Status == consts.PAY_SUCCESS {
+	if sub.FirstPaidTime == 0 && payment.Status == consts.PaymentSuccess {
 		FirstPaidTime = payment.PaidTime
 	}
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), uint64(sub.PlanId))

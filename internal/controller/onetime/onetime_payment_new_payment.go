@@ -71,7 +71,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 		Gateway:   gateway,
 		Pay: &entity.Payment{
 			BizId:             req.MerchantPaymentId,
-			BizType:           consts.BIZ_TYPE_ONE_TIME,
+			BizType:           consts.BizTypeOneTime,
 			GatewayId:         int64(gateway.Id),
 			TotalAmount:       req.TotalAmount.Amount,
 			Currency:          req.TotalAmount.Currency,
@@ -97,8 +97,6 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 		TokenId:                  req.PaymentMethod.TokenId,
 		MerchantOrderReference:   req.MerchantOrderReference,
 		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
-		PayMethod:                1, //automatic
-		DaysUtilDue:              5, //one day expire
 	}
 
 	resp, err := service.GatewayPaymentCreate(ctx, createPayContext)

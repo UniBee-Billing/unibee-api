@@ -30,7 +30,6 @@ type CreatePayContext struct {
 	DateOfBirth              *gtime.Time             `json:"dateOfBirth"`
 	Platform                 string                  `json:"platform"`
 	DeviceType               string                  `json:"deviceType"`
-	PayMethod                int                     `json:"payMethod"`
 	DaysUtilDue              int                     `json:"daysUtilDue"`
 	GatewayPaymentMethod     string                  `json:"gatewayPaymentMethod"`
 	PayImmediate             bool                    `json:"payImmediate"`
@@ -171,6 +170,7 @@ type InvoiceItemDetailRo struct {
 
 type InvoiceDetailSimplify struct {
 	InvoiceId                      string                 `json:"invoiceId"`
+	InvoiceName                    string                 `json:"invoiceName"`
 	TotalAmount                    int64                  `json:"totalAmount"`
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
 	Currency                       string                 `json:"currency"`

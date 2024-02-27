@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"strconv"
 	"strings"
 	"unibee/api/merchant/invoice"
 	v1 "unibee/api/onetime/payment"
@@ -15,6 +14,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -72,7 +72,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	//创建
 	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
-		BizType:                        consts.BIZ_TYPE_SUBSCRIPTION,
+		BizType:                        consts.BizTypeSubscription,
 		MerchantId:                     _interface.GetMerchantId(ctx),
 		InvoiceId:                      invoiceId,
 		InvoiceName:                    req.Name,
@@ -153,7 +153,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 
 	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().BizType:                        consts.BIZ_TYPE_SUBSCRIPTION,
+		dao.Invoice.Columns().BizType:                        consts.BizTypeSubscription,
 		dao.Invoice.Columns().InvoiceName:                    req.Name,
 		dao.Invoice.Columns().TotalAmount:                    totalAmount,
 		dao.Invoice.Columns().TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -240,96 +240,20 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (*i
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
-	var lines []*ro.InvoiceItemDetailRo
-	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
-	if err != nil {
-		return nil, err
-	}
 	checkInvoice(invoice_compute.ConvertInvoiceToRo(ctx, one))
-
-	merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
-	user := query.GetUserAccountById(ctx, uint64(one.UserId))
-
-	createPayContext := &ro.CreatePayContext{
-		Gateway: gateway,
-		Pay: &entity.Payment{
-			BizId:           one.InvoiceId,
-			BizType:         consts.BIZ_TYPE_INVOICE,
-			AuthorizeStatus: consts.AUTHORIZED,
-			UserId:          one.UserId,
-			GatewayId:       int64(gateway.Id),
-			TotalAmount:     one.TotalAmount,
-			Currency:        one.Currency,
-			CountryCode:     user.CountryCode,
-			MerchantId:      one.MerchantId,
-			CompanyId:       merchantInfo.CompanyId,
-			BillingReason:   "InvoicePay",
-		},
-		Platform:      "WEB",
-		DeviceType:    "Web",
-		ShopperUserId: strconv.FormatInt(one.UserId, 10),
-		ShopperEmail:  user.Email,
-		ShopperLocale: "en",
-		Mobile:        user.Mobile,
-		Invoice: &ro.InvoiceDetailSimplify{
-			InvoiceId:                      one.InvoiceId,
-			TotalAmount:                    one.TotalAmount,
-			TotalAmountExcludingTax:        one.TotalAmountExcludingTax,
-			Currency:                       one.Currency,
-			TaxAmount:                      one.TaxAmount,
-			SubscriptionAmount:             one.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: one.SubscriptionAmountExcludingTax,
-			Lines:                          lines,
-			PeriodEnd:                      one.PeriodEnd,
-			PeriodStart:                    one.PeriodStart,
-		},
-		ShopperName: &v1.OutShopperName{
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Gender:    user.Gender,
-		},
-		MerchantOrderReference: one.InvoiceId,
-		PayMethod:              req.PayMethod,   //automatic
-		DaysUtilDue:            req.DaysUtilDue, //one day expire
-	}
-
-	createRes, err := service.GatewayPaymentCreate(ctx, createPayContext)
-
-	//createRes, err := out.GetPayChannelServiceProvider(ctx, one.Id).GatewayInvoiceCreateAndPay(ctx, gateway, &ro.GatewayCreateInvoiceInternalReq{
-	//	Invoice:      one,
-	//	InvoiceLines: lines,
-	//	PayMethod:    req.PayMethod,
-	//	DaysUtilDue:  req.DaysUtilDue,
-	//})
-
-	if err != nil {
-		return nil, gerror.Newf(`FinishInvoice failure %v`, err)
-	}
-	var invoiceStatus = consts.InvoiceStatusProcessing
-	if createRes.Status == consts.PAY_SUCCESS {
-		invoiceStatus = consts.InvoiceStatusPaid
-	} else if createRes.Status == consts.PAY_FAILED {
-		invoiceStatus = consts.InvoiceStatusFailed
-	}
-	//更新 Subscription
-	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		//dao.Invoice.Columns().GatewayInvoiceId:  createRes.GatewayInvoiceId,
-		//dao.Invoice.Columns().GatewayInvoicePdf: createRes.GatewayInvoicePdf,
+	invoiceStatus := consts.InvoiceStatusProcessing
+	invoiceLink := invoice_compute.GetInvoiceLink(one.InvoiceId)
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:    invoiceStatus,
-		dao.Invoice.Columns().Link:      createRes.Link,
+		dao.Invoice.Columns().Link:      invoiceLink,
 		dao.Invoice.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return nil, gerror.Newf("FinishInvoice update err:%s", update)
-	//}
 	one.Status = invoiceStatus
-	one.Link = createRes.Link
+	one.Link = invoiceLink
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
 	return &invoice.FinishInvoiceForPayRes{Invoice: one}, nil
 }

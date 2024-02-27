@@ -259,7 +259,7 @@ func (s Stripe) setUnibeeAppInfo() {
 	})
 }
 
-func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -298,13 +298,13 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 		if err != nil {
 			return nil, err
 		}
-		log.SaveChannelHttpLog("GatewayPayment", checkoutParams, detail, err, "CheckoutSession", nil, createPayContext.Gateway)
-		var status consts.PayStatusEnum = consts.TO_BE_PAID
+		log.SaveChannelHttpLog("GatewayNewPayment", checkoutParams, detail, err, "CheckoutSession", nil, createPayContext.Gateway)
+		var status consts.PayStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
 		} else if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
-			status = consts.PAY_SUCCESS
+			status = consts.PaymentSuccess
 		} else if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
-			status = consts.PAY_FAILED
+			status = consts.PaymentFailed
 		}
 		var gatewayPaymentId string
 		if detail.PaymentIntent != nil {
@@ -317,10 +317,10 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			Link:                   detail.URL,
 		}, nil
 	} else {
-		if createPayContext.PayMethod == 1 && createPayContext.PayImmediate {
+		if createPayContext.PayImmediate {
 			// try use payment intent
 			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
-			log.SaveChannelHttpLog("GatewayPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
+			log.SaveChannelHttpLog("GatewayNewPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
 			if err != nil {
 				return nil, err
 			}
@@ -351,7 +351,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 				}
 				params.PaymentMethod = stripe.String(method)
 				targetIntent, err = paymentintent.New(params)
-				log.SaveChannelHttpLog("GatewayPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.Gateway)
+				log.SaveChannelHttpLog("GatewayNewPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.Gateway)
 				var status = ""
 
 				if targetIntent != nil {
@@ -366,15 +366,15 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 					break
 				} else if targetIntent != nil {
 					cancelRes, cancelErr := paymentintent.Cancel(targetIntent.ID, &stripe.PaymentIntentCancelParams{})
-					log.SaveChannelHttpLog("GatewayPayment", "", cancelRes, cancelErr, "PaymentIntentCancel", nil, createPayContext.Gateway)
+					log.SaveChannelHttpLog("GatewayNewPayment", "", cancelRes, cancelErr, "PaymentIntentCancel", nil, createPayContext.Gateway)
 				} else {
 					cancelErr = gerror.Newf("targetIntent is nil")
 				}
-				g.Log().Printf(ctx, "GatewayPayment try PaymentIntent Method::%s gatewayPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, gatewayPaymentId, status, success, link, err, cancelErr)
+				g.Log().Printf(ctx, "GatewayNewPayment try PaymentIntent Method::%s gatewayPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, gatewayPaymentId, status, success, link, err, cancelErr)
 			}
 			if success && targetIntent != nil && len(gatewayPaymentId) > 0 {
 				return &ro.CreatePayInternalResp{
-					Status:                 consts.PAY_SUCCESS,
+					Status:                 consts.PaymentSuccess,
 					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
 					Link:                   link,
@@ -387,7 +387,7 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
 			Customer: stripe.String(gatewayUser.GatewayUserId)}
 
-		if createPayContext.PayMethod == 1 {
+		if createPayContext.PayImmediate {
 			params.CollectionMethod = stripe.String("charge_automatically")
 			// check the gateway user contains the payment method now
 			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
@@ -406,13 +406,15 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			params.CollectionMethod = stripe.String("send_invoice")
 			if createPayContext.DaysUtilDue > 0 {
 				params.DaysUntilDue = stripe.Int64(int64(createPayContext.DaysUtilDue))
+			} else {
+				params.DaysUntilDue = stripe.Int64(5)
 			}
 		}
 		result, err := invoice.New(params)
 		if err != nil {
 			return nil, err
 		}
-		log.SaveChannelHttpLog("GatewayPayment", params, result, err, "NewInvoice", nil, createPayContext.Gateway)
+		log.SaveChannelHttpLog("GatewayNewPayment", params, result, err, "NewInvoice", nil, createPayContext.Gateway)
 
 		for _, line := range createPayContext.Invoice.Lines {
 			ItemParams := &stripe.InvoiceItemParams{
@@ -429,33 +431,33 @@ func (s Stripe) GatewayPayment(ctx context.Context, createPayContext *ro.CreateP
 			}
 		}
 		finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
-		if createPayContext.PayMethod == 1 {
+		if createPayContext.PayImmediate {
 			finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
 		} else {
 			finalizeInvoiceParam.AutoAdvance = stripe.Bool(false)
 		}
 		detail, err := invoice.FinalizeInvoice(result.ID, finalizeInvoiceParam)
-		log.SaveChannelHttpLog("GatewayPayment", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, createPayContext.Gateway)
+		log.SaveChannelHttpLog("GatewayNewPayment", finalizeInvoiceParam, detail, err, "FinalizeInvoice", nil, createPayContext.Gateway)
 		if err != nil {
 			return nil, err
 		}
 		if createPayContext.PayImmediate {
 			params := &stripe.InvoicePayParams{}
 			response, payErr := invoice.Pay(result.ID, params)
-			log.SaveChannelHttpLog("GatewayPayment", params, response, payErr, "PayInvoice", nil, createPayContext.Gateway)
+			log.SaveChannelHttpLog("GatewayNewPayment", params, response, payErr, "PayInvoice", nil, createPayContext.Gateway)
 			if response != nil {
 				detail.Status = response.Status
 			}
 		}
-		var status consts.PayStatusEnum = consts.TO_BE_PAID
+		var status consts.PayStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), "draft") == 0 {
 		} else if strings.Compare(string(detail.Status), "open") == 0 {
 		} else if strings.Compare(string(detail.Status), "paid") == 0 {
-			status = consts.PAY_SUCCESS
+			status = consts.PaymentSuccess
 		} else if strings.Compare(string(detail.Status), "uncollectible") == 0 {
-			status = consts.PAY_FAILED
+			status = consts.PaymentFailed
 		} else if strings.Compare(string(detail.Status), "void") == 0 {
-			status = consts.PAY_FAILED
+			status = consts.PaymentFailed
 		}
 		var gatewayPaymentId string
 		if detail.PaymentIntent != nil {
@@ -492,7 +494,7 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 
-	var status = consts.TO_BE_PAID
+	var status = consts.PaymentCreated
 	var gatewayCancelId string
 	if strings.HasPrefix(payment.GatewayPaymentIntentId, "in_") {
 		params := &stripe.InvoiceVoidInvoiceParams{}
@@ -503,9 +505,9 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		}
 		gatewayCancelId = result.ID
 		if strings.Compare(string(result.Status), "paid") == 0 {
-			status = consts.PAY_SUCCESS
+			status = consts.PaymentSuccess
 		} else if strings.Compare(string(result.Status), "uncollectible") == 0 || strings.Compare(string(result.Status), "void") == 0 {
-			status = consts.PAY_FAILED
+			status = consts.PaymentFailed
 		}
 	} else if strings.HasPrefix(payment.GatewayPaymentIntentId, "cs_") {
 		params := &stripe.CheckoutSessionExpireParams{}
@@ -519,9 +521,9 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		}
 		if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
-			status = consts.PAY_SUCCESS
+			status = consts.PaymentSuccess
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
-			status = consts.PAY_FAILED
+			status = consts.PaymentFailed
 		}
 		gatewayCancelId = result.ID
 	} else {
@@ -571,7 +573,7 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	utility.Assert(result != nil, "Stripe refund failed, result is nil")
 	return &ro.OutPayRefundRo{
 		GatewayRefundId: result.ID,
-		Status:          consts.REFUND_ING,
+		Status:          consts.RefundIng,
 	}, nil
 }
 
@@ -580,13 +582,13 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	if item.PaymentIntent != nil {
 		gatewayPaymentId = item.PaymentIntent.ID
 	}
-	var status consts.RefundStatusEnum = consts.REFUND_ING
+	var status consts.RefundStatusEnum = consts.RefundIng
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
-		status = consts.REFUND_SUCCESS
+		status = consts.RefundSuccess
 	} else if strings.Compare(string(item.Status), "failed") == 0 {
-		status = consts.REFUND_FAILED
+		status = consts.RefundFailed
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
-		status = consts.REFUND_REVERSE
+		status = consts.RefundReverse
 	}
 	return &ro.OutPayRefundRo{
 		MerchantId:       "",
@@ -605,22 +607,22 @@ func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGate
 	if item.Customer != nil {
 		gatewayUserId = item.Customer.ID
 	}
-	var status = consts.TO_BE_PAID
+	var status = consts.PaymentCreated
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
-		status = consts.PAY_SUCCESS
+		status = consts.PaymentSuccess
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
-		status = consts.PAY_CANCEL
+		status = consts.PaymentCancelled
 	}
-	var captureStatus = consts.AUTHORIZED
+	var captureStatus = consts.Authorized
 	var authorizeReason = ""
 	var paymentData = ""
 	if strings.Compare(string(item.Status), "requires_payment_method") == 0 {
-		captureStatus = consts.WAITING_AUTHORIZED
+		captureStatus = consts.WaitingAuthorized
 		if item.LastPaymentError != nil {
 			authorizeReason = item.LastPaymentError.Msg
 		}
 	} else if strings.Compare(string(item.Status), "requires_confirmation") == 0 {
-		captureStatus = consts.CAPTURE_REQUEST
+		captureStatus = consts.CaptureRequest
 	}
 	if item.NextAction != nil {
 		paymentData = utility.MarshalToJsonString(item.NextAction)

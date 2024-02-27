@@ -33,6 +33,7 @@ type Invoice struct {
 	SendPdf                        interface{} // pdf link
 	IsDeleted                      interface{} // 0-UnDeleted，1-Deleted
 	Link                           interface{} // invoice link
+	PaymentLink                    interface{} // invoice payment link
 	GatewayStatus                  interface{} //
 	GatewayInvoiceId               interface{} //
 	GatewayPaymentId               interface{} //

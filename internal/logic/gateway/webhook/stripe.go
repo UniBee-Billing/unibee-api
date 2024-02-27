@@ -257,7 +257,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 			payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
 				response = "paymentId invalid"
-			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PAY_SUCCESS {
+			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PaymentSuccess {
 				returnUrl = payment.ReturnUrl
 				response = "success"
 				status = true
@@ -282,13 +282,13 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 						if err != nil {
 							response = fmt.Sprintf("%v", err)
 						} else {
-							if paymentIntentDetail.Status == consts.PAY_SUCCESS {
+							if paymentIntentDetail.Status == consts.PaymentSuccess {
 								err := handler2.HandlePaySuccess(r.Context(), &handler2.HandlePayReq{
 									PaymentId:                   payment.PaymentId,
 									GatewayPaymentIntentId:      payment.GatewayPaymentIntentId,
 									GatewayPaymentId:            paymentIntentDetail.GatewayPaymentId,
 									TotalAmount:                 paymentIntentDetail.TotalAmount,
-									PayStatusEnum:               consts.PAY_SUCCESS,
+									PayStatusEnum:               consts.PaymentSuccess,
 									PaidTime:                    paymentIntentDetail.PayTime,
 									PaymentAmount:               paymentIntentDetail.PaymentAmount,
 									CaptureAmount:               0,
@@ -301,13 +301,13 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 									response = "payment success"
 									status = true
 								}
-							} else if paymentIntentDetail.Status == consts.PAY_FAILED {
+							} else if paymentIntentDetail.Status == consts.PaymentFailed {
 								err := handler2.HandlePayFailure(r.Context(), &handler2.HandlePayReq{
 									PaymentId:              payment.PaymentId,
 									GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
 									GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 									TotalAmount:            paymentIntentDetail.TotalAmount,
-									PayStatusEnum:          consts.PAY_FAILED,
+									PayStatusEnum:          consts.PaymentFailed,
 									PaidTime:               paymentIntentDetail.PayTime,
 									PaymentAmount:          paymentIntentDetail.PaymentAmount,
 									CaptureAmount:          0,
@@ -387,13 +387,13 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			if len(paymentIntentDetail.PaymentData) == 0 && stripePayment.NextAction != nil {
 				paymentIntentDetail.PaymentData = utility.MarshalToJsonString(stripePayment.NextAction)
 			}
-			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
+			if paymentIntentDetail.Status == consts.PaymentSuccess {
 				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 					PaymentId:                   payment.PaymentId,
 					GatewayPaymentIntentId:      payment.GatewayPaymentIntentId,
 					GatewayPaymentId:            paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:                 paymentIntentDetail.TotalAmount,
-					PayStatusEnum:               consts.PAY_SUCCESS,
+					PayStatusEnum:               consts.PaymentSuccess,
 					PaidTime:                    paymentIntentDetail.PayTime,
 					PaymentAmount:               paymentIntentDetail.PaymentAmount,
 					CaptureAmount:               0,
@@ -403,13 +403,13 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
 				}
-			} else if paymentIntentDetail.Status == consts.PAY_FAILED {
+			} else if paymentIntentDetail.Status == consts.PaymentFailed {
 				err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
 					PaymentId:              payment.PaymentId,
 					GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
 					GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:            paymentIntentDetail.TotalAmount,
-					PayStatusEnum:          consts.PAY_FAILED,
+					PayStatusEnum:          consts.PaymentFailed,
 					PaidTime:               paymentIntentDetail.PayTime,
 					PaymentAmount:          paymentIntentDetail.PaymentAmount,
 					CaptureAmount:          0,
@@ -418,13 +418,13 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
 				}
-			} else if paymentIntentDetail.Status == consts.PAY_CANCEL {
+			} else if paymentIntentDetail.Status == consts.PaymentCancelled {
 				err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 					PaymentId:              payment.PaymentId,
 					GatewayPaymentIntentId: paymentIntentDetail.GatewayPaymentId,
 					GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:            paymentIntentDetail.TotalAmount,
-					PayStatusEnum:          consts.PAY_CANCEL,
+					PayStatusEnum:          consts.PaymentCancelled,
 					PaidTime:               paymentIntentDetail.PayTime,
 					PaymentAmount:          paymentIntentDetail.PaymentAmount,
 					CaptureAmount:          0,
@@ -433,7 +433,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 				if err != nil {
 					return err
 				}
-			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+			} else if paymentIntentDetail.AuthorizeStatus == consts.WaitingAuthorized {
 				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason, paymentIntentDetail.PaymentData)
 				if err != nil {
 					return err
@@ -542,20 +542,20 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	utility.Assert(len(invoice.ID) > 0, "processInvoiceWebhook gatewayInvoiceId Invalid")
 	invoiceDetails := parseStripeInvoice(invoice, int64(gateway.Id))
 
-	var status = consts.TO_BE_PAID
-	var authorizeStatus = consts.AUTHORIZED
+	var status = consts.PaymentCreated
+	var authorizeStatus = consts.Authorized
 	var authorizeReason = ""
 	var cancelReason = ""
 	var paymentData = ""
 	if invoiceDetails.Status == consts.InvoiceStatusPaid {
-		status = consts.PAY_SUCCESS
-		authorizeStatus = consts.CAPTURE_REQUEST
+		status = consts.PaymentSuccess
+		authorizeStatus = consts.CaptureRequest
 	} else if invoiceDetails.Status == consts.InvoiceStatusFailed {
-		status = consts.PAY_FAILED
+		status = consts.PaymentFailed
 	} else if invoiceDetails.Status == consts.InvoiceStatusCancelled {
-		status = consts.PAY_CANCEL
+		status = consts.PaymentCancelled
 	} else if strings.Compare("invoice.payment_action_required", eventType) == 0 {
-		authorizeStatus = consts.WAITING_AUTHORIZED
+		authorizeStatus = consts.WaitingAuthorized
 	}
 
 	if len(invoiceDetails.GatewayPaymentId) > 0 {
@@ -605,13 +605,13 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 			if err != nil {
 				return gerror.New(fmt.Sprintf("%s", err.Error()))
 			}
-			if paymentIntentDetail.Status == consts.PAY_SUCCESS {
+			if paymentIntentDetail.Status == consts.PaymentSuccess {
 				err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 					PaymentId:                   payment.PaymentId,
 					GatewayPaymentIntentId:      payment.GatewayPaymentIntentId,
 					GatewayPaymentId:            paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:                 paymentIntentDetail.TotalAmount,
-					PayStatusEnum:               consts.PAY_SUCCESS,
+					PayStatusEnum:               consts.PaymentSuccess,
 					PaidTime:                    paymentIntentDetail.PayTime,
 					PaymentAmount:               paymentIntentDetail.PaymentAmount,
 					CaptureAmount:               0,
@@ -621,13 +621,13 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
 				}
-			} else if paymentIntentDetail.Status == consts.PAY_FAILED {
+			} else if paymentIntentDetail.Status == consts.PaymentFailed {
 				err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
 					PaymentId:              payment.PaymentId,
 					GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
 					GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:            paymentIntentDetail.TotalAmount,
-					PayStatusEnum:          consts.PAY_FAILED,
+					PayStatusEnum:          consts.PaymentFailed,
 					PaidTime:               paymentIntentDetail.PayTime,
 					PaymentAmount:          paymentIntentDetail.PaymentAmount,
 					CaptureAmount:          0,
@@ -636,13 +636,13 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 				if err != nil {
 					return gerror.New(fmt.Sprintf("%s", err.Error()))
 				}
-			} else if paymentIntentDetail.Status == consts.PAY_CANCEL {
+			} else if paymentIntentDetail.Status == consts.PaymentCancelled {
 				err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 					PaymentId:              payment.PaymentId,
 					GatewayPaymentIntentId: paymentIntentDetail.GatewayPaymentId,
 					GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 					TotalAmount:            paymentIntentDetail.TotalAmount,
-					PayStatusEnum:          consts.PAY_CANCEL,
+					PayStatusEnum:          consts.PaymentCancelled,
 					PaidTime:               paymentIntentDetail.PayTime,
 					PaymentAmount:          paymentIntentDetail.PaymentAmount,
 					CaptureAmount:          0,
@@ -651,7 +651,7 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 				if err != nil {
 					return err
 				}
-			} else if paymentIntentDetail.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+			} else if paymentIntentDetail.AuthorizeStatus == consts.WaitingAuthorized {
 				err := handler2.HandlePayNeedAuthorized(ctx, payment, paymentIntentDetail.AuthorizeReason, paymentIntentDetail.PaymentData)
 				if err != nil {
 					return err

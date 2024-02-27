@@ -10,6 +10,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller"
 	"unibee/internal/controller/gateway_webhook_entry"
+	"unibee/internal/controller/invoice_entry"
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/utility"
@@ -134,7 +135,8 @@ var (
 
 			//// Session Redirect
 			//s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/session/redirect/{session}/forward", session.UserSessionRedirectEntrance)
-
+			// Invoice Link
+			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/in/{invoiceId}", invoice_entry.InvoiceEntrance)
 			// Gateway Redirect
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook

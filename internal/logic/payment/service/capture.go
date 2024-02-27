@@ -13,15 +13,15 @@ import (
 
 func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err error) {
 	utility.Assert(payment != nil, "entity not found")
-	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
-	utility.Assert(payment.AuthorizeStatus != consts.WAITING_AUTHORIZED, "payment not authorised")
+	utility.Assert(payment.Status == consts.PaymentCreated, "payment not waiting for pay")
+	utility.Assert(payment.AuthorizeStatus != consts.WaitingAuthorized, "payment not authorised")
 	utility.Assert(payment.PaymentAmount > 0, "capture value should > 0")
 	utility.Assert(payment.PaymentAmount <= payment.TotalAmount, "capture value should <= authorized value")
 
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		//todo mark need transaction gateway capture
-		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CAPTURE_REQUEST, dao.Payment.Columns().PaymentAmount: payment.PaymentAmount},
-			g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CaptureRequest, dao.Payment.Columns().PaymentAmount: payment.PaymentAmount},
+			g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 		if err != nil || result == nil {
 			//_ = transaction.Rollback()
 			return err

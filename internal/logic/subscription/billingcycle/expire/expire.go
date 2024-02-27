@@ -36,7 +36,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	var paymentList []*entity.Payment
 	err = dao.Payment.Ctx(ctx).
 		Where(dao.Payment.Columns().SubscriptionId, sub.SubscriptionId).
-		Where(dao.Payment.Columns().Status, consts.TO_BE_PAID).
+		Where(dao.Payment.Columns().Status, consts.PaymentCreated).
 		Limit(0, 100).
 		OmitEmpty().Scan(&paymentList)
 	if err != nil {
@@ -49,7 +49,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		}
 		err = handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 			PaymentId:     p.PaymentId,
-			PayStatusEnum: consts.PAY_CANCEL,
+			PayStatusEnum: consts.PaymentCancelled,
 			Reason:        reason,
 		})
 		if err != nil {

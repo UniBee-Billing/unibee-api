@@ -3,12 +3,10 @@ package callback
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/user"
@@ -23,7 +21,7 @@ type SubscriptionPaymentCallback struct {
 
 func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
-		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+		if payment.BizType == consts.BizTypeSubscription {
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "PaymentNeedAuthorisedCallback sub not found:"+payment.PaymentId)
 			user := query.GetUserAccountById(ctx, uint64(sub.UserId))
@@ -53,14 +51,8 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		// better use redis mq to trace payment
-		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
-			_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-				dao.Subscription.Columns().LatestInvoiceId: invoice.InvoiceId,
-			}).Where(dao.Subscription.Columns().SubscriptionId, payment.SubscriptionId).OmitNil().Update()
-			if err != nil {
-				utility.AssertError(err, "PaymentCreateCallback")
-			}
 			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
 		}
 	}
@@ -69,7 +61,7 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		// better use redis mq to trace payment
-		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
@@ -125,7 +117,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 
 func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
-		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
@@ -143,7 +135,7 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 
 func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
-		if payment.BizType == consts.BIZ_TYPE_SUBSCRIPTION {
+		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")

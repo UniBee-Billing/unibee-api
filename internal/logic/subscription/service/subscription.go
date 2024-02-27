@@ -18,6 +18,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/ro"
+	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
@@ -182,6 +183,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), uint64(req.PlanId))
 
 	invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+		InvoiceName:   "SubscriptionCreate",
 		Currency:      currency,
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
@@ -286,13 +288,15 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		lastName = user.LastName
 		gender = user.Gender
 	}
+	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
+	utility.AssertError(err, "System Error")
 	createPaymentResult, err := service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
 		CheckoutMode: true,
 		Gateway:      prepare.Gateway,
 		Pay: &entity.Payment{
 			SubscriptionId: one.SubscriptionId,
 			BizId:          one.SubscriptionId,
-			BizType:        consts.BIZ_TYPE_SUBSCRIPTION,
+			BizType:        consts.BizTypeSubscription,
 			UserId:         prepare.UserId,
 			GatewayId:      int64(prepare.Gateway.Id),
 			TotalAmount:    prepare.Invoice.TotalAmount,
@@ -300,7 +304,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			CountryCode:    prepare.VatCountryCode,
 			MerchantId:     prepare.MerchantInfo.Id,
 			CompanyId:      prepare.MerchantInfo.CompanyId,
-			BillingReason:  "SubscriptionCreate",
+			BillingReason:  prepare.Invoice.InvoiceName,
 			ReturnUrl:      req.ReturnUrl,
 		},
 		Platform:      "WEB",
@@ -309,16 +313,14 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		ShopperEmail:  prepare.Email,
 		ShopperLocale: "en",
 		Mobile:        mobile,
-		Invoice:       prepare.Invoice,
+		Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
 		ShopperName: &v1.OutShopperName{
 			FirstName: firstName,
 			LastName:  lastName,
 			Gender:    gender,
 		},
-		MediaData:              map[string]string{"BillingReason": "SubscriptionCreate"},
+		MediaData:              map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
 		MerchantOrderReference: one.SubscriptionId,
-		PayMethod:              1, //automatic
-		DaysUtilDue:            5, //one day expire
 	})
 	if err != nil {
 		return nil, err
@@ -327,7 +329,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		GatewaySubscriptionId: createPaymentResult.PaymentId,
 		Data:                  utility.MarshalToJsonString(createPaymentResult),
 		Link:                  createPaymentResult.Link,
-		Paid:                  createPaymentResult.Status == consts.PAY_SUCCESS,
+		Paid:                  createPaymentResult.Status == consts.PaymentSuccess,
 	}
 
 	//Update Subscription
@@ -555,6 +557,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		if prorationDate > sub.CurrentPeriodEnd || prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync todo mark
 			prorationInvoice = &ro.InvoiceDetailSimplify{
+				InvoiceName:                    "SubscriptionUpgrade",
 				TotalAmount:                    0,
 				TotalAmountExcludingTax:        0,
 				Currency:                       sub.Currency,
@@ -566,6 +569,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			}
 		} else {
 			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
+				InvoiceName:       "SubscriptionUpgrade",
 				Currency:          sub.Currency,
 				TaxScale:          sub.TaxScale,
 				ProrationDate:     prorationDate,
@@ -610,6 +614,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale))
 		nextPeriodInvoice = &ro.InvoiceDetailSimplify{
+			InvoiceName:                    "SubscriptionCycle",
 			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
 			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
 			Currency:                       currency,
@@ -634,6 +639,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 
 		prorationInvoice = &ro.InvoiceDetailSimplify{
+			InvoiceName:                    "SubscriptionUpgrade",
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
 			Currency:                       currency,
@@ -743,53 +749,9 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
-		user := query.GetUserAccountById(ctx, uint64(one.UserId))
-		var mobile = ""
-		var firstName = ""
-		var lastName = ""
-		var gender = ""
-		if user != nil {
-			mobile = user.Mobile
-			firstName = user.FirstName
-			lastName = user.LastName
-			gender = user.Gender
-		}
-
-		createRes, err := service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
-			PayImmediate: true,
-			Gateway:      gateway,
-			Pay: &entity.Payment{
-				SubscriptionId:  one.SubscriptionId,
-				BizId:           one.UpdateSubscriptionId,
-				BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
-				AuthorizeStatus: consts.AUTHORIZED,
-				UserId:          one.UserId,
-				GatewayId:       int64(gateway.Id),
-				TotalAmount:     prepare.Invoice.TotalAmount,
-				Currency:        one.Currency,
-				CountryCode:     prepare.Subscription.CountryCode,
-				MerchantId:      one.MerchantId,
-				CompanyId:       merchantInfo.CompanyId,
-				BillingReason:   "SubscriptionUpgrade",
-			},
-			Platform:      "WEB",
-			DeviceType:    "Web",
-			ShopperUserId: strconv.FormatInt(one.UserId, 10),
-			ShopperEmail:  prepare.Subscription.CustomerEmail,
-			ShopperLocale: "en",
-			Mobile:        mobile,
-			Invoice:       prepare.Invoice,
-			ShopperName: &v1.OutShopperName{
-				FirstName: firstName,
-				LastName:  lastName,
-				Gender:    gender,
-			},
-			MediaData:              map[string]string{"BillingReason": "SubscriptionUpdate"},
-			MerchantOrderReference: one.UpdateSubscriptionId,
-			PayMethod:              1, //automatic
-			DaysUtilDue:            5, //one day expire
-			GatewayPaymentMethod:   prepare.Subscription.GatewayDefaultPaymentMethod,
-		})
+		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
+		utility.AssertError(err, "System Error")
+		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, prepare.Subscription, invoice)
 		if err != nil {
 			return nil, err
 		}
@@ -798,7 +760,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			GatewayUpdateId: createRes.PaymentId,
 			Data:            utility.MarshalToJsonString(createRes),
 			Link:            createRes.Link,
-			Paid:            createRes.Status == consts.PAY_SUCCESS,
+			Paid:            createRes.Status == consts.PaymentSuccess,
 		}
 	} else {
 		prepare.EffectImmediate = false
@@ -1076,10 +1038,16 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			TaxScale:      sub.TaxScale,
 			PeriodStart:   nextPeriodStart,
 			PeriodEnd:     nextPeriodEnd,
+			InvoiceName:   "SubscriptionCycle",
 		})
-		createRes, err := service.CreateSubInvoicePayment(ctx, sub, invoice, "SubscriptionCycle", true)
+		one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)
 		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment err:", err.Error())
+			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
+			return err
+		}
+		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, one)
+		if err != nil {
+			g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
 			return err
 		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -1092,7 +1060,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		if err != nil {
 			return err
 		}
-		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePayment:", utility.MarshalToJsonString(createRes))
+		g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment:", utility.MarshalToJsonString(createRes))
 		err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual SubscriptionIncomplete err:", err.Error())

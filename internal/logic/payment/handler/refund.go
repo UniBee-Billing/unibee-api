@@ -37,11 +37,11 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
 		return gerror.New("refund not found")
 	}
-	if one.Status == consts.REFUND_FAILED {
+	if one.Status == consts.RefundFailed {
 		g.Log().Infof(ctx, "already failure")
 		return nil
 	}
-	if one.Status == consts.REFUND_SUCCESS {
+	if one.Status == consts.RefundSuccess {
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
@@ -52,8 +52,8 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_FAILED, dao.Refund.Columns().RefundComment: req.Reason},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundFailed, dao.Refund.Columns().RefundComment: req.Reason},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundIng})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -106,7 +106,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund is nil, refundId=%s", req.RefundId)
 		return gerror.New("refund not found")
 	}
-	if one.Status == consts.REFUND_SUCCESS {
+	if one.Status == consts.RefundSuccess {
 		g.Log().Infof(ctx, "refund already success")
 		return nil
 	}
@@ -135,8 +135,8 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundSuccess, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.REFUND_SUCCESS, dao.Refund.Columns().RefundTime: refundAt},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.REFUND_ING})
+			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundSuccess, dao.Refund.Columns().RefundTime: refundAt},
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundIng})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -209,7 +209,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		g.Log().Infof(ctx, "refund is nil, merchantOrderNo=%s", req.RefundId)
 		return gerror.New("refund not found")
 	}
-	if one.Status != consts.REFUND_ING {
+	if one.Status != consts.RefundIng {
 		g.Log().Infof(ctx, "Refund is success or failure")
 		return nil
 	}
@@ -241,7 +241,7 @@ func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRef
 	utility.Assert(len(gatewayRefundRo.GatewayRefundId) > 0, "gatewayRefundId not found")
 	one := query.GetRefundByGatewayRefundId(ctx, gatewayRefundRo.GatewayRefundId)
 	utility.Assert(one != nil, "refund not found")
-	if gatewayRefundRo.Status == consts.REFUND_SUCCESS {
+	if gatewayRefundRo.Status == consts.RefundSuccess {
 		err := HandleRefundSuccess(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
 			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
@@ -253,7 +253,7 @@ func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRef
 		if err != nil {
 			return err
 		}
-	} else if gatewayRefundRo.Status == consts.REFUND_FAILED {
+	} else if gatewayRefundRo.Status == consts.RefundFailed {
 		err := HandleRefundFailure(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
 			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
@@ -265,7 +265,7 @@ func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRef
 		if err != nil {
 			return err
 		}
-	} else if gatewayRefundRo.Status == consts.REFUND_REVERSE {
+	} else if gatewayRefundRo.Status == consts.RefundReverse {
 		err := HandleRefundReversed(ctx, &HandleRefundReq{
 			RefundId:         one.RefundId,
 			GatewayRefundId:  gatewayRefundRo.GatewayRefundId,
@@ -355,11 +355,11 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 
 	var status = 0
-	if refund.Status == consts.REFUND_SUCCESS {
+	if refund.Status == consts.RefundSuccess {
 		status = 1
-	} else if refund.Status == consts.REFUND_FAILED {
+	} else if refund.Status == consts.RefundFailed {
 		status = 2
-	} else if refund.Status == consts.REFUND_REVERSE {
+	} else if refund.Status == consts.RefundReverse {
 		status = 3
 	}
 

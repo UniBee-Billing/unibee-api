@@ -12,13 +12,13 @@ import (
 
 func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err error) {
 	utility.Assert(payment != nil, "entity not found")
-	utility.Assert(payment.Status == consts.TO_BE_PAID, "payment not waiting for pay")
-	utility.Assert(payment.AuthorizeStatus < consts.CAPTURE_REQUEST, "payment has capture request")
+	utility.Assert(payment.Status == consts.PaymentCreated, "payment not waiting for pay")
+	utility.Assert(payment.AuthorizeStatus < consts.CaptureRequest, "payment has capture request")
 
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 		////todo mark need transaction gateway capture
-		//result, err := transaction.Update("oversea_pay", g.Map{"pay_status": consts.PAY_FAILED},
-		//	g.Map{"id": overseaPay.Id, "pay_status": consts.TO_BE_PAID})
+		//result, err := transaction.Update("oversea_pay", g.Map{"pay_status": consts.PAYMENT_FAILED},
+		//	g.Map{"id": overseaPay.Id, "pay_status": consts.PAYMENT_CREATED})
 		//if err != nil || result == nil {
 		//	//_ = transaction.Rollback()
 		//	return err

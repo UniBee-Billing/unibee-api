@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"unibee/internal/consts"
 	"unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
@@ -12,6 +13,29 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 )
+
+func GetInvoiceLink(invoiceId string) string {
+	return fmt.Sprintf("%s/in/%s", consts.GetConfigInstance().Server.DomainPath, invoiceId)
+}
+
+func ConvertInvoiceToSimplify(one *entity.Invoice) *ro.InvoiceDetailSimplify {
+	utility.Assert(one != nil, "invoice is nil")
+	var lines []*ro.InvoiceItemDetailRo
+	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
+	utility.AssertError(err, "System Error")
+	return &ro.InvoiceDetailSimplify{
+		InvoiceId:                      one.InvoiceId,
+		TotalAmount:                    one.TotalAmount,
+		TotalAmountExcludingTax:        one.TotalAmountExcludingTax,
+		Currency:                       one.Currency,
+		TaxAmount:                      one.TaxAmount,
+		SubscriptionAmount:             one.SubscriptionAmount,
+		SubscriptionAmountExcludingTax: one.SubscriptionAmountExcludingTax,
+		Lines:                          lines,
+		PeriodEnd:                      one.PeriodEnd,
+		PeriodStart:                    one.PeriodStart,
+	}
+}
 
 func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.InvoiceDetailRo {
 	var lines []*ro.InvoiceItemDetailRo
@@ -73,6 +97,7 @@ type CalculateInvoiceReq struct {
 	TaxScale      int64  `json:"taxScale"`
 	PeriodStart   int64  `json:"periodStart"`
 	PeriodEnd     int64  `json:"periodEnd"`
+	InvoiceName   string `json:"invoiceName"`
 }
 
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *ro.InvoiceDetailSimplify {
@@ -114,6 +139,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	}
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
 	return &ro.InvoiceDetailSimplify{
+		InvoiceName:                    req.InvoiceName,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		Currency:                       req.Currency,
@@ -140,6 +166,7 @@ type CalculateProrationInvoiceReq struct {
 	PeriodEnd         int64                 `json:"periodEnd"`
 	OldProrationPlans []*ProrationPlanParam `json:"oldPlans"`
 	NewProrationPlans []*ProrationPlanParam `json:"newPlans"`
+	InvoiceName       string                `json:"invoiceName"`
 }
 
 func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *ro.InvoiceDetailSimplify {
@@ -238,6 +265,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
 	return &ro.InvoiceDetailSimplify{
+		InvoiceName:                    req.InvoiceName,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		Currency:                       req.Currency,

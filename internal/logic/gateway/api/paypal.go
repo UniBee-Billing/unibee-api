@@ -94,7 +94,7 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 	}, nil
 }
 
-func (p Paypal) GatewayPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -16,6 +16,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -37,7 +38,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId Invalid")
 	// 查询并处理所有待支付订单 todo mark
 
-	createPayContext.Pay.Status = consts.TO_BE_PAID
+	createPayContext.Pay.Status = consts.PaymentCreated
 	//createPayContext.Pay.AdditionalData = todo mark
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
@@ -82,7 +83,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
 
-			gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayPayment(ctx, createPayContext)
+			gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayNewPayment(ctx, createPayContext)
 			if err != nil {
 				return err
 			}
@@ -91,7 +92,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 				return err
 			}
 			var automatic = 0
-			if gatewayInternalPayResult.Status == consts.PAY_SUCCESS && createPayContext.PayImmediate {
+			if gatewayInternalPayResult.Status == consts.PaymentSuccess && createPayContext.PayImmediate {
 				automatic = 1
 			}
 			createPayContext.Pay.PaymentData = string(jsonData)
@@ -106,7 +107,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 				dao.Payment.Columns().Link:                   gatewayInternalPayResult.Link,
 				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
-				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				return err
 			}
@@ -125,9 +126,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	})
 
 	// create new invoice, ignore errors
-	invoice, _ := handler.CreateOrUpdateInvoiceFromPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	invoice, _ := handler.CreateOrUpdateInvoiceForPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
-	if createPayContext.Pay.Status == consts.PAY_SUCCESS {
+	if createPayContext.Pay.Status == consts.PaymentSuccess {
 		callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
 	}
 
@@ -148,7 +149,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invoice *ro.InvoiceDetailSimplify, billingReason string, automatic bool) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
+func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	var mobile = ""
 	var firstName = ""
@@ -170,17 +171,14 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
-	var automaticInt = 0
-	if automatic {
-		automaticInt = 1
-	}
 	return GatewayPaymentCreate(ctx, &ro.CreatePayContext{
-		Gateway: gateway,
+		PayImmediate: true,
+		Gateway:      gateway,
 		Pay: &entity.Payment{
 			SubscriptionId:  sub.SubscriptionId,
 			BizId:           sub.SubscriptionId,
-			BizType:         consts.BIZ_TYPE_SUBSCRIPTION,
-			AuthorizeStatus: consts.AUTHORIZED,
+			BizType:         consts.BizTypeSubscription,
+			AuthorizeStatus: consts.Authorized,
 			UserId:          sub.UserId,
 			GatewayId:       int64(gateway.Id),
 			TotalAmount:     invoice.TotalAmount,
@@ -188,8 +186,8 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 			CountryCode:     sub.CountryCode,
 			MerchantId:      sub.MerchantId,
 			CompanyId:       merchantInfo.CompanyId,
-			Automatic:       automaticInt,
-			BillingReason:   billingReason,
+			Automatic:       1,
+			BillingReason:   invoice.InvoiceName,
 		},
 		Platform:      "WEB",
 		DeviceType:    "Web",
@@ -197,16 +195,14 @@ func CreateSubInvoicePayment(ctx context.Context, sub *entity.Subscription, invo
 		ShopperEmail:  email,
 		ShopperLocale: "en",
 		Mobile:        mobile,
-		Invoice:       invoice,
+		Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
 		ShopperName: &v1.OutShopperName{
 			FirstName: firstName,
 			LastName:  lastName,
 			Gender:    gender,
 		},
-		MediaData:              map[string]string{"BillingReason": billingReason},
+		MediaData:              map[string]string{"BillingReason": invoice.InvoiceName},
 		MerchantOrderReference: sub.SubscriptionId,
-		PayMethod:              1, //automatic
-		DaysUtilDue:            5, // todo mark
 		GatewayPaymentMethod:   sub.GatewayDefaultPaymentMethod,
 	})
 }

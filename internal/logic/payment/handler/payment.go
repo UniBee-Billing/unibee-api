@@ -65,7 +65,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 
 	return HandlePayFailure(ctx, &HandlePayReq{
 		PaymentId:     req.PaymentId,
-		PayStatusEnum: consts.PAY_FAILED,
+		PayStatusEnum: consts.PaymentFailed,
 		Reason:        "system cancel by expired",
 	})
 }
@@ -101,14 +101,14 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 		g.Log().Infof(ctx, "payment is nil")
 		return errors.New("支付不存在")
 	}
-	if payment.AuthorizeStatus == consts.AUTHORIZED {
+	if payment.AuthorizeStatus == consts.Authorized {
 		return nil
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.AUTHORIZED, dao.Payment.Columns().GatewayPaymentId: payment.GatewayPaymentId},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID, dao.Payment.Columns().AuthorizeStatus: consts.WAITING_AUTHORIZED})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.Authorized, dao.Payment.Columns().GatewayPaymentId: payment.GatewayPaymentId},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated, dao.Payment.Columns().AuthorizeStatus: consts.WaitingAuthorized})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -155,12 +155,12 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayAuthorized, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().AuthorizeStatus:  consts.WAITING_AUTHORIZED,
+				dao.Payment.Columns().AuthorizeStatus:  consts.WaitingAuthorized,
 				dao.Payment.Columns().AuthorizeReason:  authorizeReason,
 				dao.Payment.Columns().PaymentData:      paymentData,
 				dao.Payment.Columns().GatewayPaymentId: payment.GatewayPaymentId},
 				g.Map{dao.Payment.Columns().Id: payment.Id,
-					dao.Payment.Columns().Status: consts.TO_BE_PAID})
+					dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -210,21 +210,21 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
-	if payment.Status == consts.PAY_CANCEL || payment.Status == consts.PAY_FAILED {
+	if payment.Status == consts.PaymentCancelled || payment.Status == consts.PaymentFailed {
 		g.Log().Infof(ctx, "already cancel or failure")
 		return nil
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	if payment.Status == consts.PAY_SUCCESS {
+	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_CANCEL, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PaymentCancelled, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -234,7 +234,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 				//_ = transaction.Rollback()
 				return err
 			}
-			payment.Status = consts.PAY_CANCEL
+			payment.Status = consts.PaymentCancelled
 			return nil
 		})
 		if err == nil {
@@ -282,21 +282,21 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
-	if payment.Status == consts.PAY_CANCEL || payment.Status == consts.PAY_FAILED {
+	if payment.Status == consts.PaymentCancelled || payment.Status == consts.PaymentFailed {
 		g.Log().Infof(ctx, "already cancel or failure")
 		return nil
 	}
 
 	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	if payment.Status == consts.PAY_SUCCESS {
+	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PAY_FAILED, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PaymentFailed, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -306,7 +306,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 				//_ = transaction.Rollback()
 				return err
 			}
-			payment.Status = consts.PAY_FAILED
+			payment.Status = consts.PaymentFailed
 			return nil
 		})
 		if err == nil {
@@ -364,7 +364,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	}
 
 	//// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	//if payment.Status == consts.PAY_SUCCESS {
+	//if payment.Status == consts.PAYMENT_SUCCESS {
 	//	g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
 	//	return nil
 	//}
@@ -375,14 +375,14 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaySuccess, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().Status:                 consts.PAY_SUCCESS,
+				dao.Payment.Columns().Status:                 consts.PaymentSuccess,
 				dao.Payment.Columns().PaidTime:               paidAt,
 				dao.Payment.Columns().GatewayPaymentIntentId: req.GatewayPaymentIntentId,
 				dao.Payment.Columns().GatewayPaymentId:       req.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentMethod:   req.ChannelDefaultPaymentMethod,
 				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
 				dao.Payment.Columns().RefundAmount:           payment.RefundAmount},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.TO_BE_PAID})
+				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -392,7 +392,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				//_ = transaction.Rollback()
 				return err
 			}
-			payment.Status = consts.PAY_SUCCESS
+			payment.Status = consts.PaymentSuccess
 			return nil
 		})
 		if err == nil {
@@ -463,13 +463,13 @@ func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq,
 func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) error {
 	one := query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
 	if one != nil {
-		if gatewayPaymentRo.Status == consts.PAY_SUCCESS {
+		if gatewayPaymentRo.Status == consts.PaymentSuccess {
 			err := HandlePaySuccess(ctx, &HandlePayReq{
 				PaymentId:                   one.PaymentId,
 				GatewayPaymentIntentId:      gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:            gatewayPaymentRo.GatewayPaymentId,
 				TotalAmount:                 gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:               consts.PAY_SUCCESS,
+				PayStatusEnum:               consts.PaymentSuccess,
 				PaidTime:                    gatewayPaymentRo.PayTime,
 				PaymentAmount:               gatewayPaymentRo.PaymentAmount,
 				CaptureAmount:               0,
@@ -479,13 +479,13 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 			if err != nil {
 				return err
 			}
-		} else if gatewayPaymentRo.Status == consts.PAY_FAILED {
+		} else if gatewayPaymentRo.Status == consts.PaymentFailed {
 			err := HandlePayFailure(ctx, &HandlePayReq{
 				PaymentId:              one.PaymentId,
 				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
 				TotalAmount:            gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:          consts.PAY_FAILED,
+				PayStatusEnum:          consts.PaymentFailed,
 				PaidTime:               gatewayPaymentRo.PayTime,
 				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
 				CaptureAmount:          0,
@@ -494,13 +494,13 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 			if err != nil {
 				return err
 			}
-		} else if gatewayPaymentRo.Status == consts.PAY_CANCEL {
+		} else if gatewayPaymentRo.Status == consts.PaymentCancelled {
 			err := HandlePayCancel(ctx, &HandlePayReq{
 				PaymentId:              one.PaymentId,
 				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
 				TotalAmount:            gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:          consts.PAY_CANCEL,
+				PayStatusEnum:          consts.PaymentCancelled,
 				PaidTime:               gatewayPaymentRo.PayTime,
 				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
 				CaptureAmount:          0,
@@ -509,7 +509,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 			if err != nil {
 				return err
 			}
-		} else if gatewayPaymentRo.AuthorizeStatus == consts.WAITING_AUTHORIZED {
+		} else if gatewayPaymentRo.AuthorizeStatus == consts.WaitingAuthorized {
 			err := HandlePayNeedAuthorized(ctx, one, gatewayPaymentRo.AuthorizeReason, gatewayPaymentRo.PaymentData)
 			if err != nil {
 				return err
@@ -526,9 +526,9 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 
 	var status = 0
-	if payment.Status == consts.PAY_SUCCESS {
+	if payment.Status == consts.PaymentSuccess {
 		status = 1
-	} else if payment.Status == consts.PAY_FAILED {
+	} else if payment.Status == consts.PaymentFailed {
 		status = 2
 	}
 	var timeLineType = 0
