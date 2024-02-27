@@ -2,17 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"strings"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
-	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -31,37 +24,6 @@ type SubscriptionListInternalReq struct {
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.SubscriptionDetailVo, error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
-
-	if one.Type == consts.SubTypeDefault {
-		go func() {
-			defer func() {
-				if exception := recover(); exception != nil {
-					var err error
-					if v, ok := exception.(error); ok && gerror.HasStack(v) {
-						err = v
-					} else {
-						err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-					}
-					g.Log().Errorf(context.Background(), "SubscriptionDetail Background panic error:%s\n", err.Error())
-					return
-				}
-			}()
-			backgroundCtx := context.Background()
-			plan := query.GetPlanById(backgroundCtx, one.PlanId)
-			utility.Assert(plan != nil, "invalid planId")
-			utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-			gatewayPlan := query.GetGatewayPlan(backgroundCtx, one.PlanId, one.GatewayId)
-			details, err := api.GetGatewayServiceProvider(backgroundCtx, one.GatewayId).GatewaySubscriptionDetails(backgroundCtx, plan, gatewayPlan, one)
-			if err == nil {
-				err := handler.UpdateSubWithGatewayDetailBack(backgroundCtx, one, details)
-				if err != nil {
-					fmt.Printf("SubscriptionDetail Background Fetch error%s", err)
-					return
-				}
-			}
-		}()
-	}
-	//删减返回值
 	{
 		one.Data = ""
 		one.ResponseData = ""

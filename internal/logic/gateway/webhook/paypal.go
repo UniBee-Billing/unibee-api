@@ -3,7 +3,6 @@ package webhook
 import (
 	"context"
 	"errors"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
@@ -11,12 +10,9 @@ import (
 	"net/http"
 	"strings"
 	_gateway "unibee/internal/logic/gateway"
-	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/ro"
-	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -62,13 +58,6 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 		param := &paypal.CreateWebhookRequest{
 			URL: _gateway.GetPaymentWebhookEntranceUrl(int64(gateway.Id)),
 			EventTypes: []paypal.WebhookEventType{
-				{Name: "BILLING.SUBSCRIPTION.CREATED"},
-				{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
-				{Name: "BILLING.SUBSCRIPTION.UPDATED"},
-				{Name: "BILLING.SUBSCRIPTION.EXPIRED"},
-				{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
-				{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
-				{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
 				{Name: "PAYMENT.SALE.COMPLETED"},
 				{Name: "PAYMENT.SALE.REFUNDED"},
 				{Name: "PAYMENT.SALE.REVERSED"},
@@ -98,13 +87,6 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				Operation: "replace",
 				Path:      "/event_types",
 				Value: []paypal.WebhookEventType{
-					{Name: "BILLING.SUBSCRIPTION.CREATED"},
-					{Name: "BILLING.SUBSCRIPTION.ACTIVATED"},
-					{Name: "BILLING.SUBSCRIPTION.UPDATED"},
-					{Name: "BILLING.SUBSCRIPTION.EXPIRED"},
-					{Name: "BILLING.SUBSCRIPTION.CANCELLED"},
-					{Name: "BILLING.SUBSCRIPTION.SUSPENDED"},
-					{Name: "BILLING.SUBSCRIPTION.PAYMENT.FAILED"},
 					{Name: "PAYMENT.SALE.COMPLETED"},
 					{Name: "PAYMENT.SALE.REFUNDED"},
 					{Name: "PAYMENT.SALE.REVERSED"},
@@ -132,26 +114,6 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	panic("implement me")
 }
 
-func (p PaypalWebhook) processWebhook(ctx context.Context, eventType string, resource *gjson.Json) error {
-	unibSub := query.GetSubscriptionByGatewaySubscriptionId(ctx, resource.Get("id").String())
-	if unibSub != nil {
-		plan := query.GetPlanById(ctx, unibSub.PlanId)
-		gatewayPlan := query.GetGatewayPlan(ctx, unibSub.PlanId, unibSub.GatewayId)
-		details, err := api.GetGatewayServiceProvider(ctx, unibSub.GatewayId).GatewaySubscriptionDetails(ctx, plan, gatewayPlan, unibSub)
-		if err != nil {
-			return err
-		}
-
-		err = handler.HandleSubscriptionWebhookEvent(ctx, unibSub, eventType, details)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else {
-		return gerror.New("subscription not found on gatewaySubId:" + resource.Get("id").String())
-	}
-}
-
 func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	jsonData, err := r.GetJson()
 	if err != nil {
@@ -176,57 +138,6 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		eventType := jsonData.Get("event_type").String()
 		var responseBack = http.StatusOK
 		switch eventType {
-		case "BILLING.SUBSCRIPTION.EXPIRED":
-			resource := jsonData.GetJson("resource")
-			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error parsing webhook resource is nil\n", gateway.GatewayName)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription deleted for %s.", gateway.GatewayName, resource.Get("id").String())
-				// Then define and call a func to handle the deleted subscription.
-				// handleSubscriptionCanceled(subscription)
-				err := p.processWebhook(r.Context(), eventType, resource)
-				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandleSubscriptionWebhookEvent: %v\n", gateway.GatewayName, err.Error())
-					r.Response.WriteHeader(http.StatusBadRequest)
-					responseBack = http.StatusBadRequest
-				}
-			}
-		case "BILLING.SUBSCRIPTION.UPDATED":
-			resource := jsonData.GetJson("resource")
-			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error parsing webhook resource is nil\n", gateway.GatewayName)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription updated for %s.", gateway.GatewayName, resource.Get("id").String())
-				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
-				// handleSubscriptionUpdated(subscription)
-				err := p.processWebhook(r.Context(), eventType, resource)
-				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandleSubscriptionWebhookEvent: %v\n", gateway.GatewayName, err.Error())
-					r.Response.WriteHeader(http.StatusBadRequest)
-					responseBack = http.StatusBadRequest
-				}
-			}
-		case "BILLING.SUBSCRIPTION.CREATED":
-			resource := jsonData.GetJson("resource")
-			if resource == nil || !resource.Contains("id") {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error parsing webhook resource is nil\n", gateway.GatewayName)
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
-			} else {
-				g.Log().Infof(r.Context(), "Webhook Gateway:%s, Subscription created for %s.", gateway.GatewayName, resource.Get("id").String())
-				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
-				// handleSubscriptionCreated(subscription)
-				err := p.processWebhook(r.Context(), eventType, resource)
-				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandleSubscriptionWebhookEvent: %v\n", gateway.GatewayName, err.Error())
-					r.Response.WriteHeader(http.StatusBadRequest)
-					responseBack = http.StatusBadRequest
-				}
-			}
 		default:
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled event type: %s\n", gateway.GatewayName, eventType)
 		}

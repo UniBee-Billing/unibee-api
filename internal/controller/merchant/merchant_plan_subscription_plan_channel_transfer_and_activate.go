@@ -25,7 +25,6 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
-	//多个渠道Plan 创建并激活
 	list := query.GetListSubscriptionTypeGateways(ctx) // todo mark 需改造成获取 merchantId 相关的 Gateway
 	utility.Assert(len(list) > 0, "no gateway found, need at least one")
 	for _, gateway := range list {
@@ -70,7 +69,7 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 					}
 				}
 
-				//发布 Plan
+				//Activate Plan
 				err = service.SubscriptionPlanActivate(ctx, addonPlan.Id)
 				if err != nil {
 					return nil, err

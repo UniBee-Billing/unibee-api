@@ -78,22 +78,6 @@ type SubscriptionPlanChannelTransferAndActivateReq struct {
 type SubscriptionPlanChannelTransferAndActivateRes struct {
 }
 
-type SubscriptionPlanChannelActivateReq struct {
-	g.Meta    `path:"/subscription_plan_gateway_activate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan Activate "  deprecated:"true" `
-	PlanId    uint64 `p:"planId" dc:"PlanId" v:"required"`
-	GatewayId int64  `p:"gatewayId"    v:"required" `
-}
-type SubscriptionPlanChannelActivateRes struct {
-}
-
-type SubscriptionPlanChannelDeactivateReq struct {
-	g.Meta    `path:"/subscription_plan_gateway_deactivate" tags:"Merchant-Plan-Controller" method:"post" summary:"Plan DeActivate" deprecated:"true" `
-	PlanId    uint64 `p:"planId" dc:"PlanId" v:"required"`
-	GatewayId int64  `p:"gatewayId"    v:"required" `
-}
-type SubscriptionPlanChannelDeactivateRes struct {
-}
-
 type SubscriptionPlanPublishReq struct {
 	g.Meta `path:"/subscription_plan_publish" tags:"Merchant-Plan-Controller" method:"post" summary:"Publish Plan，Will Be Visible To UserPortal" `
 	PlanId uint64 `p:"planId" dc:"PlanId" v:"required"`

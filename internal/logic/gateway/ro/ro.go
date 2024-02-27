@@ -9,33 +9,31 @@ import (
 )
 
 type CreatePayContext struct {
-	CheckoutMode  bool                    `json:"checkoutMode"`
-	OpenApiId     int64                   `json:"openApiId"`
-	AppId         string                  `json:"appId"`
-	Desc          string                  `json:"desc"`
-	Pay           *entity.Payment         `json:"pay"`
-	Gateway       *entity.MerchantGateway `json:"gateway"`
-	TerminalIp    string                  `json:"terminalIp"`
-	ShopperUserId string                  `json:"merchantUserId"`
-	ShopperEmail  string                  `json:"shopperEmail"`
-	ShopperLocale string                  `json:"shopperLocale"`
-	Mobile        string                  `json:"mobile"`
-	MediaData     map[string]string       `json:"mediaInfo"`
-	Invoice       *InvoiceDetailSimplify  `json:"invoice"`
-	//BillingDetails           *v1.OutPayAddress         `json:"billingDetails"`
-	//ShippingDetails          *v1.OutPayAddress         `json:"shippingDetails"`
-	ShopperName              *v1.OutShopperName `json:"shopperName"`
-	ShopperInteraction       string             `json:"shopperInteraction"`
-	RecurringProcessingModel string             `json:"recurringProcessingModel"`
-	TokenId                  string             `json:"tokenId"`
-	MerchantOrderReference   string             `json:"merchantOrderReference"`
-	DateOfBirth              *gtime.Time        `json:"dateOfBirth"`
-	Platform                 string             `json:"platform"`
-	DeviceType               string             `json:"deviceType"`
-	PayMethod                int                `json:"payMethod"`
-	DaysUtilDue              int                `json:"daysUtilDue"`
-	GatewayPaymentMethod     string             `json:"gatewayPaymentMethod"`
-	PayImmediate             bool               `json:"payImmediate"`
+	CheckoutMode             bool                    `json:"checkoutMode"`
+	OpenApiId                int64                   `json:"openApiId"`
+	AppId                    string                  `json:"appId"`
+	Desc                     string                  `json:"desc"`
+	Pay                      *entity.Payment         `json:"pay"`
+	Gateway                  *entity.MerchantGateway `json:"gateway"`
+	TerminalIp               string                  `json:"terminalIp"`
+	ShopperUserId            string                  `json:"merchantUserId"`
+	ShopperEmail             string                  `json:"shopperEmail"`
+	ShopperLocale            string                  `json:"shopperLocale"`
+	Mobile                   string                  `json:"mobile"`
+	MediaData                map[string]string       `json:"mediaInfo"`
+	Invoice                  *InvoiceDetailSimplify  `json:"invoice"`
+	ShopperName              *v1.OutShopperName      `json:"shopperName"`
+	ShopperInteraction       string                  `json:"shopperInteraction"`
+	RecurringProcessingModel string                  `json:"recurringProcessingModel"`
+	TokenId                  string                  `json:"tokenId"`
+	MerchantOrderReference   string                  `json:"merchantOrderReference"`
+	DateOfBirth              *gtime.Time             `json:"dateOfBirth"`
+	Platform                 string                  `json:"platform"`
+	DeviceType               string                  `json:"deviceType"`
+	PayMethod                int                     `json:"payMethod"`
+	DaysUtilDue              int                     `json:"daysUtilDue"`
+	GatewayPaymentMethod     string                  `json:"gatewayPaymentMethod"`
+	PayImmediate             bool                    `json:"payImmediate"`
 }
 
 type CreatePayInternalResp struct {
@@ -82,122 +80,37 @@ type GatewayPaymentListReq struct {
 
 // GatewayPaymentRo is the golang structure for table oversea_pay.
 type GatewayPaymentRo struct {
-	MerchantId                  uint64                                 `json:"merchantId"         `
-	Status                      int                                    `json:"status"`
-	AuthorizeStatus             int                                    `json:"captureStatus"`
-	AuthorizeReason             string                                 `json:"authorizeReason" `
-	Currency                    string                                 `json:"currency"              `
-	TotalAmount                 int64                                  `json:"totalAmount"              `
-	PaymentAmount               int64                                  `json:"paymentAmount"              `
-	BalanceAmount               int64                                  `json:"balanceAmount"              `
-	RefundAmount                int64                                  `json:"refundAmount"              `
-	BalanceStart                int64                                  `json:"balanceStart"              `
-	BalanceEnd                  int64                                  `json:"balanceEnd"              `
-	Reason                      string                                 `json:"reason"              `
-	UniqueId                    string                                 `json:"uniqueId"              `
-	PayTime                     *gtime.Time                            `json:"payTime" `
-	CreateTime                  *gtime.Time                            `json:"createTime" `
-	CancelTime                  *gtime.Time                            `json:"cancelTime" `
-	CancelReason                string                                 `json:"cancelReason" `
-	PaymentData                 string                                 `json:"paymentData" `
-	GatewayId                   int64                                  `json:"gatewayId"         `
-	GatewayUserId               string                                 `json:"gatewayUserId"         `
-	GatewayPaymentId            string                                 `json:"gatewayPaymentId"              `
-	GatewayPaymentMethod        string                                 `json:"gatewayPaymentMethod"              `
-	GatewayInvoiceId            string                                 `json:"gatewayInvoiceId"         `
-	GatewaySubscriptionId       string                                 `json:"gatewaySubscriptionId"         `
-	GatewaySubscriptionUpdateId string                                 `json:"gatewaySubscriptionUpdateId" `
-	GatewayInvoiceDetail        *GatewayDetailInvoiceInternalResp      `json:"gatewayInvoiceDetail"  `
-	GatewaySubscriptionDetail   *GatewayDetailSubscriptionInternalResp `json:"gatewaySubscriptionDetail"              `
-}
-
-type GatewayCreateProductInternalResp struct {
-	GatewayProductId     string `json:"gatewayProductId"`
-	GatewayProductStatus string `json:"gatewayProductStatus"`
-}
-
-type GatewayCreatePlanInternalResp struct {
-	GatewayPlanId     string                                   `json:"gatewayPlanId"`
-	GatewayPlanStatus string                                   `json:"gatewayPlanStatus"`
-	Data              string                                   `json:"data"`
-	Status            consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
+	MerchantId           uint64      `json:"merchantId"         `
+	Status               int         `json:"status"`
+	AuthorizeStatus      int         `json:"captureStatus"`
+	AuthorizeReason      string      `json:"authorizeReason" `
+	Currency             string      `json:"currency"              `
+	TotalAmount          int64       `json:"totalAmount"              `
+	PaymentAmount        int64       `json:"paymentAmount"              `
+	BalanceAmount        int64       `json:"balanceAmount"              `
+	RefundAmount         int64       `json:"refundAmount"              `
+	BalanceStart         int64       `json:"balanceStart"              `
+	BalanceEnd           int64       `json:"balanceEnd"              `
+	Reason               string      `json:"reason"              `
+	UniqueId             string      `json:"uniqueId"              `
+	PayTime              *gtime.Time `json:"payTime" `
+	CreateTime           *gtime.Time `json:"createTime" `
+	CancelTime           *gtime.Time `json:"cancelTime" `
+	CancelReason         string      `json:"cancelReason" `
+	PaymentData          string      `json:"paymentData" `
+	GatewayId            int64       `json:"gatewayId"         `
+	GatewayUserId        string      `json:"gatewayUserId"         `
+	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
+	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `
 }
 
 type GatewayCreateSubscriptionInternalResp struct {
-	GatewayUserId             string                                   `json:"gatewayUserId"`
-	GatewaySubscriptionId     string                                   `json:"gatewaySubscriptionId"`
-	GatewaySubscriptionStatus string                                   `json:"gatewaySubscriptionStatus"`
-	Data                      string                                   `json:"data"`
-	Link                      string                                   `json:"link"`
-	Status                    consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
-	Paid                      bool                                     `json:"paid"`
-}
-
-type GatewayCreateSubscriptionInternalReq struct {
-	Plan           *entity.SubscriptionPlan `json:"plan"`
-	AddonPlans     []*PlanAddonVo           `json:"addonPlans"`
-	GatewayPlan    *entity.GatewayPlan      `json:"gatewayPlan"`
-	Subscription   *entity.Subscription     `json:"subscription"`
-	VatCountryRate *VatCountryRate          `json:"vatCountryRate"`
-}
-
-type GatewayUpdateSubscriptionInternalReq struct {
-	Plan            *entity.SubscriptionPlan `json:"plan"`
-	Quantity        int64                    `json:"quantity" dc:"数量" `
-	AddonPlans      []*PlanAddonVo           `json:"addonPlans"`
-	GatewayPlan     *entity.GatewayPlan      `json:"gatewayPlan"`
-	Subscription    *entity.Subscription     `json:"subscription"`
-	ProrationDate   int64                    `json:"prorationDate"`
-	EffectImmediate bool                     `json:"EffectImmediate"`
-}
-
-type GatewayCancelSubscriptionInternalReq struct {
-	Plan         *entity.SubscriptionPlan `json:"plan"`
-	GatewayPlan  *entity.GatewayPlan      `json:"gatewayPlan"`
-	Subscription *entity.Subscription     `json:"subscription"`
-	InvoiceNow   bool                     `json:"invoiceNow"`
-	Prorate      bool                     `json:"prorate"`
-}
-
-type GatewayCancelSubscriptionInternalResp struct {
-}
-
-type GatewayCancelAtPeriodEndSubscriptionInternalResp struct {
-}
-
-type GatewayCancelLastCancelAtPeriodEndSubscriptionInternalResp struct {
-}
-
-type GatewayUpdateSubscriptionPreviewInternalResp struct {
-	Data              string                            `json:"data"`
-	TotalAmount       int64                             `json:"totalAmount"`
-	Currency          string                            `json:"currency"`
-	Invoice           *GatewayDetailInvoiceInternalResp `json:"invoice"`
-	NextPeriodInvoice *GatewayDetailInvoiceInternalResp `json:"nextPeriodInvoice"`
-	ProrationDate     int64                             `json:"prorationDate"`
-}
-
-type GatewayUpdateSubscriptionInternalResp struct {
-	GatewayUpdateId string `json:"gatewayUpdateId" description:""`
-	Data            string `json:"data"`
-	Link            string `json:"link" description:""`
-	Paid            bool   `json:"paid" description:""`
-}
-
-type GatewayDetailSubscriptionInternalResp struct {
-	Status                      consts.SubscriptionStatusEnum `json:"status"`
-	GatewaySubscriptionId       string                        `json:"gatewaySubscriptionId"`
-	GatewayStatus               string                        `json:"gatewayStatus"                  `
-	Data                        string                        `json:"data"`
-	GatewayItemData             string                        `json:"gatewayItemData"`
-	GatewayLatestInvoiceId      string                        `json:"gatewayLatestInvoiceId"`
-	GatewayLatestPaymentId      string                        `json:"gatewayLatestPaymentId"`
-	GatewayDefaultPaymentMethod string                        `json:"gatewayDefaultPaymentMethod"`
-	CancelAtPeriodEnd           bool                          `json:"cancelAtPeriodEnd"`
-	CurrentPeriodEnd            int64                         `json:"currentPeriodEnd"`
-	CurrentPeriodStart          int64                         `json:"currentPeriodStart"`
-	BillingCycleAnchor          int64                         `json:"billingCycleAnchor"`
-	TrialEnd                    int64                         `json:"trialEnd"`
+	GatewayUserId         string                                   `json:"gatewayUserId"`
+	GatewaySubscriptionId string                                   `json:"gatewaySubscriptionId"`
+	Data                  string                                   `json:"data"`
+	Link                  string                                   `json:"link"`
+	Status                consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
+	Paid                  bool                                     `json:"paid"`
 }
 
 type GatewayBalance struct {
@@ -235,60 +148,11 @@ type GatewayMerchantBalanceQueryInternalResp struct {
 	PendingBalance         []*GatewayBalance `json:"pending"`
 }
 
-type GatewayWebhookSubscriptionInternalResp struct {
-}
-
 type GatewayRedirectInternalResp struct {
 	Status    bool   `json:"status"`
 	Message   string `json:"message"`
 	ReturnUrl string `json:"returnUrl"`
 	QueryPath string `json:"queryPath"`
-}
-
-type GatewayCreateInvoiceInternalReq struct {
-	Invoice      *entity.Invoice        `json:"invoice"`
-	InvoiceLines []*InvoiceItemDetailRo `json:"invoiceLines"`
-	PayMethod    int                    `json:"payMethod"` // 1-Automatic， 2-Send Payment Link By Invoice
-	DaysUtilDue  int                    `json:"daysUtilDue"`
-}
-
-type GatewayPayInvoiceInternalReq struct {
-	GatewayInvoiceId string `json:"gatewayInvoiceId"`
-}
-
-type GatewayCancelInvoiceInternalReq struct {
-	GatewayInvoiceId string `json:"gatewayInvoiceId"`
-}
-
-type GatewayDetailInvoiceInternalResp struct {
-	GatewayDefaultPaymentMethod    string                   `json:"gatewayDefaultPaymentMethod"`
-	GatewaySubscriptionId          string                   `json:"gatewaySubscriptionId"           `
-	SubscriptionId                 string                   `json:"subscriptionId"           `
-	TotalAmount                    int64                    `json:"totalAmount"        `
-	PaymentAmount                  int64                    `json:"paymentAmount"              `
-	BalanceAmount                  int64                    `json:"balanceAmount"              `
-	BalanceStart                   int64                    `json:"balanceStart"              `
-	BalanceEnd                     int64                    `json:"balanceEnd"              `
-	TotalAmountExcludingTax        int64                    `json:"totalAmountExcludingTax"        `
-	TaxAmount                      int64                    `json:"taxAmount"          `
-	SubscriptionAmount             int64                    `json:"subscriptionAmount" `
-	SubscriptionAmountExcludingTax int64                    `json:"subscriptionAmountExcludingTax" `
-	Currency                       string                   `json:"currency"           `
-	Lines                          []*InvoiceItemDetailRo   `json:"lines"              `
-	GatewayId                      int64                    `json:"gatewayId"          `
-	Status                         consts.InvoiceStatusEnum `json:"status"             `
-	Reason                         string                   `json:"reason"             `
-	GatewayUserId                  string                   `json:"gatewayUserId"             `
-	Link                           string                   `json:"link"               `
-	GatewayStatus                  string                   `json:"gatewayStatus"      `
-	GatewayInvoiceId               string                   `json:"gatewayInvoiceId"   `
-	GatewayInvoicePdf              string                   `json:"GatewayInvoicePdf"   `
-	PeriodEnd                      int64                    `json:"periodEnd"`
-	PeriodStart                    int64                    `json:"periodStart"`
-	GatewayPaymentId               string                   `json:"gatewayPaymentId"`
-	PaymentTime                    int64                    `json:"paymentTime"        `
-	CreateTime                     int64                    `json:"createTime"        `
-	CancelTime                     int64                    `json:"cancelTime"        `
 }
 
 type InvoiceItemDetailRo struct {
@@ -370,7 +234,6 @@ type InvoiceDetailRo struct {
 type PlanDetailRo struct {
 	Plan             *PlanSimplify                `p:"plan" json:"plan" dc:"Plan"`
 	MetricPlanLimits []*MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Gateways         []*GatewaySimplify           `p:"gateways" json:"gateways" dc:"Gateways"`
 	Addons           []*PlanSimplify              `p:"addons" json:"addons" dc:"Addons"`
 	AddonIds         []int64                      `p:"addonIds" json:"addonIds" dc:"AddonIds"`
 }
@@ -381,9 +244,8 @@ type SubscriptionPlanAddonParamRo struct {
 }
 
 type PlanAddonVo struct {
-	Quantity         int64               `p:"quantity"  json:"quantity" dc:"Quantity" `
-	AddonPlan        *PlanSimplify       `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
-	AddonGatewayPlan *entity.GatewayPlan `p:"addonGatewayPlan"   json:"addonGatewayPlan" dc:"AddonGatewayPlan" `
+	Quantity  int64         `p:"quantity"  json:"quantity" dc:"Quantity" `
+	AddonPlan *PlanSimplify `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
 }
 
 type SubscriptionDetailVo struct {

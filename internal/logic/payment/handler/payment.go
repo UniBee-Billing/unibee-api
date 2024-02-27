@@ -16,7 +16,6 @@ import (
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
-	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -24,17 +23,16 @@ import (
 )
 
 type HandlePayReq struct {
-	PaymentId                        string
-	GatewayPaymentIntentId           string
-	GatewayPaymentId                 string
-	TotalAmount                      int64
-	PayStatusEnum                    consts.PayStatusEnum
-	PaidTime                         *gtime.Time
-	PaymentAmount                    int64
-	CaptureAmount                    int64
-	Reason                           string
-	ChannelDefaultPaymentMethod      string
-	ChannelDetailInvoiceInternalResp *ro.GatewayDetailInvoiceInternalResp
+	PaymentId                   string
+	GatewayPaymentIntentId      string
+	GatewayPaymentId            string
+	TotalAmount                 int64
+	PayStatusEnum               consts.PayStatusEnum
+	PaidTime                    *gtime.Time
+	PaymentAmount               int64
+	CaptureAmount               int64
+	Reason                      string
+	ChannelDefaultPaymentMethod string
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
@@ -464,86 +462,49 @@ func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq,
 
 func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) error {
 	one := query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
-	if gatewayPaymentRo.GatewaySubscriptionDetail != nil && gatewayPaymentRo.GatewayInvoiceDetail != nil {
-		// payment for subscription
-		payment, err := CreateOrUpdateSubscriptionPaymentFromGateway(ctx, gatewayPaymentRo)
-		// payment not first generate from system
-		if err != nil {
-			return err
-		}
-
-		if len(gatewayPaymentRo.GatewaySubscriptionId) > 0 && gatewayPaymentRo.GatewaySubscriptionDetail == nil {
-			return gerror.Newf("payment hook may too fast, GatewaySubscriptionDetail is nil for GatewaySubscriptionId:%s", gatewayPaymentRo.GatewaySubscriptionId)
-		}
-		//Subscription Payment Success
-		err = handler.HandleSubscriptionPaymentUpdate(ctx, &handler.SubscriptionPaymentSuccessWebHookReq{
-			Payment:                     payment,
-			GatewayInvoiceDetail:        gatewayPaymentRo.GatewayInvoiceDetail,
-			GatewaySubscriptionDetail:   gatewayPaymentRo.GatewaySubscriptionDetail,
-			GatewayPaymentId:            gatewayPaymentRo.GatewayPaymentId,
-			GatewayInvoiceId:            gatewayPaymentRo.GatewayInvoiceDetail.GatewayInvoiceId,
-			GatewaySubscriptionId:       gatewayPaymentRo.GatewayInvoiceDetail.GatewaySubscriptionId,
-			GatewaySubscriptionUpdateId: gatewayPaymentRo.GatewaySubscriptionUpdateId,
-			Status:                      gatewayPaymentRo.GatewaySubscriptionDetail.Status,
-			GatewayStatus:               gatewayPaymentRo.GatewayInvoiceDetail.GatewayStatus,
-			Data:                        gatewayPaymentRo.GatewaySubscriptionDetail.Data,
-			GatewayItemData:             gatewayPaymentRo.GatewaySubscriptionDetail.GatewayItemData,
-			CancelAtPeriodEnd:           gatewayPaymentRo.GatewaySubscriptionDetail.CancelAtPeriodEnd,
-			CurrentPeriodEnd:            gatewayPaymentRo.GatewaySubscriptionDetail.CurrentPeriodEnd,
-			CurrentPeriodStart:          gatewayPaymentRo.GatewaySubscriptionDetail.CurrentPeriodStart,
-			TrialEnd:                    gatewayPaymentRo.GatewaySubscriptionDetail.TrialEnd,
-		})
-		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
-		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
-		}
-	} else if one != nil {
-		// one-time payment
+	if one != nil {
 		if gatewayPaymentRo.Status == consts.PAY_SUCCESS {
 			err := HandlePaySuccess(ctx, &HandlePayReq{
-				PaymentId:                        one.PaymentId,
-				GatewayPaymentIntentId:           gatewayPaymentRo.GatewayPaymentId,
-				GatewayPaymentId:                 gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:                      gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:                    consts.PAY_SUCCESS,
-				PaidTime:                         gatewayPaymentRo.PayTime,
-				PaymentAmount:                    gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:                    0,
-				Reason:                           gatewayPaymentRo.Reason,
-				ChannelDefaultPaymentMethod:      gatewayPaymentRo.GatewayPaymentMethod,
-				ChannelDetailInvoiceInternalResp: gatewayPaymentRo.GatewayInvoiceDetail,
+				PaymentId:                   one.PaymentId,
+				GatewayPaymentIntentId:      gatewayPaymentRo.GatewayPaymentId,
+				GatewayPaymentId:            gatewayPaymentRo.GatewayPaymentId,
+				TotalAmount:                 gatewayPaymentRo.TotalAmount,
+				PayStatusEnum:               consts.PAY_SUCCESS,
+				PaidTime:                    gatewayPaymentRo.PayTime,
+				PaymentAmount:               gatewayPaymentRo.PaymentAmount,
+				CaptureAmount:               0,
+				Reason:                      gatewayPaymentRo.Reason,
+				ChannelDefaultPaymentMethod: gatewayPaymentRo.GatewayPaymentMethod,
 			})
 			if err != nil {
 				return err
 			}
 		} else if gatewayPaymentRo.Status == consts.PAY_FAILED {
 			err := HandlePayFailure(ctx, &HandlePayReq{
-				PaymentId:                        one.PaymentId,
-				GatewayPaymentIntentId:           gatewayPaymentRo.GatewayPaymentId,
-				GatewayPaymentId:                 gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:                      gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:                    consts.PAY_FAILED,
-				PaidTime:                         gatewayPaymentRo.PayTime,
-				PaymentAmount:                    gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:                    0,
-				Reason:                           gatewayPaymentRo.Reason,
-				ChannelDetailInvoiceInternalResp: gatewayPaymentRo.GatewayInvoiceDetail,
+				PaymentId:              one.PaymentId,
+				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
+				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
+				TotalAmount:            gatewayPaymentRo.TotalAmount,
+				PayStatusEnum:          consts.PAY_FAILED,
+				PaidTime:               gatewayPaymentRo.PayTime,
+				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
+				CaptureAmount:          0,
+				Reason:                 gatewayPaymentRo.Reason,
 			})
 			if err != nil {
 				return err
 			}
 		} else if gatewayPaymentRo.Status == consts.PAY_CANCEL {
 			err := HandlePayCancel(ctx, &HandlePayReq{
-				PaymentId:                        one.PaymentId,
-				GatewayPaymentIntentId:           gatewayPaymentRo.GatewayPaymentId,
-				GatewayPaymentId:                 gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:                      gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:                    consts.PAY_CANCEL,
-				PaidTime:                         gatewayPaymentRo.PayTime,
-				PaymentAmount:                    gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:                    0,
-				Reason:                           gatewayPaymentRo.Reason,
-				ChannelDetailInvoiceInternalResp: gatewayPaymentRo.GatewayInvoiceDetail,
+				PaymentId:              one.PaymentId,
+				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
+				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
+				TotalAmount:            gatewayPaymentRo.TotalAmount,
+				PayStatusEnum:          consts.PAY_CANCEL,
+				PaidTime:               gatewayPaymentRo.PayTime,
+				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
+				CaptureAmount:          0,
+				Reason:                 gatewayPaymentRo.Reason,
 			})
 			if err != nil {
 				return err
@@ -555,107 +516,10 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 			}
 		}
 	} else {
-		return gerror.Newf("Payment Not Match Or Not Found GatewayPaymentId:%s GatewayInvoiceId:%s GatewaySubscriptionId:%s", gatewayPaymentRo.GatewayPaymentId, gatewayPaymentRo.GatewayInvoiceId, gatewayPaymentRo.GatewaySubscriptionId)
+		return gerror.Newf("Payment Not Match Or Not Found GatewayPaymentId:%s", gatewayPaymentRo.GatewayPaymentId)
 	}
 
 	return nil
-}
-
-func CreateOrUpdateSubscriptionPaymentFromGateway(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) (*entity.Payment, error) {
-	utility.Assert(len(gatewayPaymentRo.UniqueId) > 0, "uniqueId invalid")
-	gatewayUser := query.GetGatewayUserByGatewayUserId(ctx, gatewayPaymentRo.GatewayUserId, gatewayPaymentRo.GatewayId)
-	utility.Assert(gatewayUser != nil, "gatewayUser not found")
-	var subscriptionId string
-	var invoiceId string
-	var countryCode string
-	if gatewayPaymentRo.GatewaySubscriptionDetail != nil {
-		//From Sub Create Pay or Sub Update Pay
-		sub := query.GetSubscriptionByGatewaySubscriptionId(ctx, gatewayPaymentRo.GatewaySubscriptionDetail.GatewaySubscriptionId)
-		if sub != nil {
-			subscriptionId = sub.SubscriptionId
-			countryCode = sub.CountryCode
-		}
-	}
-	if gatewayPaymentRo.GatewayInvoiceDetail != nil {
-		//From Invoice Pay
-		invoice := query.GetInvoiceByGatewayInvoiceId(ctx, gatewayPaymentRo.GatewayInvoiceId)
-		if invoice != nil {
-			invoiceId = invoice.InvoiceId
-		}
-	}
-	one := query.GetPaymentByGatewayUniqueId(ctx, gatewayPaymentRo.UniqueId)
-	if one == nil {
-		//创建
-		one = &entity.Payment{
-			BizType:                consts.BIZ_TYPE_SUBSCRIPTION,
-			MerchantId:             gatewayPaymentRo.MerchantId,
-			UserId:                 gatewayUser.UserId,
-			CountryCode:            countryCode,
-			PaymentId:              utility.CreatePaymentId(),
-			Currency:               gatewayPaymentRo.Currency,
-			TotalAmount:            gatewayPaymentRo.TotalAmount,
-			PaymentAmount:          gatewayPaymentRo.PaymentAmount,
-			BalanceAmount:          gatewayPaymentRo.BalanceAmount,
-			BalanceStart:           gatewayPaymentRo.BalanceStart,
-			BalanceEnd:             gatewayPaymentRo.BalanceEnd,
-			Status:                 gatewayPaymentRo.Status,
-			AuthorizeStatus:        gatewayPaymentRo.AuthorizeStatus,
-			GatewayId:              gatewayPaymentRo.GatewayId,
-			GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
-			GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
-			CreateTime:             gatewayPaymentRo.CreateTime.Timestamp(),
-			CancelTime:             gatewayPaymentRo.CancelTime.Timestamp(),
-			PaidTime:               gatewayPaymentRo.PayTime.Timestamp(),
-			FailureReason:          gatewayPaymentRo.CancelReason,
-			PaymentData:            gatewayPaymentRo.PaymentData,
-			AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
-			UniqueId:               gatewayPaymentRo.UniqueId,
-			SubscriptionId:         subscriptionId,
-			InvoiceId:              invoiceId,
-		}
-		result, err := dao.Payment.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateSubscriptionPaymentFromGateway record insert failure %s`, err.Error())
-			return nil, err
-		}
-		id, _ := result.LastInsertId()
-		one.Id = id
-	} else {
-		//更新
-		_, err := dao.Payment.Ctx(ctx).Data(g.Map{
-			dao.Payment.Columns().BizType:                consts.BIZ_TYPE_SUBSCRIPTION,
-			dao.Payment.Columns().MerchantId:             gatewayPaymentRo.MerchantId,
-			dao.Payment.Columns().UserId:                 gatewayUser.UserId,
-			dao.Payment.Columns().CountryCode:            countryCode,
-			dao.Payment.Columns().Currency:               gatewayPaymentRo.Currency,
-			dao.Payment.Columns().TotalAmount:            gatewayPaymentRo.TotalAmount,
-			dao.Payment.Columns().PaymentAmount:          gatewayPaymentRo.PaymentAmount,
-			dao.Payment.Columns().BalanceAmount:          gatewayPaymentRo.BalanceAmount,
-			dao.Payment.Columns().BalanceStart:           gatewayPaymentRo.BalanceStart,
-			dao.Payment.Columns().BalanceEnd:             gatewayPaymentRo.BalanceEnd,
-			dao.Payment.Columns().Status:                 gatewayPaymentRo.Status,
-			dao.Payment.Columns().AuthorizeStatus:        gatewayPaymentRo.AuthorizeStatus,
-			dao.Payment.Columns().GatewayId:              gatewayPaymentRo.GatewayId,
-			dao.Payment.Columns().GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
-			dao.Payment.Columns().CreateTime:             gatewayPaymentRo.CreateTime.Timestamp(),
-			dao.Payment.Columns().CreateTime:             gatewayPaymentRo.CancelTime.Timestamp(),
-			dao.Payment.Columns().PaidTime:               gatewayPaymentRo.PayTime.Timestamp(),
-			dao.Payment.Columns().FailureReason:          gatewayPaymentRo.CancelReason,
-			dao.Payment.Columns().PaymentData:            gatewayPaymentRo.PaymentData,
-			dao.Payment.Columns().AuthorizeReason:        gatewayPaymentRo.AuthorizeReason,
-			dao.Payment.Columns().SubscriptionId:         subscriptionId,
-			dao.Payment.Columns().InvoiceId:              invoiceId,
-			dao.Invoice.Columns().GmtModify:              gtime.Now(),
-		}).Where(dao.Payment.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return nil, err
-		}
-	}
-	err := CreateOrUpdatePaymentTimeline(ctx, one, one.PaymentId)
-	if err != nil {
-		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
-	}
-	return query.GetPaymentByGatewayUniqueId(ctx, gatewayPaymentRo.UniqueId), nil
 }
 
 func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment, uniqueId string) error {

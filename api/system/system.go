@@ -24,7 +24,6 @@ type ISystemInvoice interface {
 }
 
 type ISystemPayment interface {
-	BulkChannelSync(ctx context.Context, req *payment.BulkChannelSyncReq) (res *payment.BulkChannelSyncRes, err error)
 	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
 	GatewayPaymentMethodList(ctx context.Context, req *payment.GatewayPaymentMethodListReq) (res *payment.GatewayPaymentMethodListRes, err error)
 }
@@ -34,7 +33,6 @@ type ISystemRefund interface {
 }
 
 type ISystemSubscription interface {
-	BulkChannelSync(ctx context.Context, req *subscription.BulkChannelSyncReq) (res *subscription.BulkChannelSyncRes, err error)
 	SubscriptionEndTrial(ctx context.Context, req *subscription.SubscriptionEndTrialReq) (res *subscription.SubscriptionEndTrialRes, err error)
 	SubscriptionExpire(ctx context.Context, req *subscription.SubscriptionExpireReq) (res *subscription.SubscriptionExpireRes, err error)
 	SubscriptionWalkTestClock(ctx context.Context, req *subscription.SubscriptionWalkTestClockReq) (res *subscription.SubscriptionWalkTestClockRes, err error)

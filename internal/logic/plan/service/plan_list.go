@@ -6,9 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/merchant/plan"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway"
 	ro2 "unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -49,7 +47,6 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.Subscript
 		Plan: &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
-			Gateways:         gateway.GetActiveGatewaySimplifyList(ctx, planId),
 			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
 			AddonIds:         addonIds,
 		},
@@ -97,7 +94,6 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			list = append(list, &ro2.PlanDetailRo{
 				Plan:             ro2.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
-				Gateways:         []*ro2.GatewaySimplify{},
 				Addons:           nil,
 				AddonIds:         nil,
 			})
@@ -121,7 +117,6 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		list = append(list, &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
-			Gateways:         []*ro2.GatewaySimplify{},
 			Addons:           nil,
 			AddonIds:         addonIds,
 		})
@@ -144,21 +139,6 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 						if mapPlans[id] != nil {
 							planRo.Addons = append(planRo.Addons, ro2.SimplifyPlan(mapPlans[id]))
 						}
-					}
-				}
-			}
-		}
-	}
-	//添加 Gateway 信息
-	var allPlanChannelList []*entity.GatewayPlan
-	err = dao.GatewayPlan.Ctx(ctx).WhereIn(dao.GatewayPlan.Columns().PlanId, totalPlanIds).OmitEmpty().Scan(&allPlanChannelList)
-	if err == nil {
-		for _, gatewayPlan := range allPlanChannelList {
-			for _, planRo := range list {
-				if planRo.Plan.Id == gatewayPlan.PlanId && gatewayPlan.Status == consts.GatewayPlanStatusActive {
-					one := query.GetGatewayById(ctx, gatewayPlan.GatewayId)
-					if one != nil {
-						planRo.Gateways = append(planRo.Gateways, ro2.SimplifyGateway(one))
 					}
 				}
 			}

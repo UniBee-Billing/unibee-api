@@ -9,8 +9,6 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -44,25 +42,6 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 		return true, nil
 	}
 	utility.Assert(one.Status == consts.PendingSubStatusCreate, "pendingUpdate not status create")
-	if consts.ProrationUsingUniBeeCompute && one.EffectImmediate == 1 && sub.Type == consts.SubTypeDefault {
-		var addonParams []*ro.SubscriptionPlanAddonParamRo
-		err := utility.UnmarshalFromJsonString(one.UpdateAddonData, &addonParams)
-		if err != nil {
-			return false, err
-		}
-		_, err = api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewaySubscriptionUpdate(ctx, &ro.GatewayUpdateSubscriptionInternalReq{
-			Plan:            query.GetPlanById(ctx, one.UpdatePlanId),
-			Quantity:        one.UpdateQuantity,
-			AddonPlans:      checkAndListAddonsFromParams(ctx, addonParams, one.GatewayId),
-			GatewayPlan:     query.GetGatewayPlan(ctx, one.UpdatePlanId, one.GatewayId),
-			Subscription:    query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId),
-			ProrationDate:   one.ProrationDate,
-			EffectImmediate: false,
-		})
-		if err != nil {
-			return false, err
-		}
-	}
 
 	// 先创建 SubscriptionTimeLine 在做 Sub 更新
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))

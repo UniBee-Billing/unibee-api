@@ -12,7 +12,6 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -45,66 +44,6 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 		return err
 	}
 	return nil
-}
-
-func SubscriptionGatewayPlanActivate(ctx context.Context, planId uint64, gatewayId int64) (err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-	}
-	utility.Assert(planId > 0, "invalid planId")
-	utility.Assert(gatewayId > 0, "invalid gatewayId")
-	plan := query.GetPlanById(ctx, planId)
-	utility.Assert(plan != nil, "invalid planId")
-	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
-	utility.Assert(gatewayPlan != nil && len(gatewayPlan.GatewayProductId) > 0 && len(gatewayPlan.GatewayPlanId) > 0, "gateway plan should be transfer first")
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
-
-	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanActive(ctx, plan, gatewayPlan)
-	if err != nil {
-		return
-	}
-	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
-		dao.GatewayPlan.Columns().Status: consts.GatewayPlanStatusActive,
-		//dao.SubscriptionPlanChannel.Columns().GatewayPlanStatus: consts.GatewayPlanStatusActive,// todo mark
-		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).Update()
-	if err != nil {
-		return err
-	}
-	return
-}
-
-func SubscriptionPlanChannelDeactivate(ctx context.Context, planId uint64, gatewayId int64) (err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-	}
-	utility.Assert(planId > 0, "invalid planId")
-	utility.Assert(gatewayId > 0, "invalid gatewayId")
-	plan := query.GetPlanById(ctx, planId)
-	utility.Assert(plan != nil, "invalid planId")
-	gatewayPlan := query.GetGatewayPlan(ctx, planId, gatewayId)
-	utility.Assert(gatewayPlan != nil && len(gatewayPlan.GatewayProductId) > 0 && len(gatewayPlan.GatewayPlanId) > 0, "plan gateway should be transfer first")
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, gatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
-
-	err = api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPlanDeactivate(ctx, plan, gatewayPlan)
-	if err != nil {
-		return
-	}
-	_, err = dao.GatewayPlan.Ctx(ctx).Data(g.Map{
-		dao.GatewayPlan.Columns().Status: consts.GatewayPlanStatusInActive,
-		//dao.SubscriptionPlanChannel.Columns().GatewayPlanStatus: consts.GatewayPlanStatusInActive,// todo mark
-		dao.GatewayPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.GatewayPlan.Columns().Id, gatewayPlan.Id).OmitNil().Update()
-	if err != nil {
-		return err
-	}
-	return
 }
 
 func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateReq) (one *entity.SubscriptionPlan, err error) {
