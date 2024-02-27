@@ -60,7 +60,7 @@ type IMerchantInvoice interface {
 	NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error)
 	NewInvoiceEdit(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error)
 	DeletePendingInvoice(ctx context.Context, req *invoice.DeletePendingInvoiceReq) (res *invoice.DeletePendingInvoiceRes, err error)
-	ProcessInvoiceForPay(ctx context.Context, req *invoice.ProcessInvoiceForPayReq) (res *invoice.ProcessInvoiceForPayRes, err error)
+	FinishInvoiceForPay(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (res *invoice.FinishInvoiceForPayRes, err error)
 	CancelProcessingInvoice(ctx context.Context, req *invoice.CancelProcessingInvoiceReq) (res *invoice.CancelProcessingInvoiceRes, err error)
 	NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error)
 }
