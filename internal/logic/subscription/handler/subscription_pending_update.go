@@ -17,7 +17,7 @@ import (
 func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId string) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
 	if one == nil {
-		return false, gerror.New("FinishPendingUpdateForSubscription PendingUpdate Not Found:" + one.UpdateSubscriptionId)
+		return false, gerror.New("HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:" + one.UpdateSubscriptionId)
 	}
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
@@ -35,9 +35,9 @@ func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId stri
 	return true, nil
 }
 
-func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, pendingUpdateId string, invoice *entity.Invoice) (bool, error) {
+func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscription, pendingUpdateId string, invoice *entity.Invoice) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
-	utility.Assert(one != nil, "FinishPendingUpdateForSubscription PendingUpdate Not Found:"+pendingUpdateId)
+	utility.Assert(one != nil, "HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:"+pendingUpdateId)
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}

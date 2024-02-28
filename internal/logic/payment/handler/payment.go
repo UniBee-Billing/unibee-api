@@ -384,12 +384,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().RefundAmount:           payment.RefundAmount},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			payment.Status = consts.PaymentSuccess

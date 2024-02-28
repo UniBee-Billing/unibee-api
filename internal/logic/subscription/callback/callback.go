@@ -3,6 +3,7 @@ package callback
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
@@ -24,14 +25,14 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 		if payment.BizType == consts.BizTypeSubscription {
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "PaymentNeedAuthorisedCallback sub not found:"+payment.PaymentId)
-			user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+			oneUser := query.GetUserAccountById(ctx, uint64(sub.UserId))
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			utility.Assert(plan != nil, "PaymentNeedAuthorisedCallback plan not found:"+sub.SubscriptionId)
-			if user != nil {
+			if oneUser != nil {
 				merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
 				if merchant != nil {
-					err := email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
-						UserName:            user.FirstName + " " + user.LastName,
+					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
+						UserName:            oneUser.FirstName + " " + oneUser.LastName,
 						MerchantProductName: plan.PlanName,
 						MerchantCustomEmail: merchant.Email,
 						MerchantName:        merchant.Name,
@@ -40,7 +41,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 					})
 					if err != nil {
-						fmt.Printf("PaymentNeedAuthorisedCallback SendTemplateEmail err:%s", err.Error())
+						g.Log().Errorf(ctx, "PaymentNeedAuthorisedCallback SendTemplateEmail err:%s", err.Error())
 					}
 				}
 			}
@@ -50,7 +51,6 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 
 func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
-		// better use redis mq to trace payment
 		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
@@ -60,7 +60,6 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 
 func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
-		// better use redis mq to trace payment
 		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
@@ -68,39 +67,44 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx, payment.PaymentId)
 			pendingSubDowngrade := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpgrade != nil && strings.Compare(payment.BillingReason, "SubscriptionUpgrade") == 0 {
-				utility.Assert(strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0, "payment sub_id not match pendingUpdate sub_id")
-				utility.Assert(pendingSubUpgrade.Status == consts.PendingSubStatusCreate, "pendingUpdate has already finished or cancelled")
-				// Upgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId, invoice)
-				if err != nil {
-					utility.AssertError(err, "PaymentSuccessCallback_Finish_Upgrade")
+				if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
+					pendingSubUpgrade.Status == consts.PendingSubStatusCreate {
+					// Upgrade
+					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId, invoice)
+					if err != nil {
+						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Upgrade error:%s", err.Error())
+					}
+					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
-				if len(pendingSubDowngrade.GatewayUpdateId) > 0 {
-					utility.Assert(strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0, "paymentId not match pendingUpdate GatewayUpdateId")
-				}
-				utility.Assert(pendingSubDowngrade.UpdateAmount == payment.TotalAmount, "totalAmount not match")
-				// Downgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
-				if err != nil {
-					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
-				}
-				err = handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
-				if err != nil {
-					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
+				if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
+					pendingSubUpgrade.Status == consts.PendingSubStatusCreate &&
+					strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0 {
+					// Downgrade
+					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
+					if err != nil {
+						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
+					}
+					err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
+					if err != nil {
+						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
+					}
+					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 && sub.Amount == payment.TotalAmount && strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
 				// SubscriptionCycle
-				err := handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
+				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
 				if err != nil {
-					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCycle")
+					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCycle error:%s", err.Error())
 				}
+				handler.SubscriptionNewTimeline(ctx, invoice)
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCreate") == 0 {
 				// SubscriptionCycle
 				err := handler.HandleSubscriptionFirstPaymentSuccess(ctx, sub, payment)
 				if err != nil {
-					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCreate")
+					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
 				}
+				handler.SubscriptionNewTimeline(ctx, invoice)
 			} else {
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
@@ -109,7 +113,6 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
 				Body:  payment.SubscriptionId,
 			})
-			handler.SubscriptionNewTimeline(ctx, invoice)
 		}
 	}
 }
@@ -144,7 +147,6 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}
 			}
-			// billing cycle use cronjob check active status as contain other processing payment
 		}
 	}
 }

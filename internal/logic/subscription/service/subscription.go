@@ -814,7 +814,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	if prepare.EffectImmediate && subUpdateRes.Paid {
-		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one.UpdateSubscriptionId, subUpdateRes.Invoice)
+		_, err = handler.HandlePendingUpdatePaymentSuccess(ctx, prepare.Subscription, one.UpdateSubscriptionId, subUpdateRes.Invoice)
 		if err != nil {
 			return nil, err
 		}
@@ -980,6 +980,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "sub cancelled or sub expired")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
@@ -989,7 +990,21 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
-	err := handler.ChangeTrialEnd(ctx, newTrialEnd, sub.SubscriptionId)
+
+	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	newStatus := sub.Status
+	if newTrialEnd > gtime.Now().Timestamp() {
+		//automatic change sub status to active
+		newStatus = consts.SubStatusActive
+	}
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:             newStatus,
+		dao.Subscription.Columns().TrialEnd:           newTrialEnd,
+		dao.Subscription.Columns().DunningTime:        dunningTime,
+		dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
+		dao.Subscription.Columns().GmtModify:          gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
 	}
@@ -1063,9 +1078,9 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			return err
 		}
 		g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment:", utility.MarshalToJsonString(createRes))
-		err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
+		err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
 		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual SubscriptionIncomplete err:", err.Error())
+			g.Log().Print(ctx, "EndTrialManual HandleSubscriptionIncomplete err:", err.Error())
 			return err
 		}
 	} else {

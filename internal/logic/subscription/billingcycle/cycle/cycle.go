@@ -103,12 +103,12 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 			// Unpaid after period end or trial end
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.Status != consts.SubStatusIncomplete {
-				err = handler.SubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow)
+				err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, timeNow)
 				if err != nil {
-					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionIncomplete err:", err.Error())
+					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice HandleSubscriptionIncomplete err:", err.Error())
 					return nil, err
 				} else {
-					return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
+					return &BillingCycleWalkRes{WalkHasDeal: true, Message: "HandleSubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
 				}
 			}
 
@@ -172,7 +172,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					}
 					payment := query.GetPaymentByPaymentId(ctx, createRes.PaymentId)
 					if payment != nil && createRes.Status == consts.PaymentSuccess {
-						_ = handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
+						_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
 					}
 					return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				} else {
