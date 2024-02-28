@@ -77,6 +77,7 @@ func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 			PlanId:          sub.PlanId,
 			Quantity:        sub.Quantity,
 			AddonData:       sub.AddonData,
+			Status:          1,
 			GatewayId:       sub.GatewayId,
 			PeriodStart:     invoice.PeriodStart,
 			PeriodEnd:       invoice.PeriodEnd,
