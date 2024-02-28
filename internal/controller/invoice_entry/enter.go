@@ -87,6 +87,6 @@ func InvoiceEntrance(r *ghttp.Request) {
 			r.Response.RedirectTo(one.PaymentLink)
 		}
 	} else if one.Status == consts.InvoiceStatusPaid {
-		r.Response.RedirectTo(one.PaymentLink)
+		r.Response.RedirectTo(one.SendPdf)
 	}
 }
