@@ -10,11 +10,11 @@ type MerchantInformationReq struct {
 }
 
 type MerchantInformationRes struct {
-	Env             string             `description:"System Env, em: daily|stage|local|prod" `
-	IsProd          bool               `description:"Check System Env Is Prod, true|false" `
-	SupportTimeZone []string           `description:"Support TimeZone List" `
-	SupportCurrency []*SupportCurrency `description:"Support Currency List" `
-	Gateway         []*ro.GatewaySimplify
+	Env             string                `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	IsProd          bool                  `json:"isProd" description:"Check System Env Is Prod, true|false" `
+	SupportTimeZone []string              `json:"supportTimeZone" description:"Support TimeZone List" `
+	SupportCurrency []*SupportCurrency    `json:"supportCurrency" description:"Support Currency List" `
+	Gateway         []*ro.GatewaySimplify `json:"gateway" description:"Support Currency List" `
 }
 
 type SupportCurrency struct {
