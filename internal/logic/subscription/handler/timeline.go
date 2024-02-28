@@ -12,6 +12,28 @@ import (
 	"unibee/utility"
 )
 
+func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string) {
+	utility.Assert(len(subscriptionId) == 0, "invalid subscriptionId")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "sub not found")
+	var oldOne *entity.SubscriptionTimeline
+	_ = dao.SubscriptionTimeline.Ctx(ctx).
+		Where(dao.SubscriptionTimeline.Columns().MerchantId, sub.MerchantId).
+		Where(dao.SubscriptionTimeline.Columns().Status, 1).
+		Where(dao.SubscriptionTimeline.Columns().SubscriptionId, sub.SubscriptionId).
+		OmitEmpty().Scan(&oldOne)
+	if oldOne != nil {
+		periodEnd := gtime.Now().Timestamp()
+		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(g.Map{
+			dao.SubscriptionTimeline.Columns().Status:    2,
+			dao.SubscriptionTimeline.Columns().PeriodEnd: periodEnd,
+		}).Where(dao.SubscriptionTimeline.Columns().Id, oldOne.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(ctx, `FinishOldTimelineBySubEnd update old one failure %s`, err.Error())
+		}
+	}
+}
+
 func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 	utility.Assert(invoice != nil, "invoice is null ")
 	utility.Assert(len(invoice.SubscriptionId) == 0, "not sub invoice")
