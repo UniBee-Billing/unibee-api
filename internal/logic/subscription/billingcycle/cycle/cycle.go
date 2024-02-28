@@ -170,6 +170,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
 						return nil, err
 					}
+					payment := query.GetPaymentByPaymentId(ctx, createRes.PaymentId)
+					if payment != nil && createRes.Status == consts.PaymentSuccess {
+						_ = handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
+					}
 					return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				} else {
 					return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo, Seems Invoice Does not Need Generate"}, nil

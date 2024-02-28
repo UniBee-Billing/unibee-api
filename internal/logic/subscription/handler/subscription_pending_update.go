@@ -43,7 +43,7 @@ func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscri
 	}
 	utility.Assert(one.Status == consts.PendingSubStatusCreate, "pendingUpdate not status create")
 
-	// 先创建 SubscriptionTimeLine 在做 Sub 更新
+	// Create SubscriptionTimeLine First
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))
 	if err != nil {
 		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())

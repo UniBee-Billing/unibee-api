@@ -15,13 +15,13 @@ import (
 	"unibee/utility"
 )
 
-func HandleSubscriptionCreatePaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
-	utility.Assert(payment != nil, "HandleSubscriptionCreatePaymentSuccess payment is nil")
-	utility.Assert(len(payment.SubscriptionId) > 0, "HandleSubscriptionCreatePaymentSuccess payment subId is nil")
+func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
+	utility.Assert(payment != nil, "HandleSubscriptionFirstPaymentSuccess payment is nil")
+	utility.Assert(len(payment.SubscriptionId) > 0, "HandleSubscriptionFirstPaymentSuccess payment subId is nil")
 	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
-	utility.Assert(sub != nil, "HandleSubscriptionCreatePaymentSuccess sub not found")
+	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(invoice != nil, "HandleSubscriptionCreatePaymentSuccess invoice not found payment:"+payment.PaymentId)
+	utility.Assert(invoice != nil, "HandleSubscriptionFirstPaymentSuccess invoice not found payment:"+payment.PaymentId)
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, uint64(sub.PlanId))
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
@@ -40,13 +40,36 @@ func HandleSubscriptionCreatePaymentSuccess(ctx context.Context, sub *entity.Sub
 }
 
 func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
+	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
+	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
+	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
 	// billing-cycle
 	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
 	if err != nil {
 		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
 	}
-	err = UpdateSubscriptionBillingCycleWithPayment(ctx, payment)
-	return err
+	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
+	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
+	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
+	if sub.CurrentPeriodEnd >= invoice.PeriodEnd {
+		// sub cycle never go back time
+		return nil
+	}
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), sub.PlanId)
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
+		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		dao.Subscription.Columns().DunningTime:            dunningTime,
+		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func ChangeTrialEnd(ctx context.Context, newTrialEnd int64, subscriptionId string) error {
@@ -92,33 +115,5 @@ func SubscriptionIncomplete(ctx context.Context, subscriptionId string, nowTimeS
 		Tag:   redismq2.TopicSubscriptionIncomplete.Tag,
 		Body:  sub.SubscriptionId,
 	})
-	return nil
-}
-
-func UpdateSubscriptionBillingCycleWithPayment(ctx context.Context, payment *entity.Payment) error {
-	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
-	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
-	sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
-	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
-	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
-	var FirstPaidTime int64 = 0
-	if sub.FirstPaidTime == 0 && payment.Status == consts.PaymentSuccess {
-		FirstPaidTime = payment.PaidTime
-	}
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), uint64(sub.PlanId))
-	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
-		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
-		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
-		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
-		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
-		dao.Subscription.Columns().DunningTime:            dunningTime,
-		dao.Subscription.Columns().GmtModify:              gtime.Now(),
-		dao.Subscription.Columns().FirstPaidTime:          FirstPaidTime,
-	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
-	if err != nil {
-		return err
-	}
 	return nil
 }
