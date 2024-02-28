@@ -269,7 +269,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 	}()
 	if message.isBoardCastingMessage() {
 		// todo mark it's a bug
-		fmt.Printf("RedisMQ_Receive Stream Message Exception Group Receive Boardcast，Drop messageKey:%s message:%v\n", GetMessageKey(message.Topic, message.Tag), message)
+		fmt.Printf("RedisMQ_Receive Stream Message Exception Group Receive Boardcast，Drop messageKey:%s messageId:%v\n", GetMessageKey(message.Topic, message.Tag), message.MessageId)
 		return
 	}
 	cost := utility.CurrentTimeMillis()
@@ -278,7 +278,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		//历史消息没有过期时间
 		if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*24*3 {
 			//message should expire after 3 days，drop
-			fmt.Printf("RedisMQ_Receive Stream Message Exception After 3 Days Drop Expired messageKey:%s message:%v\n ", GetMessageKey(message.Topic, message.Tag), message)
+			fmt.Printf("RedisMQ_Receive Stream Message Exception After 3 Days Drop Expired messageKey:%s messageId:%v\n ", GetMessageKey(message.Topic, message.Tag), message.MessageId)
 			return
 		}
 	} else {
@@ -288,7 +288,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		ctx := context.Background()
 		defer func() {
 			if exception := recover(); exception != nil {
-				fmt.Printf("RedisMQ_Receive Stream Message Error message:%v panic error:%s\n", message, exception)
+				fmt.Printf("RedisMQ_Receive Stream Message Error  messageKey:%s messageId:%v panic error:%s\n", GetMessageKey(message.Topic, message.Tag), message.MessageId, exception)
 				if pushTaskToResumeLater(consumer, message) {
 					messageAck(message)
 				} else {
@@ -299,7 +299,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 		}()
 		time.Sleep(2 * time.Second)
 		action := consumer.Consume(ctx, message)
-		fmt.Printf("RedisMQ_Receive Stream Message messageKey:%s result:%d message:%v cost:%dms\n", GetMessageKey(message.Topic, message.Tag), action, message, cost)
+		fmt.Printf("RedisMQ_Receive Stream Message Consume messageKey:%s result:%d messageId:%v cost:%dms\n", GetMessageKey(message.Topic, message.Tag), action, message.MessageId, cost)
 		if action == ReconsumeLater {
 			if pushTaskToResumeLater(consumer, message) {
 				messageAck(message)
