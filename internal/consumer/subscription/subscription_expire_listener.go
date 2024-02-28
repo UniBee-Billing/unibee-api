@@ -52,8 +52,8 @@ func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redism
 		}
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_EXPIRED)
 	handler.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId)
+	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_EXPIRED)
 	return redismq.CommitMessage
 }
 
