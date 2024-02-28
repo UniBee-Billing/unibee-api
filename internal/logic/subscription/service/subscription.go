@@ -104,6 +104,7 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId i
 func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId uint64) *entity.MerchantGateway {
 	if reqGatewayId > 0 {
 		gateway := query.GetGatewayById(ctx, reqGatewayId)
+		utility.Assert(gateway != nil, "gateway not found")
 		utility.Assert(gateway.MerchantId == merchantId, "gateway not match")
 		return gateway
 	} else {
