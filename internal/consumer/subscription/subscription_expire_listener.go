@@ -42,12 +42,13 @@ func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redism
 		Limit(0, 100).
 		OmitEmpty().Scan(&pendingUpdates)
 	if err != nil {
+		g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener Fetch PendingUpdateList Error:%s", err.Error())
 		return redismq.ReconsumeLater
 	}
 	for _, p := range pendingUpdates {
 		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionExpire")
 		if err != nil {
-			fmt.Printf("MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
+			g.Log().Errorf(ctx, "MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)

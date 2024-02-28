@@ -555,7 +555,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			prorationDate = time.Now().Unix()
 		}
 		if prorationDate > sub.CurrentPeriodEnd || prorationDate < sub.CurrentPeriodStart {
-			// after period end before trial end, also or sub data not sync todo mark
+			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			prorationInvoice = &ro.InvoiceDetailSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
 				TotalAmount:                    0,

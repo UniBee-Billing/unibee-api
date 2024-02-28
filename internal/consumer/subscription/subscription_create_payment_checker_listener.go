@@ -35,7 +35,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 		//should expire sub
 		err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 		if err != nil {
-			fmt.Printf("SubscriptionCreatePaymentCheckListener SubscriptionExpire Error:%s", err.Error())
+			g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SubscriptionExpire Error:%s", err.Error())
 		}
 		return redismq.CommitMessage
 	}
@@ -51,6 +51,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 				Body:  sub.SubscriptionId,
 			}, 24*60*60) //every day send util expire
 			if err != nil {
+				g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SendDelay TopicSubscriptionCreatePaymentCheck Error:%s", err.Error())
 				return redismq.CommitMessage
 			}
 		}
