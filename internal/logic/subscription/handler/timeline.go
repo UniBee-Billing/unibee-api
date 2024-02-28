@@ -35,6 +35,7 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string) {
 }
 
 func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
+	g.Log().Infof(ctx, "SubscriptionNewTimeline-%s", invoice.InvoiceId)
 	utility.Assert(invoice != nil, "invoice is null ")
 	utility.Assert(len(invoice.SubscriptionId) > 0, "not sub invoice")
 	utility.Assert(invoice.Status == consts.InvoiceStatusPaid, "invoice not paid")
