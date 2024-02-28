@@ -4,9 +4,6 @@ import (
 	"context"
 	"unibee/api/system/information"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway"
-	"unibee/internal/query"
 	"unibee/time"
 )
 
@@ -34,9 +31,9 @@ func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *in
 		Scale:    1,
 	})
 	res.SupportCurrency = supportCurrency
-	res.MerchantId = _interface.GetMerchantId(ctx)
-	res.MerchantInfo = query.GetMerchantInfoById(ctx, res.MerchantId)
-	res.Gateway = gateway.GetActiveGatewaySimplifyListByMerchantId(ctx, res.MerchantId)
+	//res.MerchantId = _interface.GetMerchantId(ctx)
+	//res.MerchantInfo = query.GetMerchantInfoById(ctx, res.MerchantId)
+	//res.Gateway = gateway.GetActiveGatewaySimplifyListByMerchantId(ctx, res.MerchantId)
 
 	return res, nil
 }

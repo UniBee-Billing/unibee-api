@@ -3,7 +3,6 @@ package information
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/internal/logic/gateway/ro"
-	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type MerchantInformationReq struct {
@@ -15,8 +14,6 @@ type MerchantInformationRes struct {
 	IsProd          bool               `description:"Check System Env Is Prod, true|false" `
 	SupportTimeZone []string           `description:"Support TimeZone List" `
 	SupportCurrency []*SupportCurrency `description:"Support Currency List" `
-	MerchantId      uint64
-	MerchantInfo    *entity.MerchantInfo
 	Gateway         []*ro.GatewaySimplify
 }
 

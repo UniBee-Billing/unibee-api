@@ -120,7 +120,7 @@ var (
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 					//_interface.Middleware().UserPortalPreAuth,
-					_interface.Middleware().TokenAuth,
+					//_interface.Middleware().TokenAuth,
 				)
 				if !consts.GetConfigInstance().IsProd() {
 					router.SystemSubscription(ctx, group)
