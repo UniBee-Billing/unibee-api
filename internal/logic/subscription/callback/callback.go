@@ -73,8 +73,9 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId, invoice)
 					if err != nil {
 						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Upgrade error:%s", err.Error())
+					} else {
+						handler.SubscriptionNewTimeline(ctx, invoice)
 					}
-					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
 				if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
@@ -84,27 +85,30 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
 					if err != nil {
 						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
+					} else {
+						err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
+						if err != nil {
+							g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
+						}
+						handler.SubscriptionNewTimeline(ctx, invoice)
 					}
-					err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
-					if err != nil {
-						g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
-					}
-					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 && sub.Amount == payment.TotalAmount && strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
 				// SubscriptionCycle
 				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCycle error:%s", err.Error())
+				} else {
+					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
-				handler.SubscriptionNewTimeline(ctx, invoice)
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCreate") == 0 {
 				// SubscriptionCycle
 				err := handler.HandleSubscriptionFirstPaymentSuccess(ctx, sub, payment)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
+				} else {
+					handler.SubscriptionNewTimeline(ctx, invoice)
 				}
-				handler.SubscriptionNewTimeline(ctx, invoice)
 			} else {
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
