@@ -75,7 +75,6 @@ var (
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
-				// No Merchant Check, Use For Merchant Created
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -119,8 +118,6 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
-					//_interface.Middleware().UserPortalPreAuth,
-					//_interface.Middleware().TokenAuth,
 				)
 				if !consts.GetConfigInstance().IsProd() {
 					router.SystemSubscription(ctx, group)
