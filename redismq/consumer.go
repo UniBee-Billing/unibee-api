@@ -275,7 +275,7 @@ func runConsumeMessage(consumer IMessageListener, message *Message) {
 	cost := utility.CurrentTimeMillis()
 	if message.SendTime > 0 {
 		cost = utility.CurrentTimeMillis() - message.SendTime
-		//历史消息没有过期时间
+		// history no expire time
 		if (utility.CurrentTimeMillis() - message.SendTime) > 1000*60*60*24*3 {
 			//message should expire after 3 days，drop
 			fmt.Printf("RedisMQ_Receive Stream Message Exception After 3 Days Drop Expired messageKey:%s messageId:%v\n ", GetMessageKey(message.Topic, message.Tag), message.MessageId)
