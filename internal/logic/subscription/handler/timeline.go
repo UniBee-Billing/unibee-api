@@ -13,7 +13,7 @@ import (
 )
 
 func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string) {
-	utility.Assert(len(subscriptionId) == 0, "invalid subscriptionId")
+	utility.Assert(len(subscriptionId) > 0, "invalid subscriptionId")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "sub not found")
 	var oldOne *entity.SubscriptionTimeline

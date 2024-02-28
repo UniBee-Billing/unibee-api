@@ -393,7 +393,7 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 
 func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
 	ResumeTimesMax := 6
-	if message.ReconsumeTimes > ResumeTimesMax {
+	if message.ReconsumeTimes >= ResumeTimesMax {
 		return putMessageToDeathQueue(message.Topic, message.MessageId, message)
 	} else {
 		message.ReconsumeTimes = message.ReconsumeTimes + 1
