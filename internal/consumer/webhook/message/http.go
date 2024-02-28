@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) bool {
+func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, reconsumeTimes int) bool {
 	utility.Assert(webhookMessage.Data != nil, "param is nil")
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
@@ -33,15 +33,16 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) boo
 	}
 
 	one := &entity.MerchantWebhookLog{
-		MerchantId:   webhookMessage.MerchantId,
-		EndpointId:   int64(webhookMessage.EndpointId),
-		WebhookUrl:   webhookMessage.Url,
-		WebhookEvent: string(webhookMessage.Event),
-		RequestId:    msgId,
-		Body:         jsonString,
-		Response:     string(response),
-		Mamo:         utility.MarshalToJsonString(err),
-		CreateTime:   gtime.Now().Timestamp(),
+		MerchantId:     webhookMessage.MerchantId,
+		EndpointId:     int64(webhookMessage.EndpointId),
+		WebhookUrl:     webhookMessage.Url,
+		WebhookEvent:   string(webhookMessage.Event),
+		RequestId:      msgId,
+		Body:           jsonString,
+		ReconsumeCount: reconsumeTimes,
+		Response:       string(response),
+		Mamo:           utility.MarshalToJsonString(err),
+		CreateTime:     gtime.Now().Timestamp(),
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if saveErr != nil {

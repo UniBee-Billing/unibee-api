@@ -31,7 +31,7 @@ func (t MerchantWebhookListener) Consume(ctx context.Context, message *redismq.M
 		return redismq.ReconsumeLater
 	}
 
-	if SendWebhookRequest(ctx, webhookMessage) {
+	if SendWebhookRequest(ctx, webhookMessage, message.ReconsumeTimes) {
 		return redismq.CommitMessage
 	}
 

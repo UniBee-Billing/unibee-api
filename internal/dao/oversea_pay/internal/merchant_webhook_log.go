@@ -20,34 +20,36 @@ type MerchantWebhookLogDao struct {
 
 // MerchantWebhookLogColumns defines and stores column names for table merchant_webhook_log.
 type MerchantWebhookLogColumns struct {
-	Id           string // id
-	MerchantId   string // webhook url
-	EndpointId   string //
-	WebhookUrl   string // webhook url
-	WebhookEvent string // webhook_event
-	RequestId    string // request_id
-	Body         string // body(json)
-	Response     string // response
-	Mamo         string // mamo
-	GmtCreate    string // create time
-	GmtModify    string // update time
-	CreateTime   string // create utc time
+	Id             string // id
+	MerchantId     string // webhook url
+	EndpointId     string //
+	WebhookUrl     string // webhook url
+	WebhookEvent   string // webhook_event
+	RequestId      string // request_id
+	Body           string // body(json)
+	Response       string // response
+	Mamo           string // mamo
+	GmtCreate      string // create time
+	GmtModify      string // update time
+	CreateTime     string // create utc time
+	ReconsumeCount string //
 }
 
 // merchantWebhookLogColumns holds the columns for table merchant_webhook_log.
 var merchantWebhookLogColumns = MerchantWebhookLogColumns{
-	Id:           "id",
-	MerchantId:   "merchant_id",
-	EndpointId:   "endpoint_id",
-	WebhookUrl:   "webhook_url",
-	WebhookEvent: "webhook_event",
-	RequestId:    "request_id",
-	Body:         "body",
-	Response:     "response",
-	Mamo:         "mamo",
-	GmtCreate:    "gmt_create",
-	GmtModify:    "gmt_modify",
-	CreateTime:   "create_time",
+	Id:             "id",
+	MerchantId:     "merchant_id",
+	EndpointId:     "endpoint_id",
+	WebhookUrl:     "webhook_url",
+	WebhookEvent:   "webhook_event",
+	RequestId:      "request_id",
+	Body:           "body",
+	Response:       "response",
+	Mamo:           "mamo",
+	GmtCreate:      "gmt_create",
+	GmtModify:      "gmt_modify",
+	CreateTime:     "create_time",
+	ReconsumeCount: "reconsume_count",
 }
 
 // NewMerchantWebhookLogDao creates and returns a new DAO object for table data access.

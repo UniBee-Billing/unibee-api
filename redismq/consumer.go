@@ -392,13 +392,12 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 }
 
 func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
-	ResumeTimesMax := 10
+	ResumeTimesMax := 6
 	if message.ReconsumeTimes > ResumeTimesMax {
 		return putMessageToDeathQueue(message.Topic, message.MessageId, message)
 	} else {
-		//延长时间重新发送消息
 		message.ReconsumeTimes = message.ReconsumeTimes + 1
-		message.StartDeliverTime = gtime.Now().Timestamp() + (20 * int64(message.ReconsumeTimes)) // 20 Second Up
+		message.StartDeliverTime = gtime.Now().Timestamp() + 60 // resume every min till end
 		return sendDelayMessage(message)
 	}
 }
