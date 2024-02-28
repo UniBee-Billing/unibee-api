@@ -35,6 +35,7 @@ func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subs
 	if err != nil {
 		return err
 	}
+	SubscriptionNewTimeline(ctx, invoice)
 	return nil
 }
 
@@ -64,6 +65,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	if err != nil {
 		return err
 	}
+	SubscriptionNewTimeline(ctx, invoice)
 	return nil
 }
 

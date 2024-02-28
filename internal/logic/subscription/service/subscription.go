@@ -108,7 +108,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	email := ""
 	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
 		email = _interface.BizCtx().Get(ctx).User.Email
@@ -144,7 +143,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}
 
 	if len(vatCountryCode) == 0 && len(user.CountryCode) > 0 {
-		//if not set , default user countryCode
 		vatCountryCode = user.CountryCode
 		req.VatCountryCode = user.CountryCode
 	}
@@ -159,7 +157,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
-	//设置Default值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
@@ -180,7 +177,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 
 	var billingCycleAnchor = gtime.Now()
 	var currentTimeStart = billingCycleAnchor
-	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), uint64(req.PlanId))
+	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), req.PlanId)
 
 	invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 		InvoiceName:   "SubscriptionCreate",
@@ -230,8 +227,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		return nil, err
 	}
 	utility.Assert(len(prepare.VatCountryCode) > 0, "CountryCode Needed")
-
-	//校验
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 
@@ -360,22 +355,21 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription *entity.Subscription               `json:"subscription"`
-	Plan         *entity.SubscriptionPlan           `json:"plan"`
-	Quantity     int64                              `json:"quantity"`
-	Gateway      *entity.MerchantGateway            `json:"gateway"`
-	MerchantInfo *entity.MerchantInfo               `json:"merchantInfo"`
-	AddonParams  []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons       []*ro.PlanAddonVo                  `json:"addons"`
-	TotalAmount  int64                              `json:"totalAmount"                `
-	Currency     string                             `json:"currency"              `
-	UserId       int64                              `json:"userId" `
-	OldPlan      *entity.SubscriptionPlan           `json:"oldPlan"`
-	//OldPlanChannel    *entity.GatewayPlan    `json:"oldPlanChannel"`
-	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
-	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
-	ProrationDate     int64                     `json:"prorationDate"`
-	EffectImmediate   bool                      `json:"EffectImmediate"`
+	Subscription      *entity.Subscription               `json:"subscription"`
+	Plan              *entity.SubscriptionPlan           `json:"plan"`
+	Quantity          int64                              `json:"quantity"`
+	Gateway           *entity.MerchantGateway            `json:"gateway"`
+	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
+	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
+	Addons            []*ro.PlanAddonVo                  `json:"addons"`
+	TotalAmount       int64                              `json:"totalAmount"                `
+	Currency          string                             `json:"currency"              `
+	UserId            int64                              `json:"userId" `
+	OldPlan           *entity.SubscriptionPlan           `json:"oldPlan"`
+	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
+	NextPeriodInvoice *ro.InvoiceDetailSimplify          `json:"nextPeriodInvoice"`
+	ProrationDate     int64                              `json:"prorationDate"`
+	EffectImmediate   bool                               `json:"EffectImmediate"`
 }
 
 // SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
@@ -386,13 +380,12 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
-	//utility.Assert(sub.Id == req.ConfirmChannelId, "gateway not match")
 	// todo mark addon binding check
 
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -400,12 +393,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	//utility.Assert(sub.TrialEnd < gtime.Now().Timestamp(), "subscription is in trial period ,should end trial before update")
 	//设置了下周期取消不允许修改计划
 	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription cannot be update as it will cancel at period end, should resume subscription first")
-
-	//设置Default值
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
-
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 
 	var currency = sub.Currency
@@ -462,17 +452,14 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		for newAddonPlanId, newAddonQuantity := range newAddonMap {
 			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
 				if oldAddonQuantity < newAddonQuantity {
-					//数量有增加,视为升级
 					effectImmediate = true
 					break
 				}
 			} else {
-				//新增,视为升级
 				effectImmediate = true
 				break
 			}
 		}
-		//如果是降级，校验是否有变化
 		var changed = false
 		if len(oldAddonMap) != len(newAddonMap) {
 			changed = true
@@ -480,12 +467,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			for newAddonPlanId, newAddonQuantity := range newAddonMap {
 				if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
 					if oldAddonQuantity != newAddonQuantity {
-						//数量不等
 						changed = true
 						break
 					}
 				} else {
-					//新增
 					changed = true
 					break
 				}
@@ -695,7 +680,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		return nil, err
 	}
 
-	//subscription prepare 检查
+	//subscription prepare
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 	if prepare.Invoice.TotalAmount <= 0 {
@@ -725,9 +710,9 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UpdateCurrency:       prepare.Currency,
 		UpdatePlanId:         prepare.Plan.Id,
 		UpdateQuantity:       prepare.Quantity,
-		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams), // addon 暂定不带上之前订阅
+		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams),
 		Status:               consts.PendingSubStatusInit,
-		Data:                 "", //额外参数配置
+		Data:                 "",
 		MerchantUserId:       merchantUserId,
 		ProrationDate:        req.ProrationDate,
 		EffectImmediate:      effectImmediate,
@@ -836,7 +821,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -896,12 +881,12 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().CancelAtPeriodEnd: 1, // todo mark 如果您在计费周期结束时取消订阅（即设置cancel_at_period_end为true），customer.subscription.updated则会立即触发事件。该事件反映了订阅值的变化cancel_at_period_end。当订阅在期限结束时实际取消时，customer.subscription.deleted就会发生一个事件
+		dao.Subscription.Columns().CancelAtPeriodEnd: 1,
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
@@ -949,7 +934,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -985,7 +970,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
@@ -1019,7 +1004,7 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not trialed")
 	err := EndTrialManual(ctx, sub.SubscriptionId)
