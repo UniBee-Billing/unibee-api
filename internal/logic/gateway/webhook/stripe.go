@@ -146,7 +146,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	}
 
 	data, _ := gjson.Marshal(event)
-	g.Log().Info(r.Context(), "Receive_Webhook_Channel: ", gateway.GatewayName, " hook:", string(data))
+	g.Log().Debug(r.Context(), "Receive_Webhook_Channel: ", gateway.GatewayName, " hook:", string(data))
 
 	var responseBack = http.StatusOK
 	var requestId = ""
