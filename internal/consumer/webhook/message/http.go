@@ -19,7 +19,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) boo
 	msgId := generateMsgId()
 	jsonString, err := webhookMessage.Data.ToJsonString()
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
-	g.Log().Infof(ctx, "\nWebhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
+	g.Log().Infof(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Gateway": "application/json",
@@ -27,7 +27,11 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) boo
 		"Datetime":        datetime,
 	}
 	response, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
-	g.Log().Infof(ctx, "\nWebhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err)
+	if err != nil {
+		g.Log().Errorf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err.Error())
+	} else {
+		g.Log().Infof(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
+	}
 
 	one := &entity.MerchantWebhookLog{
 		MerchantId:   webhookMessage.MerchantId,
@@ -41,7 +45,9 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) boo
 		CreateTime:   gtime.Now().Timestamp(),
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
-	g.Log().Infof(ctx, "\nWebhook_SaveLog error %s\n", saveErr)
+	if saveErr != nil {
+		g.Log().Errorf(ctx, "Webhook_SaveLog error %s\n", saveErr.Error())
+	}
 
 	return err == nil && strings.Compare(string(response), "success") == 0
 }
