@@ -14,7 +14,6 @@ import (
 
 func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage) bool {
 	utility.Assert(webhookMessage.Data != nil, "param is nil")
-	// 定义自定义的头部信息
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
 	jsonString, err := webhookMessage.Data.ToJsonString()
