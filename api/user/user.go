@@ -8,6 +8,7 @@ import (
 	"context"
 	
 	"unibee/api/user/auth"
+	"unibee/api/user/gateway"
 	"unibee/api/user/invoice"
 	"unibee/api/user/payment"
 	"unibee/api/user/plan"
@@ -26,6 +27,10 @@ type IUserAuth interface {
 	PasswordForgetOtpVerify(ctx context.Context, req *auth.PasswordForgetOtpVerifyReq) (res *auth.PasswordForgetOtpVerifyRes, err error)
 	Register(ctx context.Context, req *auth.RegisterReq) (res *auth.RegisterRes, err error)
 	RegisterVerify(ctx context.Context, req *auth.RegisterVerifyReq) (res *auth.RegisterVerifyRes, err error)
+}
+
+type IUserGateway interface {
+	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)
 }
 
 type IUserInvoice interface {
@@ -54,7 +59,6 @@ type IUserSession interface {
 type IUserSubscription interface {
 	SubscriptionDetail(ctx context.Context, req *subscription.SubscriptionDetailReq) (res *subscription.SubscriptionDetailRes, err error)
 	SubscriptionPayCheck(ctx context.Context, req *subscription.SubscriptionPayCheckReq) (res *subscription.SubscriptionPayCheckRes, err error)
-	SubscriptionChannels(ctx context.Context, req *subscription.SubscriptionChannelsReq) (res *subscription.SubscriptionChannelsRes, err error)
 	SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (res *subscription.SubscriptionCreatePreviewRes, err error)
 	SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (res *subscription.SubscriptionCreateRes, err error)
 	SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error)

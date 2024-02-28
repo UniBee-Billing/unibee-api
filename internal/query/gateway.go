@@ -5,21 +5,22 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
+func GetGatewaySimplifyById(ctx context.Context, id uint64) *ro.GatewaySimplify {
 	if id <= 0 {
 		return nil
 	}
+	var one *entity.MerchantGateway
 	m := dao.MerchantGateway.Ctx(ctx)
 	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).OmitEmpty().Scan(&one)
-	if err != nil {
-		one = nil
+	if err != nil || one == nil {
+		return nil
 	}
-	return
+	return ro.SimplifyGateway(one)
 }
 
 func GetGatewayByGatewayName(ctx context.Context, gatewayName string) (one *entity.MerchantGateway) {
@@ -33,71 +34,32 @@ func GetGatewayByGatewayName(ctx context.Context, gatewayName string) (one *enti
 	return one
 }
 
-func GetGatewaysGroupByEnumKey(ctx context.Context) []*entity.MerchantGateway {
-	var data []*entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).Group(dao.MerchantGateway.Columns().EnumKey).
-		OmitEmpty().Scan(&data)
-	if err != nil {
-		g.Log().Errorf(ctx, "GetGatewaysGroupByEnumKey error:%s", err)
-		return nil
-	}
-	return data
-}
-
-func GetPaymentTypeGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
+func GetGatewayById(ctx context.Context, id uint64) (one *entity.MerchantGateway) {
 	if id <= 0 {
 		return nil
 	}
-	m := dao.MerchantGateway.Ctx(ctx)
-	err := m.Where(entity.MerchantGateway{Id: uint64(id)}).
-		Where(m.Builder().
-			Where(entity.MerchantGateway{GatewayType: consts.GatewayTypeOneTimePayment}).WhereOr("gateway_type is null")).
-		OmitEmpty().Scan(&one)
+	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{Id: uint64(id)}).
+		Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetSubscriptionTypeGatewayById(ctx context.Context, id int64) (one *entity.MerchantGateway) {
-	if id <= 0 {
-		return nil
-	}
-	m := dao.MerchantGateway.Ctx(ctx)
-	err := m.Where(entity.MerchantGateway{Id: uint64(id), GatewayType: consts.GatewayTypeSubscription}).
-		OmitEmpty().Scan(&one)
-	if err != nil {
-		one = nil
-	}
-	return
-}
-
-func GetListSubscriptionTypeGateways(ctx context.Context) (list []*entity.MerchantGateway) {
+func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*entity.MerchantGateway) {
 	var data []*entity.MerchantGateway
-	err := dao.MerchantGateway.Ctx(ctx).Where(entity.MerchantGateway{GatewayType: consts.GatewayTypeSubscription}).
-		OmitEmpty().Scan(&data)
+	err := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
+		Scan(&data)
 	if err != nil {
-		g.Log().Errorf(ctx, "GetListSubscriptionTypeGateways error:%s", err)
+		g.Log().Errorf(ctx, "GetMerchantGatewayList error:%s", err)
 		return nil
 	}
 	return data
 }
 
-func SaveGatewayUniqueProductId(ctx context.Context, id int64, productId string) error {
-	if len(productId) == 0 || id < 0 {
-		return nil
-	}
-	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
-		dao.MerchantGateway.Columns().UniqueProductId: productId,
-		dao.MerchantGateway.Columns().GmtModify:       gtime.Now(),
-	}).Where(dao.MerchantGateway.Columns().Id, id).Update()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func UpdateGatewayWebhookSecret(ctx context.Context, id int64, secret string) error {
+func UpdateGatewayWebhookSecret(ctx context.Context, id uint64, secret string) error {
 	if id <= 0 {
 		return gerror.New("invalid id")
 	}
@@ -108,9 +70,5 @@ func UpdateGatewayWebhookSecret(ctx context.Context, id int64, secret string) er
 	if err != nil {
 		return err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return gerror.Newf("UpdateGatewayWebhookSecret update err:%s", update)
-	//}
 	return nil
 }

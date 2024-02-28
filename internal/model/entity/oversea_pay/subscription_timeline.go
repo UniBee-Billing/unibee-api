@@ -26,7 +26,7 @@ type SubscriptionTimeline struct {
 	PlanId          uint64      `json:"planId"          description:"PlanId"`                  // PlanId
 	Quantity        int64       `json:"quantity"        description:"quantity"`                // quantity
 	AddonData       string      `json:"addonData"       description:"plan addon json data"`    // plan addon json data
-	GatewayId       int64       `json:"gatewayId"       description:"gateway_id"`              // gateway_id
+	GatewayId       uint64      `json:"gatewayId"       description:"gateway_id"`              // gateway_id
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)
 	CreateTime      int64       `json:"createTime"      description:"create utc time"`         // create utc time

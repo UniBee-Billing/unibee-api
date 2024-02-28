@@ -23,16 +23,16 @@ import (
 )
 
 type HandlePayReq struct {
-	PaymentId                   string
-	GatewayPaymentIntentId      string
-	GatewayPaymentId            string
-	TotalAmount                 int64
-	PayStatusEnum               consts.PayStatusEnum
-	PaidTime                    *gtime.Time
-	PaymentAmount               int64
-	CaptureAmount               int64
-	Reason                      string
-	ChannelDefaultPaymentMethod string
+	PaymentId              string
+	GatewayPaymentIntentId string
+	GatewayPaymentId       string
+	TotalAmount            int64
+	PayStatusEnum          consts.PayStatusEnum
+	PaidTime               *gtime.Time
+	PaymentAmount          int64
+	CaptureAmount          int64
+	Reason                 string
+	GatewayPaymentMethod   string
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
@@ -287,7 +287,6 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		return nil
 	}
 
-	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
 	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")
@@ -328,7 +327,6 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment, invoice)
-		//交易事件记录
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,
@@ -363,11 +361,11 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("payment not found")
 	}
 
-	//// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
-	//if payment.Status == consts.PAYMENT_SUCCESS {
-	//	g.Log().Infof(ctx, "merchantOrderNo:%s payment already success", req.PaymentId)
-	//	return nil
-	//}
+	if payment.Status == consts.PaymentSuccess {
+		g.Log().Infof(ctx, "payment already success, paymentId=%s", req.PaymentId)
+		return errors.New("payment already success")
+	}
+
 	var paidAt = gtime.Now().Timestamp()
 	if req.PaidTime != nil {
 		paidAt = req.PaidTime.Timestamp()
@@ -379,9 +377,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().PaidTime:               paidAt,
 				dao.Payment.Columns().GatewayPaymentIntentId: req.GatewayPaymentIntentId,
 				dao.Payment.Columns().GatewayPaymentId:       req.GatewayPaymentId,
-				dao.Payment.Columns().GatewayPaymentMethod:   req.ChannelDefaultPaymentMethod,
+				dao.Payment.Columns().GatewayPaymentMethod:   req.GatewayPaymentMethod,
 				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
-				dao.Payment.Columns().RefundAmount:           payment.RefundAmount},
+			},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
 				return err
@@ -409,7 +407,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		{
 			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
-			gateway := query.GetGatewayById(ctx, gatewayUser.GatewayId)
+			gateway := query.GetGatewayById(ctx, uint64(gatewayUser.GatewayId))
 			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
 				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
 				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
@@ -423,12 +421,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 
 		//default payment method update
-		if len(req.ChannelDefaultPaymentMethod) > 0 {
+		if len(req.GatewayPaymentMethod) > 0 {
 			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 		}
 
-		//try {
-		//交易事件记录
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,
@@ -442,7 +438,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
 		if err != nil {
-			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+			g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimeline error %s`, err.Error())
 		}
 	}
 	return err
@@ -450,10 +446,10 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq, err error, payment *entity.Payment) error {
 	_, err = dao.GatewayUser.Ctx(ctx).Data(g.Map{
-		dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: req.ChannelDefaultPaymentMethod,
+		dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: req.GatewayPaymentMethod,
 	}).Where(dao.GatewayUser.Columns().UserId, payment.UserId).Where(dao.GatewayUser.Columns().GatewayId, payment.GatewayId).OmitNil().Update()
 	if err != nil {
-		g.Log().Printf(ctx, `SaveChannelUserDefaultPaymentMethod GatewayDefaultPaymentMethod failure %s`, err.Error())
+		g.Log().Errorf(ctx, `SaveChannelUserDefaultPaymentMethod GatewayDefaultPaymentMethod failure %s`, err.Error())
 	}
 	return err
 }
@@ -463,16 +459,16 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 	if one != nil {
 		if gatewayPaymentRo.Status == consts.PaymentSuccess {
 			err := HandlePaySuccess(ctx, &HandlePayReq{
-				PaymentId:                   one.PaymentId,
-				GatewayPaymentIntentId:      gatewayPaymentRo.GatewayPaymentId,
-				GatewayPaymentId:            gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:                 gatewayPaymentRo.TotalAmount,
-				PayStatusEnum:               consts.PaymentSuccess,
-				PaidTime:                    gatewayPaymentRo.PayTime,
-				PaymentAmount:               gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:               0,
-				Reason:                      gatewayPaymentRo.Reason,
-				ChannelDefaultPaymentMethod: gatewayPaymentRo.GatewayPaymentMethod,
+				PaymentId:              one.PaymentId,
+				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
+				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
+				TotalAmount:            gatewayPaymentRo.TotalAmount,
+				PayStatusEnum:          consts.PaymentSuccess,
+				PaidTime:               gatewayPaymentRo.PayTime,
+				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
+				CaptureAmount:          0,
+				Reason:                 gatewayPaymentRo.Reason,
+				GatewayPaymentMethod:   gatewayPaymentRo.GatewayPaymentMethod,
 			})
 			if err != nil {
 				return err

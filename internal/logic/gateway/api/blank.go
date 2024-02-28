@@ -9,6 +9,11 @@ import (
 type Blank struct {
 }
 
+func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

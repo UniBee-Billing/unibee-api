@@ -14,19 +14,58 @@ import (
 )
 
 type GatewayKeyEnum struct {
-	Code int64
+	Name string
 	Desc string
 }
 
 var (
-	GatewayPaypal   = GatewayKeyEnum{3, "Paypal"}
-	GatewayStripe   = GatewayKeyEnum{4, "Stripe"}
-	GatewayBlank    = GatewayKeyEnum{50, "0 Payment"}
-	GatewayAutoTest = GatewayKeyEnum{500, "For Automatic Test Payment"}
+	GatewayInvalid  = GatewayKeyEnum{"invalid", "Invalid Gateway"}
+	GatewayPaypal   = GatewayKeyEnum{"paypal", "Paypal"}
+	GatewayStripe   = GatewayKeyEnum{"stripe", "Stripe"}
+	GatewayBlank    = GatewayKeyEnum{"0", "0 Payment Gateway"}
+	GatewayAutoTest = GatewayKeyEnum{"autotest", "Auto Test"}
 )
 
 type GatewayProxy struct {
-	Gateway *entity.MerchantGateway
+	Gateway     *entity.MerchantGateway
+	GatewayName string
+}
+
+func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
+	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
+	if p.GatewayName == GatewayPaypal.Name {
+		return &Paypal{}
+	} else if p.GatewayName == GatewayStripe.Name {
+		return &Stripe{}
+	} else if p.GatewayName == GatewayBlank.Name {
+		return &Blank{}
+	} else if p.GatewayName == GatewayAutoTest.Name {
+		return &AutoTest{}
+	} else {
+		return &Invalid{}
+	}
+}
+
+func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
+
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayTest cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return err
 }
 
 func (p GatewayProxy) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
@@ -117,21 +156,6 @@ func (p GatewayProxy) GatewayUserCreate(ctx context.Context, gateway *entity.Mer
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
 	return res, err
-}
-
-func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
-	utility.Assert(p.Gateway != nil, "gateway is not set")
-	if p.Gateway.EnumKey == GatewayPaypal.Code {
-		return &Paypal{}
-	} else if p.Gateway.EnumKey == GatewayStripe.Code {
-		return &Stripe{}
-	} else if p.Gateway.EnumKey == GatewayBlank.Code {
-		return &Blank{}
-	} else if p.Gateway.EnumKey == GatewayAutoTest.Code {
-		return &AutoTest{}
-	} else {
-		return &Invalid{}
-	}
 }
 
 func (p GatewayProxy) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {

@@ -16,7 +16,7 @@ func (c *ControllerPayment) GatewayPaymentMethodList(ctx context.Context, req *p
 	if pay != nil {
 		gateway := query.GetGatewayById(ctx, pay.GatewayId)
 		if gateway != nil {
-			methodRes, err := api.GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayUserPaymentMethodListQuery(ctx, gateway, pay.UserId)
+			methodRes, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayUserPaymentMethodListQuery(ctx, gateway, pay.UserId)
 			if err != nil {
 				return nil, err
 			}

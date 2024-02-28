@@ -6,6 +6,6 @@ import (
 	"unibee/internal/query"
 )
 
-func GetGatewayById(ctx context.Context, id int64) (gateway *entity.MerchantGateway) {
+func GetGatewayById(ctx context.Context, id uint64) (gateway *entity.MerchantGateway) {
 	return query.GetGatewayById(ctx, id)
 }

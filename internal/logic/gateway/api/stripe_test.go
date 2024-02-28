@@ -78,7 +78,7 @@ func TestStrip(t *testing.T) {
 			fmt.Println(utility.MarshalToJsonString(result))
 		}
 		//{
-		//	paymentIntentDetail, err := GetGatewayServiceProvider(ctx, int64(gateway.Id)).GatewayPaymentDetail(ctx, gateway, "pi_3OmpHZHhgikz9ijM0a87ACwq")
+		//	paymentIntentDetail, err := GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, "pi_3OmpHZHhgikz9ijM0a87ACwq")
 		//	if err != nil {
 		//		fmt.Println(utility.MarshalToJsonString(err))
 		//	}

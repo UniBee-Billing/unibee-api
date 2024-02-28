@@ -9,21 +9,28 @@ import (
 	"unibee/utility"
 )
 
-func GetGatewayWebhookServiceProvider(ctx context.Context, gatewayId int64) (one _interface.GatewayWebhookInterface) {
+func GetGatewayWebhookServiceProvider(ctx context.Context, gatewayId uint64) (one _interface.GatewayWebhookInterface) {
 	proxy := &GatewayWebhookProxy{}
-	proxy.PaymentChannel = query.GetGatewayById(ctx, gatewayId)
-	utility.Assert(proxy.PaymentChannel != nil, fmt.Sprintf("gateway not found %d", gatewayId))
+	proxy.Gateway = query.GetGatewayById(ctx, gatewayId)
+	proxy.GatewayName = proxy.Gateway.GatewayName
+	utility.Assert(proxy.Gateway != nil, fmt.Sprintf("gateway not found %d", gatewayId))
 	return proxy
 }
 
-func CheckAndSetupGatewayWebhooks(ctx context.Context) {
-	list := query.GetGatewaysGroupByEnumKey(ctx)
-	for _, gateway := range list {
-		err := GetGatewayWebhookServiceProvider(ctx, int64(gateway.Id)).GatewayCheckAndSetupWebhook(ctx, gateway)
-		if err != nil {
-			g.Log().Errorf(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Error:%s", gateway.GatewayName, err)
-		} else {
-			g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
-		}
+func GetGatewayWebhookServiceProviderByGatewayName(ctx context.Context, gatewayName string) (one _interface.GatewayWebhookInterface) {
+	proxy := &GatewayWebhookProxy{}
+	proxy.GatewayName = gatewayName
+	return proxy
+}
+
+func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
+	gateway := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(gateway != nil, fmt.Sprintf("gateway not found %d", gatewayId))
+	err := GetGatewayWebhookServiceProvider(ctx, gateway.Id).GatewayCheckAndSetupWebhook(ctx, gateway)
+	if err != nil {
+		g.Log().Errorf(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Error:%s", gateway.GatewayName, err)
+	} else {
+		g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
 	}
+	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
 }

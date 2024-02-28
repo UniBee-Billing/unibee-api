@@ -10,7 +10,7 @@ func GetSubscriptionVatRateChannel(ctx context.Context, vatRateId uint64, gatewa
 	if gatewayId <= 0 || vatRateId <= 0 {
 		return nil
 	}
-	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{VatRateId: int64(vatRateId), GatewayId: int64(gatewayId)}).OmitEmpty().Scan(&one)
+	err := dao.GatewayVatRate.Ctx(ctx).Where(entity.GatewayVatRate{VatRateId: int64(vatRateId), GatewayId: gatewayId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

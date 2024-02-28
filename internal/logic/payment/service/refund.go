@@ -29,7 +29,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 
-	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	gateway := query.GetGatewayById(ctx, uint64(payment.GatewayId))
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")

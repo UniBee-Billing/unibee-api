@@ -21,7 +21,7 @@ func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subs
 	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(invoice != nil, "HandleSubscriptionFirstPaymentSuccess invoice not found payment:"+payment.PaymentId)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, uint64(sub.PlanId))
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, sub.PlanId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,

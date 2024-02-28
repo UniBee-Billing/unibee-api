@@ -25,16 +25,9 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")
-	list := query.GetListSubscriptionTypeGateways(ctx) // todo mark 需改造成获取 merchantId 相关的 Gateway
-	utility.Assert(len(list) > 0, "no gateway found, need at least one")
-	for _, gateway := range list {
-		err = service.SubscriptionPlanChannelTransferAndActivate(ctx, req.PlanId, int64(gateway.Id))
-		if err != nil {
-			return nil, err
-		}
-	}
+	service.PlanOrAddonIntervalVerify(ctx, req.PlanId)
 
-	//发布 Plan
+	//Activate Plan
 	err = service.SubscriptionPlanActivate(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
@@ -61,13 +54,7 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
-				//发布 addonPlan
-				for _, gateway := range list {
-					err = service.SubscriptionPlanChannelTransferAndActivate(ctx, addonPlan.Id, int64(gateway.Id))
-					if err != nil {
-						return nil, err
-					}
-				}
+				service.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)
 
 				//Activate Plan
 				err = service.SubscriptionPlanActivate(ctx, addonPlan.Id)

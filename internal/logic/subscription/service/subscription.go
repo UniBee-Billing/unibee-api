@@ -101,6 +101,19 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId i
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
 }
 
+func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId uint64) *entity.MerchantGateway {
+	if reqGatewayId > 0 {
+		gateway := query.GetGatewayById(ctx, reqGatewayId)
+		utility.Assert(gateway.MerchantId == merchantId, "gateway not match")
+		return gateway
+	} else {
+		list := query.GetMerchantGatewayList(ctx, merchantId)
+		utility.Assert(len(list) > 0, "merchant gateway need setup")
+		utility.Assert(len(list) == 1, "gateway need specify")
+		return list[0]
+	}
+}
+
 func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
@@ -115,7 +128,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId) //todo mark 改造成支持 Merchant 级别的 Gateway
+	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -241,7 +254,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		MerchantId:         prepare.MerchantInfo.Id,
 		Type:               subType,
 		PlanId:             prepare.Plan.Id,
-		GatewayId:          int64(prepare.Gateway.Id),
+		GatewayId:          prepare.Gateway.Id,
 		UserId:             prepare.UserId,
 		Quantity:           prepare.Quantity,
 		Amount:             prepare.TotalAmount,
@@ -293,7 +306,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			BizId:          one.SubscriptionId,
 			BizType:        consts.BizTypeSubscription,
 			UserId:         prepare.UserId,
-			GatewayId:      int64(prepare.Gateway.Id),
+			GatewayId:      prepare.Gateway.Id,
 			TotalAmount:    prepare.Invoice.TotalAmount,
 			Currency:       prepare.Currency,
 			CountryCode:    prepare.VatCountryCode,
@@ -385,7 +398,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	plan := query.GetPlanById(ctx, req.NewPlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -733,7 +746,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		//utility.Assert(user != nil, "user not found")
-		gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
+		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
@@ -747,7 +760,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			Data:            utility.MarshalToJsonString(createRes),
 			Link:            createRes.Link,
 			Paid:            createRes.Status == consts.PaymentSuccess,
-			Invoice:         invoice,
+			Invoice:         createRes.Invoice,
 		}
 	} else {
 		prepare.EffectImmediate = false
@@ -821,7 +834,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -881,7 +894,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -934,7 +947,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	}
 
 	plan := query.GetPlanById(ctx, sub.PlanId)
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
@@ -970,7 +983,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
@@ -1004,7 +1017,7 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not trialed")
 	err := EndTrialManual(ctx, sub.SubscriptionId)

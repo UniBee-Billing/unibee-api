@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetPaymentWebhookEntranceUrl(gatewayId int64) string {
+func GetPaymentWebhookEntranceUrl(gatewayId uint64) string {
 	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", consts.GetConfigInstance().Server.DomainPath, gatewayId)
 }
 

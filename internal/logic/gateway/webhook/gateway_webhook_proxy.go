@@ -7,44 +7,40 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/glog"
+	"time"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
-	"time"
 )
 
 type GatewayKeyEnum struct {
-	Code int64
+	Name string
 	Desc string
 }
 
 var (
-	GatewayInvalid  = GatewayKeyEnum{-1, "无效支付"}
-	GatewayGrab     = GatewayKeyEnum{0, "Grab支付"}
-	GatewayKlarna   = GatewayKeyEnum{1, "Klarna支付"}
-	GatewayEvonet   = GatewayKeyEnum{2, "Evonet支付"}
-	GatewayPaypal   = GatewayKeyEnum{3, "Paypal支付"}
-	GatewayStripe   = GatewayKeyEnum{4, "Stripe支付"}
-	GatewayBlank    = GatewayKeyEnum{50, "0金额支付专用"}
-	GatewayAutoTest = GatewayKeyEnum{500, "自动化测试支付专用"}
+	GatewayInvalid  = GatewayKeyEnum{"invalid", "Invalid Gateway"}
+	GatewayPaypal   = GatewayKeyEnum{"paypal", "Paypal"}
+	GatewayStripe   = GatewayKeyEnum{"stripe", "Stripe"}
+	GatewayBlank    = GatewayKeyEnum{"0", "0 Payment Gateway"}
+	GatewayAutoTest = GatewayKeyEnum{"autotest", "Auto Test"}
 )
 
 type GatewayWebhookProxy struct {
-	PaymentChannel *entity.MerchantGateway
+	Gateway     *entity.MerchantGateway
+	GatewayName string
 }
 
 func (p GatewayWebhookProxy) getRemoteGateway() (one _interface.GatewayWebhookInterface) {
-	utility.Assert(p.PaymentChannel != nil, "gateway is not set")
-	if p.PaymentChannel.EnumKey == GatewayEvonet.Code {
-		return &EvonetWebhook{}
-	} else if p.PaymentChannel.EnumKey == GatewayPaypal.Code {
+	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
+	if p.GatewayName == GatewayPaypal.Name {
 		return &PaypalWebhook{}
-	} else if p.PaymentChannel.EnumKey == GatewayStripe.Code {
+	} else if p.GatewayName == GatewayStripe.Name {
 		return &StripeWebhook{}
-	} else if p.PaymentChannel.EnumKey == GatewayBlank.Code {
+	} else if p.GatewayName == GatewayBlank.Name {
 		return &BlankWebhook{}
-	} else if p.PaymentChannel.EnumKey == GatewayAutoTest.Code {
+	} else if p.GatewayName == GatewayAutoTest.Name {
 		return &AutoTestWebhook{}
 	} else {
 		return &InvalidWebhook{}

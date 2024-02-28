@@ -23,6 +23,7 @@ type MerchantWebhookLogColumns struct {
 	Id             string // id
 	MerchantId     string // webhook url
 	EndpointId     string //
+	ReconsumeCount string //
 	WebhookUrl     string // webhook url
 	WebhookEvent   string // webhook_event
 	RequestId      string // request_id
@@ -32,7 +33,6 @@ type MerchantWebhookLogColumns struct {
 	GmtCreate      string // create time
 	GmtModify      string // update time
 	CreateTime     string // create utc time
-	ReconsumeCount string //
 }
 
 // merchantWebhookLogColumns holds the columns for table merchant_webhook_log.
@@ -40,6 +40,7 @@ var merchantWebhookLogColumns = MerchantWebhookLogColumns{
 	Id:             "id",
 	MerchantId:     "merchant_id",
 	EndpointId:     "endpoint_id",
+	ReconsumeCount: "reconsume_count",
 	WebhookUrl:     "webhook_url",
 	WebhookEvent:   "webhook_event",
 	RequestId:      "request_id",
@@ -49,7 +50,6 @@ var merchantWebhookLogColumns = MerchantWebhookLogColumns{
 	GmtCreate:      "gmt_create",
 	GmtModify:      "gmt_modify",
 	CreateTime:     "create_time",
-	ReconsumeCount: "reconsume_count",
 }
 
 // NewMerchantWebhookLogDao creates and returns a new DAO object for table data access.

@@ -14,6 +14,7 @@ import (
 	"github.com/stripe/stripe-go/v76/invoiceitem"
 	"github.com/stripe/stripe-go/v76/paymentintent"
 	"github.com/stripe/stripe-go/v76/paymentmethod"
+	"github.com/stripe/stripe-go/v76/product"
 	"github.com/stripe/stripe-go/v76/refund"
 	"strconv"
 	"strings"
@@ -28,6 +29,16 @@ import (
 )
 
 type Stripe struct {
+}
+
+func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+	stripe.Key = secret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.ProductListParams{}
+	params.Limit = stripe.Int64(3)
+	result := product.List(params)
+	return result.Err()
 }
 
 func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
@@ -328,6 +339,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 			var success = false
 			var targetIntent *stripe.PaymentIntent
 			var gatewayPaymentId = ""
+			var paymentMethod = ""
 			var link = ""
 			var cancelErr error
 			if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
@@ -350,6 +362,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				}
 				params.PaymentMethod = stripe.String(method)
+				paymentMethod = method
 				targetIntent, err = paymentintent.New(params)
 				log.SaveChannelHttpLog("GatewayNewPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.Gateway)
 				var status = ""
@@ -373,10 +386,14 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 				g.Log().Printf(ctx, "GatewayNewPayment try PaymentIntent Method::%s gatewayPaymentId:%s status:%s success:%v link:%s error:%s cancelErr:%s\n", method, gatewayPaymentId, status, success, link, err, cancelErr)
 			}
 			if success && targetIntent != nil && len(gatewayPaymentId) > 0 {
+				if targetIntent.PaymentMethod != nil {
+					paymentMethod = targetIntent.PaymentMethod.ID
+				}
 				return &ro.CreatePayInternalResp{
 					Status:                 consts.PaymentSuccess,
 					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
+					GatewayPaymentMethod:   paymentMethod,
 					Link:                   link,
 				}, nil
 			}
@@ -449,6 +466,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 				detail.Status = response.Status
 			}
 		}
+
 		var status consts.PayStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), "draft") == 0 {
 		} else if strings.Compare(string(detail.Status), "open") == 0 {
@@ -463,11 +481,16 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 		if detail.PaymentIntent != nil {
 			gatewayPaymentId = detail.PaymentIntent.ID
 		}
+		var gatewayPaymentMethod string
+		if detail.PaymentIntent != nil && detail.PaymentIntent.PaymentMethod != nil {
+			gatewayPaymentMethod = detail.PaymentIntent.PaymentMethod.ID
+		}
 		return &ro.CreatePayInternalResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
 			Link:                   detail.HostedInvoiceURL,
+			GatewayPaymentMethod:   gatewayPaymentMethod,
 		}, nil
 	}
 }
@@ -632,7 +655,7 @@ func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGate
 		gatewayPaymentMethod = item.PaymentMethod.ID
 	}
 	return &ro.GatewayPaymentRo{
-		GatewayId:            int64(gateway.Id),
+		GatewayId:            gateway.Id,
 		MerchantId:           gateway.MerchantId,
 		GatewayUserId:        gatewayUserId,
 		GatewayPaymentId:     item.ID,

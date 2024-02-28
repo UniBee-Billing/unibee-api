@@ -32,7 +32,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 	} else if one.Status == consts.InvoiceStatusProcessing {
 		if len(one.PaymentLink) == 0 {
 			// create payment link for this invoice
-			gateway := query.GetSubscriptionTypeGatewayById(r.Context(), one.GatewayId)
+			gateway := query.GetGatewayById(r.Context(), one.GatewayId)
 			if gateway == nil {
 				r.Response.Writeln("Gateway Error")
 				return
@@ -53,7 +53,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 					BizType:         consts.BizTypeInvoice,
 					AuthorizeStatus: consts.Authorized,
 					UserId:          one.UserId,
-					GatewayId:       int64(gateway.Id),
+					GatewayId:       gateway.Id,
 					TotalAmount:     one.TotalAmount,
 					Currency:        one.Currency,
 					CountryCode:     user.CountryCode,

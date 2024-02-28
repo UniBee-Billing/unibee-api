@@ -334,7 +334,7 @@ func (e EvonetWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	utility.Assert(err == nil, "参数错误，payId 需 int 类型 %s")
 	overseaPay := query.GetPaymentById(r.Context(), int64(payId))
 	utility.Assert(overseaPay != nil, fmt.Sprintf("找不到支付单 payId: %s", payIdStr))
-	gateway = query.GetPaymentTypeGatewayById(r.Context(), overseaPay.GatewayId)
+	gateway = query.GetGatewayById(r.Context(), uint64(overseaPay.GatewayId))
 	utility.Assert(gateway != nil, fmt.Sprintf("payId: %s", payIdStr))
 	g.Log().Infof(r.Context(), "GatewayRedirect payId:%s notifyUrl:%s", payIdStr, overseaPay.ReturnUrl)
 	if len(overseaPay.ReturnUrl) > 0 {

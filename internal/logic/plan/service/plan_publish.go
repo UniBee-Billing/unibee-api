@@ -38,7 +38,7 @@ func SubscriptionPlanActivate(ctx context.Context, planId uint64) error {
 	return nil
 }
 
-func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId uint64, gatewayId int64) error {
+func PlanOrAddonIntervalVerify(ctx context.Context, planId uint64) {
 	intervals := []string{"day", "month", "year", "week"}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "plan not found")
@@ -52,5 +52,4 @@ func SubscriptionPlanChannelTransferAndActivate(ctx context.Context, planId uint
 	} else if strings.ToLower(plan.IntervalUnit) == "week" {
 		utility.Assert(plan.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 	}
-	return nil
 }

@@ -180,14 +180,13 @@ func CreateOrUpdateInvoiceForPayment(ctx context.Context, invoice *ro.InvoiceDet
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
-		//新建 Invoice 发送邮件
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		err = UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		//更新
+		//Update
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().BizType:                        payment.BizType,
 			dao.Invoice.Columns().MerchantId:                     payment.MerchantId,
@@ -212,7 +211,6 @@ func CreateOrUpdateInvoiceForPayment(ctx context.Context, invoice *ro.InvoiceDet
 			return nil, err
 		}
 		if one.Status != status {
-			//更新状态发送邮件
 			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		}
 	}

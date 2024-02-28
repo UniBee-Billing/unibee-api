@@ -31,7 +31,7 @@ type Payment struct {
 	CountryCode            string      `json:"countryCode"            description:"country code"`                                                           // country code
 	AuthorizeStatus        int         `json:"authorizeStatus"        description:"authorize status，0-waiting authorize，1-authorized，2-authorized_request"` // authorize status，0-waiting authorize，1-authorized，2-authorized_request
 	AuthorizeReason        string      `json:"authorizeReason"        description:""`                                                                       //
-	GatewayId              int64       `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
+	GatewayId              uint64      `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
 	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
 	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
 	CaptureDelayHours      int         `json:"captureDelayHours"      description:"capture_delay_hours"`                                                    // capture_delay_hours

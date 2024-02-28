@@ -14,7 +14,7 @@ type GatewayVatRate struct {
 	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"create time"`           // create time
 	GmtModify        *gtime.Time `json:"gmtModify"        description:"update time"`           // update time
 	VatRateId        int64       `json:"vatRateId"        description:"vat_rate_id"`           // vat_rate_id
-	GatewayId        int64       `json:"gatewayId"        description:"gateway_id"`            // gateway_id
+	GatewayId        uint64      `json:"gatewayId"        description:"gateway_id"`            // gateway_id
 	GatewayVatRateId string      `json:"gatewayVatRateId" description:"gateway_vat_rate_Id"`   // gateway_vat_rate_Id
 	IsDeleted        int         `json:"isDeleted"        description:"0-UnDeleted，1-Deleted"` // 0-UnDeleted，1-Deleted
 	CreateTime       int64       `json:"createTime"       description:"create utc time"`       // create utc time

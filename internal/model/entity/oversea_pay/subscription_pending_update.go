@@ -29,7 +29,7 @@ type SubscriptionPendingUpdate struct {
 	UpdateQuantity       int64       `json:"updateQuantity"       description:"quantity after update"`                                                     // quantity after update
 	AddonData            string      `json:"addonData"            description:"plan addon data (json) of this period"`                                     // plan addon data (json) of this period
 	UpdateAddonData      string      `json:"updateAddonData"      description:"plan addon data (json) after update"`                                       // plan addon data (json) after update
-	GatewayId            int64       `json:"gatewayId"            description:"gateway_id"`                                                                // gateway_id
+	GatewayId            uint64      `json:"gatewayId"            description:"gateway_id"`                                                                // gateway_id
 	UserId               int64       `json:"userId"               description:"userId"`                                                                    // userId
 	IsDeleted            int         `json:"isDeleted"            description:"0-UnDeleted，1-Deleted"`                                                     // 0-UnDeleted，1-Deleted
 	Paid                 int         `json:"paid"                 description:"paid，0-no，1-yes"`                                                           // paid，0-no，1-yes

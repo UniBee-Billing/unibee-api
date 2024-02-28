@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/internal/consts"
-	"unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -80,7 +79,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.Invoic
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
-		Gateway:                        gateway.GetGatewaySimplifyById(ctx, invoice.GatewayId),
+		Gateway:                        query.GetGatewaySimplifyById(ctx, uint64(invoice.GatewayId)),
 		MerchantInfo:                   query.GetMerchantInfoById(ctx, invoice.MerchantId),
 		UserAccount:                    query.GetUserAccountById(ctx, uint64(invoice.UserId)),
 		Subscription:                   query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId),

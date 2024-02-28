@@ -8,6 +8,7 @@ import (
 )
 
 type GatewayInterface interface {
+	GatewayTest(ctx context.Context, key string, secret string) (err error)
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *ro.GatewayUserCreateInternalResp, err error)
 	// Balance

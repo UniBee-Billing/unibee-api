@@ -18,8 +18,8 @@ func GatewayWebhookEntrance(r *ghttp.Request) {
 		g.Log().Errorf(r.Context(), "GatewayWebhookEntrance panic url: %s gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
 		return
 	}
-	gateway := util.GetGatewayById(r.Context(), int64(gatewayIdInt))
-	webhook.GetGatewayWebhookServiceProvider(r.Context(), int64(gatewayIdInt)).GatewayWebhook(r, gateway)
+	gateway := util.GetGatewayById(r.Context(), uint64(gatewayIdInt))
+	webhook.GetGatewayWebhookServiceProvider(r.Context(), uint64(gatewayIdInt)).GatewayWebhook(r, gateway)
 }
 
 func GatewayRedirectEntrance(r *ghttp.Request) {
@@ -29,8 +29,8 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 		g.Log().Errorf(r.Context(), "GatewayRedirectEntrance panic url:%s gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
 		return
 	}
-	gateway := util.GetGatewayById(r.Context(), int64(gatewayIdInt))
-	redirect, err := webhook.GetGatewayWebhookServiceProvider(r.Context(), int64(gatewayIdInt)).GatewayRedirect(r, gateway)
+	gateway := util.GetGatewayById(r.Context(), uint64(gatewayIdInt))
+	redirect, err := webhook.GetGatewayWebhookServiceProvider(r.Context(), uint64(gatewayIdInt)).GatewayRedirect(r, gateway)
 	if err != nil {
 		r.Response.Writeln(fmt.Sprintf("%v", err))
 		return

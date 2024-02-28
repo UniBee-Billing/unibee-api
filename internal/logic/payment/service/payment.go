@@ -19,6 +19,7 @@ import (
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
+	handler2 "unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -81,8 +82,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			}
 			createPayContext.Pay.Id = id
 
-			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的 todo mark
-
 			gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayNewPayment(ctx, createPayContext)
 			if err != nil {
 				return err
@@ -101,9 +100,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
 			gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().PaymentData:            string(jsonData),
-				dao.Payment.Columns().Automatic:              automatic,
-				dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
+				dao.Payment.Columns().PaymentData: string(jsonData),
+				dao.Payment.Columns().Automatic:   automatic,
+				//dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
 				dao.Payment.Columns().Link:                   gatewayInternalPayResult.Link,
 				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
@@ -127,11 +126,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 	// create new invoice, ignore errors
 	invoice, _ := handler.CreateOrUpdateInvoiceForPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	gatewayInternalPayResult.Invoice = invoice
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
-	if createPayContext.Pay.Status == consts.PaymentSuccess {
-		callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
-	}
-
 	if err != nil {
 		return nil, err
 	} else {
@@ -145,6 +141,21 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			OpenApiId: createPayContext.OpenApiId,
 			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
 		})
+	}
+
+	if createPayContext.Pay.Status == consts.PaymentSuccess {
+		//callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
+		req := &handler2.HandlePayReq{
+			PaymentId:              createPayContext.Pay.PaymentId,
+			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
+			GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
+			GatewayPaymentMethod:   gatewayInternalPayResult.GatewayPaymentMethod,
+			PayStatusEnum:          consts.PaymentSuccess,
+			TotalAmount:            createPayContext.Pay.TotalAmount,
+			PaymentAmount:          createPayContext.Pay.TotalAmount,
+			PaidTime:               gtime.Now(),
+		}
+		_ = handler2.HandlePaySuccess(ctx, req)
 	}
 	return gatewayInternalPayResult, nil
 }
@@ -163,7 +174,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		gender = user.Gender
 		email = user.Email
 	}
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, uint64(sub.GatewayId))
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
@@ -180,7 +191,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			BizType:         consts.BizTypeSubscription,
 			AuthorizeStatus: consts.Authorized,
 			UserId:          sub.UserId,
-			GatewayId:       int64(gateway.Id),
+			GatewayId:       gateway.Id,
 			TotalAmount:     invoice.TotalAmount,
 			Currency:        invoice.Currency,
 			CountryCode:     sub.CountryCode,

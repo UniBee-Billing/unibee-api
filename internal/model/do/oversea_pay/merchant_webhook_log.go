@@ -15,6 +15,7 @@ type MerchantWebhookLog struct {
 	Id             interface{} // id
 	MerchantId     interface{} // webhook url
 	EndpointId     interface{} //
+	ReconsumeCount interface{} //
 	WebhookUrl     interface{} // webhook url
 	WebhookEvent   interface{} // webhook_event
 	RequestId      interface{} // request_id
@@ -24,5 +25,4 @@ type MerchantWebhookLog struct {
 	GmtCreate      *gtime.Time // create time
 	GmtModify      *gtime.Time // update time
 	CreateTime     interface{} // create utc time
-	ReconsumeCount interface{} //
 }

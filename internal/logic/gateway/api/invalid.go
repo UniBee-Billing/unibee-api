@@ -8,6 +8,11 @@ import (
 
 type Invalid struct{}
 
+func (i Invalid) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i Invalid) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")

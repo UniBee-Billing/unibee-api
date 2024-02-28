@@ -10,7 +10,7 @@ import (
 	"unibee/utility"
 )
 
-func GetGatewayUser(ctx context.Context, userId int64, gatewayId int64) (one *entity.GatewayUser) {
+func GetGatewayUser(ctx context.Context, userId int64, gatewayId uint64) (one *entity.GatewayUser) {
 	utility.Assert(userId > 0, "invalid userId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{UserId: userId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
@@ -20,7 +20,7 @@ func GetGatewayUser(ctx context.Context, userId int64, gatewayId int64) (one *en
 	return
 }
 
-func GetGatewayUserByGatewayUserId(ctx context.Context, gatewayUserId string, gatewayId int64) (one *entity.GatewayUser) {
+func GetGatewayUserByGatewayUserId(ctx context.Context, gatewayUserId string, gatewayId uint64) (one *entity.GatewayUser) {
 	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{GatewayUserId: gatewayUserId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
@@ -30,7 +30,7 @@ func GetGatewayUserByGatewayUserId(ctx context.Context, gatewayUserId string, ga
 	return
 }
 
-func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId int64, gatewayUserId string, gatewayDefaultPaymentMethod string) (*entity.GatewayUser, error) {
+func CreateOrUpdateGatewayUser(ctx context.Context, userId int64, gatewayId uint64, gatewayUserId string, gatewayDefaultPaymentMethod string) (*entity.GatewayUser, error) {
 	utility.Assert(userId > 0, "invalid userId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
 	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")

@@ -55,3 +55,9 @@ func NewSession() user.IUserSession {
 	return &ControllerSession{}
 }
 
+type ControllerGateway struct{}
+
+func NewGateway() user.IUserGateway {
+	return &ControllerGateway{}
+}
+

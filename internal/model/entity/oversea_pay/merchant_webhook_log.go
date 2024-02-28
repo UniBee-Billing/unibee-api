@@ -13,6 +13,7 @@ type MerchantWebhookLog struct {
 	Id             uint64      `json:"id"             description:"id"`              // id
 	MerchantId     uint64      `json:"merchantId"     description:"webhook url"`     // webhook url
 	EndpointId     int64       `json:"endpointId"     description:""`                //
+	ReconsumeCount int         `json:"reconsumeCount" description:""`                //
 	WebhookUrl     string      `json:"webhookUrl"     description:"webhook url"`     // webhook url
 	WebhookEvent   string      `json:"webhookEvent"   description:"webhook_event"`   // webhook_event
 	RequestId      string      `json:"requestId"      description:"request_id"`      // request_id
@@ -22,5 +23,4 @@ type MerchantWebhookLog struct {
 	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"create time"`     // create time
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`     // update time
 	CreateTime     int64       `json:"createTime"     description:"create utc time"` // create utc time
-	ReconsumeCount int         `json:"reconsumeCount" description:""`                //
 }

@@ -40,8 +40,10 @@ type CreatePayInternalResp struct {
 	PaymentId              string               `json:"paymentId"`
 	GatewayPaymentId       string               `json:"gatewayPaymentId"`
 	GatewayPaymentIntentId string               `json:"gatewayPaymentIntentId"`
+	GatewayPaymentMethod   string               `json:"gatewayPaymentMethod"`
 	Link                   string               `json:"link"`
 	Action                 *gjson.Json          `json:"action"`
+	Invoice                *entity.Invoice      `json:"invoice"`
 }
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
@@ -97,7 +99,7 @@ type GatewayPaymentRo struct {
 	CancelTime           *gtime.Time `json:"cancelTime" `
 	CancelReason         string      `json:"cancelReason" `
 	PaymentData          string      `json:"paymentData" `
-	GatewayId            int64       `json:"gatewayId"         `
+	GatewayId            uint64      `json:"gatewayId"         `
 	GatewayUserId        string      `json:"gatewayUserId"         `
 	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
 	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `
@@ -201,7 +203,7 @@ type InvoiceDetailRo struct {
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"             description:"SubscriptionAmount,Cents"`
 	Currency                       string                 `json:"currency"                       description:"Currency"`
 	Lines                          []*InvoiceItemDetailRo `json:"lines"                          description:"lines json data"`
-	GatewayId                      int64                  `json:"gatewayId"                      description:"Id"`
+	GatewayId                      uint64                 `json:"gatewayId"                      description:"Id"`
 	Status                         int                    `json:"status"                         description:"Status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"`
 	SendStatus                     int                    `json:"sendStatus"                     description:"SendStatus，0-No | 1- YES"`
 	SendEmail                      string                 `json:"sendEmail"                      description:"SendEmail"`
@@ -275,7 +277,7 @@ type SubscriptionPendingUpdateDetailVo struct {
 	UpdateQuantity       int64                        `json:"updateQuantity"       description:"UpdateQuantity"`
 	AddonData            string                       `json:"addonData"            description:"plan addon json data"`
 	UpdateAddonData      string                       `json:"updateAddonData"     description:"UpdateAddonData"`
-	GatewayId            int64                        `json:"gatewayId"            description:"Id"`
+	GatewayId            uint64                       `json:"gatewayId"            description:"Id"`
 	UserId               int64                        `json:"userId"               description:"UserId"`
 	GmtModify            *gtime.Time                  `json:"gmtModify"            description:"GmtModify"`
 	Paid                 int                          `json:"paid"                 description:"Paid"`

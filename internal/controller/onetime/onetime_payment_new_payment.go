@@ -72,7 +72,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 		Pay: &entity.Payment{
 			BizId:             req.MerchantPaymentId,
 			BizType:           consts.BizTypeOneTime,
-			GatewayId:         int64(gateway.Id),
+			GatewayId:         gateway.Id,
 			TotalAmount:       req.TotalAmount.Amount,
 			Currency:          req.TotalAmount.Currency,
 			CountryCode:       req.CountryCode,

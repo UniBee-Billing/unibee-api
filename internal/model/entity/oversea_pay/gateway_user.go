@@ -14,7 +14,7 @@ type GatewayUser struct {
 	GmtCreate                   *gtime.Time `json:"gmtCreate"                   description:"create time"`                    // create time
 	GmtModify                   *gtime.Time `json:"gmtModify"                   description:"update time"`                    // update time
 	UserId                      int64       `json:"userId"                      description:"userId"`                         // userId
-	GatewayId                   int64       `json:"gatewayId"                   description:"gateway_id"`                     // gateway_id
+	GatewayId                   uint64      `json:"gatewayId"                   description:"gateway_id"`                     // gateway_id
 	GatewayUserId               string      `json:"gatewayUserId"               description:"gateway_user_Id"`                // gateway_user_Id
 	IsDeleted                   int         `json:"isDeleted"                   description:"0-UnDeleted，1-Deleted"`          // 0-UnDeleted，1-Deleted
 	GatewayDefaultPaymentMethod string      `json:"gatewayDefaultPaymentMethod" description:"gateway_default_payment_method"` // gateway_default_payment_method

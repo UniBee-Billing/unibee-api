@@ -49,7 +49,10 @@ type IMerchantEmail interface {
 }
 
 type IMerchantGateway interface {
-	CheckAndSetup(ctx context.Context, req *gateway.CheckAndSetupReq) (res *gateway.CheckAndSetupRes, err error)
+	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)
+	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
+	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
+	SetupGatewayWebhook(ctx context.Context, req *gateway.SetupGatewayWebhookReq) (res *gateway.SetupGatewayWebhookRes, err error)
 }
 
 type IMerchantInvoice interface {

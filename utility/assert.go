@@ -14,7 +14,8 @@ func Assert(check bool, message string) {
 
 func AssertError(err error, message string) {
 	if err != nil {
-		panic(fmt.Sprintf(SystemAssertPrefix+message+" error:%s", err.Error()))
+		fmt.Printf("error:%s", err.Error())
+		panic(fmt.Sprintf(SystemAssertPrefix + message))
 	}
 }
 

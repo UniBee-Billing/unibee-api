@@ -56,7 +56,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 	if len(result.Webhooks) == 0 {
 		//创建
 		param := &paypal.CreateWebhookRequest{
-			URL: _gateway.GetPaymentWebhookEntranceUrl(int64(gateway.Id)),
+			URL: _gateway.GetPaymentWebhookEntranceUrl(gateway.Id),
 			EventTypes: []paypal.WebhookEventType{
 				{Name: "PAYMENT.SALE.COMPLETED"},
 				{Name: "PAYMENT.SALE.REFUNDED"},
@@ -73,7 +73,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 		}
 		//更新 secret
 		//utility.Assert(len(result.Secret) > 0, "secret is nil")
-		//err = query.UpdateGatewayWebhookSecret(ctx, int64(gateway.Id), result.Secret)
+		//err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, result.Secret)
 		//if err != nil {
 		//	return err
 		//}
@@ -95,7 +95,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			{
 				Operation: "replace",
 				Path:      "/url",
-				Value:     strings.Replace(_gateway.GetPaymentWebhookEntranceUrl(int64(gateway.Id)), "http://", "https://", 1), //paypal 只支持 https
+				Value:     strings.Replace(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id), "http://", "https://", 1), //paypal 只支持 https
 			},
 		}
 		response, err := client.UpdateWebhook(ctx, webhook.ID, param)

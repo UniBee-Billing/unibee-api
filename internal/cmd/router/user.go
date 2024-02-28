@@ -77,3 +77,12 @@ func UserSession(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func UserGateway(ctx context.Context, group *ghttp.RouterGroup) {
+	// auth
+	group.Group("/gateway", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewGateway(),
+		)
+	})
+}

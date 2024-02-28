@@ -45,7 +45,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
-	gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId)
+	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
 	var invoiceItems []*ro.InvoiceItemDetailRo
@@ -121,7 +121,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	if req.GatewayId > 0 {
-		gateway := query.GetSubscriptionTypeGatewayById(ctx, req.GatewayId)
+		gateway := query.GetGatewayById(ctx, req.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 	} else {
 		req.GatewayId = one.GatewayId
@@ -225,7 +225,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	} else {
 		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 		utility.Assert(payment != nil, "payment not found")
-		gateway := query.GetSubscriptionTypeGatewayById(ctx, one.GatewayId)
+		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		err := service.PaymentGatewayCancel(ctx, payment)
 		if err != nil {

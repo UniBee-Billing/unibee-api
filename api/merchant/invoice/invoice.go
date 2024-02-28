@@ -54,7 +54,7 @@ type NewInvoiceCreateReq struct {
 	g.Meta    `path:"/new_invoice_create" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
 	UserId    int64                  `p:"userId" dc:"UserId" v:"required"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
-	GatewayId int64                  `p:"gatewayId" dc:"Gateway Id"   v:"required" `
+	GatewayId uint64                 `p:"gatewayId" dc:"Gateway Id"   v:"required" `
 	Currency  string                 `p:"currency"   dc:"Currency" v:"required" `
 	Name      string                 `p:"name"   dc:"Name" `
 	Lines     []*NewInvoiceItemParam `p:"lines"              `
@@ -75,7 +75,7 @@ type NewInvoiceEditReq struct {
 	g.Meta    `path:"/new_invoice_edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
 	InvoiceId string                 `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
-	GatewayId int64                  `p:"gatewayId" dc:"Gateway Id" `
+	GatewayId uint64                 `p:"gatewayId" dc:"Gateway Id" `
 	Currency  string                 `p:"currency"   dc:"Currency" `
 	Name      string                 `p:"name"   dc:"Name" `
 	Lines     []*NewInvoiceItemParam `p:"lines"              `
