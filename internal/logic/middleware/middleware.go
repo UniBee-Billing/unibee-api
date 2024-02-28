@@ -114,6 +114,19 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 	}
 }
 
+func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
+	customCtx := _interface.BizCtx().Get(r.Context())
+	userAgent := r.Header.Get("User-Agent")
+	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
+		customCtx.IsOpenApiCall = true
+	}
+	tokenString := r.Header.Get("Authorization")
+	if len(tokenString) > 0 && strings.HasPrefix(tokenString, "Bearer ") {
+		customCtx.IsOpenApiCall = true
+	}
+	r.Middleware.Next()
+}
+
 func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
 	list := query.GetActiveMerchantInfoList(r.Context())

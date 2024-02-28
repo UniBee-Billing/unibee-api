@@ -3,7 +3,6 @@ package cycle
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
@@ -50,10 +49,25 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if err != nil {
 			g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
 		}
+		// generate invoice and payment ahead
+		latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+		var needInvoiceGenerate = true
+		var needInvoiceFirstTryPayment = false
+		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing || latestInvoice.Status == consts.InvoiceStatusPending) {
+			needInvoiceGenerate = false
+			if latestInvoice.Status == consts.InvoiceStatusProcessing && len(latestInvoice.PaymentId) == 0 {
+				needInvoiceFirstTryPayment = true
+				// invoice need first payment try
+			}
+		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && latestInvoice.PeriodEnd > timeNow {
+			needInvoiceGenerate = false
+		}
+
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
 		} else if sub.Status == consts.SubStatusCreate {
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
+				// first time create sub expired
 				err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
@@ -64,8 +78,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo As Sub At Create Status NotPayBefore48Hours"}, nil
 			}
-		} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime < timeNow {
-			// sub out of time, need expired by system
+		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime < timeNow {
+			// invoice not generate and sub out of time, need expired by system
 			err := expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 			if err != nil {
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
@@ -75,6 +89,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 		} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.CancelAtPeriodEnd == 1 && sub.Status != consts.SubStatusCancelled {
 			// sub set cancelAtPeriodEnd, need cancel by system
+			needInvoiceGenerate = false
 			err = service2.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelAtPeriodEndBySystem")
 			if err != nil {
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionCancel err:", err.Error())
@@ -96,15 +111,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
 				}
 			}
-			// generate invoice and payment ahead
-			latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
-			var needGenerate = true
-			if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing || latestInvoice.Status == consts.InvoiceStatusPending) {
-				needGenerate = false
-			} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && latestInvoice.PeriodEnd > timeNow {
-				needGenerate = false
-			}
-			if needGenerate {
+
+			if needInvoiceGenerate {
 				var invoice *ro.InvoiceDetailSimplify
 				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 				if pendingUpdate != nil {
@@ -155,20 +163,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
-				if latestInvoice != nil && len(latestInvoice.PaymentId) > 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && sub.CurrentPeriodEnd < timeNow {
-					//finish the invoice payment automatic
-					payment := query.GetPaymentByPaymentId(ctx, latestInvoice.PaymentId)
-					if payment != nil {
-						// finish the payment
-						createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, latestInvoice)
-						if err != nil {
-							g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
-							return nil, err
-						}
-						return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
-					} else {
-						return nil, gerror.New("finish invoice payment error, payment not found")
+				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && sub.CurrentPeriodEnd < timeNow {
+					// finish the payment
+					createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, latestInvoice)
+					if err != nil {
+						g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
+						return nil, err
 					}
+					return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				} else {
 					return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo, Seems Invoice Does not Need Generate"}, nil
 				}

@@ -118,6 +118,7 @@ var (
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().OpenApiDetach,
 				)
 				if !consts.GetConfigInstance().IsProd() {
 					router.SystemSubscription(ctx, group)

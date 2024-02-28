@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"time"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
@@ -52,6 +53,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 		} else {
 			result.Walks = append(result.Walks, walk)
 		}
+		time.Sleep(500)
 	}
 	if result.Error == nil {
 		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -62,6 +64,6 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 			return nil, err
 		}
 	}
-
+	g.Log().Print(ctx, "WalkSubscriptionToTestClock result:%s", utility.MarshalToJsonString(result))
 	return result, nil
 }

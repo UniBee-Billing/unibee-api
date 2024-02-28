@@ -16,8 +16,8 @@ import (
 
 type SubscriptionPlanListInternalReq struct {
 	MerchantId    uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	Type          int    `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
-	Status        int    `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
+	Type          []int  `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
+	Status        []int  `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int    `p:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
 	Currency      string `p:"currency" dc:"Currency"  `
 	SortField     string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
@@ -71,11 +71,15 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			sortKey = req.SortField + " desc"
 		}
 	}
-	err := dao.SubscriptionPlan.Ctx(ctx).
-		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId).
-		Where(dao.SubscriptionPlan.Columns().Type, req.Type).
-		Where(dao.SubscriptionPlan.Columns().Status, req.Status).
-		Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
+	q := dao.SubscriptionPlan.Ctx(ctx).
+		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId)
+	if len(req.Type) > 0 {
+		q = q.Where(dao.SubscriptionPlan.Columns().Type, req.Type)
+	}
+	if len(req.Status) > 0 {
+		q = q.Where(dao.SubscriptionPlan.Columns().Status, req.Status)
+	}
+	err := q.Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
 		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
 		WhereIn(dao.SubscriptionPlan.Columns().IsDeleted, []int{0}).
 		OmitEmpty().

@@ -5,6 +5,7 @@ import "github.com/gogf/gf/v2/net/ghttp"
 type IMiddleware interface {
 	CORS(r *ghttp.Request)
 	ResponseHandler(r *ghttp.Request)
+	OpenApiDetach(r *ghttp.Request)
 	TokenAuth(r *ghttp.Request)
 	UserPortalPreAuth(r *ghttp.Request)
 }
