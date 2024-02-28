@@ -71,7 +71,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				utility.Assert(strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0, "payment sub_id not match pendingUpdate sub_id")
 				utility.Assert(pendingSubUpgrade.Status == consts.PendingSubStatusCreate, "pendingUpdate has already finished or cancelled")
 				// Upgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId)
+				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId, invoice)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Upgrade")
 				}
@@ -81,11 +81,10 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 				utility.Assert(pendingSubDowngrade.UpdateAmount == payment.TotalAmount, "totalAmount not match")
 				// Downgrade
-				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId)
+				_, err := handler.FinishPendingUpdateForSubscription(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
 				}
-
 				err = handler.FinishNextBillingCycleForSubscription(ctx, sub, payment)
 				if err != nil {
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_Downgrade")
@@ -103,7 +102,6 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentSuccessCallback_Finish_SubscriptionCreate")
 				}
 			} else {
-				//todo mark
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
 			_, _ = redismq.Send(&redismq.Message{
@@ -111,6 +109,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
 				Body:  payment.SubscriptionId,
 			})
+			handler.SubscriptionNewTimeline(ctx, invoice)
 		}
 	}
 }
@@ -128,7 +127,6 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}
 			}
-			// billing cycle use cronjob check active status as contain other processing payment
 		}
 	}
 }

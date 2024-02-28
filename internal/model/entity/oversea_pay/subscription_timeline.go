@@ -30,4 +30,5 @@ type SubscriptionTimeline struct {
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)
 	CreateTime      int64       `json:"createTime"      description:"create utc time"`         // create utc time
+	Status          int         `json:"status"          description:"1-processing,2-finish"`   // 1-processing,2-finish
 }

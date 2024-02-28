@@ -32,4 +32,5 @@ type SubscriptionTimeline struct {
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} // unique key (deperated)
 	CreateTime      interface{} // create utc time
+	Status          interface{} // 1-processing,2-finish
 }

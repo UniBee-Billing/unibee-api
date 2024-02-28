@@ -35,21 +35,14 @@ func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId stri
 	return true, nil
 }
 
-func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, pendingUpdateId string) (bool, error) {
+func FinishPendingUpdateForSubscription(ctx context.Context, sub *entity.Subscription, pendingUpdateId string, invoice *entity.Invoice) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
 	utility.Assert(one != nil, "FinishPendingUpdateForSubscription PendingUpdate Not Found:"+pendingUpdateId)
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
 	utility.Assert(one.Status == consts.PendingSubStatusCreate, "pendingUpdate not status create")
-
-	// Create SubscriptionTimeLine First
-	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("pendingUpdateFinish-%s", one.UpdateSubscriptionId))
-	if err != nil {
-		g.Log().Errorf(ctx, "CreateOrUpdateSubscriptionTimeline error:%s", err.Error())
-	}
-	// todo mark use transaction
-	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+	_, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).OmitNil().Update()

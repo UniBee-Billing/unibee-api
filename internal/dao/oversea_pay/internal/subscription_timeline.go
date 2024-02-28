@@ -40,6 +40,7 @@ type SubscriptionTimelineColumns struct {
 	IsDeleted       string // 0-UnDeleted，1-Deleted
 	UniqueKey       string // unique key (deperated)
 	CreateTime      string // create utc time
+	Status          string // 1-processing,2-finish
 }
 
 // subscriptionTimelineColumns holds the columns for table subscription_timeline.
@@ -64,6 +65,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 	IsDeleted:       "is_deleted",
 	UniqueKey:       "unique_key",
 	CreateTime:      "create_time",
+	Status:          "status",
 }
 
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.

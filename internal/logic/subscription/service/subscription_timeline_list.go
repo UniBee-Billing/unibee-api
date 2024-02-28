@@ -43,6 +43,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	}
 	err = dao.SubscriptionTimeline.Ctx(ctx).
 		Where(dao.SubscriptionTimeline.Columns().MerchantId, req.MerchantId).
+		Where(dao.SubscriptionTimeline.Columns().Status, 2).
 		Where(dao.SubscriptionTimeline.Columns().UserId, req.UserId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).

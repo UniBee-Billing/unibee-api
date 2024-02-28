@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	redismq2 "unibee/internal/cmd/redismq"
@@ -43,11 +42,7 @@ func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subs
 	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
 	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
-	// billing-cycle
-	err := CreateOrUpdateSubscriptionTimeline(ctx, sub, fmt.Sprintf("cycle-paymentId-%s", payment.PaymentId))
-	if err != nil {
-		g.Log().Errorf(ctx, "FinishNextBillingCycleForSubscription error:%s", err.Error())
-	}
+
 	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
@@ -57,7 +52,7 @@ func FinishNextBillingCycleForSubscription(ctx context.Context, sub *entity.Subs
 		return nil
 	}
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), sub.PlanId)
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,

@@ -676,10 +676,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 }
 
 type UpdateSubscriptionInternalResp struct {
-	GatewayUpdateId string `json:"gatewayUpdateId" description:""`
-	Data            string `json:"data"`
-	Link            string `json:"link" description:""`
-	Paid            bool   `json:"paid" description:""`
+	GatewayUpdateId string          `json:"gatewayUpdateId" description:""`
+	Data            string          `json:"data"`
+	Link            string          `json:"link" description:""`
+	Paid            bool            `json:"paid" description:""`
+	Invoice         *entity.Invoice `json:"invoice" description:""`
 }
 
 func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
@@ -761,6 +762,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 			Data:            utility.MarshalToJsonString(createRes),
 			Link:            createRes.Link,
 			Paid:            createRes.Status == consts.PaymentSuccess,
+			Invoice:         invoice,
 		}
 	} else {
 		prepare.EffectImmediate = false
@@ -812,7 +814,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	}
 
 	if prepare.EffectImmediate && subUpdateRes.Paid {
-		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one.UpdateSubscriptionId)
+		_, err = handler.FinishPendingUpdateForSubscription(ctx, prepare.Subscription, one.UpdateSubscriptionId, subUpdateRes.Invoice)
 		if err != nil {
 			return nil, err
 		}
