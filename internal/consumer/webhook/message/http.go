@@ -25,9 +25,11 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
 	}
-	response, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
+	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
+	var response = string(res)
 	if err != nil {
-		g.Log().Errorf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err.Error())
+		response = utility.MarshalToJsonString(err)
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err.Error())
 	} else {
 		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
 	}
@@ -40,7 +42,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		RequestId:      msgId,
 		Body:           jsonString,
 		ReconsumeCount: reconsumeTimes,
-		Response:       string(response),
+		Response:       response,
 		Mamo:           utility.MarshalToJsonString(err),
 		CreateTime:     gtime.Now().Timestamp(),
 	}
