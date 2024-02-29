@@ -18,7 +18,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	msgId := generateMsgId()
 	jsonString, err := webhookMessage.Data.ToJsonString()
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
-	g.Log().Infof(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
+	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
 	body := []byte(jsonString)
 	headers := map[string]string{
 		"Content-Gateway": "application/json",
@@ -29,7 +29,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	if err != nil {
 		g.Log().Errorf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err.Error())
 	} else {
-		g.Log().Infof(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
 	}
 
 	one := &entity.MerchantWebhookLog{

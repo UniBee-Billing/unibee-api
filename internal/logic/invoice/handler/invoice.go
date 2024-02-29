@@ -20,7 +20,7 @@ import (
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId+" subId:"+payment.SubscriptionId)
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PaymentSuccess {
@@ -48,17 +48,6 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	one.GatewayPaymentId = payment.GatewayPaymentId
 	one.Link = payment.Link
 	return one, nil
-}
-
-func UpdatePaymentInvoiceId(ctx context.Context, paymentId string, invoiceId string) error {
-	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
-		dao.Payment.Columns().InvoiceId: invoiceId,
-		dao.Invoice.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.Payment.Columns().PaymentId, paymentId).OmitNil().Update()
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func CreateProcessingInvoiceForSub(ctx context.Context, simplify *ro.InvoiceDetailSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
@@ -120,7 +109,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *ro.InvoiceDeta
 	return one, nil
 }
 
-func CreateOrUpdateInvoiceForPayment(ctx context.Context, invoice *ro.InvoiceDetailSimplify, payment *entity.Payment) (*entity.Invoice, error) {
+func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *ro.InvoiceDetailSimplify, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
@@ -181,10 +170,6 @@ func CreateOrUpdateInvoiceForPayment(ctx context.Context, invoice *ro.InvoiceDet
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		err = UpdatePaymentInvoiceId(ctx, payment.PaymentId, one.InvoiceId)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		//Update
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{

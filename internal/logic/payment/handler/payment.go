@@ -405,40 +405,38 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if err == nil {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
-		{
-			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
-			gateway := query.GetGatewayById(ctx, uint64(gatewayUser.GatewayId))
-			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
-				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
-				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
-			}
-		}
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
-
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
-
-		//default payment method update
-		if len(req.GatewayPaymentMethod) > 0 {
-			_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
+		{
+			event.SaveEvent(ctx, entity.PaymentEvent{
+				BizType:   0,
+				BizId:     payment.PaymentId,
+				Fee:       req.PaymentAmount,
+				EventType: event.Settled.Type,
+				Event:     event.Settled.Desc,
+				OpenApiId: payment.OpenApiId,
+				UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Settled"),
+				Message:   req.Reason,
+			})
+			err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+			if err != nil {
+				g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimeline error %s`, err.Error())
+			}
 		}
-
-		event.SaveEvent(ctx, entity.PaymentEvent{
-			BizType:   0,
-			BizId:     payment.PaymentId,
-			Fee:       req.PaymentAmount,
-			EventType: event.Settled.Type,
-			Event:     event.Settled.Desc,
-			OpenApiId: payment.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Settled"),
-			Message:   req.Reason,
-		})
-
-		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
-		if err != nil {
-			g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimeline error %s`, err.Error())
+		{
+			//default payment method update
+			if len(req.GatewayPaymentMethod) > 0 {
+				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
+			}
+			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
+			gateway := query.GetGatewayById(ctx, gatewayUser.GatewayId)
+			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
+				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
+				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)
+			}
 		}
 	}
 	return err
@@ -532,7 +530,6 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		timeLineType = 1
 	}
 	if one == nil {
-		//创建
 		one = &entity.PaymentTimeline{
 			MerchantId:     payment.MerchantId,
 			UserId:         payment.UserId,
@@ -556,7 +553,6 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
 	} else {
-		//更新
 		_, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
 			dao.PaymentTimeline.Columns().MerchantId:     payment.MerchantId,
 			dao.PaymentTimeline.Columns().UserId:         payment.UserId,
@@ -573,10 +569,6 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		if err != nil {
 			return err
 		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return gerror.Newf("CreateOrUpdatePaymentTimeline err:%s", update)
-		//}
 	}
 	return nil
 }

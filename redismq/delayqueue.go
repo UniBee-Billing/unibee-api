@@ -118,13 +118,13 @@ func SendDelay(message *Message, delay int64) (bool, error) {
 	}
 	jsonString := string(messageJson)
 	score := gtime.Now().Timestamp() + delay
-	result, err := client.ZAdd(context.Background(), MqDelayQueueName, redis.Z{
+	_, err = client.ZAdd(context.Background(), MqDelayQueueName, redis.Z{
 		Score:  float64(score),
 		Member: jsonString,
 	}).Result()
 	if err != nil {
 		return false, errors.New(fmt.Sprintf("SendDelay exception:%s message:%v\n", err.Error(), message))
 	}
-	fmt.Printf("RedisMq Push To Deplay Queue,Name[%s],Task[%s],Score[%d],Result[%v]\n", MqDelayQueueName, messageJson, score, result)
+	//fmt.Printf("RedisMq Push To Deplay Queue,Name[%s],Task[%s],Score[%d],Result[%v]\n", MqDelayQueueName, messageJson, score, result)
 	return true, nil
 }

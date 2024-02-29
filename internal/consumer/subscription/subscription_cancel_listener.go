@@ -32,7 +32,7 @@ func (t SubscriptionCancelListener) GetTag() string {
 func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Infof(ctx, "SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Debugf(ctx, "SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	//Cancelled SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate

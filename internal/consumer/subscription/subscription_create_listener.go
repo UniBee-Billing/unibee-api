@@ -27,7 +27,7 @@ func (t SubscriptionCreateListener) GetTag() string {
 func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Infof(ctx, "SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Debugf(ctx, "SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	_, _ = redismq.SendDelay(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,

@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/redis/go-redis/v9"
-	"unibee/utility"
 	"strings"
+	"unibee/utility"
 )
 
 func Send(message *Message) (bool, error) {
@@ -76,7 +76,7 @@ func sendMessage(message *Message, source string) (bool, error) {
 		return false, errors.New(fmt.Sprintf("MQ STREAM Send MQStream exception:%s queueName=%s message:%v\n", err, GetQueueName(message.Topic), utility.MarshalToJsonString(message)))
 	}
 	message.MessageId = streamMessageId
-	fmt.Printf("MQ STREAM Send Stream Success, Source:%s QueueName=%s Message=%v\n", source, GetQueueName(message.Topic), utility.MarshalToJsonString(message))
+	fmt.Printf("MQ STREAM Send Stream Success, Source:%s QueueName=%s MessageId=%v\n", source, GetQueueName(message.Topic), message.MessageId)
 	return true, nil
 }
 

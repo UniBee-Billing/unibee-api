@@ -33,30 +33,23 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
 	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay gatewayId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
-	//utility.Assert(len(createPayContext.Pay.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
 	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId Invalid")
 	// 查询并处理所有待支付订单 todo mark
 
 	createPayContext.Pay.Status = consts.PaymentCreated
-	//createPayContext.Pay.AdditionalData = todo mark
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
-	if len(createPayContext.Invoice.InvoiceId) > 0 {
-		createPayContext.Pay.InvoiceId = createPayContext.Invoice.InvoiceId
-	}
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
 	if createPayContext.MediaData == nil {
 		createPayContext.MediaData = make(map[string]string)
 	}
 	createPayContext.MediaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
 	createPayContext.MediaData["PaymentId"] = createPayContext.Pay.PaymentId
-	//toSave.setServiceRate(iMerchantInfoService.getServiceDeductPoint(toSave.getMerchantId(),toSave.getChannelId()));//记录当下的服务费率
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
 	isDuplicatedInvoke := false
 
-	//- 并发调用严重，加上Redis排它锁, todo mark database lock
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)
@@ -67,6 +60,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
+	invoice, err := handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	if err != nil {
+		return nil, err
+	}
+	createPayContext.Pay.InvoiceId = invoice.InvoiceId
+
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway refund
@@ -100,9 +99,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
 			gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().PaymentData: string(jsonData),
-				dao.Payment.Columns().Automatic:   automatic,
-				//dao.Payment.Columns().Status:                 createPayContext.Pay.Status,
+				dao.Payment.Columns().PaymentData:            string(jsonData),
+				dao.Payment.Columns().Automatic:              automatic,
 				dao.Payment.Columns().Link:                   gatewayInternalPayResult.Link,
 				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
@@ -123,28 +121,13 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			return redismq.RollbackTransaction, err
 		}
 	})
-
-	// create new invoice, ignore errors
-	invoice, _ := handler.CreateOrUpdateInvoiceForPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-	gatewayInternalPayResult.Invoice = invoice
-	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
 	if err != nil {
 		return nil, err
-	} else {
-		//交易事件记录
-		event.SaveEvent(ctx, entity.PaymentEvent{
-			BizType:   0,
-			BizId:     createPayContext.Pay.PaymentId,
-			Fee:       createPayContext.Pay.TotalAmount,
-			EventType: event.SentForSettle.Type,
-			Event:     event.SentForSettle.Desc,
-			OpenApiId: createPayContext.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
-		})
 	}
 
+	gatewayInternalPayResult.Invoice = invoice
+	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
-		//callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentSuccessCallback(ctx, createPayContext.Pay, invoice)
 		req := &handler2.HandlePayReq{
 			PaymentId:              createPayContext.Pay.PaymentId,
 			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
@@ -157,6 +140,16 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 		}
 		_ = handler2.HandlePaySuccess(ctx, req)
 	}
+
+	event.SaveEvent(ctx, entity.PaymentEvent{
+		BizType:   0,
+		BizId:     createPayContext.Pay.PaymentId,
+		Fee:       createPayContext.Pay.TotalAmount,
+		EventType: event.SentForSettle.Type,
+		Event:     event.SentForSettle.Desc,
+		OpenApiId: createPayContext.OpenApiId,
+		UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
+	})
 	return gatewayInternalPayResult, nil
 }
 
@@ -174,7 +167,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		gender = user.Gender
 		email = user.Email
 	}
-	gateway := query.GetGatewayById(ctx, uint64(sub.GatewayId))
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
