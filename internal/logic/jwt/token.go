@@ -10,8 +10,6 @@ import (
 	"unibee/internal/consts"
 )
 
-var secretKey = []byte("3^&secret-key-for-UniBee*1!8*")
-
 type TokenType string
 
 const (
@@ -35,7 +33,7 @@ func IsPortalToken(token string) bool {
 func ParsePortalToken(accessToken string) *TokenClaims {
 	accessToken = strings.Replace(accessToken, TOKEN_PREFIX, "", 1)
 	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return consts.GetConfigInstance().Server.TokenKey, nil
 	})
 	return parsedAccessToken.Claims.(*TokenClaims)
 }
@@ -50,7 +48,7 @@ func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email 
 			"exp":        time.Now().Add(time.Hour * 1).Unix(),
 		})
 
-	tokenString, err := token.SignedString(secretKey)
+	tokenString, err := token.SignedString(consts.GetConfigInstance().Server.TokenKey)
 	if err != nil {
 		return "", err
 	}

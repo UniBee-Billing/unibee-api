@@ -18,6 +18,7 @@ type Server struct {
 	Address    string `yaml:"address"`
 	Name       string `yaml:"name"`
 	DomainPath string `yaml:"domainPath"`
+	TokenKey   string `yaml:"tokenKey"`
 }
 
 func (s *Server) GetDomainScheme() string {
