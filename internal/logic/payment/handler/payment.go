@@ -40,7 +40,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
-		return errors.New("支付不存在")
+		return errors.New("payment not found")
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{
@@ -75,7 +75,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
-		return errors.New("支付不存在")
+		return errors.New("payment not found")
 	}
 	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
@@ -99,7 +99,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	g.Log().Infof(ctx, "HandlePayAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil")
-		return errors.New("支付不存在")
+		return errors.New("payment not found")
 	}
 	if payment.AuthorizeStatus == consts.Authorized {
 		return nil
@@ -347,10 +347,6 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "handlePaySuccess, req=%s", utility.MarshalToJsonString(req))
-
-	if req.PaidTime == nil {
-		return errors.New("invalid param PaidTime is nil")
-	}
 	if len(req.PaymentId) == 0 {
 		return errors.New("invalid param PaymentId is nil")
 	}
