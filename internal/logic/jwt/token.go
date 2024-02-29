@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	"unibee/internal/consts"
+	"unibee/utility"
 )
 
 type TokenType string
@@ -31,14 +32,16 @@ func IsPortalToken(token string) bool {
 }
 
 func ParsePortalToken(accessToken string) *TokenClaims {
+	utility.Assert(len(consts.GetConfigInstance().Server.TokenKey) > 0, "server error: tokenKey is nil")
 	accessToken = strings.Replace(accessToken, TOKEN_PREFIX, "", 1)
 	parsedAccessToken, _ := jwt.ParseWithClaims(accessToken, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return consts.GetConfigInstance().Server.TokenKey, nil
+		return []byte(consts.GetConfigInstance().Server.TokenKey), nil
 	})
 	return parsedAccessToken.Claims.(*TokenClaims)
 }
 
 func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email string) (string, error) {
+	utility.Assert(len(consts.GetConfigInstance().Server.TokenKey) > 0, "server error: tokenKey is nil")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"tokenType":  tokenType,
@@ -48,7 +51,7 @@ func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email 
 			"exp":        time.Now().Add(time.Hour * 1).Unix(),
 		})
 
-	tokenString, err := token.SignedString(consts.GetConfigInstance().Server.TokenKey)
+	tokenString, err := token.SignedString([]byte(consts.GetConfigInstance().Server.TokenKey))
 	if err != nil {
 		return "", err
 	}

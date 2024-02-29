@@ -102,7 +102,7 @@ type NewMerchantMetricInternalReq struct {
 	Code                string `p:"code" dc:"Code" v:"required"`
 	Name                string `p:"name" dc:"Name" v:"required"`
 	Description         string `p:"description" dc:"Description"`
-	AggregationType     int    `p:"aggregationType" dc:"AggregationType,0-count，1-count unique, 2-latest, 3-max, 4-sum"`
+	AggregationType     int    `p:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
 	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
