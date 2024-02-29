@@ -128,7 +128,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 	if err != nil {
 		return nil, err
 	} else {
-		//交易事件记录
+
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,

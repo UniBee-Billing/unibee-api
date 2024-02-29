@@ -81,7 +81,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
-	//交易事件记录
+
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     payment.PaymentId,
@@ -256,7 +256,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentCancelCallback(ctx, payment, invoice)
-		//交易事件记录
+		
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,
