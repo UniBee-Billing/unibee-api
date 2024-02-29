@@ -78,8 +78,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
 				if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
-					pendingSubUpgrade.Status == consts.PendingSubStatusCreate &&
-					strings.Compare(pendingSubDowngrade.GatewayUpdateId, payment.PaymentId) == 0 {
+					pendingSubUpgrade.Status == consts.PendingSubStatusCreate {
 					// Downgrade
 					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
 					if err != nil {
