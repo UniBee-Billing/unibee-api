@@ -66,10 +66,11 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName stri
 
 func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
-	}
+	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	countries, err := gateway.ListAllCountries()
+	for _, country := range countries {
+		country.MerchantId = merchantId
+	}
 	if err != nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
@@ -92,6 +93,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
 		} else {
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(
+				dao.CountryRate.Columns().MerchantId,
 				dao.CountryRate.Columns().StandardTypes,
 				dao.CountryRate.Columns().StandardDescription,
 				dao.CountryRate.Columns().StandardTaxPercentage,
@@ -124,10 +126,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 		}, nil
 	}
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	if gateway == nil {
-		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat gateway not setup")
-	}
+	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
 	if validateError != nil {
 		return nil, validateError
@@ -159,10 +158,11 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatC
 	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
+		Where(dao.CountryRate.Columns().MerchantId, merchantId).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
 		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
 		Order("country_name").
-		OmitEmpty().Scan(&countryRateList)
+		Scan(&countryRateList)
 	if err != nil {
 		return nil, err
 	}
@@ -186,16 +186,14 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatC
 
 func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat gateway not setup")
-	}
+	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var one *entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
+		Where(dao.CountryRate.Columns().MerchantId, merchantId).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
 		Where(dao.CountryRate.Columns().Gateway, gateway.GetGatewayName()).
 		Where(dao.CountryRate.Columns().CountryCode, countryCode).
-		OmitEmpty().Scan(&one)
+		Scan(&one)
 	if err != nil {
 		return nil, err
 	}

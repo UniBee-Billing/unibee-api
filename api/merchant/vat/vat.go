@@ -6,7 +6,7 @@ import (
 )
 
 type SetupVatGatewayReq struct {
-	g.Meta      `path:"/vat_gateway_setup" tags:"Merchant-Setting-Controller" method:"post" summary:"Vat Gateway Settings"`
+	g.Meta      `path:"/vat_gateway_setup" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Gateway Settings"`
 	GatewayName string `p:"gatewayName" dc:"GatewayName, em. vatsense" v:"required"`
 	Data        string `p:"data" dc:"Data" v:"required"`
 	IsDefault   bool   `p:"IsDefault" d:"true" dc:"IsDefault, default is true" `

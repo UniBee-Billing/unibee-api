@@ -21,6 +21,7 @@ type CountryRateDao struct {
 // CountryRateColumns defines and stores column names for table country_rate.
 type CountryRateColumns struct {
 	Id                    string // id
+	MerchantId            string //
 	Gateway               string // vat gateway name, em vatsense
 	CountryCode           string // country_code
 	CountryName           string // country_name
@@ -43,6 +44,7 @@ type CountryRateColumns struct {
 // countryRateColumns holds the columns for table country_rate.
 var countryRateColumns = CountryRateColumns{
 	Id:                    "id",
+	MerchantId:            "merchant_id",
 	Gateway:               "gateway",
 	CountryCode:           "country_code",
 	CountryName:           "country_name",
