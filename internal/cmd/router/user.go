@@ -86,3 +86,12 @@ func UserGateway(ctx context.Context, group *ghttp.RouterGroup) {
 		)
 	})
 }
+
+func UserMerchant(ctx context.Context, group *ghttp.RouterGroup) {
+	// auth
+	group.Group("/merchant", func(group *ghttp.RouterGroup) {
+		group.Bind(
+			user.NewMerchantinfo(),
+		)
+	})
+}

@@ -95,6 +95,7 @@ var (
 				router.UserPayment(ctx, group)
 				router.UserSession(ctx, group)
 				router.UserGateway(ctx, group)
+				router.UserMerchant(ctx, group)
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {

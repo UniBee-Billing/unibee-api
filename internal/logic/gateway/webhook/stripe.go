@@ -260,7 +260,6 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				response = "success"
 				status = true
 			} else {
-				//需要去检索
 				returnUrl = payment.ReturnUrl
 				params := &stripe.CheckoutSessionParams{}
 				result, err := session.Get(
