@@ -177,7 +177,7 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	_, key := getDefaultMerchantEmailConfig(ctx, merchantId)
 	if len(key) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
-			utility.Assert(false, "default email gateway key not set")
+			utility.Assert(false, "Default Email Gateway Need Setup")
 		} else {
 			return gerror.New("default email gateway key not set")
 		}
