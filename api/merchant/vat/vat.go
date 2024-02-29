@@ -6,10 +6,10 @@ import (
 )
 
 type SetupVatGatewayReq struct {
-	g.Meta    `path:"/vat_gateway_setup" tags:"Merchant-Setting-Controller" method:"post" summary:"Vat Gateway Settings"`
-	VatName   string `p:"vatName" dc:"vatName, em. vatsense" v:"required"`
-	VatData   string `p:"vatData" dc:"VatData" v:"required"`
-	IsDefault bool   `p:"IsDefault" d:"false" dc:"IsDefault, default is false" `
+	g.Meta      `path:"/vat_gateway_setup" tags:"Merchant-Setting-Controller" method:"post" summary:"Vat Gateway Settings"`
+	GatewayName string `p:"gatewayName" dc:"GatewayName, em. vatsense" v:"required"`
+	Data        string `p:"data" dc:"Data" v:"required"`
+	IsDefault   bool   `p:"IsDefault" d:"true" dc:"IsDefault, default is true" `
 }
 type SetupVatGatewayRes struct {
 }

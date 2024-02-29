@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/merchant_config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -39,38 +40,43 @@ const (
 	TemplateInvoiceRefundCreated                            = "InvoiceRefundCreated"
 )
 
-// const SG_KEY = "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"
-const SG_KEY = "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"
+const (
+	KeyMerchantEmailName = "KEY_MERCHANT_DEFAULT_EMAIL_NAME"
+	IMPLEMENT_NAMES      = "sendgrid"
+)
 
-func SendEmailToUser(mailTo string, subject string, body string) error {
-	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
-	subject = subject
-	to := mail.NewEmail(mailTo, mailTo)
-	plainTextContent := body
-	htmlContent := "<strong>" + body + " </strong>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	client := sendgrid.NewSendClient(SG_KEY)
-	response, err := client.Send(message)
-	if err != nil {
-		log.Println(err)
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
+func getDefaultMerchantEmailConfig(ctx context.Context, merchantId uint64) (name string, data string) {
+	nameConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantEmailName)
+	if nameConfig != nil {
+		name = nameConfig.ConfigValue
 	}
-	return nil
+	valueConfig := merchant_config.GetMerchantConfig(ctx, merchantId, name)
+	if valueConfig != nil {
+		data = valueConfig.ConfigValue
+	}
+	return
 }
 
-func SendTemplateEmailToUser(mailTo string, subject string, body string) (result string, err error) {
+func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name string, data string, isDefault bool) error {
+	utility.Assert(strings.Contains(IMPLEMENT_NAMES, name), "gateway not support, should be "+IMPLEMENT_NAMES)
+	err := merchant_config.SetMerchantConfig(ctx, merchantId, name, data)
+	if err != nil {
+		return err
+	}
+	if isDefault {
+		err = merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantEmailName, name)
+	}
+	return err
+}
+
+func SendTemplateEmailToUser(key string, mailTo string, subject string, body string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	subject = subject
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
 	htmlContent := "<div>" + body + " </div>"
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	client := sendgrid.NewSendClient(SG_KEY)
+	client := sendgrid.NewSendClient(key)
 	response, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
@@ -83,7 +89,7 @@ func SendTemplateEmailToUser(mailTo string, subject string, body string) (result
 	return utility.MarshalToJsonString(response), nil
 }
 
-func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
+func SendPdfAttachEmailToUser(key string, mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
@@ -100,8 +106,7 @@ func SendPdfAttachEmailToUser(mailTo string, subject string, body string, pdfFil
 	attach.SetFilename(pdfFileName)
 	attach.SetDisposition("attachment")
 	message.AddAttachment(attach)
-	// client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
-	client := sendgrid.NewSendClient(SG_KEY)
+	client := sendgrid.NewSendClient(key)
 	response, err := client.Send(message)
 	if err != nil {
 		fmt.Printf("SendPdfAttachEmailToUser error:%s\n", err.Error())
@@ -167,8 +172,13 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = "attach"
 	}
+	_, key := getDefaultMerchantEmailConfig(ctx, merchantId)
+	if len(key) == 0 {
+		return gerror.New("default email gateway key not set")
+	}
+
 	if len(pdfFilePath) > 0 {
-		response, err := SendPdfAttachEmailToUser(mailTo, title, content, pdfFilePath, attachName+".pdf")
+		response, err := SendPdfAttachEmailToUser(key, mailTo, title, content, pdfFilePath, attachName+".pdf")
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
 		} else {
@@ -176,7 +186,7 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 		}
 		return err
 	} else {
-		response, err := SendTemplateEmailToUser(mailTo, title, content)
+		response, err := SendTemplateEmailToUser(key, mailTo, title, content)
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
 		} else {

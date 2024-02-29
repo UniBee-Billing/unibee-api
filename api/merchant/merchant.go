@@ -46,6 +46,7 @@ type IMerchantEmail interface {
 	MerchantEmailTemplateSetDefault(ctx context.Context, req *email.MerchantEmailTemplateSetDefaultReq) (res *email.MerchantEmailTemplateSetDefaultRes, err error)
 	MerchantEmailTemplateActivate(ctx context.Context, req *email.MerchantEmailTemplateActivateReq) (res *email.MerchantEmailTemplateActivateRes, err error)
 	MerchantEmailTemplateDeactivate(ctx context.Context, req *email.MerchantEmailTemplateDeactivateReq) (res *email.MerchantEmailTemplateDeactivateRes, err error)
+	MerchantEmailGatewaySetup(ctx context.Context, req *email.MerchantEmailGatewaySetupReq) (res *email.MerchantEmailGatewaySetupRes, err error)
 }
 
 type IMerchantGateway interface {

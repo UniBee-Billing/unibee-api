@@ -14,6 +14,7 @@ import (
 	"unibee/internal/logic/vat_gateway/vatsense"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 const (
@@ -52,9 +53,7 @@ func getDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatNam
 }
 
 func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName string, data string, isDefault bool) error {
-	if !strings.Contains(VAT_IMPLEMENT_NAMES, vatName) {
-		return gerror.New("Vat gateway not support")
-	}
+	utility.Assert(strings.Contains(VAT_IMPLEMENT_NAMES, vatName), "gateway not support, should be "+VAT_IMPLEMENT_NAMES)
 	err := merchant_config.SetMerchantConfig(ctx, merchantId, vatName, data)
 	if err != nil {
 		return err
@@ -89,7 +88,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	}
 	if countryRates != nil && len(countryRates) > 0 {
 		if countries == nil || len(countries) == 0 {
-			//Country 没数据，全覆盖
+			//Country
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
 		} else {
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(

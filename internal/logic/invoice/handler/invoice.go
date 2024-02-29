@@ -286,9 +286,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 			TokenExpireMinute:   strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
 			Link:                "<a href=\"" + one.Link + "\">Link</a>",
 		})
-		if err != nil {
-			return err
-		}
+		utility.AssertError(err, "send email error")
 		//update send status
 		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendStatus: 1,

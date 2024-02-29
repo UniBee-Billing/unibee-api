@@ -46,3 +46,13 @@ type MerchantEmailTemplateDeactivateReq struct {
 
 type MerchantEmailTemplateDeactivateRes struct {
 }
+
+type MerchantEmailGatewaySetupReq struct {
+	g.Meta      `path:"/email_gateway_setup" tags:"Merchant-Email-Template-Controller" method:"post" summary:"Merchant Email Gateway Setup"`
+	GatewayName string `p:"gatewayName"  dc:"GatewayName, e.m. sendgrid" v:"required"`
+	Data        string `p:"data" dc:"data" v:"required"`
+	IsDefault   bool   `p:"IsDefault" d:"true" dc:"IsDefault, default is true" `
+}
+
+type MerchantEmailGatewaySetupRes struct {
+}
