@@ -757,7 +757,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		}
 		// Upgrade
 		subUpdateRes = &UpdateSubscriptionInternalResp{
-			GatewayUpdateId: createRes.PaymentId,
+			GatewayUpdateId: createRes.Invoice.InvoiceId,
 			Data:            utility.MarshalToJsonString(createRes),
 			Link:            createRes.Link,
 			Paid:            createRes.Status == consts.PaymentSuccess,

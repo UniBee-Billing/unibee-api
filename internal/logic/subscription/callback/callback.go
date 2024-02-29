@@ -65,7 +65,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx, payment.PaymentId)
+			pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx, invoice.InvoiceId)
 			pendingSubDowngrade := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 			if pendingSubUpgrade != nil && strings.Compare(payment.BillingReason, "SubscriptionUpgrade") == 0 {
 				if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
@@ -78,7 +78,8 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
 				if strings.Compare(pendingSubDowngrade.SubscriptionId, payment.SubscriptionId) == 0 &&
-					pendingSubDowngrade.Status == consts.PendingSubStatusCreate {
+					pendingSubDowngrade.Status == consts.PendingSubStatusCreate &&
+					pendingSubDowngrade.GatewayUpdateId == invoice.InvoiceId {
 					// Downgrade
 					_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
 					if err != nil {

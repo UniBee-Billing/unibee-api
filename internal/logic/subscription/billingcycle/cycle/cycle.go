@@ -159,6 +159,15 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
 					return nil, err
 				}
+				if pendingUpdate != nil {
+					_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
+						dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
+						dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId: one.InvoiceId,
+					}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdate.UpdateSubscriptionId).OmitNil().Update()
+					if err != nil {
+						return nil, err
+					}
+				}
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
