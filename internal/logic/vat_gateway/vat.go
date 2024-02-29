@@ -68,12 +68,12 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	countries, err := gateway.ListAllCountries()
-	for _, country := range countries {
-		country.MerchantId = merchantId
-	}
 	if err != nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
+	}
+	for _, country := range countries {
+		country.MerchantId = merchantId
 	}
 	if countries != nil && len(countries) > 0 {
 		_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
@@ -86,6 +86,9 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	if err != nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllRates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
 		return err
+	}
+	for _, country := range countryRates {
+		country.MerchantId = merchantId
 	}
 	if countryRates != nil && len(countryRates) > 0 {
 		if countries == nil || len(countries) == 0 {
