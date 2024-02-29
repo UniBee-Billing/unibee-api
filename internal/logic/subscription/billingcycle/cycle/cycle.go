@@ -53,13 +53,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 		var needInvoiceGenerate = true
 		var needInvoiceFirstTryPayment = false
-		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing || latestInvoice.Status == consts.InvoiceStatusPending) {
+		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing) {
 			needInvoiceGenerate = false
-			if latestInvoice.Status == consts.InvoiceStatusProcessing && len(latestInvoice.PaymentId) == 0 {
+			if len(latestInvoice.PaymentId) == 0 && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) {
 				needInvoiceFirstTryPayment = true
-				// invoice need first payment try
 			}
 		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && latestInvoice.PeriodEnd > timeNow {
+			needInvoiceGenerate = false
+		} else if timeNow < sub.DunningTime {
 			needInvoiceGenerate = false
 		}
 
@@ -78,7 +79,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo As Sub At Create Status NotPayBefore48Hours"}, nil
 			}
-		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime < timeNow {
+		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime {
 			// invoice not generate and sub out of time, need expired by system
 			err := expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 			if err != nil {
@@ -87,7 +88,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionExpire From Billing Cycle As Payment Out Of Permission Days"}, nil
 			}
-		} else if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < timeNow && sub.CancelAtPeriodEnd == 1 && sub.Status != consts.SubStatusCancelled {
+		} else if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) && sub.CancelAtPeriodEnd == 1 && sub.Status != consts.SubStatusCancelled {
 			// sub set cancelAtPeriodEnd, need cancel by system
 			needInvoiceGenerate = false
 			err = service2.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelAtPeriodEndBySystem")

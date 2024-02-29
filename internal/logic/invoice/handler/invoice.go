@@ -101,6 +101,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *ro.InvoiceDeta
 	if err != nil {
 		utility.AssertError(err, "CreateProcessingInvoiceForSub")
 	}
+	//todo mark cancel other sub processing invoice
 	//New Invoice Send Email
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {

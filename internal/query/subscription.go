@@ -43,15 +43,18 @@ func GetSubscriptionBySubscriptionId(ctx context.Context, subscriptionId string)
 	return
 }
 
-func GetSubscriptionByGatewaySubscriptionId(ctx context.Context, gatewaySubscriptionId string) (one *entity.Subscription) {
-	if len(gatewaySubscriptionId) == 0 {
+func GetSubscriptionPendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {
+	if len(invoiceId) == 0 {
 		return nil
 	}
-	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{GatewaySubscriptionId: gatewaySubscriptionId}).OmitEmpty().Scan(&one)
+	var one *entity.SubscriptionPendingUpdate
+	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
+		Where(dao.SubscriptionPendingUpdate.Columns().InvoiceId, invoiceId).
+		OmitEmpty().Scan(&one)
 	if err != nil {
-		one = nil
+		return nil
 	}
-	return
+	return one
 }
 
 func GetSubscriptionUpgradePendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {

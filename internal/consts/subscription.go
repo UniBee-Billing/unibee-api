@@ -1,9 +1,8 @@
 package consts
 
 const (
-	NonEffectImmediatelyUsePendingUpdate = false
-	ProrationUsingUniBeeCompute          = true
-	SubscriptionCycleUnderUniBeeControl  = true
+	ProrationUsingUniBeeCompute         = true
+	SubscriptionCycleUnderUniBeeControl = true
 )
 
 type InvoiceStatusEnum int

@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
+	subscription2 "unibee/internal/logic/subscription"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -50,15 +51,23 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		return false, err
 	}
 
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), sub.PlanId)
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().PlanId:          one.UpdatePlanId,
-		dao.Subscription.Columns().Quantity:        one.UpdateQuantity,
-		dao.Subscription.Columns().AddonData:       one.UpdateAddonData,
-		dao.Subscription.Columns().Amount:          one.UpdateAmount,
-		dao.Subscription.Columns().Currency:        one.UpdateCurrency,
-		dao.Subscription.Columns().LastUpdateTime:  gtime.Now().Timestamp(),
-		dao.Subscription.Columns().GmtModify:       gtime.Now(),
-		dao.Subscription.Columns().PendingUpdateId: "", //clear PendingUpdateId
+		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
+		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		dao.Subscription.Columns().DunningTime:            dunningTime,
+		dao.Subscription.Columns().PlanId:                 one.UpdatePlanId,
+		dao.Subscription.Columns().Quantity:               one.UpdateQuantity,
+		dao.Subscription.Columns().AddonData:              one.UpdateAddonData,
+		dao.Subscription.Columns().Amount:                 one.UpdateAmount,
+		dao.Subscription.Columns().Currency:               one.UpdateCurrency,
+		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
+		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+		dao.Subscription.Columns().PendingUpdateId:        "", //clear PendingUpdateId
+		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return false, err

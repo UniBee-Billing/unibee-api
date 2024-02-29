@@ -502,28 +502,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 	}
 
-	var nextPeriodStart = sub.CurrentPeriodEnd
-	if sub.TrialEnd > sub.CurrentPeriodEnd {
-		nextPeriodStart = sub.TrialEnd
-	}
-	var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, req.NewPlanId)
-
 	var totalAmount int64
 	var prorationInvoice *ro.InvoiceDetailSimplify
-	//var nextPeriodTotalAmount int64
 	var nextPeriodInvoice *ro.InvoiceDetailSimplify
 	if effectImmediate {
-		// Generate Proration Invoice Preview
-		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			Currency:      sub.Currency,
-			PlanId:        req.NewPlanId,
-			Quantity:      req.Quantity,
-			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-			TaxScale:      sub.TaxScale,
-			PeriodStart:   nextPeriodStart,
-			PeriodEnd:     nextPeriodEnd,
-		})
-
 		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
 		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
 		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
@@ -549,14 +531,13 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				Quantity: addonParam.Quantity,
 			})
 		}
-
 		if prorationDate == 0 {
 			prorationDate = time.Now().Unix()
 			if sub.TestClock > 0 && sub.TestClock > sub.CurrentPeriodStart && sub.TestClock < sub.CurrentPeriodEnd && !consts.GetConfigInstance().IsProd() {
 				prorationDate = sub.TestClock
 			}
 		}
-		if prorationDate > sub.CurrentPeriodEnd || prorationDate < sub.CurrentPeriodStart {
+		if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			prorationInvoice = &ro.InvoiceDetailSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
@@ -568,78 +549,54 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 				SubscriptionAmountExcludingTax: 0,
 				Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
 				ProrationDate:                  prorationDate,
+				PeriodStart:                    sub.CurrentPeriodStart,
+				PeriodEnd:                      sub.CurrentPeriodEnd,
 			}
+		} else if prorationDate > sub.CurrentPeriodEnd {
+			// after periodEnd, is not a prorationInvoice, just use it
+			prorationInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+				InvoiceName:   "SubscriptionCycle",
+				Currency:      sub.Currency,
+				PlanId:        req.NewPlanId,
+				Quantity:      req.Quantity,
+				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+				TaxScale:      sub.TaxScale,
+				PeriodStart:   prorationDate,
+				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
+			})
 		} else {
 			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 				InvoiceName:       "SubscriptionUpgrade",
 				Currency:          sub.Currency,
 				TaxScale:          sub.TaxScale,
 				ProrationDate:     prorationDate,
-				PeriodStart:       sub.CurrentPeriodStart,
-				PeriodEnd:         sub.CurrentPeriodEnd,
 				OldProrationPlans: oldProrationPlanParams,
 				NewProrationPlans: newProrationPlanParams,
+				PeriodStart:       sub.CurrentPeriodStart,
+				PeriodEnd:         sub.CurrentPeriodEnd,
 			})
 		}
 		prorationDate = prorationInvoice.ProrationDate
 		totalAmount = prorationInvoice.TotalAmount
-	} else {
-		//Effect Next Period, Generate Invoice Preview
-		var nextPeriodTotalAmountExcludingTax = plan.Amount * req.Quantity
-		for _, addon := range addons {
-			utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
-			utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
-			utility.Assert(addon.AddonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
-			nextPeriodTotalAmountExcludingTax = nextPeriodTotalAmountExcludingTax + addon.AddonPlan.Amount*addon.Quantity
-		}
 
-		var nextPeriodInvoiceItems []*ro.InvoiceItemDetailRo
-		nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.InvoiceItemDetailRo{
-			Currency:               currency,
-			Amount:                 req.Quantity*plan.Amount + int64(float64(req.Quantity*plan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
-			AmountExcludingTax:     req.Quantity * plan.Amount,
-			Tax:                    int64(float64(req.Quantity*plan.Amount) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
-			UnitAmountExcludingTax: plan.Amount,
-			Description:            plan.PlanName,
-			Quantity:               req.Quantity,
+		var nextPeriodStart = sub.CurrentPeriodEnd
+		if sub.TrialEnd > sub.CurrentPeriodEnd {
+			nextPeriodStart = sub.TrialEnd
+		}
+		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, req.NewPlanId)
+		// Generate Proration Invoice Preview
+		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			InvoiceName:   "SubscriptionCycle",
+			Currency:      sub.Currency,
+			PlanId:        req.NewPlanId,
+			Quantity:      req.Quantity,
+			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+			TaxScale:      sub.TaxScale,
+			PeriodStart:   nextPeriodStart,
+			PeriodEnd:     nextPeriodEnd,
 		})
-		for _, addon := range addons {
-			nextPeriodInvoiceItems = append(nextPeriodInvoiceItems, &ro.InvoiceItemDetailRo{
-				Currency:               currency,
-				Amount:                 addon.Quantity*addon.AddonPlan.Amount + int64(float64(addon.Quantity*addon.AddonPlan.Amount)*utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
-				Tax:                    int64(float64(addon.Quantity*addon.AddonPlan.Amount) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale)),
-				AmountExcludingTax:     addon.Quantity * addon.AddonPlan.Amount,
-				UnitAmountExcludingTax: addon.AddonPlan.Amount,
-				Description:            addon.AddonPlan.PlanName,
-				Quantity:               addon.Quantity,
-			})
-		}
-		var nextPeriodTaxAmount = int64(float64(nextPeriodTotalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(sub.TaxScale))
-		nextPeriodInvoice = &ro.InvoiceDetailSimplify{
-			InvoiceName:                    "SubscriptionCycle",
-			TotalAmount:                    nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount,
-			TotalAmountExcludingTax:        nextPeriodTotalAmountExcludingTax,
-			Currency:                       currency,
-			TaxAmount:                      nextPeriodTaxAmount,
-			SubscriptionAmount:             nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount, // 在没有 discount 之前，保持于 Total 一致
-			SubscriptionAmountExcludingTax: nextPeriodTotalAmountExcludingTax,                       // 在没有 discount 之前，保持于 Total 一致
-			Lines:                          nextPeriodInvoiceItems,
-		}
-
-		if consts.ProrationUsingUniBeeCompute {
-			selfComputeNextPeriodInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				Currency:      sub.Currency,
-				PlanId:        req.NewPlanId,
-				Quantity:      req.Quantity,
-				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxScale:      sub.TaxScale,
-				PeriodStart:   nextPeriodStart,
-				PeriodEnd:     nextPeriodEnd,
-			})
-			utility.Assert(selfComputeNextPeriodInvoice.TotalAmount == nextPeriodInvoice.TotalAmount, "System Error, Compute Error")
-			nextPeriodInvoice = selfComputeNextPeriodInvoice
-		}
-
+	} else {
+		prorationDate = sub.CurrentPeriodEnd
 		prorationInvoice = &ro.InvoiceDetailSimplify{
 			InvoiceName:                    "SubscriptionUpgrade",
 			TotalAmount:                    0,
@@ -649,13 +606,24 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 			SubscriptionAmount:             0,
 			SubscriptionAmountExcludingTax: 0,
 			Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
+			ProrationDate:                  prorationDate,
+			PeriodStart:                    sub.CurrentPeriodStart,
+			PeriodEnd:                      sub.CurrentPeriodEnd,
 		}
-		//nextPeriodTotalAmount = nextPeriodTotalAmountExcludingTax + nextPeriodTaxAmount
-		prorationDate = sub.CurrentPeriodEnd
+		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			InvoiceName:   "SubscriptionCycle",
+			Currency:      sub.Currency,
+			PlanId:        req.NewPlanId,
+			Quantity:      req.Quantity,
+			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+			TaxScale:      sub.TaxScale,
+			PeriodStart:   utility.MaxInt64(prorationInvoice.PeriodEnd, sub.TrialEnd),
+			PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(prorationInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
+		})
 	}
 
 	if prorationInvoice.TotalAmount <= 0 {
-		effectImmediate = false // todo mark effectImmediate = true with negative proration invoice should not allowed
+		effectImmediate = false
 	}
 
 	return &SubscriptionUpdatePrepareInternalRes{
