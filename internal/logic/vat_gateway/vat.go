@@ -96,7 +96,6 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
 		} else {
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(
-				dao.CountryRate.Columns().MerchantId,
 				dao.CountryRate.Columns().StandardTypes,
 				dao.CountryRate.Columns().StandardDescription,
 				dao.CountryRate.Columns().StandardTaxPercentage,
