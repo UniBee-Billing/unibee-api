@@ -23,12 +23,15 @@ func SubscriptionPendingUpdateCancel(ctx context.Context, pendingUpdateId string
 			return nil
 		}
 
-		if len(one.GatewayUpdateId) > 0 {
-			payment := query.GetPaymentByPaymentId(ctx, one.GatewayUpdateId)
-			if payment != nil {
-				err := service.PaymentGatewayCancel(ctx, payment)
-				if err != nil {
-					g.Log().Errorf(ctx, "PaymentGatewayCancel Error:%s", err.Error())
+		if len(one.InvoiceId) > 0 {
+			invoice := query.GetInvoiceByInvoiceId(ctx, one.InvoiceId)
+			if invoice != nil {
+				payment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
+				if payment != nil {
+					err := service.PaymentGatewayCancel(ctx, payment)
+					if err != nil {
+						g.Log().Errorf(ctx, "PaymentGatewayCancel Error:%s", err.Error())
+					}
 				}
 			}
 		}

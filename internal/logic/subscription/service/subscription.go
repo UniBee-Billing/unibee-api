@@ -800,13 +800,13 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	one.Link = subUpdateRes.Link
 	one.Status = consts.PendingSubStatusCreate
 	_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPendingUpdate.Columns().Status:          consts.PendingSubStatusCreate,
-		dao.SubscriptionPendingUpdate.Columns().ResponseData:    subUpdateRes.Data,
-		dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
-		dao.SubscriptionPendingUpdate.Columns().Paid:            PaidInt,
-		dao.SubscriptionPendingUpdate.Columns().Link:            subUpdateRes.Link,
-		dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId: subUpdateRes.GatewayUpdateId,
-		dao.SubscriptionPendingUpdate.Columns().Note:            note,
+		dao.SubscriptionPendingUpdate.Columns().Status:       consts.PendingSubStatusCreate,
+		dao.SubscriptionPendingUpdate.Columns().ResponseData: subUpdateRes.Data,
+		dao.SubscriptionPendingUpdate.Columns().GmtModify:    gtime.Now(),
+		dao.SubscriptionPendingUpdate.Columns().Paid:         PaidInt,
+		dao.SubscriptionPendingUpdate.Columns().Link:         subUpdateRes.Link,
+		dao.SubscriptionPendingUpdate.Columns().InvoiceId:    subUpdateRes.GatewayUpdateId,
+		dao.SubscriptionPendingUpdate.Columns().Note:         note,
 	}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, one.UpdateSubscriptionId).OmitNil().Update()
 	if err != nil {
 		return nil, err

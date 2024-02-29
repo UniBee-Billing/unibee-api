@@ -54,29 +54,14 @@ func GetSubscriptionByGatewaySubscriptionId(ctx context.Context, gatewaySubscrip
 	return
 }
 
-func GetSubscriptionUpgradePendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(gatewayUpdateId) == 0 {
+func GetSubscriptionUpgradePendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {
+	if len(invoiceId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().InvoiceId, invoiceId).
 		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
-		OmitEmpty().Scan(&one)
-	if err != nil {
-		return nil
-	}
-	return one
-}
-
-func GetSubscriptionDowngradePendingUpdateByPendingUpdateId(ctx context.Context, pendingUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(pendingUpdateId) == 0 {
-		return nil
-	}
-	var one *entity.SubscriptionPendingUpdate
-	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
-		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 0).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
@@ -113,30 +98,14 @@ func GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context
 	return one
 }
 
-func GetUnfinishedSubscriptionPendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(gatewayUpdateId) == 0 {
+func GetUnfinishedSubscriptionPendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {
+	if len(invoiceId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().InvoiceId, invoiceId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
-		OmitEmpty().Scan(&one)
-	if err != nil {
-		return nil
-	}
-	return one
-}
-
-func GetUnfinishedEffectImmediateSubscriptionPendingUpdateByGatewayUpdateId(ctx context.Context, gatewayUpdateId string) *entity.SubscriptionPendingUpdate {
-	if len(gatewayUpdateId) == 0 {
-		return nil
-	}
-	var one *entity.SubscriptionPendingUpdate
-	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId, gatewayUpdateId).
-		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
-		Where(dao.SubscriptionPendingUpdate.Columns().EffectImmediate, 1).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil

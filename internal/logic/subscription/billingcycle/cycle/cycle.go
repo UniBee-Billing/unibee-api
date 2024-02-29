@@ -161,8 +161,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				if pendingUpdate != nil {
 					_, err = dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
-						dao.SubscriptionPendingUpdate.Columns().GmtModify:       gtime.Now(),
-						dao.SubscriptionPendingUpdate.Columns().GatewayUpdateId: one.InvoiceId,
+						dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
+						dao.SubscriptionPendingUpdate.Columns().InvoiceId: one.InvoiceId,
 					}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdate.UpdateSubscriptionId).OmitNil().Update()
 					if err != nil {
 						return nil, err

@@ -16,7 +16,7 @@ type SubscriptionPendingUpdate struct {
 	MerchantId           interface{} // merchant id
 	SubscriptionId       interface{} // subscription id
 	UpdateSubscriptionId interface{} // pending update unique id
-	GatewayUpdateId      interface{} // gateway update payment id assosiate to this update, use payment.paymentId
+	InvoiceId            interface{} // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            *gtime.Time // create time
 	GmtModify            *gtime.Time // update time
 	Amount               interface{} // amount of this period, cent
