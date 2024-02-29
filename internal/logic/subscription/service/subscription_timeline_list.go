@@ -4,7 +4,10 @@ import (
 	"context"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
+	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -18,7 +21,7 @@ type SubscriptionTimeLineListInternalReq struct {
 }
 
 type SubscriptionTimeLineListInternalRes struct {
-	SubscriptionTimelines []*entity.SubscriptionTimeline `json:"subscriptionTimeline" dc:"SubscriptionTimeline"`
+	SubscriptionTimelines []*ro.SubscriptionTimeLineDetailVo
 }
 
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
@@ -51,6 +54,27 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	if err != nil {
 		return nil, err
 	}
+	var timelines []*ro.SubscriptionTimeLineDetailVo
+	for _, one := range mainList {
+		timelines = append(timelines, &ro.SubscriptionTimeLineDetailVo{
+			MerchantId:      one.MerchantId,
+			UserId:          one.UserId,
+			SubscriptionId:  one.SubscriptionId,
+			PeriodStart:     one.PeriodStart,
+			PeriodEnd:       one.PeriodEnd,
+			PeriodStartTime: one.PeriodStartTime,
+			PeriodEndTime:   one.PeriodEndTime,
+			InvoiceId:       one.InvoiceId,
+			UniqueId:        one.UniqueId,
+			Currency:        one.Currency,
+			PlanId:          one.PlanId,
+			Plan:            ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Quantity:        one.Quantity,
+			Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			GatewayId:       one.GatewayId,
+			CreateTime:      one.CreateTime,
+		})
+	}
 
-	return &SubscriptionTimeLineListInternalRes{SubscriptionTimelines: mainList}, nil
+	return &SubscriptionTimeLineListInternalRes{SubscriptionTimelines: timelines}, nil
 }

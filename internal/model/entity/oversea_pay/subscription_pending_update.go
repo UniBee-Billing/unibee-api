@@ -14,6 +14,7 @@ type SubscriptionPendingUpdate struct {
 	MerchantId           uint64      `json:"merchantId"           description:"merchant id"`                                                               // merchant id
 	SubscriptionId       string      `json:"subscriptionId"       description:"subscription id"`                                                           // subscription id
 	UpdateSubscriptionId string      `json:"updateSubscriptionId" description:"pending update unique id"`                                                  // pending update unique id
+	Name                 string      `json:"name"                 description:"name"`                                                                      // name
 	InvoiceId            string      `json:"invoiceId"            description:"gateway update payment id assosiate to this update, use payment.paymentId"` // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            *gtime.Time `json:"gmtCreate"            description:"create time"`                                                               // create time
 	GmtModify            *gtime.Time `json:"gmtModify"            description:"update time"`                                                               // update time

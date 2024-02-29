@@ -24,6 +24,7 @@ type SubscriptionPendingUpdateColumns struct {
 	MerchantId           string // merchant id
 	SubscriptionId       string // subscription id
 	UpdateSubscriptionId string // pending update unique id
+	Name                 string // name
 	InvoiceId            string // gateway update payment id assosiate to this update, use payment.paymentId
 	GmtCreate            string // create time
 	GmtModify            string // update time
@@ -61,6 +62,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	MerchantId:           "merchant_id",
 	SubscriptionId:       "subscription_id",
 	UpdateSubscriptionId: "update_subscription_id",
+	Name:                 "name",
 	InvoiceId:            "invoice_id",
 	GmtCreate:            "gmt_create",
 	GmtModify:            "gmt_modify",

@@ -163,5 +163,5 @@ type SubscriptionTimeLineListReq struct {
 }
 
 type SubscriptionTimeLineListRes struct {
-	SubscriptionTimeLines []*entity.SubscriptionTimeline `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	SubscriptionTimeLines []*ro.SubscriptionTimeLineDetailVo `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
 }
