@@ -27,7 +27,8 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 
 	merchantUser := query.GetMerchantUserAccountByEmail(ctx, req.Email)
 	utility.Assert(merchantUser != nil, "merchant user not found")
-	err = email.SendTemplateEmail(ctx, merchantUser.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+	// deploy version todo mark send to unibee api
+	err = email.SendTemplateEmail(ctx, merchantUser.MerchantId, req.Email, "", email.TemplateMerchantOTPLogin, "", &email.TemplateVariable{
 		UserName:         merchantUser.FirstName + " " + merchantUser.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,

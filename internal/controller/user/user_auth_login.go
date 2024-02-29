@@ -12,13 +12,13 @@ import (
 )
 
 func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *auth.LoginRes, err error) {
-	utility.Assert(req.Email != "", "email cannot be empty")
-	utility.Assert(req.Password != "", "password cannot be empty")
+	utility.Assert(req.Email != "", "Email Cannot Be Empty")
+	utility.Assert(req.Password != "", "Password Cannot Be Empty")
 
 	var one *entity.UserAccount
 	one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
-	utility.Assert(one != nil, "Login Failed")
-	utility.Assert(one.Status == 0, "account status abnormal")
+	utility.Assert(one != nil, "Email Not Found")
+	utility.Assert(one.Status == 0, "Account Status Abnormal")
 	utility.Assert(utility.ComparePasswords(one.Password, req.Password), "Login Failed, Password Not Match")
 
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)

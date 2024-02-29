@@ -29,6 +29,8 @@ const (
 	TemplateInvoiceManualPaid                               = "InvoiceManualPaid"
 	TemplateNewProcessingInvoice                            = "NewProcessingInvoice "
 	TemplateInvoiceCancel                                   = "InvoiceCancel "
+	TemplateMerchantRegistrationCodeVerify                  = "MerchantRegistrationCodeVerify"
+	TemplateMerchantOTPLogin                                = "MerchantOTPLogin"
 	TemplateUserRegistrationCodeVerify                      = "UserRegistrationCodeVerify"
 	TemplateUserOTPLogin                                    = "UserOTPLogin"
 	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
@@ -174,7 +176,11 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	}
 	_, key := getDefaultMerchantEmailConfig(ctx, merchantId)
 	if len(key) == 0 {
-		return gerror.New("default email gateway key not set")
+		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
+			utility.Assert(false, "default email gateway key not set")
+		} else {
+			return gerror.New("default email gateway key not set")
+		}
 	}
 
 	if len(pdfFilePath) > 0 {

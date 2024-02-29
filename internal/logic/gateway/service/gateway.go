@@ -26,7 +26,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	} else {
 		utility.Assert(false, "invalid gatewayName")
 	}
-	one := query.GetGatewayByGatewayName(ctx, gatewayName)
+	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
 	one = &entity.MerchantGateway{
 		MerchantId:    merchantId,

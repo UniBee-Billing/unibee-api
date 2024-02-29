@@ -30,7 +30,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
 
 	openApiConfig, merchantInfo := merchantCheck(ctx, _interface.GetMerchantId(ctx))
-	gateway := query.GetGatewayByGatewayName(ctx, req.PaymentMethod.Gateway)
+	gateway := query.GetGatewayByGatewayName(ctx, merchantInfo.Id, req.PaymentMethod.Gateway)
 	utility.Assert(gateway != nil, "type not found:"+req.PaymentMethod.Gateway)
 	//支付方式绑定校验 todo mark
 

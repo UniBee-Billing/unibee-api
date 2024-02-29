@@ -120,7 +120,7 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	log.SaveChannelHttpLog("GatewayPaymentList", params, paymentList, err, "", nil, gateway)
 	var list []*ro.GatewayPaymentRo
 	for _, item := range paymentList.PaymentIntentList().Data {
-		list = append(list, parseStripePayment(item, gateway))
+		list = append(list, parseStripePayment(item))
 	}
 
 	return list, nil
@@ -155,7 +155,7 @@ func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 		return nil, err
 	}
 
-	return parseStripePayment(response, gateway), nil
+	return parseStripePayment(response), nil
 }
 
 func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
@@ -556,7 +556,7 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		if err != nil {
 			return nil, err
 		}
-		paymentDetails := parseStripePayment(result, gateway)
+		paymentDetails := parseStripePayment(result)
 		status = paymentDetails.Status
 		gatewayCancelId = paymentDetails.GatewayPaymentId
 	}
@@ -589,7 +589,7 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	params.Reason = stripe.String("requested_by_customer")
 	params.Amount = stripe.Int64(one.RefundAmount)
 	//params.Currency = stripe.String(strings.ToLower(one.Currency))
-	params.Metadata = map[string]string{"RefundId": one.RefundId}
+	params.Metadata = map[string]string{"RefundId": one.RefundId, "MerchantId": strconv.FormatUint(one.MerchantId, 10)}
 	result, err := refund.New(params)
 	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))
@@ -625,7 +625,7 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	}
 }
 
-func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGateway) *ro.GatewayPaymentRo {
+func parseStripePayment(item *stripe.PaymentIntent) *ro.GatewayPaymentRo {
 	var gatewayUserId string
 	if item.Customer != nil {
 		gatewayUserId = item.Customer.ID
@@ -655,8 +655,6 @@ func parseStripePayment(item *stripe.PaymentIntent, gateway *entity.MerchantGate
 		gatewayPaymentMethod = item.PaymentMethod.ID
 	}
 	return &ro.GatewayPaymentRo{
-		GatewayId:            gateway.Id,
-		MerchantId:           gateway.MerchantId,
 		GatewayUserId:        gatewayUserId,
 		GatewayPaymentId:     item.ID,
 		Status:               status,

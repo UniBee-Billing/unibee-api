@@ -14,11 +14,14 @@ func GetGatewaySimplifyById(ctx context.Context, id uint64) *ro.GatewaySimplify 
 	return ro.SimplifyGateway(GetGatewayById(ctx, id))
 }
 
-func GetGatewayByGatewayName(ctx context.Context, gatewayName string) (one *entity.MerchantGateway) {
+func GetGatewayByGatewayName(ctx context.Context, merchantId uint64, gatewayName string) (one *entity.MerchantGateway) {
 	if len(gatewayName) == 0 {
 		return nil
 	}
-	err := dao.MerchantGateway.Ctx(ctx).Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).OmitEmpty().Scan(&one)
+	err := dao.MerchantGateway.Ctx(ctx).
+		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
+		Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+		Scan(&one)
 	if err != nil {
 		return nil
 	}

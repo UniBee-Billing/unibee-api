@@ -47,6 +47,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	}
 	createPayContext.MediaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
 	createPayContext.MediaData["PaymentId"] = createPayContext.Pay.PaymentId
+	createPayContext.MediaData["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
 	isDuplicatedInvoke := false
 

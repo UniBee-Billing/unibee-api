@@ -14,6 +14,7 @@ import (
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"net/http"
+	"strconv"
 	"strings"
 	"unibee/internal/consts"
 	_gateway "unibee/internal/logic/gateway"
@@ -60,13 +61,12 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			EnabledEvents: []*string{
 				stripe.String("invoice.upcoming"),
 				stripe.String("invoice.created"),
-				stripe.String("invoice.updated"), //todo mark 并发所有发票都会产生支付，并发所有订阅更新都会产生支付，可能从贷方余额支付（需确认）或者更新会产生退款从情况，所有 invoice.paid 可能必须要接
+				stripe.String("invoice.updated"),
 				stripe.String("invoice.paid"),
 				stripe.String("invoice.voided"),
 				stripe.String("invoice.will_be_due"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
-				stripe.String("payment_intent.created"),
 				stripe.String("payment_intent.succeeded"),
 				stripe.String("payment_intent.canceled"),
 				stripe.String("payment_intent.partially_funded"),
@@ -75,7 +75,8 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			URL: stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
+			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
+			URL:      stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
 		}
 		result, err := webhookendpoint.New(params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, "", nil, gateway)
@@ -103,7 +104,6 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("invoice.will_be_due"),
 				stripe.String("invoice.payment_failed"),
 				stripe.String("invoice.payment_action_required"),
-				//stripe.String("payment_intent.created"),//Payment Under UniBee Control, Created Webhook Not Needed
 				stripe.String("payment_intent.succeeded"),
 				stripe.String("payment_intent.canceled"),
 				stripe.String("payment_intent.partially_funded"),
@@ -112,7 +112,8 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			URL: stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
+			URL:      stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
+			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
 		}
 		result, err := webhookendpoint.Update(one.ID, params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, one.ID, nil, gateway)
@@ -341,29 +342,6 @@ func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType strin
 	if err != nil {
 		return err
 	}
-	//details.Id = gateway.Id
-	//utility.Assert(len(details.GatewayUserId) > 0, "invalid gatewayUserId")
-	//if payment.Invoice != nil {
-	//	//可能来自 SubPendingUpdate 流程，需要补充 Invoice 信息获取 GatewaySubscriptionUpdateId
-	//	invoiceDetails, err := s.GatewayInvoiceDetails(ctx, gateway, payment.Invoice.ID)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	details.GatewayInvoiceDetail = invoiceDetails
-	//	details.GatewayInvoiceId = payment.Invoice.ID
-	//	details.GatewaySubscriptionUpdateId = invoiceDetails.GatewayInvoiceId
-	//	oneSub := query.GetSubscriptionByGatewaySubscriptionId(ctx, invoiceDetails.GatewaySubscriptionId)
-	//	if oneSub != nil {
-	//		plan := query.GetPlanById(ctx, oneSub.PlanId)
-	//		gatewayPlan := query.GetGatewayPlan(ctx, oneSub.PlanId, oneSub.Id)
-	//		subDetails, err := s.GatewaySubscriptionDetails(ctx, plan, gatewayPlan, oneSub)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		details.GatewaySubscriptionDetail = subDetails
-	//	}
-	//}
-	//details.UniqueId = details.GatewayPaymentIntentId
 	err = handler2.HandleRefundWebhookEvent(ctx, refundDetail)
 	if err != nil {
 		return err
@@ -447,7 +425,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 	return nil
 }
 
-func parseStripeInvoice(detail stripe.Invoice, gatewayId uint64) *GatewayDetailInvoiceInternalResp {
+func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp {
 	var status consts.InvoiceStatusEnum = consts.InvoiceStatusInit
 	if strings.Compare(string(detail.Status), "draft") == 0 {
 		status = consts.InvoiceStatusPending
@@ -517,7 +495,6 @@ func parseStripeInvoice(detail stripe.Invoice, gatewayId uint64) *GatewayDetailI
 		SubscriptionAmountExcludingTax: detail.TotalExcludingTax,
 		Currency:                       strings.ToUpper(string(detail.Currency)),
 		Lines:                          invoiceItems,
-		GatewayId:                      gatewayId,
 		Status:                         status,
 		Link:                           detail.HostedInvoiceURL,
 		GatewayStatus:                  string(detail.Status),
@@ -537,7 +514,7 @@ func parseStripeInvoice(detail stripe.Invoice, gatewayId uint64) *GatewayDetailI
 
 func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType string, invoice stripe.Invoice, gateway *entity.MerchantGateway) error {
 	utility.Assert(len(invoice.ID) > 0, "processInvoiceWebhook gatewayInvoiceId Invalid")
-	invoiceDetails := parseStripeInvoice(invoice, gateway.Id)
+	invoiceDetails := parseStripeInvoice(invoice)
 
 	var status = consts.PaymentCreated
 	var authorizeStatus = consts.Authorized
@@ -565,7 +542,6 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	}
 
 	err := handler2.HandlePaymentWebhookEvent(ctx, &ro.GatewayPaymentRo{
-		MerchantId:           gateway.MerchantId,
 		Status:               status,
 		AuthorizeStatus:      authorizeStatus,
 		AuthorizeReason:      authorizeReason,
@@ -582,7 +558,6 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		PayTime:              gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
 		CreateTime:           gtime.NewFromTimeStamp(invoiceDetails.CreateTime),
 		CancelTime:           gtime.NewFromTimeStamp(invoiceDetails.CancelTime),
-		GatewayId:            gateway.Id,
 		GatewayUserId:        invoiceDetails.GatewayUserId,
 		GatewayPaymentId:     invoiceDetails.GatewayPaymentId,
 		GatewayPaymentMethod: invoiceDetails.GatewayDefaultPaymentMethod,
@@ -677,7 +652,6 @@ type GatewayDetailInvoiceInternalResp struct {
 	SubscriptionAmountExcludingTax int64                     `json:"subscriptionAmountExcludingTax" `
 	Currency                       string                    `json:"currency"           `
 	Lines                          []*ro.InvoiceItemDetailRo `json:"lines"              `
-	GatewayId                      uint64                    `json:"gatewayId"          `
 	Status                         consts.InvoiceStatusEnum  `json:"status"             `
 	Reason                         string                    `json:"reason"             `
 	GatewayUserId                  string                    `json:"gatewayUserId"             `
