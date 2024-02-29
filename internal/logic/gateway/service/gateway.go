@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
@@ -28,6 +29,16 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	}
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
+	if consts.GetConfigInstance().IsProd() {
+		err := dao.MerchantGateway.Ctx(ctx).
+			Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+			Where(dao.MerchantGateway.Columns().GatewayKey, gatewayKey).
+			Where(dao.MerchantGateway.Columns().GatewaySecret, gatewaySecret).
+			OmitEmpty().
+			Scan(&one)
+		utility.AssertError(err, "system error")
+		utility.Assert(one == nil, "same gateway exist")
+	}
 	one = &entity.MerchantGateway{
 		MerchantId:    merchantId,
 		GatewayName:   gatewayName,

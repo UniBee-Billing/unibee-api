@@ -156,10 +156,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 
 func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	if gateway == nil {
-		g.Log().Infof(ctx, "MerchantCountryRateList merchant gateway data not setup merchantId:%d gatewayName:%s", merchantId, gateway.GetGatewayName())
-		return nil, gerror.New("default vat gateway not setup")
-	}
+	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().IsDeleted, 0).
