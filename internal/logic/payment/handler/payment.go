@@ -363,7 +363,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success, paymentId=%s", req.PaymentId)
-		return errors.New("payment already success")
+		return nil
 	}
 
 	var paidAt = gtime.Now().Timestamp()
