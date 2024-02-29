@@ -533,7 +533,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 		}
 		if prorationDate == 0 {
 			prorationDate = time.Now().Unix()
-			if sub.TestClock > 0 && sub.TestClock > sub.CurrentPeriodStart && sub.TestClock < sub.CurrentPeriodEnd && !consts.GetConfigInstance().IsProd() {
+			if sub.TestClock > sub.CurrentPeriodStart && !consts.GetConfigInstance().IsProd() {
 				prorationDate = sub.TestClock
 			}
 		}
