@@ -6,7 +6,7 @@ import (
 )
 
 type MerchantInfoReq struct {
-	g.Meta `path:"/info" tags:"Merchant-Info-Controller" method:"get" summary:"Get Merchant Info"`
+	g.Meta `path:"/info" tags:"User-Merchant-Info-Controller" method:"get" summary:"Get Merchant Info"`
 }
 
 type MerchantInfoRes struct {
