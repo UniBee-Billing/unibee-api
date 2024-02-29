@@ -131,8 +131,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	gatewayInternalPayResult.Invoice = invoice
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
-		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-		gatewayInternalPayResult.Invoice = invoice
 		req := &handler2.HandlePayReq{
 			PaymentId:              createPayContext.Pay.PaymentId,
 			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
@@ -143,7 +141,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 			PaymentAmount:          createPayContext.Pay.TotalAmount,
 			PaidTime:               gtime.Now(),
 		}
-		_ = handler2.HandlePaySuccess(ctx, req)
+		err = handler2.HandlePaySuccess(ctx, req)
+		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+		gatewayInternalPayResult.Invoice = invoice
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{
