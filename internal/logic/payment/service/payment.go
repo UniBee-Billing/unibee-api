@@ -131,6 +131,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	gatewayInternalPayResult.Invoice = invoice
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
+		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+		gatewayInternalPayResult.Invoice = invoice
 		req := &handler2.HandlePayReq{
 			PaymentId:              createPayContext.Pay.PaymentId,
 			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
