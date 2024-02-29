@@ -2,19 +2,12 @@ package merchant
 
 import (
 	"context"
-	"unibee/internal/consts"
+	"unibee/api/merchant/vat"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/vat_gateway"
-	"unibee/utility"
-
-	"unibee/api/merchant/vat"
 )
 
 func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
-	}
 	err = vat_gateway.SetupMerchantVatConfig(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.Data, req.IsDefault)
 	if err != nil {
 		return nil, err
