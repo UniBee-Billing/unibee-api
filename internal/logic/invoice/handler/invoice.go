@@ -21,7 +21,9 @@ import (
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(one != nil, "invoice not found, paymentId:"+payment.PaymentId+" subId:"+payment.SubscriptionId)
+	if one == nil {
+		return nil, gerror.New("invoice not found, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+	}
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PaymentSuccess {
 		status = consts.InvoiceStatusPaid
@@ -30,7 +32,6 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	} else if payment.Status == consts.PaymentCancelled {
 		status = consts.InvoiceStatusCancelled
 	}
-	utility.Assert(one != nil, "invoice not found")
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:           status,
 		dao.Invoice.Columns().GmtModify:        gtime.Now(),
@@ -41,7 +42,6 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return nil, err
 	}
 	if one.Status != status {
-		//更新状态发送邮件
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status

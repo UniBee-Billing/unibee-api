@@ -60,11 +60,14 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
 	}
-	invoice, err := handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-	if err != nil {
-		return nil, err
+	var invoice *entity.Invoice
+	if createPayContext.Invoice != nil {
+		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+		if err != nil {
+			return nil, err
+		}
+		createPayContext.Pay.InvoiceId = invoice.InvoiceId
 	}
-	createPayContext.Pay.InvoiceId = invoice.InvoiceId
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -126,7 +129,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	}
 
 	gatewayInternalPayResult.Invoice = invoice
-	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, invoice)
+	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
 		req := &handler2.HandlePayReq{
 			PaymentId:              createPayContext.Pay.PaymentId,
