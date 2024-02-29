@@ -506,7 +506,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	if sub.TrialEnd > sub.CurrentPeriodEnd {
 		nextPeriodStart = sub.TrialEnd
 	}
-	var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, uint64(req.NewPlanId))
+	var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, req.NewPlanId)
 
 	var totalAmount int64
 	var prorationInvoice *ro.InvoiceDetailSimplify
@@ -552,6 +552,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 
 		if prorationDate == 0 {
 			prorationDate = time.Now().Unix()
+			if sub.TestClock > 0 && sub.TestClock > sub.CurrentPeriodStart && sub.TestClock < sub.CurrentPeriodEnd && !consts.GetConfigInstance().IsProd() {
+				prorationDate = sub.TestClock
+			}
 		}
 		if prorationDate > sub.CurrentPeriodEnd || prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
