@@ -297,6 +297,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
+			Metadata:   createPayContext.MediaData,
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 				Metadata:         createPayContext.MediaData,
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),

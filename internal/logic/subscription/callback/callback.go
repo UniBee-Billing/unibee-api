@@ -66,33 +66,6 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
-			//pendingSubUpgrade := query.GetSubscriptionUpgradePendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
-			//pendingSubDowngrade := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-			//if pendingSubUpgrade != nil && strings.Compare(payment.BillingReason, "SubscriptionUpgrade") == 0 {
-			//	if strings.Compare(pendingSubUpgrade.SubscriptionId, payment.SubscriptionId) == 0 &&
-			//		pendingSubUpgrade.Status == consts.PendingSubStatusCreate &&
-			//		pendingSubUpgrade.InvoiceId == invoice.InvoiceId {
-			//		// Upgrade
-			//		_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubUpgrade.UpdateSubscriptionId, invoice)
-			//		if err != nil {
-			//			g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Upgrade error:%s", err.Error())
-			//		}
-			//	}
-			//} else if pendingSubDowngrade != nil && strings.Compare(payment.BillingReason, "SubscriptionDowngrade") == 0 {
-			//	if strings.Compare(pendingSubDowngrade.SubscriptionId, payment.SubscriptionId) == 0 &&
-			//		pendingSubDowngrade.Status == consts.PendingSubStatusCreate &&
-			//		pendingSubDowngrade.InvoiceId == invoice.InvoiceId {
-			//		// Downgrade
-			//		_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingSubDowngrade.UpdateSubscriptionId, invoice)
-			//		if err != nil {
-			//			g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
-			//		} else {
-			//			err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
-			//			if err != nil {
-			//				g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Downgrade error:%s", err.Error())
-			//			}
-			//		}
-			//	}
 			if pendingUpdate != nil && pendingUpdate.Status == consts.PendingSubStatusCreate {
 				// PendingUpdate
 				_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.UpdateSubscriptionId, invoice)
