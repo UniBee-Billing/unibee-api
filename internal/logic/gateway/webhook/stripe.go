@@ -60,9 +60,6 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			break
 		}
 	}
-	if len(result.WebhookEndpointList().Data) > 1 {
-		return gerror.New("webhook endpoints count > 1")
-	}
 	if one == nil {
 		//create
 		params := &stripe.WebhookEndpointParams{
