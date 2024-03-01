@@ -52,10 +52,18 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 	params := &stripe.WebhookEndpointListParams{}
 	params.Limit = stripe.Int64(10)
 	result := webhookendpoint.List(params)
+	webhookUrl := _gateway.GetPaymentWebhookEntranceUrl(gateway.Id)
+	var one *stripe.WebhookEndpoint
+	for _, endpoint := range result.WebhookEndpointList().Data {
+		if strings.Compare(endpoint.URL, webhookUrl) == 0 {
+			one = endpoint
+			break
+		}
+	}
 	if len(result.WebhookEndpointList().Data) > 1 {
 		return gerror.New("webhook endpoints count > 1")
 	}
-	if len(result.WebhookEndpointList().Data) == 0 {
+	if one == nil {
 		//create
 		params := &stripe.WebhookEndpointParams{
 			EnabledEvents: []*string{
@@ -76,7 +84,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("charge.refund.updated"),
 			},
 			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
-			URL:      stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
+			URL:      stripe.String(webhookUrl),
 		}
 		result, err := webhookendpoint.New(params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, "", nil, gateway)
@@ -90,8 +98,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			return err
 		}
 	} else {
-		utility.Assert(len(result.WebhookEndpointList().Data) == 1, "internal webhook update, count is not 1")
-		one := result.WebhookEndpointList().Data[0]
+		utility.Assert(len(gateway.WebhookSecret) > 0, "Gateway Setup Error")
 		utility.Assert(strings.Compare(one.Status, "enabled") == 0, "webhook not status enabled")
 		params := &stripe.WebhookEndpointParams{
 			EnabledEvents: []*string{
@@ -112,7 +119,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			URL:      stripe.String(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id)),
+			URL:      stripe.String(webhookUrl),
 			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
 		}
 		result, err := webhookendpoint.Update(one.ID, params)
