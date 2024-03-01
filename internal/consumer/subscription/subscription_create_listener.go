@@ -8,6 +8,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
+	"unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
@@ -29,6 +30,9 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	utility.Assert(len(message.Body) != 0, "body length is 0")
 	g.Log().Debugf(ctx, "SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
+	if sub != nil {
+		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+	}
 	_, _ = redismq.SendDelay(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
 		Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,

@@ -31,7 +31,7 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 	g.Log().Debugf(ctx, "SubscriptionPaymentSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
-		user.UpdateUserDefaultSubscription(ctx, sub.UserId, sub.SubscriptionId)
+		user.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
 		if len(sub.VatNumber) > 0 {
 			user.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
 		}

@@ -12,6 +12,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/subscription/user_sub_plan"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -34,6 +35,9 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 	utility.Assert(len(message.Body) != 0, "body length is 0")
 	g.Log().Debugf(ctx, "SubscriptionCancelListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
+	if sub != nil {
+		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+	}
 	//Cancelled SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).

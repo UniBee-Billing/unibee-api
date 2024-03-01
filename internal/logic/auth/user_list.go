@@ -56,7 +56,7 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 			sortKey = req.SortField + " desc"
 		}
 	}
-	query := dao.UserAccount.Ctx(ctx).
+	q := dao.UserAccount.Ctx(ctx).
 		//Where(dao.UserAccount.Columns().Email, req.Email).
 		//Where(dao.UserAccount.Columns().UserName, req.UserName).
 		//Where(dao.UserAccount.Columns().SubscriptionName, req.SubscriptionName).
@@ -65,21 +65,21 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 		Where(dao.UserAccount.Columns().MerchantId, req.MerchantId).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes)
 	if req.UserId > 0 {
-		query = query.Where(dao.UserAccount.Columns().Id, req.UserId)
+		q = q.Where(dao.UserAccount.Columns().Id, req.UserId)
 	}
 	if len(req.Email) > 0 {
-		query = query.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
+		q = q.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
 	}
 	if len(req.FirstName) > 0 {
-		query = query.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
+		q = q.WhereLike(dao.UserAccount.Columns().FirstName, "%"+req.FirstName+"%")
 	}
 	if len(req.LastName) > 0 {
-		query = query.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+		q = q.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
 	}
 	if len(req.Status) > 0 {
-		query = query.WhereIn(dao.UserAccount.Columns().Status, req.Status)
+		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)
 	}
-	err = query.Order(sortKey).
+	err = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {
@@ -123,7 +123,7 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		}
 	}
 	if len(mainList) < 10 {
-		//模糊查询
+		//like search
 		var likeList []*entity.UserAccount
 		_ = dao.UserAccount.Ctx(ctx).
 			WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").

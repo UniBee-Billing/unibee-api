@@ -8,6 +8,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	"unibee/internal/logic/subscription/user_sub_plan"
+	"unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
@@ -29,6 +30,9 @@ func (t SubscriptionIncompleteListener) Consume(ctx context.Context, message *re
 	utility.Assert(len(message.Body) != 0, "body length is 0")
 	g.Log().Debugf(ctx, "SubscriptionIncompleteListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
+	if sub != nil {
+		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
 	return redismq.CommitMessage

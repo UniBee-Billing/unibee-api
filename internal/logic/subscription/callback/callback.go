@@ -53,7 +53,7 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 	if consts.ProrationUsingUniBeeCompute {
 		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
-			user.UpdateUserDefaultSubscription(ctx, payment.UserId, payment.SubscriptionId)
+			user.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, payment.UserId, payment.SubscriptionId)
 		}
 	}
 }
