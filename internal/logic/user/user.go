@@ -39,6 +39,7 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 				dao.UserAccount.Columns().SubscriptionId:     subscriptionId,
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
 				dao.UserAccount.Columns().SubscriptionName:   subName,
+				dao.UserAccount.Columns().BillingType:        1,
 				dao.UserAccount.Columns().RecurringAmount:    user.RecurringAmount + one.Amount,
 				dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, userId).OmitNil().Update()
