@@ -4,6 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/internal/consts"
+	"unibee/internal/logic/email"
+	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
 
 	"encoding/json"
@@ -82,5 +85,21 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	newOne = query.GetMerchantUserAccountById(ctx, merchantUser.Id)
 	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
+	if consts.GetConfigInstance().Mode == "cloud" {
+		//if cloud version setup default sendgrid and vat
+		{
+			name, data := email.GetDefaultMerchantEmailConfig(ctx, 15621)
+			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
+			err = email.SetupMerchantEmailConfig(ctx, newOne.MerchantId, name, data, true)
+			utility.AssertError(err, "Server Error")
+		}
+		{
+			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, 15621)
+			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
+			err = vat_gateway.SetupMerchantVatConfig(ctx, newOne.MerchantId, name, data, true)
+			utility.AssertError(err, "Server Error")
+		}
+	}
+
 	return &auth.RegisterVerifyRes{MerchantUser: newOne}, nil
 }

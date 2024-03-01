@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	Env         string      `yaml:"env"`
+	Mode        string      `yaml:"mode"`
 	RedisConfig RedisConfig `yaml:"redis"`
 	MinioConfig MinioConfig `yaml:"minio"`
 	Server      Server      `yaml:"server"`

@@ -26,7 +26,7 @@ const (
 )
 
 func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VATGateway {
-	vatName, vatData := getDefaultMerchantVatConfig(ctx, merchantId)
+	vatName, vatData := GetDefaultMerchantVatConfig(ctx, merchantId)
 	if len(vatName) == 0 {
 		return nil
 	}
@@ -40,7 +40,7 @@ func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VAT
 	return nil
 }
 
-func getDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatName string, data string) {
+func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatName string, data string) {
 	nameConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantVatName)
 	if nameConfig != nil {
 		vatName = nameConfig.ConfigValue

@@ -47,7 +47,7 @@ const (
 	IMPLEMENT_NAMES      = "sendgrid"
 )
 
-func getDefaultMerchantEmailConfig(ctx context.Context, merchantId uint64) (name string, data string) {
+func GetDefaultMerchantEmailConfig(ctx context.Context, merchantId uint64) (name string, data string) {
 	nameConfig := merchant_config.GetMerchantConfig(ctx, merchantId, KeyMerchantEmailName)
 	if nameConfig != nil {
 		name = nameConfig.ConfigValue
@@ -174,7 +174,7 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = "attach"
 	}
-	_, key := getDefaultMerchantEmailConfig(ctx, merchantId)
+	_, key := GetDefaultMerchantEmailConfig(ctx, merchantId)
 	if len(key) == 0 {
 		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
 			utility.Assert(false, "Default Email Gateway Need Setup")

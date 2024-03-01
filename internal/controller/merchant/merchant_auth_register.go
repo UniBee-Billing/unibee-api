@@ -52,8 +52,8 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	// deploy version todo mark send to unibee api
-	err = email.SendTemplateEmail(ctx, 0, req.Email, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
+	// deploy version todo mark send to unibee api, cloud version use cloud merchantId
+	err = email.SendTemplateEmail(ctx, 15621, req.Email, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})
