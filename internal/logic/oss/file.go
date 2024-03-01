@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/util/grand"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -61,7 +62,6 @@ func Upload(ctx context.Context, in FileUploadInput) (*FileUploadOutput, error) 
 }
 
 func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath string, uploadFileName string, uploadUserId string) (*FileUploadOutput, error) {
-	// 读取本地文件
 	data, err := os.ReadFile(localFilePath)
 	if err != nil {
 		return nil, err
@@ -69,18 +69,19 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 
 	minioClient, err := minio.New(consts.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(consts.GetConfigInstance().MinioConfig.AccessKey, consts.GetConfigInstance().MinioConfig.SecretKey, ""),
-		Secure: false, // 如果是 HTTPS 连接，请将其设置为 true
+		Secure: false,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = minioClient.PutObject(ctx, consts.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{})
+	_, err = minioClient.PutObject(ctx, consts.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
+		ContentType: http.DetectContentType(data),
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	// 记录到数据表
 	toSave := entity.FileUpload{
 		UserId:     uploadUserId,
 		Url:        consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
