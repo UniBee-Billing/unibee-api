@@ -7,8 +7,8 @@ import (
 	"unibee/time"
 )
 
-func (c *ControllerInformation) MerchantInformation(ctx context.Context, req *information.MerchantInformationReq) (res *information.MerchantInformationRes, err error) {
-	res = &information.MerchantInformationRes{}
+func (c *ControllerInformation) Get(ctx context.Context, req *information.GetReq) (res *information.GetRes, err error) {
+	res = &information.GetRes{}
 
 	res.SupportTimeZone = time.GetTimeZoneList()
 	res.Env = consts.GetConfigInstance().Env

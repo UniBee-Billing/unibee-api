@@ -34,7 +34,6 @@ func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entit
 	}
 	var addonIdsList []uint64
 	if len(one.BindingAddonIds) > 0 {
-		//初始化
 		strList := strings.Split(one.BindingAddonIds, ",")
 
 		for _, s := range strList {

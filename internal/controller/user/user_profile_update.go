@@ -13,7 +13,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 )
 
-func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error) {
+func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error) {
 	// timezone check
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
@@ -42,5 +42,5 @@ func (c *ControllerProfile) ProfileUpdate(ctx context.Context, req *profile.Prof
 		return nil, err
 	}
 
-	return &profile.ProfileUpdateRes{}, nil
+	return &profile.UpdateRes{}, nil
 }

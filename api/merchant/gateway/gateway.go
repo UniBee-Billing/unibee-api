@@ -14,25 +14,25 @@ type ListRes struct {
 
 type SetupReq struct {
 	g.Meta        `path:"/setup" tags:"Merchant-Gateway-Controller" method:"post" summary:"Gateway Setup"`
-	GatewayName   string `p:"gatewayName"  dc:"GatewayName, stripe|paypal" v:"required"`
-	GatewayKey    string `p:"gatewayKey"  dc:"GatewayKey" `
-	GatewaySecret string `p:"gatewaySecret"  dc:"GatewaySecret" `
+	GatewayName   string `json:"gatewayName"  dc:"GatewayName, stripe|paypal" v:"required"`
+	GatewayKey    string `json:"gatewayKey"  dc:"GatewayKey" `
+	GatewaySecret string `json:"gatewaySecret"  dc:"GatewaySecret" `
 }
 type SetupRes struct {
 }
 
 type EditReq struct {
 	g.Meta        `path:"/edit" tags:"Merchant-Gateway-Controller" method:"post" summary:"Gateway Webhook Edit"`
-	GatewayId     uint64 `p:"gatewayId"  dc:"GatewayId" v:"required"`
-	GatewayKey    string `p:"gatewayKey"  dc:"GatewayKey" `
-	GatewaySecret string `p:"gatewaySecret"  dc:"GatewaySecret" `
+	GatewayId     uint64 `json:"gatewayId"  dc:"GatewayId" v:"required"`
+	GatewayKey    string `json:"gatewayKey"  dc:"GatewayKey" `
+	GatewaySecret string `json:"gatewaySecret"  dc:"GatewaySecret" `
 }
 type EditRes struct {
 }
 
 type SetupWebhookReq struct {
 	g.Meta    `path:"/setup_webhook" tags:"Merchant-Gateway-Controller" method:"post" summary:"Gateway Webhook Setup"`
-	GatewayId uint64 `p:"gatewayId"  dc:"GatewayId" v:"required"`
+	GatewayId uint64 `json:"gatewayId"  dc:"GatewayId" v:"required"`
 }
 type SetupWebhookRes struct {
 }

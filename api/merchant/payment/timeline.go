@@ -7,11 +7,11 @@ import (
 
 type TimeLineListReq struct {
 	g.Meta    `path:"/payment_timeline_list" tags:"Merchant-Payment-Timeline-Controller" method:"post" summary:"Payment TimeLine List"`
-	UserId    int    `p:"userId" dc:"Filter UserId, Default All" `
-	SortField string `p:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
-	SortType  string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page      int    `p:"page"  dc:"Page,Start 0" `
-	Count     int    `p:"count" dc:"Count Of Page" `
+	UserId    int    `json:"userId" dc:"Filter UserId, Default All" `
+	SortField string `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
+	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page      int    `json:"page"  dc:"Page,Start 0" `
+	Count     int    `json:"count" dc:"Count Of Page" `
 }
 
 type TimeLineListRes struct {

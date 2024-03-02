@@ -15,13 +15,13 @@ type GetRes struct {
 
 type UpdateReq struct {
 	g.Meta      `path:"/update" tags:"Merchant-Info-Controller" method:"post" summary:"Update Merchant Info"`
-	CompanyName string `p:"companyName" description:"company_name"`
-	Email       string `p:"email"       description:"email"`
-	Address     string `p:"address"     description:"address"`
-	CompanyLogo string `p:"companyLogo" description:"company_logo"`
-	Phone       string `p:"phone"       description:"phone"`
-	TimeZone    string `p:"timeZone" description:"User TimeZone"`
-	Host        string `p:"host" description:"User Portal Host"`
+	CompanyName string `json:"companyName" description:"company_name"`
+	Email       string `json:"email"       description:"email"`
+	Address     string `json:"address"     description:"address"`
+	CompanyLogo string `json:"companyLogo" description:"company_logo"`
+	Phone       string `json:"phone"       description:"phone"`
+	TimeZone    string `json:"timeZone" description:"User TimeZone"`
+	Host        string `json:"host" description:"User Portal Host"`
 }
 
 type UpdateRes struct {

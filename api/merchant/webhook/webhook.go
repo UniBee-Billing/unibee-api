@@ -24,9 +24,9 @@ type EndpointListRes struct {
 
 type EndpointLogListReq struct {
 	g.Meta     `path:"/endpoint_log_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Merchant Webhook Endpoint Log list"`
-	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
-	Page       int   `p:"page" dc:"Page, Start WIth 0" `
-	Count      int   `p:"count" dc:"Count Of Page" `
+	EndpointId int64 `json:"endpointId" dc:"EndpointId" v:"required"`
+	Page       int   `json:"page" dc:"Page, Start WIth 0" `
+	Count      int   `json:"count" dc:"Count Of Page" `
 }
 
 type EndpointLogListRes struct {
@@ -35,8 +35,8 @@ type EndpointLogListRes struct {
 
 type NewEndpointReq struct {
 	g.Meta `path:"/new_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant New Webhook Endpoint"`
-	Url    string   `p:"url" dc:"Url" v:"required"`
-	Events []string `p:"events" dc:"Events"`
+	Url    string   `json:"url" dc:"Url" v:"required"`
+	Events []string `json:"events" dc:"Events"`
 }
 
 type NewEndpointRes struct {
@@ -44,9 +44,9 @@ type NewEndpointRes struct {
 
 type UpdateEndpointReq struct {
 	g.Meta     `path:"/update_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Update Webhook Endpoint"`
-	EndpointId int64    `p:"endpointId" dc:"EndpointId" v:"required"`
-	Url        string   `p:"url" dc:"Url To Update" v:"required"`
-	Events     []string `p:"events" dc:"Events To Update"`
+	EndpointId int64    `json:"endpointId" dc:"EndpointId" v:"required"`
+	Url        string   `json:"url" dc:"Url To Update" v:"required"`
+	Events     []string `json:"events" dc:"Events To Update"`
 }
 
 type UpdateEndpointRes struct {
@@ -54,7 +54,7 @@ type UpdateEndpointRes struct {
 
 type DeleteEndpointReq struct {
 	g.Meta     `path:"/delete_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Delete Webhook Endpoint"`
-	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
+	EndpointId int64 `json:"endpointId" dc:"EndpointId" v:"required"`
 }
 
 type DeleteEndpointRes struct {

@@ -15,7 +15,7 @@ import (
 )
 
 type ISystemInformation interface {
-	MerchantInformation(ctx context.Context, req *information.MerchantInformationReq) (res *information.MerchantInformationRes, err error)
+	Get(ctx context.Context, req *information.GetReq) (res *information.GetRes, err error)
 }
 
 type ISystemInvoice interface {
@@ -33,9 +33,7 @@ type ISystemRefund interface {
 }
 
 type ISystemSubscription interface {
-	SubscriptionEndTrial(ctx context.Context, req *subscription.SubscriptionEndTrialReq) (res *subscription.SubscriptionEndTrialRes, err error)
-	SubscriptionExpire(ctx context.Context, req *subscription.SubscriptionExpireReq) (res *subscription.SubscriptionExpireRes, err error)
-	SubscriptionWalkTestClock(ctx context.Context, req *subscription.SubscriptionWalkTestClockReq) (res *subscription.SubscriptionWalkTestClockRes, err error)
+	TestClockWalk(ctx context.Context, req *subscription.TestClockWalkReq) (res *subscription.TestClockWalkRes, err error)
 }
 
 

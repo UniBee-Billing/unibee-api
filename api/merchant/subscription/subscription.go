@@ -8,8 +8,8 @@ import (
 )
 
 type SubscriptionDetailReq struct {
-	g.Meta         `path:"/subscription_detail" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription Detail"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	g.Meta         `path:"/detail" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription Detail"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionDetailRes struct {
 	User                                *ro.UserAccountSimplify               `json:"user" dc:"User"`
@@ -21,70 +21,70 @@ type SubscriptionDetailRes struct {
 }
 
 type SubscriptionListReq struct {
-	g.Meta    `path:"/subscription_list" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription List"`
-	UserId    int64  `p:"userId"  dc:"UserId" `
-	Status    []int  `p:"status" dc:"Filter, Default All，Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	SortField string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType  string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page      int    `p:"page" dc:"Page, Start WIth 0" `
-	Count     int    `p:"count"  dc:"Count" dc:"Count Of Page" `
+	g.Meta    `path:"/list" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription List"`
+	UserId    int64  `json:"userId"  dc:"UserId" `
+	Status    []int  `json:"status" dc:"Filter, Default All，Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page      int    `json:"page" dc:"Page, Start WIth 0" `
+	Count     int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type SubscriptionListRes struct {
 	Subscriptions []*ro.SubscriptionDetailVo `json:"subscriptions" dc:"Subscriptions"`
 }
 
 type SubscriptionCancelReq struct {
-	g.Meta         `path:"/subscription_cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	InvoiceNow     bool   `p:"invoiceNow" dc:"Default false"  deprecated:"true"`
-	Prorate        bool   `p:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
+	g.Meta         `path:"/cancel" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	InvoiceNow     bool   `json:"invoiceNow" dc:"Default false"  deprecated:"true"`
+	Prorate        bool   `json:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
 }
 type SubscriptionCancelRes struct {
 }
 
 type SubscriptionUpdateCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/subscription_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Set Cancel Ad Period End"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	g.Meta         `path:"/cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Set Cancel Ad Period End"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionUpdateCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionUpdateCancelLastCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/subscription_cancel_last_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Cancel Last CancelAtPeriod"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Cancel Last CancelAtPeriod"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionUpdateCancelLastCancelAtPeriodEndRes struct {
 }
 
 type SubscriptionSuspendReq struct {
-	g.Meta         `path:"/subscription_suspend" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Stop"  deprecated:"true"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	g.Meta         `path:"/suspend" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Stop"  deprecated:"true"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionSuspendRes struct {
 }
 
 type SubscriptionResumeReq struct {
-	g.Meta         `path:"/subscription_resume" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Resume"  deprecated:"true"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	g.Meta         `path:"/resume" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-Resume"  deprecated:"true"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SubscriptionResumeRes struct {
 }
 
 type SubscriptionAddNewTrialStartReq struct {
-	g.Meta             `path:"/subscription_add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-add appendTrialEndHour For Free"`
-	SubscriptionId     string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	AppendTrialEndHour int64  `p:"appendTrialEndHour" dc:"add appendTrialEndHour For Free" v:"required"`
+	g.Meta             `path:"/add_new_trial_start" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Edit Subscription-add appendTrialEndHour For Free"`
+	SubscriptionId     string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	AppendTrialEndHour int64  `json:"appendTrialEndHour" dc:"add appendTrialEndHour For Free" v:"required"`
 }
 type SubscriptionAddNewTrialStartRes struct {
 }
 
 type SubscriptionUpdatePreviewReq struct {
-	g.Meta              `path:"/subscription_update_preview" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Preview"`
-	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `p:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
+	g.Meta              `path:"/update_preview" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Preview"`
+	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                             `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
+	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
 }
 type SubscriptionUpdatePreviewRes struct {
 	TotalAmount       int64                     `json:"totalAmount"                `
@@ -95,15 +95,15 @@ type SubscriptionUpdatePreviewRes struct {
 }
 
 type SubscriptionUpdateReq struct {
-	g.Meta              `path:"/subscription_update_submit" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Submit"`
-	SubscriptionId      string                             `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `p:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                              `p:"quantity" dc:"Quantity，Default 1" `
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `p:"addonParams" dc:"addonParams" `
-	WithImmediateEffect int                                `p:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	ConfirmTotalAmount  int64                              `p:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency     string                             `p:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate       int64                              `p:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
+	g.Meta              `path:"/update_submit" tags:"Merchant-Subscription-Controller" method:"post" summary:"Merchant Update Subscription Submit"`
+	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                             `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
+	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
+	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	ConfirmTotalAmount  int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency     string                             `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate       int64                              `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
 }
 
 type SubscriptionUpdateRes struct {
@@ -114,7 +114,7 @@ type SubscriptionUpdateRes struct {
 
 type UserSubscriptionDetailReq struct {
 	g.Meta `path:"/user_subscription_detail" tags:"Merchant-Subscription-Controller" method:"post" summary:"Subscription Detail"`
-	UserId int64 `p:"userId" dc:"UserId" v:"required"`
+	UserId int64 `json:"userId" dc:"UserId" v:"required"`
 }
 
 type UserSubscriptionDetailRes struct {
@@ -127,12 +127,12 @@ type UserSubscriptionDetailRes struct {
 }
 
 type SubscriptionTimeLineListReq struct {
-	g.Meta    `path:"/subscription_timeline_list" tags:"Merchant-Subscription-Timeline-Controller" method:"post" summary:"Merchant Subscription TimeLine List"`
-	UserId    int    `p:"userId" dc:"Filter UserId, Default All " `
-	SortField string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType  string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page      int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count     int    `p:"count" dc:"Count Of Page" `
+	g.Meta    `path:"/timeline_list" tags:"Merchant-Subscription-Timeline-Controller" method:"post" summary:"Merchant Subscription TimeLine List"`
+	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
+	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page      int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count     int    `json:"count" dc:"Count Of Page" `
 }
 
 type SubscriptionTimeLineListRes struct {
@@ -140,12 +140,12 @@ type SubscriptionTimeLineListRes struct {
 }
 
 type SubscriptionMerchantPendingUpdateListReq struct {
-	g.Meta         `path:"/subscription_merchant_pending_update_list" tags:"Merchant-SubscriptionPendingUpdate-Controller" method:"post" summary:"Merchant-SubscriptionPendingUpdate List"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	SortField      string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType       string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count          int    `p:"count" dc:"Count Of Page" `
+	g.Meta         `path:"/pending_update_list" tags:"Merchant-SubscriptionPendingUpdate-Controller" method:"post" summary:"Merchant SubscriptionPendingUpdate List"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	SortField      string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType       string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count          int    `json:"count" dc:"Count Of Page" `
 }
 
 type SubscriptionMerchantPendingUpdateListRes struct {
@@ -153,10 +153,10 @@ type SubscriptionMerchantPendingUpdateListRes struct {
 }
 
 type SubscriptionNewAdminNoteReq struct {
-	g.Meta           `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant New Subscription Note"`
-	SubscriptionId   string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	MerchantMemberId int64  `p:"merchantMemberId" dc:"MerchantMemberId" v:"required"`
-	Note             string `p:"note" dc:"note" v:"required"`
+	g.Meta           `path:"/new_admin_note" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant New Subscription Note"`
+	SubscriptionId   string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	MerchantMemberId int64  `json:"merchantMemberId" dc:"MerchantMemberId" v:"required"`
+	Note             string `json:"note" dc:"note" v:"required"`
 }
 
 type SubscriptionNewAdminNoteRes struct {
@@ -174,10 +174,10 @@ type SubscriptionAdminNoteRo struct {
 }
 
 type SubscriptionAdminNoteListReq struct {
-	g.Meta         `path:"/subscription_admin_note_list" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant Subscription Note List"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count          int    `p:"count" dc:"Count Of Page" `
+	g.Meta         `path:"/admin_note_list" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant Subscription Note List"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count          int    `json:"count" dc:"Count Of Page" `
 }
 
 type SubscriptionAdminNoteListRes struct {

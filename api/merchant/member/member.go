@@ -15,7 +15,7 @@ type ProfileRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/user_logout" tags:"Merchant-Member-Profile-Controller" method:"post" summary:"Merchant Member Logout"`
+	g.Meta `path:"/logout" tags:"Merchant-Member-Profile-Controller" method:"post" summary:"Merchant Member Logout"`
 }
 
 type LogoutRes struct {
@@ -23,8 +23,8 @@ type LogoutRes struct {
 
 type PasswordResetReq struct {
 	g.Meta      `path:"/passwordReset" tags:"Merchant-Member-Profile-Controller" method:"post" summary:"Merchant Member Reset Password"`
-	OldPassword string `p:"oldPassword" dc:"OldPassword" v:"required"`
-	NewPassword string `p:"newPassword" dc:"NewPassword" v:"required"`
+	OldPassword string `json:"oldPassword" dc:"OldPassword" v:"required"`
+	NewPassword string `json:"newPassword" dc:"NewPassword" v:"required"`
 }
 
 type PasswordResetRes struct {

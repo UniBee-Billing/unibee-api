@@ -8,10 +8,10 @@ import (
 
 type NewEventReq struct {
 	g.Meta           `path:"/event/new" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Event"`
-	MetricCode       string      `p:"metricCode" dc:"MetricCode" v:"required"`
-	ExternalUserId   string      `p:"externalUserId" dc:"ExternalUserId" v:"required"`
-	ExternalEventId  string      `p:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
-	MetricProperties *gjson.Json `p:"metricProperties" dc:"MetricProperties"`
+	MetricCode       string      `json:"metricCode" dc:"MetricCode" v:"required"`
+	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
+	MetricProperties *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
 }
 
 type NewEventRes struct {
@@ -20,9 +20,9 @@ type NewEventRes struct {
 
 type DeleteEventReq struct {
 	g.Meta          `path:"/event/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Del Merchant Metric Event"`
-	MetricCode      string `p:"metricCode" dc:"MetricCode" v:"required"`
-	ExternalUserId  string `p:"externalUserId" dc:"ExternalUserId" v:"required"`
-	ExternalEventId string `p:"externalEventId" dc:"ExternalEventId" v:"required"`
+	MetricCode      string `json:"metricCode" dc:"MetricCode" v:"required"`
+	ExternalUserId  string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalEventId string `json:"externalEventId" dc:"ExternalEventId" v:"required"`
 }
 
 type DeleteEventRes struct {

@@ -7,8 +7,8 @@ import (
 
 type ListReq struct {
 	g.Meta   `path:"/list" tags:"User-Plan-Controller" method:"post" summary:"Plan List"`
-	Type     int    `p:"type"  dc:"Default All，,1-main plan，2-addon plan" `
-	Currency string `p:"currency" dc:"Currency"  `
+	Type     int    `json:"type"  dc:"Default All，,1-main plan，2-addon plan" `
+	Currency string `json:"currency" dc:"Currency"  `
 }
 type ListRes struct {
 	Plans []*ro.PlanDetailRo `json:"plans" dc:"Plan Detail"`

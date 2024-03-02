@@ -23,8 +23,8 @@ type SessionLoginReq struct {
 }
 
 type SessionLoginRes struct {
-	User  *entity.UserAccount `p:"user" dc:"user"`
-	Token string              `p:"token" dc:"token string"`
+	User  *entity.UserAccount `json:"user" dc:"user"`
+	Token string              `json:"token" dc:"token string"`
 }
 
 type LoginOtpReq struct {
@@ -42,8 +42,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	User  *entity.UserAccount `p:"user" dc:"user"`
-	Token string              `p:"token" dc:"token"`
+	User  *entity.UserAccount `json:"user" dc:"user"`
+	Token string              `json:"token" dc:"token"`
 }
 
 type PasswordForgetOtpReq struct {
@@ -77,7 +77,6 @@ type RegisterReq struct {
 	UserName    string `p:"userName" dc:"UserName"`
 }
 type RegisterRes struct {
-	// User *entity.UserAccount `p:"user" dc:"user"`
 }
 
 type RegisterVerifyReq struct {
@@ -87,5 +86,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	User *entity.UserAccount `p:"user" dc:"User"`
+	User *entity.UserAccount `json:"user" dc:"User"`
 }

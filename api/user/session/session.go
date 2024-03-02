@@ -4,14 +4,14 @@ import "github.com/gogf/gf/v2/frame/g"
 
 type NewReq struct {
 	g.Meta         `path:"/new_session" tags:"User-Session-Controller" method:"post" summary:"New User Portal Session"`
-	ExternalUserId string `p:"externalUserId" dc:"ExternalUserId" v:"required"`
-	Email          string `p:"email" dc:"Email" v:"required"`
-	FirstName      string `p:"firstName" dc:"First Name"`
-	LastName       string `p:"lastName" dc:"Last Name"`
-	ReturnUrl      string `p:"returnUrl" dc:"ReturnUrl"`
-	Password       string `p:"password" dc:"Password"`
-	Phone          string `p:"phone" dc:"Phone" `
-	Address        string `p:"address" dc:"Address"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	Email          string `json:"email" dc:"Email" v:"required"`
+	FirstName      string `json:"firstName" dc:"First Name"`
+	LastName       string `json:"lastName" dc:"Last Name"`
+	ReturnUrl      string `json:"returnUrl" dc:"ReturnUrl"`
+	Password       string `json:"password" dc:"Password"`
+	Phone          string `json:"phone" dc:"Phone" `
+	Address        string `json:"address" dc:"Address"`
 }
 
 type NewRes struct {

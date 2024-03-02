@@ -51,9 +51,9 @@ type IUserPlan interface {
 }
 
 type IUserProfile interface {
-	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
+	Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error)
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
-	ProfileUpdate(ctx context.Context, req *profile.ProfileUpdateReq) (res *profile.ProfileUpdateRes, err error)
+	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
 }
 

@@ -15,11 +15,11 @@ type ListRes struct {
 
 type NewReq struct {
 	g.Meta              `path:"/new" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric"`
-	Code                string `p:"code" dc:"Code" v:"required"`
-	MetricName          string `p:"metricName" dc:"MetricName" v:"required"`
-	MetricDescription   string `p:"metricDescription" dc:"MetricDescription"`
-	AggregationType     int    `p:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
-	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	Code                string `json:"code" dc:"Code" v:"required"`
+	MetricName          string `json:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription   string `json:"metricDescription" dc:"MetricDescription"`
+	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
+	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
 type NewRes struct {
@@ -28,9 +28,9 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta            `path:"/edit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
-	MetricId          int64  `p:"metricId" dc:"MetricId" v:"required"`
-	MetricName        string `p:"metricName" dc:"MetricName" v:"required"`
-	MetricDescription string `p:"metricDescription" dc:"MetricDescription"`
+	MetricId          int64  `json:"metricId" dc:"MetricId" v:"required"`
+	MetricName        string `json:"metricName" dc:"MetricName" v:"required"`
+	MetricDescription string `json:"metricDescription" dc:"MetricDescription"`
 }
 
 type EditRes struct {
@@ -39,7 +39,7 @@ type EditRes struct {
 
 type DeleteReq struct {
 	g.Meta   `path:"/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
-	MetricId int64 `p:"metricId" dc:"MetricId" v:"required"`
+	MetricId int64 `json:"metricId" dc:"MetricId" v:"required"`
 }
 
 type DeleteRes struct {
@@ -48,7 +48,7 @@ type DeleteRes struct {
 
 type DetailReq struct {
 	g.Meta   `path:"/detail" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Detail"`
-	MetricId uint64 `p:"metricId" dc:"MetricId" v:"required"`
+	MetricId uint64 `json:"metricId" dc:"MetricId" v:"required"`
 }
 
 type DetailRes struct {
