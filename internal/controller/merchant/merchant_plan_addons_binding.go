@@ -10,7 +10,7 @@ import (
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanAddonsBinding(ctx context.Context, req *plan.SubscriptionPlanAddonsBindingReq) (res *plan.SubscriptionPlanAddonsBindingRes, err error) {
+func (c *ControllerPlan) AddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (res *plan.AddonsBindingRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -22,5 +22,5 @@ func (c *ControllerPlan) SubscriptionPlanAddonsBinding(ctx context.Context, req 
 	if err != nil {
 		return nil, err
 	}
-	return &plan.SubscriptionPlanAddonsBindingRes{Plan: ro.SimplifyPlan(one)}, nil
+	return &plan.AddonsBindingRes{Plan: ro.SimplifyPlan(one)}, nil
 }

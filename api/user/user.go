@@ -47,7 +47,7 @@ type IUserPayment interface {
 }
 
 type IUserPlan interface {
-	SubscriptionPlanList(ctx context.Context, req *plan.SubscriptionPlanListReq) (res *plan.SubscriptionPlanListRes, err error)
+	List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error)
 }
 
 type IUserProfile interface {

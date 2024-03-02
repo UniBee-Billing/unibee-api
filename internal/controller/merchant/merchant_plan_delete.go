@@ -7,10 +7,10 @@ import (
 	"unibee/api/merchant/plan"
 )
 
-func (c *ControllerPlan) SubscriptionPlanDelete(ctx context.Context, req *plan.SubscriptionPlanDeleteReq) (res *plan.SubscriptionPlanDeleteRes, err error) {
+func (c *ControllerPlan) Delete(ctx context.Context, req *plan.DeleteReq) (res *plan.DeleteRes, err error) {
 	_, err = service.SubscriptionPlanDelete(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}
-	return &plan.SubscriptionPlanDeleteRes{}, nil
+	return &plan.DeleteRes{}, nil
 }

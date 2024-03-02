@@ -10,7 +10,7 @@ import (
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanCreate(ctx context.Context, req *plan.SubscriptionPlanCreateReq) (res *plan.SubscriptionPlanCreateRes, err error) {
+func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.NewRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -22,5 +22,5 @@ func (c *ControllerPlan) SubscriptionPlanCreate(ctx context.Context, req *plan.S
 	if err != nil {
 		return nil, err
 	}
-	return &plan.SubscriptionPlanCreateRes{Plan: ro.SimplifyPlan(one)}, nil
+	return &plan.NewRes{Plan: ro.SimplifyPlan(one)}, nil
 }

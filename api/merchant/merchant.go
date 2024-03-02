@@ -103,16 +103,16 @@ type IMerchantPayment interface {
 }
 
 type IMerchantPlan interface {
-	SubscriptionPlanCreate(ctx context.Context, req *plan.SubscriptionPlanCreateReq) (res *plan.SubscriptionPlanCreateRes, err error)
-	SubscriptionPlanEdit(ctx context.Context, req *plan.SubscriptionPlanEditReq) (res *plan.SubscriptionPlanEditRes, err error)
-	SubscriptionPlanAddonsBinding(ctx context.Context, req *plan.SubscriptionPlanAddonsBindingReq) (res *plan.SubscriptionPlanAddonsBindingRes, err error)
-	SubscriptionPlanList(ctx context.Context, req *plan.SubscriptionPlanListReq) (res *plan.SubscriptionPlanListRes, err error)
-	SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *plan.SubscriptionPlanChannelTransferAndActivateReq) (res *plan.SubscriptionPlanChannelTransferAndActivateRes, err error)
-	SubscriptionPlanPublish(ctx context.Context, req *plan.SubscriptionPlanPublishReq) (res *plan.SubscriptionPlanPublishRes, err error)
-	SubscriptionPlanUnPublish(ctx context.Context, req *plan.SubscriptionPlanUnPublishReq) (res *plan.SubscriptionPlanUnPublishRes, err error)
-	SubscriptionPlanDetail(ctx context.Context, req *plan.SubscriptionPlanDetailReq) (res *plan.SubscriptionPlanDetailRes, err error)
-	SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error)
-	SubscriptionPlanDelete(ctx context.Context, req *plan.SubscriptionPlanDeleteReq) (res *plan.SubscriptionPlanDeleteRes, err error)
+	New(ctx context.Context, req *plan.NewReq) (res *plan.NewRes, err error)
+	Edit(ctx context.Context, req *plan.EditReq) (res *plan.EditRes, err error)
+	AddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (res *plan.AddonsBindingRes, err error)
+	List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error)
+	Activate(ctx context.Context, req *plan.ActivateReq) (res *plan.ActivateRes, err error)
+	Publish(ctx context.Context, req *plan.PublishReq) (res *plan.PublishRes, err error)
+	UnPublish(ctx context.Context, req *plan.UnPublishReq) (res *plan.UnPublishRes, err error)
+	Detail(ctx context.Context, req *plan.DetailReq) (res *plan.DetailRes, err error)
+	Expire(ctx context.Context, req *plan.ExpireReq) (res *plan.ExpireRes, err error)
+	Delete(ctx context.Context, req *plan.DeleteReq) (res *plan.DeleteRes, err error)
 }
 
 type IMerchantSearch interface {

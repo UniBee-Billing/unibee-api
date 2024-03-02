@@ -26,7 +26,7 @@ type SubscriptionPlanListInternalReq struct {
 	Count         int    `p:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.SubscriptionPlanDetailRes, error) {
+func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes, error) {
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
 	var addonIds []int64
@@ -43,7 +43,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.Subscript
 			}
 		}
 	}
-	return &plan.SubscriptionPlanDetailRes{
+	return &plan.DetailRes{
 		Plan: &ro2.PlanDetailRo{
 			Plan:             ro2.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),

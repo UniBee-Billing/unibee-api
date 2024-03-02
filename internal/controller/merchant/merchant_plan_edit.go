@@ -5,11 +5,12 @@ import (
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/plan/service"
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanDetail(ctx context.Context, req *plan.SubscriptionPlanDetailReq) (res *plan.SubscriptionPlanDetailRes, err error) {
+func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan.EditRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -17,5 +18,9 @@ func (c *ControllerPlan) SubscriptionPlanDetail(ctx context.Context, req *plan.S
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 
-	return service.SubscriptionPlanDetail(ctx, req.PlanId)
+	one, err := service.SubscriptionPlanEdit(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return &plan.EditRes{Plan: ro.SimplifyPlan(one)}, nil
 }

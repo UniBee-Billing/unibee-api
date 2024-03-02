@@ -10,24 +10,18 @@ import (
 	"unibee/utility"
 )
 
-// SubscriptionPlanList todo mark 修改成 User Protal Plan List， Only Return Publish Plans And User Sub Plan
-func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.SubscriptionPlanListReq) (res *plan.SubscriptionPlanListRes, err error) {
-	// service 层不做用户校验
+func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 	}
 
 	publishPlans := service.SubscriptionPlanList(ctx, &service.SubscriptionPlanListInternalReq{
-		MerchantId: _interface.GetMerchantId(ctx),
-		//Type:          []int{req.Type},
+		MerchantId:    _interface.GetMerchantId(ctx),
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
 		Currency:      req.Currency,
-		//SortField:     req.SortField,
-		//SortType:      req.SortType,
-		Page:  0,
-		Count: 10,
+		Page:          0,
+		Count:         10,
 	})
 	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
 	if sub != nil {
@@ -39,5 +33,5 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *plan.Sub
 			}
 		}
 	}
-	return &plan.SubscriptionPlanListRes{Plans: publishPlans}, nil
+	return &plan.ListRes{Plans: publishPlans}, nil
 }

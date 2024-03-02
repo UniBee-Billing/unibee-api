@@ -46,7 +46,7 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.SubscriptionPlan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -140,7 +140,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.SubscriptionPlanCreateR
 	return one, nil
 }
 
-func SubscriptionPlanEdit(ctx context.Context, req *v1.SubscriptionPlanEditReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.SubscriptionPlan, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -253,7 +253,7 @@ func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Sub
 	return one, nil
 }
 
-func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.SubscriptionPlanAddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")

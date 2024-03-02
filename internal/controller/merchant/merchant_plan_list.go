@@ -9,7 +9,7 @@ import (
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.SubscriptionPlanListReq) (res *v1.SubscriptionPlanListRes, err error) {
+func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.ListRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -28,5 +28,5 @@ func (c *ControllerPlan) SubscriptionPlanList(ctx context.Context, req *v1.Subsc
 		Page:          req.Page,
 		Count:         req.Count,
 	})
-	return &v1.SubscriptionPlanListRes{Plans: plans}, nil
+	return &v1.ListRes{Plans: plans}, nil
 }

@@ -2,15 +2,15 @@ package merchant
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
-	"unibee/internal/logic/plan/service"
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanEdit(ctx context.Context, req *plan.SubscriptionPlanEditReq) (res *plan.SubscriptionPlanEditRes, err error) {
+func (c *ControllerPlan) Expire(ctx context.Context, req *plan.ExpireReq) (res *plan.ExpireRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -18,9 +18,5 @@ func (c *ControllerPlan) SubscriptionPlanEdit(ctx context.Context, req *plan.Sub
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 
-	one, err := service.SubscriptionPlanEdit(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	return &plan.SubscriptionPlanEditRes{Plan: ro.SimplifyPlan(one)}, nil
+	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

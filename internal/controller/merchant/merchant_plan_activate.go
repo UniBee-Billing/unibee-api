@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.Context, req *_plan.SubscriptionPlanChannelTransferAndActivateReq) (res *_plan.SubscriptionPlanChannelTransferAndActivateRes, err error) {
+func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (res *_plan.ActivateRes, err error) {
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -65,5 +65,5 @@ func (c *ControllerPlan) SubscriptionPlanChannelTransferAndActivate(ctx context.
 		}
 	}
 
-	return &_plan.SubscriptionPlanChannelTransferAndActivateRes{}, nil
+	return &_plan.ActivateRes{}, nil
 }
