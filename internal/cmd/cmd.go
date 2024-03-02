@@ -229,7 +229,7 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().OpenApiDetach,
 				)
-				group.Group("/", func(group *ghttp.RouterGroup) {
+				group.Group("/information", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						system.NewInformation(),
 					)

@@ -6,7 +6,7 @@ import (
 )
 
 type GetReq struct {
-	g.Meta `path:"/information" tags:"System-Information-Controller" method:"post" summary:"Get System Information"`
+	g.Meta `path:"/get" tags:"System-Information-Controller" method:"post" summary:"Get System Information"`
 }
 
 type GetRes struct {
