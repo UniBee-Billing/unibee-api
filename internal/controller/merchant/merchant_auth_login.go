@@ -17,8 +17,8 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(req.Email != "", "Email Cannot Be Empty")
 	utility.Assert(req.Password != "", "Password Cannot Be Empty")
 
-	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountByEmail(ctx, req.Email)
+	var newOne *entity.MerchantMember
+	newOne = query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "Email Not Found")
 	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
 
@@ -27,8 +27,8 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "Server Error", nil))
 	}
-	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantUser#%d", newOne.Id)), "Cache Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
 	newOne.Password = ""
-	return &auth.LoginRes{MerchantUser: newOne, Token: token}, nil
+	return &auth.LoginRes{MerchantMember: newOne, Token: token}, nil
 
 }

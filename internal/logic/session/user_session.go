@@ -76,7 +76,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, ss, 3*60)
 	utility.AssertError(err, "Server Error")
-	merchantInfo := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
+	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
 

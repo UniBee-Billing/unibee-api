@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantInfo is the golang structure of table merchant_info for DAO operations like Where/Data.
-type MerchantInfo struct {
-	g.Meta      `orm:"table:merchant_info, do:true"`
+// Merchant is the golang structure of table merchant for DAO operations like Where/Data.
+type Merchant struct {
+	g.Meta      `orm:"table:merchant, do:true"`
 	Id          interface{} // merchant_id
 	CompanyId   interface{} // company_id
 	UserId      interface{} // create_user_id

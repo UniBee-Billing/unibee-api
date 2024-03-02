@@ -129,7 +129,7 @@ func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
 
 func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
-	list := query.GetActiveMerchantInfoList(r.Context())
+	list := query.GetActiveMerchantList(r.Context())
 	userAgent := r.Header.Get("User-Agent")
 	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
 		customCtx.IsOpenApiCall = true
@@ -156,7 +156,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 			r.Middleware.Next()
 			return
 		}
-		one := query.GetMerchantInfoByHost(r.Context(), r.GetHost())
+		one := query.GetMerchantByHost(r.Context(), r.GetHost())
 		if one == nil {
 			//try match merchant from Http Origin
 			origin := r.GetHeader("Origin")
@@ -166,7 +166,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 				if err == nil {
 					// Extract the host (domain) from the parsed URL
 					domain := parsedURL.Hostname()
-					one = query.GetMerchantInfoByHost(r.Context(), domain)
+					one = query.GetMerchantByHost(r.Context(), domain)
 				}
 			}
 		}
@@ -235,14 +235,14 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = userAccount.MerchantId
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTUSER {
-			merchantAccount := query.GetMerchantUserAccountById(r.Context(), token.Id)
+			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			if merchantAccount == nil {
 				g.Log().Infof(r.Context(), "TokenAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
 				utility.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
 				r.Exit()
 			}
 
-			customCtx.MerchantUser = &model.ContextMerchantUser{
+			customCtx.MerchantMember = &model.ContextMerchantUser{
 				Id:         token.Id,
 				MerchantId: merchantAccount.MerchantId,
 				Token:      tokenString,

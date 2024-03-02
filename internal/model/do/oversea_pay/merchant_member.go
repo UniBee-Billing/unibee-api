@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantUserAccount is the golang structure of table merchant_user_account for DAO operations like Where/Data.
-type MerchantUserAccount struct {
-	g.Meta     `orm:"table:merchant_user_account, do:true"`
+// MerchantMember is the golang structure of table merchant_member for DAO operations like Where/Data.
+type MerchantMember struct {
+	g.Meta     `orm:"table:merchant_member, do:true"`
 	Id         interface{} // userId
 	GmtCreate  *gtime.Time // create time
 	GmtModify  *gtime.Time // update time

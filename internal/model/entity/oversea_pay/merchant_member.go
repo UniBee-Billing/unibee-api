@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantUserAccount is the golang structure for table merchant_user_account.
-type MerchantUserAccount struct {
+// MerchantMember is the golang structure for table merchant_member.
+type MerchantMember struct {
 	Id         uint64      `json:"id"         description:"userId"`                // userId
 	GmtCreate  *gtime.Time `json:"gmtCreate"  description:"create time"`           // create time
 	GmtModify  *gtime.Time `json:"gmtModify"  description:"update time"`           // update time

@@ -13,8 +13,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"Merchant User"`
-	Token        string                      `p:"token" dc:"Token"`
+	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"Merchant Member"`
+	Token          string                 `json:"token" dc:"Token"`
 }
 
 type LoginOtpReq struct {
@@ -32,8 +32,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"Merchant User"`
-	Token        string                      `p:"token" dc:"Token"`
+	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"Merchant Member"`
+	Token          string                 `json:"token" dc:"Token"`
 }
 
 type PasswordForgetOtpReq struct {
@@ -55,7 +55,7 @@ type PasswordForgetOtpVerifyRes struct {
 }
 
 type RegisterReq struct {
-	g.Meta    `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant User Register"`
+	g.Meta    `path:"/sso/register" tags:"Merchant-Auth-Controller" method:"post" summary:"Merchant Register"`
 	FirstName string `p:"firstName" dc:"First Name" v:"required"`
 	LastName  string `p:"lastName" dc:"Last Name" v:"required"`
 	Email     string `p:"email" dc:"Email" v:"required"`
@@ -73,5 +73,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	MerchantUser *entity.MerchantUserAccount `p:"merchantUser" dc:"MerchantUser"`
+	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"MerchantMember"`
 }

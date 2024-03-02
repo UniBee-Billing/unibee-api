@@ -62,7 +62,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		GmtModify:            one.GmtModify,
 		Paid:                 one.Paid,
 		Link:                 one.Link,
-		MerchantUser:         ro.SimplifyMerchantUserAccount(query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId))),
+		MerchantMember:       ro.SimplifyMerchantUserAccount(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
 		EffectImmediate:      one.EffectImmediate,
 		EffectTime:           one.EffectTime,
 		Note:                 one.Note,
@@ -96,7 +96,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 	err = dao.SubscriptionPendingUpdate.Ctx(ctx).
 		Where(dao.SubscriptionPendingUpdate.Columns().MerchantId, req.MerchantId).
 		Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, req.SubscriptionId).
-		WhereNotNull(dao.SubscriptionPendingUpdate.Columns().MerchantUserId).
+		WhereNotNull(dao.SubscriptionPendingUpdate.Columns().MerchantMemberId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
@@ -128,7 +128,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			GmtModify:            one.GmtModify,
 			Paid:                 one.Paid,
 			Link:                 one.Link,
-			MerchantUser:         ro.SimplifyMerchantUserAccount(query.GetMerchantUserAccountById(ctx, uint64(one.MerchantUserId))),
+			MerchantMember:       ro.SimplifyMerchantUserAccount(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
 			EffectImmediate:      one.EffectImmediate,
 			EffectTime:           one.EffectTime,
 			Note:                 one.Note,

@@ -13,8 +13,8 @@ import (
 func (c *ControllerEmail) MerchantEmailTemplateSetDefault(ctx context.Context, req *email.MerchantEmailTemplateSetDefaultReq) (res *email.MerchantEmailTemplateSetDefaultRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//Merchant User Check
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 	err = email2.SetMerchantEmailTemplateDefault(ctx, _interface.GetMerchantId(ctx), req.TemplateName)
 	if err != nil {

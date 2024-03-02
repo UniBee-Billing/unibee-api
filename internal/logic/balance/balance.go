@@ -10,7 +10,7 @@ import (
 
 func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId int64, gatewayId uint64) (*ro.GatewayUserDetailQueryInternalResp, error) {
 	user := query.GetUserAccountById(ctx, uint64(userId))
-	merchant := query.GetMerchantInfoById(ctx, merchantId)
+	merchant := query.GetMerchantById(ctx, merchantId)
 	gateway := query.GetGatewayById(ctx, uint64(gatewayId))
 	utility.Assert(user != nil, "user not found")
 	utility.Assert(merchant != nil, "merchant not found")
@@ -23,7 +23,7 @@ func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId int64
 }
 
 func MerchantBalanceDetailQuery(ctx context.Context, merchantId uint64, gatewayId uint64) (*ro.GatewayMerchantBalanceQueryInternalResp, error) {
-	merchant := query.GetMerchantInfoById(ctx, merchantId)
+	merchant := query.GetMerchantById(ctx, merchantId)
 	gateway := query.GetGatewayById(ctx, uint64(gatewayId))
 	utility.Assert(merchant != nil, "merchant not found")
 

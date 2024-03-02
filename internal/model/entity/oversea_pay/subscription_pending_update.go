@@ -36,7 +36,7 @@ type SubscriptionPendingUpdate struct {
 	Paid                 int         `json:"paid"                 description:"paid，0-no，1-yes"`                                                           // paid，0-no，1-yes
 	Link                 string      `json:"link"                 description:"payment link"`                                                              // payment link
 	GatewayStatus        string      `json:"gatewayStatus"        description:"gateway status"`                                                            // gateway status
-	MerchantUserId       int64       `json:"merchantUserId"       description:"merchant_user_id"`                                                          // merchant_user_id
+	MerchantMemberId     int64       `json:"merchantMemberId"     description:"merchant_user_id"`                                                          // merchant_user_id
 	Data                 string      `json:"data"                 description:""`                                                                          //
 	ResponseData         string      `json:"responseData"         description:""`                                                                          //
 	EffectImmediate      int         `json:"effectImmediate"      description:"effect immediate，0-no，1-yes"`                                               // effect immediate，0-no，1-yes

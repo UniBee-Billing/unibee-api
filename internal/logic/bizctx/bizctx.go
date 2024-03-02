@@ -40,7 +40,7 @@ func (s *sBizCtx) SetUser(ctx context.Context, ctxUser *model.ContextUser) {
 }
 
 func (s *sBizCtx) SetMerchantUser(ctx context.Context, ctxMerchantUser *model.ContextMerchantUser) {
-	s.Get(ctx).MerchantUser = ctxMerchantUser
+	s.Get(ctx).MerchantMember = ctxMerchantUser
 }
 
 func (s *sBizCtx) SetData(ctx context.Context, data g.Map) {

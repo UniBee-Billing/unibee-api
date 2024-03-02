@@ -8,14 +8,14 @@ import (
 )
 
 type Context struct {
-	Session       *ghttp.Session
-	MerchantId    uint64
-	User          *ContextUser
-	MerchantUser  *ContextMerchantUser
-	RequestId     string
-	Data          g.Map
-	OpenApiConfig *entity.OpenApiConfig
-	IsOpenApiCall bool
+	Session        *ghttp.Session
+	MerchantId     uint64
+	User           *ContextUser
+	MerchantMember *ContextMerchantUser
+	RequestId      string
+	Data           g.Map
+	OpenApiConfig  *entity.OpenApiConfig
+	IsOpenApiCall  bool
 }
 
 type ContextUser struct {

@@ -8,5 +8,5 @@ import (
 )
 
 func (c *ControllerMerchantinfo) MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error) {
-	return &merchantinfo.MerchantInfoRes{MerchantInfo: query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))}, nil
+	return &merchantinfo.MerchantInfoRes{MerchantInfo: query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))}, nil
 }

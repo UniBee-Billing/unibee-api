@@ -180,7 +180,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
-	merchantInfo := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, sub.MerchantId)
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}

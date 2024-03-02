@@ -20,26 +20,26 @@ type SubscriptionAdminNoteDao struct {
 
 // SubscriptionAdminNoteColumns defines and stores column names for table subscription_admin_note.
 type SubscriptionAdminNoteColumns struct {
-	Id             string // id
-	GmtCreate      string // create_time
-	GmtModify      string // modify_time
-	SubscriptionId string // subscription_id
-	MerchantUserId string // merchant_user_id
-	Note           string // note
-	IsDeleted      string // 0-UnDeleted，1-Deleted
-	CreateTime     string // create utc time
+	Id               string // id
+	GmtCreate        string // create_time
+	GmtModify        string // modify_time
+	SubscriptionId   string // subscription_id
+	MerchantMemberId string // merchant_user_id
+	Note             string // note
+	IsDeleted        string // 0-UnDeleted，1-Deleted
+	CreateTime       string // create utc time
 }
 
 // subscriptionAdminNoteColumns holds the columns for table subscription_admin_note.
 var subscriptionAdminNoteColumns = SubscriptionAdminNoteColumns{
-	Id:             "id",
-	GmtCreate:      "gmt_create",
-	GmtModify:      "gmt_modify",
-	SubscriptionId: "subscription_id",
-	MerchantUserId: "merchant_user_id",
-	Note:           "note",
-	IsDeleted:      "is_deleted",
-	CreateTime:     "create_time",
+	Id:               "id",
+	GmtCreate:        "gmt_create",
+	GmtModify:        "gmt_modify",
+	SubscriptionId:   "subscription_id",
+	MerchantMemberId: "merchant_member_id",
+	Note:             "note",
+	IsDeleted:        "is_deleted",
+	CreateTime:       "create_time",
 }
 
 // NewSubscriptionAdminNoteDao creates and returns a new DAO object for table data access.

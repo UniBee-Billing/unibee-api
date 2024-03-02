@@ -283,7 +283,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) 
 	}
 	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
 	if user != nil {
-		merchant := query.GetMerchantInfoById(ctx, payment.MerchantId)
+		merchant := query.GetMerchantById(ctx, payment.MerchantId)
 		if merchant != nil {
 			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,

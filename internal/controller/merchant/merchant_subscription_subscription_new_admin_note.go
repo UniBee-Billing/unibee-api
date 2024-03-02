@@ -14,10 +14,10 @@ import (
 
 func (c *ControllerSubscription) SubscriptionNewAdminNote(ctx context.Context, req *subscription.SubscriptionNewAdminNoteReq) (res *subscription.SubscriptionNewAdminNoteRes, err error) {
 	note := &entity.SubscriptionAdminNote{
-		SubscriptionId: req.SubscriptionId,
-		MerchantUserId: req.MerchantUserId,
-		Note:           req.Note,
-		CreateTime:     gtime.Now().Timestamp(),
+		SubscriptionId:   req.SubscriptionId,
+		MerchantMemberId: req.MerchantMemberId,
+		Note:             req.Note,
+		CreateTime:       gtime.Now().Timestamp(),
 	}
 
 	_, err = dao.SubscriptionAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)

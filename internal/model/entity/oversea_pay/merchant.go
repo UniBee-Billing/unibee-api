@@ -8,8 +8,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// MerchantInfo is the golang structure for table merchant_info.
-type MerchantInfo struct {
+// Merchant is the golang structure for table merchant.
+type Merchant struct {
 	Id          uint64      `json:"id"          description:"merchant_id"`                // merchant_id
 	CompanyId   int64       `json:"companyId"   description:"company_id"`                 // company_id
 	UserId      int64       `json:"userId"      description:"create_user_id"`             // create_user_id

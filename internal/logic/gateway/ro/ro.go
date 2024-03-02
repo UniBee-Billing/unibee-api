@@ -16,7 +16,7 @@ type CreatePayContext struct {
 	Pay                      *entity.Payment         `json:"pay"`
 	Gateway                  *entity.MerchantGateway `json:"gateway"`
 	TerminalIp               string                  `json:"terminalIp"`
-	ShopperUserId            string                  `json:"merchantUserId"`
+	ShopperUserId            string                  `json:"shopperUserId"`
 	ShopperEmail             string                  `json:"shopperEmail"`
 	ShopperLocale            string                  `json:"shopperLocale"`
 	Mobile                   string                  `json:"mobile"`
@@ -226,7 +226,7 @@ type InvoiceDetailRo struct {
 	PaymentId                      string                 `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                 `json:"refundId"                       description:"refundId"`
 	Gateway                        *GatewaySimplify       `json:"gateway"                       description:"Gateway"`
-	MerchantInfo                   *entity.MerchantInfo   `json:"merchantInfo"                       description:"MerchantInfo"`
+	MerchantInfo                   *entity.Merchant       `json:"merchantInfo"                       description:"MerchantInfo"`
 	UserAccount                    *entity.UserAccount    `json:"userAccount"                       description:"UserAccount"`
 	Subscription                   *entity.Subscription   `json:"subscription"                       description:"Subscription"`
 	Payment                        *entity.Payment        `json:"payment"                       description:"Payment"`
@@ -301,7 +301,7 @@ type SubscriptionPendingUpdateDetailVo struct {
 	GmtModify            *gtime.Time                  `json:"gmtModify"            description:"GmtModify"`
 	Paid                 int                          `json:"paid"                 description:"Paid"`
 	Link                 string                       `json:"link"                 description:"Link"`
-	MerchantUser         *MerchantUserAccountSimplify `json:"merchantUser"       description:"merchant_user"`
+	MerchantMember       *MerchantUserAccountSimplify `json:"merchantMember"       description:"Merchant Member"`
 	EffectImmediate      int                          `json:"effectImmediate"      description:"EffectImmediate"`
 	EffectTime           int64                        `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
 	Note                 string                       `json:"note"            description:"Update Note"`

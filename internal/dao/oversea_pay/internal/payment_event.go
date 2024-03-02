@@ -20,42 +20,42 @@ type PaymentEventDao struct {
 
 // PaymentEventColumns defines and stores column names for table payment_event.
 type PaymentEventColumns struct {
-	Id              string // id
-	UserId          string // user_id
-	MerchantUserId  string // merchant_user_id
-	OpenApiId       string // open api id
-	TerminalIp      string // terminal_ip
-	BizType         string // biz_type=1，Payment表
-	BizId           string // biz_type=1，pay；
-	Fee             string // amount, cent
-	EventType       string // 0-unknown
-	Event           string // event
-	RelativeTradeNo string // relative trade no
-	UniqueNo        string // unique no
-	GmtCreate       string // create time
-	GmtModify       string // update time
-	Message         string // message
-	CreateTime      string // create utc time
+	Id               string // id
+	UserId           string // user_id
+	MerchantMemberId string // merchant_user_id
+	OpenApiId        string // open api id
+	TerminalIp       string // terminal_ip
+	BizType          string // biz_type=1，Payment表
+	BizId            string // biz_type=1，pay；
+	Fee              string // amount, cent
+	EventType        string // 0-unknown
+	Event            string // event
+	RelativeTradeNo  string // relative trade no
+	UniqueNo         string // unique no
+	GmtCreate        string // create time
+	GmtModify        string // update time
+	Message          string // message
+	CreateTime       string // create utc time
 }
 
 // paymentEventColumns holds the columns for table payment_event.
 var paymentEventColumns = PaymentEventColumns{
-	Id:              "id",
-	UserId:          "user_id",
-	MerchantUserId:  "merchant_user_id",
-	OpenApiId:       "open_api_id",
-	TerminalIp:      "terminal_ip",
-	BizType:         "biz_type",
-	BizId:           "biz_id",
-	Fee:             "fee",
-	EventType:       "event_type",
-	Event:           "event",
-	RelativeTradeNo: "relative_trade_no",
-	UniqueNo:        "unique_no",
-	GmtCreate:       "gmt_create",
-	GmtModify:       "gmt_modify",
-	Message:         "message",
-	CreateTime:      "create_time",
+	Id:               "id",
+	UserId:           "user_id",
+	MerchantMemberId: "merchant_member_id",
+	OpenApiId:        "open_api_id",
+	TerminalIp:       "terminal_ip",
+	BizType:          "biz_type",
+	BizId:            "biz_id",
+	Fee:              "fee",
+	EventType:        "event_type",
+	Event:            "event",
+	RelativeTradeNo:  "relative_trade_no",
+	UniqueNo:         "unique_no",
+	GmtCreate:        "gmt_create",
+	GmtModify:        "gmt_modify",
+	Message:          "message",
+	CreateTime:       "create_time",
 }
 
 // NewPaymentEventDao creates and returns a new DAO object for table data access.

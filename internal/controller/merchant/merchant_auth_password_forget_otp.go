@@ -31,10 +31,10 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 
-	merchantUser := query.GetMerchantUserAccountByEmail(ctx, req.Email)
-	utility.Assert(merchantUser != nil, "merchantUser not found")
-	err = email.SendTemplateEmail(ctx, merchantUser.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
-		UserName:         merchantUser.FirstName + " " + merchantUser.LastName,
+	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
+	utility.Assert(merchantMember != nil, "merchant member not found")
+	err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
+		UserName:         merchantMember.FirstName + " " + merchantMember.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

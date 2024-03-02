@@ -44,7 +44,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 				return
 			}
 
-			merchantInfo := query.GetMerchantInfoById(r.Context(), one.MerchantId)
+			merchantInfo := query.GetMerchantById(r.Context(), one.MerchantId)
 			user := query.GetUserAccountById(r.Context(), uint64(one.UserId))
 			createPayContext := &ro.CreatePayContext{
 				Gateway: gateway,

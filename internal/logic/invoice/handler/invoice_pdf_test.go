@@ -24,7 +24,7 @@ func TestGenerate(t *testing.T) {
 		GmtModify:          gtime.Now(),
 		Link:               "http://unibee.top",
 		TaxScale:           2000,
-	}, &entity.MerchantInfo{
+	}, &entity.Merchant{
 		CompanyName: "UniBee.inc",
 		BusinessNum: "EE101775690",
 		Name:        "UniBee",

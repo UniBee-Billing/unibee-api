@@ -38,7 +38,7 @@ type SubscriptionPendingUpdate struct {
 	Paid                 interface{} // paid，0-no，1-yes
 	Link                 interface{} // payment link
 	GatewayStatus        interface{} // gateway status
-	MerchantUserId       interface{} // merchant_user_id
+	MerchantMemberId     interface{} // merchant_user_id
 	Data                 interface{} //
 	ResponseData         interface{} //
 	EffectImmediate      interface{} // effect immediate，0-no，1-yes

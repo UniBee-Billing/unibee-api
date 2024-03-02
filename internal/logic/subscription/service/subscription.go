@@ -34,7 +34,7 @@ type SubscriptionCreatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
-	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
+	Merchant          *entity.Merchant                   `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.PlanAddonVo                  `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
@@ -131,7 +131,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, "user not found")
@@ -208,7 +208,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 		Plan:              plan,
 		Quantity:          req.Quantity,
 		Gateway:           gateway,
-		MerchantInfo:      merchantInfo,
+		Merchant:          merchantInfo,
 		AddonParams:       req.AddonParams,
 		Addons:            addons,
 		TotalAmount:       invoice.TotalAmount,
@@ -252,7 +252,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, prepare.Invoice.PeriodEnd, prepare.Plan.Id)
 
 	one := &entity.Subscription{
-		MerchantId:         prepare.MerchantInfo.Id,
+		MerchantId:         prepare.Merchant.Id,
 		Type:               subType,
 		PlanId:             prepare.Plan.Id,
 		GatewayId:          prepare.Gateway.Id,
@@ -311,8 +311,8 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 			TotalAmount:    prepare.Invoice.TotalAmount,
 			Currency:       prepare.Currency,
 			CountryCode:    prepare.VatCountryCode,
-			MerchantId:     prepare.MerchantInfo.Id,
-			CompanyId:      prepare.MerchantInfo.CompanyId,
+			MerchantId:     prepare.Merchant.Id,
+			CompanyId:      prepare.Merchant.CompanyId,
 			BillingReason:  prepare.Invoice.InvoiceName,
 			ReturnUrl:      req.ReturnUrl,
 		},
@@ -373,7 +373,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	Plan              *entity.SubscriptionPlan           `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
-	MerchantInfo      *entity.MerchantInfo               `json:"merchantInfo"`
+	MerchantInfo      *entity.Merchant                   `json:"merchantInfo"`
 	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
 	Addons            []*ro.PlanAddonVo                  `json:"addons"`
 	TotalAmount       int64                              `json:"totalAmount"                `
@@ -387,7 +387,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 }
 
 // SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantUserId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -401,7 +401,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.Subscripti
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	//试用期内不允许修改计划
 	//utility.Assert(sub.TrialEnd < gtime.Now().Timestamp(), "subscription is in trial period ,should end trial before update")
@@ -653,14 +653,14 @@ type UpdateSubscriptionInternalResp struct {
 	Invoice         *entity.Invoice `json:"invoice" description:""`
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantUserId int64) (*subscription.SubscriptionUpdateRes, error) {
+func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantMemberId int64) (*subscription.SubscriptionUpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
 		Quantity:            req.Quantity,
 		AddonParams:         req.AddonParams,
 		WithImmediateEffect: req.WithImmediateEffect,
-	}, req.ProrationDate, merchantUserId)
+	}, req.ProrationDate, merchantMemberId)
 	if err != nil {
 		return nil, err
 	}
@@ -698,7 +698,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams),
 		Status:               consts.PendingSubStatusInit,
 		Data:                 "",
-		MerchantUserId:       merchantUserId,
+		MerchantMemberId:     merchantMemberId,
 		ProrationDate:        req.ProrationDate,
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
@@ -715,7 +715,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 	var subUpdateRes *UpdateSubscriptionInternalResp
 	if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
 		// createAndPayNewProrationInvoice
-		merchantInfo := query.GetMerchantInfoById(ctx, one.MerchantId)
+		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
@@ -808,7 +808,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	if !consts.GetConfigInstance().IsServerDev() || !consts.GetConfigInstance().IsLocal() {
 		// todo mark will support proration invoiceNow later
@@ -832,7 +832,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	if user != nil {
-		merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if merchant != nil {
 			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,
@@ -855,7 +855,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	return nil
 }
 
-func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool, merchantUserId int64) error {
+func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, proration bool, merchantMemberId int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -868,7 +868,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 1,
@@ -879,9 +879,9 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 	}
 
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 	// SendEmail
-	if merchantUserId > 0 {
+	if merchantMemberId > 0 {
 		//merchant Cancel
 		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin, "", &email.TemplateVariable{
 			UserName:            user.FirstName + " " + user.LastName,
@@ -921,7 +921,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	merchantInfo := query.GetMerchantInfoById(ctx, plan.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -932,7 +932,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 		return err
 	}
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: plan.PlanName,

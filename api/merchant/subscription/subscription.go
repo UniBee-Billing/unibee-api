@@ -153,10 +153,10 @@ type SubscriptionMerchantPendingUpdateListRes struct {
 }
 
 type SubscriptionNewAdminNoteReq struct {
-	g.Meta         `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant New Subscription Note"`
-	SubscriptionId string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	MerchantUserId int64  `p:"merchantUserId" dc:"MerchantUserId" v:"required"`
-	Note           string `p:"note" dc:"note" v:"required"`
+	g.Meta           `path:"/subscription_new_admin_note" tags:"Merchant-Subscription-Note-Controller" method:"post" summary:"Merchant New Subscription Note"`
+	SubscriptionId   string `p:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	MerchantMemberId int64  `p:"merchantMemberId" dc:"MerchantMemberId" v:"required"`
+	Note             string `p:"note" dc:"note" v:"required"`
 }
 
 type SubscriptionNewAdminNoteRes struct {

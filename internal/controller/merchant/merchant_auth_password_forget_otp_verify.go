@@ -21,8 +21,8 @@ func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.
 	utility.Assert(verificationCode != nil, "code expired")
 	utility.Assert((verificationCode.String()) == req.VerificationCode, "code not match")
 
-	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountByEmail(ctx, req.Email)
+	var newOne *entity.MerchantMember
+	newOne = query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "User Not Found")
 	auth2.ChangeMerchantUserPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
 	return &auth.PasswordForgetOtpVerifyRes{}, nil

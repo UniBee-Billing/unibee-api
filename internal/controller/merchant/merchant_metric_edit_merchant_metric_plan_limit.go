@@ -11,7 +11,7 @@ import (
 )
 
 func (c *ControllerMetric) EditMerchantMetricPlanLimit(ctx context.Context, req *metric.EditMerchantMetricPlanLimitReq) (res *metric.EditMerchantMetricPlanLimitRes, err error) {
-	one := query.GetMerchantInfoById(ctx, _interface.GetMerchantId(ctx))
+	one := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}

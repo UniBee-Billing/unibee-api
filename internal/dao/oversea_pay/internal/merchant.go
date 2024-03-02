@@ -11,15 +11,15 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// MerchantInfoDao is the data access object for table merchant_info.
-type MerchantInfoDao struct {
-	table   string              // table is the underlying table name of the DAO.
-	group   string              // group is the database configuration group name of current DAO.
-	columns MerchantInfoColumns // columns contains all the column names of Table for convenient usage.
+// MerchantDao is the data access object for table merchant.
+type MerchantDao struct {
+	table   string          // table is the underlying table name of the DAO.
+	group   string          // group is the database configuration group name of current DAO.
+	columns MerchantColumns // columns contains all the column names of Table for convenient usage.
 }
 
-// MerchantInfoColumns defines and stores column names for table merchant_info.
-type MerchantInfoColumns struct {
+// MerchantColumns defines and stores column names for table merchant.
+type MerchantColumns struct {
 	Id          string // merchant_id
 	CompanyId   string // company_id
 	UserId      string // create_user_id
@@ -43,8 +43,8 @@ type MerchantInfoColumns struct {
 	ApiKey      string // merchant open api key
 }
 
-// merchantInfoColumns holds the columns for table merchant_info.
-var merchantInfoColumns = MerchantInfoColumns{
+// merchantColumns holds the columns for table merchant.
+var merchantColumns = MerchantColumns{
 	Id:          "id",
 	CompanyId:   "company_id",
 	UserId:      "user_id",
@@ -68,37 +68,37 @@ var merchantInfoColumns = MerchantInfoColumns{
 	ApiKey:      "api_key",
 }
 
-// NewMerchantInfoDao creates and returns a new DAO object for table data access.
-func NewMerchantInfoDao() *MerchantInfoDao {
-	return &MerchantInfoDao{
+// NewMerchantDao creates and returns a new DAO object for table data access.
+func NewMerchantDao() *MerchantDao {
+	return &MerchantDao{
 		group:   "oversea_pay",
-		table:   "merchant_info",
-		columns: merchantInfoColumns,
+		table:   "merchant",
+		columns: merchantColumns,
 	}
 }
 
 // DB retrieves and returns the underlying raw database management object of current DAO.
-func (dao *MerchantInfoDao) DB() gdb.DB {
+func (dao *MerchantDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
 // Table returns the table name of current dao.
-func (dao *MerchantInfoDao) Table() string {
+func (dao *MerchantDao) Table() string {
 	return dao.table
 }
 
 // Columns returns all column names of current dao.
-func (dao *MerchantInfoDao) Columns() MerchantInfoColumns {
+func (dao *MerchantDao) Columns() MerchantColumns {
 	return dao.columns
 }
 
 // Group returns the configuration group name of database of current dao.
-func (dao *MerchantInfoDao) Group() string {
+func (dao *MerchantDao) Group() string {
 	return dao.group
 }
 
 // Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
-func (dao *MerchantInfoDao) Ctx(ctx context.Context) *gdb.Model {
+func (dao *MerchantDao) Ctx(ctx context.Context) *gdb.Model {
 	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
 }
 
@@ -108,6 +108,6 @@ func (dao *MerchantInfoDao) Ctx(ctx context.Context) *gdb.Model {
 //
 // Note that, you should not Commit or Rollback the transaction in function f
 // as it is automatically handled by this function.
-func (dao *MerchantInfoDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
+func (dao *MerchantDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
 }

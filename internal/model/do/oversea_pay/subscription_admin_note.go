@@ -11,13 +11,13 @@ import (
 
 // SubscriptionAdminNote is the golang structure of table subscription_admin_note for DAO operations like Where/Data.
 type SubscriptionAdminNote struct {
-	g.Meta         `orm:"table:subscription_admin_note, do:true"`
-	Id             interface{} // id
-	GmtCreate      *gtime.Time // create_time
-	GmtModify      *gtime.Time // modify_time
-	SubscriptionId interface{} // subscription_id
-	MerchantUserId interface{} // merchant_user_id
-	Note           interface{} // note
-	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
-	CreateTime     interface{} // create utc time
+	g.Meta           `orm:"table:subscription_admin_note, do:true"`
+	Id               interface{} // id
+	GmtCreate        *gtime.Time // create_time
+	GmtModify        *gtime.Time // modify_time
+	SubscriptionId   interface{} // subscription_id
+	MerchantMemberId interface{} // merchant_user_id
+	Note             interface{} // note
+	IsDeleted        interface{} // 0-UnDeleted，1-Deleted
+	CreateTime       interface{} // create utc time
 }

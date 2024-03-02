@@ -14,8 +14,8 @@ func (c *ControllerInvoice) SubscriptionInvoiceSendEmail(ctx context.Context, re
 
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantUser.Id > 0, "merchantUserId invalid")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 	err = handler.SendSubscriptionInvoiceEmailToUser(ctx, req.InvoiceId)
 	if err != nil {

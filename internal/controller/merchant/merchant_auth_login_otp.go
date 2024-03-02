@@ -25,11 +25,11 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-Verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	merchantUser := query.GetMerchantUserAccountByEmail(ctx, req.Email)
-	utility.Assert(merchantUser != nil, "merchant user not found")
+	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
+	utility.Assert(merchantMember != nil, "merchant member not found")
 	// deploy version todo mark send to unibee api
-	err = email.SendTemplateEmail(ctx, merchantUser.MerchantId, req.Email, "", email.TemplateMerchantOTPLogin, "", &email.TemplateVariable{
-		UserName:         merchantUser.FirstName + " " + merchantUser.LastName,
+	err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", email.TemplateMerchantOTPLogin, "", &email.TemplateVariable{
+		UserName:         merchantMember.FirstName + " " + merchantMember.LastName,
 		CodeExpireMinute: "3",
 		Code:             verificationCode,
 	})

@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
-	"unibee/internal/cmd/router"
 	"unibee/internal/cmd/swagger"
 	"unibee/internal/consts"
 	"unibee/internal/controller"
 	"unibee/internal/controller/gateway_webhook_entry"
 	"unibee/internal/controller/invoice_entry"
+	"unibee/internal/controller/merchant"
+	"unibee/internal/controller/onetime"
+	"unibee/internal/controller/system"
+	"unibee/internal/controller/user"
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/utility"
@@ -47,8 +50,16 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
-				router.OpenPayment(ctx, group)
-				router.OpenMocks(ctx, group)
+				group.Group("/payment", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						onetime.NewPayment(),
+					)
+				})
+				group.Group("/mock", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						onetime.NewMock(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant", func(group *ghttp.RouterGroup) {
@@ -57,29 +68,81 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
-				router.MerchantPlan(ctx, group)
-				router.MerchantGateway(ctx, group)
-				router.MerchantProfile(ctx, group)
-				router.MerchantSubscrption(ctx, group)
-				router.MerchantInvoice(ctx, group)
-				router.MerchantOss(ctx, group)
-				router.MerchantVat(ctx, group)
-				router.MerchantBalance(ctx, group)
-				router.MerchantPayment(ctx, group)
-				router.MerchantUser(ctx, group)
-				router.MerchantSearch(ctx, group)
-				router.MerchantInfo(ctx, group)
-				router.MerchantEmailTemplate(ctx, group)
-				router.MerchantWebhook(ctx, group)
-				router.MerchantMetric(ctx, group)
-			})
-
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-				)
-				router.MerchantUserAuth(ctx, group)
+				group.Group("/plan", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewPlan(),
+					)
+				})
+				group.Group("/gateway", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewGateway(),
+					)
+				})
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewProfile(),
+					)
+				})
+				group.Group("/subscription", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewSubscription(),
+					)
+				})
+				group.Group("/invoice", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewInvoice(),
+					)
+				})
+				group.Group("/oss", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewOss(),
+					)
+				})
+				group.Group("/vat", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewVat(),
+					)
+				})
+				group.Group("/balance", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewBalance(),
+					)
+				})
+				group.Group("/payment", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewPayment(),
+					)
+				})
+				group.Group("/merchant_user", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewUser(),
+					)
+				})
+				group.Group("/search", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewSearch(),
+					)
+				})
+				group.Group("/merchant_info", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewMerchantinfo(),
+					)
+				})
+				group.Group("/email", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewEmail(),
+					)
+				})
+				group.Group("/merchant_webhook", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewWebhook(),
+					)
+				})
+				group.Group("/merchant_metric", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewMetric(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user", func(group *ghttp.RouterGroup) {
@@ -88,14 +151,58 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
-				router.UserPlan(ctx, group)
-				router.UserSubscription(ctx, group)
-				router.UserInvoice(ctx, group)
-				router.UserProfile(ctx, group)
-				router.UserPayment(ctx, group)
-				router.UserSession(ctx, group)
-				router.UserGateway(ctx, group)
-				router.UserMerchant(ctx, group)
+				group.Group("/plan", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewPlan(),
+					)
+				})
+				group.Group("/subscription", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewSubscription(),
+					)
+				})
+				group.Group("/invoice", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewInvoice(),
+					)
+				})
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewProfile(),
+					)
+				})
+				group.Group("/payment", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewPayment(),
+					)
+				})
+				group.Group("/session", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewSession(),
+					)
+				})
+				group.Group("/gateway", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewGateway(),
+					)
+				})
+				group.Group("/merchant", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewMerchantinfo(),
+					)
+				})
+			})
+
+			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewAuth(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {
@@ -104,7 +211,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().UserPortalPreAuth,
 				)
-				router.UserAuth(ctx, group)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewAuth(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/vat", func(group *ghttp.RouterGroup) {
@@ -113,7 +224,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
-				router.UserVat(ctx, group)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewVat(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/system", func(group *ghttp.RouterGroup) {
@@ -123,18 +238,36 @@ var (
 					_interface.Middleware().OpenApiDetach,
 				)
 				if !consts.GetConfigInstance().IsProd() {
-					router.SystemSubscription(ctx, group)
-					router.SystemInvoice(ctx, group)
-					router.SystemPayment(ctx, group)
-					router.SystemRefund(ctx, group)
+					group.Group("/subscription", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							system.NewSubscription(),
+						)
+					})
+					group.Group("/invoice", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							system.NewInvoice(),
+						)
+					})
+					group.Group("/payment", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							system.NewPayment(),
+						)
+					})
+					group.Group("/refund", func(group *ghttp.RouterGroup) {
+						group.Bind(
+							system.NewRefund(),
+						)
+					})
 				}
-				router.SystemMerchantInformation(ctx, group)
+				group.Group("/merchant", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewInformation(),
+					)
+				})
 			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
-			//// Session Redirect
-			//s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/session/redirect/{session}/forward", session.UserSessionRedirectEntrance)
 			// Invoice Link
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/in/{invoiceId}", invoice_entry.InvoiceEntrance)
 			// Gateway Redirect
@@ -145,7 +278,6 @@ var (
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)
 				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
-				//g.Log().Infof(ctx, "Server TimeZone: %d ", time.z)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
 				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
@@ -158,7 +290,6 @@ var (
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
 				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
 				if !consts.GetConfigInstance().IsServerDev() && !consts.GetConfigInstance().IsLocal() {
-					//g.Log().SetLevel(glog.LEVEL_ALL ^ glog.LEVEL_DEBU) // use bit migrate remove debug log
 					_ = g.Log().SetLevelStr("info") // remove debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
 				}
 				cronjob.StartCronJobs()

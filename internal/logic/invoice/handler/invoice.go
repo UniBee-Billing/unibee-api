@@ -250,7 +250,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
 	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
-	merchant := query.GetMerchantInfoById(ctx, one.MerchantId)
+	merchant := query.GetMerchantById(ctx, one.MerchantId)
 	var merchantProductName = ""
 	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 	if sub == nil {

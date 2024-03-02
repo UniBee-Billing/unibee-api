@@ -8,19 +8,19 @@ import (
 	"unibee/internal/dao/oversea_pay/internal"
 )
 
-// internalMerchantInfoDao is internal type for wrapping internal DAO implements.
-type internalMerchantInfoDao = *internal.MerchantInfoDao
+// internalMerchantDao is internal type for wrapping internal DAO implements.
+type internalMerchantDao = *internal.MerchantDao
 
-// merchantInfoDao is the data access object for table merchant_info.
+// merchantDao is the data access object for table merchant.
 // You can define custom methods on it to extend its functionality as you wish.
-type merchantInfoDao struct {
-	internalMerchantInfoDao
+type merchantDao struct {
+	internalMerchantDao
 }
 
 var (
-	// MerchantInfo is globally public accessible object for table merchant_info operations.
-	MerchantInfo = merchantInfoDao{
-		internal.NewMerchantInfoDao(),
+	// Merchant is globally public accessible object for table merchant operations.
+	Merchant = merchantDao{
+		internal.NewMerchantDao(),
 	}
 )
 

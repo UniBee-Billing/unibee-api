@@ -32,7 +32,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	}{}
 	err = json.Unmarshal([]byte(userStr.String()), &u)
 
-	merchantUser := &entity.MerchantUserAccount{
+	merchantMember := &entity.MerchantMember{
 		FirstName:  u.FirstName,
 		LastName:   u.LastName,
 		Email:      u.Email,
@@ -44,7 +44,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 
 	// transaction create Merchant
 	err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		insert, err := dao.MerchantUserAccount.Ctx(ctx).Data(merchantUser).OmitNil().Insert(merchantUser)
+		insert, err := dao.MerchantMember.Ctx(ctx).Data(merchantMember).OmitNil().Insert(merchantMember)
 		if err != nil {
 			return err
 		}
@@ -52,16 +52,15 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		if err != nil {
 			return err
 		}
-		merchantUser.Id = uint64(id)
+		merchantMember.Id = uint64(id)
 
-		//create MerchantInfo
-		merchantInfo := &entity.MerchantInfo{
+		merchantInfo := &entity.Merchant{
 			CompanyId: 0,
 			UserId:    id,
 			ApiKey:    utility.GenerateRandomAlphanumeric(32), //32 bit open api key
 		}
 
-		insert, err = dao.MerchantInfo.Ctx(ctx).Data(merchantInfo).OmitNil().Insert(merchantInfo)
+		insert, err = dao.Merchant.Ctx(ctx).Data(merchantInfo).OmitNil().Insert(merchantInfo)
 		if err != nil {
 			return err
 		}
@@ -69,11 +68,11 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		if err != nil {
 			return err
 		}
-		// bind merchantUserAccount
-		_, err = dao.MerchantUserAccount.Ctx(ctx).Data(g.Map{
-			dao.MerchantUserAccount.Columns().MerchantId: merchantId,
-			dao.MerchantUserAccount.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.MerchantUserAccount.Columns().Id, id).OmitNil().Update()
+		// bind merchantMemberAccount
+		_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
+			dao.MerchantMember.Columns().MerchantId: merchantId,
+			dao.MerchantMember.Columns().GmtModify:  gtime.Now(),
+		}).Where(dao.MerchantMember.Columns().Id, id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
@@ -81,8 +80,8 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	})
 
 	utility.AssertError(err, "Server Error")
-	var newOne *entity.MerchantUserAccount
-	newOne = query.GetMerchantUserAccountById(ctx, merchantUser.Id)
+	var newOne *entity.MerchantMember
+	newOne = query.GetMerchantMemberById(ctx, merchantMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
 	if consts.GetConfigInstance().Mode == "cloud" {
@@ -101,5 +100,5 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		}
 	}
 
-	return &auth.RegisterVerifyRes{MerchantUser: newOne}, nil
+	return &auth.RegisterVerifyRes{MerchantMember: newOne}, nil
 }

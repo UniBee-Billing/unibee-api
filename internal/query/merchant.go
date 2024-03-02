@@ -6,12 +6,12 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantInfoByApiKey(ctx context.Context, apiKey string) (one *entity.MerchantInfo) {
+func GetMerchantInfoByApiKey(ctx context.Context, apiKey string) (one *entity.Merchant) {
 	if len(apiKey) <= 0 {
 		return nil
 	}
-	err := dao.MerchantInfo.Ctx(ctx).
-		Where(dao.MerchantInfo.Columns().ApiKey, apiKey).
+	err := dao.Merchant.Ctx(ctx).
+		Where(dao.Merchant.Columns().ApiKey, apiKey).
 		Scan(&one)
 	if err != nil {
 		return nil
@@ -19,12 +19,12 @@ func GetMerchantInfoByApiKey(ctx context.Context, apiKey string) (one *entity.Me
 	return one
 }
 
-func GetMerchantInfoById(ctx context.Context, id uint64) (one *entity.MerchantInfo) {
+func GetMerchantById(ctx context.Context, id uint64) (one *entity.Merchant) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.MerchantInfo.Ctx(ctx).
-		Where(dao.MerchantInfo.Columns().Id, id).
+	err := dao.Merchant.Ctx(ctx).
+		Where(dao.Merchant.Columns().Id, id).
 		Scan(&one)
 	if err != nil {
 		return nil
@@ -32,12 +32,12 @@ func GetMerchantInfoById(ctx context.Context, id uint64) (one *entity.MerchantIn
 	return one
 }
 
-func GetMerchantInfoByHost(ctx context.Context, host string) (one *entity.MerchantInfo) {
+func GetMerchantByHost(ctx context.Context, host string) (one *entity.Merchant) {
 	if len(host) <= 0 {
 		return nil
 	}
-	err := dao.MerchantInfo.Ctx(ctx).
-		Where(dao.MerchantInfo.Columns().Host, host).
+	err := dao.Merchant.Ctx(ctx).
+		Where(dao.Merchant.Columns().Host, host).
 		Scan(&one)
 	if err != nil {
 		return nil
@@ -45,22 +45,22 @@ func GetMerchantInfoByHost(ctx context.Context, host string) (one *entity.Mercha
 	return one
 }
 
-func GetActiveMerchantInfoList(ctx context.Context) (list []*entity.MerchantInfo) {
-	err := dao.MerchantInfo.Ctx(ctx).
-		Where(dao.MerchantInfo.Columns().IsDeleted, 0).
+func GetActiveMerchantList(ctx context.Context) (list []*entity.Merchant) {
+	err := dao.Merchant.Ctx(ctx).
+		Where(dao.Merchant.Columns().IsDeleted, 0).
 		Scan(&list)
 	if err != nil {
-		return make([]*entity.MerchantInfo, 0)
+		return make([]*entity.Merchant, 0)
 	}
 	return
 }
 
-func GetMerchantUserAccountById(ctx context.Context, id uint64) (one *entity.MerchantUserAccount) {
+func GetMerchantMemberById(ctx context.Context, id uint64) (one *entity.MerchantMember) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.MerchantUserAccount.Ctx(ctx).
-		Where(dao.MerchantUserAccount.Columns().Id, id).
+	err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().Id, id).
 		Scan(&one)
 	if err != nil {
 		return nil
@@ -71,12 +71,12 @@ func GetMerchantUserAccountById(ctx context.Context, id uint64) (one *entity.Mer
 	return one
 }
 
-func GetMerchantUserAccountByEmail(ctx context.Context, email string) (one *entity.MerchantUserAccount) {
+func GetMerchantMemberByEmail(ctx context.Context, email string) (one *entity.MerchantMember) {
 	if len(email) == 0 {
 		return nil
 	}
-	err := dao.MerchantUserAccount.Ctx(ctx).
-		Where(dao.MerchantUserAccount.Columns().Email, email).
+	err := dao.MerchantMember.Ctx(ctx).
+		Where(dao.MerchantMember.Columns().Email, email).
 		Scan(&one)
 	if err != nil {
 		return nil

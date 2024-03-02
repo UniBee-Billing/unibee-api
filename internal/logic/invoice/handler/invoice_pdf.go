@@ -3,6 +3,12 @@ package handler
 import (
 	"context"
 	"fmt"
+	"golang.org/x/text/currency"
+	"golang.org/x/text/number"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/ro"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
@@ -10,19 +16,13 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
-	"golang.org/x/text/currency"
-	"golang.org/x/text/number"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
 
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
-	merchantInfo := query.GetMerchantInfoById(ctx, unibInvoice.MerchantId)
+	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
 	utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, uint64(unibInvoice.UserId))
 
@@ -36,7 +36,7 @@ func GenerateAndUploadInvoicePdf(ctx context.Context, unibInvoice *entity.Invoic
 	return upload.Url
 }
 
-func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchantInfo *entity.MerchantInfo, user *entity.UserAccount, savePath string) error {
+func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, savePath string) error {
 	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency))))
 	doc, _ := generator2.New(generator2.Invoice, &generator2.Options{
 		//TextTypeInvoice: "INVOICE",

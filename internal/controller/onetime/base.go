@@ -17,12 +17,12 @@ func currencyNumberCheck(amount *payment.AmountVo) {
 	}
 }
 
-func merchantCheck(ctx context.Context, merchantId uint64) (apiconfig *entity.OpenApiConfig, res *entity.MerchantInfo) {
+func merchantCheck(ctx context.Context, merchantId uint64) (apiconfig *entity.OpenApiConfig, res *entity.Merchant) {
 	openApiConfig := _interface.BizCtx().Get(ctx).OpenApiConfig
 	utility.Assert(openApiConfig != nil, "api config not found")
 	utility.Assert(openApiConfig.MerchantId == merchantId, "api config not found")
 	utility.Assert(openApiConfig.MerchantId > 0, "api config not found")
-	err := dao.MerchantInfo.Ctx(ctx).Where(entity.MerchantInfo{Id: openApiConfig.MerchantId}).OmitEmpty().Scan(&res)
+	err := dao.Merchant.Ctx(ctx).Where(entity.Merchant{Id: openApiConfig.MerchantId}).OmitEmpty().Scan(&res)
 	if err != nil {
 		return openApiConfig, res
 	}

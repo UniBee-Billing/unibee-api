@@ -74,7 +74,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	}
 
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 
 	SubscriptionNewTimeline(ctx, invoice)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{

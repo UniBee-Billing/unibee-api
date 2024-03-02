@@ -46,7 +46,7 @@ type SubscriptionPendingUpdateColumns struct {
 	Paid                 string // paid，0-no，1-yes
 	Link                 string // payment link
 	GatewayStatus        string // gateway status
-	MerchantUserId       string // merchant_user_id
+	MerchantMemberId     string // merchant_user_id
 	Data                 string //
 	ResponseData         string //
 	EffectImmediate      string // effect immediate，0-no，1-yes
@@ -84,7 +84,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	Paid:                 "paid",
 	Link:                 "link",
 	GatewayStatus:        "gateway_status",
-	MerchantUserId:       "merchant_user_id",
+	MerchantMemberId:     "merchant_member_id",
 	Data:                 "data",
 	ResponseData:         "response_data",
 	EffectImmediate:      "effect_immediate",

@@ -11,7 +11,7 @@ type MerchantUserAccountSimplify struct {
 	CreateTime int64  `json:"createTime" description:"create utc time"`            // create utc time
 }
 
-func SimplifyMerchantUserAccount(one *entity.MerchantUserAccount) *MerchantUserAccountSimplify {
+func SimplifyMerchantUserAccount(one *entity.MerchantMember) *MerchantUserAccountSimplify {
 	if one == nil {
 		return nil
 	}

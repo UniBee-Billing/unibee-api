@@ -29,7 +29,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			utility.Assert(plan != nil, "PaymentNeedAuthorisedCallback plan not found:"+sub.SubscriptionId)
 			if oneUser != nil {
-				merchant := query.GetMerchantInfoById(ctx, sub.MerchantId)
+				merchant := query.GetMerchantById(ctx, sub.MerchantId)
 				if merchant != nil {
 					err := email.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionNeedAuthorized, "", &email.TemplateVariable{
 						UserName:            oneUser.FirstName + " " + oneUser.LastName,

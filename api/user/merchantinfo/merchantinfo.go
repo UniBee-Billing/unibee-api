@@ -10,5 +10,5 @@ type MerchantInfoReq struct {
 }
 
 type MerchantInfoRes struct {
-	MerchantInfo *entity.MerchantInfo `p:"merchantInfo" dc:"merchantInfo"`
+	MerchantInfo *entity.Merchant `p:"merchantInfo" dc:"merchantInfo"`
 }
