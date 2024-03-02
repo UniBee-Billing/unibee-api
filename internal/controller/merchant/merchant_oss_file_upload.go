@@ -12,7 +12,7 @@ import (
 
 func (c *ControllerOss) FileUpload(ctx context.Context, req *oss.FileUploadReq) (res *oss.FileUploadRes, err error) {
 	if req.File == nil {
-		return nil, gerror.NewCode(gcode.CodeMissingParameter, "请选择需要上传的文件")
+		return nil, gerror.NewCode(gcode.CodeMissingParameter, "Please Specify The File")
 	}
 	result, err := ossService.Upload(ctx, ossService.FileUploadInput{
 		File:       req.File,
