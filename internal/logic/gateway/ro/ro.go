@@ -280,35 +280,35 @@ type SubscriptionTimeLineDetailVo struct {
 }
 
 type SubscriptionPendingUpdateDetailVo struct {
-	MerchantId           uint64                       `json:"merchantId"           description:"MerchantId"`
-	SubscriptionId       string                       `json:"subscriptionId"       description:"SubscriptionId"`
-	UpdateSubscriptionId string                       `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
-	GmtCreate            *gtime.Time                  `json:"gmtCreate"            description:"GmtCreate"`
-	Amount               int64                        `json:"amount"               description:"Amount, Cent"`
-	Status               int                          `json:"status"               description:"Status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`
-	UpdateAmount         int64                        `json:"updateAmount"         description:"UpdateAmount, Cents"`
-	ProrationAmount      int64                        `json:"prorationAmount"      description:"ProrationAmount,Cents"`
-	Currency             string                       `json:"currency"             description:"Currency"`
-	UpdateCurrency       string                       `json:"updateCurrency"       description:"UpdateCurrency"`
-	PlanId               uint64                       `json:"planId"               description:"PlanId"`
-	UpdatePlanId         uint64                       `json:"updatePlanId"         description:"UpdatePlanId"`
-	Quantity             int64                        `json:"quantity"             description:"quantity"`
-	UpdateQuantity       int64                        `json:"updateQuantity"       description:"UpdateQuantity"`
-	AddonData            string                       `json:"addonData"            description:"plan addon json data"`
-	UpdateAddonData      string                       `json:"updateAddonData"     description:"UpdateAddonData"`
-	GatewayId            uint64                       `json:"gatewayId"            description:"Id"`
-	UserId               int64                        `json:"userId"               description:"UserId"`
-	GmtModify            *gtime.Time                  `json:"gmtModify"            description:"GmtModify"`
-	Paid                 int                          `json:"paid"                 description:"Paid"`
-	Link                 string                       `json:"link"                 description:"Link"`
-	MerchantMember       *MerchantUserAccountSimplify `json:"merchantMember"       description:"Merchant Member"`
-	EffectImmediate      int                          `json:"effectImmediate"      description:"EffectImmediate"`
-	EffectTime           int64                        `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
-	Note                 string                       `json:"note"            description:"Update Note"`
-	Plan                 *PlanSimplify                `json:"plan" dc:"Plan"`
-	Addons               []*PlanAddonVo               `json:"addons" dc:"Addons"`
-	UpdatePlan           *PlanSimplify                `json:"updatePlan" dc:"UpdatePlan"`
-	UpdateAddons         []*PlanAddonVo               `json:"updateAddons" dc:"UpdateAddons"`
+	MerchantId           uint64                  `json:"merchantId"           description:"MerchantId"`
+	SubscriptionId       string                  `json:"subscriptionId"       description:"SubscriptionId"`
+	UpdateSubscriptionId string                  `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
+	GmtCreate            *gtime.Time             `json:"gmtCreate"            description:"GmtCreate"`
+	Amount               int64                   `json:"amount"               description:"Amount, Cent"`
+	Status               int                     `json:"status"               description:"Status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`
+	UpdateAmount         int64                   `json:"updateAmount"         description:"UpdateAmount, Cents"`
+	ProrationAmount      int64                   `json:"prorationAmount"      description:"ProrationAmount,Cents"`
+	Currency             string                  `json:"currency"             description:"Currency"`
+	UpdateCurrency       string                  `json:"updateCurrency"       description:"UpdateCurrency"`
+	PlanId               uint64                  `json:"planId"               description:"PlanId"`
+	UpdatePlanId         uint64                  `json:"updatePlanId"         description:"UpdatePlanId"`
+	Quantity             int64                   `json:"quantity"             description:"quantity"`
+	UpdateQuantity       int64                   `json:"updateQuantity"       description:"UpdateQuantity"`
+	AddonData            string                  `json:"addonData"            description:"plan addon json data"`
+	UpdateAddonData      string                  `json:"updateAddonData"     description:"UpdateAddonData"`
+	GatewayId            uint64                  `json:"gatewayId"            description:"Id"`
+	UserId               int64                   `json:"userId"               description:"UserId"`
+	GmtModify            *gtime.Time             `json:"gmtModify"            description:"GmtModify"`
+	Paid                 int                     `json:"paid"                 description:"Paid"`
+	Link                 string                  `json:"link"                 description:"Link"`
+	MerchantMember       *MerchantMemberSimplify `json:"merchantMember"       description:"Merchant Member"`
+	EffectImmediate      int                     `json:"effectImmediate"      description:"EffectImmediate"`
+	EffectTime           int64                   `json:"effectTime"           description:"effect_immediate=0, EffectTime unit_time"`
+	Note                 string                  `json:"note"            description:"Update Note"`
+	Plan                 *PlanSimplify           `json:"plan" dc:"Plan"`
+	Addons               []*PlanAddonVo          `json:"addons" dc:"Addons"`
+	UpdatePlan           *PlanSimplify           `json:"updatePlan" dc:"UpdatePlan"`
+	UpdateAddons         []*PlanAddonVo          `json:"updateAddons" dc:"UpdateAddons"`
 }
 
 type ValidResult struct {

@@ -14,9 +14,9 @@ import (
 type TokenType string
 
 const (
-	TOKEN_PREFIX          = "UniBee.Portal."
-	TOKENTYPEUSER         = "USER"
-	TOKENTYPEMERCHANTUSER = "MERCHANT_USER"
+	TOKEN_PREFIX            = "UniBee.Portal."
+	TOKENTYPEUSER           = "USER"
+	TOKENTYPEMERCHANTMember = "MERCHANT_MEMBER"
 )
 
 type TokenClaims struct {

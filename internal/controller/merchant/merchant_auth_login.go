@@ -22,7 +22,7 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	utility.Assert(newOne != nil, "Email Not Found")
 	utility.Assert(utility.ComparePasswords(newOne.Password, req.Password), "Login Failed, Password Not Match")
 
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTUSER, newOne.MerchantId, newOne.Id, req.Email)
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTMember, newOne.MerchantId, newOne.Id, req.Email)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", newOne.Id)
 	if err != nil {
 		return nil, gerror.NewCode(gcode.New(500, "Server Error", nil))

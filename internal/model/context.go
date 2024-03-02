@@ -11,7 +11,7 @@ type Context struct {
 	Session        *ghttp.Session
 	MerchantId     uint64
 	User           *ContextUser
-	MerchantMember *ContextMerchantUser
+	MerchantMember *ContextMerchantMember
 	RequestId      string
 	Data           g.Map
 	OpenApiConfig  *entity.OpenApiConfig
@@ -25,7 +25,7 @@ type ContextUser struct {
 	Email      string
 }
 
-type ContextMerchantUser struct {
+type ContextMerchantMember struct {
 	Id         uint64
 	MerchantId uint64
 	Token      string

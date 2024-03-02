@@ -234,7 +234,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				Email:      token.Email,
 			}
 			customCtx.MerchantId = userAccount.MerchantId
-		} else if token.TokenType == jwt.TOKENTYPEMERCHANTUSER {
+		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			if merchantAccount == nil {
 				g.Log().Infof(r.Context(), "TokenAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
@@ -242,7 +242,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				r.Exit()
 			}
 
-			customCtx.MerchantMember = &model.ContextMerchantUser{
+			customCtx.MerchantMember = &model.ContextMerchantMember{
 				Id:         token.Id,
 				MerchantId: merchantAccount.MerchantId,
 				Token:      tokenString,

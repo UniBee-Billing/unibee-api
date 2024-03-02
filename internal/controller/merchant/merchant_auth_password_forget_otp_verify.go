@@ -24,6 +24,6 @@ func (c *ControllerAuth) PasswordForgetOtpVerify(ctx context.Context, req *auth.
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "User Not Found")
-	auth2.ChangeMerchantUserPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
+	auth2.ChangeMerchantMemberPasswordWithOutOldVerify(ctx, req.Email, req.NewPassword)
 	return &auth.PasswordForgetOtpVerifyRes{}, nil
 }

@@ -9,7 +9,7 @@ import (
 	"unibee/utility"
 )
 
-func ChangeMerchantUserPasswordWithOutOldVerify(ctx context.Context, email string, newPassword string) {
+func ChangeMerchantMemberPasswordWithOutOldVerify(ctx context.Context, email string, newPassword string) {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one != nil, "user not found")
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
@@ -19,7 +19,7 @@ func ChangeMerchantUserPasswordWithOutOldVerify(ctx context.Context, email strin
 	utility.AssertError(err, "server error")
 }
 
-func ChangeMerchantUserPassword(ctx context.Context, merchantId uint64, email string, oldPassword string, newPassword string) {
+func ChangeMerchantMemberPassword(ctx context.Context, merchantId uint64, email string, oldPassword string, newPassword string) {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one != nil, "user not found")
 	utility.Assert(utility.ComparePasswords(one.Password, oldPassword), "password not match")
