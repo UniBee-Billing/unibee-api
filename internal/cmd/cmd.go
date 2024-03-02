@@ -191,6 +191,11 @@ var (
 						user.NewMerchantinfo(),
 					)
 				})
+				group.Group("/vat", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewVat(),
+					)
+				})
 			})
 
 			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
@@ -214,19 +219,6 @@ var (
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewAuth(),
-					)
-				})
-			})
-
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/vat", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenAuth,
-				)
-				group.Group("/", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						user.NewVat(),
 					)
 				})
 			})

@@ -5,15 +5,15 @@ import (
 	"unibee/internal/logic/gateway/ro"
 )
 
-type CountryVatListReq struct {
-	g.Meta `path:"/vat_country_list" tags:"User-Vat-Controller" method:"post" summary:"Vat Country List"`
+type CountryListReq struct {
+	g.Meta `path:"/country_list" tags:"User-Vat-Controller" method:"post" summary:"Vat Country List"`
 }
-type CountryVatListRes struct {
+type CountryListRes struct {
 	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }
 
 type NumberValidateReq struct {
-	g.Meta    `path:"/vat_number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
+	g.Meta    `path:"/number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
 	VatNumber string `p:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {

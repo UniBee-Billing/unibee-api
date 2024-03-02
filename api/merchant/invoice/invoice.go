@@ -7,7 +7,7 @@ import (
 )
 
 type SubscriptionInvoicePdfGenerateReq struct {
-	g.Meta        `path:"/subscription_invoice_pdf_generate" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Generate Merchant Invoice pdf"`
+	g.Meta        `path:"/pdf_generate" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Generate Merchant Invoice pdf"`
 	InvoiceId     string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 	SendUserEmail bool   `p:"sendUserEmail" d:"false" dc:"Whether Send Invoice Email To User Or Not，Default Not Send"`
 }
@@ -15,14 +15,14 @@ type SubscriptionInvoicePdfGenerateRes struct {
 }
 
 type SubscriptionInvoiceSendEmailReq struct {
-	g.Meta    `path:"/subscription_invoice_send_user_email" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Send Merchant Invoice Email to User"`
+	g.Meta    `path:"/send_email" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Send Merchant Invoice Email to User"`
 	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type SubscriptionInvoiceSendEmailRes struct {
 }
 
 type SubscriptionInvoiceDetailReq struct {
-	g.Meta    `path:"/subscription_invoice_detail" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice Detail"`
+	g.Meta    `path:"/detail" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice Detail"`
 	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type SubscriptionInvoiceDetailRes struct {
@@ -30,7 +30,7 @@ type SubscriptionInvoiceDetailRes struct {
 }
 
 type SubscriptionInvoiceListReq struct {
-	g.Meta        `path:"/subscription_invoice_list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice List"`
+	g.Meta        `path:"/list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice List"`
 	FirstName     string `p:"firstName" dc:"FirstName" `
 	LastName      string `p:"lastName" dc:"LastName" `
 	Currency      string `p:"currency" dc:"Currency" `
@@ -51,7 +51,7 @@ type SubscriptionInvoiceListRes struct {
 }
 
 type NewInvoiceCreateReq struct {
-	g.Meta    `path:"/new_invoice_create" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
+	g.Meta    `path:"/new" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
 	UserId    int64                  `p:"userId" dc:"UserId" v:"required"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
 	GatewayId uint64                 `p:"gatewayId" dc:"Gateway Id"   v:"required" `
@@ -72,7 +72,7 @@ type NewInvoiceCreateRes struct {
 }
 
 type NewInvoiceEditReq struct {
-	g.Meta    `path:"/new_invoice_edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
+	g.Meta    `path:"/edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
 	InvoiceId string                 `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
 	GatewayId uint64                 `p:"gatewayId" dc:"Gateway Id" `
@@ -86,14 +86,14 @@ type NewInvoiceEditRes struct {
 }
 
 type DeletePendingInvoiceReq struct {
-	g.Meta    `path:"/new_invoice_delete" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Delete Invoice Of Pending Status"`
+	g.Meta    `path:"/delete" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Delete Invoice Of Pending Status"`
 	InvoiceId string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 }
 type DeletePendingInvoiceRes struct {
 }
 
 type FinishInvoiceForPayReq struct {
-	g.Meta      `path:"/finish_new_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
+	g.Meta      `path:"/finish" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
 	InvoiceId   string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 	PayMethod   int    `p:"payMethod" dc:"PayMethod,1-manual，2-auto" v:"required"`
 	DaysUtilDue int    `p:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
@@ -103,14 +103,14 @@ type FinishInvoiceForPayRes struct {
 }
 
 type CancelProcessingInvoiceReq struct {
-	g.Meta    `path:"/cancel_processing_invoice" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Cancel Invoice Of Processing Status"`
+	g.Meta    `path:"/cancel" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Cancel Invoice Of Processing Status"`
 	InvoiceId string `p:"invoiceId" dc:"InvoiceId" v:"required`
 }
 type CancelProcessingInvoiceRes struct {
 }
 
 type NewInvoiceRefundReq struct {
-	g.Meta       `path:"/new_invoice_refund" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create Refund From Invoice"`
+	g.Meta       `path:"/refund" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create Refund From Invoice"`
 	InvoiceId    string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 	RefundNo     string `p:"refundNo" dc:"RefundNo" v:"required"`
 	RefundAmount int64  `p:"refundAmount" dc:"Refund Amount" v:"required"`

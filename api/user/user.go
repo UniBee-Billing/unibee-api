@@ -78,7 +78,7 @@ type IUserSubscription interface {
 }
 
 type IUserVat interface {
-	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
+	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
 	NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error)
 }
 
