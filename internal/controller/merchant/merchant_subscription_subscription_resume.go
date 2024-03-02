@@ -9,6 +9,6 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionResume(ctx context.Context, req *subscription.SubscriptionResumeReq) (res *subscription.SubscriptionResumeRes, err error) {
+func (c *ControllerSubscription) Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

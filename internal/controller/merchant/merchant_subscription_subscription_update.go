@@ -11,7 +11,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq) (res *subscription.SubscriptionUpdateRes, err error) {
+func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error) {
 
 	var merchantMemberId int64
 	if !consts.GetConfigInstance().IsLocal() {
@@ -20,7 +20,7 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 		merchantMemberId = int64(_interface.BizCtx().Get(ctx).MerchantMember.Id)
 	}
-	update, err := service.SubscriptionUpdate(ctx, &subscription2.SubscriptionUpdateReq{
+	update, err := service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
 		Quantity:            req.Quantity,
@@ -33,7 +33,7 @@ func (c *ControllerSubscription) SubscriptionUpdate(ctx context.Context, req *su
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionUpdateRes{
+	return &subscription.UpdateRes{
 		SubscriptionPendingUpdate: update.SubscriptionPendingUpdate,
 		Paid:                      update.Paid,
 		Link:                      update.Link,

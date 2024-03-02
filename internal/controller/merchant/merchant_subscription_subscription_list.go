@@ -8,8 +8,8 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error) {
-	return &subscription.SubscriptionListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
+func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
+	return &subscription.ListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		Status:     req.Status,

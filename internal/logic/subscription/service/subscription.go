@@ -115,7 +115,7 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 	}
 }
 
-func SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
+func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.GatewayId > 0, "Id invalid")
@@ -226,9 +226,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.Subscripti
 	}, nil
 }
 
-func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (*subscription.SubscriptionCreateRes, error) {
+func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subscription.CreateRes, error) {
 
-	prepare, err := SubscriptionCreatePreview(ctx, &subscription.SubscriptionCreatePreviewReq{
+	prepare, err := SubscriptionCreatePreview(ctx, &subscription.CreatePreviewReq{
 		PlanId:         req.PlanId,
 		Quantity:       req.Quantity,
 		GatewayId:      req.GatewayId,
@@ -361,7 +361,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 		Tag:   redismq2.TopicSubscriptionCreate.Tag,
 		Body:  one.SubscriptionId,
 	})
-	return &subscription.SubscriptionCreateRes{
+	return &subscription.CreateRes{
 		Subscription: one,
 		Paid:         createRes.Paid,
 		Link:         one.Link,
@@ -387,7 +387,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 }
 
 // SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -653,8 +653,8 @@ type UpdateSubscriptionInternalResp struct {
 	Invoice         *entity.Invoice `json:"invoice" description:""`
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdateReq, merchantMemberId int64) (*subscription.SubscriptionUpdateRes, error) {
-	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.SubscriptionUpdatePreviewReq{
+func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
+	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.UpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
 		Quantity:            req.Quantity,
@@ -791,7 +791,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.SubscriptionUpdat
 		one.Status = consts.PendingSubStatusFinished
 	}
 
-	return &subscription.SubscriptionUpdateRes{
+	return &subscription.UpdateRes{
 		SubscriptionPendingUpdate: one,
 		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
 		Link:                      subUpdateRes.Link,

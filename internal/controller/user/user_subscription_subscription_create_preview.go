@@ -8,12 +8,12 @@ import (
 	"unibee/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionCreatePreview(ctx context.Context, req *subscription.SubscriptionCreatePreviewReq) (res *subscription.SubscriptionCreatePreviewRes, err error) {
+func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
 	prepare, err := service.SubscriptionCreatePreview(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionCreatePreviewRes{
+	return &subscription.CreatePreviewRes{
 		Plan:              prepare.Plan,
 		Quantity:          prepare.Quantity,
 		Gateway:           service.ConvertGatewayToRo(prepare.Gateway),

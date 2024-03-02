@@ -11,7 +11,7 @@ import (
 	"unibee/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *subscription.SubscriptionCancelReq) (res *subscription.SubscriptionCancelRes, err error) {
+func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
@@ -29,5 +29,5 @@ func (c *ControllerSubscription) SubscriptionCancel(ctx context.Context, req *su
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionCancelRes{}, nil
+	return &subscription.CancelRes{}, nil
 }

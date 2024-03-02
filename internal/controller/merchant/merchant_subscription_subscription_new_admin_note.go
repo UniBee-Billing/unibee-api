@@ -12,7 +12,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionNewAdminNote(ctx context.Context, req *subscription.SubscriptionNewAdminNoteReq) (res *subscription.SubscriptionNewAdminNoteRes, err error) {
+func (c *ControllerSubscription) NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error) {
 	note := &entity.SubscriptionAdminNote{
 		SubscriptionId:   req.SubscriptionId,
 		MerchantMemberId: req.MerchantMemberId,

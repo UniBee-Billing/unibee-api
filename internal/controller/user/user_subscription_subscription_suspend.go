@@ -9,6 +9,6 @@ import (
 	"unibee/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionSuspend(ctx context.Context, req *subscription.SubscriptionSuspendReq) (res *subscription.SubscriptionSuspendRes, err error) {
+func (c *ControllerSubscription) Suspend(ctx context.Context, req *subscription.SuspendReq) (res *subscription.SuspendRes, err error) {
 	return nil, gerror.NewCode(gcode.CodeNotImplemented)
 }

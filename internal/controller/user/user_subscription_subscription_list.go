@@ -13,7 +13,7 @@ import (
 )
 
 // SubscriptionList todo mark demo requirement, return only one user sub by gmt_create desc
-func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subscription.SubscriptionListReq) (res *subscription.SubscriptionListRes, err error) {
+func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
 	// service 层不做用户校验
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -39,5 +39,5 @@ func (c *ControllerSubscription) SubscriptionList(ctx context.Context, req *subs
 			})
 		}
 	}
-	return &subscription.SubscriptionListRes{Subscriptions: subDetails}, nil
+	return &subscription.ListRes{Subscriptions: subDetails}, nil
 }

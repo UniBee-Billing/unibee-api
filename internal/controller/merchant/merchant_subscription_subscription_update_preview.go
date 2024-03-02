@@ -12,7 +12,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error) {
+func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error) {
 	//Update 可以由 Admin 操作，service 层不做用户校验
 	var merchantMemberId int64
 	if !consts.GetConfigInstance().IsLocal() {
@@ -22,7 +22,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 		merchantMemberId = int64(_interface.BizCtx().Get(ctx).MerchantMember.Id)
 	}
 	g.Log().Infof(ctx, "SubscriptionUpdatePreview merchantMemberId:%d", merchantMemberId)
-	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.SubscriptionUpdatePreviewReq{
+	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.UpdatePreviewReq{
 		SubscriptionId:      req.SubscriptionId,
 		NewPlanId:           req.NewPlanId,
 		Quantity:            req.Quantity,
@@ -32,7 +32,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionUpdatePreviewRes{
+	return &subscription.UpdatePreviewRes{
 		TotalAmount:       update.TotalAmount,
 		Currency:          update.Currency,
 		Invoice:           update.Invoice,

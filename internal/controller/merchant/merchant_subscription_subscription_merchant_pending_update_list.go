@@ -8,7 +8,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionMerchantPendingUpdateList(ctx context.Context, req *subscription.SubscriptionMerchantPendingUpdateListReq) (res *subscription.SubscriptionMerchantPendingUpdateListRes, err error) {
+func (c *ControllerSubscription) PendingUpdateList(ctx context.Context, req *subscription.PendingUpdateListReq) (res *subscription.PendingUpdateListRes, err error) {
 	result, err := service.SubscriptionPendingUpdateList(ctx, &service.SubscriptionPendingUpdateListInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
 		SubscriptionId: req.SubscriptionId,
@@ -20,5 +20,5 @@ func (c *ControllerSubscription) SubscriptionMerchantPendingUpdateList(ctx conte
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionMerchantPendingUpdateListRes{SubscriptionPendingUpdateDetails: result.SubscriptionPendingUpdateDetails}, nil
+	return &subscription.PendingUpdateListRes{SubscriptionPendingUpdateDetails: result.SubscriptionPendingUpdateDetails}, nil
 }

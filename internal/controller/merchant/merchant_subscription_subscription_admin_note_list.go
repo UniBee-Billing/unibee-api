@@ -8,7 +8,7 @@ import (
 	"unibee/internal/query"
 )
 
-func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, req *subscription.SubscriptionAdminNoteListReq) (res *subscription.SubscriptionAdminNoteListRes, err error) {
+func (c *ControllerSubscription) AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error) {
 	var mainList []*entity.SubscriptionAdminNote
 	if req.Count <= 0 {
 		req.Count = 20
@@ -26,11 +26,11 @@ func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	var resultList []*subscription.SubscriptionAdminNoteRo
+	var resultList []*subscription.AdminNoteRo
 	for _, note := range mainList {
 		merchantMember := query.GetMerchantMemberById(ctx, uint64(note.MerchantMemberId))
 		if merchantMember != nil {
-			resultList = append(resultList, &subscription.SubscriptionAdminNoteRo{
+			resultList = append(resultList, &subscription.AdminNoteRo{
 				GmtCreate:      note.GmtCreate,
 				GmtModify:      note.GmtModify,
 				SubscriptionId: note.SubscriptionId,
@@ -42,5 +42,5 @@ func (c *ControllerSubscription) SubscriptionAdminNoteList(ctx context.Context, 
 			})
 		}
 	}
-	return &subscription.SubscriptionAdminNoteListRes{NoteLists: resultList}, nil
+	return &subscription.AdminNoteListRes{NoteLists: resultList}, nil
 }

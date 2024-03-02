@@ -10,7 +10,7 @@ import (
 	"unibee/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionUpdateCancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.SubscriptionUpdateCancelLastCancelAtPeriodEndReq) (res *subscription.SubscriptionUpdateCancelLastCancelAtPeriodEndRes, err error) {
+func (c *ControllerSubscription) CancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.CancelLastCancelAtPeriodEndReq) (res *subscription.CancelLastCancelAtPeriodEndRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
@@ -20,5 +20,5 @@ func (c *ControllerSubscription) SubscriptionUpdateCancelLastCancelAtPeriodEnd(c
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionUpdateCancelLastCancelAtPeriodEndRes{}, nil
+	return &subscription.CancelLastCancelAtPeriodEndRes{}, nil
 }

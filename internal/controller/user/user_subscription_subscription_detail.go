@@ -6,12 +6,12 @@ import (
 	"unibee/internal/logic/subscription/service"
 )
 
-func (c *ControllerSubscription) SubscriptionDetail(ctx context.Context, req *subscription.SubscriptionDetailReq) (res *subscription.SubscriptionDetailRes, err error) {
+func (c *ControllerSubscription) Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error) {
 	detail, err := service.SubscriptionDetail(ctx, req.SubscriptionId)
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionDetailRes{
+	return &subscription.DetailRes{
 		User:                                detail.User,
 		Subscription:                        detail.Subscription,
 		Plan:                                detail.Plan,

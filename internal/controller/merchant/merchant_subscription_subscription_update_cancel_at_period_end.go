@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionUpdateCancelAtPeriodEnd(ctx context.Context, req *subscription.SubscriptionUpdateCancelAtPeriodEndReq) (res *subscription.SubscriptionUpdateCancelAtPeriodEndRes, err error) {
+func (c *ControllerSubscription) CancelAtPeriodEnd(ctx context.Context, req *subscription.CancelAtPeriodEndReq) (res *subscription.CancelAtPeriodEndRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -21,5 +21,5 @@ func (c *ControllerSubscription) SubscriptionUpdateCancelAtPeriodEnd(ctx context
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionUpdateCancelAtPeriodEndRes{}, nil
+	return &subscription.CancelAtPeriodEndRes{}, nil
 }

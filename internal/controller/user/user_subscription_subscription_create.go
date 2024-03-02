@@ -6,7 +6,7 @@ import (
 	"unibee/internal/logic/subscription/service"
 )
 
-func (c *ControllerSubscription) SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreateReq) (res *subscription.SubscriptionCreateRes, err error) {
-	
+func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.CreateReq) (res *subscription.CreateRes, err error) {
+
 	return service.SubscriptionCreate(ctx, req)
 }

@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionAddNewTrialStart(ctx context.Context, req *subscription.SubscriptionAddNewTrialStartReq) (res *subscription.SubscriptionAddNewTrialStartRes, err error) {
+func (c *ControllerSubscription) AddNewTrialStart(ctx context.Context, req *subscription.AddNewTrialStartReq) (res *subscription.AddNewTrialStartRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -20,5 +20,5 @@ func (c *ControllerSubscription) SubscriptionAddNewTrialStart(ctx context.Contex
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionAddNewTrialStartRes{}, nil
+	return &subscription.AddNewTrialStartRes{}, nil
 }

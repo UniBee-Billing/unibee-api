@@ -11,7 +11,7 @@ import (
 	"unibee/api/user/subscription"
 )
 
-func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, req *subscription.SubscriptionUpdatePreviewReq) (res *subscription.SubscriptionUpdatePreviewRes, err error) {
+func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -28,7 +28,7 @@ func (c *ControllerSubscription) SubscriptionUpdatePreview(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionUpdatePreviewRes{
+	return &subscription.UpdatePreviewRes{
 		TotalAmount:       prepare.TotalAmount,
 		Currency:          prepare.Currency,
 		Invoice:           prepare.Invoice,

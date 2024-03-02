@@ -7,7 +7,7 @@ import (
 	"unibee/internal/logic/subscription/service"
 )
 
-func (c *ControllerSubscription) SubscriptionTimeLineList(ctx context.Context, req *subscription.SubscriptionTimeLineListReq) (res *subscription.SubscriptionTimeLineListRes, err error) {
+func (c *ControllerSubscription) TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error) {
 	result, err := service.SubscriptionTimeLineList(ctx, &service.SubscriptionTimeLineListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
@@ -19,5 +19,5 @@ func (c *ControllerSubscription) SubscriptionTimeLineList(ctx context.Context, r
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.SubscriptionTimeLineListRes{SubscriptionTimeLines: result.SubscriptionTimelines}, nil
+	return &subscription.TimeLineListRes{SubscriptionTimeLines: result.SubscriptionTimelines}, nil
 }
