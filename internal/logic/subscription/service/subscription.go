@@ -252,29 +252,30 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, prepare.Invoice.PeriodEnd, prepare.Plan.Id)
 
 	one := &entity.Subscription{
-		MerchantId:         prepare.Merchant.Id,
-		Type:               subType,
-		PlanId:             prepare.Plan.Id,
-		GatewayId:          prepare.Gateway.Id,
-		UserId:             prepare.UserId,
-		Quantity:           prepare.Quantity,
-		Amount:             prepare.TotalAmount,
-		Currency:           prepare.Currency,
-		AddonData:          utility.MarshalToJsonString(prepare.AddonParams),
-		SubscriptionId:     utility.CreateSubscriptionId(),
-		Status:             consts.SubStatusCreate,
-		CustomerEmail:      prepare.Email,
-		ReturnUrl:          req.ReturnUrl,
-		Data:               "", //额外参数配置
-		VatNumber:          prepare.VatNumber,
-		VatVerifyData:      prepare.VatVerifyData,
-		CountryCode:        prepare.VatCountryCode,
-		TaxScale:           prepare.TaxScale,
-		CurrentPeriodStart: prepare.Invoice.PeriodStart,
-		CurrentPeriodEnd:   prepare.Invoice.PeriodEnd,
-		DunningTime:        dunningTime,
-		BillingCycleAnchor: prepare.Invoice.PeriodStart,
-		CreateTime:         gtime.Now().Timestamp(),
+		MerchantId:                  prepare.Merchant.Id,
+		Type:                        subType,
+		PlanId:                      prepare.Plan.Id,
+		GatewayId:                   prepare.Gateway.Id,
+		UserId:                      prepare.UserId,
+		Quantity:                    prepare.Quantity,
+		Amount:                      prepare.TotalAmount,
+		Currency:                    prepare.Currency,
+		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
+		SubscriptionId:              utility.CreateSubscriptionId(),
+		Status:                      consts.SubStatusCreate,
+		CustomerEmail:               prepare.Email,
+		ReturnUrl:                   req.ReturnUrl,
+		Data:                        "", //额外参数配置
+		VatNumber:                   prepare.VatNumber,
+		VatVerifyData:               prepare.VatVerifyData,
+		CountryCode:                 prepare.VatCountryCode,
+		TaxScale:                    prepare.TaxScale,
+		CurrentPeriodStart:          prepare.Invoice.PeriodStart,
+		CurrentPeriodEnd:            prepare.Invoice.PeriodEnd,
+		DunningTime:                 dunningTime,
+		BillingCycleAnchor:          prepare.Invoice.PeriodStart,
+		GatewayDefaultPaymentMethod: req.PaymentMethodId,
+		CreateTime:                  gtime.Now().Timestamp(),
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -299,41 +300,58 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	}
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 	utility.AssertError(err, "System Error")
-	createPaymentResult, err := service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
-		CheckoutMode: true,
-		Gateway:      prepare.Gateway,
-		Pay: &entity.Payment{
-			SubscriptionId: one.SubscriptionId,
-			BizId:          one.SubscriptionId,
-			BizType:        consts.BizTypeSubscription,
-			UserId:         prepare.UserId,
-			GatewayId:      prepare.Gateway.Id,
-			TotalAmount:    prepare.Invoice.TotalAmount,
-			Currency:       prepare.Currency,
-			CountryCode:    prepare.VatCountryCode,
-			MerchantId:     prepare.Merchant.Id,
-			CompanyId:      prepare.Merchant.CompanyId,
-			BillingReason:  prepare.Invoice.InvoiceName,
-			ReturnUrl:      req.ReturnUrl,
-		},
-		Platform:      "WEB",
-		DeviceType:    "Web",
-		ShopperUserId: strconv.FormatInt(one.UserId, 10),
-		ShopperEmail:  prepare.Email,
-		ShopperLocale: "en",
-		Mobile:        mobile,
-		Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
-		ShopperName: &v1.OutShopperName{
-			FirstName: firstName,
-			LastName:  lastName,
-			Gender:    gender,
-		},
-		MediaData:              map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
-		MerchantOrderReference: one.SubscriptionId,
-	})
-	if err != nil {
-		return nil, err
+	var createPaymentResult *ro.CreatePayInternalResp
+	if len(req.PaymentMethodId) > 0 {
+		// createAndPayNewProrationInvoice
+		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
+		utility.Assert(merchantInfo != nil, "merchantInfo not found")
+		//utility.Assert(user != nil, "user not found")
+		gateway := query.GetGatewayById(ctx, one.GatewayId)
+		utility.Assert(gateway != nil, "gateway not found")
+		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
+		utility.AssertError(err, "System Error")
+		createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
+			CheckoutMode: true,
+			Gateway:      prepare.Gateway,
+			Pay: &entity.Payment{
+				SubscriptionId: one.SubscriptionId,
+				BizId:          one.SubscriptionId,
+				BizType:        consts.BizTypeSubscription,
+				UserId:         prepare.UserId,
+				GatewayId:      prepare.Gateway.Id,
+				TotalAmount:    prepare.Invoice.TotalAmount,
+				Currency:       prepare.Currency,
+				CountryCode:    prepare.VatCountryCode,
+				MerchantId:     prepare.Merchant.Id,
+				CompanyId:      prepare.Merchant.CompanyId,
+				BillingReason:  prepare.Invoice.InvoiceName,
+				ReturnUrl:      req.ReturnUrl,
+			},
+			Platform:      "WEB",
+			DeviceType:    "Web",
+			ShopperUserId: strconv.FormatInt(one.UserId, 10),
+			ShopperEmail:  prepare.Email,
+			ShopperLocale: "en",
+			Mobile:        mobile,
+			Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
+			ShopperName: &v1.OutShopperName{
+				FirstName: firstName,
+				LastName:  lastName,
+				Gender:    gender,
+			},
+			MediaData:              map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
+			MerchantOrderReference: one.SubscriptionId,
+		})
+		if err != nil {
+			return nil, err
+		}
 	}
+
 	createRes = &ro.GatewayCreateSubscriptionInternalResp{
 		GatewaySubscriptionId: createPaymentResult.PaymentId,
 		Data:                  utility.MarshalToJsonString(createPaymentResult),

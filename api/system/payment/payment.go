@@ -1,6 +1,9 @@
 package payment
 
-import "github.com/gogf/gf/v2/frame/g"
+import (
+	"github.com/gogf/gf/v2/frame/g"
+	"unibee/internal/logic/gateway/ro"
+)
 
 type PaymentCallbackAgainReq struct {
 	g.Meta    `path:"/payment_callback_again" tags:"System-Admin-Controller" method:"post" summary:"Admin Trigger Payment Callback"`
@@ -16,5 +19,5 @@ type GatewayPaymentMethodListReq struct {
 }
 
 type GatewayPaymentMethodListRes struct {
-	MethodList []string
+	MethodList []*ro.PaymentMethod
 }

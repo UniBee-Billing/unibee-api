@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -68,6 +69,45 @@ func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatew
 	return &ro.GatewayUserDeAttachPaymentMethodInternalResp{}, nil
 }
 
+func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
+	s.setUnibeeAppInfo()
+
+	params := &stripe.PaymentMethodParams{
+		Type: stripe.String(string(stripe.PaymentMethodTypeCard)),
+		Card: &stripe.PaymentMethodCardParams{
+			Number:   stripe.String(data.Get("card").String()),
+			ExpMonth: stripe.Int64(data.Get("expMonth").Int64()),
+			ExpYear:  stripe.Int64(data.Get("expYear").Int64()),
+			CVC:      stripe.String(data.Get("cvc").String()),
+		},
+	}
+	paymentMethod, err := paymentmethod.New(params)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.GatewayUserAttachPaymentMethodQuery(ctx, gateway, userId, paymentMethod.ID)
+	if err != nil {
+		return nil, err
+	}
+	rData := gjson.New(nil)
+	_ = rData.Set("brand", paymentMethod.Card.Brand)
+	_ = rData.Set("checks", paymentMethod.Card.Checks)
+	_ = rData.Set("country", paymentMethod.Card.Country)
+	_ = rData.Set("last4", paymentMethod.Card.Last4)
+	_ = rData.Set("expMonth", paymentMethod.Card.ExpMonth)
+	_ = rData.Set("expYear", paymentMethod.Card.ExpYear)
+	_ = rData.Set("fingerprint", paymentMethod.Card.Fingerprint)
+	_ = rData.Set("description", paymentMethod.Card.Description)
+	return &ro.GatewayUserPaymentMethodCreateAndBindInternalResp{PaymentMethod: &ro.PaymentMethod{
+		Id:   paymentMethod.ID,
+		Type: "card",
+		Data: rData,
+	}}, nil
+}
+
 func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -79,9 +119,25 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	}
 	params.Limit = stripe.Int64(10)
 	result := customer.ListPaymentMethods(params)
-	var paymentMethods = make([]string, 0)
+	var paymentMethods = make([]*ro.PaymentMethod, 0)
 	for _, paymentMethod := range result.PaymentMethodList().Data {
-		paymentMethods = append(paymentMethods, paymentMethod.ID)
+		// only append card type
+		if paymentMethod.Type == stripe.PaymentMethodTypeCard {
+			data := gjson.New(nil)
+			_ = data.Set("brand", paymentMethod.Card.Brand)
+			_ = data.Set("checks", paymentMethod.Card.Checks)
+			_ = data.Set("country", paymentMethod.Card.Country)
+			_ = data.Set("last4", paymentMethod.Card.Last4)
+			_ = data.Set("expMonth", paymentMethod.Card.ExpMonth)
+			_ = data.Set("expYear", paymentMethod.Card.ExpYear)
+			_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
+			_ = data.Set("description", paymentMethod.Card.Description)
+			paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+				Id:   paymentMethod.ID,
+				Type: "card",
+				Data: data,
+			})
+		}
 	}
 	return &ro.GatewayUserPaymentMethodListInternalResp{
 		PaymentMethods: paymentMethods,
@@ -345,9 +401,19 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 			var cancelErr error
 			if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
 				if listQuery.PaymentMethods == nil {
-					listQuery.PaymentMethods = make([]string, 0)
+					listQuery.PaymentMethods = make([]*ro.PaymentMethod, 0)
 				}
-				listQuery.PaymentMethods = append(listQuery.PaymentMethods, gatewayUser.GatewayDefaultPaymentMethod)
+				listQuery.PaymentMethods = append(listQuery.PaymentMethods, &ro.PaymentMethod{
+					Id: gatewayUser.GatewayDefaultPaymentMethod,
+				})
+			}
+			if len(createPayContext.GatewayPaymentMethod) > 0 {
+				if listQuery.PaymentMethods == nil {
+					listQuery.PaymentMethods = make([]*ro.PaymentMethod, 0)
+				}
+				listQuery.PaymentMethods = append(listQuery.PaymentMethods, &ro.PaymentMethod{
+					Id: createPayContext.GatewayPaymentMethod,
+				})
 			}
 			for _, method := range listQuery.PaymentMethods {
 				params := &stripe.PaymentIntentParams{
@@ -362,8 +428,8 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 					ReturnURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				}
-				params.PaymentMethod = stripe.String(method)
-				paymentMethod = method
+				params.PaymentMethod = stripe.String(method.Id)
+				paymentMethod = method.Id
 				targetIntent, err = paymentintent.New(params)
 				log.SaveChannelHttpLog("GatewayNewPayment", params, targetIntent, err, "PaymentIntentCreate", nil, createPayContext.Gateway)
 				var status = ""
@@ -409,16 +475,20 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 			params.CollectionMethod = stripe.String("charge_automatically")
 			// check the gateway user contains the payment method now
 			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
+			var paymentMethodIds = make([]string, 0)
+			for _, paymentMethod := range listQuery.PaymentMethods {
+				paymentMethodIds = append(paymentMethodIds, paymentMethod.Id)
+			}
 			if err != nil {
 				return nil, err
 			}
-			if len(createPayContext.GatewayPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, createPayContext.GatewayPaymentMethod) {
+			if len(createPayContext.GatewayPaymentMethod) > 0 && ContainString(paymentMethodIds, createPayContext.GatewayPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(createPayContext.GatewayPaymentMethod)
-			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 && ContainString(listQuery.PaymentMethods, gatewayUser.GatewayDefaultPaymentMethod) {
+			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 && ContainString(paymentMethodIds, gatewayUser.GatewayDefaultPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
 			} else if len(listQuery.PaymentMethods) > 0 {
 				// todo mark use detail query
-				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0])
+				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0].Id)
 			}
 		} else {
 			params.CollectionMethod = stripe.String("send_invoice")

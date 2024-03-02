@@ -69,6 +69,7 @@ type CreateReq struct {
 	ReturnUrl          string                             `json:"returnUrl"  dc:"RedirectUrl"  `
 	VatCountryCode     string                             `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                             `json:"vatNumber" dc:"VatNumber" `
+	PaymentMethodId    string                             `json:"paymentMethodId" dc:"PaymentMethodId" `
 }
 type CreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"Subscription"`

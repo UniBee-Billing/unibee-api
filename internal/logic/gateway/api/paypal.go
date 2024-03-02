@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/plutov/paypal/v4"
 	"net/http"
 	"unibee/internal/logic/gateway/ro"
@@ -24,6 +25,11 @@ import (
 //APIBaseLive = "https://api-m.paypal.com"
 
 type Paypal struct {
+}
+
+func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (err error) {

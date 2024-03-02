@@ -2,11 +2,17 @@ package api
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type Invalid struct{}
+
+func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
 
 func (i Invalid) GatewayTest(ctx context.Context, key string, secret string) (err error) {
 	//TODO implement me

@@ -2,11 +2,17 @@ package api
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type Blank struct {
+}
+
+func (b Blank) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (err error) {

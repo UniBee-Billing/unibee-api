@@ -43,6 +43,8 @@ type IUserMerchant interface {
 }
 
 type IUserPayment interface {
+	MethodList(ctx context.Context, req *payment.MethodListReq) (res *payment.MethodListRes, err error)
+	New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error)
 	TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error)
 }
 

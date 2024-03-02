@@ -139,8 +139,18 @@ type GatewayUserAttachPaymentMethodInternalResp struct {
 type GatewayUserDeAttachPaymentMethodInternalResp struct {
 }
 
+type PaymentMethod struct {
+	Id   string      `json:"id"`
+	Type string      `json:"type"`
+	Data *gjson.Json `json:"data"`
+}
+
 type GatewayUserPaymentMethodListInternalResp struct {
-	PaymentMethods []string `json:"paymentMethods"`
+	PaymentMethods []*PaymentMethod `json:"paymentMethods"`
+}
+
+type GatewayUserPaymentMethodCreateAndBindInternalResp struct {
+	PaymentMethod *PaymentMethod `json:"paymentMethod"`
 }
 
 type GatewayMerchantBalanceQueryInternalResp struct {
