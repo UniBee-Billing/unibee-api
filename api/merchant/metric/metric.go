@@ -37,12 +37,12 @@ type EditRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
-type DelReq struct {
+type DeleteReq struct {
 	g.Meta   `path:"/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
 	MetricId int64 `p:"metricId" dc:"MetricId" v:"required"`
 }
 
-type DelRes struct {
+type DeleteRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 

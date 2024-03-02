@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/metric"
 )
 
-func (c *ControllerMetric) EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditMerchantMetricPlanLimitRes, err error) {
+func (c *ControllerMetric) EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditPlanLimitRes, err error) {
 	one := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
@@ -23,5 +23,5 @@ func (c *ControllerMetric) EditPlanLimit(ctx context.Context, req *metric.EditPl
 	if err != nil {
 		return nil, err
 	}
-	return &metric.EditMerchantMetricPlanLimitRes{MerchantMetricPlanLimit: me}, nil
+	return &metric.EditPlanLimitRes{MerchantMetricPlanLimit: me}, nil
 }

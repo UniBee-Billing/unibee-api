@@ -22,7 +22,7 @@ type EditPlanLimitReq struct {
 	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
 }
 
-type EditMerchantMetricPlanLimitRes struct {
+type EditPlanLimitRes struct {
 	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 

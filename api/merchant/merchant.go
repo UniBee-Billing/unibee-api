@@ -84,7 +84,7 @@ type IMerchantMetric interface {
 	List(ctx context.Context, req *metric.ListReq) (res *metric.ListRes, err error)
 	New(ctx context.Context, req *metric.NewReq) (res *metric.NewRes, err error)
 	Edit(ctx context.Context, req *metric.EditReq) (res *metric.EditRes, err error)
-	Del(ctx context.Context, req *metric.DelReq) (res *metric.DelRes, err error)
+	Delete(ctx context.Context, req *metric.DeleteReq) (res *metric.DeleteRes, err error)
 	Detail(ctx context.Context, req *metric.DetailReq) (res *metric.DetailRes, err error)
 	NewEvent(ctx context.Context, req *metric.NewEventReq) (res *metric.NewEventRes, err error)
 	DeleteEvent(ctx context.Context, req *metric.DeleteEventReq) (res *metric.DeleteEventRes, err error)
