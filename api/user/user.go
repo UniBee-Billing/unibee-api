@@ -10,7 +10,7 @@ import (
 	"unibee/api/user/auth"
 	"unibee/api/user/gateway"
 	"unibee/api/user/invoice"
-	"unibee/api/user/merchantinfo"
+	"unibee/api/user/merchant"
 	"unibee/api/user/payment"
 	"unibee/api/user/plan"
 	"unibee/api/user/profile"
@@ -38,8 +38,8 @@ type IUserInvoice interface {
 	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
 }
 
-type IUserMerchantinfo interface {
-	MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error)
+type IUserMerchant interface {
+	Get(ctx context.Context, req *merchant.GetReq) (res *merchant.GetRes, err error)
 }
 
 type IUserPayment interface {

@@ -13,10 +13,10 @@ import (
 	"unibee/time"
 	"unibee/utility"
 
-	"unibee/api/merchant/merchantinfo"
+	"unibee/api/merchant/info"
 )
 
-func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error) {
+func (c *ControllerMerchantinfo) Update(ctx context.Context, req *info.UpdateReq) (res *info.UpdateRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -26,9 +26,9 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}
-	info := query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)
-	utility.Assert(info != nil, "merchantInfo not found")
-	var companyLogo = info.CompanyLogo
+	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
+	utility.Assert(merchant != nil, "merchantInfo not found")
+	var companyLogo = merchant.CompanyLogo
 	if len(req.CompanyLogo) > 0 {
 		utility.Assert(strings.HasPrefix(req.CompanyLogo, "http://") || strings.HasPrefix(req.CompanyLogo, "https://"), "companyLogo Invalid, should has http:// or https:// prefix")
 		companyLogo = req.CompanyLogo
@@ -47,5 +47,5 @@ func (c *ControllerMerchantinfo) MerchantInfoUpdate(ctx context.Context, req *me
 		return nil, err
 	}
 
-	return &merchantinfo.MerchantInfoUpdateRes{MerchantInfo: query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)}, nil
+	return &info.UpdateRes{Merchant: query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)}, nil
 }

@@ -20,12 +20,6 @@ func NewAuth() merchant.IMerchantAuth {
 	return &ControllerAuth{}
 }
 
-type ControllerProfile struct{}
-
-func NewProfile() merchant.IMerchantProfile {
-	return &ControllerProfile{}
-}
-
 type ControllerSubscription struct{}
 
 func NewSubscription() merchant.IMerchantSubscription {
@@ -56,6 +50,13 @@ func NewBalance() merchant.IMerchantBalance {
 	return &ControllerBalance{}
 }
 
+
+type ControllerMember struct{}
+
+func NewMember() merchant.IMerchantMember {
+	return &ControllerMember{}
+}
+
 type ControllerPayment struct{}
 
 func NewPayment() merchant.IMerchantPayment {
@@ -76,7 +77,7 @@ func NewSearch() merchant.IMerchantSearch {
 
 type ControllerMerchantinfo struct{}
 
-func NewMerchantinfo() merchant.IMerchantMerchantinfo {
+func NewMerchantinfo() merchant.IMerchantInfo {
 	return &ControllerMerchantinfo{}
 }
 

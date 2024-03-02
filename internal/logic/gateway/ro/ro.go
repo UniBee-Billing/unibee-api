@@ -226,7 +226,7 @@ type InvoiceDetailRo struct {
 	PaymentId                      string                 `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                 `json:"refundId"                       description:"refundId"`
 	Gateway                        *GatewaySimplify       `json:"gateway"                       description:"Gateway"`
-	MerchantInfo                   *entity.Merchant       `json:"merchantInfo"                       description:"MerchantInfo"`
+	Merchant                       *entity.Merchant       `json:"merchant"                       description:"Merchant"`
 	UserAccount                    *entity.UserAccount    `json:"userAccount"                       description:"UserAccount"`
 	Subscription                   *entity.Subscription   `json:"subscription"                       description:"Subscription"`
 	Payment                        *entity.Payment        `json:"payment"                       description:"Payment"`

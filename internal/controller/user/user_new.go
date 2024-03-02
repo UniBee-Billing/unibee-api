@@ -61,9 +61,9 @@ func NewGateway() user.IUserGateway {
 	return &ControllerGateway{}
 }
 
-type ControllerMerchantinfo struct{}
+type ControllerMerchant struct{}
 
-func NewMerchantinfo() user.IUserMerchantinfo {
-	return &ControllerMerchantinfo{}
+func NewMerchantinfo() user.IUserMerchant {
+	return &ControllerMerchant{}
 }
 

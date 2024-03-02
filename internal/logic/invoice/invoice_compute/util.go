@@ -80,7 +80,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *ro.Invoic
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
 		Gateway:                        query.GetGatewaySimplifyById(ctx, uint64(invoice.GatewayId)),
-		MerchantInfo:                   query.GetMerchantById(ctx, invoice.MerchantId),
+		Merchant:                       query.GetMerchantById(ctx, invoice.MerchantId),
 		UserAccount:                    query.GetUserAccountById(ctx, uint64(invoice.UserId)),
 		Subscription:                   query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId),
 		Payment:                        query.GetPaymentByPaymentId(ctx, invoice.PaymentId),

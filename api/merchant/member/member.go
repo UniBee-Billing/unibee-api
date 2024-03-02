@@ -1,4 +1,4 @@
-package profile
+package member
 
 import (
 	entity "unibee/internal/model/entity/oversea_pay"

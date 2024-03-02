@@ -68,6 +68,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewMerchantinfo(),
+					)
+				})
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewPlan(),
@@ -78,9 +83,9 @@ var (
 						merchant.NewGateway(),
 					)
 				})
-				group.Group("/", func(group *ghttp.RouterGroup) {
+				group.Group("/member", func(group *ghttp.RouterGroup) {
 					group.Bind(
-						merchant.NewProfile(),
+						merchant.NewMember(),
 					)
 				})
 				group.Group("/subscription", func(group *ghttp.RouterGroup) {
@@ -121,11 +126,6 @@ var (
 				group.Group("/search", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewSearch(),
-					)
-				})
-				group.Group("/merchant_info", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						merchant.NewMerchantinfo(),
 					)
 				})
 				group.Group("/email", func(group *ghttp.RouterGroup) {
@@ -237,6 +237,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().OpenApiDetach,
 				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewInformation(),
+					)
+				})
 				if !consts.GetConfigInstance().IsProd() {
 					group.Group("/subscription", func(group *ghttp.RouterGroup) {
 						group.Bind(
@@ -259,11 +264,6 @@ var (
 						)
 					})
 				}
-				group.Group("/merchant", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						system.NewInformation(),
-					)
-				})
 			})
 
 			s.BindHandler("GET:/health", controller.HealthCheck)

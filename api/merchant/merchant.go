@@ -11,13 +11,13 @@ import (
 	"unibee/api/merchant/balance"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
+	"unibee/api/merchant/info"
 	"unibee/api/merchant/invoice"
-	"unibee/api/merchant/merchantinfo"
+	"unibee/api/merchant/member"
 	"unibee/api/merchant/metric"
 	"unibee/api/merchant/oss"
 	"unibee/api/merchant/payment"
 	"unibee/api/merchant/plan"
-	"unibee/api/merchant/profile"
 	"unibee/api/merchant/search"
 	"unibee/api/merchant/subscription"
 	"unibee/api/merchant/user"
@@ -56,6 +56,11 @@ type IMerchantGateway interface {
 	SetupGatewayWebhook(ctx context.Context, req *gateway.SetupGatewayWebhookReq) (res *gateway.SetupGatewayWebhookRes, err error)
 }
 
+type IMerchantInfo interface {
+	Get(ctx context.Context, req *info.GetReq) (res *info.GetRes, err error)
+	Update(ctx context.Context, req *info.UpdateReq) (res *info.UpdateRes, err error)
+}
+
 type IMerchantInvoice interface {
 	SubscriptionInvoicePdfGenerate(ctx context.Context, req *invoice.SubscriptionInvoicePdfGenerateReq) (res *invoice.SubscriptionInvoicePdfGenerateRes, err error)
 	SubscriptionInvoiceSendEmail(ctx context.Context, req *invoice.SubscriptionInvoiceSendEmailReq) (res *invoice.SubscriptionInvoiceSendEmailRes, err error)
@@ -69,9 +74,10 @@ type IMerchantInvoice interface {
 	NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error)
 }
 
-type IMerchantMerchantinfo interface {
-	MerchantInfo(ctx context.Context, req *merchantinfo.MerchantInfoReq) (res *merchantinfo.MerchantInfoRes, err error)
-	MerchantInfoUpdate(ctx context.Context, req *merchantinfo.MerchantInfoUpdateReq) (res *merchantinfo.MerchantInfoUpdateRes, err error)
+type IMerchantMember interface {
+	Profile(ctx context.Context, req *member.ProfileReq) (res *member.ProfileRes, err error)
+	Logout(ctx context.Context, req *member.LogoutReq) (res *member.LogoutRes, err error)
+	PasswordReset(ctx context.Context, req *member.PasswordResetReq) (res *member.PasswordResetRes, err error)
 }
 
 type IMerchantMetric interface {
@@ -107,12 +113,6 @@ type IMerchantPlan interface {
 	SubscriptionPlanDetail(ctx context.Context, req *plan.SubscriptionPlanDetailReq) (res *plan.SubscriptionPlanDetailRes, err error)
 	SubscriptionPlanExpire(ctx context.Context, req *plan.SubscriptionPlanExpireReq) (res *plan.SubscriptionPlanExpireRes, err error)
 	SubscriptionPlanDelete(ctx context.Context, req *plan.SubscriptionPlanDeleteReq) (res *plan.SubscriptionPlanDeleteRes, err error)
-}
-
-type IMerchantProfile interface {
-	Profile(ctx context.Context, req *profile.ProfileReq) (res *profile.ProfileRes, err error)
-	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
-	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
 }
 
 type IMerchantSearch interface {
