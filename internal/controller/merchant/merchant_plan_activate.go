@@ -50,8 +50,8 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 			}
 		}
 		//检查 addonIds 类型
-		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			if addonPlan.Status != consts.PlanStatusActive {
 				service.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)

@@ -54,7 +54,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 }
 
 func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro2.PlanDetailRo) {
-	var mainList []*entity.SubscriptionPlan
+	var mainList []*entity.Plan
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -71,17 +71,17 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			sortKey = req.SortField + " desc"
 		}
 	}
-	q := dao.SubscriptionPlan.Ctx(ctx).
-		Where(dao.SubscriptionPlan.Columns().MerchantId, req.MerchantId)
+	q := dao.Plan.Ctx(ctx).
+		Where(dao.Plan.Columns().MerchantId, req.MerchantId)
 	if len(req.Type) > 0 {
-		q = q.Where(dao.SubscriptionPlan.Columns().Type, req.Type)
+		q = q.Where(dao.Plan.Columns().Type, req.Type)
 	}
 	if len(req.Status) > 0 {
-		q = q.Where(dao.SubscriptionPlan.Columns().Status, req.Status)
+		q = q.Where(dao.Plan.Columns().Status, req.Status)
 	}
-	err := q.Where(dao.SubscriptionPlan.Columns().PublishStatus, req.PublishStatus).
-		Where(dao.SubscriptionPlan.Columns().Currency, strings.ToLower(req.Currency)).
-		WhereIn(dao.SubscriptionPlan.Columns().IsDeleted, []int{0}).
+	err := q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
+		Where(dao.Plan.Columns().Currency, strings.ToLower(req.Currency)).
+		WhereIn(dao.Plan.Columns().IsDeleted, []int{0}).
 		OmitEmpty().
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
@@ -127,11 +127,11 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	}
 	if len(totalAddonIds) > 0 {
 		//主 Plan 查询 addons
-		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//整合进列表
-			mapPlans := make(map[int64]*entity.SubscriptionPlan)
+			mapPlans := make(map[int64]*entity.Plan)
 			for _, pair := range allAddonList {
 				key := int64(pair.Id)
 				value := pair

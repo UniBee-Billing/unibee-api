@@ -22,10 +22,10 @@ func SubscriptionPlanPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PublishStatus: consts.PlanPublishStatusPublished,
-		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
+	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().PublishStatus: consts.PlanPublishStatusPublished,
+		dao.Plan.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.Plan.Columns().Id, planId).Update()
 	if err != nil {
 		return err
 	}
@@ -36,17 +36,17 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PublishStatus: consts.PlanPublishStatusUnPublished,
-		dao.SubscriptionPlan.Columns().GmtModify:     gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).Update()
+	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().PublishStatus: consts.PlanPublishStatusUnPublished,
+		dao.Plan.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.Plan.Columns().Id, planId).Update()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Plan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -97,15 +97,15 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Su
 	}
 
 	if len(req.AddonIds) > 0 {
-		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
 
-	one = &entity.SubscriptionPlan{
+	one = &entity.Plan{
 		CompanyId:                 merchantInfo.CompanyId,
 		MerchantId:                _interface.GetMerchantId(ctx),
 		PlanName:                  req.PlanName,
@@ -123,7 +123,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Su
 		Status:                    consts.PlanStatusEditable,
 		CreateTime:                gtime.Now().Timestamp(),
 	}
-	result, err := dao.SubscriptionPlan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
 	}
@@ -140,7 +140,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Su
 	return one, nil
 }
 
-func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Plan, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -190,27 +190,27 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Sub
 	}
 
 	if len(req.AddonIds) > 0 {
-		var allAddonList []*entity.SubscriptionPlan
-		err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
 
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().PlanName:                  req.PlanName,
-		dao.SubscriptionPlan.Columns().Amount:                    req.Amount,
-		dao.SubscriptionPlan.Columns().Currency:                  strings.ToUpper(req.Currency),
-		dao.SubscriptionPlan.Columns().IntervalUnit:              req.IntervalUnit,
-		dao.SubscriptionPlan.Columns().IntervalCount:             req.IntervalCount,
-		dao.SubscriptionPlan.Columns().Description:               req.Description,
-		dao.SubscriptionPlan.Columns().ImageUrl:                  req.ImageUrl,
-		dao.SubscriptionPlan.Columns().HomeUrl:                   req.HomeUrl,
-		dao.SubscriptionPlan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
-		dao.SubscriptionPlan.Columns().GatewayProductName:        req.ProductName,
-		dao.SubscriptionPlan.Columns().GatewayProductDescription: req.ProductDescription,
-	}).Where(dao.SubscriptionPlan.Columns().Id, req.PlanId).OmitNil().Update()
+	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().PlanName:                  req.PlanName,
+		dao.Plan.Columns().Amount:                    req.Amount,
+		dao.Plan.Columns().Currency:                  strings.ToUpper(req.Currency),
+		dao.Plan.Columns().IntervalUnit:              req.IntervalUnit,
+		dao.Plan.Columns().IntervalCount:             req.IntervalCount,
+		dao.Plan.Columns().Description:               req.Description,
+		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
+		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
+		dao.Plan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
+		dao.Plan.Columns().GatewayProductName:        req.ProductName,
+		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
+	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
 	}
@@ -237,15 +237,15 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Sub
 	return one, nil
 }
 
-func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
 	utility.Assert(planId > 0, "planId invlaid")
 	one = query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", planId))
-	_, err = dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().IsDeleted: gtime.Now().Timestamp(),
-		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, one.Id).Update()
+	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().IsDeleted: gtime.Now().Timestamp(),
+		dao.Plan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +253,7 @@ func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Sub
 	return one, nil
 }
 
-func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq) (one *entity.SubscriptionPlan, err error) {
+func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq) (one *entity.Plan, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -281,8 +281,8 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq
 		}
 	}
 	//检查 addonIds 类型
-	var allAddonList []*entity.SubscriptionPlan
-	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
+	var allAddonList []*entity.Plan
+	err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
 		utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
@@ -307,10 +307,10 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq
 
 	newIds := intListToString(addonIdsList)
 	one.BindingAddonIds = newIds
-	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().BindingAddonIds: one.BindingAddonIds,
-		dao.SubscriptionPlan.Columns().GmtModify:       gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, one.Id).Update()
+	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().BindingAddonIds: one.BindingAddonIds,
+		dao.Plan.Columns().GmtModify:       gtime.Now(),
+	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err
 	}

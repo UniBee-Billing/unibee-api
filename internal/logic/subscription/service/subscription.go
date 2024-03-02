@@ -31,7 +31,7 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan              *entity.SubscriptionPlan           `json:"plan"`
+	Plan              *entity.Plan                       `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
 	Merchant          *entity.Merchant                   `json:"merchantInfo"`
@@ -59,13 +59,13 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 			totalAddonIds = append(totalAddonIds, s.AddonPlanId) // 添加到整数列表中
 		}
 	}
-	var allAddonList []*entity.SubscriptionPlan
+	var allAddonList []*entity.Plan
 	if len(totalAddonIds) > 0 {
 		//query all plan
-		err := dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
+		err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
 			//add to list
-			mapPlans := make(map[uint64]*entity.SubscriptionPlan)
+			mapPlans := make(map[uint64]*entity.Plan)
 			for _, pair := range allAddonList {
 				key := pair.Id
 				value := pair
@@ -370,7 +370,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.SubscriptionCreat
 
 type SubscriptionUpdatePrepareInternalRes struct {
 	Subscription      *entity.Subscription               `json:"subscription"`
-	Plan              *entity.SubscriptionPlan           `json:"plan"`
+	Plan              *entity.Plan                       `json:"plan"`
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *entity.MerchantGateway            `json:"gateway"`
 	MerchantInfo      *entity.Merchant                   `json:"merchantInfo"`
@@ -379,7 +379,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	TotalAmount       int64                              `json:"totalAmount"                `
 	Currency          string                             `json:"currency"              `
 	UserId            int64                              `json:"userId" `
-	OldPlan           *entity.SubscriptionPlan           `json:"oldPlan"`
+	OldPlan           *entity.Plan                       `json:"oldPlan"`
 	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
 	NextPeriodInvoice *ro.InvoiceDetailSimplify          `json:"nextPeriodInvoice"`
 	ProrationDate     int64                              `json:"prorationDate"`

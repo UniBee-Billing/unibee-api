@@ -9,23 +9,23 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetPlanById(ctx context.Context, id uint64) (one *entity.SubscriptionPlan) {
+func GetPlanById(ctx context.Context, id uint64) (one *entity.Plan) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.Plan.Ctx(ctx).Where(entity.Plan{Id: id}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
 	return
 }
 
-func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entity.SubscriptionPlan) {
+func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entity.Plan) {
 	if id <= 0 {
 		return nil
 	}
-	var one *entity.SubscriptionPlan
-	err := dao.SubscriptionPlan.Ctx(ctx).Where(entity.SubscriptionPlan{Id: id}).OmitEmpty().Scan(&one)
+	var one *entity.Plan
+	err := dao.Plan.Ctx(ctx).Where(entity.Plan{Id: id}).OmitEmpty().Scan(&one)
 	if err != nil && one == nil {
 		return nil
 	}
@@ -46,7 +46,7 @@ func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entit
 			addonIdsList = append(addonIdsList, uint64(num)) // 添加到整数列表中
 		}
 	}
-	err = dao.SubscriptionPlan.Ctx(ctx).WhereIn(dao.SubscriptionPlan.Columns().Id, addonIdsList).Scan(&list)
+	err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIdsList).Scan(&list)
 	if err != nil {
 		return nil
 	}

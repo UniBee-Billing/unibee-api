@@ -9,9 +9,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-// SubscriptionPlan is the golang structure of table subscription_plan for DAO operations like Where/Data.
-type SubscriptionPlan struct {
-	g.Meta                    `orm:"table:subscription_plan, do:true"`
+// Plan is the golang structure of table plan for DAO operations like Where/Data.
+type Plan struct {
+	g.Meta                    `orm:"table:plan, do:true"`
 	Id                        interface{} //
 	GmtCreate                 *gtime.Time // create time
 	GmtModify                 *gtime.Time // update time

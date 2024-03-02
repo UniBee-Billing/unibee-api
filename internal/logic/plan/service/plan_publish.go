@@ -21,10 +21,10 @@ func SubscriptionPlanActivate(ctx context.Context, planId uint64) error {
 		//已成功
 		return nil
 	}
-	update, err := dao.SubscriptionPlan.Ctx(ctx).Data(g.Map{
-		dao.SubscriptionPlan.Columns().Status:    consts.PlanStatusActive,
-		dao.SubscriptionPlan.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPlan.Columns().Id, planId).OmitNil().Update()
+	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().Status:    consts.PlanStatusActive,
+		dao.Plan.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Plan.Columns().Id, planId).OmitNil().Update()
 	if err != nil {
 		return err
 	}

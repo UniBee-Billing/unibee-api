@@ -23,7 +23,7 @@ type PlanSimplify struct {
 	ProductDescription string `json:"productDescription" description:"product description"`                                              // product description
 }
 
-func SimplifyPlan(one *entity.SubscriptionPlan) *PlanSimplify {
+func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 	if one == nil {
 		return nil
 	}
@@ -49,7 +49,7 @@ func SimplifyPlan(one *entity.SubscriptionPlan) *PlanSimplify {
 	}
 }
 
-func SimplifyPlanList(ones []*entity.SubscriptionPlan) (list []*PlanSimplify) {
+func SimplifyPlanList(ones []*entity.Plan) (list []*PlanSimplify) {
 	if len(ones) == 0 {
 		return make([]*PlanSimplify, 0)
 	}

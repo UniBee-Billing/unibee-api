@@ -171,7 +171,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	return err
 }
 
-func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.SubscriptionPlan, params []*ro.BulkMetricLimitPlanBindingParam) error {
+func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*ro.BulkMetricLimitPlanBindingParam) error {
 	utility.Assert(plan != nil, "invalid plan")
 	if len(params) > 0 {
 		var oldList []*entity.MerchantMetricPlanLimit
