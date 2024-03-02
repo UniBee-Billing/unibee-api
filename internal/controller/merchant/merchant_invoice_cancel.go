@@ -10,12 +10,11 @@ import (
 	"unibee/api/merchant/invoice"
 )
 
-func (c *ControllerInvoice) NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error) {
+func (c *ControllerInvoice) Cancel(ctx context.Context, req *invoice.CancelReq) (res *invoice.CancelRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
-		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 
-	return service.CreateInvoice(ctx, req)
+	return &invoice.CancelRes{}, service.CancelProcessingInvoice(ctx, req.InvoiceId)
 }

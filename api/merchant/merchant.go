@@ -62,16 +62,16 @@ type IMerchantInfo interface {
 }
 
 type IMerchantInvoice interface {
-	SubscriptionInvoicePdfGenerate(ctx context.Context, req *invoice.SubscriptionInvoicePdfGenerateReq) (res *invoice.SubscriptionInvoicePdfGenerateRes, err error)
-	SubscriptionInvoiceSendEmail(ctx context.Context, req *invoice.SubscriptionInvoiceSendEmailReq) (res *invoice.SubscriptionInvoiceSendEmailRes, err error)
-	SubscriptionInvoiceDetail(ctx context.Context, req *invoice.SubscriptionInvoiceDetailReq) (res *invoice.SubscriptionInvoiceDetailRes, err error)
-	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
-	NewInvoiceCreate(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error)
-	NewInvoiceEdit(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error)
-	DeletePendingInvoice(ctx context.Context, req *invoice.DeletePendingInvoiceReq) (res *invoice.DeletePendingInvoiceRes, err error)
-	FinishInvoiceForPay(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (res *invoice.FinishInvoiceForPayRes, err error)
-	CancelProcessingInvoice(ctx context.Context, req *invoice.CancelProcessingInvoiceReq) (res *invoice.CancelProcessingInvoiceRes, err error)
-	NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error)
+	PdfGenerate(ctx context.Context, req *invoice.PdfGenerateReq) (res *invoice.PdfGenerateRes, err error)
+	SendEmail(ctx context.Context, req *invoice.SendEmailReq) (res *invoice.SendEmailRes, err error)
+	Detail(ctx context.Context, req *invoice.DetailReq) (res *invoice.DetailRes, err error)
+	List(ctx context.Context, req *invoice.ListReq) (res *invoice.ListRes, err error)
+	New(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRes, err error)
+	Edit(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRes, err error)
+	Delete(ctx context.Context, req *invoice.DeleteReq) (res *invoice.DeleteRes, err error)
+	Finish(ctx context.Context, req *invoice.FinishReq) (res *invoice.FinishRes, err error)
+	Cancel(ctx context.Context, req *invoice.CancelReq) (res *invoice.CancelRes, err error)
+	Refund(ctx context.Context, req *invoice.RefundReq) (res *invoice.RefundRes, err error)
 }
 
 type IMerchantMember interface {

@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/invoice"
 )
 
-func (c *ControllerInvoice) NewInvoiceEdit(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
+func (c *ControllerInvoice) Edit(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")

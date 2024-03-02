@@ -6,30 +6,30 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-type SubscriptionInvoicePdfGenerateReq struct {
+type PdfGenerateReq struct {
 	g.Meta        `path:"/pdf_generate" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Generate Merchant Invoice pdf"`
 	InvoiceId     string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 	SendUserEmail bool   `p:"sendUserEmail" d:"false" dc:"Whether Send Invoice Email To User Or Not，Default Not Send"`
 }
-type SubscriptionInvoicePdfGenerateRes struct {
+type PdfGenerateRes struct {
 }
 
-type SubscriptionInvoiceSendEmailReq struct {
+type SendEmailReq struct {
 	g.Meta    `path:"/send_email" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Send Merchant Invoice Email to User"`
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
-type SubscriptionInvoiceSendEmailRes struct {
+type SendEmailRes struct {
 }
 
-type SubscriptionInvoiceDetailReq struct {
+type DetailReq struct {
 	g.Meta    `path:"/detail" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice Detail"`
 	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 }
-type SubscriptionInvoiceDetailRes struct {
+type DetailRes struct {
 	Invoice *ro.InvoiceDetailRo `json:"invoice" dc:"invoice Detail"`
 }
 
-type SubscriptionInvoiceListReq struct {
+type ListReq struct {
 	g.Meta        `path:"/list" tags:"Merchant-Invoice-Controller" method:"post" summary:"Invoice List"`
 	FirstName     string `p:"firstName" dc:"FirstName" `
 	LastName      string `p:"lastName" dc:"LastName" `
@@ -46,11 +46,11 @@ type SubscriptionInvoiceListReq struct {
 	Count         int    `p:"count"  dc:"Count" dc:"Count By Page" `
 }
 
-type SubscriptionInvoiceListRes struct {
+type ListRes struct {
 	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"invoice Detail List"`
 }
 
-type NewInvoiceCreateReq struct {
+type NewReq struct {
 	g.Meta    `path:"/new" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create New Invoice"`
 	UserId    int64                  `p:"userId" dc:"UserId" v:"required"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
@@ -67,11 +67,11 @@ type NewInvoiceItemParam struct {
 	Quantity               int64  `json:"quantity"`
 }
 
-type NewInvoiceCreateRes struct {
+type NewRes struct {
 	Invoice *ro.InvoiceDetailRo `json:"invoice" `
 }
 
-type NewInvoiceEditReq struct {
+type EditReq struct {
 	g.Meta    `path:"/edit" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Edit Invoice"`
 	InvoiceId string                 `p:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
 	TaxScale  int64                  `p:"taxScale"  dc:"TaxScale，1000 represent 10%"`
@@ -81,35 +81,35 @@ type NewInvoiceEditReq struct {
 	Lines     []*NewInvoiceItemParam `p:"lines"              `
 	Finish    bool                   `p:"finish" `
 }
-type NewInvoiceEditRes struct {
+type EditRes struct {
 	Invoice *ro.InvoiceDetailRo `json:"invoice" `
 }
 
-type DeletePendingInvoiceReq struct {
+type DeleteReq struct {
 	g.Meta    `path:"/delete" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Delete Invoice Of Pending Status"`
 	InvoiceId string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 }
-type DeletePendingInvoiceRes struct {
+type DeleteRes struct {
 }
 
-type FinishInvoiceForPayReq struct {
+type FinishReq struct {
 	g.Meta      `path:"/finish" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
 	InvoiceId   string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 	PayMethod   int    `p:"payMethod" dc:"PayMethod,1-manual，2-auto" v:"required"`
 	DaysUtilDue int    `p:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
 }
-type FinishInvoiceForPayRes struct {
+type FinishRes struct {
 	Invoice *entity.Invoice `json:"invoice" `
 }
 
-type CancelProcessingInvoiceReq struct {
+type CancelReq struct {
 	g.Meta    `path:"/cancel" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Cancel Invoice Of Processing Status"`
 	InvoiceId string `p:"invoiceId" dc:"InvoiceId" v:"required`
 }
-type CancelProcessingInvoiceRes struct {
+type CancelRes struct {
 }
 
-type NewInvoiceRefundReq struct {
+type RefundReq struct {
 	g.Meta       `path:"/refund" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Create Refund From Invoice"`
 	InvoiceId    string `p:"invoiceId" dc:"InvoiceId" v:"required"`
 	RefundNo     string `p:"refundNo" dc:"RefundNo" v:"required"`
@@ -117,6 +117,6 @@ type NewInvoiceRefundReq struct {
 	Reason       string `p:"reason" dc:"Refund Reason" v:"required"`
 }
 
-type NewInvoiceRefundRes struct {
+type RefundRes struct {
 	Refund *entity.Refund `json:"refund" `
 }

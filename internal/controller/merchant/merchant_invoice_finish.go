@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/invoice"
 )
 
-func (c *ControllerInvoice) FinishInvoiceForPay(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (res *invoice.FinishInvoiceForPayRes, err error) {
+func (c *ControllerInvoice) Finish(ctx context.Context, req *invoice.FinishReq) (res *invoice.FinishRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")

@@ -6,10 +6,10 @@ import (
 	"unibee/internal/logic/invoice/service"
 )
 
-func (c *ControllerInvoice) NewInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (res *invoice.NewInvoiceRefundRes, err error) {
+func (c *ControllerInvoice) Refund(ctx context.Context, req *invoice.RefundReq) (res *invoice.RefundRes, err error) {
 	refund, err := service.CreateInvoiceRefund(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	return &invoice.NewInvoiceRefundRes{Refund: refund}, nil
+	return &invoice.RefundRes{Refund: refund}, nil
 }

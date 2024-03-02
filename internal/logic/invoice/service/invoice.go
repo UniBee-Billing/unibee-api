@@ -41,7 +41,7 @@ func checkInvoice(one *ro.InvoiceDetailRo) {
 	utility.Assert(one.TotalAmount == totalAmount, "line totalAmount mistake")
 }
 
-func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *invoice.NewInvoiceCreateRes, err error) {
+func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRes, err error) {
 	user := query.GetUserAccountById(ctx, uint64(req.UserId))
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
@@ -102,7 +102,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
-		finishRes, err := FinishInvoice(ctx, &invoice.FinishInvoiceForPayReq{
+		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
 			InvoiceId:   one.InvoiceId,
 			PayMethod:   2,
 			DaysUtilDue: 3,
@@ -112,10 +112,10 @@ func CreateInvoice(ctx context.Context, req *invoice.NewInvoiceCreateReq) (res *
 		}
 		one = finishRes.Invoice
 	}
-	return &invoice.NewInvoiceCreateRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
+	return &invoice.NewRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
 
-func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invoice.NewInvoiceEditRes, err error) {
+func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRes, err error) {
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
@@ -179,7 +179,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
-		finishRes, err := FinishInvoice(ctx, &invoice.FinishInvoiceForPayReq{
+		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
 			InvoiceId:   one.InvoiceId,
 			PayMethod:   2,
 			DaysUtilDue: 3,
@@ -189,7 +189,7 @@ func EditInvoice(ctx context.Context, req *invoice.NewInvoiceEditReq) (res *invo
 		}
 		one = finishRes.Invoice
 	}
-	return &invoice.NewInvoiceEditRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
+	return &invoice.EditRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
 
 func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
@@ -235,7 +235,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 }
 
-func FinishInvoice(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (*invoice.FinishInvoiceForPayRes, error) {
+func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.FinishRes, error) {
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
@@ -255,10 +255,10 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishInvoiceForPayReq) (*i
 	one.Link = invoiceLink
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
-	return &invoice.FinishInvoiceForPayRes{Invoice: one}, nil
+	return &invoice.FinishRes{Invoice: one}, nil
 }
 
-func CreateInvoiceRefund(ctx context.Context, req *invoice.NewInvoiceRefundReq) (*entity.Refund, error) {
+func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.Refund, error) {
 	utility.Assert(req.RefundAmount > 0, "refundFee should > 0")
 	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
 	utility.Assert(len(req.Reason) > 0, "reason should not be blank")

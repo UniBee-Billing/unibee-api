@@ -35,7 +35,7 @@ type IUserGateway interface {
 }
 
 type IUserInvoice interface {
-	SubscriptionInvoiceList(ctx context.Context, req *invoice.SubscriptionInvoiceListReq) (res *invoice.SubscriptionInvoiceListRes, err error)
+	List(ctx context.Context, req *invoice.ListReq) (res *invoice.ListRes, err error)
 }
 
 type IUserMerchant interface {

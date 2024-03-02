@@ -10,7 +10,7 @@ import (
 	merchantInvoice "unibee/api/merchant/invoice"
 )
 
-func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *merchantInvoice.SubscriptionInvoiceListReq) (res *merchantInvoice.SubscriptionInvoiceListRes, err error) {
+func (c *ControllerInvoice) List(ctx context.Context, req *merchantInvoice.ListReq) (res *merchantInvoice.ListRes, err error) {
 	//Merchant 权限检查
 
 	if !consts.GetConfigInstance().IsLocal() {
@@ -38,5 +38,5 @@ func (c *ControllerInvoice) SubscriptionInvoiceList(ctx context.Context, req *me
 	if err != nil {
 		return nil, err
 	}
-	return &merchantInvoice.SubscriptionInvoiceListRes{Invoices: internalResult.Invoices}, nil
+	return &merchantInvoice.ListRes{Invoices: internalResult.Invoices}, nil
 }
