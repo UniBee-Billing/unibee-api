@@ -10,14 +10,14 @@ import (
 	"unibee/api/merchant/metric"
 )
 
-func (c *ControllerMetric) DelMerchantMetricPlanLimit(ctx context.Context, req *metric.DelMerchantMetricPlanLimitReq) (res *metric.DelMerchantMetricPlanLimitRes, err error) {
+func (c *ControllerMetric) Delete(ctx context.Context, req *metric.DelReq) (res *metric.DelRes, err error) {
 	one := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	err = metric2.DeleteMerchantMetricPlanLimit(ctx, _interface.GetMerchantId(ctx), req.MetricPlanLimitId)
+	err = metric2.DeleteMerchantMetric(ctx, _interface.GetMerchantId(ctx), req.MetricId)
 	if err != nil {
 		return nil, err
 	}
-	return &metric.DelMerchantMetricPlanLimitRes{}, nil
+	return &metric.DelRes{}, nil
 }

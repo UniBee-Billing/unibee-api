@@ -7,7 +7,7 @@ import (
 	"unibee/internal/logic/metric_event"
 )
 
-func (c *ControllerMetric) MerchantMetricEvent(ctx context.Context, req *metric.MerchantMetricEventReq) (res *metric.MerchantMetricEventRes, err error) {
+func (c *ControllerMetric) NewEvent(ctx context.Context, req *metric.NewEventReq) (res *metric.NewEventRes, err error) {
 	event, err := metric_event.NewMerchantMetricEvent(ctx, &metric_event.MerchantMetricEventInternalReq{
 		MerchantId:       _interface.GetMerchantId(ctx),
 		MetricCode:       req.MetricCode,
@@ -18,5 +18,5 @@ func (c *ControllerMetric) MerchantMetricEvent(ctx context.Context, req *metric.
 	if err != nil {
 		return nil, err
 	}
-	return &metric.MerchantMetricEventRes{MerchantMetricEvent: event}, nil
+	return &metric.NewEventRes{MerchantMetricEvent: event}, nil
 }

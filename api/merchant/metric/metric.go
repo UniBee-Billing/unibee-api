@@ -5,16 +5,16 @@ import (
 	"unibee/internal/logic/gateway/ro"
 )
 
-type MerchantMetricListReq struct {
-	g.Meta `path:"/merchant_metric_list" tags:"Merchant-Metric-Controller" method:"get" summary:"Merchant Metric list"`
+type ListReq struct {
+	g.Meta `path:"/list" tags:"Merchant-Metric-Controller" method:"get" summary:"Merchant Metric list"`
 }
 
-type MerchantMetricListRes struct {
+type ListRes struct {
 	MerchantMetrics []*ro.MerchantMetricVo `json:"merchantMetrics" dc:"MerchantMetrics"`
 }
 
-type NewMerchantMetricReq struct {
-	g.Meta              `path:"/new_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric"`
+type NewReq struct {
+	g.Meta              `path:"/new" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric"`
 	Code                string `p:"code" dc:"Code" v:"required"`
 	MetricName          string `p:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription   string `p:"metricDescription" dc:"MetricDescription"`
@@ -22,35 +22,35 @@ type NewMerchantMetricReq struct {
 	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
-type NewMerchantMetricRes struct {
+type NewRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
-type EditMerchantMetricReq struct {
-	g.Meta            `path:"/edit_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
+type EditReq struct {
+	g.Meta            `path:"/edit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
 	MetricId          int64  `p:"metricId" dc:"MetricId" v:"required"`
 	MetricName        string `p:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription string `p:"metricDescription" dc:"MetricDescription"`
 }
 
-type EditMerchantMetricRes struct {
+type EditRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
-type DelMerchantMetricReq struct {
-	g.Meta   `path:"/delete_merchant_metric" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
+type DelReq struct {
+	g.Meta   `path:"/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
 	MetricId int64 `p:"metricId" dc:"MetricId" v:"required"`
 }
 
-type DelMerchantMetricRes struct {
+type DelRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
-type MerchantMetricDetailReq struct {
-	g.Meta   `path:"/merchant_metric_detail" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Detail"`
+type DetailReq struct {
+	g.Meta   `path:"/detail" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Detail"`
 	MetricId uint64 `p:"metricId" dc:"MetricId" v:"required"`
 }
 
-type MerchantMetricDetailRes struct {
+type DetailRes struct {
 	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
 }

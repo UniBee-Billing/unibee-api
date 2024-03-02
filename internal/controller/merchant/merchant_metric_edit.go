@@ -10,10 +10,14 @@ import (
 	"unibee/api/merchant/metric"
 )
 
-func (c *ControllerMetric) MerchantMetricList(ctx context.Context, req *metric.MerchantMetricListReq) (res *metric.MerchantMetricListRes, err error) {
+func (c *ControllerMetric) Edit(ctx context.Context, req *metric.EditReq) (res *metric.EditRes, err error) {
 	one := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	return &metric.MerchantMetricListRes{MerchantMetrics: metric2.MerchantMetricList(ctx, _interface.GetMerchantId(ctx))}, nil
+	me, err := metric2.EditMerchantMetric(ctx, _interface.GetMerchantId(ctx), req.MetricId, req.MetricName, req.MetricDescription)
+	if err != nil {
+		return nil, err
+	}
+	return &metric.EditRes{MerchantMetric: me}, nil
 }

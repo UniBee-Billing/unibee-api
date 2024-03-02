@@ -6,24 +6,24 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-type MerchantMetricEventReq struct {
-	g.Meta           `path:"/merchant_metric_event" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Event"`
+type NewEventReq struct {
+	g.Meta           `path:"/event/new" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Event"`
 	MetricCode       string      `p:"metricCode" dc:"MetricCode" v:"required"`
 	ExternalUserId   string      `p:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId  string      `p:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
 	MetricProperties *gjson.Json `p:"metricProperties" dc:"MetricProperties"`
 }
 
-type MerchantMetricEventRes struct {
+type NewEventRes struct {
 	MerchantMetricEvent *entity.MerchantMetricEvent `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
 }
 
-type DelMerchantMetricEventReq struct {
-	g.Meta          `path:"/del_merchant_metric_event" tags:"Merchant-Metric-Controller" method:"post" summary:"Del Merchant Metric Event"`
+type DeleteEventReq struct {
+	g.Meta          `path:"/event/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Del Merchant Metric Event"`
 	MetricCode      string `p:"metricCode" dc:"MetricCode" v:"required"`
 	ExternalUserId  string `p:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId string `p:"externalEventId" dc:"ExternalEventId" v:"required"`
 }
 
-type DelMerchantMetricEventRes struct {
+type DeleteEventRes struct {
 }

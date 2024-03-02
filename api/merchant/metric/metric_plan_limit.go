@@ -5,19 +5,19 @@ import (
 	"unibee/internal/logic/gateway/ro"
 )
 
-type NewMerchantMetricPlanLimitReq struct {
-	g.Meta      `path:"/new_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric Plan TotalLimit"`
+type NewPlanLimitReq struct {
+	g.Meta      `path:"/plan/limit/new" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric Plan TotalLimit"`
 	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
 	PlanId      uint64 `p:"planId" dc:"PlanId" v:"required"`
 	MetricLimit uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
 }
 
-type NewMerchantMetricPlanLimitRes struct {
+type NewPlanLimitRes struct {
 	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
-type EditMerchantMetricPlanLimitReq struct {
-	g.Meta            `path:"/edit_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric Plan TotalLimit"`
+type EditPlanLimitReq struct {
+	g.Meta            `path:"/plan/limit/edit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric Plan TotalLimit"`
 	MetricPlanLimitId int64  `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
 	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
 }
@@ -26,11 +26,11 @@ type EditMerchantMetricPlanLimitRes struct {
 	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
-type DelMerchantMetricPlanLimitReq struct {
-	g.Meta            `path:"/delete_merchant_metric_plan_limit" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric Plan TotalLimit"`
+type DeletePlanLimitReq struct {
+	g.Meta            `path:"/plan/limit/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric Plan TotalLimit"`
 	MetricPlanLimitId int64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
 }
 
-type DelMerchantMetricPlanLimitRes struct {
+type DeletePlanLimitRes struct {
 	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }

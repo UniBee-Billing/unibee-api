@@ -11,7 +11,7 @@ import (
 	"unibee/api/merchant/metric"
 )
 
-func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metric.UserMerchantMetricStatReq) (res *metric.UserMerchantMetricStatRes, err error) {
+func (c *ControllerMetric) UserStat(ctx context.Context, req *metric.UserStatReq) (res *metric.UserStatRes, err error) {
 	utility.Assert(req.UserId > 0 || len(req.ExternalUserId) > 0, "UserId or ExternalUserId Needed")
 	var user *entity.UserAccount
 	if req.UserId > 0 {
@@ -21,5 +21,5 @@ func (c *ControllerMetric) UserMerchantMetricStat(ctx context.Context, req *metr
 	}
 	utility.Assert(user != nil, "user not found")
 	list := metric_event.GetUserMetricLimitStat(ctx, _interface.GetMerchantId(ctx), user)
-	return &metric.UserMerchantMetricStatRes{UserMerchantMetricStats: list}, nil
+	return &metric.UserStatRes{UserMerchantMetricStats: list}, nil
 }

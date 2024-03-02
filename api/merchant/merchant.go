@@ -81,17 +81,17 @@ type IMerchantMember interface {
 }
 
 type IMerchantMetric interface {
-	MerchantMetricList(ctx context.Context, req *metric.MerchantMetricListReq) (res *metric.MerchantMetricListRes, err error)
-	NewMerchantMetric(ctx context.Context, req *metric.NewMerchantMetricReq) (res *metric.NewMerchantMetricRes, err error)
-	EditMerchantMetric(ctx context.Context, req *metric.EditMerchantMetricReq) (res *metric.EditMerchantMetricRes, err error)
-	DelMerchantMetric(ctx context.Context, req *metric.DelMerchantMetricReq) (res *metric.DelMerchantMetricRes, err error)
-	MerchantMetricDetail(ctx context.Context, req *metric.MerchantMetricDetailReq) (res *metric.MerchantMetricDetailRes, err error)
-	MerchantMetricEvent(ctx context.Context, req *metric.MerchantMetricEventReq) (res *metric.MerchantMetricEventRes, err error)
-	DelMerchantMetricEvent(ctx context.Context, req *metric.DelMerchantMetricEventReq) (res *metric.DelMerchantMetricEventRes, err error)
-	NewMerchantMetricPlanLimit(ctx context.Context, req *metric.NewMerchantMetricPlanLimitReq) (res *metric.NewMerchantMetricPlanLimitRes, err error)
-	EditMerchantMetricPlanLimit(ctx context.Context, req *metric.EditMerchantMetricPlanLimitReq) (res *metric.EditMerchantMetricPlanLimitRes, err error)
-	DelMerchantMetricPlanLimit(ctx context.Context, req *metric.DelMerchantMetricPlanLimitReq) (res *metric.DelMerchantMetricPlanLimitRes, err error)
-	UserMerchantMetricStat(ctx context.Context, req *metric.UserMerchantMetricStatReq) (res *metric.UserMerchantMetricStatRes, err error)
+	List(ctx context.Context, req *metric.ListReq) (res *metric.ListRes, err error)
+	New(ctx context.Context, req *metric.NewReq) (res *metric.NewRes, err error)
+	Edit(ctx context.Context, req *metric.EditReq) (res *metric.EditRes, err error)
+	Del(ctx context.Context, req *metric.DelReq) (res *metric.DelRes, err error)
+	Detail(ctx context.Context, req *metric.DetailReq) (res *metric.DetailRes, err error)
+	NewEvent(ctx context.Context, req *metric.NewEventReq) (res *metric.NewEventRes, err error)
+	DeleteEvent(ctx context.Context, req *metric.DeleteEventReq) (res *metric.DeleteEventRes, err error)
+	NewPlanLimit(ctx context.Context, req *metric.NewPlanLimitReq) (res *metric.NewPlanLimitRes, err error)
+	EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditPlanLimitRes, err error)
+	DeletePlanLimit(ctx context.Context, req *metric.DeletePlanLimitReq) (res *metric.DeletePlanLimitRes, err error)
+	UserStat(ctx context.Context, req *metric.UserStatReq) (res *metric.UserStatRes, err error)
 }
 
 type IMerchantOss interface {

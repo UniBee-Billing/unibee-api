@@ -138,7 +138,7 @@ var (
 						merchant.NewWebhook(),
 					)
 				})
-				group.Group("/merchant_metric", func(group *ghttp.RouterGroup) {
+				group.Group("/metric", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewMetric(),
 					)
@@ -151,6 +151,11 @@ var (
 					_interface.Middleware().ResponseHandler,
 					_interface.Middleware().TokenAuth,
 				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewProfile(),
+					)
+				})
 				group.Group("/plan", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewPlan(),
@@ -164,11 +169,6 @@ var (
 				group.Group("/invoice", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewInvoice(),
-					)
-				})
-				group.Group("/", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						user.NewProfile(),
 					)
 				})
 				group.Group("/payment", func(group *ghttp.RouterGroup) {
