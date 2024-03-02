@@ -16,7 +16,7 @@ type SubscriptionInvoicePdfGenerateRes struct {
 
 type SubscriptionInvoiceSendEmailReq struct {
 	g.Meta    `path:"/send_email" tags:"Merchant-Invoice-Controller" method:"post" summary:"Admin Send Merchant Invoice Email to User"`
-	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
+	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type SubscriptionInvoiceSendEmailRes struct {
 }
@@ -26,7 +26,7 @@ type SubscriptionInvoiceDetailReq struct {
 	InvoiceId string `p:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type SubscriptionInvoiceDetailRes struct {
-	Invoice *ro.InvoiceDetailRo `p:"invoice" dc:"invoice Detail"`
+	Invoice *ro.InvoiceDetailRo `json:"invoice" dc:"invoice Detail"`
 }
 
 type SubscriptionInvoiceListReq struct {
@@ -47,7 +47,7 @@ type SubscriptionInvoiceListReq struct {
 }
 
 type SubscriptionInvoiceListRes struct {
-	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"invoice Detail List"`
+	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"invoice Detail List"`
 }
 
 type NewInvoiceCreateReq struct {
