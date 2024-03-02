@@ -7,7 +7,7 @@ import (
 )
 
 type EventListReq struct {
-	g.Meta `path:"/webhook_event_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Webhook Event list"`
+	g.Meta `path:"/event_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Webhook Event list"`
 }
 
 type EventListRes struct {
@@ -15,7 +15,7 @@ type EventListRes struct {
 }
 
 type EndpointListReq struct {
-	g.Meta `path:"/webhook_endpoint_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Merchant Webhook Endpoint list"`
+	g.Meta `path:"/endpoint_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Merchant Webhook Endpoint list"`
 }
 
 type EndpointListRes struct {
@@ -23,7 +23,7 @@ type EndpointListRes struct {
 }
 
 type EndpointLogListReq struct {
-	g.Meta     `path:"/webhook_endpoint_log_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Merchant Webhook Endpoint Log list"`
+	g.Meta     `path:"/endpoint_log_list" tags:"Merchant-Webhook-Controller" method:"get" summary:"Merchant Webhook Endpoint Log list"`
 	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
 	Page       int   `p:"page" dc:"Page, Start WIth 0" `
 	Count      int   `p:"count" dc:"Count Of Page" `
@@ -34,7 +34,7 @@ type EndpointLogListRes struct {
 }
 
 type NewEndpointReq struct {
-	g.Meta `path:"/new_webhook_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant New Webhook Endpoint"`
+	g.Meta `path:"/new_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant New Webhook Endpoint"`
 	Url    string   `p:"url" dc:"Url" v:"required"`
 	Events []string `p:"events" dc:"Events"`
 }
@@ -43,7 +43,7 @@ type NewEndpointRes struct {
 }
 
 type UpdateEndpointReq struct {
-	g.Meta     `path:"/update_webhook_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Update Webhook Endpoint"`
+	g.Meta     `path:"/update_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Update Webhook Endpoint"`
 	EndpointId int64    `p:"endpointId" dc:"EndpointId" v:"required"`
 	Url        string   `p:"url" dc:"Url To Update" v:"required"`
 	Events     []string `p:"events" dc:"Events To Update"`
@@ -53,7 +53,7 @@ type UpdateEndpointRes struct {
 }
 
 type DeleteEndpointReq struct {
-	g.Meta     `path:"/delete_webhook_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Delete Webhook Endpoint"`
+	g.Meta     `path:"/delete_endpoint" tags:"Merchant-Webhook-Controller" method:"post" summary:"Merchant Delete Webhook Endpoint"`
 	EndpointId int64 `p:"endpointId" dc:"EndpointId" v:"required"`
 }
 

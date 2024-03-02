@@ -10,16 +10,12 @@ import (
 	"unibee/api/merchant/email"
 )
 
-func (c *ControllerEmail) MerchantEmailTemplateActivate(ctx context.Context, req *email.MerchantEmailTemplateActivateReq) (res *email.MerchantEmailTemplateActivateRes, err error) {
+func (c *ControllerEmail) TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
-	err = email2.ActivateMerchantEmailTemplate(ctx, _interface.GetMerchantId(ctx), req.TemplateName)
-	if err != nil {
-		return nil, err
-	} else {
-		return &email.MerchantEmailTemplateActivateRes{}, nil
-	}
+	list := email2.GetMerchantEmailTemplateList(ctx, _interface.GetMerchantId(ctx))
+	return &email.TemplateListRes{EmailTemplateList: list}, nil
 }

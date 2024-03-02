@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta    `path:"/user_list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
+	g.Meta    `path:"/list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
 	UserId    int    `p:"userId" dc:"Filter UserId" `
 	FirstName string `p:"firstName" dc:"Search FirstName" `
 	LastName  string `p:"lastName" dc:"Search LastName" `
@@ -29,7 +29,7 @@ type ListRes struct {
 }
 
 type GetReq struct {
-	g.Meta `path:"/get_user_profile" tags:"Merchant-User-Controller" method:"get" summary:"Get User Profile"`
+	g.Meta `path:"/get" tags:"Merchant-User-Controller" method:"get" summary:"Get User Profile"`
 	UserId int64 `p:"userId" dc:"UserId" `
 }
 
@@ -54,7 +54,7 @@ type ReleaseRes struct {
 }
 
 type SearchReq struct {
-	g.Meta    `path:"/user_search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
+	g.Meta    `path:"/search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
 	SearchKey string `p:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
@@ -62,8 +62,8 @@ type SearchRes struct {
 	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
 }
 
-type UserProfileUpdateReq struct {
-	g.Meta          `path:"/update_user_profile" tags:"Merchant-User-Controller" method:"post" summary:"Update User Profile"`
+type UpdateReq struct {
+	g.Meta          `path:"/update" tags:"Merchant-User-Controller" method:"post" summary:"Update User Profile"`
 	UserId          uint64 `p:"userId" dc:"User Id" v:"required"`
 	FirstName       string `p:"firstName" dc:"First name" v:"required"`
 	LastName        string `p:"lastName" dc:"Last Name" v:"required"`
@@ -84,8 +84,5 @@ type UserProfileUpdateReq struct {
 	CountryName     string `p:"countryName" dc:"Country Name" v:"required"`
 }
 
-// with token to be implemented in the future
-type UserProfileUpdateRes struct {
-	//User *entity.UserAccount `p:"user" dc:"User"`
-	// Token string `p:"token" dc:"token string"`
+type UpdateRes struct {
 }

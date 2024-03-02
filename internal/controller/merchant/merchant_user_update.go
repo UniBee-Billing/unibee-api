@@ -12,7 +12,7 @@ import (
 	"unibee/api/merchant/user"
 )
 
-func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error) {
+func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
 	//Admin 操作，service 层不做用户校验
 	if !consts.GetConfigInstance().IsLocal() {
 		//User 检查
@@ -41,5 +41,5 @@ func (c *ControllerUser) UserProfileUpdate(ctx context.Context, req *user.UserPr
 	if err != nil {
 		return nil, err
 	}
-	return &user.UserProfileUpdateRes{}, nil
+	return &user.UpdateRes{}, nil
 }

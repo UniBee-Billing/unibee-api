@@ -7,7 +7,7 @@ import (
 	"unibee/internal/logic/vat_gateway"
 )
 
-func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error) {
+func (c *ControllerVat) SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error) {
 	err = vat_gateway.SetupMerchantVatConfig(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.Data, req.IsDefault)
 	if err != nil {
 		return nil, err
@@ -18,5 +18,5 @@ func (c *ControllerVat) SetupVatGateway(ctx context.Context, req *vat.SetupVatGa
 			return nil, err
 		}
 	}
-	return &vat.SetupVatGatewayRes{}, nil
+	return &vat.SetupGatewayRes{}, nil
 }

@@ -118,7 +118,7 @@ var (
 						merchant.NewPayment(),
 					)
 				})
-				group.Group("/merchant_user", func(group *ghttp.RouterGroup) {
+				group.Group("/user", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewUser(),
 					)
@@ -133,7 +133,7 @@ var (
 						merchant.NewEmail(),
 					)
 				})
-				group.Group("/merchant_webhook", func(group *ghttp.RouterGroup) {
+				group.Group("/webhook", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						merchant.NewWebhook(),
 					)

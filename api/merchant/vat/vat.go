@@ -5,19 +5,19 @@ import (
 	"unibee/internal/logic/gateway/ro"
 )
 
-type SetupVatGatewayReq struct {
-	g.Meta      `path:"/vat_gateway_setup" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Gateway Settings"`
+type SetupGatewayReq struct {
+	g.Meta      `path:"/setup_gateway" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Gateway Setup"`
 	GatewayName string `p:"gatewayName" dc:"GatewayName, em. vatsense" v:"required"`
 	Data        string `p:"data" dc:"Data" v:"required"`
 	IsDefault   bool   `p:"IsDefault" d:"true" dc:"IsDefault, default is true" `
 }
-type SetupVatGatewayRes struct {
+type SetupGatewayRes struct {
 }
 
-type CountryVatListReq struct {
-	g.Meta     `path:"/vat_country_list" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Country List"`
+type CountryListReq struct {
+	g.Meta     `path:"/country_list" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Country List"`
 	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
 }
-type CountryVatListRes struct {
+type CountryListRes struct {
 	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }

@@ -7,10 +7,10 @@ import (
 	"unibee/api/merchant/vat"
 )
 
-func (c *ControllerVat) CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error) {
+func (c *ControllerVat) CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error) {
 	list, err := vat_gateway.MerchantCountryRateList(ctx, req.MerchantId)
 	if err != nil {
 		return nil, err
 	}
-	return &vat.CountryVatListRes{VatCountryList: list}, nil
+	return &vat.CountryListRes{VatCountryList: list}, nil
 }

@@ -10,7 +10,7 @@ import (
 	"unibee/api/merchant/email"
 )
 
-func (c *ControllerEmail) MerchantEmailTemplateUpdate(ctx context.Context, req *email.MerchantEmailTemplateUpdateReq) (res *email.MerchantEmailTemplateUpdateRes, err error) {
+func (c *ControllerEmail) TemplateUpdate(ctx context.Context, req *email.TemplateUpdateReq) (res *email.TemplateUpdateRes, err error) {
 	if !consts.GetConfigInstance().IsLocal() {
 		//Merchant User Check
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
@@ -20,6 +20,6 @@ func (c *ControllerEmail) MerchantEmailTemplateUpdate(ctx context.Context, req *
 	if err != nil {
 		return nil, err
 	} else {
-		return &email.MerchantEmailTemplateUpdateRes{}, nil
+		return &email.TemplateUpdateRes{}, nil
 	}
 }

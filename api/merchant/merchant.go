@@ -41,19 +41,19 @@ type IMerchantBalance interface {
 }
 
 type IMerchantEmail interface {
-	MerchantEmailTemplateList(ctx context.Context, req *email.MerchantEmailTemplateListReq) (res *email.MerchantEmailTemplateListRes, err error)
-	MerchantEmailTemplateUpdate(ctx context.Context, req *email.MerchantEmailTemplateUpdateReq) (res *email.MerchantEmailTemplateUpdateRes, err error)
-	MerchantEmailTemplateSetDefault(ctx context.Context, req *email.MerchantEmailTemplateSetDefaultReq) (res *email.MerchantEmailTemplateSetDefaultRes, err error)
-	MerchantEmailTemplateActivate(ctx context.Context, req *email.MerchantEmailTemplateActivateReq) (res *email.MerchantEmailTemplateActivateRes, err error)
-	MerchantEmailTemplateDeactivate(ctx context.Context, req *email.MerchantEmailTemplateDeactivateReq) (res *email.MerchantEmailTemplateDeactivateRes, err error)
-	MerchantEmailGatewaySetup(ctx context.Context, req *email.MerchantEmailGatewaySetupReq) (res *email.MerchantEmailGatewaySetupRes, err error)
+	GatewaySetup(ctx context.Context, req *email.GatewaySetupReq) (res *email.GatewaySetupRes, err error)
+	TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error)
+	TemplateUpdate(ctx context.Context, req *email.TemplateUpdateReq) (res *email.TemplateUpdateRes, err error)
+	TemplateSetDefault(ctx context.Context, req *email.TemplateSetDefaultReq) (res *email.TemplateSetDefaultRes, err error)
+	TemplateActivate(ctx context.Context, req *email.TemplateActivateReq) (res *email.TemplateActivateRes, err error)
+	TemplateDeactivate(ctx context.Context, req *email.TemplateDeactivateReq) (res *email.TemplateDeactivateRes, err error)
 }
 
 type IMerchantGateway interface {
 	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)
 	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
-	SetupGatewayWebhook(ctx context.Context, req *gateway.SetupGatewayWebhookReq) (res *gateway.SetupGatewayWebhookRes, err error)
+	SetupWebhook(ctx context.Context, req *gateway.SetupWebhookReq) (res *gateway.SetupWebhookRes, err error)
 }
 
 type IMerchantInfo interface {
@@ -143,12 +143,12 @@ type IMerchantUser interface {
 	Frozen(ctx context.Context, req *user.FrozenReq) (res *user.FrozenRes, err error)
 	Release(ctx context.Context, req *user.ReleaseReq) (res *user.ReleaseRes, err error)
 	Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error)
-	UserProfileUpdate(ctx context.Context, req *user.UserProfileUpdateReq) (res *user.UserProfileUpdateRes, err error)
+	Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error)
 }
 
 type IMerchantVat interface {
-	SetupVatGateway(ctx context.Context, req *vat.SetupVatGatewayReq) (res *vat.SetupVatGatewayRes, err error)
-	CountryVatList(ctx context.Context, req *vat.CountryVatListReq) (res *vat.CountryVatListRes, err error)
+	SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error)
+	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
 }
 
 type IMerchantWebhook interface {

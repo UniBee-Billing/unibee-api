@@ -30,9 +30,9 @@ type EditReq struct {
 type EditRes struct {
 }
 
-type SetupGatewayWebhookReq struct {
+type SetupWebhookReq struct {
 	g.Meta    `path:"/setup_webhook" tags:"Merchant-Gateway-Controller" method:"post" summary:"Gateway Webhook Setup"`
 	GatewayId uint64 `p:"gatewayId"  dc:"GatewayId" v:"required"`
 }
-type SetupGatewayWebhookRes struct {
+type SetupWebhookRes struct {
 }

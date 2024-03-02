@@ -7,10 +7,10 @@ import (
 	email2 "unibee/internal/logic/email"
 )
 
-func (c *ControllerEmail) MerchantEmailGatewaySetup(ctx context.Context, req *email.MerchantEmailGatewaySetupReq) (res *email.MerchantEmailGatewaySetupRes, err error) {
+func (c *ControllerEmail) GatewaySetup(ctx context.Context, req *email.GatewaySetupReq) (res *email.GatewaySetupRes, err error) {
 	err = email2.SetupMerchantEmailConfig(ctx, _interface.GetMerchantId(ctx), req.GatewayName, req.Data, req.IsDefault)
 	if err != nil {
 		return nil, err
 	}
-	return &email.MerchantEmailGatewaySetupRes{}, nil
+	return &email.GatewaySetupRes{}, nil
 }
