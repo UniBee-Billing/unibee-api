@@ -12,13 +12,13 @@ import (
 )
 
 type SubscriptionListInternalReq struct {
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId"`
-	UserId     int64  `p:"userId"  dc:"UserId" `
-	Status     []int  `p:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType   string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page       int    `p:"page" dc:"Page, Start WIth 0" `
-	Count      int    `p:"count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId"`
+	UserId     int64  `json:"userId"  dc:"UserId" `
+	Status     []int  `json:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	SortField  string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType   string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page       int    `json:"page" dc:"Page, Start WIth 0" `
+	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.SubscriptionDetailVo, error) {

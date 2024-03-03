@@ -14,7 +14,7 @@ type CountryListRes struct {
 
 type NumberValidateReq struct {
 	g.Meta    `path:"/number_validate" tags:"User-Vat-Controller" method:"post" summary:"Vat Number Validate"`
-	VatNumber string `p:"vatNumber" dc:"VatNumber" v:"required"`
+	VatNumber string `json:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
 	VatNumberValidate *ro.ValidResult `json:"vatNumberValidate"`

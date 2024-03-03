@@ -7,21 +7,21 @@ import (
 
 type SamplePaymentNetherlandsReq struct {
 	g.Meta      `path:"/quick_pay_sample_netherlands" tags:"Open-Mock-Controller" method:"post" summary:"Mock Netherlands Create Payment (Auto Fill) https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
-	Currency    string `p:"currency" dc:"Currency" v:"required"`
-	Amount      int64  `p:"amount" dc:" Amount, Cent" v:"required"`
-	GatewayName string `p:"gatewayName" dc:"Gateway，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
-	ReturnUrl   string `p:"returnUrl" dc:"Return Url" v:""`
+	Currency    string `json:"currency" dc:"Currency" v:"required"`
+	Amount      int64  `json:"amount" dc:" Amount, Cent" v:"required"`
+	GatewayName string `json:"gatewayName" dc:"Gateway，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
+	ReturnUrl   string `json:"returnUrl" dc:"Return Url" v:""`
 }
 type SamplePaymentNetherlandsRes struct {
-	Status            string      `p:"status" dc:"Status"`
-	PaymentId         string      `p:"paymentId" dc:"PaymentId"`
-	MerchantPaymentId string      `p:"merchantPaymentId" dc:"MerchantPaymentId"`
-	Action            *gjson.Json `p:"action" dc:"action"`
+	Status            string      `json:"status" dc:"Status"`
+	PaymentId         string      `json:"paymentId" dc:"PaymentId"`
+	MerchantPaymentId string      `json:"merchantPaymentId" dc:"MerchantPaymentId"`
+	Action            *gjson.Json `json:"action" dc:"action"`
 }
 
 type DetailPayReq struct {
 	g.Meta    `path:"/detail_pay" tags:"Open-Mock-Controller" method:"post" summary:"Mock Payment Detail"`
-	PaymentId string `p:"paymentId" dc:"PaymentId" v:"required"`
+	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 }
 type DetailPayRes struct {
 }

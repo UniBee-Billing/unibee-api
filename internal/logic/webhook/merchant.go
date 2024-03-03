@@ -52,10 +52,10 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*Merc
 }
 
 type EndpointLogListInternalReq struct {
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	EndpointId int64  `p:"endpointId" dc:"EndpointId" v:"required"`
-	Page       int    `p:"page" dc:"Page, Start WIth 0" `
-	Count      int    `p:"count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	EndpointId int64  `json:"endpointId" dc:"EndpointId" v:"required"`
+	Page       int    `json:"page" dc:"Page, Start WIth 0" `
+	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
 func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*entity.MerchantWebhookLog {

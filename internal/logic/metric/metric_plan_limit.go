@@ -64,11 +64,11 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 }
 
 type MerchantMetricPlanLimitInternalReq struct {
-	MerchantId        uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	MetricId          int64  `p:"metricId" dc:"MetricId" `
-	MetricPlanLimitId uint64 `p:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
-	PlanId            uint64 `p:"planId" dc:"PlanId" `
-	MetricLimit       uint64 `p:"metricLimit" dc:"MetricLimit" `
+	MerchantId        uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	MetricId          int64  `json:"metricId" dc:"MetricId" `
+	MetricPlanLimitId uint64 `json:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
+	PlanId            uint64 `json:"planId" dc:"PlanId" `
+	MetricLimit       uint64 `json:"metricLimit" dc:"MetricLimit" `
 }
 
 func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {

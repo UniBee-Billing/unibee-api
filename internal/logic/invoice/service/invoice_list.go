@@ -11,24 +11,24 @@ import (
 )
 
 type SubscriptionInvoiceListInternalReq struct {
-	MerchantId    uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	FirstName     string `p:"firstName" dc:"FirstName" `
-	LastName      string `p:"lastName" dc:"LastName" `
-	Currency      string `p:"Currency" dc:"Currency" `
-	Status        []int  `p:"status" dc:"Status" `
-	AmountStart   int64  `p:"amountStart" dc:"AmountStart" `
-	AmountEnd     int64  `p:"amountEnd" dc:"AmountEnd" `
-	UserId        int    `p:"userId" dc:"Filter UserId Default All" `
-	SendEmail     string `p:"sendEmail" dc:"Filter SendEmail Default All" `
-	SortField     string `p:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
-	SortType      string `p:"sortType" dc:"Sort Type，asc|desc" `
-	DeleteInclude bool   `p:"deleteInclude" dc:"Is Delete Include" `
-	Page          int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count         int    `p:"count"  dc:"Count Of Page"`
+	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	FirstName     string `json:"firstName" dc:"FirstName" `
+	LastName      string `json:"lastName" dc:"LastName" `
+	Currency      string `json:"Currency" dc:"Currency" `
+	Status        []int  `json:"status" dc:"Status" `
+	AmountStart   int64  `json:"amountStart" dc:"AmountStart" `
+	AmountEnd     int64  `json:"amountEnd" dc:"AmountEnd" `
+	UserId        int    `json:"userId" dc:"Filter UserId Default All" `
+	SendEmail     string `json:"sendEmail" dc:"Filter SendEmail Default All" `
+	SortField     string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
+	SortType      string `json:"sortType" dc:"Sort Type，asc|desc" `
+	DeleteInclude bool   `json:"deleteInclude" dc:"Is Delete Include" `
+	Page          int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count         int    `json:"count"  dc:"Count Of Page"`
 }
 
 type SubscriptionInvoiceListInternalRes struct {
-	Invoices []*ro.InvoiceDetailRo `p:"invoices" dc:"Invoice Detail List"`
+	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"Invoice Detail List"`
 }
 
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {

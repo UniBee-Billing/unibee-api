@@ -9,16 +9,16 @@ import (
 )
 
 type PaymentTimelineListInternalReq struct {
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
-	SortField  string `p:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
-	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `
-	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `json:"userId" dc:"Filter UserId, Default All " `
+	SortField  string `json:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
+	SortType   string `json:"sortType" dc:"Sort Type，asc|desc" `
+	Page       int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count      int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 
 type PaymentTimeLineListInternalRes struct {
-	PaymentTimelines []*entity.PaymentTimeline `p:"paymentTimeline" dc:"paymentTimelines明细"`
+	PaymentTimelines []*entity.PaymentTimeline `json:"paymentTimeline" dc:"paymentTimelines明细"`
 }
 
 func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalReq) (res *PaymentTimeLineListInternalRes, err error) {

@@ -16,11 +16,11 @@ import (
 )
 
 type MerchantMetricEventInternalReq struct {
-	MerchantId       uint64      `p:"merchantId" dc:"MerchantId" v:"required"`
-	MetricCode       string      `p:"metricCode" dc:"MetricCode" v:"required"`
-	ExternalUserId   string      `p:"externalUserId" dc:"ExternalUserId" v:"required"`
-	ExternalEventId  string      `p:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
-	MetricProperties *gjson.Json `p:"metricProperties" dc:"MetricProperties"`
+	MerchantId       uint64      `json:"merchantId" dc:"MerchantId" v:"required"`
+	MetricCode       string      `json:"metricCode" dc:"MetricCode" v:"required"`
+	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
+	MetricProperties *gjson.Json `json:"metricProperties" dc:"MetricProperties"`
 }
 
 func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInternalReq) (*entity.MerchantMetricEvent, error) {

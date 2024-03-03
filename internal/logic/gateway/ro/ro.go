@@ -244,29 +244,29 @@ type InvoiceDetailRo struct {
 }
 
 type PlanDetailRo struct {
-	Plan             *PlanSimplify                `p:"plan" json:"plan" dc:"Plan"`
-	MetricPlanLimits []*MerchantMetricPlanLimitVo `p:"metricPlanLimits" json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Addons           []*PlanSimplify              `p:"addons" json:"addons" dc:"Addons"`
-	AddonIds         []int64                      `p:"addonIds" json:"addonIds" dc:"AddonIds"`
+	Plan             *PlanSimplify                `json:"plan" dc:"Plan"`
+	MetricPlanLimits []*MerchantMetricPlanLimitVo `json:"metricPlanLimits" dc:"MetricPlanLimits"`
+	Addons           []*PlanSimplify              `json:"addons" dc:"Addons"`
+	AddonIds         []int64                      `json:"addonIds" dc:"AddonIds"`
 }
 
 type SubscriptionPlanAddonParamRo struct {
-	Quantity    int64  `p:"quantity" json:"quantity" dc:"Quantity，Default 1" `
-	AddonPlanId uint64 `p:"addonPlanId" json:"addonPlanId" dc:"AddonPlanId"`
+	Quantity    int64  `json:"quantity" dc:"Quantity，Default 1" `
+	AddonPlanId uint64 `json:"addonPlanId" dc:"AddonPlanId"`
 }
 
 type PlanAddonVo struct {
-	Quantity  int64         `p:"quantity"  json:"quantity" dc:"Quantity" `
-	AddonPlan *PlanSimplify `p:"addonPlan"  json:"addonPlan" dc:"addonPlan" `
+	Quantity  int64         `json:"quantity" dc:"Quantity" `
+	AddonPlan *PlanSimplify `json:"addonPlan" dc:"addonPlan" `
 }
 
 type SubscriptionDetailVo struct {
 	User                                *UserAccountSimplify               `json:"user" dc:"user"`
-	Subscription                        *SubscriptionSimplify              `p:"subscription" json:"subscription" dc:"Subscription"`
-	Plan                                *PlanSimplify                      `p:"plan" json:"plan" dc:"Plan"`
-	Gateway                             *GatewaySimplify                   `p:"gateway" json:"gateway" dc:"Gateway"`
-	AddonParams                         []*SubscriptionPlanAddonParamRo    `p:"addonParams" json:"addonParams" dc:"AddonParams"`
-	Addons                              []*PlanAddonVo                     `p:"addons" json:"addons" dc:"Addon"`
+	Subscription                        *SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*SubscriptionPlanAddonParamRo    `json:"addonParams" dc:"AddonParams"`
+	Addons                              []*PlanAddonVo                     `json:"addons" dc:"Addon"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
@@ -340,8 +340,8 @@ type VatCountryRate struct {
 }
 
 type BulkMetricLimitPlanBindingParam struct {
-	MetricId    int64  `p:"metricId" dc:"MetricId" v:"required"`
-	MetricLimit uint64 `p:"metricLimit" dc:"MetricLimit" v:"required"`
+	MetricId    int64  `json:"metricId" dc:"MetricId" v:"required"`
+	MetricLimit uint64 `json:"metricLimit" dc:"MetricLimit" v:"required"`
 }
 
 type MerchantMetricVo struct {

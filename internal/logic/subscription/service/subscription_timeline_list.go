@@ -12,12 +12,12 @@ import (
 )
 
 type SubscriptionTimeLineListInternalReq struct {
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `p:"userId" dc:"Filter UserId, Default All " `
-	SortField  string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
-	SortType   string `p:"sortType" dc:"Sort Type，asc|desc" `
-	Page       int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count      int    `p:"count"  dc:"Count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `json:"userId" dc:"Filter UserId, Default All " `
+	SortField  string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
+	SortType   string `json:"sortType" dc:"Sort Type，asc|desc" `
+	Page       int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count      int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 
 type SubscriptionTimeLineListInternalRes struct {

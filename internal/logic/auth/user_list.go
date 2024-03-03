@@ -10,22 +10,22 @@ import (
 )
 
 type UserListInternalReq struct {
-	MerchantId uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `p:"userId" dc:"Filter UserId, Default All" `
-	Email      string `p:"email" dc:"Search Email" `
-	FirstName  string `p:"firstName" dc:"Search FirstName" `
-	LastName   string `p:"lastName" dc:"Search LastName" `
-	Status     []int  `p:"status" dc:"Status, 0-Active｜2-Frozen" `
-	//UserName   int    `p:"userName" dc:"Filter UserName, Default All" `
-	//SubscriptionName   int    `p:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
-	//SubscriptionStatus int    `p:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
-	//PaymentMethod      int    `p:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
-	//BillingType        int    `p:"billingType" dc:"Filter BillingType, Default All" `
-	DeleteInclude bool   `p:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField     string `p:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `p:"page"  dc:"Page,Start 0" `
-	Count         int    `p:"count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId     int    `json:"userId" dc:"Filter UserId, Default All" `
+	Email      string `json:"email" dc:"Search Email" `
+	FirstName  string `json:"firstName" dc:"Search FirstName" `
+	LastName   string `json:"lastName" dc:"Search LastName" `
+	Status     []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	//UserName   int    `json:"userName" dc:"Filter UserName, Default All" `
+	//SubscriptionName   int    `json:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
+	//SubscriptionStatus int    `json:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
+	//PaymentMethod      int    `json:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
+	//BillingType        int    `json:"billingType" dc:"Filter BillingType, Default All" `
+	DeleteInclude bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField     string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int    `json:"page"  dc:"Page,Start 0" `
+	Count         int    `json:"count" dc:"Count Of Page" `
 }
 
 type UserListInternalRes struct {

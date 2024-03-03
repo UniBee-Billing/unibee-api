@@ -15,15 +15,15 @@ import (
 )
 
 type SubscriptionPlanListInternalReq struct {
-	MerchantId    uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	Type          []int  `p:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
-	Status        []int  `p:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
-	PublishStatus int    `p:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
-	Currency      string `p:"currency" dc:"Currency"  `
-	SortField     string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType      string `p:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `p:"page" dc:"Page, Start WIth 0" `
-	Count         int    `p:"count" dc:"Count Of Page" `
+	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	Type          []int  `json:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
+	Status        []int  `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
+	PublishStatus int    `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
+	Currency      string `json:"currency" dc:"Currency"  `
+	SortField     string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page          int    `json:"page" dc:"Page, Start WIth 0" `
+	Count         int    `json:"count" dc:"Count Of Page" `
 }
 
 func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes, error) {

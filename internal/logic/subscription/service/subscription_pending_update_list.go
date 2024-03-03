@@ -13,12 +13,12 @@ import (
 )
 
 type SubscriptionPendingUpdateListInternalReq struct {
-	MerchantId     uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	SubscriptionId string `p:"subscriptionId" `
-	SortField      string `p:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
-	SortType       string `p:"sortType" dc:"Sort Type，asc|desc" `
-	Page           int    `p:"page"  dc:"Page, Start WIth 0" `
-	Count          int    `p:"count"  dc:"Count Of Page"`
+	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	SubscriptionId string `json:"subscriptionId" `
+	SortField      string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
+	SortType       string `json:"sortType" dc:"Sort Type，asc|desc" `
+	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count          int    `json:"count"  dc:"Count Of Page"`
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {

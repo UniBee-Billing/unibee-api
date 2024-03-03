@@ -98,12 +98,12 @@ func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *ro.Merc
 }
 
 type NewMerchantMetricInternalReq struct {
-	MerchantId          uint64 `p:"merchantId" dc:"MerchantId" v:"required"`
-	Code                string `p:"code" dc:"Code" v:"required"`
-	Name                string `p:"name" dc:"Name" v:"required"`
-	Description         string `p:"description" dc:"Description"`
-	AggregationType     int    `p:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
-	AggregationProperty string `p:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
+	MerchantId          uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	Code                string `json:"code" dc:"Code" v:"required"`
+	Name                string `json:"name" dc:"Name" v:"required"`
+	Description         string `json:"description" dc:"Description"`
+	AggregationType     int    `json:"aggregationType" dc:"AggregationType,1-count，2-count unique, 3-latest, 4-max, 5-sum"`
+	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
 func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*ro.MerchantMetricVo, error) {
