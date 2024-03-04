@@ -31,6 +31,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		r.Exit()
 	}
 	for {
+		// todo mark use broadcast redis message is better
 		var one *entity.MerchantWebhookMessage
 		err := dao.MerchantWebhookMessage.Ctx(r.Context()).
 			Where(dao.MerchantWebhookMessage.Columns().MerchantId, merchant.Id).
