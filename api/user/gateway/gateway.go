@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"User-Gateway-Controller" method:"get" summary:"Query Gateway List"`
+	g.Meta `path:"/list" tags:"User-Gateway" method:"get" summary:"Query Gateway List"`
 }
 type ListRes struct {
 	Gateways []*ro.GatewaySimplify `json:"gateways"`

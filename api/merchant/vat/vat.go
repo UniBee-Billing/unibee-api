@@ -6,7 +6,7 @@ import (
 )
 
 type SetupGatewayReq struct {
-	g.Meta      `path:"/setup_gateway" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Gateway Setup"`
+	g.Meta      `path:"/setup_gateway" tags:"Merchant-Vat" method:"post" summary:"Vat Gateway Setup"`
 	GatewayName string `json:"gatewayName" dc:"GatewayName, em. vatsense" v:"required"`
 	Data        string `json:"data" dc:"Data" v:"required"`
 	IsDefault   bool   `json:"IsDefault" d:"true" dc:"IsDefault, default is true" `
@@ -15,7 +15,7 @@ type SetupGatewayRes struct {
 }
 
 type CountryListReq struct {
-	g.Meta     `path:"/country_list" tags:"Merchant-Vat-Controller" method:"post" summary:"Vat Country List"`
+	g.Meta     `path:"/country_list" tags:"Merchant-Vat" method:"post" summary:"Vat Country List"`
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 }
 type CountryListRes struct {

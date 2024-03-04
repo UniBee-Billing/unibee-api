@@ -6,7 +6,7 @@ import (
 )
 
 type UserStatReq struct {
-	g.Meta         `path:"/user/stat" tags:"Merchant-Metric-Controller" method:"post" summary:"User Merchant Metric Stat"`
+	g.Meta         `path:"/user/stat" tags:"Merchant-Metric" method:"post" summary:"User Merchant Metric Stat"`
 	UserId         int64  `json:"userId" dc:"UserId, One Of UserId|ExternalUserId Needed"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, One Of UserId|ExternalUserId Needed"`
 }

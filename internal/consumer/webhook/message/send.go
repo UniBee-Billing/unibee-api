@@ -5,15 +5,19 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	event2 "unibee/internal/consumer/webhook/event"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
 )
 
 type WebhookMessage struct {
+	Id         uint64
 	Event      event2.MerchantWebhookEvent
 	EndpointId uint64
 	Url        string
@@ -22,6 +26,19 @@ type WebhookMessage struct {
 }
 
 func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, merchantId uint64, data *gjson.Json) {
+	webhookMessage := &entity.MerchantWebhookMessage{
+		MerchantId:      merchantId,
+		WebhookEvent:    string(event),
+		Data:            data.String(),
+		WebsocketStatus: 10,
+		CreateTime:      gtime.Now().Timestamp(),
+	}
+	insert, err := dao.MerchantWebhookMessage.Ctx(ctx).Data(webhookMessage).OmitNil().Insert(webhookMessage)
+	utility.AssertError(err, "webhook message insert error")
+	id, err := insert.LastInsertId()
+	utility.AssertError(err, "webhook message LastInsertId error")
+	webhookMessage.Id = uint64(id)
+
 	utility.Assert(event2.WebhookEventInListeningEvents(event), fmt.Sprintf("Event:%s Not In Event List", event))
 	list := query.GetMerchantWebhooksByMerchantId(ctx, merchantId)
 	if list != nil {
@@ -31,6 +48,7 @@ func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, 
 					Topic: redismq2.TopicMerchantWebhook.Topic,
 					Tag:   redismq2.TopicMerchantWebhook.Tag,
 					Body: utility.MarshalToJsonString(&WebhookMessage{
+						Id:         webhookMessage.Id,
 						Event:      event,
 						EndpointId: merchantWebhook.Id,
 						Url:        merchantWebhook.WebhookUrl,

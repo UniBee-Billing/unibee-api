@@ -6,7 +6,7 @@ import (
 )
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/payment_timeline_list" tags:"Merchant-Payment-Timeline-Controller" method:"post" summary:"Payment TimeLine List"`
+	g.Meta    `path:"/payment_timeline_list" tags:"Merchant-Payment-Timeline" method:"post" summary:"Payment TimeLine List"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All" `
 	SortField string `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `

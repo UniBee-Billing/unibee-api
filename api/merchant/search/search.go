@@ -6,7 +6,7 @@ import (
 )
 
 type SearchReq struct {
-	g.Meta    `path:"/key_search" tags:"Merchant-Search-Controller" method:"post" summary:"Merchant Search"`
+	g.Meta    `path:"/key_search" tags:"Merchant-Search" method:"post" summary:"Merchant Search"`
 	SearchKey string `json:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 

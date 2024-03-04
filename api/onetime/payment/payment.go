@@ -6,7 +6,7 @@ import (
 )
 
 type NewPaymentReq struct {
-	g.Meta                   `path:"/new_payment" tags:"OneTime-Payment-Controller" method:"post" summary:"New Payment"`
+	g.Meta                   `path:"/new_payment" tags:"OneTime-Payment" method:"post" summary:"New Payment"`
 	MerchantPaymentId        string          `json:"merchantPaymentId" dc:"MerchantPaymentId" v:"required"`
 	TotalAmount              *AmountVo       `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
 	PaymentMethod            *MethodListReq  `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
@@ -65,7 +65,7 @@ type OutLineItem struct {
 }
 
 type MethodListReq struct {
-	g.Meta  `path:"/paymentMethodList" tags:"OneTime-Payment-Controller" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
+	g.Meta  `path:"/paymentMethodList" tags:"OneTime-Payment" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
 	TokenId string `json:"tokenId" dc:"TokenId" v:""`
 	Gateway string `json:"type" dc:"Gateway" v:"required"`
 }
@@ -79,7 +79,7 @@ type MethodIssur struct {
 }
 
 type DetailReq struct {
-	g.Meta    `path:"/paymentDetail/{PaymentId}" tags:"OneTime-Payment-Controller" method:"post" summary:"Query Payment Detail"`
+	g.Meta    `path:"/paymentDetail/{PaymentId}" tags:"OneTime-Payment" method:"post" summary:"Query Payment Detail"`
 	PaymentId string `in:"path" dc:"PaymentId" v:"required"`
 }
 type DetailRes struct {

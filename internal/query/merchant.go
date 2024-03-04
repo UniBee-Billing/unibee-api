@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantInfoByApiKey(ctx context.Context, apiKey string) (one *entity.Merchant) {
+func GetMerchantByApiKey(ctx context.Context, apiKey string) (one *entity.Merchant) {
 	if len(apiKey) <= 0 {
 		return nil
 	}

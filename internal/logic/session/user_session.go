@@ -85,5 +85,6 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", consts.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
+		ClientToken:    ss,
 	}, nil
 }

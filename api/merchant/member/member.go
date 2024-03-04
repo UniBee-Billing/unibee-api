@@ -7,7 +7,7 @@ import (
 )
 
 type ProfileReq struct {
-	g.Meta `path:"/profile" tags:"Merchant-Member-Profile-Controller" method:"get" summary:"Get Merchant Member Profile"`
+	g.Meta `path:"/profile" tags:"Merchant-Member-Profile" method:"get" summary:"Get Merchant Member Profile"`
 }
 
 type ProfileRes struct {
@@ -15,14 +15,14 @@ type ProfileRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/logout" tags:"Merchant-Member-Profile-Controller" method:"post" summary:"Merchant Member Logout"`
+	g.Meta `path:"/logout" tags:"Merchant-Member-Profile" method:"post" summary:"Merchant Member Logout"`
 }
 
 type LogoutRes struct {
 }
 
 type PasswordResetReq struct {
-	g.Meta      `path:"/passwordReset" tags:"Merchant-Member-Profile-Controller" method:"post" summary:"Merchant Member Reset Password"`
+	g.Meta      `path:"/passwordReset" tags:"Merchant-Member-Profile" method:"post" summary:"Merchant Member Reset Password"`
 	OldPassword string `json:"oldPassword" dc:"OldPassword" v:"required"`
 	NewPassword string `json:"newPassword" dc:"NewPassword" v:"required"`
 }

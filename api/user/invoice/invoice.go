@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"User-Invoice-Controller" method:"post" summary:"Invoice List"`
+	g.Meta        `path:"/list" tags:"User-Invoice" method:"get,post" summary:"Invoice List"`
 	UserId        int    `json:"userId" dc:"UserId Filter, Default Filter All" `
 	SendEmail     string `json:"sendEmail" dc:"SendEmail Filter , Default Filter All" `
 	SortField     string `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `

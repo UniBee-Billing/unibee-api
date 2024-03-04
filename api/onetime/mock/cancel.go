@@ -5,7 +5,7 @@ import (
 )
 
 type CancelReq struct {
-	g.Meta    `path:"/cancel" tags:"Open-Mock-Controller" method:"post" summary:"Mock Cancel Payment"`
+	g.Meta    `path:"/cancel" tags:"Open-Mock" method:"post" summary:"Mock Cancel Payment"`
 	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 }
 type CancelRes struct {

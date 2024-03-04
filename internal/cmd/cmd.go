@@ -7,6 +7,7 @@ import (
 	"time"
 	"unibee/internal/cmd/swagger"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/websocket"
 	"unibee/internal/controller"
 	"unibee/internal/controller/gateway_webhook_entry"
 	"unibee/internal/controller/invoice_entry"
@@ -32,8 +33,13 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			openapi := s.GetOpenApi()
-			openapi.Config.CommonResponse = ghttp.DefaultHandlerResponse{}
+			openapi.Config.CommonResponse = utility.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
+			//openapi.Servers = &goai.Servers{goai.Server{
+			//	URL:         consts.GetConfigInstance().Server.Address,
+			//	Description: consts.GetConfigInstance().Env,
+			//	Variables:   nil,
+			//}}
 			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
@@ -266,6 +272,8 @@ var (
 			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook
 			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
+			// Merchant Websocket
+			s.BindHandler("/merchant/ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
 				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)

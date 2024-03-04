@@ -6,7 +6,7 @@ import (
 )
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"User-Merchant-Info-Controller" method:"get" summary:"Get Merchant Info"`
+	g.Meta `path:"/get" tags:"User-Merchant-Info" method:"get" summary:"Get Merchant Info"`
 }
 
 type GetRes struct {

@@ -259,7 +259,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	} else {
 		// Api Call
 		customCtx.IsOpenApiCall = true
-		merchantInfo := query.GetMerchantInfoByApiKey(r.Context(), tokenString)
+		merchantInfo := query.GetMerchantByApiKey(r.Context(), tokenString)
 		if merchantInfo == nil {
 			r.Response.Status = 401
 			utility.OpenApiJsonExit(r, 61, "invalid token")

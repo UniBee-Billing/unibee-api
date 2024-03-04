@@ -8,7 +8,7 @@ import (
 )
 
 type DetailReq struct {
-	g.Meta         `path:"/detail" tags:"User-Subscription-Controller" method:"post" summary:"Subscription Detail"`
+	g.Meta         `path:"/detail" tags:"User-Subscription" method:"post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
@@ -21,7 +21,7 @@ type DetailRes struct {
 }
 
 type PayCheckReq struct {
-	g.Meta         `path:"/pay_check" tags:"User-Subscription-Controller" method:"post" summary:"Subscription Pay Status Check"`
+	g.Meta         `path:"/pay_check" tags:"User-Subscription" method:"post" summary:"Subscription Pay Status Check"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type PayCheckRes struct {
@@ -30,7 +30,7 @@ type PayCheckRes struct {
 }
 
 type CreatePreviewReq struct {
-	g.Meta         `path:"/create_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription Preview"`
+	g.Meta         `path:"/create_preview" tags:"User-Subscription" method:"post" summary:"User Create Subscription Preview"`
 	PlanId         uint64                             `json:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                              `json:"quantity" dc:"Quantity" `
 	GatewayId      uint64                             `json:"gatewayId" dc:"Id" v:"required" `
@@ -58,7 +58,7 @@ type CreatePreviewRes struct {
 }
 
 type CreateReq struct {
-	g.Meta             `path:"/create_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Create Subscription"`
+	g.Meta             `path:"/create_submit" tags:"User-Subscription" method:"post" summary:"User Create Subscription"`
 	PlanId             uint64                             `json:"planId" dc:"PlanId" v:"required"`
 	Quantity           int64                              `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          uint64                             `json:"gatewayId" dc:"Id"   v:"required" `
@@ -78,7 +78,7 @@ type CreateRes struct {
 }
 
 type UpdatePreviewReq struct {
-	g.Meta              `path:"/update_preview" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription Preview"`
+	g.Meta              `path:"/update_preview" tags:"User-Subscription" method:"post" summary:"User Update Subscription Preview"`
 	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId           uint64                             `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
@@ -94,7 +94,7 @@ type UpdatePreviewRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta              `path:"/update_submit" tags:"User-Subscription-Controller" method:"post" summary:"User Update Subscription"`
+	g.Meta              `path:"/update_submit" tags:"User-Subscription" method:"post" summary:"User Update Subscription"`
 	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId           uint64                             `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
@@ -112,7 +112,7 @@ type UpdateRes struct {
 }
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"User-Subscription-Controller" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
+	g.Meta `path:"/list" tags:"User-Subscription" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
 	UserId int64 `json:"userId" dc:"UserId" v:"required|length:4,30" `
 }
 type ListRes struct {
@@ -120,42 +120,42 @@ type ListRes struct {
 }
 
 type CancelReq struct {
-	g.Meta         `path:"/cancel" tags:"User-Subscription-Controller" method:"post" summary:"User Cancel Subscription Immediately (Should In Create Status)"`
+	g.Meta         `path:"/cancel" tags:"User-Subscription" method:"post" summary:"User Cancel Subscription Immediately (Should In Create Status)"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type CancelRes struct {
 }
 
 type CancelAtPeriodEndReq struct {
-	g.Meta         `path:"/cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Set Cancel Ad Period End"`
+	g.Meta         `path:"/cancel_at_period_end" tags:"User-Subscription" method:"post" summary:"User Edit Subscription-Set Cancel Ad Period End"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type CancelAtPeriodEndRes struct {
 }
 
 type CancelLastCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Cancel Last CancelAtPeriod"`
+	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"User-Subscription" method:"post" summary:"User Edit Subscription-Cancel Last CancelAtPeriod"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type CancelLastCancelAtPeriodEndRes struct {
 }
 
 type SuspendReq struct {
-	g.Meta         `path:"/suspend" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Stop"  deprecated:"true"`
+	g.Meta         `path:"/suspend" tags:"User-Subscription" method:"post" summary:"User Edit Subscription-Stop"  deprecated:"true"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type SuspendRes struct {
 }
 
 type ResumeReq struct {
-	g.Meta         `path:"/resume" tags:"User-Subscription-Controller" method:"post" summary:"User Edit Subscription-Resume"  deprecated:"true"`
+	g.Meta         `path:"/resume" tags:"User-Subscription" method:"post" summary:"User Edit Subscription-Resume"  deprecated:"true"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type ResumeRes struct {
 }
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline-Controller" method:"post" summary:"Subscription TimeLine List"`
+	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline" method:"post" summary:"Subscription TimeLine List"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `

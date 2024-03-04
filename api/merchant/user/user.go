@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Merchant-User-Controller" method:"post" summary:"User List"`
+	g.Meta    `path:"/list" tags:"Merchant-User" method:"post" summary:"User List"`
 	UserId    int    `json:"userId" dc:"Filter UserId" `
 	FirstName string `json:"firstName" dc:"Search FirstName" `
 	LastName  string `json:"lastName" dc:"Search LastName" `
@@ -29,7 +29,7 @@ type ListRes struct {
 }
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"Merchant-User-Controller" method:"get" summary:"Get User Profile"`
+	g.Meta `path:"/get" tags:"Merchant-User" method:"get" summary:"Get User Profile"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -38,7 +38,7 @@ type GetRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta `path:"/frozen_user" tags:"Merchant-User-Controller" method:"get" summary:"Merchant Frozen User"`
+	g.Meta `path:"/frozen_user" tags:"Merchant-User" method:"get" summary:"Merchant Frozen User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -46,7 +46,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta `path:"/release_user" tags:"Merchant-User-Controller" method:"get" summary:"Merchant Release User"`
+	g.Meta `path:"/release_user" tags:"Merchant-User" method:"get" summary:"Merchant Release User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -54,7 +54,7 @@ type ReleaseRes struct {
 }
 
 type SearchReq struct {
-	g.Meta    `path:"/search" tags:"Merchant-User-Controller" method:"post" summary:"User Search"`
+	g.Meta    `path:"/search" tags:"Merchant-User" method:"post" summary:"User Search"`
 	SearchKey string `json:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
@@ -63,7 +63,7 @@ type SearchRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta          `path:"/update" tags:"Merchant-User-Controller" method:"post" summary:"Update User Profile"`
+	g.Meta          `path:"/update" tags:"Merchant-User" method:"post" summary:"Update User Profile"`
 	UserId          uint64 `json:"userId" dc:"User Id" v:"required"`
 	FirstName       string `json:"firstName" dc:"First name" v:"required"`
 	LastName        string `json:"lastName" dc:"Last Name" v:"required"`

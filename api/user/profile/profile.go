@@ -7,7 +7,7 @@ import (
 )
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"User-Profile-Controller" method:"get" summary:"Get User Profile"`
+	g.Meta `path:"/get" tags:"User-Profile" method:"get" summary:"Get User Profile"`
 }
 
 type GetRes struct {
@@ -15,14 +15,14 @@ type GetRes struct {
 }
 
 type LogoutReq struct {
-	g.Meta `path:"/logout" tags:"User-Profile-Controller" method:"post" summary:"User Logout"`
+	g.Meta `path:"/logout" tags:"User-Profile" method:"post" summary:"User Logout"`
 }
 
 type LogoutRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta          `path:"/update" tags:"User-Profile-Controller" method:"post" summary:"Update User Profile"`
+	g.Meta          `path:"/update" tags:"User-Profile" method:"post" summary:"Update User Profile"`
 	Id              uint64 `json:"id" dc:"User Id" v:"required"`
 	FirstName       string `json:"firstName" dc:"First name" v:"required"`
 	LastName        string `json:"lastName" dc:"Last Name" v:"required"`
@@ -49,7 +49,7 @@ type UpdateRes struct {
 }
 
 type PasswordResetReq struct {
-	g.Meta      `path:"/passwordReset" tags:"User-Profile-Controller" method:"post" summary:"User Reset Password"`
+	g.Meta      `path:"/passwordReset" tags:"User-Profile" method:"post" summary:"User Reset Password"`
 	OldPassword string `json:"oldPassword" dc:"OldPassword" v:"required"`
 	NewPassword string `json:"newPassword" dc:"NewPassword" v:"required"`
 }

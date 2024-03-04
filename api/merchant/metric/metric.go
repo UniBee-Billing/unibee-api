@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Merchant-Metric-Controller" method:"get" summary:"Merchant Metric list"`
+	g.Meta `path:"/list" tags:"Merchant-Metric" method:"get" summary:"Merchant Metric list"`
 }
 
 type ListRes struct {
@@ -14,7 +14,7 @@ type ListRes struct {
 }
 
 type NewReq struct {
-	g.Meta              `path:"/new" tags:"Merchant-Metric-Controller" method:"post" summary:"New Merchant Metric"`
+	g.Meta              `path:"/new" tags:"Merchant-Metric" method:"post" summary:"New Merchant Metric"`
 	Code                string `json:"code" dc:"Code" v:"required"`
 	MetricName          string `json:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription   string `json:"metricDescription" dc:"MetricDescription"`
@@ -27,7 +27,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta            `path:"/edit" tags:"Merchant-Metric-Controller" method:"post" summary:"Edit Merchant Metric"`
+	g.Meta            `path:"/edit" tags:"Merchant-Metric" method:"post" summary:"Edit Merchant Metric"`
 	MetricId          int64  `json:"metricId" dc:"MetricId" v:"required"`
 	MetricName        string `json:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription string `json:"metricDescription" dc:"MetricDescription"`
@@ -38,7 +38,7 @@ type EditRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta   `path:"/delete" tags:"Merchant-Metric-Controller" method:"post" summary:"Delete Merchant Metric"`
+	g.Meta   `path:"/delete" tags:"Merchant-Metric" method:"post" summary:"Delete Merchant Metric"`
 	MetricId int64 `json:"metricId" dc:"MetricId" v:"required"`
 }
 
@@ -47,7 +47,7 @@ type DeleteRes struct {
 }
 
 type DetailReq struct {
-	g.Meta   `path:"/detail" tags:"Merchant-Metric-Controller" method:"post" summary:"Merchant Metric Detail"`
+	g.Meta   `path:"/detail" tags:"Merchant-Metric" method:"post" summary:"Merchant Metric Detail"`
 	MetricId uint64 `json:"metricId" dc:"MetricId" v:"required"`
 }
 

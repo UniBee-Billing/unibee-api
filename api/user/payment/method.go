@@ -7,7 +7,7 @@ import (
 )
 
 type MethodListReq struct {
-	g.Meta    `path:"/method_list" tags:"User-Payment-Method-Controller" method:"get" summary:"Query User Payment Method List"`
+	g.Meta    `path:"/method_list" tags:"User-Payment-Method" method:"get" summary:"Query User Payment Method List"`
 	GatewayId uint64 `json:"gatewayId" dc:"GatewayId"   v:"required" `
 }
 
@@ -16,7 +16,7 @@ type MethodListRes struct {
 }
 
 type NewReq struct {
-	g.Meta    `path:"/new" tags:"User-Payment-Method-Controller" method:"post" summary:"User Create New Payment Method"`
+	g.Meta    `path:"/new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
 	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
 	Type      string      `json:"type"`
 	Data      *gjson.Json `json:"data"`

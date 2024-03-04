@@ -3,7 +3,7 @@ package session
 import "github.com/gogf/gf/v2/frame/g"
 
 type NewReq struct {
-	g.Meta         `path:"/new_session" tags:"User-Session-Controller" method:"post" summary:"New User Portal Session"`
+	g.Meta         `path:"/new_session" tags:"User-Session" method:"post" summary:"New User Portal Session"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
 	Email          string `json:"email" dc:"Email" v:"required"`
 	FirstName      string `json:"firstName" dc:"First Name"`
@@ -19,4 +19,5 @@ type NewRes struct {
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
 	Email          string `json:"email" dc:"Email"`
 	Url            string `json:"url" dc:"Url"`
+	ClientToken    string `json:"clientToken" dc:"ClientToken"`
 }
