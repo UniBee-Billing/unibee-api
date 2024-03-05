@@ -26,12 +26,12 @@ type MerchantWebhookMessageVo struct {
 func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 	merchantApiKey := r.Get("merchantApiKey").String()
 	if len(merchantApiKey) == 0 {
-		glog.Error(r.Context(), gerror.New("merchantApiKey invalid"))
+		glog.Error(r.Context(), gerror.New("MerchantWebSocketMessage merchantApiKey invalid"))
 		r.Exit()
 	}
 	merchant := query.GetMerchantByApiKey(r.Context(), merchantApiKey)
 	if merchant == nil {
-		glog.Error(r.Context(), gerror.New("merchantApiKey invalid"))
+		glog.Error(r.Context(), gerror.New("MerchantWebSocketMessage merchantApiKey invalid"))
 		r.Exit()
 	}
 	ws, err := r.WebSocket()
@@ -39,7 +39,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		glog.Error(r.Context(), err)
 		r.Exit()
 	}
-	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry:%d", merchant.Id)
+	g.Log().Infof(r.Context(), "MerchantWebSocketMessage Entry:%d", merchant.Id)
 	for {
 		// todo mark use broadcast redis message is better
 		var one *entity.MerchantWebhookMessage
@@ -50,7 +50,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 			WhereNotNull(dao.MerchantWebhookMessage.Columns().Data).
 			OrderAsc(dao.MerchantWebhookMessage.Columns().CreateTime).
 			Scan(&one)
-		utility.AssertError(err, "merchant query MerchantWebhookMessage error")
+		utility.AssertError(err, "MerchantWebSocketMessage merchant query MerchantWebSocketMessage error")
 		if one != nil {
 			g.Log().Infof(r.Context(), "MerchantWebSocketMessage Start WriteMessage:%d", one.Id)
 			if err = ws.WriteMessage(websocket.PingMessage, []byte("ping")); err != nil {
@@ -71,11 +71,11 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 				dao.MerchantWebhookMessage.Columns().WebsocketStatus: 20,
 				dao.MerchantWebhookMessage.Columns().GmtModify:       gtime.Now(),
 			}).Where(dao.MerchantWebhookMessage.Columns().Id, one.Id).OmitNil().Update()
-			utility.AssertError(err, "merchant update websocket status error")
+			utility.AssertError(err, "MerchantWebSocketMessage merchant update websocket status error")
 			g.Log().Infof(r.Context(), "MerchantWebSocketMessage Finish WriteMessage:%d", one.Id)
 		}
 		time.Sleep(100)
 	}
-	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry Exit:%d", merchant.Id)
+	g.Log().Infof(r.Context(), "MerchantWebSocketMessage Exit:%d", merchant.Id)
 
 }
