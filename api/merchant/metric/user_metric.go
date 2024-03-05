@@ -6,11 +6,11 @@ import (
 )
 
 type UserStatReq struct {
-	g.Meta         `path:"/user/stat" tags:"Merchant-Metric" method:"get,post" summary:"User Merchant Metric Stat"`
+	g.Meta         `path:"/user/stat" tags:"Merchant-Metric" method:"get,post" summary:"Query User Metric Stat"`
 	UserId         int64  `json:"userId" dc:"UserId, One Of UserId|ExternalUserId Needed"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, One Of UserId|ExternalUserId Needed"`
 }
 
 type UserStatRes struct {
-	UserMerchantMetricStats []*ro.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
+	UserMetricStat *ro.UserMetricStat `json:"userMetricStat" dc:"UserMetricStat"`
 }

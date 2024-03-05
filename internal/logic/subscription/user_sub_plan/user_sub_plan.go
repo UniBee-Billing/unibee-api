@@ -28,7 +28,7 @@ type UserSubPlan struct {
 	SubscriptionPeriodEnd   int64
 }
 
-func UserSubPlanCachedList(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription, reloadCache bool) []*UserSubPlan {
+func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription, reloadCache bool) []*UserSubPlan {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(userId > 0, "invalid userId")
 	if sub == nil {
@@ -97,9 +97,9 @@ func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId int64) {
 				return
 			}
 		}()
-		sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, userId, merchantId)
+		sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, userId, merchantId)
 		if sub != nil {
-			UserSubPlanCachedList(ctx, merchantId, userId, sub, true)
+			UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, true)
 		}
 	}()
 }

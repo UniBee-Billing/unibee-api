@@ -33,4 +33,5 @@ type Plan struct {
 	BindingAddonIds           string      `json:"bindingAddonIds"           description:"binded addon planIds，split with ,"`                         // binded addon planIds，split with ,
 	PublishStatus             int         `json:"publishStatus"             description:"1-UnPublish,2-Publish, Use For Display Plan At UserPortal"` // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                int64       `json:"createTime"                description:"create utc time"`                                           // create utc time
+	ExtraMetricData           string      `json:"extraMetricData"           description:""`                                                          //
 }

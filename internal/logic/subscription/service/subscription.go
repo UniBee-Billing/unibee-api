@@ -137,7 +137,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	utility.Assert(user != nil, "user not found")
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")

@@ -6,35 +6,56 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/metric"
+	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/user_sub_plan"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*ro.UserMerchantMetricStat {
-	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), merchantId)
-	return GetUserSubscriptionMetricLimitStat(ctx, merchantId, user, sub)
+func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *ro.UserMetricStat {
+	sub := query.GetSubscriptionBySubscriptionId(ctx, user.SubscriptionId)
+	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub)
 }
 
-func GetUserSubscriptionMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription) []*ro.UserMerchantMetricStat {
+func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *ro.UserMetricStat {
 	var list = make([]*ro.UserMerchantMetricStat, 0)
-	if sub != nil {
-		limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
+	if user != nil {
+		user.Password = ""
+	}
+	if one != nil {
+		limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), one)
 		for _, metricLimit := range limitMap {
 			met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
 			if met != nil {
 				list = append(list, &ro.UserMerchantMetricStat{
 					MetricLimit:     metricLimit,
-					CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, user.Id, met, sub, false),
+					CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, user.Id, met, one, false),
 				})
 			}
 		}
+		return &ro.UserMetricStat{
+			IsPaid:                  one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete,
+			User:                    ro.SimplifyUserAccount(user),
+			Subscription:            ro.SimplifySubscription(one),
+			Plan:                    ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Addons:                  addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			UserMerchantMetricStats: list,
+		}
+	} else {
+		return &ro.UserMetricStat{
+			IsPaid:                  false,
+			User:                    ro.SimplifyUserAccount(user),
+			Subscription:            nil,
+			Plan:                    nil,
+			Addons:                  nil,
+			UserMerchantMetricStats: list,
+		}
 	}
-	return list
 }
 
 func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
@@ -54,7 +75,7 @@ func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entit
 
 func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*ro.MetricLimitVo {
 	var limitMap = make(map[int64]*ro.MetricLimitVo)
-	userSubPlans := user_sub_plan.UserSubPlanCachedList(ctx, merchantId, userId, sub, false)
+	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
 		for _, subPlan := range userSubPlans {
 			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, false)
@@ -104,7 +125,7 @@ func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64
 		}()
 		met := query.GetMerchantMetric(ctx, metricId)
 		if met != nil {
-			sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, userId, merchantId)
+			sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, userId, merchantId)
 			if sub != nil {
 				GetUserMetricLimitCachedUseValue(ctx, merchantId, uint64(userId), met, sub, true)
 			}

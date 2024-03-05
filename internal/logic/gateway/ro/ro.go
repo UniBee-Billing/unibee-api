@@ -265,6 +265,15 @@ type UserMerchantMetricStat struct {
 	CurrentUseValue uint64
 }
 
+type UserMetricStat struct {
+	IsPaid                  bool                      `json:"isPaid" dc:"IsPaid"`
+	User                    *UserAccountSimplify      `json:"user" dc:"user"`
+	Subscription            *SubscriptionSimplify     `json:"subscription" dc:"Subscription"`
+	Plan                    *PlanSimplify             `json:"plan" dc:"Plan"`
+	Addons                  []*PlanAddonVo            `json:"addons" dc:"Addon"`
+	UserMerchantMetricStats []*UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
+}
+
 type MetricLimitVo struct {
 	MerchantId          uint64
 	UserId              int64
@@ -286,7 +295,6 @@ type SubscriptionDetailVo struct {
 	AddonParams                         []*SubscriptionPlanAddonParamRo    `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*PlanAddonVo                     `json:"addons" dc:"Addon"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
-	UserMerchantMetricStats             []*UserMerchantMetricStat          `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }
 
 type SubscriptionTimeLineDetailVo struct {

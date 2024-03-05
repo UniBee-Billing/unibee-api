@@ -35,4 +35,5 @@ type Plan struct {
 	BindingAddonIds           interface{} // binded addon planIds，split with ,
 	PublishStatus             interface{} // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                interface{} // create utc time
+	ExtraMetricData           interface{} //
 }

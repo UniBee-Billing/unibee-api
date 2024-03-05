@@ -37,7 +37,8 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 		}
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
+	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
+	subscription3.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
 	return redismq.CommitMessage
 }
 

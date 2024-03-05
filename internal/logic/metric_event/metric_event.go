@@ -36,9 +36,9 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	met := query.GetMerchantMetricByCode(ctx, req.MetricCode)
 	utility.Assert(met != nil, "metric not found")
 	utility.Assert(met.MerchantId == req.MerchantId, "code not match")
-	// check the only subscription
-	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), req.MerchantId)
-	utility.Assert(sub != nil, "user has no subscription")
+	// check the only paid subscription
+	sub := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, int64(user.Id), req.MerchantId)
+	utility.Assert(sub != nil, "user has no active subscription")
 
 	// property determine
 	var aggregationPropertyString = ""

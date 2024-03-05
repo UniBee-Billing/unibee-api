@@ -21,6 +21,7 @@ type PlanSimplify struct {
 	CreateTime         int64  `json:"createTime"                description:"create utc time"`                                           // create utc time
 	ProductName        string `json:"productName"        description:"product name"`                                                     // product name
 	ProductDescription string `json:"productDescription" description:"product description"`                                              // product description
+	ExtraMetricData    string `json:"extraMetricData"           description:""`                                                          //
 }
 
 func SimplifyPlan(one *entity.Plan) *PlanSimplify {
@@ -46,6 +47,7 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 		CreateTime:         one.CreateTime,
 		ProductName:        one.GatewayProductName,
 		ProductDescription: one.GatewayProductDescription,
+		ExtraMetricData:    one.ExtraMetricData,
 	}
 }
 

@@ -17,7 +17,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 	if user != nil {
 		user.Password = ""
 	}
-	one := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
 	if one != nil {
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err == nil {

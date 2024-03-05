@@ -255,7 +255,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 	if sub == nil {
 		// todo mark invoice not relative to subscription
-		sub = query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, one.UserId, merchant.Id)
+		sub = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, merchant.Id)
 	}
 	if sub != nil {
 		plan := query.GetPlanById(ctx, sub.PlanId)

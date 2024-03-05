@@ -34,7 +34,7 @@ func (t SubscriptionIncompleteListener) Consume(ctx context.Context, message *re
 		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-	subscription3.SendSubscriptionMerchantWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
+	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
 	return redismq.CommitMessage
 }
 

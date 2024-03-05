@@ -15,7 +15,7 @@ import (
 //	return
 //}
 
-func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId uint64) (one *entity.Subscription) {
+func GetLatestActiveOrIncompleteSubscriptionByUserId(ctx context.Context, userId int64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil
 	}
@@ -23,7 +23,24 @@ func GetLatestActiveOrCreateSubscriptionByUserId(ctx context.Context, userId int
 		Where(dao.Subscription.Columns().UserId, userId).
 		Where(dao.Subscription.Columns().MerchantId, merchantId).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
-		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusCreate, consts.SubStatusActive}).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusIncomplete, consts.SubStatusActive}).
+		OrderDesc(dao.Subscription.Columns().GmtModify).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
+func GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId uint64) (one *entity.Subscription) {
+	if userId <= 0 || merchantId <= 0 {
+		return nil
+	}
+	err := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().UserId, userId).
+		Where(dao.Subscription.Columns().MerchantId, merchantId).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusCreate, consts.SubStatusActive, consts.SubStatusIncomplete}).
 		OrderDesc(dao.Subscription.Columns().GmtModify).
 		Scan(&one)
 	if err != nil {

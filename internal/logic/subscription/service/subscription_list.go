@@ -5,7 +5,6 @@ import (
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
-	"unibee/internal/logic/metric_event"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -40,7 +39,6 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.Subscri
 		Plan:                                ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
-		UserMerchantMetricStats:             metric_event.GetUserSubscriptionMetricLimitStat(ctx, one.MerchantId, user, one),
 	}, nil
 }
 

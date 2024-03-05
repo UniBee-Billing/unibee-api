@@ -43,6 +43,7 @@ type PlanColumns struct {
 	BindingAddonIds           string // binded addon planIds，split with ,
 	PublishStatus             string // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                string // create utc time
+	ExtraMetricData           string //
 }
 
 // planColumns holds the columns for table plan.
@@ -70,6 +71,7 @@ var planColumns = PlanColumns{
 	BindingAddonIds:           "binding_addon_ids",
 	PublishStatus:             "publish_status",
 	CreateTime:                "create_time",
+	ExtraMetricData:           "extra_metric_data",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.
