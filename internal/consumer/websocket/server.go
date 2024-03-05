@@ -43,6 +43,10 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		utility.AssertError(err, "merchant query MerchantWebhookMessage error")
 		if one != nil {
 			g.Log().Infof(r.Context(), "MerchantWebSocketMessage Start WriteMessage:%d", one.Id)
+			if err = ws.WriteMessage(websocket.PingMessage, []byte("ping")); err != nil {
+				g.Log().Errorf(r.Context(), "MerchantWebSocketMessage WritePingMessage err:%s", err.Error())
+				break
+			}
 			if err = ws.WriteMessage(websocket.BinaryMessage, []byte(one.Data)); err != nil {
 				g.Log().Errorf(r.Context(), "MerchantWebSocketMessage WriteMessage err:%s", err.Error())
 				break
