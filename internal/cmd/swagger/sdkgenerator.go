@@ -26,14 +26,14 @@ func SDKGeneratorJson(r *ghttp.Request) {
 			}
 		}
 		for key, path := range api.GetJsonMap("paths") {
-			if path.Contains("post") {
-				_ = api.Set("paths#"+key+"#", path.GetJson("post"))
-				_ = api.Remove("paths#" + key + "#post")
-			}
-			if path.Contains("get") {
-				_ = api.Set("paths#"+key+"#", path.GetJson("get"))
-				_ = api.Remove("paths#" + key + "#post")
-			}
+			//if path.Contains("post") {
+			//	_ = api.Set("paths#"+key+"#api", path.GetJson("post"))
+			//	_ = api.Remove("paths#" + key + "#post")
+			//}
+			//if path.Contains("get") {
+			//	_ = api.Set("paths#"+key+"#api", path.GetJson("get"))
+			//	_ = api.Remove("paths#" + key + "#post")
+			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/merchant")) {
 				_ = api.Remove("paths#" + key)
