@@ -42,7 +42,9 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 			Scan(&one)
 		utility.AssertError(err, "merchant query MerchantWebhookMessage error")
 		if one != nil {
+			g.Log().Infof(r.Context(), "MerchantWebSocketMessage Start WriteMessage:%d", one.Id)
 			if err = ws.WriteMessage(websocket.BinaryMessage, []byte(one.Data)); err != nil {
+				g.Log().Errorf(r.Context(), "MerchantWebSocketMessage WriteMessage err:%s", err.Error())
 				r.Exit()
 				break
 			}
@@ -51,6 +53,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 				dao.MerchantWebhookMessage.Columns().GmtModify:       gtime.Now(),
 			}).Where(dao.MerchantWebhookMessage.Columns().Id, one.Id).OmitNil().Update()
 			utility.AssertError(err, "merchant update websocket status error")
+			g.Log().Infof(r.Context(), "MerchantWebSocketMessage Finish WriteMessage:%d", one.Id)
 		}
 		time.Sleep(100)
 	}
