@@ -35,7 +35,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
-	utility.Assert(createPayContext.Pay.CompanyId > 0, "companyId Invalid")
 	// 查询并处理所有待支付订单 todo mark
 
 	createPayContext.Pay.Status = consts.PaymentCreated
