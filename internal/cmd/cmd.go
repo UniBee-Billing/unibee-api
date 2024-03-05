@@ -280,7 +280,7 @@ var (
 			// Gateway Webhook
 			s.BindHandler("POST:/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			// Merchant Websocket
-			s.BindHandler("/merchant/ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
+			s.BindHandler("/merchant/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
 				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
