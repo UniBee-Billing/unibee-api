@@ -15,11 +15,11 @@ import (
 )
 
 type MerchantWebhookMessageVo struct {
-	Id           uint64 `json:"id"              description:"id"`              // id
-	MerchantId   uint64 `json:"merchantId"      description:"merchantId"`      // merchantId
-	WebhookEvent string `json:"webhookEvent"    description:"webhook_event"`   // webhook_event
-	Data         string `json:"data"            description:"data(json)"`      // data(json)
-	CreateTime   int64  `json:"createTime"      description:"create utc time"` // create utc time
+	Id           uint64      `json:"id"              description:"id"`              // id
+	MerchantId   uint64      `json:"merchantId"      description:"merchantId"`      // merchantId
+	WebhookEvent string      `json:"webhookEvent"    description:"webhook_event"`   // webhook_event
+	Data         interface{} `json:"data"            description:"data(json)"`      // data(json)
+	CreateTime   int64       `json:"createTime"      description:"create utc time"` // create utc time
 }
 
 func MerchantWebSocketMessageEntry(r *ghttp.Request) {
@@ -55,13 +55,13 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 				g.Log().Errorf(r.Context(), "MerchantWebSocketMessage WritePingMessage err:%s", err.Error())
 				break
 			}
-			if err = ws.WriteMessage(websocket.BinaryMessage, []byte(utility.MarshalToJsonString(&MerchantWebhookMessageVo{
+			if err = ws.WriteMessage(websocket.BinaryMessage, []byte(utility.FormatToGJson(&MerchantWebhookMessageVo{
 				Id:           one.Id,
 				MerchantId:   one.MerchantId,
 				WebhookEvent: one.WebhookEvent,
 				Data:         one.Data,
 				CreateTime:   one.CreateTime,
-			}))); err != nil {
+			}).String())); err != nil {
 				g.Log().Errorf(r.Context(), "MerchantWebSocketMessage WriteMessage err:%s", err.Error())
 				break
 			}
