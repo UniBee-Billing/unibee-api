@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "unibee/api/onetime/payment"
 	"unibee/internal/consts"
-	"unibee/internal/logic/metric_event"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -261,15 +260,33 @@ type PlanAddonVo struct {
 	AddonPlan *PlanSimplify `json:"addonPlan" dc:"addonPlan" `
 }
 
+type UserMerchantMetricStat struct {
+	MetricLimit     *MetricLimitVo
+	CurrentUseValue uint64
+}
+
+type MetricLimitVo struct {
+	MerchantId          uint64
+	UserId              int64
+	MetricId            int64
+	Code                string `json:"code"                description:"code"`                                                                        // code
+	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name
+	Type                int    `json:"type"                description:"1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)"` // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
+	AggregationType     int    `json:"aggregationType"     description:"0-count，1-count unique, 2-latest, 3-max, 4-sum"`                              // 0-count，1-count unique, 2-latest, 3-max, 4-sum
+	AggregationProperty string `json:"aggregationProperty" description:"aggregation property"`
+	TotalLimit          uint64
+	PlanLimits          []*MerchantMetricPlanLimitVo // ?
+}
+
 type SubscriptionDetailVo struct {
-	User                                *UserAccountSimplify                   `json:"user" dc:"user"`
-	Subscription                        *SubscriptionSimplify                  `json:"subscription" dc:"Subscription"`
-	Plan                                *PlanSimplify                          `json:"plan" dc:"Plan"`
-	Gateway                             *GatewaySimplify                       `json:"gateway" dc:"Gateway"`
-	AddonParams                         []*SubscriptionPlanAddonParamRo        `json:"addonParams" dc:"AddonParams"`
-	Addons                              []*PlanAddonVo                         `json:"addons" dc:"Addon"`
-	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo     `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
-	UserMerchantMetricStats             []*metric_event.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
+	User                                *UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*SubscriptionPlanAddonParamRo    `json:"addonParams" dc:"AddonParams"`
+	Addons                              []*PlanAddonVo                     `json:"addons" dc:"Addon"`
+	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	UserMerchantMetricStats             []*UserMerchantMetricStat          `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }
 
 type SubscriptionTimeLineDetailVo struct {

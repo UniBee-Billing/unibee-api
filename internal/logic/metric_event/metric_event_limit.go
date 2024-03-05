@@ -15,24 +15,19 @@ import (
 	"unibee/utility"
 )
 
-type UserMerchantMetricStat struct {
-	MetricLimit     *MetricLimitVo
-	CurrentUseValue uint64
-}
-
-func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*UserMerchantMetricStat {
+func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*ro.UserMerchantMetricStat {
 	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), merchantId)
 	return GetUserSubscriptionMetricLimitStat(ctx, merchantId, user, sub)
 }
 
-func GetUserSubscriptionMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription) []*UserMerchantMetricStat {
-	var list = make([]*UserMerchantMetricStat, 0)
+func GetUserSubscriptionMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription) []*ro.UserMerchantMetricStat {
+	var list = make([]*ro.UserMerchantMetricStat, 0)
 	if sub != nil {
 		limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
 		for _, metricLimit := range limitMap {
 			met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
 			if met != nil {
-				list = append(list, &UserMerchantMetricStat{
+				list = append(list, &ro.UserMerchantMetricStat{
 					MetricLimit:     metricLimit,
 					CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, user.Id, met, sub, false),
 				})
@@ -40,19 +35,6 @@ func GetUserSubscriptionMetricLimitStat(ctx context.Context, merchantId uint64, 
 		}
 	}
 	return list
-}
-
-type MetricLimitVo struct {
-	MerchantId          uint64
-	UserId              int64
-	MetricId            int64
-	Code                string `json:"code"                description:"code"`                                                                        // code
-	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name
-	Type                int    `json:"type"                description:"1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)"` // 1-limit_metered，2-charge_metered(come later),3-charge_recurring(come later)
-	AggregationType     int    `json:"aggregationType"     description:"0-count，1-count unique, 2-latest, 3-max, 4-sum"`                              // 0-count，1-count unique, 2-latest, 3-max, 4-sum
-	AggregationProperty string `json:"aggregationProperty" description:"aggregation property"`
-	TotalLimit          uint64
-	PlanLimits          []*ro.MerchantMetricPlanLimitVo // ?
 }
 
 func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
@@ -70,8 +52,8 @@ func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entit
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*MetricLimitVo {
-	var limitMap = make(map[int64]*MetricLimitVo)
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*ro.MetricLimitVo {
+	var limitMap = make(map[int64]*ro.MetricLimitVo)
 	userSubPlans := user_sub_plan.UserSubPlanCachedList(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
 		for _, subPlan := range userSubPlans {
@@ -81,7 +63,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int
 					limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
 					limitMap[planLimit.MetricId].PlanLimits = append(limitMap[planLimit.MetricId].PlanLimits, planLimit)
 				} else {
-					limitMap[planLimit.MetricId] = &MetricLimitVo{
+					limitMap[planLimit.MetricId] = &ro.MetricLimitVo{
 						MerchantId:          merchantId,
 						UserId:              userId,
 						MetricId:            planLimit.MetricId,

@@ -61,4 +61,5 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		time.Sleep(100)
 	}
 	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry Exit:%d", merchant.Id)
+
 }

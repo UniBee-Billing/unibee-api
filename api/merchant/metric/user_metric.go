@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/metric_event"
+	"unibee/internal/logic/gateway/ro"
 )
 
 type UserStatReq struct {
@@ -12,5 +12,5 @@ type UserStatReq struct {
 }
 
 type UserStatRes struct {
-	UserMerchantMetricStats []*metric_event.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
+	UserMerchantMetricStats []*ro.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }
