@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/net/goai"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
 	"unibee/internal/cmd/swagger"
@@ -34,11 +35,21 @@ var (
 			openapi := s.GetOpenApi()
 			openapi.Config.CommonResponse = utility.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
-			//openapi.Servers = &goai.Servers{goai.Server{
-			//	URL:         consts.GetConfigInstance().Server.Address,
-			//	Description: consts.GetConfigInstance().Env,
-			//	Variables:   nil,
-			//}}
+			if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
+				openapi.Servers = &goai.Servers{goai.Server{
+					URL:         "http://127.0.0.1" + consts.GetConfigInstance().Server.Address,
+					Description: consts.GetConfigInstance().Env,
+				}, goai.Server{
+					URL:         "http://api.unibee.top",
+					Description: "stage",
+				}}
+			} else {
+				openapi.Servers = &goai.Servers{goai.Server{
+					URL:         consts.GetConfigInstance().Server.DomainPath,
+					Description: consts.GetConfigInstance().Env,
+				}}
+			}
+
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
@@ -49,24 +60,6 @@ var (
 					_interface.Middleware().ResponseHandler,
 				)
 			})
-
-			//s.Group("/onetime", func(group *ghttp.RouterGroup) {
-			//	group.Middleware(
-			//		_interface.Middleware().CORS,
-			//		_interface.Middleware().ResponseHandler,
-			//		_interface.Middleware().TokenAuth,
-			//	)
-			//	group.Group("/payment", func(group *ghttp.RouterGroup) {
-			//		group.Bind(
-			//			onetime.NewPayment(),
-			//		)
-			//	})
-			//	group.Group("/mock", func(group *ghttp.RouterGroup) {
-			//		group.Bind(
-			//			onetime.NewMock(),
-			//		)
-			//	})
-			//})
 
 			s.Group("/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
