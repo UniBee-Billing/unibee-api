@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta   `path:"/list" tags:"User-Plan" method:"post" summary:"Plan List"`
+	g.Meta   `path:"/list" tags:"User-Plan" method:"get,post" summary:"Plan List"`
 	Type     int    `json:"type"  dc:"Default All，,1-main plan，2-addon plan" `
 	Currency string `json:"currency" dc:"Currency"  `
 }

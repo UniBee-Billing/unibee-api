@@ -8,7 +8,7 @@ import (
 )
 
 type DetailReq struct {
-	g.Meta         `path:"/detail" tags:"User-Subscription" method:"post" summary:"Subscription Detail"`
+	g.Meta         `path:"/detail" tags:"User-Subscription" method:"get,post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
@@ -21,7 +21,7 @@ type DetailRes struct {
 }
 
 type PayCheckReq struct {
-	g.Meta         `path:"/pay_check" tags:"User-Subscription" method:"post" summary:"Subscription Pay Status Check"`
+	g.Meta         `path:"/pay_check" tags:"User-Subscription" method:"get,post" summary:"Subscription Pay Status Check"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type PayCheckRes struct {
@@ -112,7 +112,7 @@ type UpdateRes struct {
 }
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"User-Subscription" method:"post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
+	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
 	UserId int64 `json:"userId" dc:"UserId" v:"required|length:4,30" `
 }
 type ListRes struct {
@@ -155,7 +155,7 @@ type ResumeRes struct {
 }
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline" method:"post" summary:"Subscription TimeLine List"`
+	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline" method:"get,post" summary:"Subscription TimeLine List"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
