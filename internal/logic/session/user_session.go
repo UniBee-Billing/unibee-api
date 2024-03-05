@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -80,11 +81,16 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
 
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
+	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", one.Id)
+	utility.AssertError(err, "Server Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
+
 	return &session.NewRes{
 		UserId:         strconv.FormatUint(one.Id, 10),
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", consts.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
-		ClientToken:    ss,
+		ClientToken:    token,
 	}, nil
 }
