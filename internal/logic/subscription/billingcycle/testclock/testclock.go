@@ -26,7 +26,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	utility.Assert(newTestClock > 0, "Invalid TestClock")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
 	utility.Assert(sub != nil, "Subscription Not Found")
-	utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Walk To End Status, Cancel or Expire")
+	utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
 	utility.Assert(sub.TestClock < newTestClock, "The Subscription Has Walk To The TestClock Exceed The New One")
 
 	//firstEnd := subscription.GetPeriodEndFromStart(ctx,utility.MaxInt64(sub.CurrentPeriodEnd,sub.TrialEnd), uint64(sub.PlanId))
