@@ -16,7 +16,8 @@ func SDKGeneratorJson(r *ghttp.Request) {
 		r.Exit()
 		return
 	} else {
-		api := gjson.New(string(request))
+		json := strings.Replace(string(request), "uint64", "int64", -1)
+		api := gjson.New(json)
 		api.SetSplitChar('#')
 		for key, path := range api.GetJsonMap("components#schemas") {
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
