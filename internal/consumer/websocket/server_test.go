@@ -16,7 +16,7 @@ func TestMerchantWebSocketMessageEntry(t *testing.T) {
 	client.Proxy = http.ProxyFromEnvironment
 	client.TLSClientConfig = &tls.Config{}
 
-	conn, _, err := client.Dial("ws://127.0.0.1:8088/merchant/"+"EUXAgwv3Vcr1PFWt2SgBumMHXn3ImBqM", nil)
+	conn, _, err := client.Dial("ws://127.0.0.1:8088/merchant_ws/"+"EUXAgwv3Vcr1PFWt2SgBumMHXn3ImBqM", nil)
 	if err != nil {
 		panic(err)
 	}
