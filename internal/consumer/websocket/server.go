@@ -30,7 +30,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		glog.Error(r.Context(), err)
 		r.Exit()
 	}
-	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry:%s", merchant.Id)
+	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry:%d", merchant.Id)
 	for {
 		// todo mark use broadcast redis message is better
 		var one *entity.MerchantWebhookMessage
@@ -54,5 +54,5 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		}
 		time.Sleep(100)
 	}
-	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry Exit:%s", merchant.Id)
+	g.Log().Infof(r.Context(), "MerchantWebSocketMessageEntry Exit:%d", merchant.Id)
 }
