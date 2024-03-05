@@ -19,6 +19,7 @@ import (
 	"unibee/api/merchant/payment"
 	"unibee/api/merchant/plan"
 	"unibee/api/merchant/search"
+	"unibee/api/merchant/session"
 	"unibee/api/merchant/subscription"
 	"unibee/api/merchant/user"
 	"unibee/api/merchant/vat"
@@ -117,6 +118,10 @@ type IMerchantPlan interface {
 
 type IMerchantSearch interface {
 	Search(ctx context.Context, req *search.SearchReq) (res *search.SearchRes, err error)
+}
+
+type IMerchantSession interface {
+	New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error)
 }
 
 type IMerchantSubscription interface {

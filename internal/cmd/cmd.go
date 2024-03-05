@@ -12,7 +12,6 @@ import (
 	"unibee/internal/controller/gateway_webhook_entry"
 	"unibee/internal/controller/invoice_entry"
 	"unibee/internal/controller/merchant"
-	"unibee/internal/controller/onetime"
 	"unibee/internal/controller/system"
 	"unibee/internal/controller/user"
 	"unibee/internal/cronjob"
@@ -51,23 +50,23 @@ var (
 				)
 			})
 
-			s.Group("/onetime", func(group *ghttp.RouterGroup) {
-				group.Middleware(
-					_interface.Middleware().CORS,
-					_interface.Middleware().ResponseHandler,
-					_interface.Middleware().TokenAuth,
-				)
-				group.Group("/payment", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						onetime.NewPayment(),
-					)
-				})
-				group.Group("/mock", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						onetime.NewMock(),
-					)
-				})
-			})
+			//s.Group("/onetime", func(group *ghttp.RouterGroup) {
+			//	group.Middleware(
+			//		_interface.Middleware().CORS,
+			//		_interface.Middleware().ResponseHandler,
+			//		_interface.Middleware().TokenAuth,
+			//	)
+			//	group.Group("/payment", func(group *ghttp.RouterGroup) {
+			//		group.Bind(
+			//			onetime.NewPayment(),
+			//		)
+			//	})
+			//	group.Group("/mock", func(group *ghttp.RouterGroup) {
+			//		group.Bind(
+			//			onetime.NewMock(),
+			//		)
+			//	})
+			//})
 
 			s.Group("/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
@@ -150,6 +149,11 @@ var (
 						merchant.NewMetric(),
 					)
 				})
+				group.Group("/session", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewSession(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {
@@ -181,11 +185,6 @@ var (
 				group.Group("/payment", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewPayment(),
-					)
-				})
-				group.Group("/session", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						user.NewSession(),
 					)
 				})
 				group.Group("/gateway", func(group *ghttp.RouterGroup) {

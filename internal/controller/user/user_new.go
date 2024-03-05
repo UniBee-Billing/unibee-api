@@ -49,11 +49,6 @@ type ControllerPayment struct{}
 func NewPayment() user.IUserPayment {
 	return &ControllerPayment{}
 }
-type ControllerSession struct{}
-
-func NewSession() user.IUserSession {
-	return &ControllerSession{}
-}
 
 type ControllerGateway struct{}
 

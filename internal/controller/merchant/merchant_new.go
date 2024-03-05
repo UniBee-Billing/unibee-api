@@ -104,3 +104,9 @@ func NewMetric() merchant.IMerchantMetric {
 	return &ControllerMetric{}
 }
 
+type ControllerSession struct{}
+
+func NewSession() merchant.IMerchantSession {
+	return &ControllerSession{}
+}
+

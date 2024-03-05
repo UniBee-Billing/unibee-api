@@ -14,7 +14,6 @@ import (
 	"unibee/api/user/payment"
 	"unibee/api/user/plan"
 	"unibee/api/user/profile"
-	"unibee/api/user/session"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
 )
@@ -57,10 +56,6 @@ type IUserProfile interface {
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
-}
-
-type IUserSession interface {
-	New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error)
 }
 
 type IUserSubscription interface {

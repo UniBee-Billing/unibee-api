@@ -15,7 +15,7 @@ type SetupGatewayRes struct {
 }
 
 type CountryListReq struct {
-	g.Meta     `path:"/country_list" tags:"Merchant-Vat" method:"post" summary:"Vat Country List"`
+	g.Meta     `path:"/country_list" tags:"Merchant-Vat" method:"get,post" summary:"Vat Country List"`
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 }
 type CountryListRes struct {

@@ -56,7 +56,7 @@ type AddonsBindingRes struct {
 }
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"Merchant-Plan" method:"post" summary:"Plan List"`
+	g.Meta        `path:"/list" tags:"Merchant-Plan" method:"get,post" summary:"Plan List"`
 	Type          []int  `json:"type"  dc:"1-main plan，2-addon plan" `
 	Status        []int  `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
 	PublishStatus int    `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
@@ -92,7 +92,7 @@ type UnPublishRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Merchant-Plan" method:"post" summary:"Plan Detail"`
+	g.Meta `path:"/detail" tags:"Merchant-Plan" method:"get,post" summary:"Plan Detail"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {

@@ -1,11 +1,11 @@
-package user
+package merchant
 
 import (
 	"context"
 	session2 "unibee/internal/logic/session"
 	"unibee/utility"
 
-	"unibee/api/user/session"
+	"unibee/api/merchant/session"
 )
 
 func (c *ControllerSession) New(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error) {

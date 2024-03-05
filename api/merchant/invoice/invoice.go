@@ -22,7 +22,7 @@ type SendEmailRes struct {
 }
 
 type DetailReq struct {
-	g.Meta    `path:"/detail" tags:"Merchant-Invoice" method:"post" summary:"Invoice Detail"`
+	g.Meta    `path:"/detail" tags:"Merchant-Invoice" method:"get,post" summary:"Invoice Detail"`
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type DetailRes struct {
@@ -30,7 +30,7 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"Merchant-Invoice" method:"post" summary:"Invoice List"`
+	g.Meta        `path:"/list" tags:"Merchant-Invoice" method:"get,post" summary:"Invoice List"`
 	FirstName     string `json:"firstName" dc:"FirstName" `
 	LastName      string `json:"lastName" dc:"LastName" `
 	Currency      string `json:"currency" dc:"Currency" `

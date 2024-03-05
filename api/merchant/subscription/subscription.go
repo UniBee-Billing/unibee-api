@@ -8,7 +8,7 @@ import (
 )
 
 type DetailReq struct {
-	g.Meta         `path:"/detail" tags:"Merchant-Subscription" method:"post" summary:"Subscription Detail"`
+	g.Meta         `path:"/detail" tags:"Merchant-Subscription" method:"get,post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
@@ -21,7 +21,7 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Merchant-Subscription" method:"post" summary:"Subscription List"`
+	g.Meta    `path:"/list" tags:"Merchant-Subscription" method:"get,post" summary:"Subscription List"`
 	UserId    int64  `json:"userId"  dc:"UserId" `
 	Status    []int  `json:"status" dc:"Filter, Default All，Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
@@ -113,7 +113,7 @@ type UpdateRes struct {
 }
 
 type UserSubscriptionDetailReq struct {
-	g.Meta `path:"/user_subscription_detail" tags:"Merchant-Subscription" method:"post" summary:"Subscription Detail"`
+	g.Meta `path:"/user_subscription_detail" tags:"Merchant-Subscription" method:"get,post" summary:"Subscription Detail"`
 	UserId int64 `json:"userId" dc:"UserId" v:"required"`
 }
 
@@ -127,7 +127,7 @@ type UserSubscriptionDetailRes struct {
 }
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/timeline_list" tags:"Merchant-Subscription-Timeline" method:"post" summary:"Merchant Subscription TimeLine List"`
+	g.Meta    `path:"/timeline_list" tags:"Merchant-Subscription-Timeline" method:"get,post" summary:"Merchant Subscription TimeLine List"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -140,7 +140,7 @@ type TimeLineListRes struct {
 }
 
 type PendingUpdateListReq struct {
-	g.Meta         `path:"/pending_update_list" tags:"Merchant-SubscriptionPendingUpdate" method:"post" summary:"Merchant SubscriptionPendingUpdate List"`
+	g.Meta         `path:"/pending_update_list" tags:"Merchant-SubscriptionPendingUpdate" method:"get,post" summary:"Merchant SubscriptionPendingUpdate List"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	SortField      string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType       string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -174,7 +174,7 @@ type AdminNoteRo struct {
 }
 
 type AdminNoteListReq struct {
-	g.Meta         `path:"/admin_note_list" tags:"Merchant-Subscription-Note" method:"post" summary:"Merchant Subscription Note List"`
+	g.Meta         `path:"/admin_note_list" tags:"Merchant-Subscription-Note" method:"get,post" summary:"Merchant Subscription Note List"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
 	Count          int    `json:"count" dc:"Count Of Page" `

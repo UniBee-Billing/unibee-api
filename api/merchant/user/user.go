@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Merchant-User" method:"post" summary:"User List"`
+	g.Meta    `path:"/list" tags:"Merchant-User" method:"get,post" summary:"User List"`
 	UserId    int    `json:"userId" dc:"Filter UserId" `
 	FirstName string `json:"firstName" dc:"Search FirstName" `
 	LastName  string `json:"lastName" dc:"Search LastName" `
@@ -38,7 +38,7 @@ type GetRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta `path:"/frozen_user" tags:"Merchant-User" method:"get" summary:"Merchant Frozen User"`
+	g.Meta `path:"/frozen_user" tags:"Merchant-User" method:"post" summary:"Merchant Frozen User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -46,7 +46,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta `path:"/release_user" tags:"Merchant-User" method:"get" summary:"Merchant Release User"`
+	g.Meta `path:"/release_user" tags:"Merchant-User" method:"post" summary:"Merchant Release User"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -54,7 +54,7 @@ type ReleaseRes struct {
 }
 
 type SearchReq struct {
-	g.Meta    `path:"/search" tags:"Merchant-User" method:"post" summary:"User Search"`
+	g.Meta    `path:"/search" tags:"Merchant-User" method:"get,post" summary:"User Search"`
 	SearchKey string `json:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
