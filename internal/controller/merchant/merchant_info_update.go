@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/query"
@@ -17,12 +16,6 @@ import (
 )
 
 func (c *ControllerMerchantinfo) Update(ctx context.Context, req *info.UpdateReq) (res *info.UpdateRes, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.MerchantId > 0, "MerchantId invalid")
-	}
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}

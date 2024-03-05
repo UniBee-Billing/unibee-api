@@ -4,21 +4,11 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee/internal/consts"
-	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
-	"unibee/utility"
-
 	"unibee/api/merchant/user"
+	dao "unibee/internal/dao/oversea_pay"
 )
 
 func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
-	//Admin 操作，service 层不做用户校验
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().LastName:        req.LastName,
 		dao.UserAccount.Columns().FirstName:       req.FirstName,

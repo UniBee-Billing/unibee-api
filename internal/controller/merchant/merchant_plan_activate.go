@@ -7,7 +7,6 @@ import (
 	_plan "unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/plan/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -15,13 +14,6 @@ import (
 )
 
 func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (res *_plan.ActivateRes, err error) {
-
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-	}
-
 	utility.Assert(req.PlanId > 0, "plan should > 0")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "plan not found")

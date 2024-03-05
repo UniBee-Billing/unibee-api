@@ -33,22 +33,36 @@ var (
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
 			openapi := s.GetOpenApi()
+			openapi.Info.Description = "This is UniBee api server, For this sample, you can use the api key `EUXAgwv3Vcr1PFWt2SgBumMHXn3ImBqM` to test the authorization filters"
+			openapi.Info.Title = "OpenAPI UniBee"
+			openapi.Security = &goai.SecurityRequirements{map[string][]string{}}
+			openapi.Info.License = &goai.License{
+				Name: "Apache-2.0",
+				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
+			}
+			openapi.Tags = &goai.Tags{goai.Tag{
+				Name:        "Merchant-Plan",
+				Description: "access to UniBee plan",
+			}, goai.Tag{
+				Name:        "Merchant-Subscription",
+				Description: "access to UniBee subscription",
+			}}
 			openapi.Config.CommonResponse = utility.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
-			if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
-				openapi.Servers = &goai.Servers{goai.Server{
-					URL:         "http://127.0.0.1" + consts.GetConfigInstance().Server.Address,
-					Description: consts.GetConfigInstance().Env,
-				}, goai.Server{
-					URL:         "http://api.unibee.top",
-					Description: "stage",
-				}}
-			} else {
-				openapi.Servers = &goai.Servers{goai.Server{
-					URL:         consts.GetConfigInstance().Server.DomainPath,
-					Description: consts.GetConfigInstance().Env,
-				}}
-			}
+			//if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
+			//	openapi.Servers = &goai.Servers{goai.Server{
+			//		URL:         "http://127.0.0.1" + consts.GetConfigInstance().Server.Address,
+			//		Description: consts.GetConfigInstance().Env,
+			//	}, goai.Server{
+			//		URL:         "http://api.unibee.top",
+			//		Description: "stage",
+			//	}}
+			//} else {
+			//	openapi.Servers = &goai.Servers{goai.Server{
+			//		URL:         consts.GetConfigInstance().Server.DomainPath,
+			//		Description: consts.GetConfigInstance().Env,
+			//	}}
+			//}
 
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
