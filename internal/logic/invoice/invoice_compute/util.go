@@ -14,7 +14,7 @@ import (
 )
 
 func GetInvoiceLink(invoiceId string) string {
-	return fmt.Sprintf("%s/in/%s", consts.GetConfigInstance().Server.DomainPath, invoiceId)
+	return fmt.Sprintf("%s/in/%s", consts.GetConfigInstance().Server.GetServerPath(), invoiceId)
 }
 
 func ConvertInvoiceToSimplify(one *entity.Invoice) *ro.InvoiceDetailSimplify {

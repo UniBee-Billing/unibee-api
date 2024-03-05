@@ -1,6 +1,7 @@
 package consts
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"sync"
@@ -16,10 +17,11 @@ type Config struct {
 }
 
 type Server struct {
-	Address    string `yaml:"address"`
-	Name       string `yaml:"name"`
-	DomainPath string `yaml:"domainPath"`
-	TokenKey   string `yaml:"tokenKey"`
+	Address     string `yaml:"address"`
+	DomainPath  string `yaml:"domainPath"`
+	OpenApiPath string `yaml:"openapiPath"`
+	SwaggerPath string `yaml:"swaggerPath"`
+	TokenKey    string `yaml:"tokenKey"`
 }
 
 func (s *Server) GetDomainScheme() string {
@@ -28,6 +30,10 @@ func (s *Server) GetDomainScheme() string {
 		return parsedURL.Scheme
 	}
 	return "https"
+}
+
+func (s *Server) GetServerPath() string {
+	return fmt.Sprintf("%s", s.DomainPath)
 }
 
 type RedisConfig struct {

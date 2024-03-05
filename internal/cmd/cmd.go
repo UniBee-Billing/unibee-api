@@ -40,17 +40,18 @@ var (
 			//	Description: consts.GetConfigInstance().Env,
 			//	Variables:   nil,
 			//}}
-			s.Group("/"+consts.GetConfigInstance().Server.Name, func(group *ghttp.RouterGroup) {
+			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)
 				})
+				group.GET("/api.sdk.generator.json", swagger.SDKGeneratorJson)
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
 				)
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/onetime", func(group *ghttp.RouterGroup) {
+			s.Group("/onetime", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -68,7 +69,7 @@ var (
 				})
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant", func(group *ghttp.RouterGroup) {
+			s.Group("/merchant", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -151,7 +152,7 @@ var (
 				})
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user", func(group *ghttp.RouterGroup) {
+			s.Group("/user", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -204,7 +205,7 @@ var (
 				})
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/merchant/auth", func(group *ghttp.RouterGroup) {
+			s.Group("/merchant/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -216,7 +217,7 @@ var (
 				})
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/user/auth", func(group *ghttp.RouterGroup) {
+			s.Group("/user/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -229,7 +230,7 @@ var (
 				})
 			})
 
-			s.Group("/"+consts.GetConfigInstance().Server.Name+"/system", func(group *ghttp.RouterGroup) {
+			s.Group("/system", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
@@ -267,20 +268,19 @@ var (
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// Invoice Link
-			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/in/{invoiceId}", invoice_entry.InvoiceEntrance)
+			s.BindHandler("GET:/in/{invoiceId}", invoice_entry.InvoiceEntrance)
 			// Gateway Redirect
-			s.BindHandler("GET:/"+consts.GetConfigInstance().Server.Name+"/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
+			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook
-			s.BindHandler("POST:/"+consts.GetConfigInstance().Server.Name+"/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
+			s.BindHandler("POST:/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			// Merchant Websocket
 			s.BindHandler("/merchant/ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
-				g.Log().Infof(ctx, "Server name: %s ", consts.GetConfigInstance().Server.Name)
 				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
-				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
 				liberr.ErrIsNil(ctx, err, "Redis write check failure")
 				value, err := g.Redis().Get(ctx, "g_check")
@@ -288,7 +288,7 @@ var (
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
 				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/%s/swagger-ui.html", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.Name)
+				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/swagger-ui.html", consts.GetConfigInstance().Server.Address)
 				if !consts.GetConfigInstance().IsServerDev() && !consts.GetConfigInstance().IsLocal() {
 					_ = g.Log().SetLevelStr("info") // remove debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
 				}
