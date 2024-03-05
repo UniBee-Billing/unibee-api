@@ -265,7 +265,7 @@ type UserMerchantMetricStat struct {
 	CurrentUseValue uint64
 }
 
-type UserMetricStat struct {
+type UserMetric struct {
 	IsPaid                  bool                      `json:"isPaid" dc:"IsPaid"`
 	User                    *UserAccountSimplify      `json:"user" dc:"user"`
 	Subscription            *SubscriptionSimplify     `json:"subscription" dc:"Subscription"`

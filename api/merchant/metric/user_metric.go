@@ -5,12 +5,12 @@ import (
 	"unibee/internal/logic/gateway/ro"
 )
 
-type UserStatReq struct {
-	g.Meta         `path:"/user/stat" tags:"Merchant-Metric" method:"get,post" summary:"Query User Metric Stat"`
+type UserMetricReq struct {
+	g.Meta         `path:"/user/metric" tags:"Merchant-User-Metric" method:"get" summary:"Query User Metric"`
 	UserId         int64  `json:"userId" dc:"UserId, One Of UserId|ExternalUserId Needed"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, One Of UserId|ExternalUserId Needed"`
 }
 
-type UserStatRes struct {
-	UserMetricStat *ro.UserMetricStat `json:"userMetricStat" dc:"UserMetricStat"`
+type UserMetricRes struct {
+	UserMetric *ro.UserMetric `json:"userMetric" dc:"UserMetric"`
 }

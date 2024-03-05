@@ -17,12 +17,12 @@ import (
 	"unibee/utility"
 )
 
-func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *ro.UserMetricStat {
+func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *ro.UserMetric {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, user.SubscriptionId)
 	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub)
 }
 
-func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *ro.UserMetricStat {
+func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *ro.UserMetric {
 	var list = make([]*ro.UserMerchantMetricStat, 0)
 	if user != nil {
 		user.Password = ""
@@ -38,7 +38,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 				})
 			}
 		}
-		return &ro.UserMetricStat{
+		return &ro.UserMetric{
 			IsPaid:                  one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete,
 			User:                    ro.SimplifyUserAccount(user),
 			Subscription:            ro.SimplifySubscription(one),
@@ -47,7 +47,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 			UserMerchantMetricStats: list,
 		}
 	} else {
-		return &ro.UserMetricStat{
+		return &ro.UserMetric{
 			IsPaid:                  false,
 			User:                    ro.SimplifyUserAccount(user),
 			Subscription:            nil,

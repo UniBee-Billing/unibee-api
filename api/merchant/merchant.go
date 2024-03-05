@@ -92,7 +92,7 @@ type IMerchantMetric interface {
 	NewPlanLimit(ctx context.Context, req *metric.NewPlanLimitReq) (res *metric.NewPlanLimitRes, err error)
 	EditPlanLimit(ctx context.Context, req *metric.EditPlanLimitReq) (res *metric.EditPlanLimitRes, err error)
 	DeletePlanLimit(ctx context.Context, req *metric.DeletePlanLimitReq) (res *metric.DeletePlanLimitRes, err error)
-	UserStat(ctx context.Context, req *metric.UserStatReq) (res *metric.UserStatRes, err error)
+	UserMetric(ctx context.Context, req *metric.UserMetricReq) (res *metric.UserMetricRes, err error)
 }
 
 type IMerchantOss interface {
