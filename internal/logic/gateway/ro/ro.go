@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	v1 "unibee/api/onetime/payment"
 	"unibee/internal/consts"
+	"unibee/internal/logic/metric_event"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -261,13 +262,14 @@ type PlanAddonVo struct {
 }
 
 type SubscriptionDetailVo struct {
-	User                                *UserAccountSimplify               `json:"user" dc:"user"`
-	Subscription                        *SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *GatewaySimplify                   `json:"gateway" dc:"Gateway"`
-	AddonParams                         []*SubscriptionPlanAddonParamRo    `json:"addonParams" dc:"AddonParams"`
-	Addons                              []*PlanAddonVo                     `json:"addons" dc:"Addon"`
-	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *UserAccountSimplify                   `json:"user" dc:"user"`
+	Subscription                        *SubscriptionSimplify                  `json:"subscription" dc:"Subscription"`
+	Plan                                *PlanSimplify                          `json:"plan" dc:"Plan"`
+	Gateway                             *GatewaySimplify                       `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*SubscriptionPlanAddonParamRo        `json:"addonParams" dc:"AddonParams"`
+	Addons                              []*PlanAddonVo                         `json:"addons" dc:"Addon"`
+	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetailVo     `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	UserMerchantMetricStats             []*metric_event.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }
 
 type SubscriptionTimeLineDetailVo struct {

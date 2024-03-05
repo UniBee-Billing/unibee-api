@@ -21,8 +21,12 @@ type UserMerchantMetricStat struct {
 }
 
 func GetUserMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) []*UserMerchantMetricStat {
-	var list = make([]*UserMerchantMetricStat, 0)
 	sub := query.GetLatestActiveOrCreateSubscriptionByUserId(ctx, int64(user.Id), merchantId)
+	return GetUserSubscriptionMetricLimitStat(ctx, merchantId, user, sub)
+}
+
+func GetUserSubscriptionMetricLimitStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription) []*UserMerchantMetricStat {
+	var list = make([]*UserMerchantMetricStat, 0)
 	if sub != nil {
 		limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
 		for _, metricLimit := range limitMap {
