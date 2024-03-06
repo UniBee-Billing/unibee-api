@@ -31,6 +31,7 @@ func (c *ControllerSubscription) AdminNoteList(ctx context.Context, req *subscri
 		merchantMember := query.GetMerchantMemberById(ctx, uint64(note.MerchantMemberId))
 		if merchantMember != nil {
 			resultList = append(resultList, &subscription.AdminNoteRo{
+				Note:           note.Note,
 				GmtCreate:      note.GmtCreate,
 				GmtModify:      note.GmtModify,
 				SubscriptionId: note.SubscriptionId,
