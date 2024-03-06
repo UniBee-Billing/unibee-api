@@ -232,7 +232,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		PlanId:         req.PlanId,
 		Quantity:       req.Quantity,
 		GatewayId:      req.GatewayId,
-		UserId:         req.UserId,
+		UserId:         int64(_interface.BizCtx().Get(ctx).User.Id),
 		AddonParams:    req.AddonParams,
 		VatCountryCode: req.VatCountryCode,
 		VatNumber:      req.VatNumber,
