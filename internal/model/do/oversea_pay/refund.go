@@ -19,7 +19,7 @@ type Refund struct {
 	OpenApiId            interface{} // open api id
 	GatewayId            interface{} // gateway_id
 	BizType              interface{} // biz type, copy from payment.biz_type
-	BizId                interface{} // biz id,copy from payment.biz_id
+	ExternalRefundId     interface{} // external_refund_id
 	CountryCode          interface{} // country code
 	Currency             interface{} // currency
 	PaymentId            interface{} // relative payment id

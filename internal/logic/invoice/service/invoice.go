@@ -271,7 +271,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(payment != nil, "payment not found")
 	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.NewPaymentRefundReq{
 		PaymentId:        one.PaymentId,
-		MerchantRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
+		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
 		Amount: &v1.AmountVo{
 			Currency: one.Currency,

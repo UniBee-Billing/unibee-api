@@ -27,7 +27,7 @@ type RefundColumns struct {
 	OpenApiId            string // open api id
 	GatewayId            string // gateway_id
 	BizType              string // biz type, copy from payment.biz_type
-	BizId                string // biz id,copy from payment.biz_id
+	ExternalRefundId     string // external_refund_id
 	CountryCode          string // country code
 	Currency             string // currency
 	PaymentId            string // relative payment id
@@ -57,7 +57,7 @@ var refundColumns = RefundColumns{
 	OpenApiId:            "open_api_id",
 	GatewayId:            "gateway_id",
 	BizType:              "biz_type",
-	BizId:                "biz_id",
+	ExternalRefundId:     "external_refund_id",
 	CountryCode:          "country_code",
 	Currency:             "currency",
 	PaymentId:            "payment_id",

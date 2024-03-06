@@ -22,7 +22,7 @@ import (
 
 func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPaymentRefundReq, openApiId int64) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
-	utility.Assert(len(req.MerchantRefundId) > 0, "invalid merchantRefundId")
+	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
@@ -35,7 +35,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
 	utility.Assert(req.Amount.Amount <= payment.TotalAmount, "refund value should <= TotalAmount value")
 
-	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.MerchantRefundId)
+	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
 
 	//- 退款并发调用严重，加上Redis排它锁, todo mark use db lock
@@ -54,28 +54,28 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 		one *entity.Refund
 	)
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
-		PaymentId: req.PaymentId,
-		BizId:     req.MerchantRefundId,
-		BizType:   bizType,
+		PaymentId:        req.PaymentId,
+		ExternalRefundId: req.ExternalRefundId,
+		BizType:          bizType,
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
 	one = &entity.Refund{
-		CompanyId:     payment.CompanyId,
-		MerchantId:    payment.MerchantId,
-		BizId:         req.MerchantRefundId,
-		BizType:       bizType,
-		PaymentId:     payment.PaymentId,
-		RefundId:      utility.CreateRefundId(),
-		RefundAmount:  req.Amount.Amount,
-		Status:        consts.RefundIng,
-		GatewayId:     payment.GatewayId,
-		AppId:         payment.AppId,
-		Currency:      payment.Currency,
-		CountryCode:   payment.CountryCode,
-		RefundComment: req.Reason,
-		OpenApiId:     openApiId,
-		UserId:        payment.UserId,
+		CompanyId:        payment.CompanyId,
+		MerchantId:       payment.MerchantId,
+		ExternalRefundId: req.ExternalRefundId,
+		BizType:          bizType,
+		PaymentId:        payment.PaymentId,
+		RefundId:         utility.CreateRefundId(),
+		RefundAmount:     req.Amount.Amount,
+		Status:           consts.RefundIng,
+		GatewayId:        payment.GatewayId,
+		AppId:            payment.AppId,
+		Currency:         payment.Currency,
+		CountryCode:      payment.CountryCode,
+		RefundComment:    req.Reason,
+		OpenApiId:        openApiId,
+		UserId:           payment.UserId,
 		//AdditionalData: req.
 		//RefundComment: payBizTypeEnum.getDesc() +"退款",
 

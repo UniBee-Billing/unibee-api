@@ -26,7 +26,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 	res = &payment.NewPaymentRefundRes{
 		Status:           "SentForRefund",
 		RefundId:         resp.RefundId,
-		MerchantRefundId: req.MerchantRefundId,
+		MerchantRefundId: req.ExternalRefundId,
 		PaymentId:        resp.PaymentId,
 	}
 	return res, nil

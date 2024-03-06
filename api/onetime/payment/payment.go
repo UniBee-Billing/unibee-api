@@ -24,21 +24,6 @@ type NewPaymentRes struct {
 	Action            *gjson.Json `json:"action" dc:"action"`
 }
 
-type OutShopperName struct {
-	FirstName string `json:"firstName" dc:"First Name" v:"required"`
-	LastName  string `json:"lastName" dc:"Last Name" v:"required"`
-	Gender    string `json:"gender" dc:"Gender" v:"required"`
-}
-
-type OutPayAddress struct {
-	City              string `json:"city" dc:"City" v:"required"`
-	Country           string `json:"country" dc:"Country" v:"required"`
-	HouseNumberOrName string `json:"houseNumberOrName" dc:"HouseNumberOrName" v:"required"`
-	PostalCode        string `json:"postalCode" dc:"PostalCode" v:"required"`
-	StateOrProvince   string `json:"stateOrProvince" dc:"StateOrProvince" v:"required"`
-	Street            string `json:"street" dc:"Street" v:"required"`
-}
-
 type OutLineItem struct {
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax" dc:"UnitAmountExcludingTax" v:"required"`
 	Quantity               int64  `json:"quantity" dc:"Quantity" v:"required"`
