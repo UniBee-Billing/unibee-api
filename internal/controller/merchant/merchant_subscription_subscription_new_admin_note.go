@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
@@ -25,6 +26,7 @@ func (c *ControllerSubscription) NewAdminNote(ctx context.Context, req *subscrip
 
 	_, err = dao.SubscriptionAdminNote.Ctx(ctx).Data(note).OmitNil().Insert(note)
 	if err != nil {
+		g.Log().Printf(ctx, "NewAdminNote :%s", err.Error())
 		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 	}
 	return
