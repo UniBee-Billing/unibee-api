@@ -119,13 +119,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.GatewayId > 0, "Id invalid")
-	utility.Assert(req.UserId > 0, "UserId invalid")
+	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "User invalid")
 	email := ""
-	if !consts.GetConfigInstance().IsLocal() {
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
-		email = _interface.BizCtx().Get(ctx).User.Email
-	}
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -133,11 +128,11 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	user := query.GetUserAccountById(ctx, uint64(req.UserId))
+	user := query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
 	utility.Assert(user != nil, "user not found")
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
@@ -148,7 +143,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	var vatNumberValidate *ro.ValidResult
 
 	if len(req.VatNumber) > 0 {
-		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
+		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, int64(_interface.BizCtx().Get(ctx).User.Id), req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}
@@ -219,7 +214,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 		VatNumberValidate: vatNumberValidate,
 		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
-		UserId:            req.UserId,
+		UserId:            int64(_interface.BizCtx().Get(ctx).User.Id),
 		Email:             email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,
@@ -232,7 +227,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		PlanId:         req.PlanId,
 		Quantity:       req.Quantity,
 		GatewayId:      req.GatewayId,
-		UserId:         int64(_interface.BizCtx().Get(ctx).User.Id),
 		AddonParams:    req.AddonParams,
 		VatCountryCode: req.VatCountryCode,
 		VatNumber:      req.VatNumber,

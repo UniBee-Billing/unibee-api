@@ -34,7 +34,6 @@ type CreatePreviewReq struct {
 	PlanId         uint64                             `json:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                              `json:"quantity" dc:"Quantity" `
 	GatewayId      uint64                             `json:"gatewayId" dc:"Id" v:"required" `
-	UserId         int64                              `json:"userId" dc:"UserId" v:"required"`
 	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                             `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                             `json:"vatNumber" dc:"VatNumber" `
