@@ -162,6 +162,7 @@ type NewAdminNoteRes struct {
 }
 
 type AdminNoteRo struct {
+	Id             uint64      `json:"id"               description:"id"`           // id
 	Note           string      `json:"note"             description:"note"`         // note
 	GmtCreate      *gtime.Time `json:"gmtCreate"  description:"创建时间"`               // 创建时间
 	GmtModify      *gtime.Time `json:"gmtModify"  description:"修改时间"`               // 修改时间
