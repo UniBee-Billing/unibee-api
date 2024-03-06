@@ -45,9 +45,17 @@ const (
       window.onload = function () {
         const ui = SwaggerUIBundle({
           urls: [
+            //{
+            //  name: "UniBee Api Spec",
+            //  url: "api.json",
+            //},
             {
-              name: "UniBee Open API Spec",
-              url: "api.json",
+              name: "UniBee Merchant Portal Api Spec (Merchant Open API) ",
+              url: "api.sdk.generator.json",
+            },
+			{
+              name: "UniBee User Portal Api Spec (Web Component) ",
+              url: "api.user.portal.generator.json",
             },
           ],
           dom_id: "#swagger-ui",

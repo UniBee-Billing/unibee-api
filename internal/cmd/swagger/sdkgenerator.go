@@ -9,7 +9,7 @@ import (
 	"unibee/utility"
 )
 
-func SDKGeneratorJson(r *ghttp.Request) {
+func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 	url := fmt.Sprintf("http://127.0.0.1%s/%s", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.OpenApiPath)
 	request, err := utility.SendRequest(url, "GET", nil, nil)
 	if err != nil {
@@ -37,6 +37,43 @@ func SDKGeneratorJson(r *ghttp.Request) {
 			//}
 			utility.Assert(len(path.Array()) == 1, "error:"+key)
 			if !strings.HasPrefix(key, fmt.Sprintf("/merchant")) {
+				_ = api.Remove("paths#" + key)
+				continue
+			}
+		}
+		r.Response.WriteJson(api.String())
+		r.Exit()
+	}
+}
+
+func UserPortalGeneratorSpecJson(r *ghttp.Request) {
+	url := fmt.Sprintf("http://127.0.0.1%s/%s", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.OpenApiPath)
+	request, err := utility.SendRequest(url, "GET", nil, nil)
+	if err != nil {
+		r.Exit()
+		return
+	} else {
+		json := strings.Replace(string(request), "uint64", "int64", -1)
+		api := gjson.New(json)
+		api.SetSplitChar('#')
+		for key, path := range api.GetJsonMap("components#schemas") {
+			utility.Assert(len(path.Array()) == 1, "error:"+key)
+			if strings.HasPrefix(key, "unibee.api.merchant") {
+				_ = api.Remove("components#schemas#" + key)
+				continue
+			}
+		}
+		for key, path := range api.GetJsonMap("paths") {
+			//if path.Contains("post") {
+			//	_ = api.Set("paths#"+key+"#api", path.GetJson("post"))
+			//	_ = api.Remove("paths#" + key + "#post")
+			//}
+			//if path.Contains("get") {
+			//	_ = api.Set("paths#"+key+"#api", path.GetJson("get"))
+			//	_ = api.Remove("paths#" + key + "#post")
+			//}
+			utility.Assert(len(path.Array()) == 1, "error:"+key)
+			if !strings.HasPrefix(key, fmt.Sprintf("/user")) {
 				_ = api.Remove("paths#" + key)
 				continue
 			}

@@ -40,13 +40,6 @@ var (
 				Name: "Apache-2.0",
 				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
 			}
-			openapi.Tags = &goai.Tags{goai.Tag{
-				Name:        "Merchant-Plan",
-				Description: "access to UniBee plan",
-			}, goai.Tag{
-				Name:        "Merchant-Subscription",
-				Description: "access to UniBee subscription",
-			}}
 			openapi.Config.CommonResponse = utility.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
 			//if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
@@ -66,9 +59,10 @@ var (
 
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
-					r.Response.Write(swagger.LatestSwaggerUIPageContent)
+					r.Response.Write(swagger.V3SwaggerUIPageContent)
 				})
-				group.GET("/api.sdk.generator.json", swagger.SDKGeneratorJson)
+				group.GET("/api.sdk.generator.json", swagger.MerchantPortalAndSDKGeneratorSpecJson)
+				group.GET("/api.user.portal.generator.json", swagger.UserPortalGeneratorSpecJson)
 				group.Middleware(
 					_interface.Middleware().CORS,
 					_interface.Middleware().ResponseHandler,
