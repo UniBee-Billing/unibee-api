@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/subscription/service"
@@ -12,14 +11,7 @@ import (
 	"unibee/api/user/subscription"
 )
 
-// SubscriptionList todo mark demo requirement, return only one user sub by gmt_create desc
 func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
-	// service 层不做用户校验
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == req.UserId, "userId not match")
-	}
 	// return one latest user subscription list as unique subscription
 	var subDetails []*ro.SubscriptionDetailVo
 	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))

@@ -113,7 +113,6 @@ type UpdateRes struct {
 
 type ListReq struct {
 	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
-	UserId int64 `json:"userId" dc:"UserId" v:"required|length:4,30" `
 }
 type ListRes struct {
 	Subscriptions []*ro.SubscriptionDetailVo `json:"subscriptions" dc:"Subscription List"`
