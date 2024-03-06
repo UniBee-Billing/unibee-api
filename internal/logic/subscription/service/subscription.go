@@ -659,7 +659,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
 	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
 	if prepare.Invoice.TotalAmount <= 0 {
-		utility.Assert(prepare.EffectImmediate == false, "System Error, Cannot Effect Immediate With Negative Amount")
+		utility.Assert(prepare.EffectImmediate == false, "System Error, Cannot Effect Immediate With Negative CaptureAmount")
 	}
 
 	var effectImmediate = 0

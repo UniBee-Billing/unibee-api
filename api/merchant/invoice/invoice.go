@@ -113,7 +113,7 @@ type RefundReq struct {
 	g.Meta       `path:"/refund" tags:"Merchant-Invoice" method:"post" summary:"Admin Create Refund From Invoice"`
 	InvoiceId    string `json:"invoiceId" dc:"InvoiceId" v:"required"`
 	RefundNo     string `json:"refundNo" dc:"RefundNo" v:"required"`
-	RefundAmount int64  `json:"refundAmount" dc:"Refund Amount" v:"required"`
+	RefundAmount int64  `json:"refundAmount" dc:"Refund CaptureAmount" v:"required"`
 	Reason       string `json:"reason" dc:"Refund Reason" v:"required"`
 }
 

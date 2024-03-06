@@ -129,8 +129,8 @@ type TemplateVariable struct {
 	MerchantName        string      `json:"Merchant Name"`
 	DateNow             *gtime.Time `json:"DateNow" layout:"2006-01-02"`
 	PeriodEnd           *gtime.Time `json:"PeriodEnd" layout:"2006-01-02"`
-	PaymentAmount       string      `json:"Payment Amount"`
-	RefundAmount        string      `json:"Refund Amount"`
+	PaymentAmount       string      `json:"Payment CaptureAmount"`
+	RefundAmount        string      `json:"Refund CaptureAmount"`
 	Currency            string      `json:"Currency"`
 	TokenExpireMinute   string      `json:"TokenExpireMinute"`
 	CodeExpireMinute    string      `json:"CodeExpireMinute"`

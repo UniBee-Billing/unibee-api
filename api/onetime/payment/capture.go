@@ -6,9 +6,10 @@ import (
 
 type CaptureReq struct {
 	g.Meta            `path:"/capture/{PaymentId}" tags:"OneTime-Payment" method:"post" summary:"Capture Payment"`
-	PaymentId         string    `in:"path" dc:"PaymentId" v:"required"`
-	MerchantCaptureId string    `json:"merchantCaptureId" dc:"MerchantCaptureId" v:"required"`
-	Amount            *AmountVo `json:"amount"   in:"query" dc:"Amount, Cent" v:"required"`
+	PaymentId         string `in:"path" dc:"PaymentId" v:"required"`
+	MerchantCaptureId string `json:"merchantCaptureId" dc:"MerchantCaptureId" v:"required"`
+	CaptureAmount     int64  `json:"captureAmount"   in:"query" dc:"CaptureAmount, Cent" v:"required"`
+	Currency          string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
 }
 type CaptureRes struct {
 }

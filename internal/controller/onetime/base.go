@@ -3,17 +3,15 @@ package onetime
 import (
 	"context"
 	"strings"
-	"unibee/api/onetime/payment"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
 
-func currencyNumberCheck(amount *payment.AmountVo) {
-	utility.Assert(amount != nil, "amount is nil")
-	if strings.Compare(amount.Currency, "JPY") == 0 {
-		utility.Assert(amount.Amount%100 == 0, "this currency No decimals allowed，made it divisible by 100")
+func currencyNumberCheck(amount int64, currency string) {
+	if strings.Compare(currency, "JPY") == 0 {
+		utility.Assert(amount%100 == 0, "this currency No decimals allowed，made it divisible by 100")
 	}
 }
 

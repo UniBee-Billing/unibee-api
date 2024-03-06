@@ -15,10 +15,9 @@ import (
 
 func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaymentReq) (res *payment.NewPaymentRes, err error) {
 	utility.Assert(req != nil, "request req is nil")
-	utility.Assert(req.TotalAmount != nil, "amount is nil")
-	utility.Assert(req.TotalAmount.Amount > 0, "amount value is nil")
-	utility.Assert(len(req.TotalAmount.Currency) > 0, "amount currency is nil")
-	currencyNumberCheck(req.TotalAmount)
+	utility.Assert(req.TotalAmount > 0, "amount value is nil")
+	utility.Assert(len(req.Currency) > 0, "amount currency is nil")
+	currencyNumberCheck(req.TotalAmount, req.Currency)
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.PaymentMethod != nil, "payment method is nil")
 	utility.Assert(len(req.PaymentMethod.Gateway) > 0, "payment method type is nil")
@@ -38,7 +37,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(line.TaxScale))
 		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
-			Currency:               req.TotalAmount.Currency,
+			Currency:               req.Currency,
 			TaxScale:               line.TaxScale,
 			Tax:                    tax,
 			Amount:                 amountExcludingTax + tax,
@@ -54,14 +53,14 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	var invoice = &ro.InvoiceDetailSimplify{
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
-		Currency:                       req.TotalAmount.Currency,
+		Currency:                       req.Currency,
 		TaxAmount:                      totalTax,
 		SubscriptionAmount:             totalAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Lines:                          invoiceItems,
 	}
 
-	utility.Assert(totalAmount == req.TotalAmount.Amount, "totalAmount not match")
+	utility.Assert(totalAmount == req.TotalAmount, "totalAmount not match")
 
 	createPayContext := &ro.NewPaymentInternalReq{
 		Gateway: gateway,
@@ -69,8 +68,8 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 			ExternalPaymentId: req.ExternalPaymentId,
 			BizType:           consts.BizTypeOneTime,
 			GatewayId:         gateway.Id,
-			TotalAmount:       req.TotalAmount.Amount,
-			Currency:          req.TotalAmount.Currency,
+			TotalAmount:       req.TotalAmount,
+			Currency:          req.Currency,
 			CountryCode:       req.CountryCode,
 			MerchantId:        merchantInfo.Id,
 			CompanyId:         merchantInfo.CompanyId,

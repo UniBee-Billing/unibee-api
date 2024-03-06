@@ -131,7 +131,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 			//},
 			//Discount: &generator2.Discount{
 			//	Percent: "0",
-			//	Amount:  "0",
+			//	CaptureAmount:  "0",
 			//},
 		})
 	}
@@ -148,7 +148,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 	// Percent: "90",
 	// })
 	//doc.SetDiscount(&generator2.Discount{
-	//	Amount: "0",
+	//	CaptureAmount: "0",
 	//})
 
 	pdf, err := doc.Build()

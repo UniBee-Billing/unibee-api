@@ -12,11 +12,9 @@ import (
 func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.NewPaymentRefundReq) (res *payment.NewPaymentRefundRes, err error) {
 	utility.Assert(req != nil, "req should not be nil")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId should not be nil")
-	utility.Assert(req.Amount != nil, "Amount should not be nil")
-	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
-	utility.Assert(len(req.Amount.Currency) > 0, "refund currency should not be nil")
-	currencyNumberCheck(req.Amount)
-	//参数有效性校验 todo mark
+	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
+	utility.Assert(len(req.Currency) > 0, "refund currency should not be nil")
+	currencyNumberCheck(req.RefundAmount, req.Currency)
 	openApiConfig, _ := merchantCheck(ctx, _interface.GetMerchantId(ctx))
 
 	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BizTypeOneTime, req, int64(openApiConfig.Id))

@@ -3,7 +3,6 @@ package ro
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
-	v1 "unibee/api/onetime/payment"
 	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -34,11 +33,12 @@ type CreatePayInternalResp struct {
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
 type OutPayCaptureRo struct {
-	MerchantId       string       `json:"merchantId"         `
-	GatewayCaptureId string       `json:"gatewayCaptureId"            `
-	Reference        string       `json:"reference"              `
-	Amount           *v1.AmountVo `json:"amount"`
-	Status           string       `json:"status"`
+	MerchantId       string `json:"merchantId"         `
+	GatewayCaptureId string `json:"gatewayCaptureId"            `
+	Reference        string `json:"reference"              `
+	Amount           int64  `json:"amount"`
+	Currency         string `json:"currency"`
+	Status           string `json:"status"`
 }
 
 // OutPayCancelRo is the golang structure for table oversea_pay.
@@ -307,7 +307,7 @@ type SubscriptionPendingUpdateDetailVo struct {
 	SubscriptionId       string                  `json:"subscriptionId"       description:"SubscriptionId"`
 	UpdateSubscriptionId string                  `json:"updateSubscriptionId" description:"UpdateSubscriptionId"`
 	GmtCreate            *gtime.Time             `json:"gmtCreate"            description:"GmtCreate"`
-	Amount               int64                   `json:"amount"               description:"Amount, Cent"`
+	Amount               int64                   `json:"amount"               description:"CaptureAmount, Cent"`
 	Status               int                     `json:"status"               description:"Status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`
 	UpdateAmount         int64                   `json:"updateAmount"         description:"UpdateAmount, Cents"`
 	ProrationAmount      int64                   `json:"prorationAmount"      description:"ProrationAmount,Cents"`

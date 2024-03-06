@@ -19,10 +19,8 @@ func (c *ControllerMock) Capture(ctx context.Context, req *mock.CaptureReq) (res
 	capturesReq := &v12.CaptureReq{
 		PaymentId:         req.PaymentId,
 		MerchantCaptureId: uuid.New().String(),
-		Amount: &v12.AmountVo{
-			Currency: req.Currency,
-			Amount:   req.Amount,
-		},
+		CaptureAmount:     req.Amount,
+		Currency:          req.Currency,
 	}
 	_, err = NewPayment().Capture(ctx, capturesReq)
 	if err != nil {

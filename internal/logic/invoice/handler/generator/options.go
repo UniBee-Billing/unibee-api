@@ -27,7 +27,7 @@ type Options struct {
 	TextItemsTotalHTTitle  string `default:"Total no tax" json:"text_items_total_ht_title,omitempty"`
 	TextItemsTaxTitle      string `default:"Tax" json:"text_items_tax_title,omitempty"`
 	TextItemsDiscountTitle string `default:"Discount" json:"text_items_discount_title,omitempty"`
-	TextItemsTotalTTCTitle string `default:"Amount" json:"text_items_total_ttc_title,omitempty"`
+	TextItemsTotalTTCTitle string `default:"CaptureAmount" json:"text_items_total_ttc_title,omitempty"`
 
 	TextTotalTotal      string `default:"Sub Total" json:"text_total_total,omitempty"`
 	TextTotalDiscounted string `default:"TOTAL DISCOUNTED" json:"text_total_discounted,omitempty"`

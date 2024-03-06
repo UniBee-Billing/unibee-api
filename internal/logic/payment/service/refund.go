@@ -26,14 +26,14 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
-	utility.Assert(strings.Compare(payment.Currency, req.Amount.Currency) == 0, "refund currency not match the payment error")
+	utility.Assert(strings.Compare(payment.Currency, req.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 
 	gateway := query.GetGatewayById(ctx, uint64(payment.GatewayId))
 	utility.Assert(gateway != nil, "gateway not found")
 
-	utility.Assert(req.Amount.Amount > 0, "refund value should > 0")
-	utility.Assert(req.Amount.Amount <= payment.TotalAmount, "refund value should <= TotalAmount value")
+	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
+	utility.Assert(req.RefundAmount <= payment.TotalAmount, "refund value should <= TotalAmount value")
 
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
@@ -67,7 +67,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 		BizType:          bizType,
 		PaymentId:        payment.PaymentId,
 		RefundId:         utility.CreateRefundId(),
-		RefundAmount:     req.Amount.Amount,
+		RefundAmount:     req.RefundAmount,
 		Status:           consts.RefundIng,
 		GatewayId:        payment.GatewayId,
 		AppId:            payment.AppId,

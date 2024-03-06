@@ -6,10 +6,11 @@ import (
 
 type NewPaymentRefundReq struct {
 	g.Meta           `path:"/refund/new/{PaymentId}" tags:"OneTime-Payment" method:"post" summary:"New Payment Refund"`
-	PaymentId        string    `in:"path" dc:"PaymentId" v:"required"`
-	ExternalRefundId string    `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
-	Amount           *AmountVo `json:"amount"   in:"query" dc:"Amount, Cent" v:"required"`
-	Reason           string    `json:"reason" dc:"Reason"`
+	PaymentId        string `in:"path" dc:"PaymentId" v:"required"`
+	ExternalRefundId string `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
+	RefundAmount     int64  `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
+	Currency         string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Reason           string `json:"reason" dc:"Reason"`
 }
 type NewPaymentRefundRes struct {
 	Status           string `json:"status" dc:"Status"`

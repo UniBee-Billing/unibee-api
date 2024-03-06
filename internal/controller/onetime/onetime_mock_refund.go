@@ -19,10 +19,8 @@ func (c *ControllerMock) Refund(ctx context.Context, req *mock.RefundReq) (res *
 	refundsReq := &v12.NewPaymentRefundReq{
 		PaymentId:        req.PaymentId,
 		ExternalRefundId: uuid.New().String(),
-		Amount: &v12.AmountVo{
-			Currency: req.Currency,
-			Amount:   req.Amount,
-		},
+		RefundAmount:     req.Amount,
+		Currency:         req.Currency,
 	}
 	_, err = NewPayment().NewPaymentRefund(ctx, refundsReq)
 	if err != nil {

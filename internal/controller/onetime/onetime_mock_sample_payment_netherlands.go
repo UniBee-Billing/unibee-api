@@ -16,10 +16,8 @@ func (c *ControllerMock) SamplePaymentNetherlands(ctx context.Context, req *mock
 	utility.Assert(oneOpenApiConfig != nil, "openApi未设置")
 	outPayVo := &v12.NewPaymentReq{
 		ExternalPaymentId: uuid.New().String(),
-		TotalAmount: &v12.AmountVo{
-			Currency: req.Currency,
-			Amount:   req.Amount,
-		},
+		TotalAmount:       req.Amount,
+		Currency:          req.Currency,
 		PaymentMethod: &v12.MethodListReq{
 			Gateway: req.GatewayName,
 		},

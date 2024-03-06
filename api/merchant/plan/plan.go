@@ -8,7 +8,7 @@ import (
 type NewReq struct {
 	g.Meta             `path:"/new" tags:"Merchant-Plan" method:"post" summary:"Create Plan"`
 	PlanName           string                                `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             int64                                 `json:"amount"   dc:"Plan Amount"   v:"required" `
+	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
 	IntervalCount      int                                   `json:"intervalCount"  d:"1" dc:"Default 1，Number Of IntervalUnit" `
@@ -29,7 +29,7 @@ type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Merchant-Plan" method:"post" summary:"Edit Plan"`
 	PlanId             uint64                                `json:"planId" dc:"PlanId" v:"required"`
 	PlanName           string                                `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             int64                                 `json:"amount"   dc:"Plan Amount"   v:"required" `
+	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
 	IntervalCount      int                                   `json:"intervalCount"  d:"1" dc:"Default 1，Number Of IntervalUnit" `

@@ -8,7 +8,7 @@ import (
 type SamplePaymentNetherlandsReq struct {
 	g.Meta      `path:"/quick_pay_sample_netherlands" tags:"Open-Mock" method:"post" summary:"Mock Netherlands Create Payment (Auto Fill) https://docs.klarna.com/resources/test-environment/sample-customer-data/#netherlands"`
 	Currency    string `json:"currency" dc:"Currency" v:"required"`
-	Amount      int64  `json:"amount" dc:" Amount, Cent" v:"required"`
+	Amount      int64  `json:"amount" dc:" CaptureAmount, Cent" v:"required"`
 	GatewayName string `json:"gatewayName" dc:"Gateway，klarna_paynow|klarna|klarna_account|paypal" v:"required"`
 	ReturnUrl   string `json:"returnUrl" dc:"Return Url" v:""`
 }

@@ -39,7 +39,7 @@ func (d *Discount) Prepare() error {
 		d._percent = percent
 	}
 
-	// Amount
+	// CaptureAmount
 	if len(d.Amount) > 0 {
 		amount, err := decimal.NewFromString(d.Amount)
 		if err != nil {

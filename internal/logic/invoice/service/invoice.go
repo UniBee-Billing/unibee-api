@@ -273,10 +273,8 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
-		Amount: &v1.AmountVo{
-			Currency: one.Currency,
-			Amount:   req.RefundAmount,
-		},
+		RefundAmount:     req.RefundAmount,
+		Currency:         one.Currency,
 	}, 0)
 	if err != nil {
 		return nil, err

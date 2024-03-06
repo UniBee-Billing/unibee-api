@@ -98,7 +98,7 @@ func TestStrip(t *testing.T) {
 		//	params := &stripe.PaymentIntentParams{
 		//		Customer: stripe.String(gatewayUser.GatewayUserId),
 		//		Confirm:  stripe.Bool(true),
-		//		Amount:   stripe.Int64(101),
+		//		CaptureAmount:   stripe.Int64(101),
 		//		Currency: stripe.String(strings.ToLower("USD")),
 		//		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 		//			Enabled: stripe.Bool(true),

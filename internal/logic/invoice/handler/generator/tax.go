@@ -39,7 +39,7 @@ func (t *Tax) Prepare() error {
 		t._percent = percent
 	}
 
-	// Amount
+	// CaptureAmount
 	if len(t.Amount) > 0 {
 		amount, err := decimal.NewFromString(t.Amount)
 		if err != nil {

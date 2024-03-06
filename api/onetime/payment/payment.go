@@ -10,7 +10,8 @@ type NewPaymentReq struct {
 	ExternalPaymentId string            `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment" v:"required"`
 	ExternalUserId    string            `json:"externalUserId" dc:"ExternalUserId, should unique for user" v:"required"`
 	Email             string            `json:"email" dc:"Email" v:"required"`
-	TotalAmount       *AmountVo         `json:"totalAmount" dc:"Total Amount, Cent" v:"required"`
+	Currency          string            `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	TotalAmount       int64             `json:"totalAmount" dc:"Total PaymentAmount, Cent" v:"required"`
 	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url" v:"required"`
 	CountryCode       string            `json:"countryCode" dc:"CountryCode" v:"required"`
 	PaymentMethod     *MethodListReq    `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
