@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -13,9 +15,10 @@ import (
 )
 
 func (c *ControllerSubscription) NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error) {
+	utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "invalid token")
 	note := &entity.SubscriptionAdminNote{
 		SubscriptionId:   req.SubscriptionId,
-		MerchantMemberId: req.MerchantMemberId,
+		MerchantMemberId: int64(_interface.BizCtx().Get(ctx).MerchantMember.Id),
 		Note:             req.Note,
 		CreateTime:       gtime.Now().Timestamp(),
 	}

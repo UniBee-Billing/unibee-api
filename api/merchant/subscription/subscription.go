@@ -153,10 +153,9 @@ type PendingUpdateListRes struct {
 }
 
 type NewAdminNoteReq struct {
-	g.Meta           `path:"/new_admin_note" tags:"Merchant-Subscription-Note" method:"post" summary:"Merchant New Subscription Note"`
-	SubscriptionId   string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	MerchantMemberId int64  `json:"merchantMemberId" dc:"MerchantMemberId" v:"required"`
-	Note             string `json:"note" dc:"note" v:"required"`
+	g.Meta         `path:"/new_admin_note" tags:"Merchant-Subscription-Note" method:"post" summary:"Merchant New Subscription Note"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	Note           string `json:"note" dc:"note" v:"required"`
 }
 
 type NewAdminNoteRes struct {
