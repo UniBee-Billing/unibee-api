@@ -9,7 +9,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
-	v1 "unibee/api/onetime/payment"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -26,11 +25,11 @@ import (
 	"unibee/utility"
 )
 
-func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayContext) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
+func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
 	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
-	utility.Assert(len(createPayContext.Pay.BizId) > 0, "BizId Invalid")
+	utility.Assert(len(createPayContext.Pay.ExternalPaymentId) > 0, "BizId Invalid")
 	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay gatewayId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
@@ -39,15 +38,14 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
-	createPayContext.Pay.OpenApiId = createPayContext.OpenApiId
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
-	if createPayContext.MediaData == nil {
-		createPayContext.MediaData = make(map[string]string)
+	if createPayContext.MetaData == nil {
+		createPayContext.MetaData = make(map[string]string)
 	}
-	createPayContext.MediaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
-	createPayContext.MediaData["PaymentId"] = createPayContext.Pay.PaymentId
-	createPayContext.MediaData["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
-	redisKey := fmt.Sprintf("createPay-merchantId:%d-bizId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.BizId)
+	createPayContext.MetaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
+	createPayContext.MetaData["PaymentId"] = createPayContext.Pay.PaymentId
+	createPayContext.MetaData["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
+	redisKey := fmt.Sprintf("createPay-merchantId:%d-externalPaymentId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.ExternalPaymentId)
 	isDuplicatedInvoke := false
 
 	defer func() {
@@ -58,7 +56,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
-		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.BizId)
+		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.ExternalPaymentId)
 	}
 	var invoice *entity.Invoice
 	if createPayContext.Invoice != nil {
@@ -155,7 +153,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 		Fee:       createPayContext.Pay.TotalAmount,
 		EventType: event.SentForSettle.Type,
 		Event:     event.SentForSettle.Desc,
-		OpenApiId: createPayContext.OpenApiId,
 		UniqueNo:  fmt.Sprintf("%s_%s", createPayContext.Pay.PaymentId, "SentForSettle"),
 	})
 	return gatewayInternalPayResult, nil
@@ -163,16 +160,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.CreatePayCon
 
 func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
-	var mobile = ""
-	var firstName = ""
-	var lastName = ""
-	var gender = ""
 	var email = ""
 	if user != nil {
-		mobile = user.Mobile
-		firstName = user.FirstName
-		lastName = user.LastName
-		gender = user.Gender
 		email = user.Email
 	}
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
@@ -183,38 +172,28 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
-	return GatewayPaymentCreate(ctx, &ro.CreatePayContext{
+	return GatewayPaymentCreate(ctx, &ro.NewPaymentInternalReq{
 		PayImmediate: true,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
-			SubscriptionId:  sub.SubscriptionId,
-			BizId:           sub.SubscriptionId,
-			BizType:         consts.BizTypeSubscription,
-			AuthorizeStatus: consts.Authorized,
-			UserId:          sub.UserId,
-			GatewayId:       gateway.Id,
-			TotalAmount:     invoice.TotalAmount,
-			Currency:        invoice.Currency,
-			CountryCode:     sub.CountryCode,
-			MerchantId:      sub.MerchantId,
-			CompanyId:       merchantInfo.CompanyId,
-			Automatic:       1,
-			BillingReason:   invoice.InvoiceName,
+			SubscriptionId:    sub.SubscriptionId,
+			ExternalPaymentId: sub.SubscriptionId,
+			BizType:           consts.BizTypeSubscription,
+			AuthorizeStatus:   consts.Authorized,
+			UserId:            sub.UserId,
+			GatewayId:         gateway.Id,
+			TotalAmount:       invoice.TotalAmount,
+			Currency:          invoice.Currency,
+			CountryCode:       sub.CountryCode,
+			MerchantId:        sub.MerchantId,
+			CompanyId:         merchantInfo.CompanyId,
+			Automatic:         1,
+			BillingReason:     invoice.InvoiceName,
 		},
-		Platform:      "WEB",
-		DeviceType:    "Web",
-		ShopperUserId: strconv.FormatInt(sub.UserId, 10),
-		ShopperEmail:  email,
-		ShopperLocale: "en",
-		Mobile:        mobile,
-		Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
-		ShopperName: &v1.OutShopperName{
-			FirstName: firstName,
-			LastName:  lastName,
-			Gender:    gender,
-		},
-		MediaData:              map[string]string{"BillingReason": invoice.InvoiceName},
-		MerchantOrderReference: sub.SubscriptionId,
-		GatewayPaymentMethod:   sub.GatewayDefaultPaymentMethod,
+		ExternalUserId:       strconv.FormatInt(sub.UserId, 10),
+		Email:                email,
+		Invoice:              invoice_compute.ConvertInvoiceToSimplify(invoice),
+		MetaData:             map[string]string{"BillingReason": invoice.InvoiceName},
+		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 }

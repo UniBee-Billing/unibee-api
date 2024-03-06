@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	v1 "unibee/api/onetime/payment"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
 	redismq2 "unibee/internal/cmd/redismq"
@@ -281,17 +280,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	one.Id = uint64(uint(id))
 
 	var createRes *ro.GatewayCreateSubscriptionInternalResp
-	user := query.GetUserAccountById(ctx, uint64(one.UserId))
-	var mobile = ""
-	var firstName = ""
-	var lastName = ""
-	var gender = ""
-	if user != nil {
-		mobile = user.Mobile
-		firstName = user.FirstName
-		lastName = user.LastName
-		gender = user.Gender
-	}
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 	utility.AssertError(err, "System Error")
 	var createPaymentResult *ro.CreatePayInternalResp
@@ -309,37 +297,27 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			return nil, err
 		}
 	} else {
-		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &ro.CreatePayContext{
+		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &ro.NewPaymentInternalReq{
 			CheckoutMode: true,
 			Gateway:      prepare.Gateway,
 			Pay: &entity.Payment{
-				SubscriptionId: one.SubscriptionId,
-				BizId:          one.SubscriptionId,
-				BizType:        consts.BizTypeSubscription,
-				UserId:         prepare.UserId,
-				GatewayId:      prepare.Gateway.Id,
-				TotalAmount:    prepare.Invoice.TotalAmount,
-				Currency:       prepare.Currency,
-				CountryCode:    prepare.VatCountryCode,
-				MerchantId:     prepare.Merchant.Id,
-				CompanyId:      prepare.Merchant.CompanyId,
-				BillingReason:  prepare.Invoice.InvoiceName,
-				ReturnUrl:      req.ReturnUrl,
+				SubscriptionId:    one.SubscriptionId,
+				ExternalPaymentId: one.SubscriptionId,
+				BizType:           consts.BizTypeSubscription,
+				UserId:            prepare.UserId,
+				GatewayId:         prepare.Gateway.Id,
+				TotalAmount:       prepare.Invoice.TotalAmount,
+				Currency:          prepare.Currency,
+				CountryCode:       prepare.VatCountryCode,
+				MerchantId:        prepare.Merchant.Id,
+				CompanyId:         prepare.Merchant.CompanyId,
+				BillingReason:     prepare.Invoice.InvoiceName,
+				ReturnUrl:         req.ReturnUrl,
 			},
-			Platform:      "WEB",
-			DeviceType:    "Web",
-			ShopperUserId: strconv.FormatInt(one.UserId, 10),
-			ShopperEmail:  prepare.Email,
-			ShopperLocale: "en",
-			Mobile:        mobile,
-			Invoice:       invoice_compute.ConvertInvoiceToSimplify(invoice),
-			ShopperName: &v1.OutShopperName{
-				FirstName: firstName,
-				LastName:  lastName,
-				Gender:    gender,
-			},
-			MediaData:              map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
-			MerchantOrderReference: one.SubscriptionId,
+			ExternalUserId: strconv.FormatInt(one.UserId, 10),
+			Email:          prepare.Email,
+			Invoice:        invoice_compute.ConvertInvoiceToSimplify(invoice),
+			MetaData:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
 		})
 		if err != nil {
 			return nil, err

@@ -4,7 +4,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"strconv"
-	v1 "unibee/api/onetime/payment"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/invoice_compute"
@@ -46,35 +45,25 @@ func InvoiceEntrance(r *ghttp.Request) {
 
 			merchantInfo := query.GetMerchantById(r.Context(), one.MerchantId)
 			user := query.GetUserAccountById(r.Context(), uint64(one.UserId))
-			createPayContext := &ro.CreatePayContext{
+			createPayContext := &ro.NewPaymentInternalReq{
 				Gateway: gateway,
 				Pay: &entity.Payment{
-					BizId:           one.InvoiceId,
-					BizType:         consts.BizTypeInvoice,
-					AuthorizeStatus: consts.Authorized,
-					UserId:          one.UserId,
-					GatewayId:       gateway.Id,
-					TotalAmount:     one.TotalAmount,
-					Currency:        one.Currency,
-					CountryCode:     user.CountryCode,
-					MerchantId:      one.MerchantId,
-					CompanyId:       merchantInfo.CompanyId,
-					BillingReason:   one.InvoiceName,
+					ExternalPaymentId: one.InvoiceId,
+					BizType:           consts.BizTypeInvoice,
+					AuthorizeStatus:   consts.Authorized,
+					UserId:            one.UserId,
+					GatewayId:         gateway.Id,
+					TotalAmount:       one.TotalAmount,
+					Currency:          one.Currency,
+					CountryCode:       user.CountryCode,
+					MerchantId:        one.MerchantId,
+					CompanyId:         merchantInfo.CompanyId,
+					BillingReason:     one.InvoiceName,
 				},
-				Platform:      "WEB",
-				DeviceType:    "Web",
-				ShopperUserId: strconv.FormatInt(one.UserId, 10),
-				ShopperEmail:  user.Email,
-				ShopperLocale: "en",
-				Mobile:        user.Mobile,
-				Invoice:       invoice_compute.ConvertInvoiceToSimplify(one),
-				ShopperName: &v1.OutShopperName{
-					FirstName: user.FirstName,
-					LastName:  user.LastName,
-					Gender:    user.Gender,
-				},
-				MediaData:              map[string]string{"BillingReason": one.InvoiceName},
-				MerchantOrderReference: one.InvoiceId,
+				ExternalUserId: strconv.FormatInt(one.UserId, 10),
+				Email:          user.Email,
+				Invoice:        invoice_compute.ConvertInvoiceToSimplify(one),
+				MetaData:       map[string]string{"BillingReason": one.InvoiceName},
 			}
 
 			createRes, err := service.GatewayPaymentCreate(r.Context(), createPayContext)

@@ -225,7 +225,7 @@ func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entit
 	return res, err
 }
 
-func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {

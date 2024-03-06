@@ -15,7 +15,7 @@ type SamplePaymentNetherlandsReq struct {
 type SamplePaymentNetherlandsRes struct {
 	Status            string      `json:"status" dc:"Status"`
 	PaymentId         string      `json:"paymentId" dc:"PaymentId"`
-	MerchantPaymentId string      `json:"merchantPaymentId" dc:"MerchantPaymentId"`
+	MerchantPaymentId string      `json:"merchantPaymentId" dc:"ExternalPaymentId"`
 	Action            *gjson.Json `json:"action" dc:"action"`
 }
 

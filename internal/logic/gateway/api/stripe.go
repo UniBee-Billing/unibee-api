@@ -326,7 +326,7 @@ func (s Stripe) setUnibeeAppInfo() {
 	})
 }
 
-func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -353,14 +353,14 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
-			Metadata:   createPayContext.MediaData,
+			Metadata:   createPayContext.MetaData,
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
-				Metadata:         createPayContext.MediaData,
+				Metadata:         createPayContext.MetaData,
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 			},
 		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
-		checkoutParams.Metadata = createPayContext.MediaData
+		checkoutParams.Metadata = createPayContext.MetaData
 		//checkoutParams.ExpiresAt
 		detail, err := session.New(checkoutParams)
 		if err != nil {
@@ -424,7 +424,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 					AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 						Enabled: stripe.Bool(true),
 					},
-					Metadata:         createPayContext.MediaData,
+					Metadata:         createPayContext.MetaData,
 					ReturnURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				}
@@ -467,7 +467,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.Crea
 		}
 		// need payment link
 		params := &stripe.InvoiceParams{
-			Metadata: createPayContext.MediaData,
+			Metadata: createPayContext.MetaData,
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
 			Customer: stripe.String(gatewayUser.GatewayUserId)}
 

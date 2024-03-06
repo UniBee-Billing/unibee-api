@@ -29,7 +29,7 @@ type PaymentColumns struct {
 	GmtCreate              string // create time
 	GmtModify              string // update time
 	BizType                string // biz_type 1-single payment, 3-subscription
-	BizId                  string // biz_id
+	ExternalPaymentId      string // external_payment_id
 	Currency               string // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              string // payment id
 	TotalAmount            string // total amount
@@ -80,7 +80,7 @@ var paymentColumns = PaymentColumns{
 	GmtCreate:              "gmt_create",
 	GmtModify:              "gmt_modify",
 	BizType:                "biz_type",
-	BizId:                  "biz_id",
+	ExternalPaymentId:      "external_payment_id",
 	Currency:               "currency",
 	PaymentId:              "payment_id",
 	TotalAmount:            "total_amount",

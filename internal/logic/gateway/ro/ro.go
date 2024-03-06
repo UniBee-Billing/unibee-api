@@ -8,31 +8,17 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-type CreatePayContext struct {
-	CheckoutMode             bool                    `json:"checkoutMode"`
-	OpenApiId                int64                   `json:"openApiId"`
-	AppId                    string                  `json:"appId"`
-	Desc                     string                  `json:"desc"`
-	Pay                      *entity.Payment         `json:"pay"`
-	Gateway                  *entity.MerchantGateway `json:"gateway"`
-	TerminalIp               string                  `json:"terminalIp"`
-	ShopperUserId            string                  `json:"shopperUserId"`
-	ShopperEmail             string                  `json:"shopperEmail"`
-	ShopperLocale            string                  `json:"shopperLocale"`
-	Mobile                   string                  `json:"mobile"`
-	MediaData                map[string]string       `json:"mediaInfo"`
-	Invoice                  *InvoiceDetailSimplify  `json:"invoice"`
-	ShopperName              *v1.OutShopperName      `json:"shopperName"`
-	ShopperInteraction       string                  `json:"shopperInteraction"`
-	RecurringProcessingModel string                  `json:"recurringProcessingModel"`
-	TokenId                  string                  `json:"tokenId"`
-	MerchantOrderReference   string                  `json:"merchantOrderReference"`
-	DateOfBirth              *gtime.Time             `json:"dateOfBirth"`
-	Platform                 string                  `json:"platform"`
-	DeviceType               string                  `json:"deviceType"`
-	DaysUtilDue              int                     `json:"daysUtilDue"`
-	GatewayPaymentMethod     string                  `json:"gatewayPaymentMethod"`
-	PayImmediate             bool                    `json:"payImmediate"`
+type NewPaymentInternalReq struct {
+	CheckoutMode         bool                    `json:"checkoutMode"`
+	Pay                  *entity.Payment         `json:"pay"`
+	Gateway              *entity.MerchantGateway `json:"gateway"`
+	ExternalUserId       string                  `json:"externalUserId"`
+	Email                string                  `json:"email"`
+	MetaData             map[string]string       `json:"metaData"`
+	Invoice              *InvoiceDetailSimplify  `json:"invoice"`
+	DaysUtilDue          int                     `json:"daysUtilDue"`
+	GatewayPaymentMethod string                  `json:"gatewayPaymentMethod"`
+	PayImmediate         bool                    `json:"payImmediate"`
 }
 
 type CreatePayInternalResp struct {

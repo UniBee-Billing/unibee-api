@@ -69,7 +69,7 @@ func (i Invalid) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Mer
 	panic("implement me")
 }
 
-func (i Invalid) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (i Invalid) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

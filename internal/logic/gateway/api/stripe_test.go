@@ -103,7 +103,7 @@ func TestStrip(t *testing.T) {
 		//		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 		//			Enabled: stripe.Bool(true),
 		//		},
-		//		//Metadata:  createPayContext.MediaData,
+		//		//Metadata:  createPayContext.MetaData,
 		//		ReturnURL:        stripe.String("http://user.unibee.top"),
 		//		SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 		//	}

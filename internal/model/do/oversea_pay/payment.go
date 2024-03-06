@@ -21,7 +21,7 @@ type Payment struct {
 	GmtCreate              *gtime.Time // create time
 	GmtModify              *gtime.Time // update time
 	BizType                interface{} // biz_type 1-single payment, 3-subscription
-	BizId                  interface{} // biz_id
+	ExternalPaymentId      interface{} // external_payment_id
 	Currency               interface{} // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              interface{} // payment id
 	TotalAmount            interface{} // total amount

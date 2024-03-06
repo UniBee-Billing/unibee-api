@@ -19,7 +19,7 @@ type Payment struct {
 	GmtCreate              *gtime.Time `json:"gmtCreate"              description:"create time"`                                                            // create time
 	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time
 	BizType                int         `json:"bizType"                description:"biz_type 1-single payment, 3-subscription"`                              // biz_type 1-single payment, 3-subscription
-	BizId                  string      `json:"bizId"                  description:"biz_id"`                                                                 // biz_id
+	ExternalPaymentId      string      `json:"externalPaymentId"      description:"external_payment_id"`                                                    // external_payment_id
 	Currency               string      `json:"currency"               description:"currency，“SGD” “MYR” “PHP” “IDR” “THB”"`                                 // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              string      `json:"paymentId"              description:"payment id"`                                                             // payment id
 	TotalAmount            int64       `json:"totalAmount"            description:"total amount"`                                                           // total amount

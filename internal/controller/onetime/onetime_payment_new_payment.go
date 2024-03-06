@@ -3,7 +3,6 @@ package onetime
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/onetime/payment"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -19,20 +18,18 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	utility.Assert(req.TotalAmount != nil, "amount is nil")
 	utility.Assert(req.TotalAmount.Amount > 0, "amount value is nil")
 	utility.Assert(len(req.TotalAmount.Currency) > 0, "amount currency is nil")
-	//类似日元的小数尾数必须为 0 检查
 	currencyNumberCheck(req.TotalAmount)
 	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.PaymentMethod != nil, "payment method is nil")
 	utility.Assert(len(req.PaymentMethod.Gateway) > 0, "payment method type is nil")
-	utility.Assert(len(req.MerchantPaymentId) > 0, "MerchantPaymentId is nil")
-	utility.Assert(len(req.ShopperUserId) > 0, "shopperReference type is nil")
-	utility.Assert(len(req.ShopperEmail) > 0, "shopperEmail is nil")
+	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
+	utility.Assert(len(req.ExternalUserId) > 0, "shopperReference type is nil")
+	utility.Assert(len(req.Email) > 0, "shopperEmail is nil")
 	utility.Assert(req.LineItems != nil, "lineItems is nil")
 
-	openApiConfig, merchantInfo := merchantCheck(ctx, _interface.GetMerchantId(ctx))
+	_, merchantInfo := merchantCheck(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayByGatewayName(ctx, merchantInfo.Id, req.PaymentMethod.Gateway)
 	utility.Assert(gateway != nil, "type not found:"+req.PaymentMethod.Gateway)
-	//支付方式绑定校验 todo mark
 
 	var invoiceItems []*ro.InvoiceItemDetailRo
 	var totalAmountExcludingTax int64 = 0
@@ -66,11 +63,10 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 
 	utility.Assert(totalAmount == req.TotalAmount.Amount, "totalAmount not match")
 
-	createPayContext := &ro.CreatePayContext{
-		OpenApiId: int64(openApiConfig.Id),
-		Gateway:   gateway,
+	createPayContext := &ro.NewPaymentInternalReq{
+		Gateway: gateway,
 		Pay: &entity.Payment{
-			BizId:             req.MerchantPaymentId,
+			ExternalPaymentId: req.ExternalPaymentId,
 			BizType:           consts.BizTypeOneTime,
 			GatewayId:         gateway.Id,
 			TotalAmount:       req.TotalAmount.Amount,
@@ -79,24 +75,11 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 			MerchantId:        merchantInfo.Id,
 			CompanyId:         merchantInfo.CompanyId,
 			ReturnUrl:         req.RedirectUrl,
-			CaptureDelayHours: req.CaptureDelayHours,
 		},
-		Platform:      req.Platform,
-		DeviceType:    req.DeviceType,
-		ShopperUserId: req.ShopperUserId,
-		ShopperEmail:  req.ShopperEmail,
-		ShopperLocale: req.ShopperLocale,
-		Mobile:        req.TelephoneNumber,
-		MediaData:     req.Metadata,
-		Invoice:       invoice,
-		//BillingDetails:           req.BillingAddress,
-		//ShippingDetails:          req.DetailAddress,
-		ShopperName:              req.ShopperName,
-		ShopperInteraction:       req.ShopperInteraction,
-		RecurringProcessingModel: req.RecurringProcessingToken,
-		TokenId:                  req.PaymentMethod.TokenId,
-		MerchantOrderReference:   req.MerchantOrderReference,
-		DateOfBirth:              gtime.ParseTimeFromContent(req.DateOfBrith, "YYYY-MM-DD"),
+		ExternalUserId: req.ExternalUserId,
+		Email:          req.Email,
+		MetaData:       req.Metadata,
+		Invoice:        invoice,
 	}
 
 	resp, err := service.GatewayPaymentCreate(ctx, createPayContext)
@@ -104,7 +87,7 @@ func (c *ControllerPayment) NewPayment(ctx context.Context, req *payment.NewPaym
 	res = &payment.NewPaymentRes{
 		Status:            "Pending",
 		PaymentId:         resp.PaymentId,
-		MerchantPaymentId: req.MerchantPaymentId,
+		ExternalPaymentId: req.ExternalPaymentId,
 		Action:            resp.Action,
 	}
 	return

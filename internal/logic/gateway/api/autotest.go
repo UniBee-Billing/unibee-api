@@ -70,7 +70,7 @@ func (a AutoTest) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Me
 	panic("implement me")
 }
 
-func (a AutoTest) GatewayNewPayment(ctx context.Context, createPayContext *ro.CreatePayContext) (res *ro.CreatePayInternalResp, err error) {
+func (a AutoTest) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
