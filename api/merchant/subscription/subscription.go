@@ -2,7 +2,6 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -162,16 +161,15 @@ type NewAdminNoteRes struct {
 }
 
 type AdminNoteRo struct {
-	Id             uint64      `json:"id"               description:"id"`           // id
-	Note           string      `json:"note"             description:"note"`         // note
-	GmtCreate      *gtime.Time `json:"gmtCreate"  description:"创建时间"`               // 创建时间
-	GmtModify      *gtime.Time `json:"gmtModify"  description:"修改时间"`               // 修改时间
-	SubscriptionId string      `json:"subscriptionId" description:"SubscriptionId"` // 用户ID
-	UserName       string      `json:"userName"   description:"用户名"`                // 用户名
-	Mobile         string      `json:"mobile"     description:"手机号"`                // 手机号
-	Email          string      `json:"email"      description:"邮箱"`                 // 邮箱
-	FirstName      string      `json:"firstName"  description:""`                   //
-	LastName       string      `json:"lastName"   description:""`                   //
+	Id             uint64 `json:"id"               description:"id"`              // id
+	Note           string `json:"note"             description:"note"`            // note
+	CreateTime     int64  `json:"createTime"       description:"create utc time"` // create utc time
+	SubscriptionId string `json:"subscriptionId" description:"SubscriptionId"`    // 用户ID
+	UserName       string `json:"userName"   description:"用户名"`                   // 用户名
+	Mobile         string `json:"mobile"     description:"手机号"`                   // 手机号
+	Email          string `json:"email"      description:"邮箱"`                    // 邮箱
+	FirstName      string `json:"firstName"  description:""`                      //
+	LastName       string `json:"lastName"   description:""`                      //
 }
 
 type AdminNoteListReq struct {

@@ -33,8 +33,7 @@ func (c *ControllerSubscription) AdminNoteList(ctx context.Context, req *subscri
 			resultList = append(resultList, &subscription.AdminNoteRo{
 				Id:             note.Id,
 				Note:           note.Note,
-				GmtCreate:      note.GmtCreate,
-				GmtModify:      note.GmtModify,
+				CreateTime:     note.CreateTime,
 				SubscriptionId: note.SubscriptionId,
 				UserName:       merchantMember.UserName,
 				Mobile:         merchantMember.Mobile,
