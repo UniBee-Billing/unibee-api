@@ -31,9 +31,9 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 
 	//firstEnd := subscription.GetPeriodEndFromStart(ctx,utility.MaxInt64(sub.CurrentPeriodEnd,sub.TrialEnd), uint64(sub.PlanId))
 	// Verify Farthest Time Which Test Clock Can Set, The Max Number Of Subscription Billing Cycle Which TestClock Can Cover is 2
-	var maxTimeCap int64 = 24 * 60 * 60 * 7 // Max 7days TestClock Cap
+	var maxTimeCap int64 = 24 * 60 * 60 * 60 // Max 7days TestClock Cap
 	if sub.TestClock > 0 {
-		utility.Assert((newTestClock-sub.TestClock) < maxTimeCap, "TimeCap Should Lower Then 7 Days")
+		utility.Assert((newTestClock-sub.TestClock) < maxTimeCap, "TimeCap Should Lower Then 60 Days")
 	}
 	var result *TestClockWalkRes = &TestClockWalkRes{
 		Walks: make([]*cycle.BillingCycleWalkRes, 0),
