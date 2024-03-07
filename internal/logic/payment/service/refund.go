@@ -7,7 +7,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
-	v1 "unibee/api/onetime/payment"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -20,7 +19,15 @@ import (
 	"unibee/utility"
 )
 
-func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPaymentRefundReq, openApiId int64) (refund *entity.Refund, err error) {
+type NewPaymentRefundInternalReq struct {
+	PaymentId        string `json:"path" dc:"PaymentId" v:"required"`
+	ExternalRefundId string `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
+	RefundAmount     int64  `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
+	Currency         string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Reason           string `json:"reason" dc:"Reason"`
+}
+
+func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
 	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
@@ -74,7 +81,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *v1.NewPay
 		Currency:         payment.Currency,
 		CountryCode:      payment.CountryCode,
 		RefundComment:    req.Reason,
-		OpenApiId:        openApiId,
 		UserId:           payment.UserId,
 		//AdditionalData: req.
 		//RefundComment: payBizTypeEnum.getDesc() +"退款",

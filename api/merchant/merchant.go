@@ -11,13 +11,13 @@ import (
 	"unibee/api/merchant/balance"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
-	"unibee/api/merchant/info"
 	"unibee/api/merchant/invoice"
 	"unibee/api/merchant/member"
 	"unibee/api/merchant/metric"
 	"unibee/api/merchant/oss"
 	"unibee/api/merchant/payment"
 	"unibee/api/merchant/plan"
+	"unibee/api/merchant/profile"
 	"unibee/api/merchant/search"
 	"unibee/api/merchant/session"
 	"unibee/api/merchant/subscription"
@@ -55,11 +55,6 @@ type IMerchantGateway interface {
 	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
 	SetupWebhook(ctx context.Context, req *gateway.SetupWebhookReq) (res *gateway.SetupWebhookRes, err error)
-}
-
-type IMerchantInfo interface {
-	Get(ctx context.Context, req *info.GetReq) (res *info.GetRes, err error)
-	Update(ctx context.Context, req *info.UpdateReq) (res *info.UpdateRes, err error)
 }
 
 type IMerchantInvoice interface {
@@ -100,6 +95,14 @@ type IMerchantOss interface {
 }
 
 type IMerchantPayment interface {
+	Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error)
+	Capture(ctx context.Context, req *payment.CaptureReq) (res *payment.CaptureRes, err error)
+	New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error)
+	Detail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error)
+	List(ctx context.Context, req *payment.ListReq) (res *payment.ListRes, err error)
+	NewPaymentRefund(ctx context.Context, req *payment.NewPaymentRefundReq) (res *payment.NewPaymentRefundRes, err error)
+	RefundDetail(ctx context.Context, req *payment.RefundDetailReq) (res *payment.RefundDetailRes, err error)
+	RefundList(ctx context.Context, req *payment.RefundListReq) (res *payment.RefundListRes, err error)
 	TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error)
 }
 
@@ -114,6 +117,11 @@ type IMerchantPlan interface {
 	Detail(ctx context.Context, req *plan.DetailReq) (res *plan.DetailRes, err error)
 	Expire(ctx context.Context, req *plan.ExpireReq) (res *plan.ExpireRes, err error)
 	Delete(ctx context.Context, req *plan.DeleteReq) (res *plan.DeleteRes, err error)
+}
+
+type IMerchantProfile interface {
+	Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error)
+	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 }
 
 type IMerchantSearch interface {

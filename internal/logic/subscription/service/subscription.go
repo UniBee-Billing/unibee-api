@@ -282,7 +282,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	var createRes *ro.GatewayCreateSubscriptionInternalResp
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 	utility.AssertError(err, "System Error")
-	var createPaymentResult *ro.CreatePayInternalResp
+	var createPaymentResult *ro.NewPaymentInternalResp
 	if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)

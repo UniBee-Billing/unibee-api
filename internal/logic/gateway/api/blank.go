@@ -70,7 +70,7 @@ func (b Blank) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merch
 	panic("implement me")
 }
 
-func (b Blank) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
+func (b Blank) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.NewPaymentInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

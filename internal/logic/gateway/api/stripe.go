@@ -35,6 +35,8 @@ type Stripe struct {
 func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (err error) {
 	stripe.Key = secret
 	s.setUnibeeAppInfo()
+	utility.Assert(len(secret) > 0, "invalid gatewaySecret")
+	utility.Assert(strings.HasPrefix(secret, "sk_"), "invalid gatewaySecret, should start with 'sk_'")
 
 	params := &stripe.ProductListParams{}
 	params.Limit = stripe.Int64(3)
@@ -326,7 +328,7 @@ func (s Stripe) setUnibeeAppInfo() {
 	})
 }
 
-func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
+func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.NewPaymentInternalResp, err error) {
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -378,7 +380,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		if detail.PaymentIntent != nil {
 			gatewayPaymentId = detail.PaymentIntent.ID
 		}
-		return &ro.CreatePayInternalResp{
+		return &ro.NewPaymentInternalResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
@@ -456,7 +458,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 				if targetIntent.PaymentMethod != nil {
 					paymentMethod = targetIntent.PaymentMethod.ID
 				}
-				return &ro.CreatePayInternalResp{
+				return &ro.NewPaymentInternalResp{
 					Status:                 consts.PaymentSuccess,
 					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
@@ -556,7 +558,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		if detail.PaymentIntent != nil && detail.PaymentIntent.PaymentMethod != nil {
 			gatewayPaymentMethod = detail.PaymentIntent.PaymentMethod.ID
 		}
-		return &ro.CreatePayInternalResp{
+		return &ro.NewPaymentInternalResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,

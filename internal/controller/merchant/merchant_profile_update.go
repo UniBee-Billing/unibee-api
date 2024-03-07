@@ -12,10 +12,10 @@ import (
 	"unibee/time"
 	"unibee/utility"
 
-	"unibee/api/merchant/info"
+	"unibee/api/merchant/profile"
 )
 
-func (c *ControllerMerchantinfo) Update(ctx context.Context, req *info.UpdateReq) (res *info.UpdateRes, err error) {
+func (c *ControllerMerchantProfile) Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error) {
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}
@@ -40,5 +40,5 @@ func (c *ControllerMerchantinfo) Update(ctx context.Context, req *info.UpdateReq
 		return nil, err
 	}
 
-	return &info.UpdateRes{Merchant: query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)}, nil
+	return &profile.UpdateRes{Merchant: query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)}, nil
 }

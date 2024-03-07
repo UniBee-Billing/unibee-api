@@ -25,7 +25,7 @@ import (
 	"unibee/utility"
 )
 
-func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
+func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (gatewayInternalPayResult *ro.NewPaymentInternalResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
 	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
@@ -158,7 +158,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *ro.CreatePayInternalResp, err error) {
+func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *ro.NewPaymentInternalResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	var email = ""
 	if user != nil {

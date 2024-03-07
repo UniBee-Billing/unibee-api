@@ -14,18 +14,13 @@ import (
 	"unibee/utility"
 )
 
-type GatewayKeyEnum struct {
-	Name string
-	Desc string
+var GatewayWebhookNameMapping = map[string]_interface.GatewayWebhookInterface{
+	"stripe":   &StripeWebhook{},
+	"paypal":   &PaypalWebhook{},
+	"invalid":  &InvalidWebhook{},
+	"0":        &BlankWebhook{},
+	"autotest": &AutoTestWebhook{},
 }
-
-var (
-	GatewayInvalid  = GatewayKeyEnum{"invalid", "Invalid Gateway"}
-	GatewayPaypal   = GatewayKeyEnum{"paypal", "Paypal"}
-	GatewayStripe   = GatewayKeyEnum{"stripe", "Stripe"}
-	GatewayBlank    = GatewayKeyEnum{"0", "0 Payment Gateway"}
-	GatewayAutoTest = GatewayKeyEnum{"autotest", "Auto Test"}
-)
 
 type GatewayWebhookProxy struct {
 	Gateway     *entity.MerchantGateway
@@ -34,17 +29,9 @@ type GatewayWebhookProxy struct {
 
 func (p GatewayWebhookProxy) getRemoteGateway() (one _interface.GatewayWebhookInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
-	if p.GatewayName == GatewayPaypal.Name {
-		return &PaypalWebhook{}
-	} else if p.GatewayName == GatewayStripe.Name {
-		return &StripeWebhook{}
-	} else if p.GatewayName == GatewayBlank.Name {
-		return &BlankWebhook{}
-	} else if p.GatewayName == GatewayAutoTest.Name {
-		return &AutoTestWebhook{}
-	} else {
-		return &InvalidWebhook{}
-	}
+	one = GatewayWebhookNameMapping[p.GatewayName]
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName)
+	return
 }
 
 func (p GatewayWebhookProxy) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {

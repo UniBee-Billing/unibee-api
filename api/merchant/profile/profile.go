@@ -1,4 +1,4 @@
-package info
+package profile
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
@@ -6,7 +6,7 @@ import (
 )
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"Merchant-Info" method:"get" summary:"Get Merchant Info"`
+	g.Meta `path:"/get" tags:"Profile" method:"get" summary:"Get Merchant Info"`
 }
 
 type GetRes struct {
@@ -14,7 +14,7 @@ type GetRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta      `path:"/update" tags:"Merchant-Info" method:"post" summary:"Update Merchant Info"`
+	g.Meta      `path:"/update" tags:"Profile" method:"post" summary:"Update Merchant Info"`
 	CompanyName string `json:"companyName" description:"company_name"`
 	Email       string `json:"email"       description:"email"`
 	Address     string `json:"address"     description:"address"`

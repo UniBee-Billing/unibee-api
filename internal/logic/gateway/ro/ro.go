@@ -20,7 +20,7 @@ type NewPaymentInternalReq struct {
 	PayImmediate         bool                    `json:"payImmediate"`
 }
 
-type CreatePayInternalResp struct {
+type NewPaymentInternalResp struct {
 	Status                 consts.PayStatusEnum `json:"status"`
 	PaymentId              string               `json:"paymentId"`
 	GatewayPaymentId       string               `json:"gatewayPaymentId"`

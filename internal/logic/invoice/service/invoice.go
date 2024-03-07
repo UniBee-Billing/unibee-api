@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/merchant/invoice"
-	v1 "unibee/api/onetime/payment"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
@@ -269,13 +268,13 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
-	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &v1.NewPaymentRefundReq{
+	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
-	}, 0)
+	})
 	if err != nil {
 		return nil, err
 	}

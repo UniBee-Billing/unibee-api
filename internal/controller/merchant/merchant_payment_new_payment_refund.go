@@ -1,12 +1,12 @@
-package onetime
+package merchant
 
 import (
 	"context"
-	"unibee/api/onetime/payment"
 	"unibee/internal/consts"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/service"
 	"unibee/utility"
+
+	"unibee/api/merchant/payment"
 )
 
 func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.NewPaymentRefundReq) (res *payment.NewPaymentRefundRes, err error) {
@@ -15,16 +15,21 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
 	utility.Assert(len(req.Currency) > 0, "refund currency should not be nil")
 	currencyNumberCheck(req.RefundAmount, req.Currency)
-	openApiConfig, _ := merchantCheck(ctx, _interface.GetMerchantId(ctx))
 
-	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BizTypeOneTime, req, int64(openApiConfig.Id))
+	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BizTypeOneTime, &service.NewPaymentRefundInternalReq{
+		PaymentId:        req.PaymentId,
+		ExternalRefundId: req.ExternalRefundId,
+		RefundAmount:     req.RefundAmount,
+		Currency:         req.Currency,
+		Reason:           req.Reason,
+	})
 	if err != nil {
 		return nil, err
 	}
 	res = &payment.NewPaymentRefundRes{
-		Status:           "SentForRefund",
+		Status:           consts.RefundIng,
 		RefundId:         resp.RefundId,
-		MerchantRefundId: req.ExternalRefundId,
+		ExternalRefundId: req.ExternalRefundId,
 		PaymentId:        resp.PaymentId,
 	}
 	return res, nil

@@ -14,18 +14,13 @@ import (
 	"unibee/utility"
 )
 
-type GatewayKeyEnum struct {
-	Name string
-	Desc string
+var GatewayNameMapping = map[string]_interface.GatewayInterface{
+	"stripe":   &Stripe{},
+	"paypal":   &Paypal{},
+	"invalid":  &Invalid{},
+	"0":        &Blank{},
+	"autotest": &AutoTest{},
 }
-
-var (
-	GatewayInvalid  = GatewayKeyEnum{"invalid", "Invalid Gateway"}
-	GatewayPaypal   = GatewayKeyEnum{"paypal", "Paypal"}
-	GatewayStripe   = GatewayKeyEnum{"stripe", "Stripe"}
-	GatewayBlank    = GatewayKeyEnum{"0", "0 Payment Gateway"}
-	GatewayAutoTest = GatewayKeyEnum{"autotest", "Auto Test"}
-)
 
 type GatewayProxy struct {
 	Gateway     *entity.MerchantGateway
@@ -34,17 +29,9 @@ type GatewayProxy struct {
 
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
-	if p.GatewayName == GatewayPaypal.Name {
-		return &Paypal{}
-	} else if p.GatewayName == GatewayStripe.Name {
-		return &Stripe{}
-	} else if p.GatewayName == GatewayBlank.Name {
-		return &Blank{}
-	} else if p.GatewayName == GatewayAutoTest.Name {
-		return &AutoTest{}
-	} else {
-		return &Invalid{}
-	}
+	one = GatewayNameMapping[p.GatewayName]
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal")
+	return
 }
 
 func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
@@ -225,7 +212,7 @@ func (p GatewayProxy) GatewayUserDetailQuery(ctx context.Context, gateway *entit
 	return res, err
 }
 
-func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.CreatePayInternalResp, err error) {
+func (p GatewayProxy) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.NewPaymentInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {

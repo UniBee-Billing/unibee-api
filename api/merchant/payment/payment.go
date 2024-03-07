@@ -5,27 +5,27 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-type NewPaymentReq struct {
-	g.Meta            `path:"/new_payment" tags:"OneTime-Payment" method:"post" summary:"New Payment"`
+type NewReq struct {
+	g.Meta            `path:"/new" tags:"Payment" method:"post" summary:"New Payment"`
 	ExternalPaymentId string            `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment" v:"required"`
 	ExternalUserId    string            `json:"externalUserId" dc:"ExternalUserId, should unique for user" v:"required"`
 	Email             string            `json:"email" dc:"Email" v:"required"`
-	Currency          string            `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Currency          string            `json:"currency" dc:"Currency"  v:"required"`
 	TotalAmount       int64             `json:"totalAmount" dc:"Total PaymentAmount, Cent" v:"required"`
 	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url" v:"required"`
 	CountryCode       string            `json:"countryCode" dc:"CountryCode" v:"required"`
-	PaymentMethod     *MethodListReq    `json:"paymentMethod"   in:"query" dc:"Payment Method" v:"required"`
-	LineItems         []*OutLineItem    `json:"lineItems" dc:"LineItems" v:"required"`
+	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	Items             []*Item           `json:"lineItems" dc:"Items"`
 	Metadata          map[string]string `json:"reference" dc:"Metadata，Map" v:""`
 }
-type NewPaymentRes struct {
-	Status            string      `json:"status" dc:"Status"`
+type NewRes struct {
+	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
 	PaymentId         string      `json:"paymentId" dc:"PaymentId"`
 	ExternalPaymentId string      `json:"externalPaymentId" dc:"ExternalPaymentId"`
 	Action            *gjson.Json `json:"action" dc:"action"`
 }
 
-type OutLineItem struct {
+type Item struct {
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax" dc:"UnitAmountExcludingTax" v:"required"`
 	Quantity               int64  `json:"quantity" dc:"Quantity" v:"required"`
 	Description            string `json:"description" dc:"Description" v:""`
@@ -34,16 +34,20 @@ type OutLineItem struct {
 	ImageUrl               string `json:"imageUrl" dc:"ImageUrl"`
 }
 
-type MethodListReq struct {
-	g.Meta  `path:"/paymentMethodList" tags:"OneTime-Payment" method:"post" summary:"Payment Method Query (Support Klarna、Evonet）"`
-	Gateway string `json:"type" dc:"Gateway" v:"required"`
-}
-type MethodListRes struct {
-}
-
 type DetailReq struct {
-	g.Meta    `path:"/paymentDetail/{PaymentId}" tags:"OneTime-Payment" method:"post" summary:"Query Payment Detail"`
-	PaymentId string `in:"path" dc:"PaymentId" v:"required"`
+	g.Meta    `path:"/detail" tags:"Payment" method:"get" summary:"Query Payment Detail"`
+	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 }
 type DetailRes struct {
+}
+
+type ListReq struct {
+	g.Meta         `path:"/list" tags:"Payment" method:"get" summary:"Query Payment List"`
+	GatewayId      uint64 `json:"gatewayId"   dc:"GatewayId"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
+	Email          string `json:"email" dc:"Email"`
+	Currency       string `json:"currency" dc:"Currency"`
+	CountryCode    string `json:"countryCode" dc:"CountryCode"`
+}
+type ListRes struct {
 }

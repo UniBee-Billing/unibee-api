@@ -75,10 +75,10 @@ func NewSearch() merchant.IMerchantSearch {
 	return &ControllerSearch{}
 }
 
-type ControllerMerchantinfo struct{}
+type ControllerMerchantProfile struct{}
 
-func NewMerchantinfo() merchant.IMerchantInfo {
-	return &ControllerMerchantinfo{}
+func NewMerchantProfile() merchant.IMerchantProfile {
+	return &ControllerMerchantProfile{}
 }
 
 type ControllerGateway struct{}

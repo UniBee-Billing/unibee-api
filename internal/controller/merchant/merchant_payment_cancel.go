@@ -1,17 +1,15 @@
-package onetime
+package merchant
 
 import (
 	"context"
-	"unibee/api/onetime/payment"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/service"
 	"unibee/internal/query"
 	"unibee/utility"
+
+	"unibee/api/merchant/payment"
 )
 
 func (c *ControllerPayment) Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error) {
-	//参数有效性校验 todo mark
-	merchantCheck(ctx, _interface.GetMerchantId(ctx))
 
 	overseaPay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(overseaPay != nil, "payment not found")

@@ -7,7 +7,7 @@ import (
 )
 
 type NewEventReq struct {
-	g.Meta           `path:"/event/new" tags:"Merchant-Metric" method:"post" summary:"Merchant Metric Event"`
+	g.Meta           `path:"/event/new" tags:"Metric" method:"post" summary:"Merchant Metric Event"`
 	MetricCode       string      `json:"metricCode" dc:"MetricCode" v:"required"`
 	ExternalUserId   string      `json:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId  string      `json:"externalEventId" dc:"ExternalEventId, __unique__" v:"required"`
@@ -19,7 +19,7 @@ type NewEventRes struct {
 }
 
 type DeleteEventReq struct {
-	g.Meta          `path:"/event/delete" tags:"Merchant-Metric" method:"post" summary:"Del Merchant Metric Event"`
+	g.Meta          `path:"/event/delete" tags:"Metric" method:"post" summary:"Del Merchant Metric Event"`
 	MetricCode      string `json:"metricCode" dc:"MetricCode" v:"required"`
 	ExternalUserId  string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
 	ExternalEventId string `json:"externalEventId" dc:"ExternalEventId" v:"required"`

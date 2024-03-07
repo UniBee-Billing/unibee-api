@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
@@ -16,17 +15,8 @@ import (
 
 func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string) {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
-	if strings.Compare(strings.ToLower(gatewayName), "stripe") == 0 {
-		utility.Assert(len(gatewaySecret) > 0, "invalid gatewaySecret")
-		utility.Assert(strings.HasPrefix(gatewaySecret, "sk_"), "invalid gatewaySecret, should start with 'sk_'")
-		err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
-		utility.AssertError(err, "gateway test error, key or secret invalid")
-
-	} else if strings.Compare(strings.ToLower(gatewayName), "paypal") == 0 {
-		utility.Assert(false, "not support")
-	} else {
-		utility.Assert(false, "invalid gatewayName")
-	}
+	err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
+	utility.AssertError(err, "gateway test error, key or secret invalid")
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
 	if consts.GetConfigInstance().IsProd() {
@@ -58,6 +48,7 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == merchantId, "merchant not match")
 	err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 
