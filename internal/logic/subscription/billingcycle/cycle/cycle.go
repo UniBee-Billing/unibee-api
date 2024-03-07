@@ -79,15 +79,6 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Nothing Todo As Sub At Create Status NotPayBefore48Hours"}, nil
 			}
-		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime {
-			// invoice not generate and sub out of time, need expired by system
-			err := expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
-			if err != nil {
-				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
-				return nil, err
-			} else {
-				return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionExpire From Billing Cycle As Payment Out Of Permission Days"}, nil
-			}
 		} else if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) && sub.CancelAtPeriodEnd == 1 && sub.Status != consts.SubStatusCancelled {
 			// sub set cancelAtPeriodEnd, need cancel by system
 			needInvoiceGenerate = false
@@ -97,6 +88,15 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return nil, err
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionCancel At Billing Cycle End By CurrentPeriodEnd Set"}, nil
+			}
+		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime {
+			// invoice not generate and sub out of time, need expired by system
+			err := expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
+			if err != nil {
+				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
+				return nil, err
+			} else {
+				return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionExpire From Billing Cycle As Payment Out Of Permission Days"}, nil
 			}
 		} else {
 			if sub.CancelAtPeriodEnd == 1 {
