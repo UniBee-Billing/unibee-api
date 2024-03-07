@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	"unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -134,7 +135,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 	if err != nil {
 		return nil, err
 	} else {
-
+		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundCreateCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,

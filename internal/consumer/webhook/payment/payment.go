@@ -1,4 +1,4 @@
-package subscription
+package payment
 
 import (
 	"context"
@@ -7,12 +7,11 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/consumer/webhook/message"
-	"unibee/internal/logic/subscription/service"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, event event.MerchantWebhookEvent) {
+func SendPaymentWebhookBackground(paymentId string, event event.MerchantWebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -27,9 +26,12 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, event e
 				return
 			}
 		}()
-		subDetailRes, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
-		utility.AssertError(err, "SendMerchantSubscriptionWebhookBackground SubscriptionDetail Error")
+		one := query.GetPaymentByPaymentId(ctx, paymentId)
+		if one != nil {
+			paymentDetail := query.GetPaymentDetail(ctx, one.MerchantId, one.PaymentId)
+			utility.Assert(paymentDetail != nil, "SendPaymentWebhookBackground Error")
 
-		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes))
+			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(paymentDetail))
+		}
 	}()
 }

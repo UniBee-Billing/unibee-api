@@ -8,6 +8,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
+	user2 "unibee/internal/consumer/webhook/user"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/subscription/handler"
 	service2 "unibee/internal/logic/subscription/service"
@@ -58,7 +59,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	handler.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId)
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CANCELLED)
-	subscription3.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
+	user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
 	return redismq.CommitMessage
 }
 

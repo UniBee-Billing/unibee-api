@@ -7,6 +7,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
+	user2 "unibee/internal/consumer/webhook/user"
 	"unibee/internal/logic/subscription/user_sub_plan"
 	"unibee/internal/logic/user"
 	"unibee/internal/query"
@@ -38,7 +39,7 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 	}
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED)
-	subscription3.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
+	user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
 	return redismq.CommitMessage
 }
 

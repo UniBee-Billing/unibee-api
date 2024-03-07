@@ -3,6 +3,7 @@ package payment
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/internal/logic/gateway/ro"
 )
 
 type NewReq struct {
@@ -39,15 +40,23 @@ type DetailReq struct {
 	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 }
 type DetailRes struct {
+	PaymentDetail *ro.PaymentDetailRo `json:"paymentDetail" dc:"PaymentDetail"`
 }
 
 type ListReq struct {
-	g.Meta         `path:"/list" tags:"Payment" method:"get" summary:"Query Payment List"`
-	GatewayId      uint64 `json:"gatewayId"   dc:"GatewayId"`
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
-	Email          string `json:"email" dc:"Email"`
-	Currency       string `json:"currency" dc:"Currency"`
-	CountryCode    string `json:"countryCode" dc:"CountryCode"`
+	g.Meta      `path:"/list" tags:"Payment" method:"get" summary:"Query Payment List"`
+	GatewayId   uint64 `json:"gatewayId"   dc:"GatewayId"`
+	UserId      int64  `json:"userId" dc:"UserId " `
+	Email       string `json:"email" dc:"Email"`
+	Status      int    `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
+	Currency    string `json:"currency" dc:"Currency"`
+	CountryCode string `json:"countryCode" dc:"CountryCode"`
+	SortField   string `json:"sortField" dc:"Sort Field，user_id|create_time|status" `
+	SortType    string `json:"sortType" dc:"Sort Type，asc|desc" `
+	Page        int    `json:"page"  dc:"Page, Start With 0" `
+	Count       int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
+
 type ListRes struct {
+	PaymentDetails []*ro.PaymentDetailRo `json:"paymentDetails" dc:"PaymentDetails"`
 }

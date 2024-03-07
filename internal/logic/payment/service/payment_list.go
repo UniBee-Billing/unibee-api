@@ -4,25 +4,32 @@ import (
 	"context"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
+	query2 "unibee/internal/query"
 	"unibee/utility"
 )
 
 type PaymentListInternalReq struct {
-	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `json:"userId" dc:"Filter UserId, Default All " `
-	SortField  string `json:"sortField" dc:"Sort Field，merchant_id|user_id|gmt_create|status" `
-	SortType   string `json:"sortType" dc:"Sort Type，asc|desc" `
-	Page       int    `json:"page"  dc:"Page, Start WIth 0" `
-	Count      int    `json:"count"  dc:"Count" dc:"Count Of Page" `
+	MerchantId  uint64 `json:"merchantId"   dc:"MerchantId"`
+	GatewayId   uint64 `json:"gatewayId"   dc:"GatewayId"`
+	UserId      int64  `json:"userId" dc:"UserId " `
+	Email       string `json:"email" dc:"Email"`
+	Status      int    `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
+	Currency    string `json:"currency" dc:"Currency"`
+	CountryCode string `json:"countryCode" dc:"CountryCode"`
+	SortField   string `json:"sortField" dc:"Sort Field，user_id|create_time|status" `
+	SortType    string `json:"sortType" dc:"Sort Type，asc|desc" `
+	Page        int    `json:"page"  dc:"Page, Start With 0" `
+	Count       int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 
 type PaymentListInternalRes struct {
-	Payments []*entity.Payment `json:"payments" description:"payments"`
+	PaymentDetails []*ro.PaymentDetailRo `json:"paymentDetails" dc:"PaymentDetails"`
 }
 
-func PaymentList(ctx context.Context, req *PaymentListInternalReq) (res *PaymentListInternalRes, err error) {
-	var mainList []*entity.Payment
+func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*ro.PaymentDetailRo, err error) {
+	var mainList []*ro.PaymentDetailRo
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -31,9 +38,9 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (res *Payment
 	}
 
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "gmt_modify desc"
+	var sortKey = "create_time desc"
 	if len(req.SortField) > 0 {
-		utility.Assert(strings.Contains("merchant_id|user_id|gmt_create|status", req.SortField), "sortField should one of merchant_id|user_id|gmt_create|status")
+		utility.Assert(strings.Contains("user_id|create_time|status", req.SortField), "sortField should one of user_id|create_time|status")
 		if len(req.SortType) > 0 {
 			utility.Assert(strings.Contains("asc|desc", req.SortType), "sortType should one of asc|desc")
 			sortKey = req.SortField + " " + req.SortType
@@ -41,15 +48,44 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (res *Payment
 			sortKey = req.SortField + " desc"
 		}
 	}
-	err = dao.Payment.Ctx(ctx).
-		Where(dao.Payment.Columns().MerchantId, req.MerchantId).
-		Where(dao.Payment.Columns().UserId, req.UserId).
+	query := dao.Payment.Ctx(ctx).
+		Where(dao.Payment.Columns().MerchantId, req.MerchantId)
+	if req.GatewayId > 0 {
+		query = query.Where(dao.Payment.Columns().GatewayId, req.GatewayId)
+	}
+	if req.UserId > 0 {
+		query = query.Where(dao.Payment.Columns().UserId, req.UserId)
+	} else if len(req.Email) > 0 {
+		user := query2.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+		if user != nil {
+			query = query.Where(dao.Payment.Columns().UserId, user.Id)
+		} else {
+			return mainList, nil
+		}
+	}
+	if req.Status > 0 {
+		query = query.Where(dao.Payment.Columns().Status, req.Status)
+	}
+	if len(req.Currency) > 0 {
+		query = query.Where(dao.Payment.Columns().Currency, strings.ToUpper(req.Currency))
+	}
+	if len(req.CountryCode) > 0 {
+		query = query.Where(dao.Payment.Columns().CountryCode, req.CountryCode)
+	}
+	var list []*entity.Payment
+	err = query.
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().Scan(&list)
 	if err != nil {
 		return nil, err
 	}
+	for _, one := range list {
+		mainList = append(mainList, &ro.PaymentDetailRo{
+			User:    ro.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
+			Payment: ro.SimplifyPayment(one),
+		})
+	}
 
-	return &PaymentListInternalRes{Payments: mainList}, nil
+	return mainList, nil
 }

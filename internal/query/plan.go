@@ -13,7 +13,7 @@ func GetPlanById(ctx context.Context, id uint64) (one *entity.Plan) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.Plan.Ctx(ctx).Where(entity.Plan{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, id).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -25,7 +25,7 @@ func GetPlanBindingAddonsByPlanId(ctx context.Context, id uint64) (list []*entit
 		return nil
 	}
 	var one *entity.Plan
-	err := dao.Plan.Ctx(ctx).Where(entity.Plan{Id: id}).OmitEmpty().Scan(&one)
+	err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, id).OmitEmpty().Scan(&one)
 	if err != nil && one == nil {
 		return nil
 	}

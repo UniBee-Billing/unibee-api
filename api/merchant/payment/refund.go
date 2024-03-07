@@ -2,6 +2,7 @@ package payment
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/internal/logic/gateway/ro"
 )
 
 type NewPaymentRefundReq struct {
@@ -25,16 +26,18 @@ type RefundDetailReq struct {
 }
 
 type RefundDetailRes struct {
+	RefundDetail *ro.RefundDetailRo `json:"refundDetail" dc:"RefundDetail"`
 }
 
 type RefundListReq struct {
-	g.Meta         `path:"/refund/list" tags:"Payment" method:"get" summary:"Query Payment Refund List"`
-	PaymentId      string `json:"paymentId" dc:"PaymentId" v:"required"`
-	Status         int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`
-	GatewayId      uint64 `json:"gatewayId"   dc:"GatewayId"`
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
-	Email          string `json:"email" dc:"Email"`
-	Currency       string `json:"currency" dc:"Currency"`
+	g.Meta    `path:"/refund/list" tags:"Payment" method:"get" summary:"Query Payment Refund List"`
+	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
+	Status    int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`
+	GatewayId uint64 `json:"gatewayId"   dc:"GatewayId"`
+	UserId    int64  `json:"userId" dc:"UserId"`
+	Email     string `json:"email" dc:"Email"`
+	Currency  string `json:"currency" dc:"Currency"`
 }
 type RefundListRes struct {
+	RefundDetails []*ro.RefundDetailRo `json:"refundDetails" dc:"RefundDetails"`
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/gorilla/websocket"
 	"time"
-	"unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -45,7 +44,7 @@ func MerchantWebSocketMessageEntry(r *ghttp.Request) {
 		var one *entity.MerchantWebhookMessage
 		err := dao.MerchantWebhookMessage.Ctx(r.Context()).
 			Where(dao.MerchantWebhookMessage.Columns().MerchantId, merchant.Id).
-			Where(dao.MerchantWebhookMessage.Columns().WebhookEvent, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED).
+			//Where(dao.MerchantWebhookMessage.Columns().WebhookEvent, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED).
 			Where(dao.MerchantWebhookMessage.Columns().WebsocketStatus, 10).
 			WhereNotNull(dao.MerchantWebhookMessage.Columns().Data).
 			OrderAsc(dao.MerchantWebhookMessage.Columns().CreateTime).

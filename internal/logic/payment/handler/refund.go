@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -45,8 +46,8 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
-	pay := query.GetPaymentByPaymentId(ctx, one.RefundId)
-	if pay == nil {
+	payment := query.GetPaymentByPaymentId(ctx, one.RefundId)
+	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, refundId=%s", one.RefundId)
 		return gerror.New("payment not found")
 	}
@@ -74,14 +75,15 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
+		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundFailureCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
-			BizId:     pay.PaymentId,
+			BizId:     payment.PaymentId,
 			Fee:       one.RefundAmount,
 			EventType: event.RefundFailed.Type,
 			Event:     event.RefundFailed.Desc,
 			OpenApiId: one.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundFailed", one.RefundId),
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "RefundFailed", one.RefundId),
 			Message:   req.Reason,
 		})
 		err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
@@ -110,8 +112,8 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "refund already success")
 		return nil
 	}
-	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	if pay == nil {
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("payment not found")
 	}
@@ -147,7 +149,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				return err
 			}
 			//支付单补充退款金额
-			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND total_amount - refund_amount >= ?", one.RefundAmount, pay.Id, one.RefundAmount, one.RefundAmount)
+			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND total_amount - refund_amount >= ?", one.RefundAmount, payment.Id, one.RefundAmount, one.RefundAmount)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
 				return err
@@ -169,14 +171,15 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
+		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundSuccessCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
-			BizId:     pay.PaymentId,
+			BizId:     payment.PaymentId,
 			Fee:       one.RefundAmount,
 			EventType: event.Refunded.Type,
 			Event:     event.Refunded.Desc,
 			OpenApiId: one.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%d_%s_%s", pay.Status, "Refunded", one.RefundId),
+			UniqueNo:  fmt.Sprintf("%d_%s_%s", payment.Status, "Refunded", one.RefundId),
 			Message:   req.Reason,
 		})
 
@@ -213,20 +216,21 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 		g.Log().Infof(ctx, "Refund is success or failure")
 		return nil
 	}
-	pay := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	if pay == nil {
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("payment not found")
 	}
+	callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundReverseCallback(ctx, payment, one)
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,
-		BizId:     pay.PaymentId,
+		BizId:     payment.PaymentId,
 		Fee:       one.RefundAmount,
 		EventType: event.RefundedReversed.Type,
 		Event:     event.RefundedReversed.Desc,
 		OpenApiId: one.OpenApiId,
-		UniqueNo:  fmt.Sprintf("%s_%s_%s", pay.PaymentId, "RefundedReversed", one.RefundId),
+		UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "RefundedReversed", one.RefundId),
 		Message:   req.Reason,
 	})
 	err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)

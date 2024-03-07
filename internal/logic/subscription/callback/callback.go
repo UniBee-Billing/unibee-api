@@ -20,6 +20,26 @@ import (
 type SubscriptionPaymentCallback struct {
 }
 
+func (s SubscriptionPaymentCallback) PaymentRefundCreateCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s SubscriptionPaymentCallback) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s SubscriptionPaymentCallback) PaymentRefundFailureCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s SubscriptionPaymentCallback) PaymentRefundReverseCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
 	if consts.ProrationUsingUniBeeCompute {
 		if payment.BizType == consts.BizTypeSubscription {
