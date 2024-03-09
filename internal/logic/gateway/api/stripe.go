@@ -346,7 +346,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 					UnitAmount: stripe.Int64(line.Amount),
 				},
 				Quantity: stripe.Int64(1),
-				//TaxRates: []*string{stripe.String(gatewayVatRate.ChannelVatRateId)}, // not apply tax
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{

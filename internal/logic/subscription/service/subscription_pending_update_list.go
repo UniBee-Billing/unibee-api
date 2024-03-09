@@ -44,7 +44,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 	}
 	var metadata = make(map[string]string)
 	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &one)
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId Unmarshal Metadata error:%s", err.Error())
 		}
@@ -118,7 +118,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 	for _, one := range mainList {
 		var metadata = make(map[string]string)
 		if len(one.MetaData) > 0 {
-			err := gjson.Unmarshal([]byte(one.MetaData), &one)
+			err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 			if err != nil {
 				fmt.Printf("SubscriptionPendingUpdateList Unmarshal Metadata error:%s", err.Error())
 			}

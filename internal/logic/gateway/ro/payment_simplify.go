@@ -41,7 +41,7 @@ func SimplifyPayment(one *entity.Payment) *PaymentSimplify {
 	}
 	var metadata = make(map[string]string)
 	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &one)
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("SimplifyPayment Unmarshal Metadata error:%s", err.Error())
 		}
