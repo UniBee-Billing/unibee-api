@@ -12,6 +12,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/currency"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -52,6 +53,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(len(req.Description) > 0, "description should not blank")
+	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
 
 	//check metricLimitList
 	if len(req.MetricLimits) > 0 {
@@ -142,17 +144,13 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 }
 
 func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Plan, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-	}
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(len(req.Description) > 0, "description should not blank")
+	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
 	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 	if strings.ToLower(req.IntervalUnit) == "day" {

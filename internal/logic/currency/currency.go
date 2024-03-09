@@ -1,6 +1,9 @@
 package currency
 
-import "unibee/internal/logic/gateway/ro"
+import (
+	"strings"
+	"unibee/internal/logic/gateway/ro"
+)
 
 func GetMerchantCurrencies() []*ro.Currency {
 	var supportCurrency []*ro.Currency
@@ -20,4 +23,19 @@ func GetMerchantCurrencies() []*ro.Currency {
 		Scale:    1,
 	})
 	return supportCurrency
+}
+
+func GetMerchantCurrencyMap() map[string]*ro.Currency {
+	var currencyMap = make(map[string]*ro.Currency)
+	for _, currency := range GetMerchantCurrencies() {
+		currencyMap[currency.Currency] = currency
+	}
+	return currencyMap
+}
+
+func IsCurrencySupport(currency string) bool {
+	if len(currency) == 0 {
+		return false
+	}
+	return GetMerchantCurrencyMap()[strings.ToUpper(currency)] != nil
 }

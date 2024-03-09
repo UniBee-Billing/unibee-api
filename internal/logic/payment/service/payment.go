@@ -12,6 +12,7 @@ import (
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/handler"
@@ -34,7 +35,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
-	// 查询并处理所有待支付订单 todo mark
+	utility.Assert(currency.IsCurrencySupport(createPayContext.Pay.Currency), "currency not support")
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()

@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"strings"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
@@ -25,6 +26,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId is nil")
 	utility.Assert(len(req.Email) > 0, "Email is nil")
+	req.Currency = strings.ToUpper(req.Currency)
 
 	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
