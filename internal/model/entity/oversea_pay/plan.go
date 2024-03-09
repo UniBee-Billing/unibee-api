@@ -34,4 +34,5 @@ type Plan struct {
 	PublishStatus             int         `json:"publishStatus"             description:"1-UnPublish,2-Publish, Use For Display Plan At UserPortal"` // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                int64       `json:"createTime"                description:"create utc time"`                                           // create utc time
 	ExtraMetricData           string      `json:"extraMetricData"           description:""`                                                          //
+	MetaData                  string      `json:"metaData"                  description:"meta_data(json)"`                                           // meta_data(json)
 }

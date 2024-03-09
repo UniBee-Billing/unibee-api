@@ -122,6 +122,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
 		CreateTime:                gtime.Now().Timestamp(),
+		MetaData:                  utility.MarshalToJsonString(req.Metadata),
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -213,6 +214,11 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
+	}
+	if req.Metadata != nil {
+		_, _ = dao.Plan.Ctx(ctx).Data(g.Map{
+			dao.Plan.Columns().MetaData: utility.MarshalToJsonString(req.Metadata),
+		}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	}
 
 	one.PlanName = req.PlanName

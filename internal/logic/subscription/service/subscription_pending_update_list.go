@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -40,6 +42,13 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 	if one == nil {
 		return nil
 	}
+	var metadata = make(map[string]string)
+	if len(one.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(one.MetaData), &one)
+		if err != nil {
+			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId Unmarshal Metadata error:%s", err.Error())
+		}
+	}
 	return &ro.SubscriptionPendingUpdateDetailVo{
 		MerchantId:           one.MerchantId,
 		SubscriptionId:       one.SubscriptionId,
@@ -70,6 +79,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 		UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+		Metadata:             metadata,
 	}
 }
 
@@ -106,6 +116,13 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 
 	var updateList []*ro.SubscriptionPendingUpdateDetailVo
 	for _, one := range mainList {
+		var metadata = make(map[string]string)
+		if len(one.MetaData) > 0 {
+			err := gjson.Unmarshal([]byte(one.MetaData), &one)
+			if err != nil {
+				fmt.Printf("SubscriptionPendingUpdateList Unmarshal Metadata error:%s", err.Error())
+			}
+		}
 		updateList = append(updateList, &ro.SubscriptionPendingUpdateDetailVo{
 			MerchantId:           one.MerchantId,
 			SubscriptionId:       one.SubscriptionId,
@@ -136,6 +153,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+			Metadata:             metadata,
 		})
 	}
 

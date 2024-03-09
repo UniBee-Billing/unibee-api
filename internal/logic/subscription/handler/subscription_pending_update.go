@@ -68,6 +68,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId:        "", //clear PendingUpdateId
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
+		dao.Subscription.Columns().MetaData:               one.MetaData,
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return false, err

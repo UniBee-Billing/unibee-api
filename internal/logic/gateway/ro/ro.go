@@ -343,6 +343,7 @@ type SubscriptionPendingUpdateDetailVo struct {
 	Addons               []*PlanAddonVo          `json:"addons" dc:"Addons"`
 	UpdatePlan           *PlanSimplify           `json:"updatePlan" dc:"UpdatePlan"`
 	UpdateAddons         []*PlanAddonVo          `json:"updateAddons" dc:"UpdateAddons"`
+	Metadata             map[string]string       `json:"metadata" description:""`
 }
 
 type ValidResult struct {

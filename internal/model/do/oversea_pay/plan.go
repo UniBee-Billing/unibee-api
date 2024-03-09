@@ -36,4 +36,5 @@ type Plan struct {
 	PublishStatus             interface{} // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                interface{} // create utc time
 	ExtraMetricData           interface{} //
+	MetaData                  interface{} // meta_data(json)
 }

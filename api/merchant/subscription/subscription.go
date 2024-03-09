@@ -103,6 +103,7 @@ type UpdateReq struct {
 	ConfirmTotalAmount  int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency     string                             `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ProrationDate       int64                              `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
+	Metadata            map[string]string                  `json:"metadata" dc:"Metadata，Map" v:""`
 }
 
 type UpdateRes struct {

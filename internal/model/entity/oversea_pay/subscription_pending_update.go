@@ -44,4 +44,5 @@ type SubscriptionPendingUpdate struct {
 	Note                 string      `json:"note"                 description:"note"`                                                                      // note
 	ProrationDate        int64       `json:"prorationDate"        description:"merchant_user_id"`                                                          // merchant_user_id
 	CreateTime           int64       `json:"createTime"           description:"create utc time"`                                                           // create utc time
+	MetaData             string      `json:"metaData"             description:"meta_data(json)"`                                                           // meta_data(json)
 }

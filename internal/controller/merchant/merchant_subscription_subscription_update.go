@@ -29,6 +29,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		ConfirmTotalAmount:  req.ConfirmTotalAmount,
 		ConfirmCurrency:     req.ConfirmCurrency,
 		ProrationDate:       req.ProrationDate,
+		Metadata:            req.Metadata,
 	}, merchantMemberId)
 	if err != nil {
 		return nil, err

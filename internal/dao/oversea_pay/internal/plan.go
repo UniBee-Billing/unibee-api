@@ -44,6 +44,7 @@ type PlanColumns struct {
 	PublishStatus             string // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                string // create utc time
 	ExtraMetricData           string //
+	MetaData                  string // meta_data(json)
 }
 
 // planColumns holds the columns for table plan.
@@ -72,6 +73,7 @@ var planColumns = PlanColumns{
 	PublishStatus:             "publish_status",
 	CreateTime:                "create_time",
 	ExtraMetricData:           "extra_metric_data",
+	MetaData:                  "meta_data",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.

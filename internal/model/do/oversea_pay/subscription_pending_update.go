@@ -46,4 +46,5 @@ type SubscriptionPendingUpdate struct {
 	Note                 interface{} // note
 	ProrationDate        interface{} // merchant_user_id
 	CreateTime           interface{} // create utc time
+	MetaData             interface{} // meta_data(json)
 }

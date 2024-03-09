@@ -20,6 +20,7 @@ type NewReq struct {
 	HomeUrl            string                                `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                               `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
 	MetricLimits       []*ro.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	Metadata           map[string]string                     `json:"metadata" dc:"Metadata，Map" v:""`
 }
 type NewRes struct {
 	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
@@ -40,6 +41,7 @@ type EditReq struct {
 	HomeUrl            string                                `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                               `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
 	MetricLimits       []*ro.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	Metadata           map[string]string                     `json:"metadata" dc:"Metadata，Map" v:""`
 }
 type EditRes struct {
 	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`

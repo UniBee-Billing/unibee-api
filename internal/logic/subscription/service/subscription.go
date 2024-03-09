@@ -269,6 +269,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		BillingCycleAnchor:          prepare.Invoice.PeriodStart,
 		GatewayDefaultPaymentMethod: req.PaymentMethodId,
 		CreateTime:                  gtime.Now().Timestamp(),
+		MetaData:                    utility.MarshalToJsonString(req.Metadata),
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -693,6 +694,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		EffectImmediate:      effectImmediate,
 		EffectTime:           effectTime,
 		CreateTime:           gtime.Now().Timestamp(),
+		MetaData:             utility.MarshalToJsonString(req.Metadata),
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -768,6 +770,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		dao.SubscriptionPendingUpdate.Columns().Link:         subUpdateRes.Link,
 		dao.SubscriptionPendingUpdate.Columns().InvoiceId:    subUpdateRes.GatewayUpdateId,
 		dao.SubscriptionPendingUpdate.Columns().Note:         note,
+		dao.SubscriptionPendingUpdate.Columns().MetaData:     utility.MarshalToJsonString(req.Metadata),
 	}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, one.UpdateSubscriptionId).OmitNil().Update()
 	if err != nil {
 		return nil, err

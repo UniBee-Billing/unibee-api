@@ -56,4 +56,5 @@ type Subscription struct {
 	PendingUpdateId             string      `json:"pendingUpdateId"             description:""`                                                                                                                                                               //
 	CreateTime                  int64       `json:"createTime"                  description:"create utc time"`                                                                                                                                                // create utc time
 	TestClock                   int64       `json:"testClock"                   description:"test_clock, simulator clock for subscription, if set , sub will out of cronjob controll"`                                                                        // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
+	MetaData                    string      `json:"metaData"                    description:"meta_data(json)"`                                                                                                                                                // meta_data(json)
 }
