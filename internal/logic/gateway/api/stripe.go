@@ -339,7 +339,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		for _, line := range createPayContext.Invoice.Lines {
 			items = append(items, &stripe.CheckoutSessionLineItemParams{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-					Currency: stripe.String(strings.ToLower(line.Currency)),
+					Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
 						Name: stripe.String(fmt.Sprintf("%s", line.Description)),
 					},

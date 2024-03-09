@@ -19,20 +19,24 @@ type NewReq struct {
 	Items             []*Item           `json:"lineItems" dc:"Items"`
 	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
+
 type NewRes struct {
 	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
 	PaymentId         string      `json:"paymentId" dc:"PaymentId"`
 	ExternalPaymentId string      `json:"externalPaymentId" dc:"ExternalPaymentId"`
+	Link              string      `json:"link"`
 	Action            *gjson.Json `json:"action" dc:"action"`
 }
 
 type Item struct {
-	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax" dc:"UnitAmountExcludingTax" v:"required"`
-	Quantity               int64  `json:"quantity" dc:"Quantity" v:"required"`
-	Description            string `json:"description" dc:"Description" v:""`
-	TaxScale               int64  `json:"taxScale" dc:"TaxScale" v:"required"`
-	ProductUrl             string `json:"productUrl" dc:"ProductUrl"`
-	ImageUrl               string `json:"imageUrl" dc:"ImageUrl"`
+	Currency               string `json:"currency"`
+	Amount                 int64  `json:"amount" dc:"the item total amount,cent"`
+	Tax                    int64  `json:"tax"`
+	AmountExcludingTax     int64  `json:"amountExcludingTax"`
+	TaxScale               int64  `json:"taxScale" dc:"Tax Scale，1000 = 10%"`
+	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
+	Description            string `json:"description"`
+	Quantity               int64  `json:"quantity"`
 }
 
 type DetailReq struct {

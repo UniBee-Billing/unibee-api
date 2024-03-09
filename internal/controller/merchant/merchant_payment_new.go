@@ -25,7 +25,6 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId is nil")
 	utility.Assert(len(req.Email) > 0, "Email is nil")
-	//utility.Assert(req.Items != nil, "lineItems is nil")
 
 	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
@@ -38,33 +37,47 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		var totalAmountExcludingTax int64 = 0
 		var totalTax int64 = 0
 		for _, line := range req.Items {
-			amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
-			tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(line.TaxScale))
+			utility.Assert(line.Amount > 0, "Item Amount invalid, should > 0")
+			utility.Assert(len(line.Description) > 0, "Item Description invalid")
 			invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
-				Currency:               req.Currency,
+				Currency:               line.Currency,
 				TaxScale:               line.TaxScale,
-				Tax:                    tax,
-				Amount:                 amountExcludingTax + tax,
-				AmountExcludingTax:     amountExcludingTax,
+				Tax:                    line.Tax,
+				Amount:                 line.Amount,
+				AmountExcludingTax:     line.AmountExcludingTax,
 				UnitAmountExcludingTax: line.UnitAmountExcludingTax,
 				Description:            line.Description,
 				Quantity:               line.Quantity,
 			})
-			totalTax = totalTax + tax
-			totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
+			totalTax = totalTax + line.Tax
+			totalAmountExcludingTax = totalAmountExcludingTax + (line.Amount - line.Tax)
 		}
 		var totalAmount = totalTax + totalAmountExcludingTax
+		utility.Assert(totalAmount == req.TotalAmount, "sum(items.amount) should match totalAmount")
 		invoice = &ro.InvoiceDetailSimplify{
-			TotalAmount:                    totalAmount,
-			TotalAmountExcludingTax:        totalAmountExcludingTax,
-			Currency:                       req.Currency,
-			TaxAmount:                      totalTax,
-			SubscriptionAmount:             totalAmount,
-			SubscriptionAmountExcludingTax: totalAmountExcludingTax,
-			Lines:                          invoiceItems,
+			TotalAmount:             req.TotalAmount,
+			Currency:                req.Currency,
+			TotalAmountExcludingTax: totalAmountExcludingTax,
+			TaxAmount:               totalTax,
+			Lines:                   invoiceItems,
 		}
-
-		utility.Assert(totalAmount == req.TotalAmount, "totalAmount not match")
+	} else {
+		invoice = &ro.InvoiceDetailSimplify{
+			TotalAmount:             req.TotalAmount,
+			TotalAmountExcludingTax: req.TotalAmount,
+			Currency:                req.Currency,
+			TaxAmount:               0,
+			Lines: []*ro.InvoiceItemDetailRo{{
+				Currency:               req.Currency,
+				Amount:                 req.TotalAmount,
+				Tax:                    0,
+				AmountExcludingTax:     req.TotalAmount,
+				TaxScale:               0,
+				UnitAmountExcludingTax: req.TotalAmount,
+				Description:            merchantInfo.Name,
+				Quantity:               1,
+			}},
+		}
 	}
 	user, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
 		ExternalUserId: req.ExternalUserId,
@@ -100,6 +113,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		Status:            consts.PaymentCreated,
 		PaymentId:         resp.PaymentId,
 		ExternalPaymentId: req.ExternalPaymentId,
+		Link:              resp.Link,
 		Action:            resp.Action,
 	}
 	return

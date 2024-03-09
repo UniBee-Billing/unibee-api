@@ -155,8 +155,8 @@ type GatewayRedirectInternalResp struct {
 type InvoiceItemDetailRo struct {
 	Currency               string `json:"currency"`
 	Amount                 int64  `json:"amount"`
-	AmountExcludingTax     int64  `json:"amountExcludingTax"`
 	Tax                    int64  `json:"tax"`
+	AmountExcludingTax     int64  `json:"amountExcludingTax"`
 	TaxScale               int64  `json:"taxScale"                  description:"Tax Scale，1000 = 10%"`
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
 	Description            string `json:"description"`
