@@ -56,8 +56,8 @@ type PaymentColumns struct {
 	Verify                 string // codeVerify
 	Code                   string //
 	Token                  string //
-	AdditionalData         string // addtional data (json)
-	Automatic              string //
+	MetaData               string // meta_data (json)
+	Automatic              string // 0-no,1-yes
 	FailureReason          string //
 	BillingReason          string //
 	Link                   string //
@@ -107,7 +107,7 @@ var paymentColumns = PaymentColumns{
 	Verify:                 "verify",
 	Code:                   "code",
 	Token:                  "token",
-	AdditionalData:         "additional_data",
+	MetaData:               "meta_data",
 	Automatic:              "automatic",
 	FailureReason:          "failure_reason",
 	BillingReason:          "billing_reason",

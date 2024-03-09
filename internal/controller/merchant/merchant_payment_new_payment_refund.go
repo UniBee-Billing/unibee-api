@@ -22,6 +22,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 		RefundAmount:     req.RefundAmount,
 		Currency:         req.Currency,
 		Reason:           req.Reason,
+		Metadata:         req.Metadata,
 	})
 	if err != nil {
 		return nil, err

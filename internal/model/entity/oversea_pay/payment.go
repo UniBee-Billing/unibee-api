@@ -46,8 +46,8 @@ type Payment struct {
 	Verify                 string      `json:"verify"                 description:"codeVerify"`                                                             // codeVerify
 	Code                   string      `json:"code"                   description:""`                                                                       //
 	Token                  string      `json:"token"                  description:""`                                                                       //
-	AdditionalData         string      `json:"additionalData"         description:"addtional data (json)"`                                                  // addtional data (json)
-	Automatic              int         `json:"automatic"              description:""`                                                                       //
+	MetaData               string      `json:"metaData"               description:"meta_data (json)"`                                                       // meta_data (json)
+	Automatic              int         `json:"automatic"              description:"0-no,1-yes"`                                                             // 0-no,1-yes
 	FailureReason          string      `json:"failureReason"          description:""`                                                                       //
 	BillingReason          string      `json:"billingReason"          description:""`                                                                       //
 	Link                   string      `json:"link"                   description:""`                                                                       //

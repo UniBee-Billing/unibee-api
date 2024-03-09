@@ -42,7 +42,7 @@ type RefundColumns struct {
 	AppId                string // app id
 	RefundCommentExplain string // refund comment
 	ReturnUrl            string // return url after refund success
-	AdditionalData       string //
+	MetaData             string // meta_data(json)
 	UniqueId             string // unique id
 	SubscriptionId       string // subscription id
 	CreateTime           string // create utc time
@@ -72,7 +72,7 @@ var refundColumns = RefundColumns{
 	AppId:                "app_id",
 	RefundCommentExplain: "refund_comment_explain",
 	ReturnUrl:            "return_url",
-	AdditionalData:       "additional_data",
+	MetaData:             "meta_data",
 	UniqueId:             "unique_id",
 	SubscriptionId:       "subscription_id",
 	CreateTime:           "create_time",

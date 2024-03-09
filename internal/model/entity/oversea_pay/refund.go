@@ -32,7 +32,7 @@ type Refund struct {
 	AppId                string      `json:"appId"                description:"app id"`                                             // app id
 	RefundCommentExplain string      `json:"refundCommentExplain" description:"refund comment"`                                     // refund comment
 	ReturnUrl            string      `json:"returnUrl"            description:"return url after refund success"`                    // return url after refund success
-	AdditionalData       string      `json:"additionalData"       description:""`                                                   //
+	MetaData             string      `json:"metaData"             description:"meta_data(json)"`                                    // meta_data(json)
 	UniqueId             string      `json:"uniqueId"             description:"unique id"`                                          // unique id
 	SubscriptionId       string      `json:"subscriptionId"       description:"subscription id"`                                    // subscription id
 	CreateTime           int64       `json:"createTime"           description:"create utc time"`                                    // create utc time

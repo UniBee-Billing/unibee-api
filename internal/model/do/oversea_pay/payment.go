@@ -48,8 +48,8 @@ type Payment struct {
 	Verify                 interface{} // codeVerify
 	Code                   interface{} //
 	Token                  interface{} //
-	AdditionalData         interface{} // addtional data (json)
-	Automatic              interface{} //
+	MetaData               interface{} // meta_data (json)
+	Automatic              interface{} // 0-no,1-yes
 	FailureReason          interface{} //
 	BillingReason          interface{} //
 	Link                   interface{} //

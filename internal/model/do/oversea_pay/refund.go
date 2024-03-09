@@ -34,7 +34,7 @@ type Refund struct {
 	AppId                interface{} // app id
 	RefundCommentExplain interface{} // refund comment
 	ReturnUrl            interface{} // return url after refund success
-	AdditionalData       interface{} //
+	MetaData             interface{} // meta_data(json)
 	UniqueId             interface{} // unique id
 	SubscriptionId       interface{} // subscription id
 	CreateTime           interface{} // create utc time

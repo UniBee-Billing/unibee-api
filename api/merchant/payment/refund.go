@@ -7,11 +7,12 @@ import (
 
 type NewPaymentRefundReq struct {
 	g.Meta           `path:"/refund/new" tags:"Payment" method:"post" summary:"New Payment Refund"`
-	PaymentId        string `json:"paymentId" dc:"PaymentId" v:"required"`
-	ExternalRefundId string `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
-	RefundAmount     int64  `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
-	Currency         string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
-	Reason           string `json:"reason" dc:"Reason"`
+	PaymentId        string            `json:"paymentId" dc:"PaymentId" v:"required"`
+	ExternalRefundId string            `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
+	RefundAmount     int64             `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
+	Currency         string            `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Reason           string            `json:"reason" dc:"Reason"`
+	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map" v:""`
 }
 type NewPaymentRefundRes struct {
 	Status           int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`

@@ -42,7 +42,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	if createPayContext.MetaData == nil {
 		createPayContext.MetaData = make(map[string]string)
 	}
-	createPayContext.MetaData["BizType"] = strconv.Itoa(createPayContext.Pay.BizType)
 	createPayContext.MetaData["PaymentId"] = createPayContext.Pay.PaymentId
 	createPayContext.MetaData["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-externalPaymentId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.ExternalPaymentId)

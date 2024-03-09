@@ -21,11 +21,12 @@ import (
 )
 
 type NewPaymentRefundInternalReq struct {
-	PaymentId        string `json:"path" dc:"PaymentId" v:"required"`
-	ExternalRefundId string `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
-	RefundAmount     int64  `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
-	Currency         string `json:"currency"   in:"query" dc:"Currency"  v:"required"`
-	Reason           string `json:"reason" dc:"Reason"`
+	PaymentId        string            `json:"path" dc:"PaymentId" v:"required"`
+	ExternalRefundId string            `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
+	RefundAmount     int64             `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
+	Currency         string            `json:"currency"   in:"query" dc:"Currency"  v:"required"`
+	Reason           string            `json:"reason" dc:"Reason"`
+	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map" v:""`
 }
 
 func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {

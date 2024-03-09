@@ -17,7 +17,7 @@ type NewReq struct {
 	CountryCode       string            `json:"countryCode" dc:"CountryCode" v:"required"`
 	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	Items             []*Item           `json:"lineItems" dc:"Items"`
-	Metadata          map[string]string `json:"reference" dc:"Metadata，Map" v:""`
+	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map" v:""`
 }
 type NewRes struct {
 	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
