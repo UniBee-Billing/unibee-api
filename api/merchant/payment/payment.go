@@ -29,14 +29,14 @@ type NewRes struct {
 }
 
 type Item struct {
-	Currency               string `json:"currency"`
-	Amount                 int64  `json:"amount" dc:"the item total amount,cent"`
-	Tax                    int64  `json:"tax"`
-	AmountExcludingTax     int64  `json:"amountExcludingTax"`
-	TaxScale               int64  `json:"taxScale" dc:"Tax Scale，1000 = 10%"`
-	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
-	Description            string `json:"description"`
+	Amount                 int64  `json:"amount" dc:"item total amount, sum(item.amount) should equal to totalAmount, cent"  v:"required"`
+	Description            string `json:"description" dc:"item description " v:"required" `
 	Quantity               int64  `json:"quantity"`
+	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
+	Currency               string `json:"currency"`
+	Tax                    int64  `json:"tax" dc:"tax = amount - amountExcludingTax"`
+	AmountExcludingTax     int64  `json:"amountExcludingTax" dc:"amountExcludingTax = unitAmountExcludingTax * quantity"`
+	TaxScale               int64  `json:"taxScale" dc:"Tax Scale，1000 = 10%"`
 }
 
 type DetailReq struct {
