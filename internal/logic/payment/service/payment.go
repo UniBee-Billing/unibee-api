@@ -39,11 +39,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
-	if createPayContext.MetaData == nil {
-		createPayContext.MetaData = make(map[string]string)
+	if createPayContext.Metadata == nil {
+		createPayContext.Metadata = make(map[string]string)
 	}
-	createPayContext.MetaData["PaymentId"] = createPayContext.Pay.PaymentId
-	createPayContext.MetaData["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
+	createPayContext.Metadata["PaymentId"] = createPayContext.Pay.PaymentId
+	createPayContext.Metadata["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
+	createPayContext.Pay.MetaData = utility.MarshalToJsonString(createPayContext.Metadata)
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-externalPaymentId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.ExternalPaymentId)
 	isDuplicatedInvoke := false
 
@@ -192,7 +193,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		ExternalUserId:       strconv.FormatInt(sub.UserId, 10),
 		Email:                email,
 		Invoice:              invoice_compute.ConvertInvoiceToSimplify(invoice),
-		MetaData:             map[string]string{"BillingReason": invoice.InvoiceName},
+		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 }

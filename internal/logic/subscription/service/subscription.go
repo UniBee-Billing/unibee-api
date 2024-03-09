@@ -317,7 +317,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			ExternalUserId: strconv.FormatInt(one.UserId, 10),
 			Email:          prepare.Email,
 			Invoice:        invoice_compute.ConvertInvoiceToSimplify(invoice),
-			MetaData:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
+			Metadata:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
 		})
 		if err != nil {
 			return nil, err

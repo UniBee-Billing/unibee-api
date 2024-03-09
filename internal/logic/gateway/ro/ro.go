@@ -13,7 +13,7 @@ type NewPaymentInternalReq struct {
 	Gateway              *entity.MerchantGateway `json:"gateway"`
 	ExternalUserId       string                  `json:"externalUserId"`
 	Email                string                  `json:"email"`
-	MetaData             map[string]string       `json:"metaData"`
+	Metadata             map[string]string       `json:"metadata"`
 	Invoice              *InvoiceDetailSimplify  `json:"invoice"`
 	DaysUtilDue          int                     `json:"daysUtilDue"`
 	GatewayPaymentMethod string                  `json:"gatewayPaymentMethod"`

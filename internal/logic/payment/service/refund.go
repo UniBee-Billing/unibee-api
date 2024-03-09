@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"strings"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
@@ -69,13 +70,21 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
+	if req.Metadata == nil {
+		req.Metadata = make(map[string]string)
+	}
+	refundId := utility.CreateRefundId()
+	req.Metadata["PaymentId"] = payment.PaymentId
+	req.Metadata["RefundId"] = refundId
+	req.Metadata["MerchantId"] = strconv.FormatUint(payment.MerchantId, 10)
+
 	one = &entity.Refund{
 		CompanyId:        payment.CompanyId,
 		MerchantId:       payment.MerchantId,
 		ExternalRefundId: req.ExternalRefundId,
 		BizType:          bizType,
 		PaymentId:        payment.PaymentId,
-		RefundId:         utility.CreateRefundId(),
+		RefundId:         refundId,
 		RefundAmount:     req.RefundAmount,
 		Status:           consts.RefundIng,
 		GatewayId:        payment.GatewayId,
@@ -84,9 +93,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 		CountryCode:      payment.CountryCode,
 		RefundComment:    req.Reason,
 		UserId:           payment.UserId,
-		//AdditionalData: req.
-		//RefundComment: payBizTypeEnum.getDesc() +"退款",
-
+		MetaData:         utility.MarshalToJsonString(req.Metadata),
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {

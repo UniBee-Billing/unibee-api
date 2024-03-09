@@ -63,7 +63,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 				ExternalUserId: strconv.FormatInt(one.UserId, 10),
 				Email:          user.Email,
 				Invoice:        invoice_compute.ConvertInvoiceToSimplify(one),
-				MetaData:       map[string]string{"BillingReason": one.InvoiceName},
+				Metadata:       map[string]string{"BillingReason": one.InvoiceName},
 			}
 
 			createRes, err := service.GatewayPaymentCreate(r.Context(), createPayContext)

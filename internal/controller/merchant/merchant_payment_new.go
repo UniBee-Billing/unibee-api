@@ -90,7 +90,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		},
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
-		MetaData:       req.Metadata,
+		Metadata:       req.Metadata,
 		Invoice:        invoice,
 	}
 
