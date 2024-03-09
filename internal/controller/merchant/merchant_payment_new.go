@@ -25,7 +25,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId is nil")
 	utility.Assert(len(req.Email) > 0, "Email is nil")
-	utility.Assert(req.Items != nil, "lineItems is nil")
+	//utility.Assert(req.Items != nil, "lineItems is nil")
 
 	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
