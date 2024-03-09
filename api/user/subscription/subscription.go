@@ -68,7 +68,7 @@ type CreateReq struct {
 	VatCountryCode     string                             `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                             `json:"vatNumber" dc:"VatNumber" `
 	PaymentMethodId    string                             `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata           map[string]string                  `json:"metadata" dc:"Metadata，Map" v:""`
+	Metadata           map[string]string                  `json:"metadata" dc:"Metadata，Map"`
 }
 type CreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"Subscription"`
@@ -102,7 +102,7 @@ type UpdateReq struct {
 	ConfirmCurrency     string                             `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ProrationDate       int64                              `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
 	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata            map[string]string                  `json:"metadata" dc:"Metadata，Map" v:""`
+	Metadata            map[string]string                  `json:"metadata" dc:"Metadata，Map"`
 }
 type UpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`

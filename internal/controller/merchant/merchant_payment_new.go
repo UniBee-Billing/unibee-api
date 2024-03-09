@@ -20,7 +20,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(req.TotalAmount > 0, "amount value is nil")
 	utility.Assert(len(req.Currency) > 0, "amount currency is nil")
 	currencyNumberCheck(req.TotalAmount, req.Currency)
-	utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
+	//utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.GatewayId > 0, "gatewayId is nil")
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId is nil")

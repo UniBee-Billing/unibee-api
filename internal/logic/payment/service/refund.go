@@ -27,7 +27,7 @@ type NewPaymentRefundInternalReq struct {
 	RefundAmount     int64             `json:"refundAmount"   in:"query" dc:"RefundAmount, Cent" v:"required"`
 	Currency         string            `json:"currency"   in:"query" dc:"Currency"  v:"required"`
 	Reason           string            `json:"reason" dc:"Reason"`
-	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map" v:""`
+	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 
 func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {

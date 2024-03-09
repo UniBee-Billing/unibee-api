@@ -13,11 +13,11 @@ type NewReq struct {
 	Email             string            `json:"email" dc:"Email" v:"required"`
 	Currency          string            `json:"currency" dc:"Currency"  v:"required"`
 	TotalAmount       int64             `json:"totalAmount" dc:"Total PaymentAmount, Cent" v:"required"`
-	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url" v:"required"`
-	CountryCode       string            `json:"countryCode" dc:"CountryCode" v:"required"`
 	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url"`
+	CountryCode       string            `json:"countryCode" dc:"CountryCode"`
 	Items             []*Item           `json:"lineItems" dc:"Items"`
-	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map" v:""`
+	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 type NewRes struct {
 	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
