@@ -16,7 +16,7 @@ type NewReq struct {
 	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url"`
 	CountryCode       string            `json:"countryCode" dc:"CountryCode"`
-	Items             []*Item           `json:"lineItems" dc:"Items"`
+	Items             []*Item           `json:"items" dc:"Items"`
 	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 
