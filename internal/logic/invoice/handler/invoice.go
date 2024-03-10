@@ -41,7 +41,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if err != nil {
 		return nil, err
 	}
-	if one.Status != status {
+	if one.Status != status && one.BizType == consts.BizTypeSubscription {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status
@@ -170,7 +170,9 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *ro.Invoice
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(uint(id))
-		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		if one.BizType == consts.BizTypeSubscription {
+			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		}
 	} else {
 		//Update
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -196,7 +198,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *ro.Invoice
 		if err != nil {
 			return nil, err
 		}
-		if one.Status != status {
+		if one.Status != status && one.BizType == consts.BizTypeSubscription {
 			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		}
 	}
@@ -205,6 +207,12 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *ro.Invoice
 }
 
 func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
+	one := query.GetInvoiceByInvoiceId(context.Background(), invoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	if len(one.Lines) == 0 {
+		// invoice with valid lines will send emails
+		return gerror.New("invalid lines")
+	}
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -218,12 +226,6 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}()
 		backgroundCtx := context.Background()
-		one := query.GetInvoiceByInvoiceId(backgroundCtx, invoiceId)
-		if one.BizType == consts.BizTypeOneTime || len(one.Lines) == 0 {
-			// invoice not one time type and valid lines will send emails
-			return
-		}
-		utility.Assert(one != nil, "invoice not found")
 		url := GenerateAndUploadInvoicePdf(backgroundCtx, one)
 		if len(url) > 0 {
 			_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
