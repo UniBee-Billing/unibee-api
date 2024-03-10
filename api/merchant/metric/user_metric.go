@@ -12,5 +12,14 @@ type UserMetricReq struct {
 }
 
 type UserMetricRes struct {
-	UserMetric *ro.UserMetric `json:"userMetric" dc:"UserMetric"`
+	UserMetric *UserMetric `json:"userMetric" dc:"UserMetric"`
+}
+
+type UserMetric struct {
+	IsPaid                  bool                         `json:"isPaid" dc:"IsPaid"`
+	User                    *ro.UserAccountSimplify      `json:"user" dc:"user"`
+	Subscription            *ro.SubscriptionSimplify     `json:"subscription" dc:"Subscription"`
+	Plan                    *ro.PlanSimplify             `json:"plan" dc:"Plan"`
+	Addons                  []*ro.PlanAddonVo            `json:"addons" dc:"Addon"`
+	UserMerchantMetricStats []*ro.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }

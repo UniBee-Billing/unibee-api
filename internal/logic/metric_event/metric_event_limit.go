@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	metric2 "unibee/api/merchant/metric"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
@@ -17,12 +18,12 @@ import (
 	"unibee/utility"
 )
 
-func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *ro.UserMetric {
+func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount) *metric2.UserMetric {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, user.SubscriptionId)
 	return GetUserSubscriptionMetricStat(ctx, merchantId, user, sub)
 }
 
-func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *ro.UserMetric {
+func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *metric2.UserMetric {
 	var list = make([]*ro.UserMerchantMetricStat, 0)
 	if user != nil {
 		user.Password = ""
@@ -38,7 +39,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 				})
 			}
 		}
-		return &ro.UserMetric{
+		return &metric2.UserMetric{
 			IsPaid:                  one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete,
 			User:                    ro.SimplifyUserAccount(user),
 			Subscription:            ro.SimplifySubscription(one),
@@ -47,7 +48,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 			UserMerchantMetricStats: list,
 		}
 	} else {
-		return &ro.UserMetric{
+		return &metric2.UserMetric{
 			IsPaid:                  false,
 			User:                    ro.SimplifyUserAccount(user),
 			Subscription:            nil,
