@@ -97,7 +97,7 @@ type UpdateReq struct {
 	g.Meta              `path:"/update_submit" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Submit"`
 	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId           uint64                             `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
+	Quantity            int64                              `json:"quantity" dc:"Quantity"  v:"required"`
 	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
 	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	ConfirmTotalAmount  int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `

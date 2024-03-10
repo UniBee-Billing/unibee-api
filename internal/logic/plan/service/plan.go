@@ -52,7 +52,6 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
-	utility.Assert(len(req.Description) > 0, "description should not blank")
 	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
 
 	//check metricLimitList
@@ -65,8 +64,6 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "metric type invalid")
 		}
 	}
-
-	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	if len(req.ImageUrl) == 0 {
 		req.ImageUrl = merchantInfo.CompanyLogo
@@ -74,10 +71,10 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 	if len(req.HomeUrl) == 0 {
 		req.HomeUrl = merchantInfo.HomeUrl
 	}
-	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+	utility.Assert(req.IntervalCount > 0, "IntervalCount should > 0")
 	if strings.ToLower(req.IntervalUnit) == "day" {
 		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
 	} else if strings.ToLower(req.IntervalUnit) == "month" {
@@ -147,11 +144,8 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
-	utility.Assert(len(req.ImageUrl) > 0, "imageUrl should not be null")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
-	utility.Assert(len(req.Description) > 0, "description should not blank")
 	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
-	utility.Assert(strings.HasPrefix(req.ImageUrl, "http"), "imageUrl should start with http")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 	if strings.ToLower(req.IntervalUnit) == "day" {
 		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
@@ -258,11 +252,6 @@ func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Pla
 }
 
 func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq) (one *entity.Plan, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-	}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
@@ -272,37 +261,37 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq
 
 	var addonIdsList []int64
 	if len(one.BindingAddonIds) > 0 {
-		//初始化
+		//init
 		strList := strings.Split(one.BindingAddonIds, ",")
 
 		for _, s := range strList {
-			num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+			num, err := strconv.ParseInt(s, 10, 64)
 			if err != nil {
 				fmt.Println("Internal Error converting string to int:", err)
 				return nil, err
 			}
-			addonIdsList = append(addonIdsList, num) // 添加到整数列表中
+			addonIdsList = append(addonIdsList, num)
 		}
 	}
-	//检查 addonIds 类型
+	//addonIds type verify
 	var allAddonList []*entity.Plan
 	err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 	for _, addonPlan := range allAddonList {
 		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
 		utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
-		//addon 周期校验
+		//addon interval verify
 		utility.Assert(addonPlan.IntervalUnit == one.IntervalUnit && addonPlan.IntervalCount == one.IntervalCount, fmt.Sprintf("addon not match plan's recycle interval, id:%d", addonPlan.Id))
 	}
 
 	if req.Action == 0 {
-		//覆盖
+		//replace
 		addonIdsList = req.AddonIds
 	} else if req.Action == 1 {
-		//添加
+		//add
 		utility.Assert(len(req.AddonIds) > 0, "action add, addon ids is empty")
 		addonIdsList = mergeArrays(addonIdsList, req.AddonIds)
 	} else if req.Action == 2 {
-		//删除
+		//delete
 		utility.Assert(len(req.AddonIds) > 0, "action delete, addon ids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds)
 	}

@@ -11,9 +11,9 @@ type NewReq struct {
 	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
-	IntervalCount      int                                   `json:"intervalCount"  d:"1" dc:"Default 1，Number Of IntervalUnit" `
-	Type               int                                   `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
+	IntervalCount      int                                   `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week" v:"required" `
 	Description        string                                `json:"description"  dc:"Description"`
+	Type               int                                   `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
 	ProductName        string                                `json:"productName" dc:"Default Copy PlanName"  `
 	ProductDescription string                                `json:"productDescription" dc:"Default Copy Description" `
 	ImageUrl           string                                `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
@@ -33,7 +33,7 @@ type EditReq struct {
 	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
 	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
-	IntervalCount      int                                   `json:"intervalCount"  d:"1" dc:"Default 1，Number Of IntervalUnit" `
+	IntervalCount      int                                   `json:"intervalCount"  dc:"Number Of IntervalUnit" `
 	Description        string                                `json:"description"  dc:"Description"`
 	ProductName        string                                `json:"productName" dc:"Default Copy PlanName"  `
 	ProductDescription string                                `json:"productDescription" dc:"Default Copy Description" `
