@@ -42,8 +42,8 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 
 	{
 		sub.Status = consts.SubStatusCreate
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_CREATED)
-		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.MERCHANT_WEBHOOK_TAG_USER_METRIC_UPDATED)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED)
+		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 	}
 
 	// 3min PaymentChecker

@@ -162,15 +162,15 @@ type NewAdminNoteRes struct {
 }
 
 type AdminNoteRo struct {
-	Id             uint64 `json:"id"               description:"id"`              // id
-	Note           string `json:"note"             description:"note"`            // note
-	CreateTime     int64  `json:"createTime"       description:"create utc time"` // create utc time
-	SubscriptionId string `json:"subscriptionId" description:"SubscriptionId"`    // 用户ID
-	UserName       string `json:"userName"   description:"用户名"`                   // 用户名
-	Mobile         string `json:"mobile"     description:"手机号"`                   // 手机号
-	Email          string `json:"email"      description:"邮箱"`                    // 邮箱
-	FirstName      string `json:"firstName"  description:""`                      //
-	LastName       string `json:"lastName"   description:""`                      //
+	Id             uint64 `json:"id"               description:"id"`
+	Note           string `json:"note"             description:"note"`
+	CreateTime     int64  `json:"createTime"       description:"create utc time"`
+	SubscriptionId string `json:"subscriptionId" description:"SubscriptionId"`
+	UserName       string `json:"userName"   description:"用户名"`
+	Mobile         string `json:"mobile"     description:"手机号"`
+	Email          string `json:"email"      description:"邮箱"`
+	FirstName      string `json:"firstName"  description:""`
+	LastName       string `json:"lastName"   description:""`
 }
 
 type AdminNoteListReq struct {

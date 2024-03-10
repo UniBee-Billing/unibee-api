@@ -6,5 +6,5 @@ import (
 )
 
 func TestEvent(t *testing.T) {
-	fmt.Println(WebhookEventInListeningEvents(MERCHANT_WEBHOOK_TAG_SUBSCRIPTION_UPDATED))
+	fmt.Println(WebhookEventInListeningEvents(UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED))
 }

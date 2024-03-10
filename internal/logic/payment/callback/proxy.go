@@ -46,7 +46,7 @@ func (p proxy) PaymentRefundCreateCallback(ctx context.Context, payment *entity.
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_REFUND_CREATED)
+		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_CREATED)
 		p.GetCallbackImpl().PaymentRefundCreateCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundCreateCallback cost：%s \n", time.Now().Sub(startTime))
@@ -70,7 +70,7 @@ func (p proxy) PaymentRefundSuccessCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_REFUND_SUCCESS)
+		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_SUCCESS)
 		p.GetCallbackImpl().PaymentRefundSuccessCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundSuccessCallback cost：%s \n", time.Now().Sub(startTime))
@@ -94,7 +94,7 @@ func (p proxy) PaymentRefundFailureCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_REFUND_FAILURE)
+		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_FAILURE)
 		p.GetCallbackImpl().PaymentRefundFailureCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundFailureCallback cost：%s \n", time.Now().Sub(startTime))
@@ -118,7 +118,7 @@ func (p proxy) PaymentRefundReverseCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_REFUND_REVERSE)
+		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE)
 		p.GetCallbackImpl().PaymentRefundReverseCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundReverseCallback cost：%s \n", time.Now().Sub(startTime))
@@ -142,7 +142,7 @@ func (p proxy) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entit
 		}()
 		startTime := time.Now()
 
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_PAYMENT_NEEDAUTHORISED)
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED)
 		p.GetCallbackImpl().PaymentNeedAuthorisedCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentNeedAuthorisedCallback cost：%s \n", time.Now().Sub(startTime))
@@ -166,7 +166,7 @@ func (p proxy) PaymentCreateCallback(ctx context.Context, payment *entity.Paymen
 		}()
 		startTime := time.Now()
 
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_PAYMENT_CREATED)
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_CREATED)
 		p.GetCallbackImpl().PaymentCreateCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentCreateCallback cost：%s \n", time.Now().Sub(startTime))
@@ -190,7 +190,7 @@ func (p proxy) PaymentSuccessCallback(ctx context.Context, payment *entity.Payme
 		}()
 		startTime := time.Now()
 
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_PAYMENT_SUCCESS)
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_SUCCESS)
 		p.GetCallbackImpl().PaymentSuccessCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentSuccessCallback cost：%s \n", time.Now().Sub(startTime))
@@ -216,7 +216,7 @@ func (p proxy) PaymentFailureCallback(ctx context.Context, payment *entity.Payme
 		}()
 		startTime := time.Now()
 
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_PAYMENT_FAILURE)
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_FAILURE)
 		p.GetCallbackImpl().PaymentFailureCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentFailureCallback cost：%s \n", time.Now().Sub(startTime))
@@ -240,7 +240,7 @@ func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Paymen
 		}()
 		startTime := time.Now()
 
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.MERCHANT_WEBHOOK_TAG_PAYMENT_CANCEL)
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_CANCEL)
 		p.GetCallbackImpl().PaymentCancelCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentCancelCallback cost：%s \n", time.Now().Sub(startTime))
