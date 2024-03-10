@@ -46,7 +46,7 @@ func (p proxy) PaymentRefundCreateCallback(ctx context.Context, payment *entity.
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_CREATED)
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_CREATED)
 		p.GetCallbackImpl().PaymentRefundCreateCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundCreateCallback cost：%s \n", time.Now().Sub(startTime))
@@ -70,7 +70,7 @@ func (p proxy) PaymentRefundSuccessCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_SUCCESS)
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_SUCCESS)
 		p.GetCallbackImpl().PaymentRefundSuccessCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundSuccessCallback cost：%s \n", time.Now().Sub(startTime))
@@ -94,7 +94,7 @@ func (p proxy) PaymentRefundFailureCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_FAILURE)
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_FAILURE)
 		p.GetCallbackImpl().PaymentRefundFailureCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundFailureCallback cost：%s \n", time.Now().Sub(startTime))
@@ -118,7 +118,7 @@ func (p proxy) PaymentRefundReverseCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE)
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE)
 		p.GetCallbackImpl().PaymentRefundReverseCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundReverseCallback cost：%s \n", time.Now().Sub(startTime))
