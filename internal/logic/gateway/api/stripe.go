@@ -216,19 +216,6 @@ func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 	return parseStripePayment(response), nil
 }
 
-func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
-	utility.Assert(gateway != nil, "gateway not found")
-	stripe.Key = gateway.GatewaySecret
-	s.setUnibeeAppInfo()
-	params := &stripe.RefundParams{}
-	response, err := refund.Get(gatewayRefundId, params)
-	log.SaveChannelHttpLog("GatewayRefundDetail", params, response, err, "", nil, gateway)
-	if err != nil {
-		return nil, err
-	}
-	return parseStripeRefund(response), nil
-}
-
 func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
@@ -368,7 +355,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 			return nil, err
 		}
 		log.SaveChannelHttpLog("GatewayNewPayment", checkoutParams, detail, err, "CheckoutSession", nil, createPayContext.Gateway)
-		var status consts.PayStatusEnum = consts.PaymentCreated
+		var status consts.PaymentStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
 		} else if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
 			status = consts.PaymentSuccess
@@ -539,7 +526,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 			}
 		}
 
-		var status consts.PayStatusEnum = consts.PaymentCreated
+		var status consts.PaymentStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), "draft") == 0 {
 		} else if strings.Compare(string(detail.Status), "open") == 0 {
 		} else if strings.Compare(string(detail.Status), "paid") == 0 {
@@ -618,7 +605,7 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
 			status = consts.PaymentSuccess
 		} else if strings.Compare(string(result.Status), string(stripe.CheckoutSessionStatusExpired)) == 0 {
-			status = consts.PaymentFailed
+			status = consts.PaymentCancelled
 		}
 		gatewayCancelId = result.ID
 	} else {
@@ -637,18 +624,8 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		MerchantId:      strconv.FormatUint(payment.MerchantId, 10),
 		GatewayCancelId: gatewayCancelId,
 		Reference:       payment.PaymentId,
-		Status:          strconv.Itoa(status),
+		Status:          consts.PaymentStatusEnum(status),
 	}, nil
-}
-
-func (s Stripe) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s Stripe) GatewayRefundStatusCheck(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
@@ -674,8 +651,36 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	utility.Assert(result != nil, "Stripe refund failed, result is nil")
 	return &ro.OutPayRefundRo{
 		GatewayRefundId: result.ID,
-		Status:          consts.RefundIng,
+		Status:          consts.RefundCreated,
 	}, nil
+}
+
+func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
+	s.setUnibeeAppInfo()
+	params := &stripe.RefundParams{}
+	response, err := refund.Get(gatewayRefundId, params)
+	log.SaveChannelHttpLog("GatewayRefundDetail", params, response, err, "", nil, gateway)
+	if err != nil {
+		return nil, err
+	}
+	return parseStripeRefund(response), nil
+}
+
+func (s Stripe) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
+	gateway := util.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	stripe.Key = gateway.GatewaySecret
+	s.setUnibeeAppInfo()
+	params := &stripe.RefundCancelParams{}
+	response, err := refund.Cancel(one.GatewayRefundId, params)
+	log.SaveChannelHttpLog("GatewayRefundCancel", params, response, err, "", nil, gateway)
+	if err != nil {
+		return nil, err
+	}
+	return parseStripeRefund(response), nil
 }
 
 func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
@@ -683,13 +688,13 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	if item.PaymentIntent != nil {
 		gatewayPaymentId = item.PaymentIntent.ID
 	}
-	var status consts.RefundStatusEnum = consts.RefundIng
+	var status consts.RefundStatusEnum = consts.RefundCreated
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
 		status = consts.RefundSuccess
 	} else if strings.Compare(string(item.Status), "failed") == 0 {
 		status = consts.RefundFailed
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
-		status = consts.RefundReverse
+		status = consts.RefundCancelled
 	}
 	return &ro.OutPayRefundRo{
 		MerchantId:       "",

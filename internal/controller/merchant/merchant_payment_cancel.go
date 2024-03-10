@@ -10,10 +10,9 @@ import (
 )
 
 func (c *ControllerPayment) Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error) {
-
-	overseaPay := query.GetPaymentByPaymentId(ctx, req.PaymentId)
-	utility.Assert(overseaPay != nil, "payment not found")
-	err = service.PaymentGatewayCancel(ctx, overseaPay)
+	one := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	utility.Assert(one != nil, "payment not found")
+	err = service.PaymentGatewayCancel(ctx, one)
 	if err != nil {
 		return nil, err
 	}

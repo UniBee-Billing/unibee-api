@@ -10,6 +10,11 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -81,16 +86,6 @@ func (a AutoTest) GatewayCapture(ctx context.Context, pay *entity.Payment) (res 
 }
 
 func (a AutoTest) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (a AutoTest) GatewayPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (a AutoTest) GatewayRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

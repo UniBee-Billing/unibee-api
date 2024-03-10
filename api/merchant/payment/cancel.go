@@ -9,3 +9,11 @@ type CancelReq struct {
 }
 type CancelRes struct {
 }
+
+type RefundCancelReq struct {
+	g.Meta           `path:"/refund/cancel" tags:"Payment" method:"post" summary:"Cancel Payment Refund"`
+	RefundId         string `json:"refundId" dc:"RefundId" v:"required"`
+	ExternalCancelId string `json:"externalCancelId" dc:"ExternalCancelId" v:"required"`
+}
+type RefundCancelRes struct {
+}

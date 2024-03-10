@@ -30,7 +30,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 		return nil, err
 	}
 	res = &payment.NewPaymentRefundRes{
-		Status:           consts.RefundIng,
+		Status:           consts.RefundCreated,
 		RefundId:         resp.RefundId,
 		ExternalRefundId: req.ExternalRefundId,
 		PaymentId:        resp.PaymentId,

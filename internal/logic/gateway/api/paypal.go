@@ -27,6 +27,11 @@ import (
 type Paypal struct {
 }
 
+func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -116,16 +121,6 @@ func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 }
 
 func (p Paypal) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p Paypal) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p Paypal) GatewayRefundStatusCheck(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -10,7 +10,7 @@ const (
 	CaptureRequest    = 2
 )
 
-type PayStatusEnum int
+type PaymentStatusEnum int
 
 const (
 	PaymentCreated   = 10
@@ -19,7 +19,7 @@ const (
 	PaymentCancelled = 40
 )
 
-func (action PayStatusEnum) Description() string {
+func (action PaymentStatusEnum) Description() string {
 	switch action {
 	case PaymentCreated:
 		return "PAYMENT_CREATED"
@@ -35,21 +35,26 @@ func (action PayStatusEnum) Description() string {
 type RefundStatusEnum int
 
 const (
-	RefundIng     = 10
-	RefundSuccess = 20
-	RefundFailed  = 30
-	RefundReverse = 40
+	RefundCreated   = 10
+	RefundSuccess   = 20
+	RefundFailed    = 30
+	RefundCancelled = 40
+	RefundReverse   = 50
 )
 
 func (action RefundStatusEnum) Description() string {
 	switch action {
-	case RefundIng:
-		return "REFUND_ING"
+	case RefundCreated:
+		return "REFUND_CREATED"
 	case RefundSuccess:
 		return "REFUND_SUCCESS"
 	case RefundFailed:
 		return "REFUND_FAILED"
+	case RefundCancelled:
+		return "REFUND_CANCELLED"
+	case RefundReverse:
+		return "REFUND_REVERSE"
 	default:
-		return "REFUND_ING"
+		return "REFUND_CREATED"
 	}
 }

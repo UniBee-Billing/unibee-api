@@ -101,6 +101,30 @@ func (p proxy) PaymentRefundFailureCallback(ctx context.Context, payment *entity
 	}()
 }
 
+func (p proxy) PaymentRefundCancelCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
+	go func() {
+		backgroundCtx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(backgroundCtx, err)
+				return
+			}
+		}()
+		startTime := time.Now()
+
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_CANCELLED)
+		p.GetCallbackImpl().PaymentRefundCancelCallback(backgroundCtx, payment, refund)
+
+		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundCancelCallback cost：%s \n", time.Now().Sub(startTime))
+	}()
+}
+
 func (p proxy) PaymentRefundReverseCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
 	go func() {
 		backgroundCtx := context.Background()

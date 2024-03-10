@@ -96,6 +96,7 @@ type IMerchantOss interface {
 
 type IMerchantPayment interface {
 	Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error)
+	RefundCancel(ctx context.Context, req *payment.RefundCancelReq) (res *payment.RefundCancelRes, err error)
 	Capture(ctx context.Context, req *payment.CaptureReq) (res *payment.CaptureRes, err error)
 	New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error)
 	Detail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error)

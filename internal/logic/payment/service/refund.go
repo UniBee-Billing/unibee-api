@@ -86,7 +86,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 		PaymentId:        payment.PaymentId,
 		RefundId:         refundId,
 		RefundAmount:     req.RefundAmount,
-		Status:           consts.RefundIng,
+		Status:           consts.RefundCreated,
 		GatewayId:        payment.GatewayId,
 		AppId:            payment.AppId,
 		Currency:         payment.Currency,
@@ -121,7 +121,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 
 			one.GatewayRefundId = gatewayResult.GatewayRefundId
 			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundIng})
+				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
 			if err != nil || result == nil {
 				//_ = transaction.Rollback()
 				return err

@@ -10,6 +10,11 @@ import (
 type Blank struct {
 }
 
+func (b Blank) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (b Blank) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -81,16 +86,6 @@ func (b Blank) GatewayCapture(ctx context.Context, pay *entity.Payment) (res *ro
 }
 
 func (b Blank) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b Blank) GatewayPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (b Blank) GatewayRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }

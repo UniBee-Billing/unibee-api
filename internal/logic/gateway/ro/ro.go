@@ -21,14 +21,14 @@ type NewPaymentInternalReq struct {
 }
 
 type NewPaymentInternalResp struct {
-	Status                 consts.PayStatusEnum `json:"status"`
-	PaymentId              string               `json:"paymentId"`
-	GatewayPaymentId       string               `json:"gatewayPaymentId"`
-	GatewayPaymentIntentId string               `json:"gatewayPaymentIntentId"`
-	GatewayPaymentMethod   string               `json:"gatewayPaymentMethod"`
-	Link                   string               `json:"link"`
-	Action                 *gjson.Json          `json:"action"`
-	Invoice                *entity.Invoice      `json:"invoice"`
+	Status                 consts.PaymentStatusEnum `json:"status"`
+	PaymentId              string                   `json:"paymentId"`
+	GatewayPaymentId       string                   `json:"gatewayPaymentId"`
+	GatewayPaymentIntentId string                   `json:"gatewayPaymentIntentId"`
+	GatewayPaymentMethod   string                   `json:"gatewayPaymentMethod"`
+	Link                   string                   `json:"link"`
+	Action                 *gjson.Json              `json:"action"`
+	Invoice                *entity.Invoice          `json:"invoice"`
 }
 
 // OutPayCaptureRo is the golang structure for table oversea_pay.
@@ -43,10 +43,10 @@ type OutPayCaptureRo struct {
 
 // OutPayCancelRo is the golang structure for table oversea_pay.
 type OutPayCancelRo struct {
-	MerchantId      string `json:"merchantId"         `
-	GatewayCancelId string `json:"gatewayCancelId"            `
-	Reference       string `json:"reference"              `
-	Status          string `json:"status"`
+	MerchantId      string                   `json:"merchantId"         `
+	GatewayCancelId string                   `json:"gatewayCancelId"            `
+	Reference       string                   `json:"reference"              `
+	Status          consts.PaymentStatusEnum `json:"status"`
 }
 
 // OutPayRefundRo is the golang structure for table oversea_pay.

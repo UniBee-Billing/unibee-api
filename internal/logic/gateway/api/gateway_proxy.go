@@ -275,27 +275,6 @@ func (p GatewayProxy) GatewayCancel(ctx context.Context, pay *entity.Payment) (r
 	return res, err
 }
 
-func (p GatewayProxy) GatewayPayStatusCheck(ctx context.Context, pay *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	defer func() {
-		if exception := recover(); exception != nil {
-			if v, ok := exception.(error); ok && gerror.HasStack(v) {
-				err = v
-			} else {
-				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-			}
-			printChannelPanic(ctx, err)
-			return
-		}
-	}()
-	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayPayStatusCheck(ctx, pay)
-	glog.Infof(ctx, "MeasureChannelFunction:GatewayPayStatusCheck cost：%s \n", time.Now().Sub(startTime))
-	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
-	}
-	return res, err
-}
-
 func (p GatewayProxy) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *ro.GatewayPaymentListReq) (res []*ro.GatewayPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -359,27 +338,6 @@ func (p GatewayProxy) GatewayRefund(ctx context.Context, pay *entity.Payment, re
 	return res, err
 }
 
-func (p GatewayProxy) GatewayRefundStatusCheck(ctx context.Context, pay *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
-	defer func() {
-		if exception := recover(); exception != nil {
-			if v, ok := exception.(error); ok && gerror.HasStack(v) {
-				err = v
-			} else {
-				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-			}
-			printChannelPanic(ctx, err)
-			return
-		}
-	}()
-	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayRefundStatusCheck(ctx, pay, refund)
-	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundStatusCheck cost：%s \n", time.Now().Sub(startTime))
-	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
-	}
-	return res, err
-}
-
 func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
@@ -395,6 +353,27 @@ func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.M
 	startTime := time.Now()
 	res, err = p.getRemoteGateway().GatewayRefundDetail(ctx, gateway, gatewayRefundId)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundDetail cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return res, err
+}
+
+func (p GatewayProxy) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	res, err = p.getRemoteGateway().GatewayRefundCancel(ctx, payment, refund)
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundCancel cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}

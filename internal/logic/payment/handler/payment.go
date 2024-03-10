@@ -27,7 +27,7 @@ type HandlePayReq struct {
 	GatewayPaymentIntentId string
 	GatewayPaymentId       string
 	TotalAmount            int64
-	PayStatusEnum          consts.PayStatusEnum
+	PayStatusEnum          consts.PaymentStatusEnum
 	PaidTime               *gtime.Time
 	PaymentAmount          int64
 	CaptureAmount          int64
@@ -256,7 +256,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		}
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentCancelCallback(ctx, payment, invoice)
-		
+
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
 			BizId:     payment.PaymentId,

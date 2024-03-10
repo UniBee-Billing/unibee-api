@@ -9,6 +9,11 @@ import (
 
 type Invalid struct{}
 
+func (i Invalid) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
@@ -80,16 +85,6 @@ func (i Invalid) GatewayCapture(ctx context.Context, payment *entity.Payment) (r
 }
 
 func (i Invalid) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i Invalid) GatewayPayStatusCheck(ctx context.Context, payment *entity.Payment) (res *ro.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (i Invalid) GatewayRefundStatusCheck(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
 	//TODO implement me
 	panic("implement me")
 }
