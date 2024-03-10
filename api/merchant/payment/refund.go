@@ -28,7 +28,13 @@ type RefundDetailReq struct {
 }
 
 type RefundDetailRes struct {
-	RefundDetail *ro.RefundDetailRo `json:"refundDetail" dc:"RefundDetail"`
+	RefundDetail *RefundDetail `json:"refundDetail" dc:"RefundDetail"`
+}
+
+type RefundDetail struct {
+	User    *ro.UserAccountSimplify `json:"user" dc:"user"`
+	Payment *ro.PaymentSimplify     `json:"payment" dc:"Payment"`
+	Refund  *ro.RefundSimplify      `json:"refund" dc:"Refund"`
 }
 
 type RefundListReq struct {
@@ -41,5 +47,5 @@ type RefundListReq struct {
 	Currency  string `json:"currency" dc:"Currency"`
 }
 type RefundListRes struct {
-	RefundDetails []*ro.RefundDetailRo `json:"refundDetails" dc:"RefundDetails"`
+	RefundDetails []*RefundDetail `json:"refundDetails" dc:"RefundDetails"`
 }

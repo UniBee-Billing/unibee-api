@@ -2,7 +2,7 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	merhcnatPlan "unibee/api/merchant/plan"
 )
 
 type ListReq struct {
@@ -11,5 +11,5 @@ type ListReq struct {
 	Currency string `json:"currency" dc:"Currency"  `
 }
 type ListRes struct {
-	Plans []*ro.PlanDetailRo `json:"plans" dc:"Plan Detail"`
+	Plans []*merhcnatPlan.PlanDetail `json:"plans" dc:"Plan Detail"`
 }

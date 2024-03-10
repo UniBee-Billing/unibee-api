@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -30,11 +31,11 @@ func GetRefundByGatewayRefundId(ctx context.Context, gatewayRefundId string) (on
 	return
 }
 
-func GetRefundDetail(ctx context.Context, merchantId uint64, refundId string) *ro.RefundDetailRo {
+func GetRefundDetail(ctx context.Context, merchantId uint64, refundId string) *payment.RefundDetail {
 	one := GetRefundByRefundId(ctx, refundId)
 	utility.Assert(merchantId == one.MerchantId, "merchant not match")
 	if one != nil {
-		return &ro.RefundDetailRo{
+		return &payment.RefundDetail{
 			User:    ro.SimplifyUserAccount(GetUserAccountById(ctx, uint64(one.UserId))),
 			Payment: ro.SimplifyPayment(GetPaymentByPaymentId(ctx, one.PaymentId)),
 			Refund:  ro.SimplifyRefund(one),

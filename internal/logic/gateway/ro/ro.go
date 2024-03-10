@@ -229,23 +229,23 @@ type InvoiceDetailRo struct {
 	Refund                         *entity.Refund         `json:"refund"                       description:"Refund"`
 }
 
-type PaymentDetailRo struct {
-	User    *UserAccountSimplify `json:"user" dc:"user"`
-	Payment *PaymentSimplify     `json:"payment" dc:"Payment"`
-}
+//type PaymentDetailRo struct {
+//	User    *UserAccountSimplify `json:"user" dc:"user"`
+//	Payment *PaymentSimplify     `json:"payment" dc:"Payment"`
+//}
 
-type RefundDetailRo struct {
-	User    *UserAccountSimplify `json:"user" dc:"user"`
-	Payment *PaymentSimplify     `json:"payment" dc:"Payment"`
-	Refund  *RefundSimplify      `json:"refund" dc:"Refund"`
-}
+//type RefundDetailRo struct {
+//	User    *UserAccountSimplify `json:"user" dc:"user"`
+//	Payment *PaymentSimplify     `json:"payment" dc:"Payment"`
+//	Refund  *RefundSimplify      `json:"refund" dc:"Refund"`
+//}
 
-type PlanDetailRo struct {
-	Plan             *PlanSimplify                `json:"plan" dc:"Plan"`
-	MetricPlanLimits []*MerchantMetricPlanLimitVo `json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Addons           []*PlanSimplify              `json:"addons" dc:"Addons"`
-	AddonIds         []int64                      `json:"addonIds" dc:"AddonIds"`
-}
+//type PlanDetailRo struct {
+//	Plan             *PlanSimplify                `json:"plan" dc:"Plan"`
+//	MetricPlanLimits []*MerchantMetricPlanLimitVo `json:"metricPlanLimits" dc:"MetricPlanLimits"`
+//	Addons           []*PlanSimplify              `json:"addons" dc:"Addons"`
+//	AddonIds         []int64                      `json:"addonIds" dc:"AddonIds"`
+//}
 
 type SubscriptionPlanAddonParamRo struct {
 	Quantity    int64  `json:"quantity" dc:"Quantity，Default 1" `

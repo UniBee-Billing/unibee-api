@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -52,11 +53,11 @@ func GetPaymentTimeLineByUniqueId(ctx context.Context, uniqueId string) (one *en
 	return
 }
 
-func GetPaymentDetail(ctx context.Context, merchantId uint64, paymentId string) *ro.PaymentDetailRo {
+func GetPaymentDetail(ctx context.Context, merchantId uint64, paymentId string) *payment.PaymentDetail {
 	one := GetPaymentByPaymentId(ctx, paymentId)
 	utility.Assert(merchantId == one.MerchantId, "merchant not match")
 	if one != nil {
-		return &ro.PaymentDetailRo{
+		return &payment.PaymentDetail{
 			User:    ro.SimplifyUserAccount(GetUserAccountById(ctx, uint64(one.UserId))),
 			Payment: ro.SimplifyPayment(one),
 		}

@@ -69,7 +69,7 @@ type ListReq struct {
 	Count         int    `json:"count"  dc:"Count Of Per Page" `
 }
 type ListRes struct {
-	Plans []*ro.PlanDetailRo `json:"plans" dc:"Plans"`
+	Plans []*PlanDetail `json:"plans" dc:"Plans"`
 }
 
 type ActivateReq struct {
@@ -98,7 +98,14 @@ type DetailReq struct {
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {
-	Plan *ro.PlanDetailRo `json:"plan" dc:"Plan Detail"`
+	Plan *PlanDetail `json:"plan" dc:"Plan Detail"`
+}
+
+type PlanDetail struct {
+	Plan             *ro.PlanSimplify                `json:"plan" dc:"Plan"`
+	MetricPlanLimits []*ro.MerchantMetricPlanLimitVo `json:"metricPlanLimits" dc:"MetricPlanLimits"`
+	Addons           []*ro.PlanSimplify              `json:"addons" dc:"Addons"`
+	AddonIds         []int64                         `json:"addonIds" dc:"AddonIds"`
 }
 
 type ExpireReq struct {

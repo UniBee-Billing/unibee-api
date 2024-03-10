@@ -44,7 +44,12 @@ type DetailReq struct {
 	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 }
 type DetailRes struct {
-	PaymentDetail *ro.PaymentDetailRo `json:"paymentDetail" dc:"PaymentDetail"`
+	PaymentDetail *PaymentDetail `json:"paymentDetail" dc:"PaymentDetail"`
+}
+
+type PaymentDetail struct {
+	User    *ro.UserAccountSimplify `json:"user" dc:"user"`
+	Payment *ro.PaymentSimplify     `json:"payment" dc:"Payment"`
 }
 
 type ListReq struct {
@@ -62,5 +67,5 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	PaymentDetails []*ro.PaymentDetailRo `json:"paymentDetails" dc:"PaymentDetails"`
+	PaymentDetails []*PaymentDetail `json:"paymentDetails" dc:"PaymentDetails"`
 }

@@ -44,7 +44,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 		}
 	}
 	return &plan.DetailRes{
-		Plan: &ro2.PlanDetailRo{
+		Plan: &plan.PlanDetail{
 			Plan:             ro2.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
 			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
@@ -53,7 +53,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 	}, nil
 }
 
-func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*ro2.PlanDetailRo) {
+func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*plan.PlanDetail) {
 	var mainList []*entity.Plan
 	if req.Count <= 0 {
 		req.Count = 20
@@ -95,7 +95,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		totalPlanIds = append(totalPlanIds, p.Id)
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
-			list = append(list, &ro2.PlanDetailRo{
+			list = append(list, &plan.PlanDetail{
 				Plan:             ro2.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Addons:           nil,
@@ -109,16 +109,16 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			strList := strings.Split(p.BindingAddonIds, ",")
 
 			for _, s := range strList {
-				num, err := strconv.ParseInt(s, 10, 64) // 将字符串转换为整数
+				num, err := strconv.ParseInt(s, 10, 64)
 				if err != nil {
 					fmt.Println("Internal Error converting string to int:", err)
 				} else {
-					totalAddonIds = append(totalAddonIds, num) // 添加到整数列表中
-					addonIds = append(addonIds, num)           // 添加到整数列表中
+					totalAddonIds = append(totalAddonIds, num)
+					addonIds = append(addonIds, num)
 				}
 			}
 		}
-		list = append(list, &ro2.PlanDetailRo{
+		list = append(list, &plan.PlanDetail{
 			Plan:             ro2.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Addons:           nil,
@@ -126,11 +126,9 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		})
 	}
 	if len(totalAddonIds) > 0 {
-		//主 Plan 查询 addons
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, totalAddonIds).OmitEmpty().Scan(&allAddonList)
 		if err == nil {
-			//整合进列表
 			mapPlans := make(map[int64]*entity.Plan)
 			for _, pair := range allAddonList {
 				key := int64(pair.Id)

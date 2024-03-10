@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -25,11 +26,11 @@ type PaymentListInternalReq struct {
 }
 
 type PaymentListInternalRes struct {
-	PaymentDetails []*ro.PaymentDetailRo `json:"paymentDetails" dc:"PaymentDetails"`
+	PaymentDetails []*payment.PaymentDetail `json:"paymentDetails" dc:"PaymentDetails"`
 }
 
-func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*ro.PaymentDetailRo, err error) {
-	var mainList []*ro.PaymentDetailRo
+func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*payment.PaymentDetail, err error) {
+	var mainList []*payment.PaymentDetail
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -81,7 +82,7 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		return nil, err
 	}
 	for _, one := range list {
-		mainList = append(mainList, &ro.PaymentDetailRo{
+		mainList = append(mainList, &payment.PaymentDetail{
 			User:    ro.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
 			Payment: ro.SimplifyPayment(one),
 		})
