@@ -90,3 +90,18 @@ func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, no
 	})
 	return nil
 }
+
+func UpdateSubscriptionDefaultPaymentMethod(ctx context.Context, subscriptionId string, paymentMethod string) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(len(paymentMethod) > 0, "paymentMethod invalid")
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethod,
+		dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}

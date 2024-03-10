@@ -375,11 +375,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 	} else {
 		if createPayContext.PayImmediate {
 			// try use payment intent
-			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
-			log.SaveChannelHttpLog("GatewayNewPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
-			if err != nil {
-				return nil, err
-			}
 
 			var success = false
 			var targetIntent *stripe.PaymentIntent
@@ -387,23 +382,30 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 			var paymentMethod = ""
 			var link = ""
 			var cancelErr error
-			if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
-				if listQuery.PaymentMethods == nil {
-					listQuery.PaymentMethods = make([]*ro.PaymentMethod, 0)
-				}
-				listQuery.PaymentMethods = append(listQuery.PaymentMethods, &ro.PaymentMethod{
-					Id: gatewayUser.GatewayDefaultPaymentMethod,
-				})
-			}
+			paymentMethods := make([]*ro.PaymentMethod, 0)
 			if len(createPayContext.GatewayPaymentMethod) > 0 {
-				if listQuery.PaymentMethods == nil {
-					listQuery.PaymentMethods = make([]*ro.PaymentMethod, 0)
-				}
-				listQuery.PaymentMethods = append(listQuery.PaymentMethods, &ro.PaymentMethod{
+				paymentMethods = append(paymentMethods, &ro.PaymentMethod{
 					Id: createPayContext.GatewayPaymentMethod,
 				})
+			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
+				paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+					Id: gatewayUser.GatewayDefaultPaymentMethod,
+				})
+			} else {
+				listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, gatewayUser.UserId)
+				log.SaveChannelHttpLog("GatewayNewPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
+				if err != nil {
+					return nil, err
+				}
+				if listQuery != nil && listQuery.PaymentMethods != nil {
+					for _, method := range listQuery.PaymentMethods {
+						paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+							Id: method.Id,
+						})
+					}
+				}
 			}
-			for _, method := range listQuery.PaymentMethods {
+			for _, method := range paymentMethods {
 				params := &stripe.PaymentIntentParams{
 					Customer: stripe.String(gatewayUser.GatewayUserId),
 					Confirm:  stripe.Bool(true),
