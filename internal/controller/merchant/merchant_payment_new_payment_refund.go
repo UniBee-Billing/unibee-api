@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"strings"
 	"unibee/internal/consts"
 	"unibee/internal/logic/payment/service"
 	"unibee/utility"
@@ -13,6 +14,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 	utility.Assert(req != nil, "req should not be nil")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId should not be nil")
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
+	req.Currency = strings.ToUpper(req.Currency)
 	utility.Assert(len(req.Currency) > 0, "refund currency should not be nil")
 	currencyNumberCheck(req.RefundAmount, req.Currency)
 
