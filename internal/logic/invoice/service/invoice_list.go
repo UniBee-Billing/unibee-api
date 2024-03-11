@@ -107,32 +107,39 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 
 func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*entity.Invoice, err error) {
 	//Will Search
-	var mainList []*entity.Invoice
+	var mainList = make([]*entity.Invoice, 0)
+	var mainMap = make(map[uint64]*entity.Invoice)
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
-	_ = dao.Invoice.Ctx(ctx).
-		Where(dao.Invoice.Columns().MerchantId, merchantId).
-		WhereOr(dao.Invoice.Columns().InvoiceId, searchKey).
-		WhereOr(dao.Invoice.Columns().SendEmail, searchKey).
+	m := dao.Invoice.Ctx(ctx)
+	_ = m.Where(m.Builder().WhereOr(dao.Invoice.Columns().InvoiceId, searchKey).
+		WhereOr(dao.Invoice.Columns().SendEmail, searchKey)).
 		WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
+		Where(dao.Invoice.Columns().MerchantId, merchantId).
 		Order(sortKey).
 		Limit(0, 10).
 		OmitEmpty().Scan(&mainList)
+	for _, invoice := range mainList {
+		mainMap[invoice.Id] = invoice
+	}
 	if len(mainList) < 10 {
-		//模糊查询
+		//like search
 		var likeList []*entity.Invoice
-		_ = dao.Invoice.Ctx(ctx).
-			Where(dao.Invoice.Columns().MerchantId, merchantId).
-			WhereOrLike(dao.Invoice.Columns().InvoiceId, "%"+searchKey+"%").
+		m = dao.Invoice.Ctx(ctx)
+		_ = m.Where(m.Builder().WhereOrLike(dao.Invoice.Columns().InvoiceId, "%"+searchKey+"%").
 			WhereOrLike(dao.Invoice.Columns().InvoiceName, "%"+searchKey+"%").
-			WhereOrLike(dao.Invoice.Columns().SendEmail, "%"+searchKey+"%").
+			WhereOrLike(dao.Invoice.Columns().SendEmail, "%"+searchKey+"%")).
 			WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
+			Where(dao.Invoice.Columns().MerchantId, merchantId).
 			Order(sortKey).
 			Limit(0, 10).
 			OmitEmpty().Scan(&likeList)
 		if len(likeList) > 0 {
-			for _, item := range likeList {
-				mainList = append(mainList, item)
+			for _, invoice := range likeList {
+				if mainMap[invoice.Id] == nil {
+					mainList = append(mainList, invoice)
+					mainMap[invoice.Id] = invoice
+				}
 			}
 		}
 	}

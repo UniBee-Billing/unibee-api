@@ -93,51 +93,63 @@ func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserLi
 
 func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*entity.UserAccount, err error) {
 	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
-	var mainList []*entity.UserAccount
+	var mainList = make([]*entity.UserAccount, 0)
+	var mainMap = make(map[uint64]*entity.UserAccount)
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
-	_ = dao.UserAccount.Ctx(ctx).
-		WhereOr(dao.UserAccount.Columns().Id, searchKey).
+	m := dao.UserAccount.Ctx(ctx)
+	_ = m.
 		Where(dao.UserAccount.Columns().MerchantId, merchantId).
-		WhereOr(dao.UserAccount.Columns().SubscriptionId, searchKey).
-		WhereOr(dao.UserAccount.Columns().VATNumber, searchKey).
+		Where(
+			m.Builder().WhereOr(dao.UserAccount.Columns().Id, searchKey).
+				WhereOr(dao.UserAccount.Columns().SubscriptionId, searchKey).
+				WhereOr(dao.UserAccount.Columns().VATNumber, searchKey)).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
 		Order(sortKey).
 		Limit(0, 10).
 		OmitEmpty().Scan(&mainList)
+	for _, user := range mainList {
+		mainMap[user.Id] = user
+	}
 	if len(mainList) < 10 {
-		//继续查 InvoiceId 和 PaymentId
+		//keep go on InvoiceId and PaymentId
 		invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
 		if invoice != nil && invoice.UserId > 0 && invoice.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
-			if user != nil {
+			if user != nil && mainMap[user.Id] == nil {
 				mainList = append(mainList, user)
+				mainMap[user.Id] = user
 			}
 		}
 		payment := query.GetPaymentByPaymentId(ctx, searchKey)
 		if payment != nil && payment.UserId > 0 && payment.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, uint64(payment.UserId))
-			if user != nil {
+			if user != nil && mainMap[user.Id] == nil {
 				mainList = append(mainList, user)
+				mainMap[user.Id] = user
 			}
 		}
 	}
 	if len(mainList) < 10 {
 		//like search
 		var likeList []*entity.UserAccount
-		_ = dao.UserAccount.Ctx(ctx).
+		m := dao.UserAccount.Ctx(ctx)
+		_ = m.
 			Where(dao.UserAccount.Columns().MerchantId, merchantId).
-			WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").
-			WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+searchKey+"%").
-			WhereOrLike(dao.UserAccount.Columns().LastName, "%"+searchKey+"%").
-			WhereOrLike(dao.UserAccount.Columns().CompanyName, "%"+searchKey+"%").
+			Where(m.Builder().WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").
+				WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+searchKey+"%").
+				WhereOrLike(dao.UserAccount.Columns().LastName, "%"+searchKey+"%").
+				WhereOrLike(dao.UserAccount.Columns().CompanyName, "%"+searchKey+"%")).
 			WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
 			Order(sortKey).
 			Limit(0, 10).
 			OmitEmpty().Scan(&likeList)
 		if len(likeList) > 0 {
-			for _, item := range likeList {
-				mainList = append(mainList, item)
+			for _, user := range likeList {
+				if mainMap[user.Id] == nil {
+					mainList = append(mainList, user)
+					mainMap[user.Id] = user
+				}
 			}
 		}
 	}
