@@ -14,7 +14,7 @@ type ListRes struct {
 
 type SetupReq struct {
 	g.Meta        `path:"/setup" tags:"Gateway" method:"post" summary:"Gateway Setup"`
-	GatewayName   string `json:"gatewayName"  dc:"GatewayName, stripe|paypal" v:"required"`
+	GatewayName   string `json:"gatewayName"  dc:"GatewayName, stripe|paypal|changelly" v:"required"`
 	GatewayKey    string `json:"gatewayKey"  dc:"GatewayKey" `
 	GatewaySecret string `json:"gatewaySecret"  dc:"GatewaySecret" `
 }

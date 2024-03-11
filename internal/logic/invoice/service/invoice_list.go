@@ -105,12 +105,13 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil
 }
 
-func SearchInvoice(ctx context.Context, searchKey string) (list []*entity.Invoice, err error) {
+func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*entity.Invoice, err error) {
 	//Will Search
 	var mainList []*entity.Invoice
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
 	_ = dao.Invoice.Ctx(ctx).
+		Where(dao.Invoice.Columns().MerchantId, merchantId).
 		WhereOr(dao.Invoice.Columns().InvoiceId, searchKey).
 		WhereOr(dao.Invoice.Columns().SendEmail, searchKey).
 		WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
@@ -121,6 +122,7 @@ func SearchInvoice(ctx context.Context, searchKey string) (list []*entity.Invoic
 		//模糊查询
 		var likeList []*entity.Invoice
 		_ = dao.Invoice.Ctx(ctx).
+			Where(dao.Invoice.Columns().MerchantId, merchantId).
 			WhereOrLike(dao.Invoice.Columns().InvoiceId, "%"+searchKey+"%").
 			WhereOrLike(dao.Invoice.Columns().InvoiceName, "%"+searchKey+"%").
 			WhereOrLike(dao.Invoice.Columns().SendEmail, "%"+searchKey+"%").

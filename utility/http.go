@@ -3,32 +3,26 @@ package utility
 import (
 	"bytes"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"io"
 	"net/http"
 )
 
 func SendRequest(url string, method string, data []byte, headers map[string]string) ([]byte, error) {
-	// 创建一个字节数组读取器，用于将数据传递给请求体
 	bodyReader := bytes.NewReader(data)
-
-	// 创建一个POST请求
 	request, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
 		return nil, err
 	}
-
-	// 设置自定义头部信息
 	for key, value := range headers {
 		request.Header.Set(key, value)
 	}
-
-	// 发送请求
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
 		return nil, err
 	}
-	// 关闭响应体
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
@@ -40,6 +34,8 @@ func SendRequest(url string, method string, data []byte, headers map[string]stri
 	if err != nil {
 		return nil, err
 	}
-
+	if response.StatusCode != 200 {
+		return nil, gerror.NewCode(gcode.New(response.StatusCode, response.Status, response.Status+" "+string(responseBody)), response.Status+" "+string(responseBody))
+	}
 	return responseBody, nil
 }

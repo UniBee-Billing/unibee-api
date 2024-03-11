@@ -22,7 +22,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 	}
 	if strings.HasPrefix(req.SearchKey, "in") {
 		one := query.GetInvoiceByInvoiceId(ctx, req.SearchKey)
-		if one != nil {
+		if one != nil && one.MerchantId == _interface.GetMerchantId(ctx) {
 			searchResult.PrecisionMatchObject = &search.PrecisionMatchObject{
 				Type: "invoice",
 				Id:   req.SearchKey,
@@ -33,7 +33,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 		searchInt, err := strconv.Atoi(req.SearchKey)
 		if err == nil {
 			one := query.GetUserAccountById(ctx, uint64(searchInt))
-			if one != nil {
+			if one != nil && one.MerchantId == _interface.GetMerchantId(ctx) {
 				searchResult.PrecisionMatchObject = &search.PrecisionMatchObject{
 					Type: "user",
 					Id:   req.SearchKey,
@@ -46,7 +46,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 	if err == nil {
 		searchResult.UserAccounts = searchUser
 	}
-	searchInvoice, err := service.SearchInvoice(ctx, req.SearchKey)
+	searchInvoice, err := service.SearchInvoice(ctx, _interface.GetMerchantId(ctx), req.SearchKey)
 	if err == nil {
 		searchResult.Invoices = searchInvoice
 	}
