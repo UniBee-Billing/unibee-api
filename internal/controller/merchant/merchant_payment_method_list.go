@@ -1,4 +1,4 @@
-package user
+package merchant
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 
-	"unibee/api/user/payment"
+	"unibee/api/merchant/payment"
 )
 
 func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodListReq) (res *payment.MethodListRes, err error) {

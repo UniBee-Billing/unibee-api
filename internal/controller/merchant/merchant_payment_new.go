@@ -102,6 +102,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			MerchantId:        merchantInfo.Id,
 			CompanyId:         merchantInfo.CompanyId,
 			ReturnUrl:         req.RedirectUrl,
+			GasPayer:          req.GasPayer,
 		},
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,

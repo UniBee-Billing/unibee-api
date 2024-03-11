@@ -67,6 +67,7 @@ type PaymentColumns struct {
 	BalanceEnd             string // balance_end, utc time
 	InvoiceData            string //
 	GatewayPaymentMethod   string //
+	GasPayer               string // who pay the gas, merchant|user
 }
 
 // paymentColumns holds the columns for table payment.
@@ -118,6 +119,7 @@ var paymentColumns = PaymentColumns{
 	BalanceEnd:             "balance_end",
 	InvoiceData:            "invoice_data",
 	GatewayPaymentMethod:   "gateway_payment_method",
+	GasPayer:               "gas_payer",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

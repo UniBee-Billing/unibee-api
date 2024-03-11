@@ -9,7 +9,6 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/api/changelly"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
@@ -17,7 +16,7 @@ import (
 
 var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"stripe":    &Stripe{},
-	"changelly": &changelly.Changelly{},
+	"changelly": &Changelly{},
 	"paypal":    &Paypal{},
 	"invalid":   &Invalid{},
 	"0":         &Blank{},
@@ -58,7 +57,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 	return res, err
 }
 
-func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -71,13 +70,13 @@ func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string
 		}
 	}()
 	startTime := time.Now()
-	err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
+	gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
 
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayTest cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
-	return err
+	return gatewayType, err
 }
 
 func (p GatewayProxy) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
@@ -124,7 +123,7 @@ func (p GatewayProxy) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context,
 	return res, err
 }
 
-func (p GatewayProxy) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
+func (p GatewayProxy) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *ro.GatewayUserPaymentMethodReq) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -138,7 +137,7 @@ func (p GatewayProxy) GatewayUserPaymentMethodListQuery(ctx context.Context, gat
 	}()
 	startTime := time.Now()
 
-	res, err = p.getRemoteGateway().GatewayUserPaymentMethodListQuery(ctx, gateway, userId)
+	res, err = p.getRemoteGateway().GatewayUserPaymentMethodListQuery(ctx, gateway, req)
 
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserPaymentMethodListQuery cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {

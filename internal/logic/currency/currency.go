@@ -33,7 +33,8 @@ func GetMerchantCurrencyMap() map[string]*ro.Currency {
 	return currencyMap
 }
 
-func IsCurrencySupport(currency string) bool {
+func IsFiatCurrencySupport(currency string) bool {
+	//Fiat Currency Check
 	if len(currency) == 0 {
 		return false
 	}

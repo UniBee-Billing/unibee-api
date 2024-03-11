@@ -57,4 +57,5 @@ type Payment struct {
 	BalanceEnd             int64       `json:"balanceEnd"             description:"balance_end, utc time"`                                                  // balance_end, utc time
 	InvoiceData            string      `json:"invoiceData"            description:""`                                                                       //
 	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
+	GasPayer               string      `json:"gasPayer"               description:"who pay the gas, merchant|user"`                                         // who pay the gas, merchant|user
 }

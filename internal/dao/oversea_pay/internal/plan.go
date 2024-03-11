@@ -45,6 +45,7 @@ type PlanColumns struct {
 	CreateTime                string // create utc time
 	ExtraMetricData           string //
 	MetaData                  string // meta_data(json)
+	GasPayer                  string // who pay the gas, merchant|user
 }
 
 // planColumns holds the columns for table plan.
@@ -74,6 +75,7 @@ var planColumns = PlanColumns{
 	CreateTime:                "create_time",
 	ExtraMetricData:           "extra_metric_data",
 	MetaData:                  "meta_data",
+	GasPayer:                  "gas_payer",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.

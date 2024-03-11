@@ -52,7 +52,10 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
-	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
+	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
+	if len(req.GasPayer) > 0 {
+		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
+	}
 
 	//check metricLimitList
 	if len(req.MetricLimits) > 0 {
@@ -122,6 +125,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 		Status:                    consts.PlanStatusEditable,
 		CreateTime:                gtime.Now().Timestamp(),
 		MetaData:                  utility.MarshalToJsonString(req.Metadata),
+		GasPayer:                  req.GasPayer,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -145,8 +149,12 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
-	utility.Assert(currency.IsCurrencySupport(req.Currency), "currency not support")
+	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+	if len(req.GasPayer) > 0 {
+		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
+	}
+
 	if strings.ToLower(req.IntervalUnit) == "day" {
 		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
 	} else if strings.ToLower(req.IntervalUnit) == "month" {
@@ -203,6 +211,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 		dao.Plan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
 		dao.Plan.Columns().GatewayProductName:        req.ProductName,
 		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
+		dao.Plan.Columns().GasPayer:                  req.GasPayer,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)

@@ -35,4 +35,5 @@ type Plan struct {
 	CreateTime                int64       `json:"createTime"                description:"create utc time"`                                           // create utc time
 	ExtraMetricData           string      `json:"extraMetricData"           description:""`                                                          //
 	MetaData                  string      `json:"metaData"                  description:"meta_data(json)"`                                           // meta_data(json)
+	GasPayer                  string      `json:"gasPayer"                  description:"who pay the gas, merchant|user"`                            // who pay the gas, merchant|user
 }

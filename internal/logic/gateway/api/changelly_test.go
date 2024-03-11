@@ -1,4 +1,4 @@
-package changelly
+package api
 
 import (
 	"context"

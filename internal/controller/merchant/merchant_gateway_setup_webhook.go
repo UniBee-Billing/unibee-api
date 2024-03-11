@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	_interface "unibee/internal/interface"
+	gateway2 "unibee/internal/logic/gateway"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -16,5 +17,5 @@ func (c *ControllerGateway) SetupWebhook(ctx context.Context, req *gateway.Setup
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "merchant not match")
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 
-	return &gateway.SetupWebhookRes{}, nil
+	return &gateway.SetupWebhookRes{GatewayWebhookUrl: gateway2.GetPaymentWebhookEntranceUrl(req.GatewayId)}, nil
 }

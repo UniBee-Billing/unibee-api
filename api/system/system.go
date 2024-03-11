@@ -25,7 +25,6 @@ type ISystemInvoice interface {
 
 type ISystemPayment interface {
 	PaymentCallbackAgain(ctx context.Context, req *payment.PaymentCallbackAgainReq) (res *payment.PaymentCallbackAgainRes, err error)
-	GatewayPaymentMethodList(ctx context.Context, req *payment.GatewayPaymentMethodListReq) (res *payment.GatewayPaymentMethodListRes, err error)
 }
 
 type ISystemRefund interface {

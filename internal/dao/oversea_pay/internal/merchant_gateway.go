@@ -20,54 +20,56 @@ type MerchantGatewayDao struct {
 
 // MerchantGatewayColumns defines and stores column names for table merchant_gateway.
 type MerchantGatewayColumns struct {
-	Id               string // gateway_id
-	MerchantId       string // merchant_id
-	EnumKey          string // enum key , match in gateway implementation
-	GatewayType      string // gateway type，null or 0-Payment Type ｜ 1-Subscription Type
-	GatewayName      string // gateway name
-	Name             string // name
-	SubGateway       string // sub_gateway_enum
-	BrandData        string //
-	Logo             string // gateway logo
-	Host             string // pay host
-	GatewayAccountId string // gateway account id
-	GatewayKey       string //
-	GatewaySecret    string // secret
-	Custom           string // custom
-	GmtCreate        string // create time
-	GmtModify        string // update time
-	Description      string // description
-	WebhookKey       string // webhook_key
-	WebhookSecret    string // webhook_secret
-	UniqueProductId  string // unique  gateway productId, only stripe need
-	CreateTime       string // create utc time
-	IsDeleted        string // 0-UnDeleted，1-Deleted
+	Id                    string // gateway_id
+	MerchantId            string // merchant_id
+	EnumKey               string // enum key , match in gateway implementation
+	GatewayType           string // gateway type，1-Default｜ 2-Crypto
+	GatewayName           string // gateway name
+	Name                  string // name
+	SubGateway            string // sub_gateway_enum
+	BrandData             string //
+	Logo                  string // gateway logo
+	Host                  string // pay host
+	GatewayAccountId      string // gateway account id
+	GatewayKey            string //
+	GatewaySecret         string // secret
+	Custom                string // custom
+	GmtCreate             string // create time
+	GmtModify             string // update time
+	Description           string // description
+	WebhookKey            string // webhook_key
+	WebhookSecret         string // webhook_secret
+	UniqueProductId       string // unique  gateway productId, only stripe need
+	CreateTime            string // create utc time
+	IsDeleted             string // 0-UnDeleted，1-Deleted
+	CryptoReceiveCurrency string //
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
 var merchantGatewayColumns = MerchantGatewayColumns{
-	Id:               "id",
-	MerchantId:       "merchant_id",
-	EnumKey:          "enum_key",
-	GatewayType:      "gateway_type",
-	GatewayName:      "gateway_name",
-	Name:             "name",
-	SubGateway:       "sub_gateway",
-	BrandData:        "brand_data",
-	Logo:             "logo",
-	Host:             "host",
-	GatewayAccountId: "gateway_account_id",
-	GatewayKey:       "gateway_key",
-	GatewaySecret:    "gateway_secret",
-	Custom:           "custom",
-	GmtCreate:        "gmt_create",
-	GmtModify:        "gmt_modify",
-	Description:      "description",
-	WebhookKey:       "webhook_key",
-	WebhookSecret:    "webhook_secret",
-	UniqueProductId:  "unique_product_id",
-	CreateTime:       "create_time",
-	IsDeleted:        "is_deleted",
+	Id:                    "id",
+	MerchantId:            "merchant_id",
+	EnumKey:               "enum_key",
+	GatewayType:           "gateway_type",
+	GatewayName:           "gateway_name",
+	Name:                  "name",
+	SubGateway:            "sub_gateway",
+	BrandData:             "brand_data",
+	Logo:                  "logo",
+	Host:                  "host",
+	GatewayAccountId:      "gateway_account_id",
+	GatewayKey:            "gateway_key",
+	GatewaySecret:         "gateway_secret",
+	Custom:                "custom",
+	GmtCreate:             "gmt_create",
+	GmtModify:             "gmt_modify",
+	Description:           "description",
+	WebhookKey:            "webhook_key",
+	WebhookSecret:         "webhook_secret",
+	UniqueProductId:       "unique_product_id",
+	CreateTime:            "create_time",
+	IsDeleted:             "is_deleted",
+	CryptoReceiveCurrency: "crypto_receive_currency",
 }
 
 // NewMerchantGatewayDao creates and returns a new DAO object for table data access.

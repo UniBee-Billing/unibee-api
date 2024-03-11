@@ -270,6 +270,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		GatewayDefaultPaymentMethod: req.PaymentMethodId,
 		CreateTime:                  gtime.Now().Timestamp(),
 		MetaData:                    utility.MarshalToJsonString(req.Metadata),
+		GasPayer:                    prepare.Plan.GasPayer,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -314,6 +315,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 				CompanyId:         prepare.Merchant.CompanyId,
 				BillingReason:     prepare.Invoice.InvoiceName,
 				ReturnUrl:         req.ReturnUrl,
+				GasPayer:          prepare.Plan.GasPayer,
 			},
 			ExternalUserId: strconv.FormatInt(one.UserId, 10),
 			Email:          prepare.Email,

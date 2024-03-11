@@ -18,6 +18,7 @@ type NewReq struct {
 	CountryCode       string            `json:"countryCode" dc:"CountryCode"`
 	Items             []*Item           `json:"items" dc:"Items"`
 	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map"`
+	GasPayer          string            `json:"gasPayer" dc:"who pay the gas, merchant|user"`
 }
 
 type NewRes struct {

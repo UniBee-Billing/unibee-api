@@ -59,4 +59,5 @@ type Payment struct {
 	BalanceEnd             interface{} // balance_end, utc time
 	InvoiceData            interface{} //
 	GatewayPaymentMethod   interface{} //
+	GasPayer               interface{} // who pay the gas, merchant|user
 }

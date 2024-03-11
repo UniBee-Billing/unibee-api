@@ -20,7 +20,7 @@ func (b Blank) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatewa
 	panic("implement me")
 }
 
-func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -35,7 +35,7 @@ func (b Blank) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatewa
 	panic("implement me")
 }
 
-func (b Blank) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
+func (b Blank) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *ro.GatewayUserPaymentMethodReq) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

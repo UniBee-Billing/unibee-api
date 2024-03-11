@@ -67,6 +67,7 @@ type SubscriptionColumns struct {
 	CreateTime                  string // create utc time
 	TestClock                   string // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	MetaData                    string // meta_data(json)
+	GasPayer                    string // who pay the gas, merchant|user
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -118,6 +119,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CreateTime:                  "create_time",
 	TestClock:                   "test_clock",
 	MetaData:                    "meta_data",
+	GasPayer:                    "gas_payer",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

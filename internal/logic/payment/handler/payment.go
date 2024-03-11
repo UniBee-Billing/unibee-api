@@ -439,6 +439,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq, err error, payment *entity.Payment) error {
+	if len(payment.GatewayPaymentMethod) == 0 {
+		return nil
+	}
 	_, err = dao.GatewayUser.Ctx(ctx).Data(g.Map{
 		dao.GatewayUser.Columns().GatewayDefaultPaymentMethod: req.GatewayPaymentMethod,
 	}).Where(dao.GatewayUser.Columns().UserId, payment.UserId).Where(dao.GatewayUser.Columns().GatewayId, payment.GatewayId).OmitNil().Update()
@@ -472,11 +475,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 				PaymentId:              one.PaymentId,
 				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:            gatewayPaymentRo.TotalAmount,
 				PayStatusEnum:          consts.PaymentFailed,
-				PaidTime:               gatewayPaymentRo.PayTime,
-				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:          0,
 				Reason:                 gatewayPaymentRo.Reason,
 			})
 			if err != nil {
@@ -487,11 +486,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.Gateway
 				PaymentId:              one.PaymentId,
 				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
-				TotalAmount:            gatewayPaymentRo.TotalAmount,
 				PayStatusEnum:          consts.PaymentCancelled,
-				PaidTime:               gatewayPaymentRo.PayTime,
-				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
-				CaptureAmount:          0,
 				Reason:                 gatewayPaymentRo.Reason,
 			})
 			if err != nil {

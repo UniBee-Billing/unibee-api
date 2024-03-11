@@ -37,7 +37,7 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	panic("implement me")
 }
 
-func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (err error) {
+func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -52,7 +52,7 @@ func (p Paypal) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatew
 	panic("implement me")
 }
 
-func (p Paypal) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
+func (p Paypal) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *ro.GatewayUserPaymentMethodReq) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

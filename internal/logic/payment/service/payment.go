@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"strings"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -35,7 +36,13 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
-	utility.Assert(currency.IsCurrencySupport(createPayContext.Pay.Currency), "currency not support")
+	if createPayContext.Gateway.GatewayType != consts.GatewayTypeCrypto {
+		utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
+	} else {
+		//crypto payment
+		utility.Assert(len(createPayContext.Pay.GasPayer) > 0, "crypto payment should contain gasPayer")
+		utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
+	}
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
@@ -190,6 +197,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			CompanyId:         merchantInfo.CompanyId,
 			Automatic:         1,
 			BillingReason:     invoice.InvoiceName,
+			GasPayer:          sub.GasPayer,
 		},
 		ExternalUserId:       strconv.FormatInt(sub.UserId, 10),
 		Email:                email,

@@ -35,4 +35,5 @@ type SetupWebhookReq struct {
 	GatewayId uint64 `json:"gatewayId"  dc:"GatewayId" v:"required"`
 }
 type SetupWebhookRes struct {
+	GatewayWebhookUrl string `json:"gatewayWebhookUrl"  dc:"GatewayWebhookUrl"`
 }

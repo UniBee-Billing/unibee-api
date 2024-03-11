@@ -79,14 +79,12 @@ type GatewayPaymentRo struct {
 	BalanceStart         int64       `json:"balanceStart"              `
 	BalanceEnd           int64       `json:"balanceEnd"              `
 	Reason               string      `json:"reason"              `
-	UniqueId             string      `json:"uniqueId"              `
 	PayTime              *gtime.Time `json:"payTime" `
 	CreateTime           *gtime.Time `json:"createTime" `
 	CancelTime           *gtime.Time `json:"cancelTime" `
 	CancelReason         string      `json:"cancelReason" `
 	PaymentData          string      `json:"paymentData" `
 	GatewayId            uint64      `json:"gatewayId"         `
-	GatewayUserId        string      `json:"gatewayUserId"         `
 	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
 	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `
 }
@@ -129,6 +127,11 @@ type PaymentMethod struct {
 	Id   string      `json:"id"`
 	Type string      `json:"type"`
 	Data *gjson.Json `json:"data"`
+}
+
+type GatewayUserPaymentMethodReq struct {
+	UserId           int64  `json:"userId"`
+	GatewayPaymentId string `json:"gatewayPaymentId"`
 }
 
 type GatewayUserPaymentMethodListInternalResp struct {
