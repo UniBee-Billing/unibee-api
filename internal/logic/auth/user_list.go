@@ -98,7 +98,7 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 	var sortKey = "gmt_create desc"
 	_ = dao.UserAccount.Ctx(ctx).
 		WhereOr(dao.UserAccount.Columns().Id, searchKey).
-		WhereOr(dao.UserAccount.Columns().MerchantId, merchantId).
+		Where(dao.UserAccount.Columns().MerchantId, merchantId).
 		WhereOr(dao.UserAccount.Columns().SubscriptionId, searchKey).
 		WhereOr(dao.UserAccount.Columns().VATNumber, searchKey).
 		WhereIn(dao.UserAccount.Columns().IsDeleted, isDeletes).
@@ -108,14 +108,14 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 	if len(mainList) < 10 {
 		//继续查 InvoiceId 和 PaymentId
 		invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
-		if invoice != nil && invoice.UserId > 0 {
+		if invoice != nil && invoice.UserId > 0 && invoice.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
 			if user != nil {
 				mainList = append(mainList, user)
 			}
 		}
 		payment := query.GetPaymentByPaymentId(ctx, searchKey)
-		if payment != nil && payment.UserId > 0 {
+		if payment != nil && payment.UserId > 0 && payment.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, uint64(payment.UserId))
 			if user != nil {
 				mainList = append(mainList, user)
@@ -126,6 +126,7 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		//like search
 		var likeList []*entity.UserAccount
 		_ = dao.UserAccount.Ctx(ctx).
+			Where(dao.UserAccount.Columns().MerchantId, merchantId).
 			WhereOrLike(dao.UserAccount.Columns().Email, "%"+searchKey+"%").
 			WhereOrLike(dao.UserAccount.Columns().FirstName, "%"+searchKey+"%").
 			WhereOrLike(dao.UserAccount.Columns().LastName, "%"+searchKey+"%").
