@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unibee/api/merchant/plan"
 	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
 	ro2 "unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -29,6 +30,7 @@ type SubscriptionPlanListInternalReq struct {
 func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes, error) {
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
+	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
 	var addonIds []int64
 	if len(one.BindingAddonIds) > 0 {
 		//初始化

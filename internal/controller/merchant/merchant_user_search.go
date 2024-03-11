@@ -2,10 +2,9 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/merchant/user"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
-
-	"unibee/api/merchant/user"
 )
 
 func (c *ControllerUser) Search(ctx context.Context, req *user.SearchReq) (res *user.SearchRes, err error) {

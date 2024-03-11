@@ -2,7 +2,9 @@ package merchant
 
 import (
 	"context"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
 )
@@ -12,6 +14,7 @@ func (c *ControllerSubscription) Detail(ctx context.Context, req *subscription.D
 	if err != nil {
 		return nil, err
 	}
+	utility.Assert(detail.Subscription.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
 	return &subscription.DetailRes{
 		User:                                detail.User,
 		Subscription:                        detail.Subscription,

@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -80,6 +81,7 @@ func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *ro.Merc
 			Where(dao.MerchantMetric.Columns().Id, merchantMetricId).
 			Scan(&one)
 		if err == nil && one != nil {
+			utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
 			return &ro.MerchantMetricVo{
 				Id:                  one.Id,
 				MerchantId:          one.MerchantId,
