@@ -42,6 +42,7 @@ type SubscriptionSimplify struct {
 	CreateTime         int64             `json:"createTime"                  description:"create utc time"`                                                                                                                                                // create utc time
 	TestClock          int64             `json:"testClock"                   description:"test_clock, simulator clock for subscription, if set , sub will out of cronjob controll"`                                                                        // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	Metadata           map[string]string `json:"metadata" description:""`
+	GasPayer           string            `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 }
 
 func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
@@ -90,5 +91,6 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 		CreateTime:         one.CreateTime,
 		TestClock:          one.TestClock,
 		Metadata:           metadata,
+		GasPayer:           one.GasPayer,
 	}
 }

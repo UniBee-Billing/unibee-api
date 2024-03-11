@@ -27,6 +27,7 @@ type PlanSimplify struct {
 	ProductDescription string            `json:"productDescription" description:"product description"`                                              // product description
 	ExtraMetricData    string            `json:"extraMetricData"           description:""`                                                          //
 	Metadata           map[string]string `json:"metadata" description:""`
+	GasPayer           string            `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 }
 
 func SimplifyPlan(one *entity.Plan) *PlanSimplify {
@@ -61,6 +62,7 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 		ProductDescription: one.GatewayProductDescription,
 		ExtraMetricData:    one.ExtraMetricData,
 		Metadata:           metadata,
+		GasPayer:           one.GasPayer,
 	}
 }
 
