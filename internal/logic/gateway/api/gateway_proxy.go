@@ -9,17 +9,19 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/gateway/api/changelly"
 	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
 
 var GatewayNameMapping = map[string]_interface.GatewayInterface{
-	"stripe":   &Stripe{},
-	"paypal":   &Paypal{},
-	"invalid":  &Invalid{},
-	"0":        &Blank{},
-	"autotest": &AutoTest{},
+	"stripe":    &Stripe{},
+	"changelly": &changelly.Changelly{},
+	"paypal":    &Paypal{},
+	"invalid":   &Invalid{},
+	"0":         &Blank{},
+	"autotest":  &AutoTest{},
 }
 
 type GatewayProxy struct {
@@ -30,7 +32,7 @@ type GatewayProxy struct {
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayNameMapping[p.GatewayName]
-	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal")
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal|changelly")
 	return
 }
 

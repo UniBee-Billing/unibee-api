@@ -1,0 +1,2260 @@
+openapi: 3.0.3
+info:
+  title: 'Changelly Pay API'
+  version: ''
+  x-logo:
+    url: /images/logo.png
+    altText: Logo
+  description: >
+    # Introduction
+
+
+    Merchant Solution is crypto acquiring based on the C2C (crypto-to-crypto)
+    model for merchants who sell any kind of goods or services.
+
+
+
+    ## Welcome to Changelly Pay API
+
+
+    Changelly Pay is a reliable cryptocurrency payment solution, operating on
+    a C2C (crypto-to-crypto) model, engineered to simplify transactions for
+    merchants across a variety of goods. Integrating our API allows merchants to
+    accept a wide range of cryptocurrencies for their goods or services with
+    ease.
+
+
+    The Changelly Pay API makes integrating cryptocurrency payments into your
+    business
+
+    straightforward. It enables customers to pay directly from their computer or
+    mobile device, using the blockchain as the settlement network.
+
+
+    With Changelly Pay, there's no need to build and maintain infrastructure
+    to monitor the blockchain. We create payment addresses for you, and
+    continuously monitor the blockchain to identify when payments have been
+    made.
+
+
+
+    ## Benefits
+
+
+    * Easy and fast API integration.
+
+    * Competitive pricing.
+
+    * 24/7 technical support.
+
+    * Speedy payment processing times.
+
+    * Wide range of supported coins.
+
+
+
+    ## API Usage Flow
+
+
+    In the realm of Changelly Pay, we simplify the transaction flow to ensure
+    a seamless experience for both merchants and their customers. Here is a
+    step-by-step breakdown of the process from the moment a user decides to make
+    a purchase or top-up a balance, to the merchant delivering the service or
+    goods:
+
+    1. User Initiation:
+
+        A user is on the merchant's site and wishes to purchase a product, avail a service, or top-up their balance.
+
+    2. Payment Method Selection:
+
+        The user selects cryptocurrency as the payment method.
+
+    3. Payment Creation:
+
+        The merchant invokes the "Create a payment" method via Changelly Pay API.
+
+    4. Parameter Verification:
+
+        We verify the parameters provided in the method call.
+
+        If any parameter is not as expected, an error is returned to the merchant.
+
+    5. Payment Link Generation:
+
+        Upon successful verification, a payment link is generated and returned to the merchant.
+
+    6. Redirect to Changelly Pay Interface:
+
+        The merchant redirects the user to the Changelly Pay interface using the provided payment link.
+
+    7. Cryptocurrency Selection:
+
+        The user selects the cryptocurrency they wish to use for payment.
+
+    8. Amount Confirmation:
+
+        The required amount to be sent is displayed to the user (or the exchange rate, in case of a variable amount balance top-up).
+
+    9. Payment Initiation:
+
+        The user sends the specified amount of cryptocurrency to the provided address.
+
+    10. Payment Monitoring:
+
+        We monitor the blockchain to confirm the receipt of funds.
+
+    11. Transaction Confirmation Callback:
+
+        Once the funds are received, a callback is sent to the merchant confirming the successful transaction.
+
+    12. Service/Good Delivery or Balance Top-Up:
+
+        The merchant then provides the service, sends the goods, or tops up the user's balance as per the initial request.
+
+    This structured approach ensures a smooth and straightforward process for
+    both the user and the merchant, making transactions hassle-free and
+    efficient.
+
+
+
+    ### Payments With Price — Invoices
+
+
+    Invoice life cycle includes the following stages:
+
+
+    1. Initiate payment.
+
+    2. Set payment method.
+
+    3. Declaration payment payin.
+
+    4. (optional) Swap payment payin.
+
+    5. Confirm payment.
+
+    6. Complete payment.
+
+
+
+    #### Initiate Payment
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+
+
+        M ->> P: CreatePayment(nominal_amount, nominal_currency, pending_deadline_at)
+
+        P -->> M: Payment(payment_id, payment_url)
+
+        opt The customer specifies payment details
+            C -->> M: customer_email, payment_data
+            M ->> P: UpdatePayment(customer_email, payment_data)
+        end
+    ```
+
+
+    Requests:
+
+
+    * 1 — [Create a payment](#tag/Payments/operation/CreatePayment)
+
+    * 4 — [Update a payment](#tag/Payments/operation/UpdatePayment)
+
+
+
+    #### Set Payment Method
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+
+
+        M ->> P: GetPaymentMethods(payment_id)
+        P -->> M: []PaymentMethod(currency, network)
+        M -->> C: []PaymentMethod(currency, network)
+        C -->> M: currency, network
+
+        M ->> P: GetExpectedAmount(currency, network)
+        P -->> M: PaymentMethod(amount, currency, network)
+
+        M ->> P: SetPaymentMethod(payment_id, currency, network)
+
+        P -->> M: SelectedPaymentMethod(address)
+        P --) M: Callback(state=WAITING)
+
+        M -->> C: Redirect(payment_url)
+
+        P -->> C: address
+    ```
+
+
+    Requests:
+
+
+    * 1 — [Get payment methods](#tag/Payments/operation/GetPaymentMethods)
+
+    * 5 — [Get expected amount](#tag/Payments/operation/GetExpectedAmount)
+
+    * 7 — [Set payment method](#tag/Payments/operation/SetPaymentMethod)
+
+
+    Callbacks:
+
+
+    * 9 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Payin Declaration
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        C ->> B: SendCrypto(address)
+
+        loop
+            P ->> B: FetchTransactions(address)
+            opt
+                B -->> P: []Transaction(hash, confirmations, amount)
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 4, 5 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Payin Swapping
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        loop []Transaction
+            P ->> B: GetTransaction(hash)
+            B -->> P: Transaction(confirmations)
+            opt confirmations > 0
+                alt Success
+                    P ->> P: PreSwap(nominal_currency, holding_currency, amount)
+                else Failure
+                    P --) M: Callback(state=FAILED)
+                end
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 4, 5 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Confirmation
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        loop []Transaction
+            P ->> B: GetTransaction(hash)
+            B -->> P: Transaction(confirmations)
+
+            opt confirmations ≥ payin_confirmations
+                P ->> P: Swap(payin_currency, holding_currency, amount)
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 4, 5 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Completion
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        participant M as Merchant
+        participant P as Changelly Pay
+
+
+        alt amount ≥ nominal_amount
+            P ->> P: Transfer(amount)
+            P --) M: Callback(state=COMPLETED)
+        else amount < nominal_amount
+            P ->> P: FetchTransactions(address)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 2 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    ### Payments Without Price — Deposits
+
+
+    Invoice life cycle includes the following stages:
+
+
+    1. Initiate payment.
+
+    2. Set payment method.
+
+    3. Declaration payment payin.
+
+    4. (optional) Swap payment payin.
+
+    5. Confirm complete payment.
+
+
+
+    #### Initiate payment
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+
+
+        M ->> P: CreatePayment(nominal_currency, pending_deadline_at)
+
+        P -->> M: Payment(payment_id, payment_url)
+
+        opt The customer specifies payment details
+            C -->> M: customer_email, payment_data
+            M ->> P: UpdatePayment(customer_email, payment_data)
+        end
+    ```
+
+
+    Requests:
+
+
+    * 1 — [Create a payment](#tag/Payments/operation/CreatePayment)
+
+    * 4 — [Update a payment](#tag/Payments/operation/UpdatePayment)
+
+
+
+    #### Set Payment Method
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+
+
+        M ->> P: GetPaymentMethods(payment_id)
+        P -->> M: []PaymentMethod(currency, network)
+        M -->> C: []PaymentMethod(currency, network)
+
+        M ->> P: SetPaymentMethod(payment_id, currency, network)
+
+        P -->> M: SelectedPaymentMethod(address)
+        P --) M: Callback(state=WAITING)
+
+        M -->> C: Redirect(payment_url)
+
+        P -->> C: address
+    ```
+
+
+    Requests:
+
+
+    * 1 — [Get payment methods](#tag/Payments/operation/GetPaymentMethods)
+
+    * 4 — [Set payment method](#tag/Payments/operation/SetPaymentMethod)
+
+
+    Callbacks:
+
+
+    * 6 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Payin Declaration
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        actor C as Customer
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        C ->> B: SendCrypto(address)
+
+        loop
+            P ->> B: FetchTransactions(address)
+            opt
+                B -->> P: Transaction(hash, confirmations, amount)
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 4, 5 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Payin Swapping
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        loop
+            P ->> B: GetTransaction(hash)
+            B -->> P: Transaction(confirmations)
+            opt confirmations > 0
+                alt Success
+                    P ->> P: PreSwap(payin_currency, holding_currency, amount)
+                else Failure
+                    P --) M: Callback(state=FAILED)
+                end
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 4, 5 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    #### Payment Confirmation and Completion
+
+
+    ```mermaid
+
+    %%{init: {'theme': 'base', 'themeVariables': { 'activationBorderColor':
+    'black', 'primaryColor': 'white', 'primaryBorderColor': 'black',
+    'background': 'white', 'noteBkgColor': 'white', 'noteTextColor': 'black',
+    'noteBorderColor': 'black'}}}%%
+
+    sequenceDiagram
+        autonumber
+
+        participant M as Merchant
+        participant P as Changelly Pay
+        participant B as Blockchain
+
+
+        loop
+            P ->> B: GetTransaction(hash)
+            B -->> P: Transaction(confirmations)
+
+            opt confirmations ≥ payin_confirmations
+                P ->> P: Swap(payin_currency, holding_currency, amount)
+                P ->> P: FetchTransactions(address)
+                P --) M: Callback(state=COMPLETED)
+            end
+        end
+
+        opt Now() > pending_deadline_at
+            P --) M: Callback(state=CANCELED)
+        end
+
+        opt Now() > deadline_at
+            P --) M: Callback(state=FAILED)
+        end
+    ```
+
+
+    Callbacks:
+
+
+    * 6, 7 — [Send a callback](#tag/Callbacks/operation/Callback)
+
+
+
+    ## Available Cryptocurrencies
+
+
+    We are dedicated to offer a wide range of cryptocurrencies to accommodate
+    the diverse preferences of our merchant clients.
+
+
+    As of now, we support the following cryptocurrencies, and we are constantly
+    expanding this list in response to our clients' requests.
+
+
+    The supported cryptocurrencies at now are listed below in alphabetical order
+    along with their respective tickers:
+
+    * the most popular coins:
+      * **ADA** (Cardano)
+      * **ATOM** (Cosmos)
+      * **BNB** (Binance Coin)
+      * **BTC** (Bitcoin)
+      * **ETH** (Ethereum)
+      * **FIL** (Filecoin)
+      * **FTM** (Fantom)
+      * **HBAR** (Hedera Hashgraph)
+      * **LTC** (Litecoin)
+      * **SOL** (Solana)
+      * **TRX** (TRON)
+      * **USDT** (Tether)
+      * **XLM** (Stellar)
+      * **XRP** (Ripple)
+      * **ZEC** (Zcash)
+    * other coins:
+      * **1INCH** (1inch)
+      * **AAVE** (Aave)
+      * **AGIX** (SingularityNET)
+      * **ALGO** (Algorand)
+      * **APE** (ApeCoin)
+      * **AVAX** (Avalanche)
+      * **BCH** (Bitcoin Cash)
+      * **BLUR** (Blur)
+      * **CELO** (Celo)
+      * **CHZ** (Chiliz)
+      * **COMP** (Compound)
+      * **CRV** (Curve DAO Token)
+      * **CVX** (Convex Finance)
+      * **DAI** (Dai)
+      * **DASH** (Dash)
+      * **DOT** (Polkadot)
+      * **DYDX** (dYdX)
+      * **EGLD** (Elrond)
+      * **ENJ** (Enjin Coin)
+      * **EOS** (EOS.IO)
+      * **FLOW** (Flow)
+      * **GALA** (Gala)
+      * **GMX** (GamerCoin)
+      * **GNO** (Gnosis)
+      * **GRT** (The Graph)
+      * **ICP** (Internet Computer)
+      * **ICX** (ICON)
+      * **IMX** (Immutable X)
+      * **INJ** (NEAR Protocol)
+      * **IOTX** (IoTeX)
+      * **KAVA** (KAVA)
+      * **KSM** (Kusama)
+      * **LDO** (Lido DAO Token)
+      * **LINK** (Chainlink)
+      * **LRC** (Loopring)
+      * **MANA** (Decentraland)
+      * **MATIC** (Polygon)
+      * **MINA** (Mina Protocol)
+      * **NEAR** (NEAR Protocol)
+      * **NEXO** (Nexo)
+      * **OMG** (OMG Network)
+      * **OP** (Octopus Protocol)
+      * **QNT** (Quant)
+      * **QTUM** (Qtum)
+      * **RVN** (Ravencoin)
+      * **SAND** (The Sandbox)
+      * **SUSHI** (SushiSwap)
+      * **SXP** (Swipe)
+      * **THETA** (Theta Network)
+      * **TWT** (Trust Wallet Token)
+      * **UNI** (Uniswap)
+      * **USDC** (USD Coin)
+      * **VET** (VeChain)
+      * **WAVES** (Waves)
+      * **XEC** (eCash)
+      * **XEM** (NEM)
+      * **XTZ** (Tezos)
+      * **XYM** (Symbol)
+      * **YFI** (yearn.finance)
+      * **ZIL** (Zilliqa)
+      * **ZRX** (0x)
+
+
+    ## Support
+
+
+    Changelly Pay provides a support option.
+
+
+    In case of any technical issues, difficulties during the integration
+    process, or other concerns, you can contact the support team at
+    [psp@changelly.com](psp@changelly.com).
+
+
+    Also, you can request more features by contacting our development team.
+
+
+
+    # Terms
+
+
+    **API key**—a pair of private and public keys that identifies a merchant and
+    a project.
+
+
+    **Callback**—an asynchronous message emitted by us and caught by a merchant
+    when a payment changes its state.
+
+
+    **Crypto payin**—an operation of sending crypto to our deposit account. If
+    the customer specifies the desired sum, a single payment may involve
+    multiple crypto payins before their total amount reaches the specified
+    amount.
+
+
+    **Customer**—the user who interacts with a merchant's store.
+
+
+    **Expected amount**—an estimated final amount of payment after charging
+    fees.
+
+
+    **Holding currency**—the currency that denominates funds on the merchant
+    intermediate account. This currency determines the necessity of additional
+    conversions if the currency of a payment does not match it.
+
+
+    **Merchant**—a seller of goods who integrates payment methods we provide.
+
+
+    **Payment method**—a combination of the cryptocurrency of payment and its
+    hosting network.
+
+
+    **Payment**, invoice—an operation of transferring user crypto to a merchant.
+    The operation itself is committed by the user after they obtain a deposit
+    address.
+
+
+    **Project**—a scope of a merchant's product line tied to a separate
+    combination of arbitrary payment parameters and callbacks configuration.
+
+
+    **Swap**—an exchange operation executed at a predefined price that is
+    reserved for this operation for a short period of time.
+
+
+
+    # Types of Payments
+
+
+    Changelly Pay facilitates two kinds of payments.
+
+
+
+    ## Payments With Price — Invoices
+
+
+    This payment method is ideal for purchasing goods with a fixed price tag.
+
+    Upon payment, you'll receive a notification—a callback, which provides the
+    status, payment amount, and hash.
+
+
+    * If the payment isn't made, a `CANCELED` status will be sent.
+
+    * If the exact amount is paid, a `COMPLETED` status will be sent.
+
+    * If a lesser amount is sent, a `FAILED` status will be sent.
+
+
+    Customers have the option to cover the remaining amount within the payment
+    expiration time frame.
+
+
+    On the payment page, customers will be alerted about any additional amount
+    due. If the balance isn't covered, a callback with a `FAILED` status and
+    details will be sent upon invoice expiration.
+
+
+
+    ## Payments Without Price — Deposits
+
+
+    This method is Suitable for balance top-ups.
+
+
+    The key distinction here is that users can send any amount to top up their
+    USD or specified cryptocurrency balance. Unlike fixed price payments, this
+    method doesn't have a `FAILED` state due to a lower amount being sent.
+
+
+
+    # Getting Started
+
+
+    This section guides you through the initial setup on Changelly Pay.
+    Merchants can create an account on our site to obtain the necessary keys for
+    integration. Here are the steps to get you started.
+
+
+
+    ## Create an Account
+
+
+    Go to [pay.changelly.com](pay.changelly.com) and sign up.
+
+
+
+    ## Set Up Access to the API
+
+
+    The **Integrations** page contains the list of API keys and the callback
+    configuration.
+
+
+    This page allows creating, editing, and deleting API keys and modifying the
+    callbacks configuration.
+
+
+
+    ## Create API Key
+
+
+    1. Click **Integrations** in the sidebar.
+
+    2. In the **API Keys** section, click **Generate API Key**.
+
+    3. In the **Create API Key** pop-up, enter a title.
+
+    4. Enter a 2FA code.
+
+    5. Click **Continue**.
+
+    6. Click **Copy** icon next to the generated public and private keys or scan
+    QR codes.
+
+    7. Click **I saved Private Key, continue**.
+
+
+
+    ## Set Up Callbacks
+
+
+    For keeping track of the payment state, a merchant solution catches our
+    callbacks arriving to a specified URL.
+
+
+    1. Click **Integrations** in the sidebar.
+
+    2. In the **Callback URL configuration** section, click **Set up Callback
+    URL**.
+
+    3. In the **Set up Callback URL** pop-up, enter a callback URL.
+
+    4. Click **Save**.
+
+    5. Click **Copy** icon next to the generated callback public key.
+
+    6. Save the callback public key in a secured storage.
+
+
+
+    ## Initiate a Payment
+
+
+    With your account set up and your API keys generated, you are ready to
+    create a payment.
+
+
+    Navigate to the [Create a payment](#tag/Payments/operation/CreatePayment)
+    section to explore the API and initiate a payment.
+
+
+
+    # Connectivity
+
+
+    In each call, the merchant provides the following credentials:
+
+    * API key (a public key that identifies the combination of merchant and
+    project);
+
+    * signature (basically, the request payload signed by a private key).
+
+
+
+    ## API Keys
+
+
+    All requests detected from the merchant to us must contain the header
+    `X-Api-Key` with an API key (i.e., public key) unique to a project.
+
+
+    Before sending requests:
+
+    1. [Create an API key](#section/Getting-Started/Create-API-Key).
+
+    2. Save the keys in secure storage.
+
+
+
+    ## Sign Payment Request
+
+
+    In addition to an API key, each request directed to us must contain a
+    signature.
+
+
+    The signature should be passed via `X-Signature` header and be formed as
+    follows:
+
+    1. Create a payload using the request data and desired expiration timestamp:
+
+        `PAYLOAD` = `METHOD` + `":"` + `PATH` + `":"` + [EncodeBase64(`BODY`)] + `":"` + `TIMESTAMP` ,
+
+        where <br>
+        `METHOD`—an HTTP method, for example: `"POST"`, <br>
+        `PATH`—call URL, for example: `"/api/payment/v1/payments"`, <br>
+        `BODY`—request JSON payload stored in a string, <br>
+        `TIMESTAMP`—expiration UNIX timestamp in seconds.
+    2. Generate a hash from the payload and sign it with the private key and
+    serialize it:
+
+        `SIGNATURE` = EncodeBase64( RSASign( SHA256(`PAYLOAD`), `PRIVATE_KEY` ) ) ,
+
+        where <br>
+        `PRIVATE_KEY`—the private key from the API key with PEM delimiters, <br>
+        EncodeBase64()—encoding with Base64 algorithm (RFC 4648 compatible), <br>
+        RSASign()—signing the SHA-256 hash with the private key (PKCS#1 v1.5 format is suggested), <br>
+        SHA256()—generating an SHA-256 hash from the request payload.
+    3. Append the expiration timestamp to the signature and serialize the
+    result:
+
+        EncodeBase64( `SIGNATURE` + `":"` + `TIMESTAMP` ) ,
+
+        where <br>
+        `SIGNATURE`—an SHA-256 hash signed with the private key.
+    4. Put the resulting sequence to the `X-Signature` header of the request.
+
+
+    **NOTES:**
+
+    1. Request body is always a string and cannot be transmitted as a
+    programming language structure.
+
+    2. Operation of hashing and singing from step 2 are normally executed in a
+    single command.
+
+
+    **Example (NodeJS):**
+
+    ```javascript
+
+    const crypto = require('node:crypto');
+
+
+
+    // RSA private key
+
+    let privateKey = `
+
+    -----BEGIN PRIVATE KEY-----
+
+    ${PRIVATE_KEY}
+
+    -----END PRIVATE KEY-----
+
+    `;
+
+
+    let method = 'POST';
+
+
+    let path = '/api/payment/v1/payments';
+
+
+
+    // Request body
+
+    let bodyRaw = {
+        nominal_currency: 'USDT',
+        nominal_amount: '14.08'
+    };
+
+
+    let bodyJSON = JSON.stringify(bodyRaw);
+
+
+    let body = Buffer.from(bodyJSON)
+        .toString('base64');
+
+
+    // Time period before the expiration in seconds
+
+    let window = 3600;                      // 60 minutes
+
+
+    // Expiration timestamp in seconds
+
+    let timestamp = Math.floor(Date.now() / 1000) + window;
+
+
+
+    // Request payload
+
+    let payload = [
+        method,
+        path,
+        body,
+        timestamp
+    ]
+        .join(':');
+
+
+    // Sign a SHA256 payload hash with the RSA private key
+
+    let signature = Buffer.from(
+        [
+            crypto.sign('RSA-SHA256', payload, privateKey)
+                .toString('base64'),
+            timestamp
+        ]
+            .join(':')
+    )
+        .toString('base64');
+
+
+    // Send a request
+
+    let resource = 'BASE_URL' + path;
+
+
+    let options = {
+        method: method,
+        headers: {
+            'X-Api-Key': PUBLIC_KEY,
+            'X-Signature': signature,
+            'Content-Type': 'application/json'
+        },
+        body: bodyJSON
+    };
+
+
+    fetch(resource, options)
+        .then(response =>
+            response.json().then(body =>
+                console.log(body)
+            )
+        )
+        .catch(error =>
+            console.log(error)
+        );
+    ```
+
+
+    ## Verify Callback Signature
+
+
+    We sign our callback request the same way the merchant does it for their
+    outgoing calls. As a server, a merchant solution must be able to verify
+    signatures.
+
+
+    Such signatures are located in the same `X-Signature` header, produced the
+    same way, and expire after 5 seconds by default.
+
+
+    For being able to verify the hash part of a signature, the merchant [sets up
+    callbacks](#section/Getting-Started/Set-Up-Callbacks).
+
+
+    To verify a signature, perform the following common steps:
+
+    1. De-serialize the signature sequence.
+
+    2. Split the resulting string by the semicolon and extract the first entry
+    of resulting array:
+
+        EncodeBase64(`SIGNATURE`) + `":"` + `TIMESTAMP` = DecodeBase64(`X-Signature`) ,
+
+        where <br>
+        DecodeBase64()—decoding with Base64 algorithm.
+    3. De-serialize the entry with a signature.
+
+    4. Check if the 5–seconds sliding window is violated.
+
+    5. Recreate the payload by concatenating the JSON body and the expiration
+    timestamp:
+
+        `PAYLOAD` = `BODY` + `":"` + `TIMESTAMP`
+    6. Generate an SHA-256 hash from the payload:
+
+        SHA256(`PAYLOAD`)
+    7. Verify the resulting hash against the provided signature using our public
+    key and the payload.
+
+
+    **Example (NodeJS):**
+
+    ```javascript
+
+    const crypto = require('node:crypto');
+
+
+
+    // De-serialize a public key from the dashboard
+
+    const publicKeyRaw = PUBLIC_KEY;
+
+
+    const publicKey = Buffer
+        .from(publicKeyRaw, 'base64')
+        .toString('utf8');
+
+
+    /**
+     * Verifies a callback signature.
+     * @param {string} body - Request JSON body.
+     * @param {string} signatureHeader - The `X-Signature` header.
+     * @returns {boolean} The result of signature verification.
+    */
+
+    const verifyCallback = (body, signatureHeader) => {
+        if (!signatureHeader) {
+            return false
+        }
+
+        let [signature, timestamp] = Buffer
+            .from(signatureHeader, 'base64')
+            .toString('utf8')
+            .split(':');
+
+        signature = Buffer
+            .from(signature, 'base64');
+
+        if (timestamp < Math.floor(Date.now() / 1000)) {
+            return false
+        }
+
+        let payload = `${body}:${timestamp}`;
+
+        return crypto
+            .verify('RSA-SHA256', payload, publicKey, signature)
+    };
+
+    ```
+tags:
+  - name: Payments
+    description: >
+      Managing new payments.
+
+
+      The primary API endpoint for all production environment requests is
+      `api.pay.changelly.com`.
+
+
+      To interact with the Changelly Pay API, you will need to obtain API keys
+      (link to section) for authentication.
+  - name: Callbacks
+    description: Payment state callbacks.
+x-tagGroups:
+  - name: API Reference
+    description: >-
+      This specification contains methods of interactions between a merchant and
+      our system, meaning that the merchant implements corresponding logic on
+      their solution and sends calls described below.
+    tags:
+      - Payments
+      - Callbacks
+paths:
+  /api/payment/v1/payments:
+    post:
+      tags:
+        - Payments
+      operationId: CreatePayment
+      summary: Create a payment
+      parameters:
+        - $ref: '#/components/parameters/Signature'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPaymentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+  '/api/payment/v1/payments/{payment_id}':
+    parameters:
+      - $ref: '#/components/parameters/Signature'
+      - $ref: '#/components/parameters/PaymentId'
+    get:
+      tags:
+        - Payments
+      operationId: GetPayment
+      summary: Get a payment
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+    patch:
+      tags:
+        - Payments
+      operationId: UpdatePayment
+      summary: Update a payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePaymentRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+  '/api/payment/v1/payments/{payment_id}/payment_methods':
+    get:
+      tags:
+        - Payments
+      operationId: GetPaymentMethods
+      summary: Get payment methods
+      description: Returns a list of payment methods available for a payment.
+      parameters:
+        - $ref: '#/components/parameters/Signature'
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+  '/api/payment/v1/payments/{payment_id}/payment_methods/{currency}':
+    get:
+      tags:
+        - Payments
+      operationId: GetExpectedAmount
+      summary: Get expected amount
+      description: Returns an expected amount of payment given the fees.
+      parameters:
+        - $ref: '#/components/parameters/Signature'
+        - $ref: '#/components/parameters/PaymentId'
+        - name: currency
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{3,16}$'
+            minLength: 3
+            maxLength: 16
+          description: Currency code.
+          example: USDT20
+        - name: network
+          in: query
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{3,16}$'
+            minLength: 3
+            maxLength: 16
+          description: Network code.
+          example: ETH
+        - name: payin_amount
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 36
+          description: Amount
+          example: '14.08'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpectedAmount'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+  '/api/payment/v1/payments/{payment_id}/selected_payment_method':
+    put:
+      tags:
+        - Payments
+      operationId: SetPaymentMethod
+      summary: Set payment method
+      description: Sets the payment method for a payment.
+      parameters:
+        - $ref: '#/components/parameters/Signature'
+        - $ref: '#/components/parameters/PaymentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetPaymentMethod'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SelectedPaymentMethod'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '429':
+          $ref: '#/components/responses/429'
+        5XX:
+          $ref: '#/components/responses/5XX'
+      security:
+        - APIKeyAuth: []
+  /:
+    post:
+      tags:
+        - Callbacks
+      operationId: Callback
+      summary: Send a callback
+      description: >
+        We send calls with the payment status on updates.
+
+
+        ℹ️ Processing of this incoming request must be implemented on the
+        merchant side which in this case acts as a server.
+
+
+        ℹ️ For receiving such callbacks, the merchant provides us the target
+        URL.
+      parameters:
+        - $ref: '#/components/parameters/Signature'
+        - $ref: '#/components/parameters/SpanID'
+        - $ref: '#/components/parameters/TraceID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentNotification'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        4XX:
+          $ref: '#/components/responses/5XX'
+        5XX:
+          $ref: '#/components/responses/5XX'
+components:
+  parameters:
+    Signature:
+      name: X-Signature
+      in: header
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 255
+      description: >-
+        Signature of a call passed to the receiver for verification of the call
+        origin.
+    SpanID:
+      name: X-Span-Id
+      in: header
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 255
+    TraceID:
+      name: X-Trace-Id
+      in: header
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 255
+    PaymentId:
+      name: payment_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: Payment ID.
+      example: 80036de2-7aef-4aaf-9205-992647ff730a
+  schemas:
+    CurrencyCommon:
+      type: string
+      pattern: '^[A-Z0-9]{3,16}$'
+      minLength: 3
+      maxLength: 16
+      description: Currency code.
+      example: USDT20
+    NetworkCommon:
+      type: string
+      pattern: '^[A-Z0-9]{3,16}$'
+      minLength: 3
+      maxLength: 16
+      description: Network code.
+      example: ETH
+    Currency:
+      title: Currency
+      type: object
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyCommon'
+    Network:
+      title: Network
+      type: object
+      properties:
+        network:
+          $ref: '#/components/schemas/NetworkCommon'
+    Data:
+      type: object
+      additionalProperties: true
+      description: Arbitrary metadata associated with the payment.
+      example:
+        sales_manager_id: 221069
+        customer_phone: '+999999999'
+    PaymentDataBase:
+      title: Payment
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+          description: Payment custom name shown to the customer.
+          example: DBA
+        description:
+          type: string
+          maxLength: 4096
+          description: Payment custom description.
+        order_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary payment ID generated of the merchant side.
+          example: ''
+        customer_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary customer ID.
+        customer_email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Customer email.
+          example: johndoe@example.com
+        success_redirect_url:
+          type: string
+          format: uri
+          description: >-
+            Link to the merchant page displayed to the customer in the case of
+            success.
+          example: 'https://example.com/payment/success'
+        failure_redirect_url:
+          type: string
+          format: uri
+          description: >-
+            Link to the merchant page displayed to the customer in the case of
+            failure.
+          example: 'https://example.com/payment/failure'
+    NominalCurrency:
+      title: Nominal currency
+      type: object
+      properties:
+        nominal_currency:
+          type: string
+          description: >
+            The desired currency of payment.
+
+
+            ℹ️ This currency also denominates the amount specified in
+            `nominal_amount`.
+    NominalAmount:
+      title: Nominal amount
+      type: object
+      properties:
+        nominal_amount:
+          type: string
+          maxLength: 36
+          description: >
+            The desired amount of a payment.
+
+
+            ⚠️ A payment will not complete until this amount is sent by the
+            customer.
+
+
+            Format: decimal
+          example: '14.08'
+    PaymentBase:
+      title: Payment
+      allOf:
+        - $ref: '#/components/schemas/NominalCurrency'
+        - $ref: '#/components/schemas/NominalAmount'
+        - $ref: '#/components/schemas/PaymentDataBase'
+        - type: object
+          properties:
+            fees_payer:
+              type: string
+              enum:
+                - MERCHANT
+                - CUSTOMER
+              description: |
+                The party that pays fees.
+
+                Values:
+                  * `MERCHANT`—the amount of payment is not affected by fees;
+                  * `CUSTOMER`—the amount of a payment is reduced by fees.
+    NewPaymentRequest:
+      title: New payment request
+      allOf:
+        - $ref: '#/components/schemas/PaymentBase'
+        - type: object
+          required:
+            - nominal_currency
+          properties:
+            payment_data:
+              $ref: '#/components/schemas/Data'
+            pending_deadline_at:
+              type: string
+              format: date-time
+              description: >
+                The deadline for payments in the `PENDING` state.
+
+
+                ℹ️ If the provided deadline exceeds the one in `deadline_at` for
+                the chosen method, it will not take effect.
+
+
+                ⚠️ If a payment violates the deadline, it will be transferred to
+                the `CANCELED` state.
+              example: '2023-03-22T15:23:56.876Z'
+    UpdatePaymentRequest:
+      title: Update payment request
+      type: object
+      properties:
+        order_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary payment ID generated of the merchant side.
+          example: ''
+        customer_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary customer ID.
+        customer_email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Customer email.
+          example: johndoe@example.com
+        payment_data:
+          type: object
+          additionalProperties: true
+          description: Arbitrary metadata associated with the payment.
+          example:
+            sales_manager_id: 221069
+            customer_phone: '+999999999'
+        payment_title:
+          type: string
+          maxLength: 255
+          description: Payment custom name shown to the customer.
+          example: DBA
+        payment_description:
+          type: string
+          maxLength: 4096
+          description: Payment custom description.
+          example: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...'
+    PaymentDetails:
+      title: Payment details
+      allOf:
+        - $ref: '#/components/schemas/PaymentDataBase'
+        - type: object
+          required:
+            - title
+            - description
+            - success_redirect_url
+            - failure_redirect_url
+            - order_id
+            - customer_id
+            - customer_email
+            - other_data
+          properties:
+            other_data:
+              $ref: '#/components/schemas/Data'
+    Payment:
+      title: Payment
+      allOf:
+        - $ref: '#/components/schemas/PaymentBase'
+        - type: object
+          required:
+            - id
+            - project_id
+            - type
+            - state
+            - nominal_currency
+            - fees_payer
+            - details
+            - payment_url
+            - created_at
+            - updated_at
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Payment ID.
+              example: 80036de2-7aef-4aaf-9205-992647ff730a
+            project_id:
+              type: string
+              format: uuid
+              description: Project ID.
+              example: 7388421c-06af-11ee-be56-0242ac120002
+            type:
+              $ref: '#/components/schemas/PaymentType'
+            state:
+              $ref: '#/components/schemas/PaymentState'
+            details:
+              $ref: '#/components/schemas/Data'
+            payment_url:
+              type: string
+              format: uri
+              description: >-
+                Link to an individual payment page hosted by us when the
+                customer can choose a payment method.
+              example: 'https://dba.com/C1408A'
+            selected_payment_method:
+              $ref: '#/components/schemas/SelectedPaymentMethod'
+            created_at:
+              type: string
+              format: date-time
+              description: Date and time of the payment creation.
+              example: '2023-03-22T15:23:56.876Z'
+            updated_at:
+              type: string
+              format: date-time
+              description: Date and time of the last update of payment state.
+              example: '2023-03-22T15:23:56.876Z'
+            completed_at:
+              type: string
+              format: date-time
+              description: Date and time of the transition to the `COMPLETED` state.
+              example: '2023-03-22T15:23:56.876Z'
+            deadline_at:
+              type: string
+              format: date-time
+              description: >
+                Our deadline for a payment in the `WAITING` state.
+
+
+                ⚠️ If a payment violates the deadline, it will be transferred to
+                the `FAILED` state.
+              example: '2023-03-22T15:23:56.876Z'
+    PaymentType:
+      title: Payment type
+      type: string
+      enum:
+        - INVOICE
+        - DEPOSIT
+      description: |
+        Payment type.
+
+        Values:
+          * `INVOICE`—a payment of the predefined amount that succeeds only after the total amount of all detected payins reaches this amount;
+          * `DEPOSIT`—a deposit of an arbitrary amount that succeeds after the first detected payin.
+    PaymentState:
+      title: Payment states
+      type: string
+      enum:
+        - CREATED
+        - CANCELED
+        - WAITING
+        - FAILED
+        - COMPLETED
+      description: |
+        Payment state.
+
+        Values:
+          * `CREATED`—the customer initiated a payment and picks a payment method;
+          * `CANCELED`—the merchant deadline specified in `pending_deadline_at` is exceeded;
+          * `FAILED`—the payment expired our deadline or failed during processing;
+          * `WAITING_`—a transaction corresponding to the payment is detected in the blockchain and gains confirmations;
+          * `COMPLETED`—the payment successfully completed.
+    SelectedPaymentMethodDeposit:
+      title: Deposit
+      allOf:
+        - $ref: '#/components/schemas/NominalCurrency'
+        - $ref: '#/components/schemas/NominalAmount'
+        - type: object
+          required:
+            - selected_at
+            - holding_currency
+            - payin_currency
+            - payin_address
+          properties:
+            selected_at:
+              type: string
+              format: date-time
+            nominal_holding_swap:
+              allOf:
+                - $ref: '#/components/schemas/Swap'
+                - description: >-
+                    Details of a swap created after the payment initialization
+                    which is not guaranteed to be executed after successful
+                    payins.
+            payment_fee:
+              type: string
+              description: |
+                Fee charged for the payment.
+
+                ℹ️ A percent: `0.01` stands for 0.01%.
+
+                Format: decimal
+              example: '0.27'
+            holding_transfer_txn_id:
+              type: string
+              description: null
+              example: cec43f26-99a7-48dd-a42e-c332833a3c47
+            payin_holding_swap:
+              allOf:
+                - $ref: '#/components/schemas/SwapTransaction'
+                - description: >-
+                    Transaction produces as a result of the actually committed
+                    swap at the latest stage of the payment.
+            payin_currency:
+              $ref: '#/components/schemas/CurrencyCommon'
+            payin_network:
+              $ref: '#/components/schemas/NetworkCommon'
+            expected_payin_amount:
+              type: string
+              maxLength: 36
+              description: |
+                Expected payment amount.
+
+                Format: decimal
+              example: '14.07'
+            payin_address:
+              type: string
+              description: Deposit address.
+              example: '0xb794f5ea0ba39494ce839613fffba74279579268'
+            payin_address_tag:
+              type: string
+              description: Additional ID of the payment apart from a deposit address.
+              example: lOqMs91JaKqlwM18Mkqolx
+    SelectedPaymentMethodInvoice:
+      title: Invoice
+      allOf:
+        - $ref: '#/components/schemas/SelectedPaymentMethodDeposit'
+        - type: object
+          properties:
+            payins:
+              type: array
+              items:
+                $ref: '#/components/schemas/Payin'
+              description: Payins detected for an invoice payment.
+            remaining_payin_amount:
+              type: string
+              maxLength: 36
+              description: |
+                Payins amount remaining before we accept the payment.
+
+                Format: decimal
+              example: '0.01'
+    Swap:
+      title: Swap
+      type: object
+      required:
+        - rate
+        - time
+      properties:
+        rate:
+          type: string
+          maxLength: 36
+          description: Swap rate.
+          example: '30250.48'
+        time:
+          type: string
+          format: date-time
+          description: >-
+            Date and time of the swap from default holding currency to holding
+            currency.
+          example: '2023-03-22T15:23:56.876Z'
+        txn_id:
+          type: string
+          format: uuid
+          description: Swap transaction UUID.
+          example: cec43f26-99a7-48dd-a42e-c332833a3c47
+    SwapTransaction:
+      title: Swap transition
+      allOf:
+        - $ref: '#/components/schemas/Swap'
+        - type: object
+          required:
+            - txn_id
+    Payin:
+      title: Payin
+      allOf:
+        - $ref: '#/components/schemas/NominalCurrency'
+        - $ref: '#/components/schemas/NominalAmount'
+        - type: object
+          required:
+            - amount
+            - fee
+            - currency
+            - network
+            - txn_hash
+            - declared_at
+          properties:
+            amount:
+              type: string
+              format: decimal
+              maxLength: 36
+              example: '1.40'
+            fee:
+              type: string
+              maxLength: 36
+              description: |
+                Deposit fee.
+
+                Format: decimal
+              example: '0.01'
+            txn_hash:
+              type: string
+              description: Payin transaction hash as assigned by the blockchain.
+              example: '0xb794f5ea0ba39494ce839613fffba74279579268'
+            declared_at:
+              type: string
+              format: date-time
+              description: >-
+                Date and time of submitting the payin transaction to the
+                blockchain.
+              example: '2023-03-22T15:23:56.876Z'
+            confirmed_at:
+              type: string
+              format: date-time
+              description: Date and time of gathering sufficient number of confirmations.
+              example: '2023-03-22T15:23:56.876Z'
+    SelectedPaymentMethod:
+      title: Selected payment method
+      oneOf:
+        - $ref: '#/components/schemas/SelectedPaymentMethodDeposit'
+        - $ref: '#/components/schemas/SelectedPaymentMethodInvoice'
+    PaymentMethod:
+      title: Payment method
+      required:
+        - name
+        - code
+        - precision
+        - networks
+      properties:
+        name:
+          type: string
+          example: Tether ERC20
+        code:
+          $ref: '#/components/schemas/CurrencyCommon'
+        precision:
+          type: integer
+          format: uint64
+          description: '0.01'
+          example: The minimum amount of a transaction.
+        priority:
+          type: integer
+          format: uint64
+          description: >-
+            The absolute position of the currency in the currency list based on
+            its popularity.
+          example: 3
+        address_tag_name:
+          type: string
+          description: The name of the auxiliary identifier used for the currency.
+          example: PayID
+        crypto_explorer:
+          type: string
+          format: uri
+          description: >-
+            The link to the transactions explorer with "{tx}" placeholder as the
+            hash.
+          example: 'https://etherscan.io/tx/{tx}'
+        networks:
+          type: array
+          items:
+            $ref: '#/components/schemas/NetworkDetails'
+          description: Networks supporting the currency.
+    NetworkDetails:
+      type: object
+      required:
+        - name
+        - code
+      properties:
+        name:
+          type: string
+          description: Full currency name.
+          example: Ethereum
+        code:
+          $ref: '#/components/schemas/NetworkCommon'
+        address_tag_name:
+          type: string
+          description: The name of the auxiliary identifier used for the network.
+          example: PayID
+        crypto_explorer:
+          type: string
+          format: uri
+          description: >-
+            The link to the transactions explorer with "{tx}" placeholder as the
+            hash.
+          example: 'https://etherscan.io/tx/{tx}'
+    SetPaymentMethod:
+      allOf:
+        - $ref: '#/components/schemas/Currency'
+        - $ref: '#/components/schemas/Network'
+        - type: object
+          required:
+            - currency
+    ExpectedAmount:
+      title: Expected amount
+      allOf:
+        - $ref: '#/components/schemas/NominalCurrency'
+        - $ref: '#/components/schemas/NominalAmount'
+        - type: object
+          required:
+            - holding_currency
+            - nominal_currency
+            - nominal_amount
+            - nominal_holding_swap_rate
+            - payment_fee
+            - payin_holding_swap_rate
+            - payin_currency
+            - deposit_fee
+            - expected_payin_amount
+          properties:
+            nominal_holding_swap_rate:
+              type: string
+              description: >
+                Estimated exchange rate from the payment currency to the holding
+                currency calculated if these do not match.
+
+
+                Format: decimal
+              example: '2.37'
+            payin_holding_swap_rate:
+              type: string
+              description: >
+                Estimated exchange rate from the payin currency to the holding
+                currency calculated if these do not match.
+
+
+                Format: decimal
+              example: '1'
+            deposit_fee:
+              type: string
+              description: |
+                Fixed fee charged for deposits.
+
+                ℹ️ An absolute value: `0.01` stands for 0.01 USDT.
+
+                Format: decimal
+              example: '0,01'
+            holding_currency:
+              allOf:
+                - $ref: '#/components/schemas/CurrencyCommon'
+                - description: Holding currency.
+            holding_amount:
+              type: string
+              description: >-
+                Amount credited to the holding account as a result of the
+                payment minus fees.
+              example: '14.08'
+            payin_currency:
+              allOf:
+                - $ref: '#/components/schemas/CurrencyCommon'
+                - description: |
+                    Payin currency.
+
+                    ℹ️ Specified in `currency` parameter.
+            payin_network:
+              allOf:
+                - $ref: '#/components/schemas/NetworkCommon'
+                - description: |
+                    Payin network.
+
+                    ℹ️ Specified in `network` parameter.
+            payment_fee:
+              type: string
+              maxLength: 36
+              description: |
+                The total payment fee.
+
+                Format: decimal
+              example: '0.97'
+            expected_payin_amount:
+              type: string
+              maxLength: 36
+              description: |
+                Expected amount of payin in payin currency.
+
+                Format: decimal
+              example: '0.0062534748'
+    PaymentNotification:
+      title: Payment notification
+      type: object
+      required:
+        - payment_id
+        - state
+        - updated_at
+      properties:
+        payment_id:
+          type: string
+          format: uuid
+          description: Payment ID.
+          example: ca2e8aeb-23f5-42d9-a47c-82a2029012ec
+        order_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary payment ID generated on the merchant side.
+          example: 3afb7e73-2795-4b7d-8c9a-0e169cd920a4
+        customer_id:
+          type: string
+          minLength: 1
+          maxLength: 36
+          description: Arbitrary customer ID.
+          example: 2d21c2b7-2b79-4a42-8133-b94833f4eed0
+        customer_email:
+          type: string
+          format: email
+          maxLength: 255
+          description: Customer email.
+          example: johndoe@example.com
+        payment_data:
+          type: object
+          additionalProperties: true
+          description: Arbitrary metadata associated with the payment.
+          example:
+            sales_manager_id: 221069
+            customer_phone: '+999999999'
+        state:
+          $ref: '#/components/schemas/PaymentState'
+        updated_at:
+          type: string
+          format: date-time
+          description: Date and time of the last update of payment state.
+          example: '2023-03-22T15:23:56.876Z'
+    Error:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - message
+            properties:
+              type:
+                type: string
+                enum:
+                  - BAD_REQUEST
+                  - API_ERROR
+                description: Error type.
+              code:
+                $ref: '#/components/schemas/ErrorCode'
+              message:
+                type: string
+                description: Error message.
+              param:
+                type: string
+                description: Name of the parameter caused the error.
+    ErrorCode:
+      title: Error code
+      type: string
+      enum:
+        - INVALID_REQUEST_PARAMETERS
+        - INVALID_REQUEST_BODY
+        - INVALID_REQUEST
+        - REQUEST_TIMED_OUT
+        - NOMINAL_AMOUNT_INVALID
+        - PAYMENT_METHOD_NOT_ALLOWED
+      description: Error reason.
+  responses:
+    '204':
+      description: Notification received successfully.
+    '400':
+      description: The request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            errors:
+              type: INVALID_REQUEST_ERROR
+              code: NOMINAL_AMOUNT_INVALID
+              message: nominal_amount should be positive
+              param: nominal_amount
+    '401':
+      description: Authorization information is missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '404':
+      description: Project with given ID is not found.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '409':
+      description: >-
+        Request conflicts with the current state or another request executing
+        concurrently.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '429':
+      description: Too many requests. Try exponential backoff.
+      headers:
+        Retry-After:
+          description: Time in milliseconds to wait before making a new request
+          schema:
+            type: integer
+            example: 3600
+    4XX:
+      description: Notification is invalid and should not be retried.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    5XX:
+      description: Server error. Retrying the request as it should succeed eventually.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            errors:
+              - type: API_ERROR
+                code: REQUEST_TIMED_OUT
+  securitySchemes:
+    APIKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: Public part of an API key.
