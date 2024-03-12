@@ -3,7 +3,7 @@ package metric
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type NewEventReq struct {
@@ -15,7 +15,7 @@ type NewEventReq struct {
 }
 
 type NewEventRes struct {
-	MerchantMetricEvent *entity.MerchantMetricEvent `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
+	MerchantMetricEvent *bean.MerchantMetricEventSimplify `json:"merchantMetricEvent" dc:"MerchantMetricEvent"`
 }
 
 type DeleteEventReq struct {

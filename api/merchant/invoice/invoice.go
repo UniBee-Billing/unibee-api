@@ -3,7 +3,6 @@ package invoice
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type PdfGenerateReq struct {
@@ -99,7 +98,7 @@ type FinishReq struct {
 	DaysUtilDue int    `json:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
 }
 type FinishRes struct {
-	Invoice *entity.Invoice `json:"invoice" `
+	Invoice *bean.InvoiceSimplify `json:"invoice" `
 }
 
 type CancelReq struct {
@@ -118,5 +117,5 @@ type RefundReq struct {
 }
 
 type RefundRes struct {
-	Refund *entity.Refund `json:"refund" `
+	Refund *bean.RefundSimplify `json:"refund" `
 }

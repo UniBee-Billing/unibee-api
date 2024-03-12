@@ -1,9 +1,8 @@
 package member
 
 import (
-	entity "unibee/internal/model/entity/oversea_pay"
-
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 )
 
 type ProfileReq struct {
@@ -11,7 +10,7 @@ type ProfileReq struct {
 }
 
 type ProfileRes struct {
-	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"Merchant Member"`
+	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member"`
 }
 
 type LogoutReq struct {

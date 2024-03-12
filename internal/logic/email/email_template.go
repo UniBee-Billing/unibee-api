@@ -4,14 +4,14 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*query.EmailTemplateVo {
-	var list = make([]*query.EmailTemplateVo, 0)
+func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*bean.EmailTemplateVo {
+	var list = make([]*bean.EmailTemplateVo, 0)
 	if merchantId > 0 {
 		var defaultTemplateList []*entity.EmailDefaultTemplate
 		err := dao.EmailDefaultTemplate.Ctx(ctx).
@@ -23,7 +23,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*que
 					Where(entity.MerchantEmailTemplate{MerchantId: merchantId}).
 					Where(entity.MerchantEmailTemplate{TemplateName: emailTemplate.TemplateName}).
 					Scan(&merchantEmailTemplate)
-				vo := &query.EmailTemplateVo{
+				vo := &bean.EmailTemplateVo{
 					Id:                  emailTemplate.Id,
 					MerchantId:          0,
 					TemplateName:        emailTemplate.TemplateName,

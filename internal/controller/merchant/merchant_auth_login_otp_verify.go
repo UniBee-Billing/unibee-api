@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -33,5 +34,5 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	}
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
 	newOne.Password = ""
-	return &auth.LoginOtpVerifyRes{MerchantMember: newOne, Token: token}, nil
+	return &auth.LoginOtpVerifyRes{MerchantMember: bean.SimplifyMerchantMember(newOne), Token: token}, nil
 }

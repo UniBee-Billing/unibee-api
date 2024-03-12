@@ -7,7 +7,6 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
-	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -63,7 +62,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 				},
 				ExternalUserId: strconv.FormatInt(one.UserId, 10),
 				Email:          user.Email,
-				Invoice:        invoice_compute.ConvertInvoiceToSimplify(one),
+				Invoice:        bean.SimplifyInvoice(one),
 				Metadata:       map[string]string{"BillingReason": one.InvoiceName},
 			}
 

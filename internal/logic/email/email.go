@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"os"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/merchant_config"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -140,7 +141,7 @@ type TemplateVariable struct {
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
 func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
-	var template *query.EmailTemplateVo
+	var template *bean.EmailTemplateVo
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
 	} else {

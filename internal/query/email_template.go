@@ -2,29 +2,17 @@ package query
 
 import (
 	"context"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-type EmailTemplateVo struct {
-	Id                  int64  `json:"id"                 description:""`                //
-	MerchantId          uint64 `json:"merchantId"         description:""`                //
-	TemplateName        string `json:"templateName"       description:""`                //
-	TemplateDescription string `json:"templateDescription" description:""`               //
-	TemplateTitle       string `json:"templateTitle"      description:""`                //
-	TemplateContent     string `json:"templateContent"    description:""`                //
-	TemplateAttachName  string `json:"templateAttachName" description:""`                //
-	CreateTime          int64  `json:"createTime"         description:"create utc time"` // create utc time
-	UpdateTime          int64  `json:"updateTime"         description:"update utc time"` // create utc time
-	Status              string `json:"status"             description:""`                //
-}
-
-func convertMerchantEmailTemplateToVo(emailTemplate *entity.MerchantEmailTemplate) *EmailTemplateVo {
+func convertMerchantEmailTemplateToVo(emailTemplate *entity.MerchantEmailTemplate) *bean.EmailTemplateVo {
 	var status = "Active"
 	if emailTemplate.Status != 0 {
 		status = "InActive"
 	}
-	return &EmailTemplateVo{
+	return &bean.EmailTemplateVo{
 		Id:                  emailTemplate.Id,
 		MerchantId:          emailTemplate.MerchantId,
 		TemplateName:        emailTemplate.TemplateName,
@@ -38,8 +26,8 @@ func convertMerchantEmailTemplateToVo(emailTemplate *entity.MerchantEmailTemplat
 	}
 }
 
-func convertEmailDefaultTemplateToVo(emailTemplate *entity.EmailDefaultTemplate) *EmailTemplateVo {
-	return &EmailTemplateVo{
+func convertEmailDefaultTemplateToVo(emailTemplate *entity.EmailDefaultTemplate) *bean.EmailTemplateVo {
+	return &bean.EmailTemplateVo{
 		Id:                  emailTemplate.Id,
 		MerchantId:          0,
 		TemplateName:        emailTemplate.TemplateName,
@@ -53,7 +41,7 @@ func convertEmailDefaultTemplateToVo(emailTemplate *entity.EmailDefaultTemplate)
 	}
 }
 
-func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *EmailTemplateVo {
+func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.EmailTemplateVo {
 	if len(templateName) == 0 {
 		return nil
 	}
@@ -71,7 +59,7 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 	}
 }
 
-func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *EmailTemplateVo {
+func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *bean.EmailTemplateVo {
 	if len(templateName) == 0 || merchantId <= 0 {
 		return nil
 	}

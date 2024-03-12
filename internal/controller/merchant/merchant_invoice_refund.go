@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/logic/invoice/service"
 )
@@ -11,5 +12,5 @@ func (c *ControllerInvoice) Refund(ctx context.Context, req *invoice.RefundReq) 
 	if err != nil {
 		return nil, err
 	}
-	return &invoice.RefundRes{Refund: refund}, nil
+	return &invoice.RefundRes{Refund: bean.SimplifyRefund(refund)}, nil
 }

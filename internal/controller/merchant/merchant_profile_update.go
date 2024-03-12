@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/query"
@@ -40,5 +41,5 @@ func (c *ControllerMerchantProfile) Update(ctx context.Context, req *profile.Upd
 		return nil, err
 	}
 
-	return &profile.UpdateRes{Merchant: query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId)}, nil
+	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId))}, nil
 }

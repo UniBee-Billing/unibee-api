@@ -1,9 +1,8 @@
 package auth
 
 import (
-	entity "unibee/internal/model/entity/oversea_pay"
-
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 )
 
 type LoginReq struct {
@@ -13,8 +12,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"Merchant Member"`
-	Token          string                 `json:"token" dc:"Token"`
+	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member"`
+	Token          string                       `json:"token" dc:"Token"`
 }
 
 type LoginOtpReq struct {
@@ -32,8 +31,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"Merchant Member"`
-	Token          string                 `json:"token" dc:"Token"`
+	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member"`
+	Token          string                       `json:"token" dc:"Token"`
 }
 
 type PasswordForgetOtpReq struct {
@@ -73,5 +72,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	MerchantMember *entity.MerchantMember `json:"merchantMember" dc:"MerchantMember"`
+	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"MerchantMember"`
 }

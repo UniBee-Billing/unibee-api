@@ -105,10 +105,10 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil
 }
 
-func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*entity.Invoice, err error) {
+func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.InvoiceSimplify, err error) {
 	//Will Search
-	var mainList = make([]*entity.Invoice, 0)
-	var mainMap = make(map[uint64]*entity.Invoice)
+	var mainList = make([]*bean.InvoiceSimplify, 0)
+	var mainMap = make(map[uint64]*bean.InvoiceSimplify)
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
 	m := dao.Invoice.Ctx(ctx)
@@ -137,8 +137,8 @@ func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (li
 		if len(likeList) > 0 {
 			for _, invoice := range likeList {
 				if mainMap[invoice.Id] == nil {
-					mainList = append(mainList, invoice)
-					mainMap[invoice.Id] = invoice
+					mainList = append(mainList, bean.SimplifyInvoice(invoice))
+					mainMap[invoice.Id] = bean.SimplifyInvoice(invoice)
 				}
 			}
 		}

@@ -3,7 +3,6 @@ package profile
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type GetReq struct {
@@ -11,7 +10,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *entity.Merchant        `json:"merchant" dc:"Merchant"`
+	Merchant *bean.MerchantSimplify  `json:"merchant" dc:"Merchant"`
 	Env      string                  `json:"env" description:"System Env, em: daily|stage|local|prod" `
 	IsProd   bool                    `json:"isProd" description:"Check System Env Is Prod, true|false" `
 	TimeZone []string                `json:"TimeZone" description:"TimeZone List" `
@@ -31,5 +30,5 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
-	Merchant *entity.Merchant `json:"merchant" dc:"Merchant"`
+	Merchant *bean.MerchantSimplify `json:"merchant" dc:"Merchant"`
 }

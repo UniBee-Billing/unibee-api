@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/vat_gateway"
@@ -100,5 +101,5 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 		}
 	}
 
-	return &auth.RegisterVerifyRes{MerchantMember: newOne}, nil
+	return &auth.RegisterVerifyRes{MerchantMember: bean.SimplifyMerchantMember(newOne)}, nil
 }

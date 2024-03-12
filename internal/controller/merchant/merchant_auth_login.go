@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"unibee/api/bean"
 	"unibee/api/merchant/auth"
 	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -29,6 +30,6 @@ func (c *ControllerAuth) Login(ctx context.Context, req *auth.LoginReq) (res *au
 	}
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
 	newOne.Password = ""
-	return &auth.LoginRes{MerchantMember: newOne, Token: token}, nil
+	return &auth.LoginRes{MerchantMember: bean.SimplifyMerchantMember(newOne), Token: token}, nil
 
 }

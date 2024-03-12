@@ -9,6 +9,7 @@ type MerchantMemberSimplify struct {
 	FirstName  string `json:"firstName"  description:"first name"`      // first name
 	LastName   string `json:"lastName"   description:"last name"`       // last name
 	CreateTime int64  `json:"createTime" description:"create utc time"` // create utc time
+	Mobile     string `json:"mobile"     description:"mobile"`          // mobile
 }
 
 func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMemberSimplify {
@@ -19,6 +20,7 @@ func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMemberSimplify 
 		Id:         one.Id,
 		MerchantId: one.MerchantId,
 		Email:      one.Email,
+		Mobile:     one.Mobile,
 		CreateTime: one.CreateTime,
 		FirstName:  one.FirstName,
 		LastName:   one.LastName,

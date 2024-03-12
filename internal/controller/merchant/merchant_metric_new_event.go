@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/api/merchant/metric"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/metric_event"
@@ -18,5 +19,5 @@ func (c *ControllerMetric) NewEvent(ctx context.Context, req *metric.NewEventReq
 	if err != nil {
 		return nil, err
 	}
-	return &metric.NewEventRes{MerchantMetricEvent: event}, nil
+	return &metric.NewEventRes{MerchantMetricEvent: bean.SimplifyMerchantMetricEvent(event)}, nil
 }

@@ -2,7 +2,7 @@ package email
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/query"
+	"unibee/api/bean"
 )
 
 type TemplateListReq struct {
@@ -10,7 +10,7 @@ type TemplateListReq struct {
 }
 
 type TemplateListRes struct {
-	EmailTemplateList []*query.EmailTemplateVo `json:"emailTemplateList" description:"EmailTemplateList" `
+	EmailTemplateList []*bean.EmailTemplateVo `json:"emailTemplateList" description:"EmailTemplateList" `
 }
 
 type TemplateUpdateReq struct {

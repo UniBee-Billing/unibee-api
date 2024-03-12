@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type ListReq struct {
@@ -25,7 +25,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
+	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
 }
 
 type GetReq struct {
@@ -34,7 +34,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	User *entity.UserAccount `json:"user" dc:"User"`
+	User *bean.UserAccountSimplify `json:"user" dc:"User"`
 }
 
 type FrozenReq struct {
@@ -59,7 +59,7 @@ type SearchReq struct {
 }
 
 type SearchRes struct {
-	UserAccounts []*entity.UserAccount `json:"userAccounts" description:"UserAccounts" `
+	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
 }
 
 type UpdateReq struct {

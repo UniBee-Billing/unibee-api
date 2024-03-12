@@ -2,7 +2,7 @@ package search
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type SearchReq struct {
@@ -17,7 +17,7 @@ type PrecisionMatchObject struct {
 }
 
 type SearchRes struct {
-	PrecisionMatchObject *PrecisionMatchObject `json:"precisionMatchObject" description:"PrecisionMatchObject" `
-	UserAccounts         []*entity.UserAccount `json:"matchUserAccounts" description:"MatchUserAccounts" `
-	Invoices             []*entity.Invoice     `json:"matchInvoice" description:"MatchInvoice" `
+	PrecisionMatchObject *PrecisionMatchObject       `json:"precisionMatchObject" description:"PrecisionMatchObject" `
+	UserAccounts         []*bean.UserAccountSimplify `json:"matchUserAccounts" description:"MatchUserAccounts" `
+	Invoices             []*bean.InvoiceSimplify     `json:"matchInvoice" description:"MatchInvoice" `
 }

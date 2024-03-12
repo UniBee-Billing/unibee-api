@@ -17,25 +17,6 @@ func GetInvoiceLink(invoiceId string) string {
 	return fmt.Sprintf("%s/in/%s", consts.GetConfigInstance().Server.GetServerPath(), invoiceId)
 }
 
-func ConvertInvoiceToSimplify(one *entity.Invoice) *bean.InvoiceSimplify {
-	utility.Assert(one != nil, "invoice is nil")
-	var lines []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
-	utility.AssertError(err, "System Error")
-	return &bean.InvoiceSimplify{
-		InvoiceId:                      one.InvoiceId,
-		TotalAmount:                    one.TotalAmount,
-		TotalAmountExcludingTax:        one.TotalAmountExcludingTax,
-		Currency:                       one.Currency,
-		TaxAmount:                      one.TaxAmount,
-		SubscriptionAmount:             one.SubscriptionAmount,
-		SubscriptionAmountExcludingTax: one.SubscriptionAmountExcludingTax,
-		Lines:                          lines,
-		PeriodEnd:                      one.PeriodEnd,
-		PeriodStart:                    one.PeriodStart,
-	}
-}
-
 func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.InvoiceDetail {
 	var lines []*bean.InvoiceItemSimplify
 	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)

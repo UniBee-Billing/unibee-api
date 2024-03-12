@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/api/merchant/profile"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -12,7 +13,7 @@ import (
 
 func (c *ControllerMerchantProfile) Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error) {
 	return &profile.GetRes{
-		Merchant: query.GetMerchantById(ctx, _interface.GetMerchantId(ctx)),
+		Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))),
 		Currency: currency.GetMerchantCurrencies(),
 		Env:      consts.GetConfigInstance().Env,
 		IsProd:   consts.GetConfigInstance().IsProd(),

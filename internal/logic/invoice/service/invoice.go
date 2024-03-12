@@ -109,7 +109,11 @@ func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRe
 		if err != nil {
 			return nil, err
 		}
-		one = finishRes.Invoice
+		one.Link = finishRes.Invoice.Link
+		one.PaymentLink = finishRes.Invoice.PaymentLink
+		one.Status = finishRes.Invoice.Status
+		one.PaymentId = finishRes.Invoice.PaymentId
+		one.RefundId = finishRes.Invoice.RefundId
 	}
 	return &invoice.NewRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
@@ -186,7 +190,11 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		if err != nil {
 			return nil, err
 		}
-		one = finishRes.Invoice
+		one.Link = finishRes.Invoice.Link
+		one.PaymentLink = finishRes.Invoice.PaymentLink
+		one.Status = finishRes.Invoice.Status
+		one.PaymentId = finishRes.Invoice.PaymentId
+		one.RefundId = finishRes.Invoice.RefundId
 	}
 	return &invoice.EditRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
 }
@@ -254,7 +262,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	one.Link = invoiceLink
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
-	return &invoice.FinishRes{Invoice: one}, nil
+	return &invoice.FinishRes{Invoice: bean.SimplifyInvoice(one)}, nil
 }
 
 func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.Refund, error) {

@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -17,7 +18,6 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
@@ -201,7 +201,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		},
 		ExternalUserId:       strconv.FormatInt(sub.UserId, 10),
 		Email:                email,
-		Invoice:              invoice_compute.ConvertInvoiceToSimplify(invoice),
+		Invoice:              bean.SimplifyInvoice(invoice),
 		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
