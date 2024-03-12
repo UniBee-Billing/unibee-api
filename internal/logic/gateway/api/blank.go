@@ -20,7 +20,7 @@ func (b Blank) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatewa
 	panic("implement me")
 }
 
-func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (b Blank) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }

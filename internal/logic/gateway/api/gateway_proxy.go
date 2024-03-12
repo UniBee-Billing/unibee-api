@@ -57,7 +57,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 	return res, err
 }
 
-func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -70,13 +70,13 @@ func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string
 		}
 	}()
 	startTime := time.Now()
-	gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
+	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
 
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayTest cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
 	}
-	return gatewayType, err
+	return icon, gatewayType, err
 }
 
 func (p GatewayProxy) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {

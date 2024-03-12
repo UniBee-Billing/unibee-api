@@ -20,7 +20,7 @@ func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 	panic("implement me")
 }
 
-func (a AutoTest) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (a AutoTest) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }

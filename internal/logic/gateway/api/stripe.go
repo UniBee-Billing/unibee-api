@@ -33,7 +33,7 @@ import (
 type Stripe struct {
 }
 
-func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	stripe.Key = secret
 	s.setUnibeeAppInfo()
 	utility.Assert(len(secret) > 0, "invalid gatewaySecret")
@@ -42,7 +42,7 @@ func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (gat
 	params := &stripe.ProductListParams{}
 	params.Limit = stripe.Int64(3)
 	result := product.List(params)
-	return consts.GatewayTypeDefault, result.Err()
+	return "http://unibee.top/files/invoice/stripe.png", consts.GatewayTypeDefault, result.Err()
 }
 
 func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {

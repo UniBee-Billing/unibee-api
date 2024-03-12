@@ -32,7 +32,7 @@ import (
 type Changelly struct {
 }
 
-func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/payment/v1/payments"
 	param := map[string]interface{}{
 		"nominal_currency": "USDT",
@@ -47,7 +47,7 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")
-	return consts.GatewayTypeCrypto, nil
+	return "http://unibee.top/files/invoice/changelly.png", consts.GatewayTypeCrypto, nil
 }
 
 func (c Changelly) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {

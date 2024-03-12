@@ -9,7 +9,7 @@ import (
 )
 
 type GatewayInterface interface {
-	GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error)
+	GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error)
 	// User
 	GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error)
 	// Balance

@@ -37,7 +37,7 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	panic("implement me")
 }
 
-func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (gatewayType int64, err error) {
+func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	//TODO implement me
 	panic("implement me")
 }

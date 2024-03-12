@@ -15,7 +15,7 @@ import (
 
 func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string) {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
-	gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
+	icon, gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
@@ -36,6 +36,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 		GatewayKey:    gatewayKey,
 		GatewaySecret: gatewaySecret,
 		GatewayType:   gatewayType,
+		Logo:          icon,
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "system error")
@@ -50,10 +51,11 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
 	utility.Assert(one.MerchantId == merchantId, "merchant not match")
-	_, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
+	icon, _, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 
 	_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().Logo:          icon,
 		dao.MerchantGateway.Columns().GatewaySecret: gatewaySecret,
 		dao.MerchantGateway.Columns().GatewayKey:    gatewayKey,
 		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
