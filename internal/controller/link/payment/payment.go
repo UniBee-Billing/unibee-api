@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/internal/consts"
+	"unibee/internal/logic/payment/handler"
 	"unibee/internal/query"
 )
 
@@ -23,6 +24,19 @@ func PaymentLinkEntry(r *ghttp.Request) {
 	} else if one.Status < consts.PaymentSuccess {
 		r.Response.Writeln("Payment Already Success")
 	} else if one.ExpireTime != 0 && one.ExpireTime < gtime.Now().Timestamp() {
+		//HandlePayExpire
+		err := handler.HandlePayExpired(r.Context(), &handler.HandlePayReq{
+			PaymentId:              one.PaymentId,
+			GatewayPaymentIntentId: one.GatewayPaymentIntentId,
+			GatewayPaymentId:       one.GatewayPaymentId,
+			TotalAmount:            one.TotalAmount,
+			PayStatusEnum:          consts.PaymentFailed,
+			Reason:                 "Payment Expired",
+		})
+		if err != nil {
+			r.Response.Writeln("Server Error")
+			return
+		}
 		r.Response.Writeln("Link Expired")
 	} else if len(one.GatewayLink) > 0 {
 		r.Response.RedirectTo(one.GatewayLink)

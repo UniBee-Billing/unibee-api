@@ -152,8 +152,7 @@ func (c Changelly) GatewayCapture(ctx context.Context, payment *entity.Payment) 
 }
 
 func (c Changelly) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
 }
 
 func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
