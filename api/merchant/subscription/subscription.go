@@ -3,7 +3,6 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
-	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type DetailReq struct {
@@ -107,9 +106,9 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
-	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"subscriptionPendingUpdate"`
-	Paid                      bool                              `json:"paid"`
-	Link                      string                            `json:"link"`
+	SubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"subscriptionPendingUpdate"`
+	Paid                      bool                                  `json:"paid"`
+	Link                      string                                `json:"link"`
 }
 
 type UserSubscriptionDetailReq struct {

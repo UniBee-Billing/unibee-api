@@ -2,7 +2,7 @@ package payment
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type TimeLineListReq struct {
@@ -15,5 +15,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	PaymentTimelines []*entity.PaymentTimeline `json:"paymentTimeline" dc:"PaymentTimelines"`
+	PaymentTimelines []*bean.PaymentTimelineSimplify `json:"paymentTimeline" dc:"PaymentTimelines"`
 }

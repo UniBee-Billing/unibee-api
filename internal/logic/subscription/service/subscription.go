@@ -22,6 +22,7 @@ import (
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
+	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -792,10 +793,41 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 
 	return &subscription.UpdateRes{
-		SubscriptionPendingUpdate: one,
-		Paid:                      len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
-		Link:                      subUpdateRes.Link,
-		Note:                      note,
+		SubscriptionPendingUpdate: &bean.SubscriptionPendingUpdateDetail{
+			MerchantId:           one.MerchantId,
+			SubscriptionId:       one.SubscriptionId,
+			UpdateSubscriptionId: one.UpdateSubscriptionId,
+			GmtCreate:            one.GmtCreate,
+			Amount:               one.Amount,
+			Status:               one.Status,
+			UpdateAmount:         one.UpdateAmount,
+			Currency:             one.Currency,
+			UpdateCurrency:       one.UpdateCurrency,
+			PlanId:               one.PlanId,
+			UpdatePlanId:         one.UpdatePlanId,
+			Quantity:             one.Quantity,
+			UpdateQuantity:       one.UpdateQuantity,
+			AddonData:            one.AddonData,
+			UpdateAddonData:      one.UpdateAddonData,
+			ProrationAmount:      one.ProrationAmount,
+			GatewayId:            one.GatewayId,
+			UserId:               one.UserId,
+			GmtModify:            one.GmtModify,
+			Paid:                 one.Paid,
+			Link:                 one.Link,
+			MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+			EffectImmediate:      one.EffectImmediate,
+			EffectTime:           one.EffectTime,
+			Note:                 one.Note,
+			Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+			Metadata:             req.Metadata,
+		},
+		Paid: len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
+		Link: subUpdateRes.Link,
+		Note: note,
 	}, nil
 }
 

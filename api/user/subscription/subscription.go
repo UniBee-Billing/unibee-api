@@ -105,10 +105,10 @@ type UpdateReq struct {
 	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 type UpdateRes struct {
-	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
-	Paid                      bool                              `json:"paid" dc:"Paid，true|false"`
-	Link                      string                            `json:"link" dc:"Pay Link"`
-	Note                      string                            `json:"note" dc:"note"`
+	SubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
+	Paid                      bool                                  `json:"paid" dc:"Paid，true|false"`
+	Link                      string                                `json:"link" dc:"Pay Link"`
+	Note                      string                                `json:"note" dc:"note"`
 }
 
 type ListReq struct {

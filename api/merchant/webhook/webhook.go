@@ -2,8 +2,7 @@ package webhook
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/webhook"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type EventListReq struct {
@@ -19,7 +18,7 @@ type EndpointListReq struct {
 }
 
 type EndpointListRes struct {
-	EndpointList []*webhook.MerchantWebhookEndpointVo `json:"endpointList" dc:"EndpointList"`
+	EndpointList []*bean.MerchantWebhookEndpointSimplify `json:"endpointList" dc:"EndpointList"`
 }
 
 type EndpointLogListReq struct {
@@ -30,7 +29,7 @@ type EndpointLogListReq struct {
 }
 
 type EndpointLogListRes struct {
-	EndpointLogList []*entity.MerchantWebhookLog `json:"endpointLogList" dc:"EndpointLogList"`
+	EndpointLogList []*bean.MerchantWebhookLogSimplify `json:"endpointLogList" dc:"EndpointLogList"`
 }
 
 type NewEndpointReq struct {

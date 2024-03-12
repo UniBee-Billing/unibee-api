@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
 
@@ -18,11 +18,11 @@ type PaymentTimelineListInternalReq struct {
 }
 
 type PaymentTimeLineListInternalRes struct {
-	PaymentTimelines []*entity.PaymentTimeline `json:"paymentTimeline" dc:"paymentTimelines明细"`
+	PaymentTimelines []*bean.PaymentTimelineSimplify `json:"paymentTimeline" dc:"paymentTimelines明细"`
 }
 
 func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalReq) (res *PaymentTimeLineListInternalRes, err error) {
-	var mainList []*entity.PaymentTimeline
+	var mainList []*bean.PaymentTimelineSimplify
 	if req.Count <= 0 {
 		req.Count = 20
 	}

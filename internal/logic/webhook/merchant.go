@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -17,18 +18,9 @@ import (
 
 const SplitSep = ","
 
-type MerchantWebhookEndpointVo struct {
-	Id            uint64   `json:"id"            description:"id"`                       // id
-	MerchantId    uint64   `json:"merchantId"    description:"webhook url"`              // webhook url
-	WebhookUrl    string   `json:"webhookUrl"    description:"webhook url"`              // webhook url
-	WebhookEvents []string `json:"webhookEvents" description:"webhook_events,split dot"` // webhook_events,split dot
-	UpdateTime    int64    `json:"gmtModify"     description:"update time"`              // update time
-	CreateTime    int64    `json:"createTime"    description:"create utc time"`          // create utc time
-}
-
-func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*MerchantWebhookEndpointVo {
+func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean.MerchantWebhookEndpointSimplify {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*MerchantWebhookEndpointVo, 0)
+	var list = make([]*bean.MerchantWebhookEndpointSimplify, 0)
 	if merchantId > 0 {
 		var entities []*entity.MerchantWebhook
 		err := dao.MerchantWebhook.Ctx(ctx).
@@ -37,7 +29,7 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*Merc
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &MerchantWebhookEndpointVo{
+				list = append(list, &bean.MerchantWebhookEndpointSimplify{
 					Id:            one.Id,
 					MerchantId:    one.MerchantId,
 					WebhookUrl:    one.WebhookUrl,
@@ -58,8 +50,8 @@ type EndpointLogListInternalReq struct {
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*entity.MerchantWebhookLog {
-	var mainList []*entity.MerchantWebhookLog
+func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*bean.MerchantWebhookLogSimplify {
+	var mainList []*bean.MerchantWebhookLogSimplify
 	if req.Count <= 0 {
 		req.Count = 20
 	}
