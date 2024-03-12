@@ -20,7 +20,7 @@ type NewReq struct {
 	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
 }
 type NewRes struct {
@@ -42,7 +42,7 @@ type EditReq struct {
 	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {
