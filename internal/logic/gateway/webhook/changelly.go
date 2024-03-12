@@ -3,7 +3,6 @@ package webhook
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"unibee/internal/consts"
@@ -19,7 +18,7 @@ type ChangellyWebhook struct {
 }
 
 func (c ChangellyWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
-	return gerror.New("not support")
+	return nil
 }
 
 func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
