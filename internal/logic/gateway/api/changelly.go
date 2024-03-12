@@ -17,10 +17,11 @@ import (
 	"github.com/google/uuid"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -49,27 +50,27 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (
 	return consts.GatewayTypeCrypto, nil
 }
 
-func (c Changelly) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *ro.GatewayUserCreateInternalResp, err error) {
+func (c Changelly) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserDetailQueryInternalResp, err error) {
+func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {
+func (c Changelly) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+func (c Changelly) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+func (c Changelly) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *ro.GatewayUserPaymentMethodReq) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
+func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
 	utility.Assert(len(req.GatewayPaymentId) > 0, "gatewayPaymentId is nil")
 	urlPath := "/api/payment/v1/payments/" + req.GatewayPaymentId + "/payment_methods"
 	param := map[string]interface{}{}
@@ -79,14 +80,14 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	var paymentMethods []*ro.PaymentMethod
+	var paymentMethods []*bean.PaymentMethod
 	for _, a := range responseJson.Array() {
 		if method, ok := a.(map[string]interface{}); ok {
 			if method["code"] != nil && method["networks"] != nil {
 				currencyCode := method["code"].(string)
 				for _, network := range method["networks"].([]interface{}) {
 					if network.(map[string]interface{})["code"] != nil && len(network.(map[string]interface{})["code"].(string)) > 0 {
-						paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+						paymentMethods = append(paymentMethods, &bean.PaymentMethod{
 							Id: currencyCode + "|" + network.(map[string]interface{})["code"].(string),
 						})
 					}
@@ -94,14 +95,14 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 			}
 		}
 	}
-	return &ro.GatewayUserPaymentMethodListInternalResp{PaymentMethods: paymentMethods}, nil
+	return &gateway_bean.GatewayUserPaymentMethodListResp{PaymentMethods: paymentMethods}, nil
 }
 
-func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.NewPaymentInternalResp, err error) {
+func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	urlPath := "/api/payment/v1/payments"
 	var gasPayer string
 	if createPayContext.Pay.GasPayer == "merchant" {
@@ -137,7 +138,7 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.N
 	}
 	var status consts.PaymentStatusEnum = consts.PaymentCreated
 	gatewayPaymentId := responseJson.Get("id").String()
-	return &ro.NewPaymentInternalResp{
+	return &gateway_bean.GatewayNewPaymentResp{
 		Status:                 status,
 		GatewayPaymentId:       gatewayPaymentId,
 		GatewayPaymentIntentId: gatewayPaymentId,
@@ -145,20 +146,20 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.N
 	}, nil
 }
 
-func (c Changelly) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
+func (c Changelly) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
+func (c Changelly) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *ro.GatewayPaymentListReq) (res []*ro.GatewayPaymentRo, err error) {
+func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
+func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
 	urlPath := "/api/payment/v1/payments/" + gatewayPaymentId
 	param := map[string]interface{}{}
 	responseJson, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
@@ -174,26 +175,26 @@ func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mer
 	return parseChangellyPayment(responseJson), nil
 }
 
-func (c Changelly) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (c Changelly) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (c Changelly) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (c Changelly) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func parseChangellyPayment(item *gjson.Json) *ro.GatewayPaymentRo {
+func parseChangellyPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 	var status = consts.PaymentCreated
 	var authorizeStatus = consts.WaitingAuthorized
 	if strings.Compare(item.Get("state").String(), "WAITING") == 0 {
@@ -224,7 +225,7 @@ func parseChangellyPayment(item *gjson.Json) *ro.GatewayPaymentRo {
 		}
 	}
 
-	return &ro.GatewayPaymentRo{
+	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.Get("id").String(),
 		Status:               status,
 		AuthorizeStatus:      authorizeStatus,

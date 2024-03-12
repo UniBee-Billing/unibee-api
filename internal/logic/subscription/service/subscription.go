@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unibee/api/bean"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
 	redismq2 "unibee/internal/cmd/redismq"
@@ -16,7 +17,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
@@ -30,28 +31,28 @@ import (
 )
 
 type SubscriptionCreatePrepareInternalRes struct {
-	Plan              *entity.Plan                       `json:"plan"`
-	Quantity          int64                              `json:"quantity"`
-	Gateway           *entity.MerchantGateway            `json:"gateway"`
-	Merchant          *entity.Merchant                   `json:"merchantInfo"`
-	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons            []*ro.PlanAddonVo                  `json:"addons"`
-	TotalAmount       int64                              `json:"totalAmount"                `
-	Currency          string                             `json:"currency"              `
-	VatCountryCode    string                             `json:"vatCountryCode"              `
-	VatCountryName    string                             `json:"vatCountryName"              `
-	VatNumber         string                             `json:"vatNumber"              `
-	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
-	TaxScale          int64                              `json:"taxScale"              `
-	VatVerifyData     string                             `json:"vatVerifyData"              `
-	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
-	UserId            int64                              `json:"userId" `
-	Email             string                             `json:"email" `
-	VatCountryRate    *ro.VatCountryRate                 `json:"vatCountryRate" `
+	Plan              *entity.Plan            `json:"plan"`
+	Quantity          int64                   `json:"quantity"`
+	Gateway           *entity.MerchantGateway `json:"gateway"`
+	Merchant          *entity.Merchant        `json:"merchantInfo"`
+	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail `json:"addons"`
+	TotalAmount       int64                   `json:"totalAmount"                `
+	Currency          string                  `json:"currency"              `
+	VatCountryCode    string                  `json:"vatCountryCode"              `
+	VatCountryName    string                  `json:"vatCountryName"              `
+	VatNumber         string                  `json:"vatNumber"              `
+	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
+	TaxScale          int64                   `json:"taxScale"              `
+	VatVerifyData     string                  `json:"vatVerifyData"              `
+	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
+	UserId            int64                   `json:"userId" `
+	Email             string                  `json:"email" `
+	VatCountryRate    *bean.VatCountryRate    `json:"vatCountryRate" `
 }
 
-func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.SubscriptionPlanAddonParamRo) []*ro.PlanAddonVo {
-	var addons []*ro.PlanAddonVo
+func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanAddonParam) []*bean.PlanAddonDetail {
+	var addons []*bean.PlanAddonDetail
 	var totalAddonIds []uint64
 	if len(addonParams) > 0 {
 		for _, s := range addonParams {
@@ -75,9 +76,9 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*ro.Subscri
 				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
-				addons = append(addons, &ro.PlanAddonVo{
+				addons = append(addons, &bean.PlanAddonDetail{
 					Quantity:  param.Quantity,
-					AddonPlan: ro.SimplifyPlan(mapPlans[param.AddonPlanId]),
+					AddonPlan: bean.SimplifyPlan(mapPlans[param.AddonPlanId]),
 				})
 			}
 		}
@@ -142,8 +143,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	var vatCountryCode = req.VatCountryCode
 	var standardTaxScale int64 = 0
 	var vatCountryName = ""
-	var vatCountryRate *ro.VatCountryRate
-	var vatNumberValidate *ro.ValidResult
+	var vatCountryRate *bean.VatCountryRate
+	var vatNumberValidate *bean.ValidResult
 
 	if len(req.VatNumber) > 0 {
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, int64(_interface.BizCtx().Get(ctx).User.Id), req.VatNumber, "")
@@ -285,10 +286,10 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 
-	var createRes *ro.GatewayCreateSubscriptionInternalResp
+	var createRes *gateway_bean.GatewayCreateSubscriptionResp
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 	utility.AssertError(err, "System Error")
-	var createPaymentResult *ro.NewPaymentInternalResp
+	var createPaymentResult *gateway_bean.GatewayNewPaymentResp
 	if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
@@ -303,7 +304,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			return nil, err
 		}
 	} else {
-		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &ro.NewPaymentInternalReq{
+		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 			CheckoutMode: true,
 			Gateway:      prepare.Gateway,
 			Pay: &entity.Payment{
@@ -331,7 +332,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		}
 	}
 
-	createRes = &ro.GatewayCreateSubscriptionInternalResp{
+	createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 		GatewaySubscriptionId: createPaymentResult.PaymentId,
 		Data:                  utility.MarshalToJsonString(createPaymentResult),
 		Link:                  createPaymentResult.Link,
@@ -366,21 +367,21 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 }
 
 type SubscriptionUpdatePrepareInternalRes struct {
-	Subscription      *entity.Subscription               `json:"subscription"`
-	Plan              *entity.Plan                       `json:"plan"`
-	Quantity          int64                              `json:"quantity"`
-	Gateway           *entity.MerchantGateway            `json:"gateway"`
-	MerchantInfo      *entity.Merchant                   `json:"merchantInfo"`
-	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons            []*ro.PlanAddonVo                  `json:"addons"`
-	TotalAmount       int64                              `json:"totalAmount"                `
-	Currency          string                             `json:"currency"              `
-	UserId            int64                              `json:"userId" `
-	OldPlan           *entity.Plan                       `json:"oldPlan"`
-	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
-	NextPeriodInvoice *ro.InvoiceDetailSimplify          `json:"nextPeriodInvoice"`
-	ProrationDate     int64                              `json:"prorationDate"`
-	EffectImmediate   bool                               `json:"EffectImmediate"`
+	Subscription      *entity.Subscription    `json:"subscription"`
+	Plan              *entity.Plan            `json:"plan"`
+	Quantity          int64                   `json:"quantity"`
+	Gateway           *entity.MerchantGateway `json:"gateway"`
+	MerchantInfo      *entity.Merchant        `json:"merchantInfo"`
+	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail `json:"addons"`
+	TotalAmount       int64                   `json:"totalAmount"                `
+	Currency          string                  `json:"currency"              `
+	UserId            int64                   `json:"userId" `
+	OldPlan           *entity.Plan            `json:"oldPlan"`
+	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
+	NextPeriodInvoice *bean.InvoiceSimplify   `json:"nextPeriodInvoice"`
+	ProrationDate     int64                   `json:"prorationDate"`
+	EffectImmediate   bool                    `json:"EffectImmediate"`
 }
 
 // SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
@@ -441,7 +442,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
 		effectImmediate = false
 	} else {
-		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
+		var oldAddonParams []*bean.PlanAddonParam
 		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
 		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
 		var oldAddonMap = make(map[uint64]int64)
@@ -500,10 +501,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	}
 
 	var totalAmount int64
-	var prorationInvoice *ro.InvoiceDetailSimplify
-	var nextPeriodInvoice *ro.InvoiceDetailSimplify
+	var prorationInvoice *bean.InvoiceSimplify
+	var nextPeriodInvoice *bean.InvoiceSimplify
 	if effectImmediate {
-		var oldAddonParams []*ro.SubscriptionPlanAddonParamRo
+		var oldAddonParams []*bean.PlanAddonParam
 		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
 		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
 		var oldProrationPlanParams []*invoice_compute.ProrationPlanParam
@@ -536,7 +537,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		}
 		if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
-			prorationInvoice = &ro.InvoiceDetailSimplify{
+			prorationInvoice = &bean.InvoiceSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
 				TotalAmount:                    0,
 				TotalAmountExcludingTax:        0,
@@ -544,7 +545,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				TaxAmount:                      0,
 				SubscriptionAmount:             0,
 				SubscriptionAmountExcludingTax: 0,
-				Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
+				Lines:                          make([]*bean.InvoiceItemSimplify, 0),
 				ProrationDate:                  prorationDate,
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
@@ -594,7 +595,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		})
 	} else {
 		prorationDate = sub.CurrentPeriodEnd
-		prorationInvoice = &ro.InvoiceDetailSimplify{
+		prorationInvoice = &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionUpgrade",
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
@@ -602,7 +603,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 			TaxAmount:                      0,
 			SubscriptionAmount:             0,
 			SubscriptionAmountExcludingTax: 0,
-			Lines:                          make([]*ro.InvoiceItemDetailRo, 0),
+			Lines:                          make([]*bean.InvoiceItemSimplify, 0),
 			ProrationDate:                  prorationDate,
 			PeriodStart:                    sub.CurrentPeriodStart,
 			PeriodEnd:                      sub.CurrentPeriodEnd,

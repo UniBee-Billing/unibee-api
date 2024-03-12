@@ -2,8 +2,8 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	"unibee/internal/consts"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -12,12 +12,12 @@ type DetailReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
-	User                                *ro.UserAccountSimplify               `json:"user" dc:"user"`
-	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *bean.UserAccountSimplify             `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type PayCheckReq struct {
@@ -26,49 +26,49 @@ type PayCheckReq struct {
 }
 type PayCheckRes struct {
 	PayStatus    consts.SubscriptionStatusEnum `json:"payStatus" dc:"Pay Status，1-Pending，2-Paid，3-Suspend，4-Cancel, 5-Expired"`
-	Subscription *ro.SubscriptionSimplify      `json:"subscription" dc:"Subscription"`
+	Subscription *bean.SubscriptionSimplify    `json:"subscription" dc:"Subscription"`
 }
 
 type CreatePreviewReq struct {
 	g.Meta         `path:"/create_preview" tags:"User-Subscription" method:"post" summary:"User Create Subscription Preview"`
-	PlanId         uint64                             `json:"planId" dc:"PlanId" v:"required"`
-	Quantity       int64                              `json:"quantity" dc:"Quantity" `
-	GatewayId      uint64                             `json:"gatewayId" dc:"Id" v:"required" `
-	AddonParams    []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
-	VatCountryCode string                             `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber      string                             `json:"vatNumber" dc:"VatNumber" `
+	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Quantity       int64                  `json:"quantity" dc:"Quantity" `
+	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
+	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 }
 type CreatePreviewRes struct {
-	Plan              *entity.Plan                       `json:"plan"`
-	Quantity          int64                              `json:"quantity"`
-	Gateway           *ro.GatewaySimplify                `json:"gateway"`
-	AddonParams       []*ro.SubscriptionPlanAddonParamRo `json:"addonParams"`
-	Addons            []*ro.PlanAddonVo                  `json:"addons"`
-	TotalAmount       int64                              `json:"totalAmount"                `
-	Currency          string                             `json:"currency"              `
-	Invoice           *ro.InvoiceDetailSimplify          `json:"invoice"`
-	UserId            int64                              `json:"userId" `
-	Email             string                             `json:"email" `
-	VatCountryCode    string                             `json:"vatCountryCode"              `
-	VatCountryName    string                             `json:"vatCountryName"              `
-	TaxScale          int64                              `json:"taxScale"              `
-	VatNumber         string                             `json:"vatNumber"              `
-	VatNumberValidate *ro.ValidResult                    `json:"vatNumberValidate"              `
+	Plan              *entity.Plan            `json:"plan"`
+	Quantity          int64                   `json:"quantity"`
+	Gateway           *bean.GatewaySimplify   `json:"gateway"`
+	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail `json:"addons"`
+	TotalAmount       int64                   `json:"totalAmount"                `
+	Currency          string                  `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
+	UserId            int64                   `json:"userId" `
+	Email             string                  `json:"email" `
+	VatCountryCode    string                  `json:"vatCountryCode"              `
+	VatCountryName    string                  `json:"vatCountryName"              `
+	TaxScale          int64                   `json:"taxScale"              `
+	VatNumber         string                  `json:"vatNumber"              `
+	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
 }
 
 type CreateReq struct {
 	g.Meta             `path:"/create_submit" tags:"User-Subscription" method:"post" summary:"User Create Subscription"`
-	PlanId             uint64                             `json:"planId" dc:"PlanId" v:"required"`
-	Quantity           int64                              `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                             `json:"gatewayId" dc:"Id"   v:"required" `
-	AddonParams        []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency    string                             `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ReturnUrl          string                             `json:"returnUrl"  dc:"RedirectUrl"  `
-	VatCountryCode     string                             `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber          string                             `json:"vatNumber" dc:"VatNumber" `
-	PaymentMethodId    string                             `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata           map[string]string                  `json:"metadata" dc:"Metadata，Map"`
+	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
+	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 type CreateRes struct {
 	Subscription *entity.Subscription `json:"subscription" dc:"Subscription"`
@@ -78,31 +78,31 @@ type CreateRes struct {
 
 type UpdatePreviewReq struct {
 	g.Meta              `path:"/update_preview" tags:"User-Subscription" method:"post" summary:"User Update Subscription Preview"`
-	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `json:"newPlanId" dc:"NewPlanId" v:"required"`
-	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
-	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
+	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 }
 type UpdatePreviewRes struct {
-	TotalAmount       int64                     `json:"totalAmount"                `
-	Currency          string                    `json:"currency"              `
-	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
-	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
-	ProrationDate     int64                     `json:"prorationDate"`
+	TotalAmount       int64                 `json:"totalAmount"                `
+	Currency          string                `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify `json:"invoice"`
+	NextPeriodInvoice *bean.InvoiceSimplify `json:"nextPeriodInvoice"`
+	ProrationDate     int64                 `json:"prorationDate"`
 }
 
 type UpdateReq struct {
 	g.Meta              `path:"/update_submit" tags:"User-Subscription" method:"post" summary:"User Update Subscription"`
-	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `json:"newPlanId" dc:"NewPlanId" v:"required"`
-	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount  int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency     string                             `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate       int64                              `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
-	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata            map[string]string                  `json:"metadata" dc:"Metadata，Map"`
+	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate       int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
+	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 type UpdateRes struct {
 	SubscriptionPendingUpdate *entity.SubscriptionPendingUpdate `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
@@ -115,7 +115,7 @@ type ListReq struct {
 	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
 }
 type ListRes struct {
-	Subscriptions []*ro.SubscriptionDetailVo `json:"subscriptions" dc:"Subscription List"`
+	Subscriptions []*bean.SubscriptionDetail `json:"subscriptions" dc:"Subscription List"`
 }
 
 type CancelReq struct {
@@ -163,5 +163,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	SubscriptionTimeLines []*ro.SubscriptionTimeLineDetailVo `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	SubscriptionTimeLines []*bean.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
 }

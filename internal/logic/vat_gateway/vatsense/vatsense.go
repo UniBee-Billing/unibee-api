@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee/internal/logic/gateway/ro"
-	entity "unibee/internal/model/entity/oversea_pay"
 	"io"
 	"net/http"
+	"unibee/api/bean"
+	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type VatSense struct {
@@ -143,7 +143,7 @@ func (c VatSense) ListAllRates() ([]*entity.CountryRate, error) {
 	}
 }
 
-func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*ro.ValidResult, error) {
+func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*bean.ValidResult, error) {
 	var response *gjson.Json
 	var err error
 	if len(requesterVatNumber) > 0 {
@@ -159,7 +159,7 @@ func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string)
 		valid := data.Get("valid").Bool()
 		if valid {
 			company := data.GetJson("company")
-			return &ro.ValidResult{
+			return &bean.ValidResult{
 				Valid:          valid,
 				VatNumber:      company.Get("vat_number").String(),
 				CountryCode:    company.Get("country_code").String(),
@@ -167,12 +167,12 @@ func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string)
 				CompanyAddress: company.Get("company_address").String(),
 			}, nil
 		} else {
-			return &ro.ValidResult{
+			return &bean.ValidResult{
 				Valid: false,
 			}, nil
 		}
 	} else if response.Contains("error") && response.GetJson("error").Contains("detail") {
-		return &ro.ValidResult{
+		return &bean.ValidResult{
 			Valid:           false,
 			ValidateMessage: fmt.Sprintf("%s-%s", response.GetJson("error").Get("title").String(), response.GetJson("error").Get("detail").String()),
 		}, nil
@@ -181,7 +181,7 @@ func (c VatSense) ValidateVatNumber(vatNumber string, requesterVatNumber string)
 	}
 }
 
-func (c VatSense) ValidateEoriNumber(number string) (*ro.ValidResult, error) {
+func (c VatSense) ValidateEoriNumber(number string) (*bean.ValidResult, error) {
 	response, err := fetchVatSense("https://api.vatsense.com/1.0/validate?eori_number="+number, c.Password)
 	if err != nil {
 		return nil, err
@@ -191,7 +191,7 @@ func (c VatSense) ValidateEoriNumber(number string) (*ro.ValidResult, error) {
 		valid := data.Get("valid").Bool()
 		if valid {
 			company := data.GetJson("company")
-			return &ro.ValidResult{
+			return &bean.ValidResult{
 				Valid:          valid,
 				VatNumber:      company.Get("vat_number").String(),
 				CountryCode:    company.Get("country_code").String(),
@@ -199,7 +199,7 @@ func (c VatSense) ValidateEoriNumber(number string) (*ro.ValidResult, error) {
 				CompanyAddress: company.Get("company_address").String(),
 			}, nil
 		} else {
-			return &ro.ValidResult{
+			return &bean.ValidResult{
 				Valid: false,
 			}, nil
 		}

@@ -8,7 +8,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -25,7 +25,7 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 	panic("implement me")
 }
 
-func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	params, err := r.GetJson()
 	if err != nil {
 		g.Log().Printf(r.Context(), "ChangellyNotify redirect params:%s err:%s", params, err.Error())
@@ -91,7 +91,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 		}
 	}
 	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, "", nil, gateway)
-	return &ro.GatewayRedirectInternalResp{
+	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
 		ReturnUrl: returnUrl,

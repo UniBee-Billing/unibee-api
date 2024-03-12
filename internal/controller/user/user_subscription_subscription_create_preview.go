@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 	"unibee/internal/logic/subscription/service"
 
 	"unibee/api/user/subscription"
@@ -16,7 +16,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	return &subscription.CreatePreviewRes{
 		Plan:              prepare.Plan,
 		Quantity:          prepare.Quantity,
-		Gateway:           ro.SimplifyGateway(prepare.Gateway),
+		Gateway:           bean.SimplifyGateway(prepare.Gateway),
 		AddonParams:       prepare.AddonParams,
 		Addons:            prepare.Addons,
 		TotalAmount:       prepare.TotalAmount,
@@ -26,7 +26,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatCountryCode:    prepare.VatCountryCode,
 		VatCountryName:    prepare.VatCountryName,
 		TaxScale:          prepare.TaxScale,
-		Invoice: &ro.InvoiceDetailSimplify{
+		Invoice: &bean.InvoiceSimplify{
 			InvoiceName:                    prepare.Invoice.InvoiceName,
 			TotalAmount:                    prepare.Invoice.TotalAmount,
 			TotalAmountExcludingTax:        prepare.Invoice.TotalAmountExcludingTax,

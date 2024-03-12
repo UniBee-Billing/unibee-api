@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	query2 "unibee/internal/query"
 	"unibee/utility"
@@ -83,8 +83,8 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 	}
 	for _, one := range list {
 		mainList = append(mainList, &payment.PaymentDetail{
-			User:    ro.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
-			Payment: ro.SimplifyPayment(one),
+			User:    bean.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
+			Payment: bean.SimplifyPayment(one),
 		})
 	}
 

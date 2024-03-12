@@ -6,9 +6,9 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -25,28 +25,17 @@ const (
 	MetricAggregationTypeSum         = 5
 )
 
-func GetMerchantMetricVo(ctx context.Context, id int64) *ro.MerchantMetricVo {
+func GetMerchantMetricVo(ctx context.Context, id int64) *bean.MerchantMetricSimplify {
 	one := query.GetMerchantMetric(ctx, id)
 	if one != nil {
-		return &ro.MerchantMetricVo{
-			Id:                  one.Id,
-			MerchantId:          one.MerchantId,
-			Code:                one.Code,
-			MetricName:          one.MetricName,
-			MetricDescription:   one.MetricDescription,
-			Type:                one.Type,
-			AggregationType:     one.AggregationType,
-			AggregationProperty: one.AggregationProperty,
-			UpdateTime:          one.GmtModify.Timestamp(),
-			CreateTime:          one.CreateTime,
-		}
+		return bean.SimplifyMerchantMetric(one)
 	}
 	return nil
 }
 
-func MerchantMetricList(ctx context.Context, merchantId uint64) []*ro.MerchantMetricVo {
+func MerchantMetricList(ctx context.Context, merchantId uint64) []*bean.MerchantMetricSimplify {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*ro.MerchantMetricVo, 0)
+	var list = make([]*bean.MerchantMetricSimplify, 0)
 	if merchantId > 0 {
 		var entities []*entity.MerchantMetric
 		err := dao.MerchantMetric.Ctx(ctx).
@@ -55,25 +44,14 @@ func MerchantMetricList(ctx context.Context, merchantId uint64) []*ro.MerchantMe
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &ro.MerchantMetricVo{
-					Id:                  one.Id,
-					MerchantId:          one.MerchantId,
-					Code:                one.Code,
-					MetricName:          one.MetricName,
-					MetricDescription:   one.MetricDescription,
-					Type:                one.Type,
-					AggregationType:     one.AggregationType,
-					AggregationProperty: one.AggregationProperty,
-					UpdateTime:          one.GmtModify.Timestamp(),
-					CreateTime:          one.CreateTime,
-				})
+				list = append(list, bean.SimplifyMerchantMetric(one))
 			}
 		}
 	}
 	return list
 }
 
-func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *ro.MerchantMetricVo {
+func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *bean.MerchantMetricSimplify {
 	utility.Assert(merchantMetricId > 0, "invalid merchantMetricId")
 	if merchantMetricId > 0 {
 		var one *entity.MerchantMetric
@@ -82,18 +60,7 @@ func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *ro.Merc
 			Scan(&one)
 		if err == nil && one != nil {
 			utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
-			return &ro.MerchantMetricVo{
-				Id:                  one.Id,
-				MerchantId:          one.MerchantId,
-				Code:                one.Code,
-				MetricName:          one.MetricName,
-				MetricDescription:   one.MetricDescription,
-				Type:                one.Type,
-				AggregationType:     one.AggregationType,
-				AggregationProperty: one.AggregationProperty,
-				UpdateTime:          one.GmtModify.Timestamp(),
-				CreateTime:          one.CreateTime,
-			}
+			return bean.SimplifyMerchantMetric(one)
 		}
 	}
 	return nil
@@ -108,7 +75,7 @@ type NewMerchantMetricInternalReq struct {
 	AggregationProperty string `json:"aggregationProperty" dc:"AggregationProperty, Will Needed When AggregationType != count"`
 }
 
-func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*ro.MerchantMetricVo, error) {
+func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (*bean.MerchantMetricSimplify, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(len(req.Code) > 0, "code is nil")
 	utility.Assert(req.AggregationType > 0 && req.AggregationType < 6, "aggregationType should be one of 1-count，2-count unique, 3-latest, 4-max, 5-sum")
@@ -137,20 +104,10 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 
-	return &ro.MerchantMetricVo{
-		Id:                  one.Id,
-		MerchantId:          one.MerchantId,
-		Code:                one.Code,
-		MetricName:          one.MetricName,
-		MetricDescription:   one.MetricDescription,
-		Type:                one.Type,
-		AggregationType:     one.AggregationType,
-		AggregationProperty: one.AggregationProperty,
-		CreateTime:          one.CreateTime,
-	}, nil
+	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, name string, description string) (*ro.MerchantMetricVo, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, name string, description string) (*bean.MerchantMetricSimplify, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
@@ -167,18 +124,7 @@ func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, 
 	one.MetricName = name
 	one.MetricDescription = description
 
-	return &ro.MerchantMetricVo{
-		Id:                  one.Id,
-		MerchantId:          one.MerchantId,
-		Code:                one.Code,
-		MetricName:          one.MetricName,
-		MetricDescription:   one.MetricDescription,
-		Type:                one.Type,
-		AggregationType:     one.AggregationType,
-		AggregationProperty: one.AggregationProperty,
-		UpdateTime:          gtime.Now().Timestamp(),
-		CreateTime:          one.CreateTime,
-	}, nil
+	return bean.SimplifyMerchantMetric(one), nil
 }
 
 func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId int64) error {

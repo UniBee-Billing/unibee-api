@@ -8,10 +8,10 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/invoice_compute"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -50,7 +50,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	return one, nil
 }
 
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *ro.InvoiceDetailSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
@@ -110,7 +110,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *ro.InvoiceDeta
 	return one, nil
 }
 
-func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *ro.InvoiceDetailSimplify, payment *entity.Payment) (*entity.Invoice, error) {
+func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.InvoiceSimplify, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
 	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)

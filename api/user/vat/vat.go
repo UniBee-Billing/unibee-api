@@ -2,14 +2,14 @@ package vat
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type CountryListReq struct {
 	g.Meta `path:"/country_list" tags:"User-Vat" method:"get,post" summary:"Vat Country List"`
 }
 type CountryListRes struct {
-	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
+	VatCountryList []*bean.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }
 
 type NumberValidateReq struct {
@@ -17,5 +17,5 @@ type NumberValidateReq struct {
 	VatNumber string `json:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
-	VatNumberValidate *ro.ValidResult `json:"vatNumberValidate"`
+	VatNumberValidate *bean.ValidResult `json:"vatNumberValidate"`
 }

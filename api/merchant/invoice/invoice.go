@@ -2,7 +2,7 @@ package invoice
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -26,7 +26,7 @@ type DetailReq struct {
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type DetailRes struct {
-	Invoice *ro.InvoiceDetailRo `json:"invoice" dc:"invoice Detail"`
+	Invoice *bean.InvoiceDetailRo `json:"invoice" dc:"invoice Detail"`
 }
 
 type ListReq struct {
@@ -47,7 +47,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"invoice Detail List"`
+	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"invoice Detail List"`
 }
 
 type NewReq struct {
@@ -68,7 +68,7 @@ type NewInvoiceItemParam struct {
 }
 
 type NewRes struct {
-	Invoice *ro.InvoiceDetailRo `json:"invoice" `
+	Invoice *bean.InvoiceDetailRo `json:"invoice" `
 }
 
 type EditReq struct {
@@ -82,7 +82,7 @@ type EditReq struct {
 	Finish    bool                   `json:"finish" `
 }
 type EditRes struct {
-	Invoice *ro.InvoiceDetailRo `json:"invoice" `
+	Invoice *bean.InvoiceDetailRo `json:"invoice" `
 }
 
 type DeleteReq struct {

@@ -7,8 +7,8 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -19,10 +19,10 @@ const (
 	MerchantMetricPlanLimitCacheExpire    = 24 * 60 * 60
 )
 
-func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId uint64, reloadCache bool) []*ro.MerchantMetricPlanLimitVo {
+func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, planId uint64, reloadCache bool) []*bean.MerchantMetricPlanLimit {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(planId > 0, "invalid planId")
-	var list = make([]*ro.MerchantMetricPlanLimitVo, 0)
+	var list = make([]*bean.MerchantMetricPlanLimit, 0)
 	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
@@ -43,7 +43,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
-				list = append(list, &ro.MerchantMetricPlanLimitVo{
+				list = append(list, &bean.MerchantMetricPlanLimit{
 					Id:          one.Id,
 					MerchantId:  one.MerchantId,
 					MetricId:    one.MetricId,
@@ -71,7 +71,7 @@ type MerchantMetricPlanLimitInternalReq struct {
 	MetricLimit       uint64 `json:"metricLimit" dc:"MetricLimit" `
 }
 
-func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
+func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*bean.MerchantMetricPlanLimit, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.PlanId > 0, "invalid planId")
 	utility.Assert(req.MetricId > 0, "invalid metricId")
@@ -111,7 +111,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	one.Id = uint64(id)
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
-	return &ro.MerchantMetricPlanLimitVo{
+	return &bean.MerchantMetricPlanLimit{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
@@ -122,7 +122,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	}, nil
 }
 
-func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*ro.MerchantMetricPlanLimitVo, error) {
+func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimitInternalReq) (*bean.MerchantMetricPlanLimit, error) {
 	utility.Assert(req.MerchantId > 0, "invalid merchantId")
 	utility.Assert(req.MetricPlanLimitId > 0, "invalid MetricPlanLimitId")
 	utility.Assert(req.MetricLimit > 0, "invalid MetricLimit")
@@ -145,7 +145,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	one.MetricLimit = req.MetricLimit
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
-	return &ro.MerchantMetricPlanLimitVo{
+	return &bean.MerchantMetricPlanLimit{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
@@ -171,7 +171,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	return err
 }
 
-func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*ro.BulkMetricLimitPlanBindingParam) error {
+func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*bean.BulkMetricLimitPlanBindingParam) error {
 	utility.Assert(plan != nil, "invalid plan")
 	if len(params) > 0 {
 		var oldList []*entity.MerchantMetricPlanLimit

@@ -6,10 +6,10 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 	metric2 "unibee/api/merchant/metric"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/metric"
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/user_sub_plan"
@@ -24,7 +24,7 @@ func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.User
 }
 
 func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *metric2.UserMetric {
-	var list = make([]*ro.UserMerchantMetricStat, 0)
+	var list = make([]*bean.UserMerchantMetricStat, 0)
 	if user != nil {
 		user.Password = ""
 	}
@@ -33,7 +33,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 		for _, metricLimit := range limitMap {
 			met := query.GetMerchantMetric(ctx, metricLimit.MetricId)
 			if met != nil {
-				list = append(list, &ro.UserMerchantMetricStat{
+				list = append(list, &bean.UserMerchantMetricStat{
 					MetricLimit:     metricLimit,
 					CurrentUseValue: GetUserMetricLimitCachedUseValue(ctx, merchantId, user.Id, met, one, false),
 				})
@@ -41,16 +41,16 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 		}
 		return &metric2.UserMetric{
 			IsPaid:                  one.Status == consts.SubStatusActive || one.Status == consts.SubStatusIncomplete,
-			User:                    ro.SimplifyUserAccount(user),
-			Subscription:            ro.SimplifySubscription(one),
-			Plan:                    ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			User:                    bean.SimplifyUserAccount(user),
+			Subscription:            bean.SimplifySubscription(one),
+			Plan:                    bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 			Addons:                  addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			UserMerchantMetricStats: list,
 		}
 	} else {
 		return &metric2.UserMetric{
 			IsPaid:                  false,
-			User:                    ro.SimplifyUserAccount(user),
+			User:                    bean.SimplifyUserAccount(user),
 			Subscription:            nil,
 			Plan:                    nil,
 			Addons:                  nil,
@@ -74,8 +74,8 @@ func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entit
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*ro.MetricLimitVo {
-	var limitMap = make(map[int64]*ro.MetricLimitVo)
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*bean.PlanMetricLimitDetail {
+	var limitMap = make(map[int64]*bean.PlanMetricLimitDetail)
 	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
 		for _, subPlan := range userSubPlans {
@@ -85,7 +85,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int
 					limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
 					limitMap[planLimit.MetricId].PlanLimits = append(limitMap[planLimit.MetricId].PlanLimits, planLimit)
 				} else {
-					limitMap[planLimit.MetricId] = &ro.MetricLimitVo{
+					limitMap[planLimit.MetricId] = &bean.PlanMetricLimitDetail{
 						MerchantId:          merchantId,
 						UserId:              userId,
 						MetricId:            planLimit.MetricId,
@@ -95,7 +95,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int
 						AggregationType:     planLimit.Metric.AggregationType,
 						AggregationProperty: planLimit.Metric.AggregationProperty,
 						TotalLimit:          planLimit.MetricLimit,
-						PlanLimits:          []*ro.MerchantMetricPlanLimitVo{planLimit},
+						PlanLimits:          []*bean.MerchantMetricPlanLimit{planLimit},
 					}
 				}
 			}

@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type ListReq struct {
@@ -10,7 +10,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	MerchantMetrics []*ro.MerchantMetricVo `json:"merchantMetrics" dc:"MerchantMetrics"`
+	MerchantMetrics []*bean.MerchantMetricSimplify `json:"merchantMetrics" dc:"MerchantMetrics"`
 }
 
 type NewReq struct {
@@ -23,7 +23,7 @@ type NewReq struct {
 }
 
 type NewRes struct {
-	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type EditReq struct {
@@ -34,7 +34,7 @@ type EditReq struct {
 }
 
 type EditRes struct {
-	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type DeleteReq struct {
@@ -43,7 +43,7 @@ type DeleteReq struct {
 }
 
 type DeleteRes struct {
-	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
 }
 
 type DetailReq struct {
@@ -52,5 +52,5 @@ type DetailReq struct {
 }
 
 type DetailRes struct {
-	MerchantMetric *ro.MerchantMetricVo `json:"merchantMetric" dc:"MerchantMetric"`
+	MerchantMetric *bean.MerchantMetricSimplify `json:"merchantMetric" dc:"MerchantMetric"`
 }

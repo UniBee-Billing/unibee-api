@@ -6,9 +6,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/merchant_config"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
@@ -111,14 +111,14 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	return nil
 }
 
-func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId int64, vatNumber string, requestVatNumber string) (*ro.ValidResult, error) {
+func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId int64, vatNumber string, requestVatNumber string) (*bean.ValidResult, error) {
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
 		if one.Valid == 1 {
 			valid = true
 		}
-		return &ro.ValidResult{
+		return &bean.ValidResult{
 			Valid:           valid,
 			VatNumber:       one.VatNumber,
 			CountryCode:     one.CountryCode,
@@ -155,7 +155,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 	return result, nil
 }
 
-func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatCountryRate, error) {
+func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var countryRateList []*entity.CountryRate
@@ -168,7 +168,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatC
 	if err != nil {
 		return nil, err
 	}
-	var list []*ro.VatCountryRate
+	var list []*bean.VatCountryRate
 	for _, countryRate := range countryRateList {
 		var vatSupport = false
 		if countryRate.Vat == 1 {
@@ -176,7 +176,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatC
 		} else {
 			vatSupport = false
 		}
-		list = append(list, &ro.VatCountryRate{
+		list = append(list, &bean.VatCountryRate{
 			CountryCode:           countryRate.CountryCode,
 			CountryName:           countryRate.CountryName,
 			VatSupport:            vatSupport,
@@ -186,7 +186,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*ro.VatC
 	return list, nil
 }
 
-func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*ro.VatCountryRate, error) {
+func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
 	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var one *entity.CountryRate
@@ -208,7 +208,7 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	} else {
 		vatSupport = false
 	}
-	return &ro.VatCountryRate{
+	return &bean.VatCountryRate{
 		Id:                    one.Id,
 		Gateway:               one.Gateway,
 		CountryCode:           one.CountryCode,

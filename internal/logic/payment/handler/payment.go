@@ -12,7 +12,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
@@ -451,7 +451,7 @@ func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq,
 	return err
 }
 
-func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *ro.GatewayPaymentRo) error {
+func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_bean.GatewayPaymentRo) error {
 	one := query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
 	if one != nil {
 		if gatewayPaymentRo.Status == consts.PaymentSuccess {

@@ -16,11 +16,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	_gateway "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -243,7 +244,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	r.Response.WriteHeader(responseBack)
 }
 
-func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	params, err := r.GetJson()
 	if err != nil {
 		g.Log().Printf(r.Context(), "StripeNotify redirect params:%s err:%s", params, err.Error())
@@ -331,7 +332,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		}
 	}
 	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, "", nil, gateway)
-	return &ro.GatewayRedirectInternalResp{
+	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
 		ReturnUrl: returnUrl,
@@ -364,7 +365,7 @@ func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType stri
 			if len(paymentIntentDetail.PaymentData) == 0 && stripePayment.NextAction != nil {
 				paymentIntentDetail.PaymentData = utility.MarshalToJsonString(stripePayment.NextAction)
 			}
-			err = handler2.HandlePaymentWebhookEvent(ctx, &ro.GatewayPaymentRo{
+			err = handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
 				Status:               paymentIntentDetail.Status,
 				AuthorizeStatus:      paymentIntentDetail.AuthorizeStatus,
 				AuthorizeReason:      paymentIntentDetail.AuthorizeReason,
@@ -410,7 +411,7 @@ func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp
 	} else if strings.Compare(string(detail.Status), "void") == 0 {
 		status = consts.InvoiceStatusCancelled
 	}
-	var invoiceItems []*ro.InvoiceItemDetailRo
+	var invoiceItems []*bean.InvoiceItemSimplify
 	for _, line := range detail.Lines.Data {
 		var start int64 = 0
 		var end int64 = 0
@@ -418,7 +419,7 @@ func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp
 			start = line.Period.Start
 			end = line.Period.End
 		}
-		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               strings.ToUpper(string(line.Currency)),
 			Amount:                 line.Amount,
 			AmountExcludingTax:     line.AmountExcludingTax,
@@ -513,7 +514,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		}
 	}
 
-	err := handler2.HandlePaymentWebhookEvent(ctx, &ro.GatewayPaymentRo{
+	err := handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
 		Status:               status,
 		AuthorizeStatus:      authorizeStatus,
 		AuthorizeReason:      authorizeReason,
@@ -546,7 +547,7 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 			if err != nil {
 				return gerror.New(fmt.Sprintf("%s", err.Error()))
 			}
-			err = handler2.HandlePaymentWebhookEvent(ctx, &ro.GatewayPaymentRo{
+			err = handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
 				Status:               paymentIntentDetail.Status,
 				AuthorizeStatus:      paymentIntentDetail.AuthorizeStatus,
 				AuthorizeReason:      paymentIntentDetail.AuthorizeReason,
@@ -578,30 +579,30 @@ func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event 
 }
 
 type GatewayDetailInvoiceInternalResp struct {
-	GatewayDefaultPaymentMethod    string                    `json:"gatewayDefaultPaymentMethod"`
-	SubscriptionId                 string                    `json:"subscriptionId"           `
-	TotalAmount                    int64                     `json:"totalAmount"        `
-	PaymentAmount                  int64                     `json:"paymentAmount"              `
-	BalanceAmount                  int64                     `json:"balanceAmount"              `
-	BalanceStart                   int64                     `json:"balanceStart"              `
-	BalanceEnd                     int64                     `json:"balanceEnd"              `
-	TotalAmountExcludingTax        int64                     `json:"totalAmountExcludingTax"        `
-	TaxAmount                      int64                     `json:"taxAmount"          `
-	SubscriptionAmount             int64                     `json:"subscriptionAmount" `
-	SubscriptionAmountExcludingTax int64                     `json:"subscriptionAmountExcludingTax" `
-	Currency                       string                    `json:"currency"           `
-	Lines                          []*ro.InvoiceItemDetailRo `json:"lines"              `
-	Status                         consts.InvoiceStatusEnum  `json:"status"             `
-	Reason                         string                    `json:"reason"             `
-	GatewayUserId                  string                    `json:"gatewayUserId"             `
-	Link                           string                    `json:"link"               `
-	GatewayStatus                  string                    `json:"gatewayStatus"      `
-	GatewayInvoiceId               string                    `json:"gatewayInvoiceId"   `
-	GatewayInvoicePdf              string                    `json:"GatewayInvoicePdf"   `
-	PeriodEnd                      int64                     `json:"periodEnd"`
-	PeriodStart                    int64                     `json:"periodStart"`
-	GatewayPaymentId               string                    `json:"gatewayPaymentId"`
-	PaymentTime                    int64                     `json:"paymentTime"        `
-	CreateTime                     int64                     `json:"createTime"        `
-	CancelTime                     int64                     `json:"cancelTime"        `
+	GatewayDefaultPaymentMethod    string                      `json:"gatewayDefaultPaymentMethod"`
+	SubscriptionId                 string                      `json:"subscriptionId"           `
+	TotalAmount                    int64                       `json:"totalAmount"        `
+	PaymentAmount                  int64                       `json:"paymentAmount"              `
+	BalanceAmount                  int64                       `json:"balanceAmount"              `
+	BalanceStart                   int64                       `json:"balanceStart"              `
+	BalanceEnd                     int64                       `json:"balanceEnd"              `
+	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        `
+	TaxAmount                      int64                       `json:"taxAmount"          `
+	SubscriptionAmount             int64                       `json:"subscriptionAmount" `
+	SubscriptionAmountExcludingTax int64                       `json:"subscriptionAmountExcludingTax" `
+	Currency                       string                      `json:"currency"           `
+	Lines                          []*bean.InvoiceItemSimplify `json:"lines"              `
+	Status                         consts.InvoiceStatusEnum    `json:"status"             `
+	Reason                         string                      `json:"reason"             `
+	GatewayUserId                  string                      `json:"gatewayUserId"             `
+	Link                           string                      `json:"link"               `
+	GatewayStatus                  string                      `json:"gatewayStatus"      `
+	GatewayInvoiceId               string                      `json:"gatewayInvoiceId"   `
+	GatewayInvoicePdf              string                      `json:"GatewayInvoicePdf"   `
+	PeriodEnd                      int64                       `json:"periodEnd"`
+	PeriodStart                    int64                       `json:"periodStart"`
+	GatewayPaymentId               string                      `json:"gatewayPaymentId"`
+	PaymentTime                    int64                       `json:"paymentTime"        `
+	CreateTime                     int64                       `json:"createTime"        `
+	CancelTime                     int64                       `json:"cancelTime"        `
 }

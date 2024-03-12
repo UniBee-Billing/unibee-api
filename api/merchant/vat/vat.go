@@ -2,7 +2,7 @@ package vat
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type SetupGatewayReq struct {
@@ -19,5 +19,5 @@ type CountryListReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 }
 type CountryListRes struct {
-	VatCountryList []*ro.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
+	VatCountryList []*bean.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
 }

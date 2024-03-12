@@ -3,7 +3,7 @@ package webhook
 import (
 	"context"
 	"github.com/gogf/gf/v2/net/ghttp"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -20,7 +20,7 @@ func (b InvalidWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchan
 	panic("implement me")
 }
 
-func (b InvalidWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (b InvalidWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

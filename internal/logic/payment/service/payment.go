@@ -15,7 +15,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
@@ -27,7 +27,7 @@ import (
 	"unibee/utility"
 )
 
-func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (gatewayInternalPayResult *ro.NewPaymentInternalResp, err error) {
+func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
 	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
@@ -166,7 +166,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *ro.NewPaymentIn
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *ro.NewPaymentInternalResp, err error) {
+func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
 	var email = ""
 	if user != nil {
@@ -180,7 +180,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
-	return GatewayPaymentCreate(ctx, &ro.NewPaymentInternalReq{
+	return GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		PayImmediate: true,
 		Gateway:      gateway,
 		Pay: &entity.Payment{

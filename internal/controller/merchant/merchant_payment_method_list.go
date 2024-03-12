@@ -4,7 +4,7 @@ import (
 	"context"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -25,7 +25,7 @@ func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodL
 			gatewayPaymentId = one.GatewayPaymentId
 		}
 	}
-	listQuery, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &ro.GatewayUserPaymentMethodReq{
+	listQuery, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
 		UserId:           int64(req.UserId),
 		GatewayPaymentId: gatewayPaymentId,
 	})

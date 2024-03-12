@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 	query2 "unibee/internal/query"
 	"unibee/utility"
@@ -57,9 +57,9 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 	}
 	for _, one := range list {
 		mainList = append(mainList, &payment.RefundDetail{
-			User:    ro.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
-			Payment: ro.SimplifyPayment(query2.GetPaymentByPaymentId(ctx, one.PaymentId)),
-			Refund:  ro.SimplifyRefund(one),
+			User:    bean.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
+			Payment: bean.SimplifyPayment(query2.GetPaymentByPaymentId(ctx, one.PaymentId)),
+			Refund:  bean.SimplifyRefund(one),
 		})
 	}
 

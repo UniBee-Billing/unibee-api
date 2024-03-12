@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -21,7 +21,7 @@ type SubscriptionTimeLineListInternalReq struct {
 }
 
 type SubscriptionTimeLineListInternalRes struct {
-	SubscriptionTimelines []*ro.SubscriptionTimeLineDetailVo
+	SubscriptionTimelines []*bean.SubscriptionTimeLineDetail
 }
 
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
@@ -54,9 +54,9 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	if err != nil {
 		return nil, err
 	}
-	var timelines []*ro.SubscriptionTimeLineDetailVo
+	var timelines []*bean.SubscriptionTimeLineDetail
 	for _, one := range mainList {
-		timelines = append(timelines, &ro.SubscriptionTimeLineDetailVo{
+		timelines = append(timelines, &bean.SubscriptionTimeLineDetail{
 			MerchantId:      one.MerchantId,
 			UserId:          one.UserId,
 			SubscriptionId:  one.SubscriptionId,
@@ -68,7 +68,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 			UniqueId:        one.UniqueId,
 			Currency:        one.Currency,
 			PlanId:          one.PlanId,
-			Plan:            ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Plan:            bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 			Quantity:        one.Quantity,
 			Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			GatewayId:       one.GatewayId,

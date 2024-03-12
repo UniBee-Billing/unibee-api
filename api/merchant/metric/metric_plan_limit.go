@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type NewPlanLimitReq struct {
@@ -13,7 +13,7 @@ type NewPlanLimitReq struct {
 }
 
 type NewPlanLimitRes struct {
-	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
+	MerchantMetricPlanLimit *bean.MerchantMetricPlanLimit `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
 type EditPlanLimitReq struct {
@@ -23,7 +23,7 @@ type EditPlanLimitReq struct {
 }
 
 type EditPlanLimitRes struct {
-	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
+	MerchantMetricPlanLimit *bean.MerchantMetricPlanLimit `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }
 
 type DeletePlanLimitReq struct {
@@ -32,5 +32,5 @@ type DeletePlanLimitReq struct {
 }
 
 type DeletePlanLimitRes struct {
-	MerchantMetricPlanLimit *ro.MerchantMetricPlanLimitVo `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
+	MerchantMetricPlanLimit *bean.MerchantMetricPlanLimit `json:"merchantMetricPlanLimit" dc:"MerchantMetricPlanLimit"`
 }

@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
+	"unibee/api/bean"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/api"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -26,7 +27,7 @@ func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodL
 				gatewayPaymentId = one.GatewayPaymentId
 			}
 		}
-		listQuery, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &ro.GatewayUserPaymentMethodReq{
+		listQuery, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
 			UserId:           gatewayUser.UserId,
 			GatewayPaymentId: gatewayPaymentId,
 		})
@@ -35,6 +36,6 @@ func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodL
 		}
 		return &payment.MethodListRes{MethodList: listQuery.PaymentMethods}, nil
 	} else {
-		return &payment.MethodListRes{MethodList: make([]*ro.PaymentMethod, 0)}, nil
+		return &payment.MethodListRes{MethodList: make([]*bean.PaymentMethod, 0)}, nil
 	}
 }

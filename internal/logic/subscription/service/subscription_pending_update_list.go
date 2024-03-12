@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -24,10 +24,10 @@ type SubscriptionPendingUpdateListInternalReq struct {
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {
-	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetailVo `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
-func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *ro.SubscriptionPendingUpdateDetailVo {
+func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *bean.SubscriptionPendingUpdateDetail {
 	if len(pendingUpdateId) == 0 {
 		return nil
 	}
@@ -49,7 +49,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &ro.SubscriptionPendingUpdateDetailVo{
+	return &bean.SubscriptionPendingUpdateDetail{
 		MerchantId:           one.MerchantId,
 		SubscriptionId:       one.SubscriptionId,
 		UpdateSubscriptionId: one.UpdateSubscriptionId,
@@ -71,13 +71,13 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 		GmtModify:            one.GmtModify,
 		Paid:                 one.Paid,
 		Link:                 one.Link,
-		MerchantMember:       ro.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+		MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
 		EffectImmediate:      one.EffectImmediate,
 		EffectTime:           one.EffectTime,
 		Note:                 one.Note,
-		Plan:                 ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+		Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-		UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+		UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 		UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 		Metadata:             metadata,
 	}
@@ -114,7 +114,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		return nil, err
 	}
 
-	var updateList []*ro.SubscriptionPendingUpdateDetailVo
+	var updateList []*bean.SubscriptionPendingUpdateDetail
 	for _, one := range mainList {
 		var metadata = make(map[string]string)
 		if len(one.MetaData) > 0 {
@@ -123,7 +123,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 				fmt.Printf("SubscriptionPendingUpdateList Unmarshal Metadata error:%s", err.Error())
 			}
 		}
-		updateList = append(updateList, &ro.SubscriptionPendingUpdateDetailVo{
+		updateList = append(updateList, &bean.SubscriptionPendingUpdateDetail{
 			MerchantId:           one.MerchantId,
 			SubscriptionId:       one.SubscriptionId,
 			UpdateSubscriptionId: one.UpdateSubscriptionId,
@@ -145,13 +145,13 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			GmtModify:            one.GmtModify,
 			Paid:                 one.Paid,
 			Link:                 one.Link,
-			MerchantMember:       ro.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+			MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
 			EffectImmediate:      one.EffectImmediate,
 			EffectTime:           one.EffectTime,
 			Note:                 one.Note,
-			Plan:                 ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-			UpdatePlan:           ro.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+			UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
 			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
 			Metadata:             metadata,
 		})

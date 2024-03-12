@@ -6,13 +6,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
-
-func GetGatewaySimplifyById(ctx context.Context, id uint64) *ro.GatewaySimplify {
-	return ro.SimplifyGateway(GetGatewayById(ctx, id))
-}
 
 func GetGatewayByGatewayName(ctx context.Context, merchantId uint64, gatewayName string) (one *entity.MerchantGateway) {
 	if len(gatewayName) == 0 {

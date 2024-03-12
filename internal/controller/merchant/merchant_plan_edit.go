@@ -2,10 +2,10 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/plan/service"
 	"unibee/utility"
 )
@@ -22,5 +22,5 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 	if err != nil {
 		return nil, err
 	}
-	return &plan.EditRes{Plan: ro.SimplifyPlan(one)}, nil
+	return &plan.EditRes{Plan: bean.SimplifyPlan(one)}, nil
 }

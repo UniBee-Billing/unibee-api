@@ -1,4 +1,4 @@
-package ro
+package bean
 
 type Currency struct {
 	Currency string

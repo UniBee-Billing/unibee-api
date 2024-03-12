@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
@@ -114,7 +114,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 
 			if needInvoiceGenerate {
-				var invoice *ro.InvoiceDetailSimplify
+				var invoice *bean.InvoiceSimplify
 				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice

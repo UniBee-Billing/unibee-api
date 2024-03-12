@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"time"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -61,7 +61,7 @@ func (p GatewayWebhookProxy) GatewayWebhook(r *ghttp.Request, gateway *entity.Me
 	p.getRemoteGateway().GatewayWebhook(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayWebhook cost：%s \n", time.Now().Sub(startTime))
 }
-func (p GatewayWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (p GatewayWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	startTime := time.Now()
 	res, err = p.getRemoteGateway().GatewayRedirect(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayRedirect cost：%s \n", time.Now().Sub(startTime))

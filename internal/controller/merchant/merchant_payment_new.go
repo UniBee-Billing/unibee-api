@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -33,15 +34,15 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.MerchantId == merchantInfo.Id, "merchant gateway not match")
 
-	var invoice *ro.InvoiceDetailSimplify
+	var invoice *bean.InvoiceSimplify
 	if req.Items != nil && len(req.Items) > 0 {
-		var invoiceItems []*ro.InvoiceItemDetailRo
+		var invoiceItems []*bean.InvoiceItemSimplify
 		var totalAmountExcludingTax int64 = 0
 		var totalTax int64 = 0
 		for _, line := range req.Items {
 			utility.Assert(line.Amount > 0, "Item Amount invalid, should > 0")
 			utility.Assert(len(line.Description) > 0, "Item Description invalid")
-			invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+			invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 				Currency:               line.Currency,
 				TaxScale:               line.TaxScale,
 				Tax:                    line.Tax,
@@ -56,7 +57,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}
 		var totalAmount = totalTax + totalAmountExcludingTax
 		utility.Assert(totalAmount == req.TotalAmount, "sum(items.amount) should match totalAmount")
-		invoice = &ro.InvoiceDetailSimplify{
+		invoice = &bean.InvoiceSimplify{
 			TotalAmount:             req.TotalAmount,
 			Currency:                req.Currency,
 			TotalAmountExcludingTax: totalAmountExcludingTax,
@@ -64,12 +65,12 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Lines:                   invoiceItems,
 		}
 	} else {
-		invoice = &ro.InvoiceDetailSimplify{
+		invoice = &bean.InvoiceSimplify{
 			TotalAmount:             req.TotalAmount,
 			TotalAmountExcludingTax: req.TotalAmount,
 			Currency:                req.Currency,
 			TaxAmount:               0,
-			Lines: []*ro.InvoiceItemDetailRo{{
+			Lines: []*bean.InvoiceItemSimplify{{
 				Currency:               req.Currency,
 				Amount:                 req.TotalAmount,
 				Tax:                    0,
@@ -88,7 +89,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.AssertError(err, "Server Error")
 	utility.Assert(user != nil, "Server Error")
 
-	createPayContext := &ro.NewPaymentInternalReq{
+	createPayContext := &gateway_bean.GatewayNewPaymentReq{
 		CheckoutMode: true,
 		Gateway:      gateway,
 		Pay: &entity.Payment{

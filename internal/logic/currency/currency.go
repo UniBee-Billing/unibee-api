@@ -2,22 +2,22 @@ package currency
 
 import (
 	"strings"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
-func GetMerchantCurrencies() []*ro.Currency {
-	var supportCurrency []*ro.Currency
-	supportCurrency = append(supportCurrency, &ro.Currency{
+func GetMerchantCurrencies() []*bean.Currency {
+	var supportCurrency []*bean.Currency
+	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "EUR",
 		Symbol:   "€",
 		Scale:    100,
 	})
-	supportCurrency = append(supportCurrency, &ro.Currency{
+	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "USD",
 		Symbol:   "$",
 		Scale:    100,
 	})
-	supportCurrency = append(supportCurrency, &ro.Currency{
+	supportCurrency = append(supportCurrency, &bean.Currency{
 		Currency: "JPY",
 		Symbol:   "¥",
 		Scale:    1,
@@ -25,8 +25,8 @@ func GetMerchantCurrencies() []*ro.Currency {
 	return supportCurrency
 }
 
-func GetMerchantCurrencyMap() map[string]*ro.Currency {
-	var currencyMap = make(map[string]*ro.Currency)
+func GetMerchantCurrencyMap() map[string]*bean.Currency {
+	var currencyMap = make(map[string]*bean.Currency)
 	for _, currency := range GetMerchantCurrencies() {
 		currencyMap[currency.Currency] = currency
 	}

@@ -2,7 +2,7 @@ package subscription
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -11,12 +11,12 @@ type DetailReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
-	User                                *ro.UserAccountSimplify               `json:"user" dc:"User"`
-	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *bean.UserAccountSimplify             `json:"user" dc:"User"`
+	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type ListReq struct {
@@ -29,7 +29,7 @@ type ListReq struct {
 	Count     int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type ListRes struct {
-	Subscriptions []*ro.SubscriptionDetailVo `json:"subscriptions" dc:"Subscriptions"`
+	Subscriptions []*bean.SubscriptionDetail `json:"subscriptions" dc:"Subscriptions"`
 }
 
 type CancelReq struct {
@@ -79,31 +79,31 @@ type AddNewTrialStartRes struct {
 
 type UpdatePreviewReq struct {
 	g.Meta              `path:"/update_preview" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Preview"`
-	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                              `json:"quantity" dc:"Quantity，Default 1" `
-	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
+	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 }
 type UpdatePreviewRes struct {
-	TotalAmount       int64                     `json:"totalAmount"                `
-	Currency          string                    `json:"currency"              `
-	Invoice           *ro.InvoiceDetailSimplify `json:"invoice"`
-	NextPeriodInvoice *ro.InvoiceDetailSimplify `json:"nextPeriodInvoice"`
-	ProrationDate     int64                     `json:"prorationDate"`
+	TotalAmount       int64                 `json:"totalAmount"                `
+	Currency          string                `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify `json:"invoice"`
+	NextPeriodInvoice *bean.InvoiceSimplify `json:"nextPeriodInvoice"`
+	ProrationDate     int64                 `json:"prorationDate"`
 }
 
 type UpdateReq struct {
 	g.Meta              `path:"/update_submit" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Submit"`
-	SubscriptionId      string                             `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                             `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                              `json:"quantity" dc:"Quantity"  v:"required"`
-	AddonParams         []*ro.SubscriptionPlanAddonParamRo `json:"addonParams" dc:"addonParams" `
-	WithImmediateEffect int                                `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	ConfirmTotalAmount  int64                              `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency     string                             `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate       int64                              `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
-	Metadata            map[string]string                  `json:"metadata" dc:"Metadata，Map"`
+	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity            int64                  `json:"quantity" dc:"Quantity"  v:"required"`
+	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate       int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
+	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 
 type UpdateRes struct {
@@ -118,12 +118,12 @@ type UserSubscriptionDetailReq struct {
 }
 
 type UserSubscriptionDetailRes struct {
-	User                                *ro.UserAccountSimplify               `json:"user" dc:"user"`
-	Subscription                        *ro.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
-	Plan                                *ro.PlanSimplify                      `json:"plan" dc:"Plan"`
-	Gateway                             *ro.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
-	Addons                              []*ro.PlanAddonVo                     `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *ro.SubscriptionPendingUpdateDetailVo `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
+	User                                *bean.UserAccountSimplify             `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }
 
 type TimeLineListReq struct {
@@ -136,7 +136,7 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	SubscriptionTimeLines []*ro.SubscriptionTimeLineDetailVo `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	SubscriptionTimeLines []*bean.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
 }
 
 type PendingUpdateListReq struct {
@@ -149,7 +149,7 @@ type PendingUpdateListReq struct {
 }
 
 type PendingUpdateListRes struct {
-	SubscriptionPendingUpdateDetails []*ro.SubscriptionPendingUpdateDetailVo `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
 type NewAdminNoteReq struct {

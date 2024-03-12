@@ -2,7 +2,7 @@ package invoice
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type ListReq struct {
@@ -17,5 +17,5 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"Invoices Details"`
+	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"Invoices Details"`
 }

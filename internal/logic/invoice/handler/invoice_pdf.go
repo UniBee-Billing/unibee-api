@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unibee/api/bean"
 	"unibee/internal/consts"
-	"unibee/internal/logic/gateway/ro"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
 	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -114,7 +114,7 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		},
 	})
 
-	var lines []*ro.InvoiceItemDetailRo
+	var lines []*bean.InvoiceItemSimplify
 	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
 

@@ -10,7 +10,7 @@ import (
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -316,7 +316,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	return nil
 }
 
-func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRefundRo) error {
+func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *gateway_bean.GatewayPaymentRefundResp) error {
 	utility.Assert(len(gatewayRefundRo.GatewayRefundId) > 0, "gatewayRefundId not found")
 	one := query.GetRefundByGatewayRefundId(ctx, gatewayRefundRo.GatewayRefundId)
 	utility.Assert(one != nil, "refund not found")
@@ -372,7 +372,7 @@ func HandleRefundWebhookEvent(ctx context.Context, gatewayRefundRo *ro.OutPayRef
 	return nil
 }
 
-func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, details *ro.OutPayRefundRo, uniqueId string) error {
+func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, details *gateway_bean.GatewayPaymentRefundResp, uniqueId string) error {
 	utility.Assert(len(details.GatewayRefundId) > 0, "GatewayRefundId is null")
 	utility.Assert(payment != nil, "payment is null")
 

@@ -17,7 +17,7 @@ package vat
 import (
 	"errors"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -67,7 +67,7 @@ func (g Github) ListAllRates() ([]*entity.CountryRate, error) {
 	return list, nil
 }
 
-func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*ro.ValidResult, error) {
+func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (*bean.ValidResult, error) {
 	format, err := ValidateNumberFormat(vatNumber)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (
 	if !valid.Valid {
 		return nil, gerror.New(vatNumber + " is not valid")
 	}
-	return &ro.ValidResult{
+	return &bean.ValidResult{
 		Valid:          valid.Valid,
 		VatNumber:      valid.VATNumber,
 		CountryCode:    valid.CountryCode,
@@ -91,6 +91,6 @@ func (g Github) ValidateVatNumber(vatNumber string, requesterVatNumber string) (
 	}, nil
 }
 
-func (g Github) ValidateEoriNumber(number string) (*ro.ValidResult, error) {
+func (g Github) ValidateEoriNumber(number string) (*bean.ValidResult, error) {
 	return nil, gerror.New("not support")
 }

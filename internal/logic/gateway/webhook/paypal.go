@@ -11,7 +11,7 @@ import (
 	"strings"
 	_gateway "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -109,7 +109,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 	return nil
 }
 
-func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *ro.GatewayRedirectInternalResp, err error) {
+func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

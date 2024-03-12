@@ -2,7 +2,7 @@ package balance
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 )
 
 type DetailQueryReq struct {
@@ -11,9 +11,9 @@ type DetailQueryReq struct {
 }
 
 type DetailQueryRes struct {
-	AvailableBalance       []*ro.GatewayBalance `json:"available"`
-	ConnectReservedBalance []*ro.GatewayBalance `json:"connectReserved"`
-	PendingBalance         []*ro.GatewayBalance `json:"pending"`
+	AvailableBalance       []*gateway_bean.GatewayBalance `json:"available"`
+	ConnectReservedBalance []*gateway_bean.GatewayBalance `json:"connectReserved"`
+	PendingBalance         []*gateway_bean.GatewayBalance `json:"pending"`
 }
 
 type UserDetailQueryReq struct {
@@ -23,7 +23,7 @@ type UserDetailQueryReq struct {
 }
 
 type UserDetailQueryRes struct {
-	Balance              *ro.GatewayBalance   `json:"balance"`
-	CashBalance          []*ro.GatewayBalance `json:"cashBalance"`
-	InvoiceCreditBalance []*ro.GatewayBalance `json:"invoiceCreditBalance"`
+	Balance              *gateway_bean.GatewayBalance   `json:"balance"`
+	CashBalance          []*gateway_bean.GatewayBalance `json:"cashBalance"`
+	InvoiceCreditBalance []*gateway_bean.GatewayBalance `json:"invoiceCreditBalance"`
 }

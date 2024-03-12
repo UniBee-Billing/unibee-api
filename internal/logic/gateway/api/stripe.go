@@ -19,11 +19,12 @@ import (
 	"github.com/stripe/stripe-go/v76/refund"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
 	_ "unibee/internal/logic/gateway/base"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
@@ -44,7 +45,7 @@ func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (gat
 	return consts.GatewayTypeDefault, result.Err()
 }
 
-func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserAttachPaymentMethodInternalResp, err error) {
+func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -56,10 +57,10 @@ func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway
 	if err != nil {
 		return nil, err
 	}
-	return &ro.GatewayUserAttachPaymentMethodInternalResp{}, nil
+	return &gateway_bean.GatewayUserAttachPaymentMethodResp{}, nil
 }
 
-func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *ro.GatewayUserDeAttachPaymentMethodInternalResp, err error) {
+func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -68,10 +69,10 @@ func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatew
 	if err != nil {
 		return nil, err
 	}
-	return &ro.GatewayUserDeAttachPaymentMethodInternalResp{}, nil
+	return &gateway_bean.GatewayUserDeAttachPaymentMethodResp{}, nil
 }
 
-func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *ro.GatewayUserPaymentMethodCreateAndBindInternalResp, err error) {
+func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -103,14 +104,14 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	_ = rData.Set("expYear", paymentMethod.Card.ExpYear)
 	_ = rData.Set("fingerprint", paymentMethod.Card.Fingerprint)
 	_ = rData.Set("description", paymentMethod.Card.Description)
-	return &ro.GatewayUserPaymentMethodCreateAndBindInternalResp{PaymentMethod: &ro.PaymentMethod{
+	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &bean.PaymentMethod{
 		Id:   paymentMethod.ID,
 		Type: "card",
 		Data: rData,
 	}}, nil
 }
 
-func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *ro.GatewayUserPaymentMethodReq) (res *ro.GatewayUserPaymentMethodListInternalResp, err error) {
+func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(req.UserId > 0, "userId is nil")
 	stripe.Key = gateway.GatewaySecret
@@ -122,7 +123,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	}
 	params.Limit = stripe.Int64(10)
 	result := customer.ListPaymentMethods(params)
-	var paymentMethods = make([]*ro.PaymentMethod, 0)
+	var paymentMethods = make([]*bean.PaymentMethod, 0)
 	for _, paymentMethod := range result.PaymentMethodList().Data {
 		// only append card type
 		if paymentMethod.Type == stripe.PaymentMethodTypeCard {
@@ -135,19 +136,19 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 			_ = data.Set("expYear", paymentMethod.Card.ExpYear)
 			_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
 			_ = data.Set("description", paymentMethod.Card.Description)
-			paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+			paymentMethods = append(paymentMethods, &bean.PaymentMethod{
 				Id:   paymentMethod.ID,
 				Type: "card",
 				Data: data,
 			})
 		}
 	}
-	return &ro.GatewayUserPaymentMethodListInternalResp{
+	return &gateway_bean.GatewayUserPaymentMethodListResp{
 		PaymentMethods: paymentMethods,
 	}, nil
 }
 
-func (s Stripe) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *ro.GatewayUserCreateInternalResp, err error) {
+func (s Stripe) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -162,11 +163,11 @@ func (s Stripe) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantG
 		g.Log().Printf(ctx, "customer.New: %v", err.Error())
 		return nil, err
 	}
-	return &ro.GatewayUserCreateInternalResp{GatewayUserId: createCustomResult.ID}, nil
+	return &gateway_bean.GatewayUserCreateResp{GatewayUserId: createCustomResult.ID}, nil
 
 }
 
-func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *ro.GatewayPaymentListReq) (res []*ro.GatewayPaymentRo, err error) {
+func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -177,7 +178,7 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	params.Limit = stripe.Int64(200)
 	paymentList := paymentintent.List(params)
 	log.SaveChannelHttpLog("GatewayPaymentList", params, paymentList, err, "", nil, gateway)
-	var list []*ro.GatewayPaymentRo
+	var list []*gateway_bean.GatewayPaymentRo
 	for _, item := range paymentList.PaymentIntentList().Data {
 		list = append(list, parseStripePayment(item))
 	}
@@ -185,7 +186,7 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	return list, nil
 }
 
-func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -195,7 +196,7 @@ func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 	params.Limit = stripe.Int64(100)
 	refundList := refund.List(params)
 	log.SaveChannelHttpLog("GatewayRefundList", params, refundList, err, "", nil, gateway)
-	var list []*ro.OutPayRefundRo
+	var list []*gateway_bean.GatewayPaymentRefundResp
 	for _, item := range refundList.RefundList().Data {
 		list = append(list, parseStripeRefund(item))
 	}
@@ -203,7 +204,7 @@ func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 	return list, nil
 }
 
-func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
+func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -217,7 +218,7 @@ func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 	return parseStripePayment(response), nil
 }
 
-func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *ro.GatewayMerchantBalanceQueryInternalResp, err error) {
+func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -228,35 +229,35 @@ func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entit
 		return nil, err
 	}
 
-	var availableBalances []*ro.GatewayBalance
+	var availableBalances []*gateway_bean.GatewayBalance
 	for _, item := range response.Available {
-		availableBalances = append(availableBalances, &ro.GatewayBalance{
+		availableBalances = append(availableBalances, &gateway_bean.GatewayBalance{
 			Amount:   item.Amount,
 			Currency: strings.ToUpper(string(item.Currency)),
 		})
 	}
-	var connectReservedBalances []*ro.GatewayBalance
+	var connectReservedBalances []*gateway_bean.GatewayBalance
 	for _, item := range response.ConnectReserved {
-		connectReservedBalances = append(connectReservedBalances, &ro.GatewayBalance{
+		connectReservedBalances = append(connectReservedBalances, &gateway_bean.GatewayBalance{
 			Amount:   item.Amount,
 			Currency: strings.ToUpper(string(item.Currency)),
 		})
 	}
-	var pendingBalances []*ro.GatewayBalance
+	var pendingBalances []*gateway_bean.GatewayBalance
 	for _, item := range response.ConnectReserved {
-		pendingBalances = append(pendingBalances, &ro.GatewayBalance{
+		pendingBalances = append(pendingBalances, &gateway_bean.GatewayBalance{
 			Amount:   item.Amount,
 			Currency: strings.ToUpper(string(item.Currency)),
 		})
 	}
-	return &ro.GatewayMerchantBalanceQueryInternalResp{
+	return &gateway_bean.GatewayMerchantBalanceQueryResp{
 		AvailableBalance:       availableBalances,
 		ConnectReservedBalance: connectReservedBalances,
 		PendingBalance:         pendingBalances,
 	}, nil
 }
 
-func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *ro.GatewayUserDetailQueryInternalResp, err error) {
+func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -266,19 +267,19 @@ func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	if err != nil {
 		return nil, err
 	}
-	var cashBalances []*ro.GatewayBalance
+	var cashBalances []*gateway_bean.GatewayBalance
 	if response.CashBalance != nil {
 		for currency, amount := range response.CashBalance.Available {
-			cashBalances = append(cashBalances, &ro.GatewayBalance{
+			cashBalances = append(cashBalances, &gateway_bean.GatewayBalance{
 				Amount:   amount,
 				Currency: strings.ToUpper(currency),
 			})
 		}
 	}
 
-	var invoiceCreditBalances []*ro.GatewayBalance
+	var invoiceCreditBalances []*gateway_bean.GatewayBalance
 	for currency, amount := range response.InvoiceCreditBalance {
-		invoiceCreditBalances = append(invoiceCreditBalances, &ro.GatewayBalance{
+		invoiceCreditBalances = append(invoiceCreditBalances, &gateway_bean.GatewayBalance{
 			Amount:   amount,
 			Currency: strings.ToUpper(currency),
 		})
@@ -287,10 +288,10 @@ func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	if response.InvoiceSettings != nil && response.InvoiceSettings.DefaultPaymentMethod != nil {
 		defaultPaymentMethod = response.InvoiceSettings.DefaultPaymentMethod.ID
 	}
-	return &ro.GatewayUserDetailQueryInternalResp{
+	return &gateway_bean.GatewayUserDetailQueryResp{
 		GatewayUserId:        response.ID,
 		DefaultPaymentMethod: defaultPaymentMethod,
-		Balance: &ro.GatewayBalance{
+		Balance: &gateway_bean.GatewayBalance{
 			Amount:   response.Balance,
 			Currency: strings.ToUpper(string(response.Currency)),
 		},
@@ -316,7 +317,7 @@ func (s Stripe) setUnibeeAppInfo() {
 	})
 }
 
-func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewPaymentInternalReq) (res *ro.NewPaymentInternalResp, err error) {
+func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -367,7 +368,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		if detail.PaymentIntent != nil {
 			gatewayPaymentId = detail.PaymentIntent.ID
 		}
-		return &ro.NewPaymentInternalResp{
+		return &gateway_bean.GatewayNewPaymentResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
@@ -383,17 +384,17 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 			var paymentMethod = ""
 			var link = ""
 			var cancelErr error
-			paymentMethods := make([]*ro.PaymentMethod, 0)
+			paymentMethods := make([]*bean.PaymentMethod, 0)
 			if len(createPayContext.GatewayPaymentMethod) > 0 {
-				paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
 					Id: createPayContext.GatewayPaymentMethod,
 				})
 			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
-				paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
 					Id: gatewayUser.GatewayDefaultPaymentMethod,
 				})
 			} else {
-				listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &ro.GatewayUserPaymentMethodReq{
+				listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &gateway_bean.GatewayUserPaymentMethodReq{
 					UserId: gatewayUser.UserId,
 				})
 				log.SaveChannelHttpLog("GatewayNewPayment", gatewayUser.UserId, listQuery, err, "GatewayUserPaymentMethodListQuery", nil, createPayContext.Gateway)
@@ -402,7 +403,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 				}
 				if listQuery != nil && listQuery.PaymentMethods != nil {
 					for _, method := range listQuery.PaymentMethods {
-						paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+						paymentMethods = append(paymentMethods, &bean.PaymentMethod{
 							Id: method.Id,
 						})
 					}
@@ -449,7 +450,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 				if targetIntent.PaymentMethod != nil {
 					paymentMethod = targetIntent.PaymentMethod.ID
 				}
-				return &ro.NewPaymentInternalResp{
+				return &gateway_bean.GatewayNewPaymentResp{
 					Status:                 consts.PaymentSuccess,
 					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
@@ -467,7 +468,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		if createPayContext.PayImmediate {
 			params.CollectionMethod = stripe.String("charge_automatically")
 			// check the gateway user contains the payment method now
-			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &ro.GatewayUserPaymentMethodReq{
+			listQuery, err := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &gateway_bean.GatewayUserPaymentMethodReq{
 				UserId: gatewayUser.UserId,
 			})
 			var paymentMethodIds = make([]string, 0)
@@ -551,7 +552,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *ro.NewP
 		if detail.PaymentIntent != nil && detail.PaymentIntent.PaymentMethod != nil {
 			gatewayPaymentMethod = detail.PaymentIntent.PaymentMethod.ID
 		}
-		return &ro.NewPaymentInternalResp{
+		return &gateway_bean.GatewayNewPaymentResp{
 			Status:                 status,
 			GatewayPaymentId:       gatewayPaymentId,
 			GatewayPaymentIntentId: detail.ID,
@@ -570,12 +571,12 @@ func ContainString(slice []string, item string) bool {
 	return false
 }
 
-func (s Stripe) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCaptureRo, err error) {
+func (s Stripe) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *ro.OutPayCancelRo, err error) {
+func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
 	utility.Assert(payment.GatewayId > 0, "invalid payment gatewayId")
 	utility.Assert(len(payment.GatewayPaymentIntentId) > 0, "invalid payment GatewayPaymentIntentId")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
@@ -627,15 +628,15 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		gatewayCancelId = paymentDetails.GatewayPaymentId
 	}
 
-	return &ro.OutPayCancelRo{
+	return &gateway_bean.GatewayPaymentCancelResp{
 		MerchantId:      strconv.FormatUint(payment.MerchantId, 10),
 		GatewayCancelId: gatewayCancelId,
-		Reference:       payment.PaymentId,
+		PaymentId:       payment.PaymentId,
 		Status:          consts.PaymentStatusEnum(status),
 	}, nil
 }
 
-func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -656,13 +657,13 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))
 	utility.Assert(result != nil, "Stripe refund failed, result is nil")
-	return &ro.OutPayRefundRo{
+	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: result.ID,
 		Status:          consts.RefundCreated,
 	}, nil
 }
 
-func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -675,7 +676,7 @@ func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	return parseStripeRefund(response), nil
 }
 
-func (s Stripe) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *ro.OutPayRefundRo, err error) {
+func (s Stripe) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, one *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(payment.GatewayId > 0, "Gateway Not Found")
 	gateway := util.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -690,7 +691,7 @@ func (s Stripe) GatewayRefundCancel(ctx context.Context, payment *entity.Payment
 	return parseStripeRefund(response), nil
 }
 
-func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
+func parseStripeRefund(item *stripe.Refund) *gateway_bean.GatewayPaymentRefundResp {
 	var gatewayPaymentId string
 	if item.PaymentIntent != nil {
 		gatewayPaymentId = item.PaymentIntent.ID
@@ -703,7 +704,7 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	} else if strings.Compare(string(item.Status), "canceled") == 0 {
 		status = consts.RefundCancelled
 	}
-	return &ro.OutPayRefundRo{
+	return &gateway_bean.GatewayPaymentRefundResp{
 		MerchantId:       "",
 		GatewayRefundId:  item.ID,
 		GatewayPaymentId: gatewayPaymentId,
@@ -715,7 +716,7 @@ func parseStripeRefund(item *stripe.Refund) *ro.OutPayRefundRo {
 	}
 }
 
-func parseStripePayment(item *stripe.PaymentIntent) *ro.GatewayPaymentRo {
+func parseStripePayment(item *stripe.PaymentIntent) *gateway_bean.GatewayPaymentRo {
 	var status = consts.PaymentCreated
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
 		status = consts.PaymentSuccess
@@ -740,7 +741,7 @@ func parseStripePayment(item *stripe.PaymentIntent) *ro.GatewayPaymentRo {
 	if item.PaymentMethod != nil {
 		gatewayPaymentMethod = item.PaymentMethod.ID
 	}
-	return &ro.GatewayPaymentRo{
+	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.ID,
 		Status:               status,
 		AuthorizeStatus:      captureStatus,

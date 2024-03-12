@@ -2,8 +2,8 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -33,7 +33,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 	}
 
 	return &subscription.UserSubscriptionDetailRes{
-		User:                                ro.SimplifyUserAccount(user),
+		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        nil,
 		Plan:                                nil,
 		Gateway:                             nil,

@@ -7,12 +7,12 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/api/bean"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
@@ -21,7 +21,7 @@ import (
 	"unibee/utility"
 )
 
-func checkInvoice(one *ro.InvoiceDetailRo) {
+func checkInvoice(one *bean.InvoiceDetailRo) {
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range one.Lines {
@@ -47,13 +47,13 @@ func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRe
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
-	var invoiceItems []*ro.InvoiceItemDetailRo
+	var invoiceItems []*bean.InvoiceItemSimplify
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
 			Tax:                    tax,
@@ -129,13 +129,13 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		req.Currency = one.Currency
 	}
 
-	var invoiceItems []*ro.InvoiceItemDetailRo
+	var invoiceItems []*bean.InvoiceItemSimplify
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-		invoiceItems = append(invoiceItems, &ro.InvoiceItemDetailRo{
+		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
 			TaxScale:               req.TaxScale,
 			Tax:                    tax,

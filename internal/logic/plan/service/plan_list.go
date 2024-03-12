@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/api/merchant/plan"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	ro2 "unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -47,9 +47,9 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 	}
 	return &plan.DetailRes{
 		Plan: &plan.PlanDetail{
-			Plan:             ro2.SimplifyPlan(one),
+			Plan:             bean.SimplifyPlan(one),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.Id, false),
-			Addons:           ro2.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
+			Addons:           bean.SimplifyPlanList(query.GetPlanBindingAddonsByPlanId(ctx, planId)),
 			AddonIds:         addonIds,
 		},
 	}, nil
@@ -98,7 +98,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		if p.Type != 1 {
 			//非主 Plan 不查询 addons
 			list = append(list, &plan.PlanDetail{
-				Plan:             ro2.SimplifyPlan(p),
+				Plan:             bean.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 				Addons:           nil,
 				AddonIds:         nil,
@@ -121,7 +121,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 			}
 		}
 		list = append(list, &plan.PlanDetail{
-			Plan:             ro2.SimplifyPlan(p),
+			Plan:             bean.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Addons:           nil,
 			AddonIds:         addonIds,
@@ -141,7 +141,7 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 				if len(planRo.AddonIds) > 0 {
 					for _, id := range planRo.AddonIds {
 						if mapPlans[id] != nil {
-							planRo.Addons = append(planRo.Addons, ro2.SimplifyPlan(mapPlans[id]))
+							planRo.Addons = append(planRo.Addons, bean.SimplifyPlan(mapPlans[id]))
 						}
 					}
 				}

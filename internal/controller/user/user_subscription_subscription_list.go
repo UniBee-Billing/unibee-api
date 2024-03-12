@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
+	"unibee/api/bean"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -13,14 +13,14 @@ import (
 
 func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
 	// return one latest user subscription list as unique subscription
-	var subDetails []*ro.SubscriptionDetailVo
+	var subDetails []*bean.SubscriptionDetail
 	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
 	if sub != nil {
 		subDetailRes, err := service.SubscriptionDetail(ctx, sub.SubscriptionId)
 		if err == nil {
-			var addonParams []*ro.SubscriptionPlanAddonParamRo
+			var addonParams []*bean.PlanAddonParam
 			_ = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
-			subDetails = append(subDetails, &ro.SubscriptionDetailVo{
+			subDetails = append(subDetails, &bean.SubscriptionDetail{
 				User:                                subDetailRes.User,
 				Subscription:                        subDetailRes.Subscription,
 				Plan:                                subDetailRes.Plan,

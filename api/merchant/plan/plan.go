@@ -2,51 +2,51 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type NewReq struct {
 	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"Create Plan"`
-	PlanName           string                                `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
-	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
-	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
-	IntervalCount      int                                   `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week" v:"required" `
-	Description        string                                `json:"description"  dc:"Description"`
-	Type               int                                   `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
-	ProductName        string                                `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription string                                `json:"productDescription" dc:"Default Copy Description" `
-	ImageUrl           string                                `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
-	HomeUrl            string                                `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
-	AddonIds           []int64                               `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
-	MetricLimits       []*ro.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                `json:"gasPayer" dc:"who pay the gas, merchant|user"`
-	Metadata           map[string]string                     `json:"metadata" dc:"Metadata，Map"`
+	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
+	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Currency           string                                  `json:"currency"   dc:"Plan Currency" v:"required" `
+	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
+	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week" v:"required" `
+	Description        string                                  `json:"description"  dc:"Description"`
+	Type               int                                     `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
+	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
+	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
 }
 type NewRes struct {
-	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"Edit Plan"`
-	PlanId             uint64                                `json:"planId" dc:"PlanId" v:"required"`
-	PlanName           string                                `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             int64                                 `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
-	Currency           string                                `json:"currency"   dc:"Plan Currency" v:"required" `
-	IntervalUnit       string                                `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
-	IntervalCount      int                                   `json:"intervalCount"  dc:"Number Of IntervalUnit" `
-	Description        string                                `json:"description"  dc:"Description"`
-	ProductName        string                                `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription string                                `json:"productDescription" dc:"Default Copy Description" `
-	ImageUrl           string                                `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
-	HomeUrl            string                                `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
-	AddonIds           []int64                               `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
-	MetricLimits       []*ro.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                `json:"gasPayer" dc:"who pay the gas, merchant|user"`
-	Metadata           map[string]string                     `json:"metadata" dc:"Metadata，Map"`
+	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
+	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
+	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Currency           string                                  `json:"currency"   dc:"Plan Currency" v:"required" `
+	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week" v:"required" `
+	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit" `
+	Description        string                                  `json:"description"  dc:"Description"`
+	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Addon Type" `
+	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {
-	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type AddonsBindingReq struct {
@@ -56,7 +56,7 @@ type AddonsBindingReq struct {
 	AddonIds []int64 `json:"addonIds"  dc:"Plan Ids Of Addon Type"  v:"required" `
 }
 type AddonsBindingRes struct {
-	Plan *ro.PlanSimplify `json:"plan" dc:"Plan"`
+	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
 }
 
 type ListReq struct {
@@ -104,9 +104,9 @@ type DetailRes struct {
 }
 
 type PlanDetail struct {
-	Plan             *ro.PlanSimplify                `json:"plan" dc:"Plan"`
-	MetricPlanLimits []*ro.MerchantMetricPlanLimitVo `json:"metricPlanLimits" dc:"MetricPlanLimits"`
-	Addons           []*ro.PlanSimplify              `json:"addons" dc:"Addons"`
+	Plan             *bean.PlanSimplify              `json:"plan" dc:"Plan"`
+	MetricPlanLimits []*bean.MerchantMetricPlanLimit `json:"metricPlanLimits" dc:"MetricPlanLimits"`
+	Addons           []*bean.PlanSimplify            `json:"addons" dc:"Addons"`
 	AddonIds         []int64                         `json:"addonIds" dc:"AddonIds"`
 }
 

@@ -2,7 +2,7 @@ package metric
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type UserMetricReq struct {
@@ -16,10 +16,10 @@ type UserMetricRes struct {
 }
 
 type UserMetric struct {
-	IsPaid                  bool                         `json:"isPaid" dc:"IsPaid"`
-	User                    *ro.UserAccountSimplify      `json:"user" dc:"user"`
-	Subscription            *ro.SubscriptionSimplify     `json:"subscription" dc:"Subscription"`
-	Plan                    *ro.PlanSimplify             `json:"plan" dc:"Plan"`
-	Addons                  []*ro.PlanAddonVo            `json:"addons" dc:"Addon"`
-	UserMerchantMetricStats []*ro.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
+	IsPaid                  bool                           `json:"isPaid" dc:"IsPaid"`
+	User                    *bean.UserAccountSimplify      `json:"user" dc:"user"`
+	Subscription            *bean.SubscriptionSimplify     `json:"subscription" dc:"Subscription"`
+	Plan                    *bean.PlanSimplify             `json:"plan" dc:"Plan"`
+	Addons                  []*bean.PlanAddonDetail        `json:"addons" dc:"Addon"`
+	UserMerchantMetricStats []*bean.UserMerchantMetricStat `json:"userMerchantMetricStats" dc:"UserMerchantMetricStats"`
 }

@@ -4,8 +4,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"strconv"
+	"unibee/api/bean"
 	"unibee/internal/consts"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -36,7 +37,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 				r.Response.Writeln("Gateway Error")
 				return
 			}
-			var lines []*ro.InvoiceItemDetailRo
+			var lines []*bean.InvoiceItemSimplify
 			err := utility.UnmarshalFromJsonString(one.Lines, &lines)
 			if err != nil {
 				r.Response.Writeln("Server Error")
@@ -45,7 +46,7 @@ func InvoiceEntrance(r *ghttp.Request) {
 
 			merchantInfo := query.GetMerchantById(r.Context(), one.MerchantId)
 			user := query.GetUserAccountById(r.Context(), uint64(one.UserId))
-			createPayContext := &ro.NewPaymentInternalReq{
+			createPayContext := &gateway_bean.GatewayNewPaymentReq{
 				Gateway: gateway,
 				Pay: &entity.Payment{
 					ExternalPaymentId: one.InvoiceId,

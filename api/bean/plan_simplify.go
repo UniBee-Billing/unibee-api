@@ -1,4 +1,4 @@
-package ro
+package bean
 
 import (
 	"fmt"

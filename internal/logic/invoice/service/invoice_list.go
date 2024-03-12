@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/invoice/invoice_compute"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
@@ -28,7 +28,7 @@ type SubscriptionInvoiceListInternalReq struct {
 }
 
 type SubscriptionInvoiceListInternalRes struct {
-	Invoices []*ro.InvoiceDetailRo `json:"invoices" dc:"Invoice Detail List"`
+	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"Invoice Detail List"`
 }
 
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
@@ -97,7 +97,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	if err != nil {
 		return nil, err
 	}
-	var resultList []*ro.InvoiceDetailRo
+	var resultList []*bean.InvoiceDetailRo
 	for _, invoice := range mainList {
 		resultList = append(resultList, invoice_compute.ConvertInvoiceToRo(ctx, invoice))
 	}

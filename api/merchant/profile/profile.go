@@ -2,7 +2,7 @@ package profile
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -11,12 +11,12 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *entity.Merchant      `json:"merchant" dc:"Merchant"`
-	Env      string                `json:"env" description:"System Env, em: daily|stage|local|prod" `
-	IsProd   bool                  `json:"isProd" description:"Check System Env Is Prod, true|false" `
-	TimeZone []string              `json:"TimeZone" description:"TimeZone List" `
-	Currency []*ro.Currency        `json:"Currency" description:"Currency List" `
-	Gateway  []*ro.GatewaySimplify `json:"gateway" description:"Gateway List" `
+	Merchant *entity.Merchant        `json:"merchant" dc:"Merchant"`
+	Env      string                  `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	IsProd   bool                    `json:"isProd" description:"Check System Env Is Prod, true|false" `
+	TimeZone []string                `json:"TimeZone" description:"TimeZone List" `
+	Currency []*bean.Currency        `json:"Currency" description:"Currency List" `
+	Gateway  []*bean.GatewaySimplify `json:"gateway" description:"Gateway List" `
 }
 
 type UpdateReq struct {

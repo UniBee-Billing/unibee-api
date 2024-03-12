@@ -1,4 +1,4 @@
-package ro
+package bean
 
 import entity "unibee/internal/model/entity/oversea_pay"
 

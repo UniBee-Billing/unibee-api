@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/gateway/ro"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -21,7 +21,7 @@ type SubscriptionListInternalReq struct {
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.SubscriptionDetailVo, error) {
+func SubscriptionDetail(ctx context.Context, subscriptionId string) (*bean.SubscriptionDetail, error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
 	{
@@ -32,17 +32,17 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.Subscri
 	if user != nil {
 		user.Password = ""
 	}
-	return &ro.SubscriptionDetailVo{
-		User:                                ro.SimplifyUserAccount(user),
-		Subscription:                        ro.SimplifySubscription(one),
-		Gateway:                             ro.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
-		Plan:                                ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+	return &bean.SubscriptionDetail{
+		User:                                bean.SimplifyUserAccount(user),
+		Subscription:                        bean.SimplifySubscription(one),
+		Gateway:                             bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
+		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
 	}, nil
 }
 
-func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*ro.SubscriptionDetailVo) {
+func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*bean.SubscriptionDetail) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
 		req.Count = 20
@@ -75,7 +75,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	var totalPlanIds []uint64
 	for _, sub := range mainList {
 		totalPlanIds = append(totalPlanIds, sub.PlanId)
-		var addonParams []*ro.SubscriptionPlanAddonParamRo
+		var addonParams []*bean.PlanAddonParam
 		if len(sub.AddonData) > 0 {
 			err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 			if err == nil {
@@ -92,10 +92,10 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		if user != nil {
 			user.Password = ""
 		}
-		list = append(list, &ro.SubscriptionDetailVo{
-			User:         ro.SimplifyUserAccount(user),
-			Subscription: ro.SimplifySubscription(sub),
-			Gateway:      ro.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
+		list = append(list, &bean.SubscriptionDetail{
+			User:         bean.SimplifyUserAccount(user),
+			Subscription: bean.SimplifySubscription(sub),
+			Gateway:      bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
 			Plan:         nil,
 			Addons:       nil,
 			AddonParams:  addonParams,
@@ -114,13 +114,13 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 				mapPlans[key] = value
 			}
 			for _, subRo := range list {
-				subRo.Plan = ro.SimplifyPlan(mapPlans[subRo.Subscription.PlanId])
+				subRo.Plan = bean.SimplifyPlan(mapPlans[subRo.Subscription.PlanId])
 				if len(subRo.AddonParams) > 0 {
 					for _, param := range subRo.AddonParams {
 						if mapPlans[param.AddonPlanId] != nil {
-							subRo.Addons = append(subRo.Addons, &ro.PlanAddonVo{
+							subRo.Addons = append(subRo.Addons, &bean.PlanAddonDetail{
 								Quantity:  param.Quantity,
-								AddonPlan: ro.SimplifyPlan(mapPlans[param.AddonPlanId]),
+								AddonPlan: bean.SimplifyPlan(mapPlans[param.AddonPlanId]),
 							})
 						}
 					}

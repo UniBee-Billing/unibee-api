@@ -2,8 +2,8 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/api/merchant/plan"
-	"unibee/internal/logic/gateway/ro"
 	"unibee/internal/logic/plan/service"
 )
 
@@ -12,5 +12,5 @@ func (c *ControllerPlan) AddonsBinding(ctx context.Context, req *plan.AddonsBind
 	if err != nil {
 		return nil, err
 	}
-	return &plan.AddonsBindingRes{Plan: ro.SimplifyPlan(one)}, nil
+	return &plan.AddonsBindingRes{Plan: bean.SimplifyPlan(one)}, nil
 }

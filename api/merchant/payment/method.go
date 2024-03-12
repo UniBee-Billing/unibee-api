@@ -2,7 +2,7 @@ package payment
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/internal/logic/gateway/ro"
+	"unibee/api/bean"
 )
 
 type MethodListReq struct {
@@ -13,5 +13,5 @@ type MethodListReq struct {
 }
 
 type MethodListRes struct {
-	MethodList []*ro.PaymentMethod `json:"methodList" dc:"MethodList" `
+	MethodList []*bean.PaymentMethod `json:"methodList" dc:"MethodList" `
 }
