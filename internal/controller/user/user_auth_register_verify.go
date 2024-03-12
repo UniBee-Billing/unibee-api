@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/api/user/auth"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
@@ -50,5 +51,5 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	newOne = query.GetUserAccountById(ctx, user.Id)
 	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
-	return &auth.RegisterVerifyRes{User: newOne}, nil
+	return &auth.RegisterVerifyRes{User: bean.SimplifyUserAccount(newOne)}, nil
 }

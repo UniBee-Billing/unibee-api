@@ -39,7 +39,7 @@ type CreatePreviewReq struct {
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 }
 type CreatePreviewRes struct {
-	Plan              *entity.Plan            `json:"plan"`
+	Plan              *bean.PlanSimplify      `json:"plan"`
 	Quantity          int64                   `json:"quantity"`
 	Gateway           *bean.GatewaySimplify   `json:"gateway"`
 	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`

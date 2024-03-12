@@ -1,9 +1,8 @@
 package auth
 
 import (
-	entity "unibee/internal/model/entity/oversea_pay"
-
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 )
 
 type LoginReq struct {
@@ -13,8 +12,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	User  *entity.UserAccount `json:"user" dc:"user"`
-	Token string              `json:"token" dc:"token string"`
+	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
+	Token string                    `json:"token" dc:"token string"`
 }
 
 type SessionLoginReq struct {
@@ -23,8 +22,8 @@ type SessionLoginReq struct {
 }
 
 type SessionLoginRes struct {
-	User  *entity.UserAccount `json:"user" dc:"user"`
-	Token string              `json:"token" dc:"token string"`
+	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
+	Token string                    `json:"token" dc:"token string"`
 }
 
 type LoginOtpReq struct {
@@ -42,8 +41,8 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	User  *entity.UserAccount `json:"user" dc:"user"`
-	Token string              `json:"token" dc:"token"`
+	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
+	Token string                    `json:"token" dc:"token"`
 }
 
 type PasswordForgetOtpReq struct {
@@ -86,5 +85,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	User *entity.UserAccount `json:"user" dc:"User"`
+	User *bean.UserAccountSimplify `json:"user" dc:"User"`
 }

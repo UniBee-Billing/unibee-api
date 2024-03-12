@@ -1,9 +1,8 @@
 package profile
 
 import (
-	entity "unibee/internal/model/entity/oversea_pay"
-
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean"
 )
 
 type GetReq struct {
@@ -11,7 +10,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	User *entity.UserAccount `json:"user" dc:"User"`
+	User *bean.UserAccountSimplify `json:"user" dc:"User"`
 }
 
 type LogoutReq struct {
@@ -45,7 +44,7 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
-	User *entity.UserAccount `json:"user" dc:"User"`
+	User *bean.UserAccountSimplify `json:"user" dc:"User"`
 }
 
 type PasswordResetReq struct {

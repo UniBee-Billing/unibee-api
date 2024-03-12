@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"unibee/api/bean"
 	v1 "unibee/api/user/profile"
 
 	_interface "unibee/internal/interface"
@@ -19,5 +20,5 @@ func (c *ControllerProfile) Get(ctx context.Context, req *v1.GetReq) (res *v1.Ge
 		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))
 	}
 
-	return &v1.GetRes{User: newOne}, nil
+	return &v1.GetRes{User: bean.SimplifyUserAccount(newOne)}, nil
 }

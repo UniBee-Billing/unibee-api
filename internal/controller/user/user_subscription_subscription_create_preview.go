@@ -14,7 +14,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		return nil, err
 	}
 	return &subscription.CreatePreviewRes{
-		Plan:              prepare.Plan,
+		Plan:              bean.SimplifyPlan(prepare.Plan),
 		Quantity:          prepare.Quantity,
 		Gateway:           bean.SimplifyGateway(prepare.Gateway),
 		AddonParams:       prepare.AddonParams,

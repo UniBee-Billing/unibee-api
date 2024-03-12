@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"unibee/api/bean"
 	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/logic/jwt"
 	"unibee/utility"
@@ -19,5 +20,5 @@ func (c *ControllerAuth) SessionLogin(ctx context.Context, req *auth.SessionLogi
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	one.Password = ""
-	return &auth.SessionLoginRes{User: one, Token: token}, nil
+	return &auth.SessionLoginRes{User: bean.SimplifyUserAccount(one), Token: token}, nil
 }

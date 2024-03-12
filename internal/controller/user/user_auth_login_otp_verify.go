@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"unibee/api/bean"
 	"unibee/api/user/auth"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/jwt"
@@ -33,5 +34,5 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	}
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	one.Password = ""
-	return &auth.LoginOtpVerifyRes{User: one, Token: token}, nil
+	return &auth.LoginOtpVerifyRes{User: bean.SimplifyUserAccount(one), Token: token}, nil
 }

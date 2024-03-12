@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/api/bean"
 )
 
 type GetReq struct {
@@ -10,5 +10,5 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *entity.Merchant `json:"merchant" dc:"Merchant"`
+	Merchant *bean.MerchantSimplify `json:"merchant" dc:"Merchant"`
 }
