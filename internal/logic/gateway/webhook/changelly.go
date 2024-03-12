@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"net/http"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
@@ -22,7 +23,47 @@ func (c ChangellyWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gatew
 }
 
 func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
-	panic("implement me")
+	jsonData, err := r.GetJson()
+	if err != nil {
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook Get PortalJson failed. %v\n", gateway.GatewayName, err.Error())
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+	//client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
+	//_, err = client.GetAccessToken(context.Background())
+	//if err != nil {
+	//	r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+	//	return
+	//}
+	//signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
+	//if err != nil {
+	//	g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Webhook signature verification success\n", gateway.GatewayName)
+	//	r.Response.WriteHeader(http.StatusBadRequest)
+	//	return
+	//}
+	//if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
+	g.Log().Info(r.Context(), "Receive_Webhook_Channel:", gateway.GatewayName, " hook:", jsonData.String())
+	var responseBack = http.StatusOK
+	if jsonData.Contains("payment_id") {
+		err = ProcessPaymentWebhook(r.Context(), jsonData.Get("payment_data.PaymentId").String(), jsonData.Get("payment_id").String(), gateway)
+		if err != nil {
+			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
+			r.Response.WriteHeader(http.StatusBadRequest)
+			responseBack = http.StatusBadRequest
+		}
+	} else {
+		g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled paymentId\n", gateway.GatewayName)
+		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+		return
+	}
+	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, "Changelly Webhook", nil, gateway)
+	r.Response.WriteHeader(responseBack)
+	return
+	//} else {
+	//	g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
+	//	r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+	//	return
+	//}
 }
 
 func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {

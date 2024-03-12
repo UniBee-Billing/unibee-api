@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -189,9 +188,9 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			requestId = stripePayment.ID
 			utility.Assert(stripePayment.Metadata != nil && stripePayment.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Payment")
 
-			err = s.processPaymentWebhook(r.Context(), string(event.Type), stripePayment, gateway)
+			err = ProcessPaymentWebhook(r.Context(), stripePayment.Metadata["PaymentId"], stripePayment.ID, gateway)
 			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
+				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
 				responseBack = http.StatusBadRequest
 			}
@@ -209,7 +208,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 			utility.Assert(stripeRefund.Metadata != nil && stripeRefund.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Refund")
 
-			err = s.processRefundWebhook(r.Context(), string(event.Type), stripeRefund, gateway)
+			err = ProcessRefundWebhook(r.Context(), string(event.Type), stripeRefund.ID, gateway)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -228,7 +227,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 			utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
 
-			err = s.processCheckoutSessionWebhook(r.Context(), string(event.Type), stripeCheckoutSession, gateway)
+			err = ProcessPaymentWebhook(r.Context(), stripeCheckoutSession.Metadata["PaymentId"], stripeCheckoutSession.PaymentIntent.ID, gateway)
 			if err != nil {
 				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
 				r.Response.WriteHeader(http.StatusBadRequest)
@@ -338,64 +337,6 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		ReturnUrl: returnUrl,
 		QueryPath: r.URL.RawQuery,
 	}, nil
-}
-
-func (s StripeWebhook) processRefundWebhook(ctx context.Context, eventType string, refund stripe.Refund, gateway *entity.MerchantGateway) error {
-	refundDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayRefundDetail(ctx, gateway, refund.ID)
-	if err != nil {
-		return err
-	}
-	err = handler2.HandleRefundWebhookEvent(ctx, refundDetail)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s StripeWebhook) processPaymentWebhook(ctx context.Context, eventType string, stripePayment stripe.PaymentIntent, gateway *entity.MerchantGateway) error {
-	if paymentId, ok := stripePayment.Metadata["PaymentId"]; ok {
-		// PaymentIntent Under UniBee Control
-		payment := query.GetPaymentByPaymentId(ctx, paymentId)
-		if payment != nil {
-			paymentIntentDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, stripePayment.ID)
-			if err != nil {
-				return err
-			}
-			if len(paymentIntentDetail.PaymentData) == 0 && stripePayment.NextAction != nil {
-				paymentIntentDetail.PaymentData = utility.MarshalToJsonString(stripePayment.NextAction)
-			}
-			err = handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
-				Status:               paymentIntentDetail.Status,
-				AuthorizeStatus:      paymentIntentDetail.AuthorizeStatus,
-				AuthorizeReason:      paymentIntentDetail.AuthorizeReason,
-				Currency:             paymentIntentDetail.Currency,
-				TotalAmount:          paymentIntentDetail.TotalAmount,
-				PaymentAmount:        paymentIntentDetail.PaymentAmount,
-				BalanceAmount:        paymentIntentDetail.BalanceAmount,
-				BalanceStart:         paymentIntentDetail.BalanceStart,
-				BalanceEnd:           paymentIntentDetail.BalanceEnd,
-				Reason:               paymentIntentDetail.Reason,
-				CancelReason:         paymentIntentDetail.CancelReason,
-				PaymentData:          paymentIntentDetail.PaymentData,
-				PayTime:              paymentIntentDetail.PayTime,
-				CreateTime:           paymentIntentDetail.CreateTime,
-				CancelTime:           paymentIntentDetail.CancelTime,
-				GatewayPaymentId:     paymentIntentDetail.GatewayPaymentId,
-				GatewayPaymentMethod: paymentIntentDetail.GatewayPaymentMethod,
-			})
-			if err != nil {
-				return err
-			}
-		} else {
-			return gerror.New("Payment Not Found")
-		}
-	} else {
-		//Maybe PaymentIntent Create By Invoice
-		g.Log().Errorf(ctx, "No PaymentId Metadata PaymentIntentId:%s", stripePayment.ID)
-		return nil
-	}
-	return nil
 }
 
 func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp {
@@ -538,44 +479,6 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	}
 
 	return nil
-}
-
-func (s StripeWebhook) processCheckoutSessionWebhook(ctx context.Context, event string, checkoutSession stripe.CheckoutSession, gateway *entity.MerchantGateway) error {
-	if _, ok := checkoutSession.Metadata["PaymentId"]; ok {
-		if checkoutSession.PaymentIntent != nil {
-			paymentIntentDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, checkoutSession.PaymentIntent.ID)
-			if err != nil {
-				return gerror.New(fmt.Sprintf("%s", err.Error()))
-			}
-			err = handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
-				Status:               paymentIntentDetail.Status,
-				AuthorizeStatus:      paymentIntentDetail.AuthorizeStatus,
-				AuthorizeReason:      paymentIntentDetail.AuthorizeReason,
-				Currency:             paymentIntentDetail.Currency,
-				TotalAmount:          paymentIntentDetail.TotalAmount,
-				PaymentAmount:        paymentIntentDetail.PaymentAmount,
-				BalanceAmount:        paymentIntentDetail.BalanceAmount,
-				BalanceStart:         paymentIntentDetail.BalanceStart,
-				BalanceEnd:           paymentIntentDetail.BalanceEnd,
-				Reason:               paymentIntentDetail.Reason,
-				CancelReason:         paymentIntentDetail.CancelReason,
-				PaymentData:          paymentIntentDetail.PaymentData,
-				PayTime:              paymentIntentDetail.PayTime,
-				CreateTime:           paymentIntentDetail.CreateTime,
-				CancelTime:           paymentIntentDetail.CancelTime,
-				GatewayPaymentId:     paymentIntentDetail.GatewayPaymentId,
-				GatewayPaymentMethod: paymentIntentDetail.GatewayPaymentMethod,
-			})
-			if err != nil {
-				return err
-			}
-			return nil
-		} else {
-			return gerror.New("no PaymentIntent")
-		}
-	} else {
-		return gerror.New("No PaymentId Metadata")
-	}
 }
 
 type GatewayDetailInvoiceInternalResp struct {
