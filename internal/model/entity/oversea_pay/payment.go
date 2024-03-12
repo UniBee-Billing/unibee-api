@@ -18,7 +18,7 @@ type Payment struct {
 	SubscriptionId         string      `json:"subscriptionId"         description:"subscription id"`                                                        // subscription id
 	GmtCreate              *gtime.Time `json:"gmtCreate"              description:"create time"`                                                            // create time
 	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time
-	BizType                int         `json:"bizType"                description:"biz_type 1-single payment, 3-subscription"`                              // biz_type 1-single payment, 3-subscription
+	BizType                int         `json:"bizType"                description:"biz_type 1-onetime payment, 3-subscription"`                             // biz_type 1-onetime payment, 3-subscription
 	ExternalPaymentId      string      `json:"externalPaymentId"      description:"external_payment_id"`                                                    // external_payment_id
 	Currency               string      `json:"currency"               description:"currency，“SGD” “MYR” “PHP” “IDR” “THB”"`                                 // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              string      `json:"paymentId"              description:"payment id"`                                                             // payment id
@@ -58,4 +58,6 @@ type Payment struct {
 	InvoiceData            string      `json:"invoiceData"            description:""`                                                                       //
 	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
 	GasPayer               string      `json:"gasPayer"               description:"who pay the gas, merchant|user"`                                         // who pay the gas, merchant|user
+	ExpireTime             int64       `json:"expireTime"             description:"expire time, utc time"`                                                  // expire time, utc time
+	GatewayLink            string      `json:"gatewayLink"            description:""`                                                                       //
 }

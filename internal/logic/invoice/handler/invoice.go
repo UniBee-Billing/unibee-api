@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/invoice/invoice_compute"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -84,7 +84,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           invoice_compute.GetInvoiceLink(invoiceId),
+		Link:                           link.GetInvoiceLink(invoiceId),
 		CreateTime:                     gtime.Now().Timestamp(),
 	}
 

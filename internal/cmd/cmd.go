@@ -11,7 +11,8 @@ import (
 	"unibee/internal/consumer/websocket"
 	"unibee/internal/controller"
 	"unibee/internal/controller/gateway_webhook_entry"
-	"unibee/internal/controller/invoice_entry"
+	"unibee/internal/controller/link/invoice"
+	"unibee/internal/controller/link/payment"
 	"unibee/internal/controller/merchant"
 	"unibee/internal/controller/system"
 	"unibee/internal/controller/user"
@@ -268,7 +269,8 @@ var (
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// Invoice Link
-			s.BindHandler("GET:/in/{invoiceId}", invoice_entry.InvoiceEntrance)
+			s.BindHandler("GET:/in/{invoiceId}", invoice.InvoiceLinkEntry)
+			s.BindHandler("GET:/pay/{paymentId}", payment.PaymentLinkEntry)
 			// Gateway Redirect
 			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook

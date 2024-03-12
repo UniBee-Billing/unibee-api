@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"strconv"
 	"strings"
+	"time"
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
@@ -122,7 +123,7 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 		"failure_redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 		"fees_payer":           gasPayer, // who pay the fee
 		"payment_data":         createPayContext.Metadata,
-		//"pending_deadline_at":  "",
+		"pending_deadline_at":  time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
 	}
 	responseJson, err := SendChangellyRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
 	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "ChangelyNewPayment", nil, createPayContext.Gateway)

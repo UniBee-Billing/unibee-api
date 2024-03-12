@@ -13,6 +13,7 @@ import (
 	"unibee/api/bean"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
+	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
@@ -74,12 +75,16 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		}
 		createPayContext.Pay.InvoiceId = invoice.InvoiceId
 	}
+	if createPayContext.DaysUtilDue == 0 {
+		createPayContext.DaysUtilDue = 3 //default 3 days expire
+	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway refund
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
+			createPayContext.Pay.ExpireTime = createPayContext.Pay.CreateTime + int64(createPayContext.DaysUtilDue*86400)
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
 			if err != nil {
 				return err
@@ -107,10 +112,13 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			createPayContext.Pay.GatewayPaymentId = gatewayInternalPayResult.GatewayPaymentId
 			createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
 			gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
+			// unibee payment link
+			paymentLink := link.GetPaymentLink(createPayContext.Pay.PaymentId)
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().PaymentData:            string(jsonData),
 				dao.Payment.Columns().Automatic:              automatic,
-				dao.Payment.Columns().Link:                   gatewayInternalPayResult.Link,
+				dao.Payment.Columns().Link:                   paymentLink,
+				dao.Payment.Columns().GatewayLink:            gatewayInternalPayResult.Link,
 				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
 				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.PaymentCreated})
@@ -121,7 +129,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			if err != nil || affected != 1 {
 				return err
 			}
-
+			gatewayInternalPayResult.Link = paymentLink
 			return nil
 		})
 		if err == nil {

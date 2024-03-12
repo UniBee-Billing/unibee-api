@@ -6,16 +6,11 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
-	"unibee/internal/consts"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func GetInvoiceLink(invoiceId string) string {
-	return fmt.Sprintf("%s/in/%s", consts.GetConfigInstance().Server.GetServerPath(), invoiceId)
-}
 
 func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.InvoiceDetail {
 	var lines []*bean.InvoiceItemSimplify

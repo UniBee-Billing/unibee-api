@@ -20,7 +20,7 @@ type Payment struct {
 	SubscriptionId         interface{} // subscription id
 	GmtCreate              *gtime.Time // create time
 	GmtModify              *gtime.Time // update time
-	BizType                interface{} // biz_type 1-single payment, 3-subscription
+	BizType                interface{} // biz_type 1-onetime payment, 3-subscription
 	ExternalPaymentId      interface{} // external_payment_id
 	Currency               interface{} // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              interface{} // payment id
@@ -60,4 +60,6 @@ type Payment struct {
 	InvoiceData            interface{} //
 	GatewayPaymentMethod   interface{} //
 	GasPayer               interface{} // who pay the gas, merchant|user
+	ExpireTime             interface{} // expire time, utc time
+	GatewayLink            interface{} //
 }

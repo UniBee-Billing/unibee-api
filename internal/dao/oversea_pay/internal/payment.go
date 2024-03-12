@@ -28,7 +28,7 @@ type PaymentColumns struct {
 	SubscriptionId         string // subscription id
 	GmtCreate              string // create time
 	GmtModify              string // update time
-	BizType                string // biz_type 1-single payment, 3-subscription
+	BizType                string // biz_type 1-onetime payment, 3-subscription
 	ExternalPaymentId      string // external_payment_id
 	Currency               string // currency，“SGD” “MYR” “PHP” “IDR” “THB”
 	PaymentId              string // payment id
@@ -68,6 +68,8 @@ type PaymentColumns struct {
 	InvoiceData            string //
 	GatewayPaymentMethod   string //
 	GasPayer               string // who pay the gas, merchant|user
+	ExpireTime             string // expire time, utc time
+	GatewayLink            string //
 }
 
 // paymentColumns holds the columns for table payment.
@@ -120,6 +122,8 @@ var paymentColumns = PaymentColumns{
 	InvoiceData:            "invoice_data",
 	GatewayPaymentMethod:   "gateway_payment_method",
 	GasPayer:               "gas_payer",
+	ExpireTime:             "expire_time",
+	GatewayLink:            "gateway_link",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

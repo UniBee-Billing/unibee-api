@@ -10,6 +10,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/consts"
+	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
@@ -249,7 +250,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	checkInvoice(invoice_compute.ConvertInvoiceToRo(ctx, one))
 	invoiceStatus := consts.InvoiceStatusProcessing
-	invoiceLink := invoice_compute.GetInvoiceLink(one.InvoiceId)
+	invoiceLink := link.GetInvoiceLink(one.InvoiceId)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:    invoiceStatus,
 		dao.Invoice.Columns().Link:      invoiceLink,

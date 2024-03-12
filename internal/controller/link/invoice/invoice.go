@@ -1,4 +1,4 @@
-package invoice_entry
+package invoice
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
@@ -13,11 +13,11 @@ import (
 	"unibee/utility"
 )
 
-func InvoiceEntrance(r *ghttp.Request) {
+func InvoiceLinkEntry(r *ghttp.Request) {
 	invoiceId := r.Get("invoiceId").String()
 	one := query.GetInvoiceByInvoiceId(r.Context(), invoiceId)
 	if one == nil {
-		g.Log().Errorf(r.Context(), "InvoiceEntrance invoice not found url: %s invoiceId: %s", r.GetUrl(), invoiceId)
+		g.Log().Errorf(r.Context(), "InvoiceLinkEntry invoice not found url: %s invoiceId: %s", r.GetUrl(), invoiceId)
 		return
 	}
 	if one.IsDeleted > 0 {

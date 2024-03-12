@@ -502,13 +502,11 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 
 		for _, line := range createPayContext.Invoice.Lines {
 			ItemParams := &stripe.InvoiceItemParams{
-				Invoice:  stripe.String(result.ID),
-				Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-				//UnitAmount:  stripe.Int64(line.UnitAmountExcludingTax),
+				Invoice:     stripe.String(result.ID),
+				Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
 				Amount:      stripe.Int64(line.Amount),
 				Description: stripe.String(line.Description),
-				//Quantity:    stripe.Int64(line.Quantity),
-				Customer: stripe.String(gatewayUser.GatewayUserId)}
+				Customer:    stripe.String(gatewayUser.GatewayUserId)}
 			_, err = invoiceitem.New(ItemParams)
 			if err != nil {
 				return nil, err
