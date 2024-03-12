@@ -80,14 +80,16 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	var paymentMethods []*ro.PaymentMethod
-	for _, method := range responseJson.GetJsons("") {
-		if method.Contains("code") && method.Contains("networks") {
-			currencyCode := method.Get("code").String()
-			for _, network := range method.GetJsons("networks") {
-				if network.Contains("code") {
-					paymentMethods = append(paymentMethods, &ro.PaymentMethod{
-						Id: currencyCode + "|" + network.Get("code").String(),
-					})
+	for _, a := range responseJson.Array() {
+		if method, ok := a.(map[string]interface{}); ok {
+			if method["code"] != nil && method["networks"] != nil {
+				currencyCode := method["code"].(string)
+				for _, network := range method["networks"].([]interface{}) {
+					if network.(map[string]interface{})["code"] != nil && len(network.(map[string]interface{})["code"].(string)) > 0 {
+						paymentMethods = append(paymentMethods, &ro.PaymentMethod{
+							Id: currencyCode + "|" + network.(map[string]interface{})["code"].(string),
+						})
+					}
 				}
 			}
 		}
