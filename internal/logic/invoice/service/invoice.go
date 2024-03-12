@@ -21,7 +21,7 @@ import (
 	"unibee/utility"
 )
 
-func checkInvoice(one *bean.InvoiceDetailRo) {
+func checkInvoice(one *bean.InvoiceDetail) {
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range one.Lines {

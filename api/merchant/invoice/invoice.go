@@ -26,7 +26,7 @@ type DetailReq struct {
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type DetailRes struct {
-	Invoice *bean.InvoiceDetailRo `json:"invoice" dc:"invoice Detail"`
+	Invoice *bean.InvoiceDetail `json:"invoice" dc:"invoice Detail"`
 }
 
 type ListReq struct {
@@ -47,7 +47,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"invoice Detail List"`
+	Invoices []*bean.InvoiceDetail `json:"invoices" dc:"invoice Detail List"`
 }
 
 type NewReq struct {
@@ -68,7 +68,7 @@ type NewInvoiceItemParam struct {
 }
 
 type NewRes struct {
-	Invoice *bean.InvoiceDetailRo `json:"invoice" `
+	Invoice *bean.InvoiceDetail `json:"invoice" `
 }
 
 type EditReq struct {
@@ -82,7 +82,7 @@ type EditReq struct {
 	Finish    bool                   `json:"finish" `
 }
 type EditRes struct {
-	Invoice *bean.InvoiceDetailRo `json:"invoice" `
+	Invoice *bean.InvoiceDetail `json:"invoice" `
 }
 
 type DeleteReq struct {

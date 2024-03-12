@@ -17,5 +17,5 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"Invoices Details"`
+	Invoices []*bean.InvoiceDetail `json:"invoices" dc:"Invoices Details"`
 }

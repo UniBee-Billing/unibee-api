@@ -28,7 +28,7 @@ type SubscriptionInvoiceListInternalReq struct {
 }
 
 type SubscriptionInvoiceListInternalRes struct {
-	Invoices []*bean.InvoiceDetailRo `json:"invoices" dc:"Invoice Detail List"`
+	Invoices []*bean.InvoiceDetail `json:"invoices" dc:"Invoice Detail List"`
 }
 
 func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
@@ -97,7 +97,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	if err != nil {
 		return nil, err
 	}
-	var resultList []*bean.InvoiceDetailRo
+	var resultList []*bean.InvoiceDetail
 	for _, invoice := range mainList {
 		resultList = append(resultList, invoice_compute.ConvertInvoiceToRo(ctx, invoice))
 	}

@@ -36,7 +36,7 @@ func ConvertInvoiceToSimplify(one *entity.Invoice) *bean.InvoiceSimplify {
 	}
 }
 
-func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.InvoiceDetailRo {
+func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.InvoiceDetail {
 	var lines []*bean.InvoiceItemSimplify
 	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
 	for _, line := range lines {
@@ -46,7 +46,7 @@ func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.Invo
 	if err != nil {
 		fmt.Printf("ConvertInvoiceLines err:%s", err)
 	}
-	return &bean.InvoiceDetailRo{
+	return &bean.InvoiceDetail{
 		Id:                             invoice.Id,
 		MerchantId:                     invoice.MerchantId,
 		SubscriptionId:                 invoice.SubscriptionId,

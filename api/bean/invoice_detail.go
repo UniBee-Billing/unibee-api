@@ -4,7 +4,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 )
 
-type InvoiceDetailRo struct {
+type InvoiceDetail struct {
 	Id                             uint64                 `json:"id"                             description:""`
 	MerchantId                     uint64                 `json:"merchantId"                     description:"MerchantId"`
 	UserId                         int64                  `json:"userId"                         description:"UserId"`
