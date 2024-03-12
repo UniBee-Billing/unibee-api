@@ -18,6 +18,7 @@ type MerchantSimplify struct {
 	CreateTime  int64  `json:"createTime"  description:"create utc time"`            // create utc time
 	TimeZone    string `json:"timeZone"    description:"merchant default time zone"` // merchant default time zone
 	Host        string `json:"host"        description:"merchant user portal host"`  // merchant user portal host
+	CompanyName string `json:"companyName" description:"company_name"`               // company_name
 }
 
 func SimplifyMerchant(one *entity.Merchant) *MerchantSimplify {
@@ -40,5 +41,6 @@ func SimplifyMerchant(one *entity.Merchant) *MerchantSimplify {
 		CreateTime:  one.CreateTime,
 		TimeZone:    one.TimeZone,
 		Host:        one.Host,
+		CompanyName: one.CompanyName,
 	}
 }
