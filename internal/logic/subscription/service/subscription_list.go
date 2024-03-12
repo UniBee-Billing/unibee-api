@@ -35,7 +35,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*ro.Subscri
 	return &ro.SubscriptionDetailVo{
 		User:                                ro.SimplifyUserAccount(user),
 		Subscription:                        ro.SimplifySubscription(one),
-		Gateway:                             ConvertGatewayToRo(query.GetGatewayById(ctx, one.GatewayId)),
+		Gateway:                             ro.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
 		Plan:                                ro.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
@@ -95,7 +95,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		list = append(list, &ro.SubscriptionDetailVo{
 			User:         ro.SimplifyUserAccount(user),
 			Subscription: ro.SimplifySubscription(sub),
-			Gateway:      ConvertGatewayToRo(query.GetGatewayById(ctx, sub.GatewayId)),
+			Gateway:      ro.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
 			Plan:         nil,
 			Addons:       nil,
 			AddonParams:  addonParams,

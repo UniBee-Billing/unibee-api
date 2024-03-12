@@ -20,3 +20,13 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		GatewayType: one.GatewayType,
 	}
 }
+
+func SimplifyGatewayList(ones []*entity.MerchantGateway) (list []*GatewaySimplify) {
+	if len(ones) == 0 {
+		return make([]*GatewaySimplify, 0)
+	}
+	for _, one := range ones {
+		list = append(list, SimplifyGateway(one))
+	}
+	return list
+}
