@@ -42,10 +42,8 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (
 		"customer_id":      "17",
 		"customer_email":   "jack.fu@wowow.io",
 	}
-	data, err := SendChangellyRequest(ctx, key, secret, "POST", urlPath, param)
+	responseJson, err := SendChangellyRequest(ctx, key, secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
-	responseJson, err := gjson.LoadJson(string(data))
-	utility.Assert(err == nil, fmt.Sprintf("invalid keys, json parse error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")
 	return consts.GatewayTypeCrypto, nil
@@ -75,19 +73,12 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 	utility.Assert(len(req.GatewayPaymentId) > 0, "gatewayPaymentId is nil")
 	urlPath := "/api/payment/v1/payments/" + req.GatewayPaymentId + "/payment_methods"
 	param := map[string]interface{}{}
-	data, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
-	log.SaveChannelHttpLog("GatewayPaymentMethodList", param, data, err, "ChangelyPaymentMethodList", nil, gateway)
-	if err != nil {
-		return nil, err
-	}
-	responseJson, err := gjson.LoadJson(string(data))
+	responseJson, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	log.SaveChannelHttpLog("GatewayPaymentMethodList", param, responseJson, err, "ChangelyPaymentMethodList", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	if err != nil {
-		return nil, err
-	}
 	var paymentMethods []*ro.PaymentMethod
 	for _, method := range responseJson.GetJsons("") {
 		if method.Contains("code") && method.Contains("networks") {
@@ -130,12 +121,8 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.N
 		"payment_data":         createPayContext.Metadata,
 		//"pending_deadline_at":  "",
 	}
-	data, err := SendChangellyRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
-	log.SaveChannelHttpLog("GatewayNewPayment", param, data, err, "ChangelyNewPayment", nil, createPayContext.Gateway)
-	if err != nil {
-		return nil, err
-	}
-	responseJson, err := gjson.LoadJson(string(data))
+	responseJson, err := SendChangellyRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
+	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "ChangelyNewPayment", nil, createPayContext.Gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -172,12 +159,8 @@ func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.Merch
 func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *ro.GatewayPaymentRo, err error) {
 	urlPath := "/api/payment/v1/payments/" + gatewayPaymentId
 	param := map[string]interface{}{}
-	data, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
-	log.SaveChannelHttpLog("GatewayPaymentDetail", param, data, err, "ChangelyPaymentDetail", nil, gateway)
-	if err != nil {
-		return nil, err
-	}
-	responseJson, err := gjson.LoadJson(string(data))
+	responseJson, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	log.SaveChannelHttpLog("GatewayPaymentDetail", param, responseJson, err, "ChangelyPaymentDetail", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -253,7 +236,7 @@ func parseChangellyPayment(item *gjson.Json) *ro.GatewayPaymentRo {
 	}
 }
 
-func SendChangellyRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res []byte, err error) {
+func SendChangellyRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res *gjson.Json, err error) {
 	utility.Assert(param != nil, "param is nil")
 	datetime := getExpirationDateTime(1)
 
@@ -269,7 +252,14 @@ func SendChangellyRequest(ctx context.Context, publicKey string, privateKey stri
 	}
 	response, err := utility.SendRequest("https://api.pay.changelly.com"+urlPath, method, body, headers)
 	g.Log().Debugf(ctx, "\nChangelly_End %s %s response: %s error %s\n", method, urlPath, response, err)
-	return response, err
+	if err != nil {
+		return nil, err
+	}
+	responseJson, err := gjson.LoadJson(string(response))
+	if err != nil {
+		return nil, err
+	}
+	return responseJson, nil
 }
 
 func sign(method string, urlPath string, dateTime string, purePrivateKey string, postJson []byte) (sign string) {
