@@ -4,7 +4,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/internal/consts"
-	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 type DetailReq struct {
@@ -70,10 +69,11 @@ type CreateReq struct {
 	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
+
 type CreateRes struct {
-	Subscription *entity.Subscription `json:"subscription" dc:"Subscription"`
-	Paid         bool                 `json:"paid"`
-	Link         string               `json:"link"`
+	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
+	Paid         bool                       `json:"paid"`
+	Link         string                     `json:"link"`
 }
 
 type UpdatePreviewReq struct {

@@ -361,7 +361,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		Body:  one.SubscriptionId,
 	})
 	return &subscription.CreateRes{
-		Subscription: one,
+		Subscription: bean.SimplifySubscription(one),
 		Paid:         createRes.Paid,
 		Link:         one.Link,
 	}, nil
