@@ -122,13 +122,13 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.N
 		"title":                "",
 		"description":          "",
 		"order_id":             createPayContext.Pay.PaymentId,
-		"customer_id":          createPayContext.Pay.UserId,
+		"customer_id":          strconv.FormatInt(createPayContext.Pay.UserId, 10),
 		"customer_email":       createPayContext.Email,
 		"success_redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
 		"failure_redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 		"fees_payer":           gasPayer, // who pay the fee
 		"payment_data":         createPayContext.Metadata,
-		"pending_deadline_at":  "",
+		//"pending_deadline_at":  "",
 	}
 	data, err := SendChangellyRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
 	log.SaveChannelHttpLog("GatewayNewPayment", param, data, err, "ChangelyNewPayment", nil, createPayContext.Gateway)
@@ -140,7 +140,7 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *ro.N
 		return nil, err
 	}
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
-	if responseJson.Contains("id") {
+	if !responseJson.Contains("id") {
 		return nil, gerror.New("invalid request, id is nil")
 	}
 	if err != nil {

@@ -29,7 +29,7 @@ func SaveChannelHttpLog(url string, request interface{}, response interface{}, e
 		httpLog := &entity.GatewayHttpLog{
 			Url:        url,
 			Request:    utility.FormatToJsonString(request),
-			Response:   utility.FormatToJsonString(utility.CheckReturn(err != nil, err, response)),
+			Response:   utility.MarshalToJsonString(utility.CheckReturn(err != nil, err, response)),
 			RequestId:  utility.FormatToJsonString(requestId),
 			Mamo:       memo,
 			GatewayId:  strconv.FormatUint(gateway.Id, 10),
