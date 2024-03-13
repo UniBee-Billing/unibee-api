@@ -16,6 +16,7 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/currency"
+	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
@@ -193,11 +194,11 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		paymentTotalAmount = invoice.CryptoAmount
 		paymentCurrency = invoice.CryptoCurrency
 	}
-	merchantInfo := query.GetMerchantById(ctx, sub.MerchantId)
-	if merchantInfo == nil {
+	merchant := query.GetMerchantById(ctx, sub.MerchantId)
+	if merchant == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
-	return GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
+	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		PayImmediate: true,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
@@ -211,7 +212,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			Currency:          paymentCurrency,
 			CountryCode:       sub.CountryCode,
 			MerchantId:        sub.MerchantId,
-			CompanyId:         merchantInfo.CompanyId,
+			CompanyId:         merchant.CompanyId,
 			Automatic:         1,
 			BillingReason:     invoice.InvoiceName,
 			GasPayer:          sub.GasPayer,
@@ -222,4 +223,27 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
+	if err == nil && res.Status != consts.PaymentSuccess {
+		//need send invoice for authorised
+		payment := query.GetPaymentByPaymentId(ctx, res.PaymentId)
+		if payment != nil {
+			oneUser := query.GetUserAccountById(ctx, uint64(sub.UserId))
+			plan := query.GetPlanById(ctx, sub.PlanId)
+			if plan != nil && oneUser != nil {
+				err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
+					UserName:            oneUser.FirstName + " " + oneUser.LastName,
+					MerchantProductName: plan.PlanName,
+					MerchantCustomEmail: merchant.Email,
+					MerchantName:        merchant.Name,
+					PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
+					Currency:            strings.ToUpper(invoice.Currency),
+					PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+				})
+				if err != nil {
+					g.Log().Errorf(ctx, "CreateSubInvoiceAutomaticPayment SendTemplateEmail err:%s", err.Error())
+				}
+			}
+		}
+	}
+	return res, err
 }
