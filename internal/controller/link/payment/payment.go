@@ -21,7 +21,7 @@ func PaymentLinkEntry(r *ghttp.Request) {
 		r.Response.Writeln("Payment Cancelled")
 	} else if one.Status == consts.PaymentFailed {
 		r.Response.Writeln("Payment Failure")
-	} else if one.Status < consts.PaymentSuccess {
+	} else if one.Status == consts.PaymentSuccess {
 		r.Response.Writeln("Payment Already Success")
 	} else if one.ExpireTime != 0 && one.ExpireTime < gtime.Now().Timestamp() {
 		//HandlePayExpire
