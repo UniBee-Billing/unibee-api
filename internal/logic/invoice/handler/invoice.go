@@ -14,35 +14,10 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/crypto"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func CancelInvoiceForSubscription(ctx context.Context, subscription *entity.Subscription) {
-	var mainList = make([]*entity.Invoice, 0)
-	m := dao.Invoice.Ctx(ctx)
-	_ = m.Where(dao.Invoice.Columns().IsDeleted, 0).
-		Where(dao.Invoice.Columns().MerchantId, subscription.MerchantId).
-		Where(dao.Invoice.Columns().SubscriptionId, subscription.SubscriptionId).
-		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
-		OmitEmpty().Scan(&mainList)
-	for _, one := range mainList {
-		if len(one.PaymentId) > 0 {
-			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-			if payment != nil {
-				gateway := query.GetGatewayById(ctx, one.GatewayId)
-				if gateway != nil {
-					err := service.PaymentGatewayCancel(ctx, payment)
-					if err != nil {
-						g.Log().Errorf(ctx, `PaymentGatewayCancel failure for CancelInvoiceForSubscription %s`, err.Error())
-					}
-				}
-			}
-		}
-	}
-}
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
