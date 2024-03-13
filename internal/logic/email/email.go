@@ -163,10 +163,10 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 		htmlKey := strings.Replace(mapKey, " ", "&nbsp;", 10)
 		htmlValue := "<strong>" + value.(string) + "</strong>"
 		if len(title) > 0 {
-			title = strings.Replace(title, mapKey, value.(string), 1)
+			title = strings.Replace(title, mapKey, value.(string), -1)
 		}
 		if len(content) > 0 {
-			content = strings.Replace(content, htmlKey, htmlValue, 1)
+			content = strings.Replace(content, htmlKey, htmlValue, -1)
 		}
 		if len(attachName) > 0 {
 			attachName = strings.Replace(attachName, mapKey, value.(string), 1)
