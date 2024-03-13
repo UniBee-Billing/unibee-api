@@ -12,6 +12,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/crypto"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -267,6 +268,21 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 		}
 	}()
 	return nil
+}
+
+func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.UserId > 0, "invoice userId not found")
+	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().CryptoCurrency: crypto.GetCryptoCurrency(),
+		dao.Invoice.Columns().CryptoAmount:   crypto.GetCryptoAmount(one.TotalAmount, one.TaxAmount),
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
+	}
+	return err
 }
 
 func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) error {

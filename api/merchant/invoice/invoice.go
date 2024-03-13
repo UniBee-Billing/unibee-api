@@ -21,6 +21,13 @@ type SendEmailReq struct {
 type SendEmailRes struct {
 }
 
+type ReconvertCryptoAndSendReq struct {
+	g.Meta    `path:"/reconvert_crypto_and_send_email" tags:"Invoice" method:"post" summary:"Admin Reconvert Crypto Data and Send Invoice Email to User"`
+	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
+}
+type ReconvertCryptoAndSendRes struct {
+}
+
 type DetailReq struct {
 	g.Meta    `path:"/detail" tags:"Invoice" method:"get,post" summary:"Invoice Detail"`
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
