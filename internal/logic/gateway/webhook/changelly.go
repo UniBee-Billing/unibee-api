@@ -25,7 +25,7 @@ func (c ChangellyWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gatew
 func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	jsonData, err := r.GetJson()
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook Get PortalJson failed. %v\n", gateway.GatewayName, err.Error())
+		g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Webhook Get PortalJson failed. %v\n", gateway.GatewayName, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
@@ -60,7 +60,7 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 	r.Response.WriteHeader(responseBack)
 	return
 	//} else {
-	//	g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
+	//	g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
 	//	r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 	//	return
 	//}
