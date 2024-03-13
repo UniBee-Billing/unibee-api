@@ -41,8 +41,11 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
 	} else {
 		//crypto payment
-		utility.Assert(len(createPayContext.Pay.GasPayer) > 0, "crypto payment should contain gasPayer")
-		utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
+		if len(createPayContext.Pay.GasPayer) > 0 {
+			utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
+		} else {
+			createPayContext.Pay.GasPayer = "user" // default user pay the gas
+		}
 	}
 
 	createPayContext.Pay.Status = consts.PaymentCreated

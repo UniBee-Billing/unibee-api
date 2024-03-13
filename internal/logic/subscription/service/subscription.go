@@ -132,10 +132,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	user := query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
 	utility.Assert(user != nil, "user not found")
 
-	if gateway.GatewayType == consts.GatewayTypeCrypto {
-		utility.Assert(len(plan.GasPayer) > 0, "gasPayer must set before crypto payment")
-	}
-
 	var err error
 	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
