@@ -28,7 +28,8 @@ type InvoiceSimplify struct {
 	PaymentId                      string                 `json:"paymentId"                      description:"paymentId"`                                                              // paymentId
 	RefundId                       string                 `json:"refundId"                       description:"refundId"`                                                               // refundId
 	BizType                        int                    `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
-
+	CryptoAmount                   int64                  `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
+	CryptoCurrency                 string                 `json:"cryptoCurrency"                 description:"crypto_currency"`
 }
 
 type InvoiceItemSimplify struct {
@@ -80,6 +81,8 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		PaymentId:                      one.PaymentId,
 		RefundId:                       one.RefundId,
 		BizType:                        one.BizType,
+		CryptoCurrency:                 one.CryptoCurrency,
+		CryptoAmount:                   one.CryptoAmount,
 	}
 }
 

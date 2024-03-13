@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
 	redismq2 "unibee/internal/cmd/redismq"
@@ -294,13 +295,23 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
-		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
+		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
 		createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice)
 		if err != nil {
 			return nil, err
 		}
 	} else {
+		gateway := query.GetGatewayById(ctx, one.GatewayId)
+		if gateway == nil {
+			return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
+		}
+		paymentTotalAmount := prepare.Invoice.TotalAmount
+		paymentCurrency := prepare.Invoice.Currency
+		if gateway.GatewayType == consts.GatewayTypeCrypto {
+			paymentTotalAmount = prepare.Invoice.CryptoAmount
+			paymentCurrency = prepare.Invoice.CryptoCurrency
+		}
 		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 			CheckoutMode: true,
 			Gateway:      prepare.Gateway,
@@ -310,8 +321,8 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 				BizType:           consts.BizTypeSubscription,
 				UserId:            prepare.UserId,
 				GatewayId:         prepare.Gateway.Id,
-				TotalAmount:       prepare.Invoice.TotalAmount,
-				Currency:          prepare.Currency,
+				TotalAmount:       paymentTotalAmount,
+				Currency:          paymentCurrency,
 				CountryCode:       prepare.VatCountryCode,
 				MerchantId:        prepare.Merchant.Id,
 				CompanyId:         prepare.Merchant.CompanyId,
@@ -381,7 +392,6 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	EffectImmediate   bool                    `json:"EffectImmediate"`
 }
 
-// SubscriptionUpdatePreview Default行为，升级订阅主方案不管总金额是否比之前高，都将按比例计算发票立即生效；降级订阅方案，次月生效；问题点，降级方案如果 addon 多可能的总金额可能比之前高
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
@@ -789,7 +799,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 
 	return &subscription.UpdateRes{
-		SubscriptionPendingUpdate: &bean.SubscriptionPendingUpdateDetail{
+		SubscriptionPendingUpdate: &detail.SubscriptionPendingUpdateDetail{
 			MerchantId:           one.MerchantId,
 			SubscriptionId:       one.SubscriptionId,
 			UpdateSubscriptionId: one.UpdateSubscriptionId,

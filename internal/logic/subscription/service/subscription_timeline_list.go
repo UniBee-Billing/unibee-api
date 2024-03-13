@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -21,7 +22,7 @@ type SubscriptionTimeLineListInternalReq struct {
 }
 
 type SubscriptionTimeLineListInternalRes struct {
-	SubscriptionTimelines []*bean.SubscriptionTimeLineDetail
+	SubscriptionTimelines []*detail.SubscriptionTimeLineDetail
 }
 
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
@@ -54,9 +55,9 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	if err != nil {
 		return nil, err
 	}
-	var timelines []*bean.SubscriptionTimeLineDetail
+	var timelines []*detail.SubscriptionTimeLineDetail
 	for _, one := range mainList {
-		timelines = append(timelines, &bean.SubscriptionTimeLineDetail{
+		timelines = append(timelines, &detail.SubscriptionTimeLineDetail{
 			MerchantId:      one.MerchantId,
 			UserId:          one.UserId,
 			SubscriptionId:  one.SubscriptionId,

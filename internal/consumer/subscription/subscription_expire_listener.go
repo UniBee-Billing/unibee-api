@@ -10,6 +10,7 @@ import (
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	user2 "unibee/internal/consumer/webhook/user"
 	dao "unibee/internal/dao/oversea_pay"
+	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/subscription/handler"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/subscription/user_sub_plan"
@@ -56,6 +57,8 @@ func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redism
 			g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}
 	}
+	//Cancel All Invoice
+	handler2.CancelInvoiceForSubscription(ctx, sub)
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	handler.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId)
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED)

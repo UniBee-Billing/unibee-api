@@ -41,7 +41,7 @@ var (
 				Name: "Apache-2.0",
 				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
 			}
-			openapi.Config.CommonResponse = utility.JsonRes{}
+			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
 			//if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
 			//	openapi.Servers = &goai.Servers{goai.Server{

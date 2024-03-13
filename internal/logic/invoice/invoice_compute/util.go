@@ -6,63 +6,11 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
+	"unibee/internal/logic/crypto"
 	addon2 "unibee/internal/logic/subscription/addon"
-	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func ConvertInvoiceToRo(ctx context.Context, invoice *entity.Invoice) *bean.InvoiceDetail {
-	var lines []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString(invoice.Lines, &lines)
-	for _, line := range lines {
-		line.Currency = invoice.Currency
-		line.TaxScale = invoice.TaxScale
-	}
-	if err != nil {
-		fmt.Printf("ConvertInvoiceLines err:%s", err)
-	}
-	return &bean.InvoiceDetail{
-		Id:                             invoice.Id,
-		MerchantId:                     invoice.MerchantId,
-		SubscriptionId:                 invoice.SubscriptionId,
-		InvoiceId:                      invoice.InvoiceId,
-		InvoiceName:                    invoice.InvoiceName,
-		GmtCreate:                      invoice.GmtCreate,
-		TotalAmount:                    invoice.TotalAmount,
-		TaxAmount:                      invoice.TaxAmount,
-		SubscriptionAmount:             invoice.SubscriptionAmount,
-		Currency:                       invoice.Currency,
-		Lines:                          lines,
-		GatewayId:                      invoice.GatewayId,
-		Status:                         invoice.Status,
-		SendStatus:                     invoice.SendStatus,
-		SendEmail:                      invoice.SendEmail,
-		SendPdf:                        invoice.SendPdf,
-		UserId:                         invoice.UserId,
-		Data:                           invoice.Data,
-		GmtModify:                      invoice.GmtModify,
-		IsDeleted:                      invoice.IsDeleted,
-		Link:                           invoice.Link,
-		GatewayStatus:                  invoice.GatewayStatus,
-		GatewayInvoiceId:               invoice.GatewayInvoiceId,
-		GatewayInvoicePdf:              invoice.GatewayInvoicePdf,
-		TaxScale:                       invoice.TaxScale,
-		SendNote:                       invoice.SendNote,
-		SendTerms:                      invoice.SendTerms,
-		DiscountAmount:                 0,
-		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-		PeriodStart:                    invoice.PeriodStart,
-		PeriodEnd:                      invoice.PeriodEnd,
-		Gateway:                        bean.SimplifyGateway(query.GetGatewayById(ctx, invoice.GatewayId)),
-		Merchant:                       bean.SimplifyMerchant(query.GetMerchantById(ctx, invoice.MerchantId)),
-		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, uint64(invoice.UserId))),
-		Subscription:                   bean.SimplifySubscription(query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
-		Payment:                        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId)),
-		Refund:                         bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId)),
-	}
-}
 
 type CalculateInvoiceReq struct {
 	Currency      string `json:"currency"`
@@ -120,11 +68,13 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Currency:                       req.Currency,
 		TaxAmount:                      taxAmount,
 		TaxScale:                       req.TaxScale,
-		SubscriptionAmount:             totalAmountExcludingTax + taxAmount, // 在没有 discount 之前，保持于 Total 一致
-		SubscriptionAmountExcludingTax: totalAmountExcludingTax,             // 在没有 discount 之前，保持于 Total 一致
+		SubscriptionAmount:             totalAmountExcludingTax + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Lines:                          invoiceItems,
 		PeriodStart:                    req.PeriodStart,
 		PeriodEnd:                      req.PeriodEnd,
+		CryptoAmount:                   crypto.GetCryptoAmount(totalAmountExcludingTax+taxAmount, taxAmount),
+		CryptoCurrency:                 crypto.GetCryptoCurrency(),
 	}
 }
 
@@ -253,5 +203,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		ProrationScale:                 timeScale,
 		PeriodStart:                    req.ProrationDate,
 		PeriodEnd:                      req.PeriodEnd,
+		CryptoAmount:                   crypto.GetCryptoAmount(totalAmountExcludingTax+taxAmount, taxAmount),
+		CryptoCurrency:                 crypto.GetCryptoCurrency(),
 	}
 }

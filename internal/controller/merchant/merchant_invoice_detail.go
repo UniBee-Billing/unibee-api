@@ -2,8 +2,8 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean/detail"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -16,5 +16,5 @@ func (c *ControllerInvoice) Detail(ctx context.Context, req *invoice.DetailReq) 
 	utility.Assert(in != nil, "invoice not found")
 	utility.Assert(in.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
 
-	return &invoice.DetailRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, in)}, nil
+	return &invoice.DetailRes{Invoice: detail.ConvertInvoiceToDetail(ctx, in)}, nil
 }

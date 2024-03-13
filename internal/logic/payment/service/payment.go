@@ -187,6 +187,12 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
+	paymentTotalAmount := invoice.TotalAmount
+	paymentCurrency := invoice.Currency
+	if gateway.GatewayType == consts.GatewayTypeCrypto {
+		paymentTotalAmount = invoice.CryptoAmount
+		paymentCurrency = invoice.CryptoCurrency
+	}
 	merchantInfo := query.GetMerchantById(ctx, sub.MerchantId)
 	if merchantInfo == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
@@ -201,8 +207,8 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			AuthorizeStatus:   consts.Authorized,
 			UserId:            sub.UserId,
 			GatewayId:         gateway.Id,
-			TotalAmount:       invoice.TotalAmount,
-			Currency:          invoice.Currency,
+			TotalAmount:       paymentTotalAmount,
+			Currency:          paymentCurrency,
 			CountryCode:       sub.CountryCode,
 			MerchantId:        sub.MerchantId,
 			CompanyId:         merchantInfo.CompanyId,

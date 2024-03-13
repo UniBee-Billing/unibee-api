@@ -3,6 +3,7 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 )
 
@@ -11,12 +12,12 @@ type DetailReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
-	User                                *bean.UserAccountSimplify             `json:"user" dc:"user"`
-	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
-	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *bean.UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type PayCheckReq struct {
@@ -105,17 +106,17 @@ type UpdateReq struct {
 	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 type UpdateRes struct {
-	SubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
-	Paid                      bool                                  `json:"paid" dc:"Paid，true|false"`
-	Link                      string                                `json:"link" dc:"Pay Link"`
-	Note                      string                                `json:"note" dc:"note"`
+	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
+	Paid                      bool                                    `json:"paid" dc:"Paid，true|false"`
+	Link                      string                                  `json:"link" dc:"Pay Link"`
+	Note                      string                                  `json:"note" dc:"note"`
 }
 
 type ListReq struct {
 	g.Meta `path:"/list" tags:"User-Subscription" method:"get,post" summary:"Subscription List (Return Latest Active One - Later Deprecated) "`
 }
 type ListRes struct {
-	Subscriptions []*bean.SubscriptionDetail `json:"subscriptions" dc:"Subscription List"`
+	Subscriptions []*detail.SubscriptionDetail `json:"subscriptions" dc:"Subscription List"`
 }
 
 type CancelReq struct {
@@ -163,5 +164,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	SubscriptionTimeLines []*bean.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	SubscriptionTimeLines []*detail.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
 }

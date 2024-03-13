@@ -60,6 +60,8 @@ type InvoiceColumns struct {
 	Data                           string // data (json)
 	BizType                        string // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     string // create utc time
+	CryptoAmount                   string // crypto_amount, cent
+	CryptoCurrency                 string // crypto_currency
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -104,6 +106,8 @@ var invoiceColumns = InvoiceColumns{
 	Data:                           "data",
 	BizType:                        "biz_type",
 	CreateTime:                     "create_time",
+	CryptoAmount:                   "crypto_amount",
+	CryptoCurrency:                 "crypto_currency",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

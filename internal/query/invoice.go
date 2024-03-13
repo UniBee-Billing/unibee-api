@@ -17,33 +17,11 @@ func GetInvoiceByInvoiceId(ctx context.Context, invoiceId string) (one *entity.I
 	return
 }
 
-func GetInvoiceByGatewayInvoiceId(ctx context.Context, gatewayInvoiceId string) (one *entity.Invoice) {
-	if len(gatewayInvoiceId) == 0 {
-		return nil
-	}
-	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{GatewayInvoiceId: gatewayInvoiceId}).OmitEmpty().Scan(&one)
-	if err != nil {
-		one = nil
-	}
-	return
-}
-
 func GetInvoiceByPaymentId(ctx context.Context, paymentId string) (one *entity.Invoice) {
 	if len(paymentId) == 0 {
 		return nil
 	}
 	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{PaymentId: paymentId}).OmitEmpty().Scan(&one)
-	if err != nil {
-		one = nil
-	}
-	return
-}
-
-func GetInvoiceByUniqueId(ctx context.Context, uniqueId string) (one *entity.Invoice) {
-	if len(uniqueId) == 0 {
-		return nil
-	}
-	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{UniqueId: uniqueId}).OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

@@ -52,4 +52,6 @@ type Invoice struct {
 	Data                           interface{} // data (json)
 	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     interface{} // create utc time
+	CryptoAmount                   interface{} // crypto_amount, cent
+	CryptoCurrency                 interface{} // crypto_currency
 }

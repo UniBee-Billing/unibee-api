@@ -50,4 +50,6 @@ type Invoice struct {
 	Data                           string      `json:"data"                           description:"data (json)"`                                                            // data (json)
 	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     int64       `json:"createTime"                     description:"create utc time"`                                                        // create utc time
+	CryptoAmount                   int64       `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
+	CryptoCurrency                 string      `json:"cryptoCurrency"                 description:"crypto_currency"`                                                        // crypto_currency
 }

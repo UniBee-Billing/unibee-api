@@ -3,6 +3,7 @@ package subscription
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type DetailReq struct {
@@ -10,12 +11,12 @@ type DetailReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type DetailRes struct {
-	User                                *bean.UserAccountSimplify             `json:"user" dc:"User"`
-	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
-	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *bean.UserAccountSimplify               `json:"user" dc:"User"`
+	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type ListReq struct {
@@ -28,7 +29,7 @@ type ListReq struct {
 	Count     int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 type ListRes struct {
-	Subscriptions []*bean.SubscriptionDetail `json:"subscriptions" dc:"Subscriptions"`
+	Subscriptions []*detail.SubscriptionDetail `json:"subscriptions" dc:"Subscriptions"`
 }
 
 type CancelReq struct {
@@ -106,9 +107,9 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
-	SubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"subscriptionPendingUpdate"`
-	Paid                      bool                                  `json:"paid"`
-	Link                      string                                `json:"link"`
+	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"subscriptionPendingUpdate"`
+	Paid                      bool                                    `json:"paid"`
+	Link                      string                                  `json:"link"`
 }
 
 type UserSubscriptionDetailReq struct {
@@ -117,12 +118,12 @@ type UserSubscriptionDetailReq struct {
 }
 
 type UserSubscriptionDetailRes struct {
-	User                                *bean.UserAccountSimplify             `json:"user" dc:"user"`
-	Subscription                        *bean.SubscriptionSimplify            `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify                    `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify                 `json:"gateway" dc:"Gateway"`
-	Addons                              []*bean.PlanAddonDetail               `json:"addons" dc:"Plan Addon"`
-	UnfinishedSubscriptionPendingUpdate *bean.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
+	User                                *bean.UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"Processing Subscription Pending Update"`
 }
 
 type TimeLineListReq struct {
@@ -135,7 +136,7 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	SubscriptionTimeLines []*bean.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	SubscriptionTimeLines []*detail.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
 }
 
 type PendingUpdateListReq struct {
@@ -148,7 +149,7 @@ type PendingUpdateListReq struct {
 }
 
 type PendingUpdateListRes struct {
-	SubscriptionPendingUpdateDetails []*bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
 type NewAdminNoteReq struct {

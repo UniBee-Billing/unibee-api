@@ -3,6 +3,7 @@ package invoice
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type PdfGenerateReq struct {
@@ -25,7 +26,7 @@ type DetailReq struct {
 	InvoiceId string `json:"invoiceId" dc:"Invoice ID" v:"required"`
 }
 type DetailRes struct {
-	Invoice *bean.InvoiceDetail `json:"invoice" dc:"invoice Detail"`
+	Invoice *detail.InvoiceDetail `json:"invoice" dc:"invoice Detail"`
 }
 
 type ListReq struct {
@@ -46,7 +47,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Invoices []*bean.InvoiceDetail `json:"invoices" dc:"invoice Detail List"`
+	Invoices []*detail.InvoiceDetail `json:"invoices" dc:"invoice Detail List"`
 }
 
 type NewReq struct {
@@ -67,7 +68,7 @@ type NewInvoiceItemParam struct {
 }
 
 type NewRes struct {
-	Invoice *bean.InvoiceDetail `json:"invoice" `
+	Invoice *detail.InvoiceDetail `json:"invoice" `
 }
 
 type EditReq struct {
@@ -81,7 +82,7 @@ type EditReq struct {
 	Finish    bool                   `json:"finish" `
 }
 type EditRes struct {
-	Invoice *bean.InvoiceDetail `json:"invoice" `
+	Invoice *detail.InvoiceDetail `json:"invoice" `
 }
 
 type DeleteReq struct {

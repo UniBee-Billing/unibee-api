@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
@@ -15,14 +16,13 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func checkInvoice(one *bean.InvoiceDetail) {
+func checkInvoice(one *detail.InvoiceDetail) {
 	var totalAmountExcludingTax int64 = 0
 	var totalTax int64 = 0
 	for _, line := range one.Lines {
@@ -116,7 +116,7 @@ func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRe
 		one.PaymentId = finishRes.Invoice.PaymentId
 		one.RefundId = finishRes.Invoice.RefundId
 	}
-	return &invoice.NewRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
+	return &invoice.NewRes{Invoice: detail.ConvertInvoiceToDetail(ctx, one)}, nil
 }
 
 func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRes, err error) {
@@ -197,7 +197,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		one.PaymentId = finishRes.Invoice.PaymentId
 		one.RefundId = finishRes.Invoice.RefundId
 	}
-	return &invoice.EditRes{Invoice: invoice_compute.ConvertInvoiceToRo(ctx, one)}, nil
+	return &invoice.EditRes{Invoice: detail.ConvertInvoiceToDetail(ctx, one)}, nil
 }
 
 func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
@@ -248,7 +248,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", req.InvoiceId))
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
-	checkInvoice(invoice_compute.ConvertInvoiceToRo(ctx, one))
+	checkInvoice(detail.ConvertInvoiceToDetail(ctx, one))
 	invoiceStatus := consts.InvoiceStatusProcessing
 	invoiceLink := link.GetInvoiceLink(one.InvoiceId)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{

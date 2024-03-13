@@ -1,13 +1,11 @@
-package utility
+package _interface
 
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
-	_interface "unibee/internal/interface"
 )
 
-// JsonRes 数据返回通用JSON数据结构
 type JsonRes struct {
 	Code      int         `json:"code"`
 	Message   string      `json:"message"`
@@ -27,7 +25,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 		Code:      code,
 		Message:   message,
 		Data:      responseData,
-		RequestId: _interface.BizCtx().Get(r.Context()).RequestId,
+		RequestId: BizCtx().Get(r.Context()).RequestId,
 	})
 }
 
@@ -40,7 +38,7 @@ func openApiJson(r *ghttp.Request, code int, message string, data ...interface{}
 	}
 	_ = responseData.Set("code", code)
 	_ = responseData.Set("message", message)
-	_ = responseData.Set("requestId", _interface.BizCtx().Get(r.Context()).RequestId)
+	_ = responseData.Set("requestId", BizCtx().Get(r.Context()).RequestId)
 	r.Response.WriteJson(responseData)
 }
 

@@ -60,4 +60,6 @@ type Subscription struct {
 	TestClock                   interface{} // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	MetaData                    interface{} // meta_data(json)
 	GasPayer                    interface{} // who pay the gas, merchant|user
+	CryptoAmount                interface{} // crypto_amount, cent
+	CryptoCurrency              interface{} // crypto_currency
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	addon2 "unibee/internal/logic/subscription/addon"
@@ -24,10 +25,10 @@ type SubscriptionPendingUpdateListInternalReq struct {
 }
 
 type SubscriptionPendingUpdateListInternalRes struct {
-	SubscriptionPendingUpdateDetails []*bean.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	SubscriptionPendingUpdateDetails []*detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
-func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *bean.SubscriptionPendingUpdateDetail {
+func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *detail.SubscriptionPendingUpdateDetail {
 	if len(pendingUpdateId) == 0 {
 		return nil
 	}
@@ -49,7 +50,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	return &bean.SubscriptionPendingUpdateDetail{
+	return &detail.SubscriptionPendingUpdateDetail{
 		MerchantId:           one.MerchantId,
 		SubscriptionId:       one.SubscriptionId,
 		UpdateSubscriptionId: one.UpdateSubscriptionId,
@@ -114,7 +115,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		return nil, err
 	}
 
-	var updateList []*bean.SubscriptionPendingUpdateDetail
+	var updateList []*detail.SubscriptionPendingUpdateDetail
 	for _, one := range mainList {
 		var metadata = make(map[string]string)
 		if len(one.MetaData) > 0 {
@@ -123,7 +124,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 				fmt.Printf("SubscriptionPendingUpdateList Unmarshal Metadata error:%s", err.Error())
 			}
 		}
-		updateList = append(updateList, &bean.SubscriptionPendingUpdateDetail{
+		updateList = append(updateList, &detail.SubscriptionPendingUpdateDetail{
 			MerchantId:           one.MerchantId,
 			SubscriptionId:       one.SubscriptionId,
 			UpdateSubscriptionId: one.UpdateSubscriptionId,

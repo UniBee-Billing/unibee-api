@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -21,7 +22,7 @@ type SubscriptionListInternalReq struct {
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionDetail(ctx context.Context, subscriptionId string) (*bean.SubscriptionDetail, error) {
+func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.SubscriptionDetail, error) {
 	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(one != nil, "subscription not found")
 	{
@@ -32,7 +33,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*bean.Subsc
 	if user != nil {
 		user.Password = ""
 	}
-	return &bean.SubscriptionDetail{
+	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        bean.SimplifySubscription(one),
 		Gateway:                             bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
@@ -42,7 +43,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*bean.Subsc
 	}, nil
 }
 
-func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*bean.SubscriptionDetail) {
+func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*detail.SubscriptionDetail) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
 		req.Count = 20
@@ -92,7 +93,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		if user != nil {
 			user.Password = ""
 		}
-		list = append(list, &bean.SubscriptionDetail{
+		list = append(list, &detail.SubscriptionDetail{
 			User:         bean.SimplifyUserAccount(user),
 			Subscription: bean.SimplifySubscription(sub),
 			Gateway:      bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
