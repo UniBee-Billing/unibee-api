@@ -33,10 +33,30 @@ import (
 type Changelly struct {
 }
 
+func (c Changelly) GatewayGetFiatCurrencyList(ctx context.Context, key string, secret string) (responseJson *gjson.Json, err error) {
+	urlPath := "/v1/currencies?providerCode=moonpay&type=crypto"
+	param := map[string]interface{}{}
+	responseJson, err = SendChangellyFiatRequest(ctx, key, secret, "GET", urlPath, param)
+	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
+	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
+
+	return responseJson, err
+}
+
+func (c Changelly) GatewayGetFiatCurrencyRate(ctx context.Context, key string, secret string, from string, to string) (responseJson *gjson.Json, err error) {
+	urlPath := "/v1/offers?currencyFrom=" + from + "&currencyTo=" + to + "&amountFrom=100&country=FR"
+	param := map[string]interface{}{}
+	responseJson, err = SendChangellyFiatRequest(ctx, key, secret, "GET", urlPath, param)
+	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
+	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
+
+	return responseJson, err
+}
+
 func (c Changelly) GatewayGetCurrency(ctx context.Context, key string, secret string) (responseJson *gjson.Json, err error) {
 	urlPath := "/api/payment/v1/currencies"
 	param := map[string]interface{}{}
-	responseJson, err = SendChangellyRequest(ctx, key, secret, "GET", urlPath, param)
+	responseJson, err = SendChangellyPaymentRequest(ctx, key, secret, "GET", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 
@@ -54,7 +74,7 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (
 		"customer_id":      "17",
 		"customer_email":   "jack.fu@wowow.io",
 	}
-	responseJson, err := SendChangellyRequest(ctx, key, secret, "POST", urlPath, param)
+	responseJson, err := SendChangellyPaymentRequest(ctx, key, secret, "POST", urlPath, param)
 	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
 	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
 	utility.Assert(responseJson.Contains("id"), "invalid keys, id is nil")
@@ -85,7 +105,7 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 	utility.Assert(len(req.GatewayPaymentId) > 0, "gatewayPaymentId is nil")
 	urlPath := "/api/payment/v1/payments/" + req.GatewayPaymentId + "/payment_methods"
 	param := map[string]interface{}{}
-	responseJson, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	responseJson, err := SendChangellyPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
 	log.SaveChannelHttpLog("GatewayPaymentMethodList", param, responseJson, err, "ChangelyPaymentMethodList", nil, gateway)
 	if err != nil {
 		return nil, err
@@ -135,7 +155,7 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 		"payment_data":         createPayContext.Metadata,
 		"pending_deadline_at":  time.Unix(createPayContext.Pay.ExpireTime, 0).Format("2006-01-02T15:04:05.876Z"),
 	}
-	responseJson, err := SendChangellyRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
+	responseJson, err := SendChangellyPaymentRequest(ctx, createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, "POST", urlPath, param)
 	log.SaveChannelHttpLog("GatewayNewPayment", param, responseJson, err, "ChangelyNewPayment", nil, createPayContext.Gateway)
 	if err != nil {
 		return nil, err
@@ -172,7 +192,7 @@ func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.Merch
 func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
 	urlPath := "/api/payment/v1/payments/" + gatewayPaymentId
 	param := map[string]interface{}{}
-	responseJson, err := SendChangellyRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
+	responseJson, err := SendChangellyPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
 	log.SaveChannelHttpLog("GatewayPaymentDetail", param, responseJson, err, "ChangelyPaymentDetail", nil, gateway)
 	if err != nil {
 		return nil, err
@@ -254,7 +274,33 @@ func parseChangellyPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 	}
 }
 
-func SendChangellyRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res *gjson.Json, err error) {
+func SendChangellyFiatRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res *gjson.Json, err error) {
+	utility.Assert(param != nil, "param is nil")
+	datetime := getExpirationDateTime(1)
+
+	jsonData, err := gjson.Marshal(param)
+	jsonString := string(jsonData)
+	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, param))
+	g.Log().Debugf(ctx, "\nChangelly_Start %s %s %s %s %s\n", method, urlPath, publicKey, jsonString, datetime)
+	body := []byte(jsonString)
+	headers := map[string]string{
+		"Content-Type":    "application/json",
+		"X-Api-Signature": signForFiat(method, "https://fiat-api.changelly.com"+urlPath, datetime, privateKey, body),
+		"X-Api-Key":       publicKey,
+	}
+	response, err := utility.SendRequest("https://fiat-api.changelly.com"+urlPath, method, body, headers)
+	g.Log().Debugf(ctx, "\nChangelly_End %s %s response: %s error %s\n", method, urlPath, response, err)
+	if err != nil {
+		return nil, err
+	}
+	responseJson, err := gjson.LoadJson(string(response))
+	if err != nil {
+		return nil, err
+	}
+	return responseJson, nil
+}
+
+func SendChangellyPaymentRequest(ctx context.Context, publicKey string, privateKey string, method string, urlPath string, param map[string]interface{}) (res *gjson.Json, err error) {
 	utility.Assert(param != nil, "param is nil")
 	datetime := getExpirationDateTime(1)
 
@@ -278,6 +324,42 @@ func SendChangellyRequest(ctx context.Context, publicKey string, privateKey stri
 		return nil, err
 	}
 	return responseJson, nil
+}
+
+func signForFiat(method string, urlPath string, dateTime string, purePrivateKey string, postJson []byte) (sign string) {
+	var builder strings.Builder
+
+	builder.WriteString(urlPath)
+	builder.WriteString(string(postJson))
+	payload := builder.String()
+	decodedBytes, err := base64.StdEncoding.DecodeString(purePrivateKey)
+	if err != nil {
+		fmt.Println("Error decoding base64:", err)
+		return
+	}
+
+	// 将解码后的字节转换为字符串并打印
+	purePrivateKey = string(decodedBytes)
+
+	//	privateKey := purePrivateKey
+	//	if !strings.Contains(privateKey, "BEGIN PRIVATE KEY") {
+	//		privateKey = `
+	//-----BEGIN PRIVATE KEY-----
+	//` + purePrivateKey + `
+	//-----END PRIVATE KEY-----
+	//`
+	//	}
+	block, _ := pem.Decode([]byte(purePrivateKey))
+	utility.Assert(block != nil, "rsa encrypt error")
+	prv, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	utility.AssertError(err, "rsa encrypt error")
+	msgHash := sha256.New()
+	_, err = msgHash.Write([]byte(payload))
+	utility.AssertError(err, "sha256 hash encrypt error")
+	result, err := rsa.SignPKCS1v15(rand.Reader, prv.(*rsa.PrivateKey), crypto.SHA256, msgHash.Sum(nil))
+	//result, err := utility.RsaEncrypt([]byte(key), []byte(sha256Encoding(builder.String())))
+	utility.AssertError(err, "rsa encrypt error")
+	return base64Encoding(result)
 }
 
 func sign(method string, urlPath string, dateTime string, purePrivateKey string, postJson []byte) (sign string) {
