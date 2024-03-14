@@ -225,11 +225,12 @@ func parseChangellyPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 	var paymentAmount int64 = 0
 	var paymentMethod = ""
 	if item.Contains("selected_payment_method") && item.GetJson("selected_payment_method").Contains("payins") {
-		for _, payin := range item.GetJson("selected_payment_method").GetJsons("payins") {
-			paymentAmount = paymentAmount + utility.ConvertDollarStrToCent(payin.Get("amount").String(), item.Get("nominal_currency").String())
-			paymentAmount = paymentAmount - utility.ConvertDollarStrToCent(payin.Get("fee").String(), item.Get("nominal_currency").String())
-		}
+		//for _, payin := range item.GetJson("selected_payment_method").GetJsons("payins") {
+		//	paymentAmount = paymentAmount + utility.ConvertDollarStrToCent(payin.Get("amount").String(), item.Get("nominal_currency").String())
+		//	paymentAmount = paymentAmount - utility.ConvertDollarStrToCent(payin.Get("fee").String(), item.Get("nominal_currency").String())
+		//}
 		//paymentAmount = utility.ConvertDollarStrToCent(item.GetJson("selected_payment_method").Get("expected_payin_amount").String(), item.Get("nominal_currency").String())
+		paymentAmount = utility.ConvertDollarStrToCent(item.GetJson("nominal_amount").String(), item.Get("nominal_currency").String())
 		paymentMethod = item.Get("payin_currency").String() + "|" + item.Get("payin_network").String()
 	}
 	var paidTime *gtime.Time
