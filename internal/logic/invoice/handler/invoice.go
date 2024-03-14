@@ -12,8 +12,9 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/crypto"
 	"unibee/internal/logic/email"
+	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -251,13 +252,27 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.UserId > 0, "invoice userId not found")
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
-	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().CryptoCurrency: crypto.GetCryptoCurrency(),
-		dao.Invoice.Columns().CryptoAmount:   crypto.GetCryptoAmount(one.TotalAmount),
+	gateway := query.GetGatewayById(ctx, one.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	user := query.GetUserAccountById(ctx, uint64(one.UserId))
+	utility.Assert(user != nil, "user not found")
+	trans, err := api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
+		Amount:   one.TotalAmount,
+		Currency: one.Currency,
+		Gateway:  gateway,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().CryptoCurrency: trans.CryptoCurrency,
+		dao.Invoice.Columns().CryptoAmount:   trans.CryptoAmount,
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
 	}
+	//todo mark cancel the currency payment and regeneration
 	return err
 }
 

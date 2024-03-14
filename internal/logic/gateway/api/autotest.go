@@ -10,6 +10,11 @@ import (
 type AutoTest struct {
 }
 
+func (a AutoTest) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a AutoTest) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")

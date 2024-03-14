@@ -33,6 +33,11 @@ import (
 type Stripe struct {
 }
 
+func (s Stripe) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	stripe.Key = secret
 	s.setUnibeeAppInfo()

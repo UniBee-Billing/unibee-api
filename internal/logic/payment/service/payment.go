@@ -15,7 +15,6 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/crypto"
 	"unibee/internal/logic/currency"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
@@ -71,8 +70,17 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		} else {
 			createPayContext.Pay.GasPayer = "user" // default user pay the gas
 		}
-		createPayContext.Pay.CryptoAmount = crypto.GetCryptoAmount(createPayContext.Pay.TotalAmount)
-		createPayContext.Pay.CryptoCurrency = crypto.GetCryptoCurrency()
+		trans, err := api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
+			Amount:      createPayContext.Pay.TotalAmount,
+			Currency:    createPayContext.Pay.Currency,
+			CountryCode: createPayContext.Pay.CountryCode,
+			Gateway:     createPayContext.Gateway,
+		})
+		if err != nil {
+			return nil, err
+		}
+		createPayContext.Pay.CryptoAmount = trans.CryptoAmount
+		createPayContext.Pay.CryptoCurrency = trans.CryptoCurrency
 	}
 	var invoice *entity.Invoice
 	if createPayContext.Invoice != nil {

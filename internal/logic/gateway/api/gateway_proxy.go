@@ -28,6 +28,28 @@ type GatewayProxy struct {
 	GatewayName string
 }
 
+func (p GatewayProxy) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(ctx, err)
+			return
+		}
+	}()
+	startTime := time.Now()
+	to, err = p.getRemoteGateway().GatewayCryptoFiatTrans(ctx, from)
+
+	glog.Infof(ctx, "MeasureChannelFunction:GatewayCryptoFiatTrans cost：%s \n", time.Now().Sub(startTime))
+	if err != nil {
+		err = gerror.NewCode(utility.GatewayError, err.Error())
+	}
+	return to, err
+}
+
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayNameMapping[p.GatewayName]
