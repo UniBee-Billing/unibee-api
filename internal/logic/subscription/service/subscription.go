@@ -1110,3 +1110,20 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 	}
 	return nil
 }
+
+func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64) error {
+	utility.Assert(gatewayId > 0, "gatewayId is nil")
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
+	gateway := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(gateway.MerchantId == sub.GatewayId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().GatewayId: gatewayId,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}

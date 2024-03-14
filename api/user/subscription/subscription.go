@@ -156,6 +156,14 @@ type ResumeReq struct {
 type ResumeRes struct {
 }
 
+type ChangeGatewayReq struct {
+	g.Meta         `path:"/change_gateway" tags:"User-Subscription" method:"post" summary:"Change Subscription Gateway" `
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	GatewayId      uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+}
+type ChangeGatewayRes struct {
+}
+
 type TimeLineListReq struct {
 	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline" method:"get,post" summary:"Subscription TimeLine List"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `

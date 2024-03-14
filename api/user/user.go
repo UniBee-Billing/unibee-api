@@ -71,6 +71,7 @@ type IUserSubscription interface {
 	CancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.CancelLastCancelAtPeriodEndReq) (res *subscription.CancelLastCancelAtPeriodEndRes, err error)
 	Suspend(ctx context.Context, req *subscription.SuspendReq) (res *subscription.SuspendRes, err error)
 	Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error)
+	ChangeGateway(ctx context.Context, req *subscription.ChangeGatewayReq) (res *subscription.ChangeGatewayRes, err error)
 	TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error)
 }
 

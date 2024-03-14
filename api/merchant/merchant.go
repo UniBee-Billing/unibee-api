@@ -143,6 +143,7 @@ type IMerchantSubscription interface {
 	CancelLastCancelAtPeriodEnd(ctx context.Context, req *subscription.CancelLastCancelAtPeriodEndReq) (res *subscription.CancelLastCancelAtPeriodEndRes, err error)
 	Suspend(ctx context.Context, req *subscription.SuspendReq) (res *subscription.SuspendRes, err error)
 	Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error)
+	ChangeGateway(ctx context.Context, req *subscription.ChangeGatewayReq) (res *subscription.ChangeGatewayRes, err error)
 	AddNewTrialStart(ctx context.Context, req *subscription.AddNewTrialStartReq) (res *subscription.AddNewTrialStartRes, err error)
 	UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error)
 	Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error)

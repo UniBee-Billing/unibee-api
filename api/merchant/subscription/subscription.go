@@ -69,6 +69,14 @@ type ResumeReq struct {
 type ResumeRes struct {
 }
 
+type ChangeGatewayReq struct {
+	g.Meta         `path:"/change_gateway" tags:"Subscription" method:"post" summary:"Change Subscription Gateway" `
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	GatewayId      uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+}
+type ChangeGatewayRes struct {
+}
+
 type AddNewTrialStartReq struct {
 	g.Meta             `path:"/add_new_trial_start" tags:"Subscription" method:"post" summary:"Merchant Edit Subscription-add appendTrialEndHour For Free"`
 	SubscriptionId     string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
