@@ -342,7 +342,7 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			if updateErr != nil {
 				return nil, updateErr
 			}
-			return nil, err
+			utility.AssertError(err, "Create Payment Error")
 		}
 	}
 
