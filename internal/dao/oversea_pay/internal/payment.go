@@ -70,6 +70,8 @@ type PaymentColumns struct {
 	GasPayer               string // who pay the gas, merchant|user
 	ExpireTime             string // expire time, utc time
 	GatewayLink            string //
+	CryptoAmount           string // crypto_amount, cent
+	CryptoCurrency         string // crypto_currency
 }
 
 // paymentColumns holds the columns for table payment.
@@ -124,6 +126,8 @@ var paymentColumns = PaymentColumns{
 	GasPayer:               "gas_payer",
 	ExpireTime:             "expire_time",
 	GatewayLink:            "gateway_link",
+	CryptoAmount:           "crypto_amount",
+	CryptoCurrency:         "crypto_currency",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

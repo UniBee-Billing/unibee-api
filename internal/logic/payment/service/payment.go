@@ -38,9 +38,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
-	if createPayContext.Gateway.GatewayType != consts.GatewayTypeCrypto {
-		utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
-	} else {
+	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
+	if createPayContext.Gateway.GatewayType == consts.GatewayTypeCrypto {
 		//crypto payment
 		if len(createPayContext.Pay.GasPayer) > 0 {
 			utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
@@ -188,12 +187,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
-	paymentTotalAmount := invoice.TotalAmount
-	paymentCurrency := invoice.Currency
-	if gateway.GatewayType == consts.GatewayTypeCrypto {
-		paymentTotalAmount = invoice.CryptoAmount
-		paymentCurrency = invoice.CryptoCurrency
-	}
+
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 	if merchant == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
@@ -208,8 +202,10 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			AuthorizeStatus:   consts.Authorized,
 			UserId:            sub.UserId,
 			GatewayId:         gateway.Id,
-			TotalAmount:       paymentTotalAmount,
-			Currency:          paymentCurrency,
+			TotalAmount:       invoice.TotalAmount,
+			Currency:          invoice.Currency,
+			CryptoAmount:      invoice.CryptoAmount,
+			CryptoCurrency:    invoice.CryptoCurrency,
 			CountryCode:       sub.CountryCode,
 			MerchantId:        sub.MerchantId,
 			CompanyId:         merchant.CompanyId,

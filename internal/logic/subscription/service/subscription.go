@@ -305,12 +305,6 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		if gateway == nil {
 			return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 		}
-		paymentTotalAmount := prepare.Invoice.TotalAmount
-		paymentCurrency := prepare.Invoice.Currency
-		if gateway.GatewayType == consts.GatewayTypeCrypto {
-			paymentTotalAmount = prepare.Invoice.CryptoAmount
-			paymentCurrency = prepare.Invoice.CryptoCurrency
-		}
 		createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 			CheckoutMode: true,
 			Gateway:      prepare.Gateway,
@@ -320,8 +314,10 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 				BizType:           consts.BizTypeSubscription,
 				UserId:            prepare.UserId,
 				GatewayId:         prepare.Gateway.Id,
-				TotalAmount:       paymentTotalAmount,
-				Currency:          paymentCurrency,
+				TotalAmount:       prepare.Invoice.TotalAmount,
+				Currency:          prepare.Invoice.Currency,
+				CryptoAmount:      prepare.Invoice.CryptoAmount,
+				CryptoCurrency:    prepare.Invoice.CryptoCurrency,
 				CountryCode:       prepare.VatCountryCode,
 				MerchantId:        prepare.Merchant.Id,
 				CompanyId:         prepare.Merchant.CompanyId,

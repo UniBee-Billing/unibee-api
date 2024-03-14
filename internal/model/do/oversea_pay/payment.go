@@ -62,4 +62,6 @@ type Payment struct {
 	GasPayer               interface{} // who pay the gas, merchant|user
 	ExpireTime             interface{} // expire time, utc time
 	GatewayLink            interface{} //
+	CryptoAmount           interface{} // crypto_amount, cent
+	CryptoCurrency         interface{} // crypto_currency
 }

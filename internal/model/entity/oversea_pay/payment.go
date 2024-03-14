@@ -60,4 +60,6 @@ type Payment struct {
 	GasPayer               string      `json:"gasPayer"               description:"who pay the gas, merchant|user"`                                         // who pay the gas, merchant|user
 	ExpireTime             int64       `json:"expireTime"             description:"expire time, utc time"`                                                  // expire time, utc time
 	GatewayLink            string      `json:"gatewayLink"            description:""`                                                                       //
+	CryptoAmount           int64       `json:"cryptoAmount"           description:"crypto_amount, cent"`                                                    // crypto_amount, cent
+	CryptoCurrency         string      `json:"cryptoCurrency"         description:"crypto_currency"`                                                        // crypto_currency
 }

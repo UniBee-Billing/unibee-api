@@ -122,8 +122,8 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 		gasPayer = "CUSTOMER"
 	}
 	param := map[string]interface{}{
-		"nominal_currency":     createPayContext.Pay.Currency,
-		"nominal_amount":       utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+		"nominal_currency":     createPayContext.Pay.CryptoCurrency,
+		"nominal_amount":       utility.ConvertCentToDollarStr(createPayContext.Pay.CryptoAmount, createPayContext.Pay.CryptoCurrency),
 		"title":                "",
 		"description":          "",
 		"order_id":             createPayContext.Pay.PaymentId,
