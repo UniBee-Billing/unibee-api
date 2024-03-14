@@ -47,7 +47,7 @@ func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (
 	urlPath := "/api/payment/v1/payments"
 	param := map[string]interface{}{
 		"nominal_currency": "BNB",
-		"nominal_amount":   "0.08",
+		"nominal_amount":   "0.00001",
 		"title":            "test crypto payment",
 		"description":      "test crypto payment description",
 		"order_id":         uuid.New().String(),

@@ -54,7 +54,6 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 	} else {
 		g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled paymentId\n", gateway.GatewayName)
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
-		return
 	}
 	log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, "Changelly Webhook", nil, gateway)
 	r.Response.WriteHeader(responseBack)
