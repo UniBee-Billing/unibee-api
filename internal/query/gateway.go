@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -41,7 +40,7 @@ func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*ent
 	var data []*entity.MerchantGateway
 	err := dao.MerchantGateway.Ctx(ctx).
 		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
-		Where(dao.MerchantGateway.Columns().GatewayType, consts.GatewayTypeDefault).
+		//Where(dao.MerchantGateway.Columns().GatewayType, consts.GatewayTypeDefault).
 		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
 		Scan(&data)
 	if err != nil {
