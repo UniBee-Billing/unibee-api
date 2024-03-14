@@ -82,6 +82,7 @@ type UpdatePreviewReq struct {
 	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
 	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 }
@@ -98,6 +99,7 @@ type UpdateReq struct {
 	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity            int64                  `json:"quantity" dc:"Quantity"  v:"required"`
+	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
 	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `

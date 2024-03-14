@@ -64,6 +64,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().AddonData:              one.UpdateAddonData,
 		dao.Subscription.Columns().Amount:                 one.UpdateAmount,
 		dao.Subscription.Columns().Currency:               one.UpdateCurrency,
+		dao.Subscription.Columns().GatewayId:              one.GatewayId,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().PendingUpdateId:        "", //clear PendingUpdateId

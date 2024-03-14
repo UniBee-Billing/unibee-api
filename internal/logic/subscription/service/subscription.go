@@ -684,9 +684,14 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		effectTime = gtime.Now().Timestamp()
 	}
 
+	gatewayId := prepare.Subscription.GatewayId
+	if req.GatewayId > 0 {
+		gatewayId = req.GatewayId
+	}
+
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:           prepare.MerchantInfo.Id,
-		GatewayId:            prepare.Subscription.GatewayId,
+		GatewayId:            gatewayId,
 		UserId:               prepare.Subscription.UserId,
 		SubscriptionId:       prepare.Subscription.SubscriptionId,
 		UpdateSubscriptionId: utility.CreateSubscriptionUpdateId(),
@@ -724,7 +729,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		//utility.Assert(user != nil, "user not found")
-		gateway := query.GetGatewayById(ctx, one.GatewayId)
+		gateway := query.GetGatewayById(ctx, gatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
