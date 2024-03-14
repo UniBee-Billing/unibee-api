@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"unibee/utility"
 )
 
 func TestForApiKey(t *testing.T) {
@@ -28,4 +29,5 @@ func TestForGetCurrencies(t *testing.T) {
 func TestForTimeFormat(t *testing.T) {
 	fmt.Println(time.Now().Format("2006-01-02T15:04:05.876Z"))
 	fmt.Println(fmt.Sprintf("PDF Generated on %s", time.Now().Format(time.RFC850)))
+	fmt.Println(utility.ConvertCentToDollarStr(108, "USDT"))
 }
