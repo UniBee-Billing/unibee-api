@@ -289,8 +289,8 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 	var createPaymentResult *gateway_bean.GatewayNewPaymentResp
 	if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
-		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
-		utility.Assert(merchantInfo != nil, "merchantInfo not found")
+		merchant := query.GetMerchantById(ctx, one.MerchantId)
+		utility.Assert(merchant != nil, "merchant not found")
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
