@@ -15,6 +15,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/crypto"
 	"unibee/internal/logic/currency"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
@@ -39,14 +40,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
-	if createPayContext.Gateway.GatewayType == consts.GatewayTypeCrypto {
-		//crypto payment
-		if len(createPayContext.Pay.GasPayer) > 0 {
-			utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
-		} else {
-			createPayContext.Pay.GasPayer = "user" // default user pay the gas
-		}
-	}
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
@@ -69,6 +62,17 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	if !utility.TryLock(ctx, redisKey, 15) {
 		isDuplicatedInvoke = true
 		return nil, gerror.Newf(`too fast duplicate call %s`, createPayContext.Pay.ExternalPaymentId)
+	}
+
+	if createPayContext.Gateway.GatewayType == consts.GatewayTypeCrypto {
+		//crypto payment
+		if len(createPayContext.Pay.GasPayer) > 0 {
+			utility.Assert(strings.Contains("merchant|user", createPayContext.Pay.GasPayer), "crypto payment gasPayer should one of merchant|user")
+		} else {
+			createPayContext.Pay.GasPayer = "user" // default user pay the gas
+		}
+		createPayContext.Pay.CryptoAmount = crypto.GetCryptoAmount(createPayContext.Pay.TotalAmount)
+		createPayContext.Pay.CryptoCurrency = crypto.GetCryptoCurrency()
 	}
 	var invoice *entity.Invoice
 	if createPayContext.Invoice != nil {

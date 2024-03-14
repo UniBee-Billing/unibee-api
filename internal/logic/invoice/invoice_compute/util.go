@@ -6,7 +6,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
-	"unibee/internal/logic/crypto"
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -73,8 +72,6 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Lines:                          invoiceItems,
 		PeriodStart:                    req.PeriodStart,
 		PeriodEnd:                      req.PeriodEnd,
-		CryptoAmount:                   crypto.GetCryptoAmount(totalAmountExcludingTax+taxAmount, taxAmount),
-		CryptoCurrency:                 crypto.GetCryptoCurrency(),
 	}
 }
 
@@ -203,7 +200,5 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		ProrationScale:                 timeScale,
 		PeriodStart:                    req.ProrationDate,
 		PeriodEnd:                      req.PeriodEnd,
-		CryptoAmount:                   crypto.GetCryptoAmount(totalAmountExcludingTax+taxAmount, taxAmount),
-		CryptoCurrency:                 crypto.GetCryptoCurrency(),
 	}
 }

@@ -147,6 +147,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
 			PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
 			Currency:                       payment.Currency,
+			CryptoCurrency:                 payment.CryptoCurrency,
 			GatewayId:                      payment.GatewayId,
 			Status:                         status,
 			SendStatus:                     0,
@@ -155,6 +156,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			UniqueId:                       payment.PaymentId,
 			PaymentId:                      payment.PaymentId,
 			TotalAmount:                    invoice.TotalAmount,
+			CryptoAmount:                   payment.CryptoAmount,
 			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 			TaxAmount:                      invoice.TaxAmount,
 			SubscriptionAmount:             invoice.SubscriptionAmount,
@@ -251,7 +253,7 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().CryptoCurrency: crypto.GetCryptoCurrency(),
-		dao.Invoice.Columns().CryptoAmount:   crypto.GetCryptoAmount(one.TotalAmount, one.TaxAmount),
+		dao.Invoice.Columns().CryptoAmount:   crypto.GetCryptoAmount(one.TotalAmount),
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
