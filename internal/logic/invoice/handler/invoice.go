@@ -184,7 +184,6 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			dao.Invoice.Columns().GatewayId:                      payment.GatewayId,
 			dao.Invoice.Columns().PaymentId:                      payment.PaymentId,
 			dao.Invoice.Columns().UniqueId:                       payment.PaymentId,
-			dao.Invoice.Columns().Currency:                       payment.Currency,
 			dao.Invoice.Columns().Status:                         status,
 			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
 			dao.Invoice.Columns().GatewayPaymentId:               payment.GatewayPaymentId,
