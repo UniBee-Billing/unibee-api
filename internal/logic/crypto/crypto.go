@@ -8,7 +8,7 @@ func GetCryptoCurrency() string {
 
 func GetCryptoAmount(totalAmount int64, taxAmount int64) int64 {
 	if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsStage() {
-		return totalAmount / 100
+		return totalAmount
 	}
 	return totalAmount // todo mark 1:1 now
 }
