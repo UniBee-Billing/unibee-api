@@ -428,7 +428,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
 			}
 			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
-			gateway := query.GetGatewayById(ctx, gatewayUser.GatewayId)
+			gateway := query.GetGatewayById(ctx, payment.GatewayId)
 			if gatewayUser != nil && gateway != nil && len(payment.GatewayPaymentMethod) > 0 {
 				_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, gatewayUser.GatewayUserId, payment.GatewayPaymentMethod)
 				_, _ = api.GetGatewayServiceProvider(ctx, gatewayUser.GatewayId).GatewayUserAttachPaymentMethodQuery(ctx, gateway, gatewayUser.UserId, payment.GatewayPaymentMethod)

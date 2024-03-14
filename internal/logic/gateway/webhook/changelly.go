@@ -45,7 +45,7 @@ func (c ChangellyWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merch
 	g.Log().Info(r.Context(), "Receive_Webhook_Channel:", gateway.GatewayName, " hook:", jsonData.String())
 	var responseBack = http.StatusOK
 	if jsonData.Contains("payment_id") {
-		err = ProcessPaymentWebhook(r.Context(), jsonData.Get("payment_data.PaymentId").String(), jsonData.Get("payment_id").String(), gateway)
+		err = ProcessPaymentWebhook(r.Context(), jsonData.Get("order_id").String(), jsonData.Get("payment_id").String(), gateway)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusBadRequest)
