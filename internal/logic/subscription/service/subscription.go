@@ -122,7 +122,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.GatewayId > 0, "Id invalid")
 	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "User invalid")
-	email := ""
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -217,7 +216,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
 		UserId:            int64(_interface.BizCtx().Get(ctx).User.Id),
-		Email:             email,
+		Email:             user.Email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,
 	}, nil
@@ -336,6 +335,13 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			Metadata:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
 		})
 		if err != nil {
+			_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+				dao.Subscription.Columns().Status:    consts.SubStatusCancelled,
+				dao.Subscription.Columns().GmtModify: gtime.Now(),
+			}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+			if err != nil {
+				return nil, err
+			}
 			return nil, err
 		}
 	}
