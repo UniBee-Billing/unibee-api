@@ -335,12 +335,12 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 			Metadata:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
 		})
 		if err != nil {
-			_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
 				dao.Subscription.Columns().Status:    consts.SubStatusCancelled,
 				dao.Subscription.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
-			if err != nil {
-				return nil, err
+			if updateErr != nil {
+				return nil, updateErr
 			}
 			return nil, err
 		}

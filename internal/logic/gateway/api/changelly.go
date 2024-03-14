@@ -33,11 +33,21 @@ import (
 type Changelly struct {
 }
 
+func (c Changelly) GatewayGetCurrency(ctx context.Context, key string, secret string) (responseJson *gjson.Json, err error) {
+	urlPath := "/api/payment/v1/currencies"
+	param := map[string]interface{}{}
+	responseJson, err = SendChangellyRequest(ctx, key, secret, "GET", urlPath, param)
+	utility.Assert(err == nil, fmt.Sprintf("invalid keys,  call changelly error %s", err))
+	g.Log().Debugf(ctx, "responseJson :%s", responseJson.String())
+
+	return responseJson, err
+}
+
 func (c Changelly) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	urlPath := "/api/payment/v1/payments"
 	param := map[string]interface{}{
-		"nominal_currency": "USDT",
-		"nominal_amount":   "1.08",
+		"nominal_currency": "BNB",
+		"nominal_amount":   "0.08",
 		"title":            "test crypto payment",
 		"description":      "test crypto payment description",
 		"order_id":         uuid.New().String(),
