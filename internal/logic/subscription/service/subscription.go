@@ -544,31 +544,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	var prorationInvoice *bean.InvoiceSimplify
 	var nextPeriodInvoice *bean.InvoiceSimplify
 	if effectImmediate {
-		var oldAddonParams []*bean.PlanAddonParam
-		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
-		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
-		var oldProrationPlanParams []*invoice_compute.ProrationPlanParam
-		oldProrationPlanParams = append(oldProrationPlanParams, &invoice_compute.ProrationPlanParam{
-			PlanId:   sub.PlanId,
-			Quantity: sub.Quantity,
-		})
-		for _, addonParam := range oldAddonParams {
-			oldProrationPlanParams = append(oldProrationPlanParams, &invoice_compute.ProrationPlanParam{
-				PlanId:   addonParam.AddonPlanId,
-				Quantity: addonParam.Quantity,
-			})
-		}
-		var newProrationPlanParams []*invoice_compute.ProrationPlanParam
-		newProrationPlanParams = append(newProrationPlanParams, &invoice_compute.ProrationPlanParam{
-			PlanId:   req.NewPlanId,
-			Quantity: req.Quantity,
-		})
-		for _, addonParam := range req.AddonParams {
-			newProrationPlanParams = append(newProrationPlanParams, &invoice_compute.ProrationPlanParam{
-				PlanId:   addonParam.AddonPlanId,
-				Quantity: addonParam.Quantity,
-			})
-		}
 		if prorationDate == 0 {
 			prorationDate = time.Now().Unix()
 			if sub.TestClock > sub.CurrentPeriodStart && !consts.GetConfigInstance().IsProd() {
@@ -603,6 +578,32 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 			})
 		} else {
+			// prorationInvoice
+			var oldAddonParams []*bean.PlanAddonParam
+			err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
+			utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+			var oldProrationPlanParams []*invoice_compute.ProrationPlanParam
+			oldProrationPlanParams = append(oldProrationPlanParams, &invoice_compute.ProrationPlanParam{
+				PlanId:   sub.PlanId,
+				Quantity: sub.Quantity,
+			})
+			for _, addonParam := range oldAddonParams {
+				oldProrationPlanParams = append(oldProrationPlanParams, &invoice_compute.ProrationPlanParam{
+					PlanId:   addonParam.AddonPlanId,
+					Quantity: addonParam.Quantity,
+				})
+			}
+			var newProrationPlanParams []*invoice_compute.ProrationPlanParam
+			newProrationPlanParams = append(newProrationPlanParams, &invoice_compute.ProrationPlanParam{
+				PlanId:   req.NewPlanId,
+				Quantity: req.Quantity,
+			})
+			for _, addonParam := range req.AddonParams {
+				newProrationPlanParams = append(newProrationPlanParams, &invoice_compute.ProrationPlanParam{
+					PlanId:   addonParam.AddonPlanId,
+					Quantity: addonParam.Quantity,
+				})
+			}
 			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 				InvoiceName:       "SubscriptionUpgrade",
 				Currency:          sub.Currency,
