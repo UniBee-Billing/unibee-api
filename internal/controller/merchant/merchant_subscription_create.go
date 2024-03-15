@@ -1,16 +1,16 @@
-package user
+package merchant
 
 import (
 	"context"
-	"unibee/api/user/subscription"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
+
+	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.CreateReq) (res *subscription.CreateRes, err error) {
 	createRes, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
 		PlanId:             req.PlanId,
-		UserId:             _interface.BizCtx().Get(ctx).User.Id,
+		UserId:             req.UserId,
 		Quantity:           req.Quantity,
 		GatewayId:          req.GatewayId,
 		AddonParams:        req.AddonParams,

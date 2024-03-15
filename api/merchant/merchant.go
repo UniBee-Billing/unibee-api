@@ -145,6 +145,8 @@ type IMerchantSubscription interface {
 	Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error)
 	ChangeGateway(ctx context.Context, req *subscription.ChangeGatewayReq) (res *subscription.ChangeGatewayRes, err error)
 	AddNewTrialStart(ctx context.Context, req *subscription.AddNewTrialStartReq) (res *subscription.AddNewTrialStartRes, err error)
+	CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error)
+	Create(ctx context.Context, req *subscription.CreateReq) (res *subscription.CreateRes, err error)
 	UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error)
 	Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error)
 	UserSubscriptionDetail(ctx context.Context, req *subscription.UserSubscriptionDetailReq) (res *subscription.UserSubscriptionDetailRes, err error)

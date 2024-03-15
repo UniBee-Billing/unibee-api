@@ -85,6 +85,56 @@ type AddNewTrialStartReq struct {
 type AddNewTrialStartRes struct {
 }
 
+type CreatePreviewReq struct {
+	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"Create Subscription Preview"`
+	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
+	Quantity       int64                  `json:"quantity" dc:"Quantity" `
+	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
+	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
+}
+type CreatePreviewRes struct {
+	Plan              *bean.PlanSimplify      `json:"plan"`
+	Quantity          int64                   `json:"quantity"`
+	Gateway           *bean.GatewaySimplify   `json:"gateway"`
+	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail `json:"addons"`
+	TotalAmount       int64                   `json:"totalAmount"                `
+	Currency          string                  `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
+	UserId            int64                   `json:"userId" `
+	Email             string                  `json:"email" `
+	VatCountryCode    string                  `json:"vatCountryCode"              `
+	VatCountryName    string                  `json:"vatCountryName"              `
+	TaxScale          int64                   `json:"taxScale"              `
+	VatNumber         string                  `json:"vatNumber"              `
+	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
+}
+
+type CreateReq struct {
+	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"Create Subscription"`
+	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
+	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+}
+
+type CreateRes struct {
+	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
+	Paid         bool                       `json:"paid"`
+	Link         string                     `json:"link"`
+}
+
 type UpdatePreviewReq struct {
 	g.Meta              `path:"/update_preview" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Preview"`
 	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`

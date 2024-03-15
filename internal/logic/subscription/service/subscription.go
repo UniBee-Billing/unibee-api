@@ -32,27 +32,6 @@ import (
 	"unibee/utility"
 )
 
-type SubscriptionCreatePrepareInternalRes struct {
-	Plan              *entity.Plan            `json:"plan"`
-	Quantity          int64                   `json:"quantity"`
-	Gateway           *entity.MerchantGateway `json:"gateway"`
-	Merchant          *entity.Merchant        `json:"merchantInfo"`
-	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
-	Addons            []*bean.PlanAddonDetail `json:"addons"`
-	TotalAmount       int64                   `json:"totalAmount"                `
-	Currency          string                  `json:"currency"              `
-	VatCountryCode    string                  `json:"vatCountryCode"              `
-	VatCountryName    string                  `json:"vatCountryName"              `
-	VatNumber         string                  `json:"vatNumber"              `
-	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
-	TaxScale          int64                   `json:"taxScale"              `
-	VatVerifyData     string                  `json:"vatVerifyData"              `
-	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
-	UserId            int64                   `json:"userId" `
-	Email             string                  `json:"email" `
-	VatCountryRate    *bean.VatCountryRate    `json:"vatCountryRate" `
-}
-
 func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanAddonParam) []*bean.PlanAddonDetail {
 	var addons []*bean.PlanAddonDetail
 	var totalAddonIds []uint64
@@ -117,11 +96,63 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 	}
 }
 
-func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (*SubscriptionCreatePrepareInternalRes, error) {
+type CreatePreviewInternalReq struct {
+	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
+	Quantity       int64                  `json:"quantity" dc:"Quantity" `
+	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
+	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
+}
+
+type CreatePreviewInternalRes struct {
+	Plan              *entity.Plan            `json:"plan"`
+	Quantity          int64                   `json:"quantity"`
+	Gateway           *entity.MerchantGateway `json:"gateway"`
+	Merchant          *entity.Merchant        `json:"merchantInfo"`
+	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail `json:"addons"`
+	TotalAmount       int64                   `json:"totalAmount"                `
+	Currency          string                  `json:"currency"              `
+	VatCountryCode    string                  `json:"vatCountryCode"              `
+	VatCountryName    string                  `json:"vatCountryName"              `
+	VatNumber         string                  `json:"vatNumber"              `
+	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
+	TaxScale          int64                   `json:"taxScale"              `
+	VatVerifyData     string                  `json:"vatVerifyData"              `
+	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
+	UserId            int64                   `json:"userId" `
+	Email             string                  `json:"email" `
+	VatCountryRate    *bean.VatCountryRate    `json:"vatCountryRate" `
+}
+
+type CreateInternalReq struct {
+	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
+	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+}
+
+type CreateInternalRes struct {
+	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
+	Paid         bool                       `json:"paid"`
+	Link         string                     `json:"link"`
+}
+
+func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
 	utility.Assert(req.GatewayId > 0, "Id invalid")
-	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "User invalid")
+	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -129,11 +160,11 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	user := query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
+	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(req.UserId), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
@@ -144,7 +175,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	var vatNumberValidate *bean.ValidResult
 
 	if len(req.VatNumber) > 0 {
-		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, int64(_interface.BizCtx().Get(ctx).User.Id), req.VatNumber, "")
+		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, int64(req.UserId), req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}
@@ -200,7 +231,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 		PeriodEnd:     currentTimeEnd,
 	})
 
-	return &SubscriptionCreatePrepareInternalRes{
+	return &CreatePreviewInternalRes{
 		Plan:              plan,
 		Quantity:          req.Quantity,
 		Gateway:           gateway,
@@ -222,10 +253,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *subscription.CreatePrev
 	}, nil
 }
 
-func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subscription.CreateRes, error) {
-
-	prepare, err := SubscriptionCreatePreview(ctx, &subscription.CreatePreviewReq{
+func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
+	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
 		PlanId:         req.PlanId,
+		UserId:         req.UserId,
 		Quantity:       req.Quantity,
 		GatewayId:      req.GatewayId,
 		AddonParams:    req.AddonParams,
@@ -369,14 +400,14 @@ func SubscriptionCreate(ctx context.Context, req *subscription.CreateReq) (*subs
 		Tag:   redismq2.TopicSubscriptionCreate.Tag,
 		Body:  one.SubscriptionId,
 	})
-	return &subscription.CreateRes{
+	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(one),
 		Paid:         createRes.Paid,
 		Link:         one.Link,
 	}, nil
 }
 
-type SubscriptionUpdatePrepareInternalRes struct {
+type UpdatePreviewInternalRes struct {
 	Subscription      *entity.Subscription    `json:"subscription"`
 	Plan              *entity.Plan            `json:"plan"`
 	Quantity          int64                   `json:"quantity"`
@@ -394,7 +425,7 @@ type SubscriptionUpdatePrepareInternalRes struct {
 	EffectImmediate   bool                    `json:"EffectImmediate"`
 }
 
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *SubscriptionUpdatePrepareInternalRes, err error) {
+func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -633,7 +664,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		effectImmediate = false
 	}
 
-	return &SubscriptionUpdatePrepareInternalRes{
+	return &UpdatePreviewInternalRes{
 		Subscription:      sub,
 		Plan:              plan,
 		Quantity:          req.Quantity,
