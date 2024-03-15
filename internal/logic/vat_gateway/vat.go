@@ -12,6 +12,7 @@ import (
 	"unibee/internal/logic/merchant_config"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
+	"unibee/internal/logic/vat_gateway/vatstack"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -35,6 +36,12 @@ func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VAT
 		return one
 	} else if strings.Compare(vatName, "github") == 0 {
 		one := &vat.Github{Password: vatData, Name: vatName}
+		return one
+	} else if strings.Compare(vatName, "vatstack") == 0 {
+		one := &vatstack.VatStack{
+			ApiData: vatData,
+			Name:    vatName,
+		}
 		return one
 	}
 	return nil
