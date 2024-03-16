@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 
 	"unibee/api/merchant/subscription"
@@ -10,6 +11,7 @@ import (
 
 func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
+		MerchantId:     _interface.GetMerchantId(ctx),
 		PlanId:         req.PlanId,
 		UserId:         req.UserId,
 		Quantity:       req.Quantity,

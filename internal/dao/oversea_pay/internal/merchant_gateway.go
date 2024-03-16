@@ -43,6 +43,7 @@ type MerchantGatewayColumns struct {
 	CreateTime            string // create utc time
 	IsDeleted             string // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency string //
+	CountryConfig         string //
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
@@ -70,6 +71,7 @@ var merchantGatewayColumns = MerchantGatewayColumns{
 	CreateTime:            "create_time",
 	IsDeleted:             "is_deleted",
 	CryptoReceiveCurrency: "crypto_receive_currency",
+	CountryConfig:         "country_config",
 }
 
 // NewMerchantGatewayDao creates and returns a new DAO object for table data access.

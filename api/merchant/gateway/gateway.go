@@ -30,6 +30,14 @@ type EditReq struct {
 type EditRes struct {
 }
 
+type EditCountryConfigReq struct {
+	g.Meta        `path:"/edit_country_config" tags:"Gateway" method:"post" summary:"Gateway Webhook Edit Country Config"`
+	GatewayId     uint64          `json:"gatewayId"  dc:"GatewayId" v:"required"`
+	CountryConfig map[string]bool `json:"countryConfig"  dc:"CountryConfig" `
+}
+type EditCountryConfigRes struct {
+}
+
 type SetupWebhookReq struct {
 	g.Meta    `path:"/setup_webhook" tags:"Gateway" method:"post" summary:"Gateway Webhook Setup"`
 	GatewayId uint64 `json:"gatewayId"  dc:"GatewayId" v:"required"`

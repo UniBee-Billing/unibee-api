@@ -33,4 +33,5 @@ type MerchantGateway struct {
 	CreateTime            int64       `json:"createTime"            description:"create utc time"`                             // create utc time
 	IsDeleted             int         `json:"isDeleted"             description:"0-UnDeleted，1-Deleted"`                       // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency string      `json:"cryptoReceiveCurrency" description:""`                                            //
+	CountryConfig         string      `json:"countryConfig"         description:""`                                            //
 }

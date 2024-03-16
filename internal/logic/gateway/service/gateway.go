@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
@@ -63,4 +64,41 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 	utility.AssertError(err, "system error")
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+}
+
+func EditGatewayCountryConfig(ctx context.Context, merchantId uint64, gatewayId uint64, countryConfig map[string]bool) (err error) {
+	utility.Assert(gatewayId > 0, "gatewayId invalid")
+	one := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == merchantId, "merchant not match")
+	_, err = dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().CountryConfig: utility.MarshalToJsonString(countryConfig),
+		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
+	utility.AssertError(err, "system error")
+	return err
+}
+
+func IsGatewaySupportCountryCode(ctx context.Context, gateway *entity.MerchantGateway, countryCode string) bool {
+	gatewaySimplify := bean.SimplifyGateway(gateway)
+	var support = true
+	if gatewaySimplify.CountryConfig != nil {
+		if _, ok := gatewaySimplify.CountryConfig[countryCode]; ok {
+			if !gatewaySimplify.CountryConfig[countryCode] {
+				support = false
+			}
+		}
+	}
+	return support
+}
+
+func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId uint64, countryCode string) []*bean.GatewaySimplify {
+	var availableGateways []*bean.GatewaySimplify
+	gateways := query.GetMerchantGatewayList(ctx, merchantId)
+	for _, one := range gateways {
+		if IsGatewaySupportCountryCode(ctx, one, countryCode) {
+			availableGateways = append(availableGateways, bean.SimplifyGateway(one))
+		}
+	}
+	return availableGateways
 }

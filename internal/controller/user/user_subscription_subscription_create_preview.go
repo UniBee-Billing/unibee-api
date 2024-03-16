@@ -11,6 +11,7 @@ import (
 
 func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
+		MerchantId:     _interface.GetMerchantId(ctx),
 		PlanId:         req.PlanId,
 		UserId:         _interface.BizCtx().Get(ctx).User.Id,
 		Quantity:       req.Quantity,

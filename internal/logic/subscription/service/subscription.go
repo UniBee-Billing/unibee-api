@@ -19,6 +19,7 @@ import (
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/gateway_bean"
+	service2 "unibee/internal/logic/gateway/service"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
@@ -97,6 +98,7 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 }
 
 type CreatePreviewInternalReq struct {
+	MerchantId     uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
@@ -125,9 +127,11 @@ type CreatePreviewInternalRes struct {
 	UserId            int64                   `json:"userId" `
 	Email             string                  `json:"email" `
 	VatCountryRate    *bean.VatCountryRate    `json:"vatCountryRate" `
+	Gateways          []*bean.GatewaySimplify `json:"gateways" `
 }
 
 type CreateInternalReq struct {
+	MerchantId         uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
@@ -154,10 +158,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(req.GatewayId > 0, "Id invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
+	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, req.UserId)
@@ -250,11 +256,13 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		Email:             user.Email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,
+		Gateways:          service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
 	}, nil
 }
 
 func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
 	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
+		MerchantId:     req.MerchantId,
 		PlanId:         req.PlanId,
 		UserId:         req.UserId,
 		Quantity:       req.Quantity,
@@ -423,6 +431,7 @@ type UpdatePreviewInternalRes struct {
 	NextPeriodInvoice *bean.InvoiceSimplify   `json:"nextPeriodInvoice"`
 	ProrationDate     int64                   `json:"prorationDate"`
 	EffectImmediate   bool                    `json:"EffectImmediate"`
+	Gateways          []*bean.GatewaySimplify `json:"gateways" `
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -439,6 +448,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
+	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	//试用期内不允许修改计划
@@ -681,6 +691,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		NextPeriodInvoice: nextPeriodInvoice,
 		ProrationDate:     prorationDate,
 		EffectImmediate:   effectImmediate,
+		Gateways:          service2.GetMerchantAvailableGatewaysByCountryCode(ctx, sub.MerchantId, sub.CountryCode),
 	}, nil
 }
 

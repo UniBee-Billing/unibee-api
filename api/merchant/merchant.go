@@ -54,6 +54,7 @@ type IMerchantGateway interface {
 	List(ctx context.Context, req *gateway.ListReq) (res *gateway.ListRes, err error)
 	Setup(ctx context.Context, req *gateway.SetupReq) (res *gateway.SetupRes, err error)
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
+	EditCountryConfig(ctx context.Context, req *gateway.EditCountryConfigReq) (res *gateway.EditCountryConfigRes, err error)
 	SetupWebhook(ctx context.Context, req *gateway.SetupWebhookReq) (res *gateway.SetupWebhookRes, err error)
 }
 

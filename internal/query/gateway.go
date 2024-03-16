@@ -40,7 +40,6 @@ func GetMerchantGatewayList(ctx context.Context, merchantId uint64) (list []*ent
 	var data []*entity.MerchantGateway
 	err := dao.MerchantGateway.Ctx(ctx).
 		Where(dao.MerchantGateway.Columns().MerchantId, merchantId).
-		//Where(dao.MerchantGateway.Columns().GatewayType, consts.GatewayTypeDefault).
 		Where(dao.MerchantGateway.Columns().IsDeleted, 0).
 		Scan(&data)
 	if err != nil {

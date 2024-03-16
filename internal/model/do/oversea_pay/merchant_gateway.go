@@ -35,4 +35,5 @@ type MerchantGateway struct {
 	CreateTime            interface{} // create utc time
 	IsDeleted             interface{} // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency interface{} //
+	CountryConfig         interface{} //
 }
