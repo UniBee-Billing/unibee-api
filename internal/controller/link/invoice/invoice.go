@@ -72,6 +72,7 @@ func InvoiceLinkEntry(r *ghttp.Request) {
 
 			createRes, err := service.GatewayPaymentCreate(r.Context(), createPayContext)
 			if err != nil {
+				g.Log().Infof(r.Context(), "GatewayPaymentCreate Error:%s", err.Error())
 				r.Response.Writeln("Server Error")
 				return
 			}
