@@ -171,11 +171,11 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			PaidTime:               gtime.Now(),
 		}
 		err = handler2.HandlePaySuccess(ctx, req)
-		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-		gatewayInternalPayResult.Invoice = invoice
-		if err != nil {
-			return nil, err
-		}
+	}
+	invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+	gatewayInternalPayResult.Invoice = invoice
+	if err != nil {
+		return nil, err
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{
