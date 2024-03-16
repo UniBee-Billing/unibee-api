@@ -49,7 +49,7 @@ var gatewayHttpLogColumns = GatewayHttpLogColumns{
 // NewGatewayHttpLogDao creates and returns a new DAO object for table data access.
 func NewGatewayHttpLogDao() *GatewayHttpLogDao {
 	return &GatewayHttpLogDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "gateway_http_log",
 		columns: gatewayHttpLogColumns,
 	}

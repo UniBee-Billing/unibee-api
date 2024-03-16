@@ -133,7 +133,7 @@ var paymentColumns = PaymentColumns{
 // NewPaymentDao creates and returns a new DAO object for table data access.
 func NewPaymentDao() *PaymentDao {
 	return &PaymentDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "payment",
 		columns: paymentColumns,
 	}

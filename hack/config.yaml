@@ -17,24 +17,8 @@ gfcli:
       - registry.cn-shenzhen.aliyuncs.com/heiku
   gen:
     dao:
-      - link:     "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/test?loc=Local&parseTime=true"
-        tables:   "test"
-        group: "xin"
-        daoPath:  "dao/xin"
-        doPath:  "model/do/xin"
-        entityPath:  "model/entity/xin"
-        typeMapping:
-          decimal:
-            type:   decimal.Decimal
-            import: github.com/shopspring/decimal
-          datetime:
-            type: int64
-          timestamp:
-            type: int64
-#        jsonCase: "CamelLower"
-
       - link:   "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/unib?loc=Local&parseTime=true"
-        group: "oversea_pay"
+        group: "default"
         daoPath:  "dao/oversea_pay"
         doPath:  "model/do/oversea_pay"
         entityPath:  "model/entity/oversea_pay"

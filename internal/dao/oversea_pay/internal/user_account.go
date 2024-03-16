@@ -121,7 +121,7 @@ var userAccountColumns = UserAccountColumns{
 // NewUserAccountDao creates and returns a new DAO object for table data access.
 func NewUserAccountDao() *UserAccountDao {
 	return &UserAccountDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "user_account",
 		columns: userAccountColumns,
 	}

@@ -47,7 +47,7 @@ var merchantMetricPlanLimitColumns = MerchantMetricPlanLimitColumns{
 // NewMerchantMetricPlanLimitDao creates and returns a new DAO object for table data access.
 func NewMerchantMetricPlanLimitDao() *MerchantMetricPlanLimitDao {
 	return &MerchantMetricPlanLimitDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_metric_plan_limit",
 		columns: merchantMetricPlanLimitColumns,
 	}

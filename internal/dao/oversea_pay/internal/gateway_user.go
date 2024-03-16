@@ -47,7 +47,7 @@ var gatewayUserColumns = GatewayUserColumns{
 // NewGatewayUserDao creates and returns a new DAO object for table data access.
 func NewGatewayUserDao() *GatewayUserDao {
 	return &GatewayUserDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "gateway_user",
 		columns: gatewayUserColumns,
 	}

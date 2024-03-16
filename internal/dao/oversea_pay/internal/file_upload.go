@@ -47,7 +47,7 @@ var fileUploadColumns = FileUploadColumns{
 // NewFileUploadDao creates and returns a new DAO object for table data access.
 func NewFileUploadDao() *FileUploadDao {
 	return &FileUploadDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "file_upload",
 		columns: fileUploadColumns,
 	}

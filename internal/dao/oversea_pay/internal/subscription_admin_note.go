@@ -45,7 +45,7 @@ var subscriptionAdminNoteColumns = SubscriptionAdminNoteColumns{
 // NewSubscriptionAdminNoteDao creates and returns a new DAO object for table data access.
 func NewSubscriptionAdminNoteDao() *SubscriptionAdminNoteDao {
 	return &SubscriptionAdminNoteDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "subscription_admin_note",
 		columns: subscriptionAdminNoteColumns,
 	}

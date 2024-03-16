@@ -53,7 +53,7 @@ var merchantMemberColumns = MerchantMemberColumns{
 // NewMerchantMemberDao creates and returns a new DAO object for table data access.
 func NewMerchantMemberDao() *MerchantMemberDao {
 	return &MerchantMemberDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_member",
 		columns: merchantMemberColumns,
 	}

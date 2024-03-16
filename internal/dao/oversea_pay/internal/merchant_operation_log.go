@@ -61,7 +61,7 @@ var merchantOperationLogColumns = MerchantOperationLogColumns{
 // NewMerchantOperationLogDao creates and returns a new DAO object for table data access.
 func NewMerchantOperationLogDao() *MerchantOperationLogDao {
 	return &MerchantOperationLogDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_operation_log",
 		columns: merchantOperationLogColumns,
 	}

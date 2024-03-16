@@ -81,7 +81,7 @@ var planColumns = PlanColumns{
 // NewPlanDao creates and returns a new DAO object for table data access.
 func NewPlanDao() *PlanDao {
 	return &PlanDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "plan",
 		columns: planColumns,
 	}

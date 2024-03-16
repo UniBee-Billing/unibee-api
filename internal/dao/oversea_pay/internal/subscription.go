@@ -125,7 +125,7 @@ var subscriptionColumns = SubscriptionColumns{
 // NewSubscriptionDao creates and returns a new DAO object for table data access.
 func NewSubscriptionDao() *SubscriptionDao {
 	return &SubscriptionDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "subscription",
 		columns: subscriptionColumns,
 	}

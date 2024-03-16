@@ -61,7 +61,7 @@ var paymentEventColumns = PaymentEventColumns{
 // NewPaymentEventDao creates and returns a new DAO object for table data access.
 func NewPaymentEventDao() *PaymentEventDao {
 	return &PaymentEventDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "payment_event",
 		columns: paymentEventColumns,
 	}

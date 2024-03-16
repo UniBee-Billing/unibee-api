@@ -55,7 +55,7 @@ var merchantWebhookLogColumns = MerchantWebhookLogColumns{
 // NewMerchantWebhookLogDao creates and returns a new DAO object for table data access.
 func NewMerchantWebhookLogDao() *MerchantWebhookLogDao {
 	return &MerchantWebhookLogDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_webhook_log",
 		columns: merchantWebhookLogColumns,
 	}

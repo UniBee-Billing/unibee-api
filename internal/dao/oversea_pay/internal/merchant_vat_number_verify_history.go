@@ -55,7 +55,7 @@ var merchantVatNumberVerifyHistoryColumns = MerchantVatNumberVerifyHistoryColumn
 // NewMerchantVatNumberVerifyHistoryDao creates and returns a new DAO object for table data access.
 func NewMerchantVatNumberVerifyHistoryDao() *MerchantVatNumberVerifyHistoryDao {
 	return &MerchantVatNumberVerifyHistoryDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_vat_number_verify_history",
 		columns: merchantVatNumberVerifyHistoryColumns,
 	}

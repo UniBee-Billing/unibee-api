@@ -61,7 +61,7 @@ var paymentTimelineColumns = PaymentTimelineColumns{
 // NewPaymentTimelineDao creates and returns a new DAO object for table data access.
 func NewPaymentTimelineDao() *PaymentTimelineDao {
 	return &PaymentTimelineDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "payment_timeline",
 		columns: paymentTimelineColumns,
 	}

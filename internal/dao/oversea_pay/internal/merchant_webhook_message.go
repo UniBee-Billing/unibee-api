@@ -45,7 +45,7 @@ var merchantWebhookMessageColumns = MerchantWebhookMessageColumns{
 // NewMerchantWebhookMessageDao creates and returns a new DAO object for table data access.
 func NewMerchantWebhookMessageDao() *MerchantWebhookMessageDao {
 	return &MerchantWebhookMessageDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_webhook_message",
 		columns: merchantWebhookMessageColumns,
 	}

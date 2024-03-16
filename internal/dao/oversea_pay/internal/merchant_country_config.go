@@ -45,7 +45,7 @@ var merchantCountryConfigColumns = MerchantCountryConfigColumns{
 // NewMerchantCountryConfigDao creates and returns a new DAO object for table data access.
 func NewMerchantCountryConfigDao() *MerchantCountryConfigDao {
 	return &MerchantCountryConfigDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_country_config",
 		columns: merchantCountryConfigColumns,
 	}

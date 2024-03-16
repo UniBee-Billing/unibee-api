@@ -51,7 +51,7 @@ var merchantEmailTemplateColumns = MerchantEmailTemplateColumns{
 // NewMerchantEmailTemplateDao creates and returns a new DAO object for table data access.
 func NewMerchantEmailTemplateDao() *MerchantEmailTemplateDao {
 	return &MerchantEmailTemplateDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_email_template",
 		columns: merchantEmailTemplateColumns,
 	}

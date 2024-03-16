@@ -71,7 +71,7 @@ var subscriptionTimelineColumns = SubscriptionTimelineColumns{
 // NewSubscriptionTimelineDao creates and returns a new DAO object for table data access.
 func NewSubscriptionTimelineDao() *SubscriptionTimelineDao {
 	return &SubscriptionTimelineDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "subscription_timeline",
 		columns: subscriptionTimelineColumns,
 	}

@@ -43,7 +43,7 @@ var merchantPayGatewayBindingColumns = MerchantPayGatewayBindingColumns{
 // NewMerchantPayGatewayBindingDao creates and returns a new DAO object for table data access.
 func NewMerchantPayGatewayBindingDao() *MerchantPayGatewayBindingDao {
 	return &MerchantPayGatewayBindingDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_pay_gateway_binding",
 		columns: merchantPayGatewayBindingColumns,
 	}

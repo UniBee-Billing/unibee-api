@@ -49,7 +49,7 @@ var emailDefaultTemplateColumns = EmailDefaultTemplateColumns{
 // NewEmailDefaultTemplateDao creates and returns a new DAO object for table data access.
 func NewEmailDefaultTemplateDao() *EmailDefaultTemplateDao {
 	return &EmailDefaultTemplateDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "email_default_template",
 		columns: emailDefaultTemplateColumns,
 	}

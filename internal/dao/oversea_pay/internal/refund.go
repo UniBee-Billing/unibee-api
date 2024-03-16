@@ -81,7 +81,7 @@ var refundColumns = RefundColumns{
 // NewRefundDao creates and returns a new DAO object for table data access.
 func NewRefundDao() *RefundDao {
 	return &RefundDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "refund",
 		columns: refundColumns,
 	}

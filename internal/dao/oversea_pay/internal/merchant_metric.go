@@ -53,7 +53,7 @@ var merchantMetricColumns = MerchantMetricColumns{
 // NewMerchantMetricDao creates and returns a new DAO object for table data access.
 func NewMerchantMetricDao() *MerchantMetricDao {
 	return &MerchantMetricDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_metric",
 		columns: merchantMetricColumns,
 	}

@@ -45,7 +45,7 @@ var gatewayVatRateColumns = GatewayVatRateColumns{
 // NewGatewayVatRateDao creates and returns a new DAO object for table data access.
 func NewGatewayVatRateDao() *GatewayVatRateDao {
 	return &GatewayVatRateDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "gateway_vat_rate",
 		columns: gatewayVatRateColumns,
 	}

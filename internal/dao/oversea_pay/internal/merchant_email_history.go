@@ -49,7 +49,7 @@ var merchantEmailHistoryColumns = MerchantEmailHistoryColumns{
 // NewMerchantEmailHistoryDao creates and returns a new DAO object for table data access.
 func NewMerchantEmailHistoryDao() *MerchantEmailHistoryDao {
 	return &MerchantEmailHistoryDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "merchant_email_history",
 		columns: merchantEmailHistoryColumns,
 	}

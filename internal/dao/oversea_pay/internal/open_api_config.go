@@ -57,7 +57,7 @@ var openApiConfigColumns = OpenApiConfigColumns{
 // NewOpenApiConfigDao creates and returns a new DAO object for table data access.
 func NewOpenApiConfigDao() *OpenApiConfigDao {
 	return &OpenApiConfigDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "open_api_config",
 		columns: openApiConfigColumns,
 	}

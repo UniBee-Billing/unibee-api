@@ -99,7 +99,7 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.
 func NewSubscriptionPendingUpdateDao() *SubscriptionPendingUpdateDao {
 	return &SubscriptionPendingUpdateDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "subscription_pending_update",
 		columns: subscriptionPendingUpdateColumns,
 	}

@@ -67,7 +67,7 @@ var countryRateColumns = CountryRateColumns{
 // NewCountryRateDao creates and returns a new DAO object for table data access.
 func NewCountryRateDao() *CountryRateDao {
 	return &CountryRateDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "country_rate",
 		columns: countryRateColumns,
 	}

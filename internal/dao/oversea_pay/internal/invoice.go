@@ -113,7 +113,7 @@ var invoiceColumns = InvoiceColumns{
 // NewInvoiceDao creates and returns a new DAO object for table data access.
 func NewInvoiceDao() *InvoiceDao {
 	return &InvoiceDao{
-		group:   "oversea_pay",
+		group:   "default",
 		table:   "invoice",
 		columns: invoiceColumns,
 	}
