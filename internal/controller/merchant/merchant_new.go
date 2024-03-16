@@ -75,12 +75,6 @@ func NewSearch() merchant.IMerchantSearch {
 	return &ControllerSearch{}
 }
 
-type ControllerMerchantProfile struct{}
-
-func NewMerchantProfile() merchant.IMerchantProfile {
-	return &ControllerMerchantProfile{}
-}
-
 type ControllerGateway struct{}
 
 func NewGateway() merchant.IMerchantGateway {

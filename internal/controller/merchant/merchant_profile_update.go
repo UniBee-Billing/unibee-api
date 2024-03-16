@@ -16,7 +16,7 @@ import (
 	"unibee/api/merchant/profile"
 )
 
-func (c *ControllerMerchantProfile) Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error) {
+func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error) {
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}

@@ -34,8 +34,6 @@ gfcli:
 #        jsonCase: "CamelLower"
 
       - link:   "mysql:unib:hn02le34lkdLKD@tcp(43.207.114.88:13306)/unib?loc=Local&parseTime=true"
-#        path:   "oversea_pay"
-#        prefix: "primary_"
         group: "oversea_pay"
         daoPath:  "dao/oversea_pay"
         doPath:  "model/do/oversea_pay"

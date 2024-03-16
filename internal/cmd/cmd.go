@@ -78,7 +78,7 @@ var (
 				)
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
-						merchant.NewMerchantProfile(),
+						merchant.NewProfile(),
 					)
 				})
 				group.Group("/plan", func(group *ghttp.RouterGroup) {

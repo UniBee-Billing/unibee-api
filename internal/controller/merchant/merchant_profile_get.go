@@ -11,7 +11,7 @@ import (
 	"unibee/time"
 )
 
-func (c *ControllerMerchantProfile) Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error) {
+func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error) {
 	return &profile.GetRes{
 		Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))),
 		Currency: currency.GetMerchantCurrencies(),
