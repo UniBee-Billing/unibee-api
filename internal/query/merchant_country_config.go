@@ -25,7 +25,7 @@ func GetMerchantCountryConfigName(ctx context.Context, merchantId uint64, countr
 	one := GetMerchantCountryConfig(ctx, merchantId, countryCode)
 	merchant := GetMerchantById(ctx, merchantId)
 	utility.Assert(merchant != nil, "merchant not found")
-	if one != nil {
+	if one != nil && len(one.Name) > 0 {
 		return one.Name
 	}
 	return merchant.Name
