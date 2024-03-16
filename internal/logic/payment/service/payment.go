@@ -145,6 +145,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 				return err
 			}
 			gatewayInternalPayResult.Link = paymentLink
+			createPayContext.Pay.Link = paymentLink
 			return nil
 		})
 		if err == nil {
