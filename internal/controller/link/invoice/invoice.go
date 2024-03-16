@@ -7,7 +7,6 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
-	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -42,9 +41,6 @@ func InvoiceLinkEntry(r *ghttp.Request) {
 			if err != nil {
 				r.Response.Writeln("Server Error")
 				return
-			}
-			if gateway.GatewayType == consts.GatewayTypeCrypto {
-				_ = handler.ReconvertCryptoDataForInvoice(r.Context(), one.InvoiceId)
 			}
 
 			merchantInfo := query.GetMerchantById(r.Context(), one.MerchantId)
