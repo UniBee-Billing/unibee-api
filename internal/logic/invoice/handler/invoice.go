@@ -314,7 +314,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: merchantProductName,
 			MerchantCustomEmail: merchant.Email,
-			MerchantName:        merchant.Name,
+			MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
 			DateNow:             gtime.Now(),
 			PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),

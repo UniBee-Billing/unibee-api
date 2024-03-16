@@ -926,7 +926,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 				UserName:            user.FirstName + " " + user.LastName,
 				MerchantProductName: plan.PlanName,
 				MerchantCustomEmail: merchant.Email,
-				MerchantName:        merchant.Name,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
 				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 			})
 			if err != nil {
@@ -975,7 +975,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.PlanName,
 			MerchantCustomEmail: merchant.Email,
-			MerchantName:        merchant.Name,
+			MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
 			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
@@ -986,7 +986,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			UserName:            user.FirstName + " " + user.LastName,
 			MerchantProductName: plan.PlanName,
 			MerchantCustomEmail: merchant.Email,
-			MerchantName:        merchant.Name,
+			MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
 			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
@@ -1025,7 +1025,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: plan.PlanName,
 		MerchantCustomEmail: merchant.Email,
-		MerchantName:        merchant.Name,
+		MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
 		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {

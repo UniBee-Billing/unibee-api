@@ -83,7 +83,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,
 		MerchantCustomEmail: merchant.Email,
-		MerchantName:        merchant.Name,
+		MerchantName:        query.GetMerchantCountryConfigName(ctx, merchant.Id, user.CountryCode),
 		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {

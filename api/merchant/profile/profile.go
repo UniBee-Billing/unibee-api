@@ -32,3 +32,18 @@ type UpdateReq struct {
 type UpdateRes struct {
 	Merchant *bean.MerchantSimplify `json:"merchant" dc:"Merchant"`
 }
+
+type CountryConfigListReq struct {
+	g.Meta `path:"/country_config_list" tags:"Profile" method:"post" summary:"Merchant Edit Country Config"`
+}
+type CountryConfigListRes struct {
+	Configs []*bean.MerchantCountryConfigSimplify `json:"configs" description:"Configs"`
+}
+
+type EditCountryConfigReq struct {
+	g.Meta      `path:"/edit_country_config" tags:"Profile" method:"post" summary:"Merchant Country Config List"`
+	CountryCode string `json:"countryCode"  dc:"CountryCode" v:"required"`
+	Name        string `json:"name"  dc:"name" `
+}
+type EditCountryConfigRes struct {
+}

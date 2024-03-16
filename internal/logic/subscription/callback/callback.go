@@ -60,7 +60,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 						UserName:            oneUser.FirstName + " " + oneUser.LastName,
 						MerchantProductName: plan.PlanName,
 						MerchantCustomEmail: merchant.Email,
-						MerchantName:        merchant.Name,
+						MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
 						PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
 						Currency:            strings.ToUpper(invoice.Currency),
 						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),

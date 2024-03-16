@@ -126,6 +126,8 @@ type IMerchantPlan interface {
 type IMerchantProfile interface {
 	Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error)
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
+	CountryConfigList(ctx context.Context, req *profile.CountryConfigListReq) (res *profile.CountryConfigListRes, err error)
+	EditCountryConfig(ctx context.Context, req *profile.EditCountryConfigReq) (res *profile.EditCountryConfigRes, err error)
 }
 
 type IMerchantSearch interface {

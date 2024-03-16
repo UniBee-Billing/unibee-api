@@ -318,7 +318,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,
 				MerchantCustomEmail: merchant.Email,
-				MerchantName:        merchant.Name,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, user.CountryCode),
 				PaymentAmount:       utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
 				Currency:            strings.ToUpper(refund.Currency),
 			})

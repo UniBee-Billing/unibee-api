@@ -110,3 +110,9 @@ func NewSession() merchant.IMerchantSession {
 	return &ControllerSession{}
 }
 
+type ControllerProfile struct{}
+
+func NewProfile() merchant.IMerchantProfile {
+	return &ControllerProfile{}
+}
+
