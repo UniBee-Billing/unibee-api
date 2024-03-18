@@ -44,6 +44,7 @@ type EditCountryConfigReq struct {
 	g.Meta      `path:"/edit_country_config" tags:"Profile" method:"post" summary:"Merchant Country Config List"`
 	CountryCode string `json:"countryCode"  dc:"CountryCode" v:"required"`
 	Name        string `json:"name"  dc:"name" `
+	VatEnable   *bool  `json:"vatEnable"  dc:"VatEnable, Default true" `
 }
 type EditCountryConfigRes struct {
 }
