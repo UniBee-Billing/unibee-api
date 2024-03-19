@@ -6,6 +6,24 @@ import (
 	"unibee/api/bean/detail"
 )
 
+type ConfigReq struct {
+	g.Meta `path:"/config" tags:"Subscription" method:"get" summary:"Get Merchant Subscription Config"`
+}
+type ConfigRes struct {
+	Config *bean.SubscriptionConfig `json:"config" dc:"Config"`
+}
+
+type ConfigUpdateReq struct {
+	g.Meta                     `path:"/config/update" tags:"Subscription" method:"get" summary:"Update Merchant Subscription Config"`
+	DowngradeEffectImmediately *bool  `json:"downgradeEffectImmediately" dc:"DowngradeEffectImmediately, whether subscription downgrade should effect immediately or at period end, default at period end"`
+	UpdateProration            *bool  `json:"updateProration" dc:"UpdateProration, whether subscription update generation proration invoice or not, default yes"`
+	IncompleteExpireTime       *int64 `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
+	InvoiceEmail               *bool  `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
+}
+type ConfigUpdateRes struct {
+	Config *bean.SubscriptionConfig `json:"config" dc:"Config"`
+}
+
 type DetailReq struct {
 	g.Meta         `path:"/detail" tags:"Subscription" method:"get,post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`

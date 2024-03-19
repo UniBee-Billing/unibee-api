@@ -13,14 +13,11 @@ import (
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/billingcycle/expire"
+	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
-)
-
-var (
-	SubscriptionCycleDelayPaymentPermissionTime int64 = 24 * 60 * 60 // 24h expire after
 )
 
 type BillingCycleWalkRes struct {
@@ -89,9 +86,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: "SubscriptionCancel At Billing Cycle End By CurrentPeriodEnd Set"}, nil
 			}
-		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+SubscriptionCycleDelayPaymentPermissionTime {
+		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).IncompleteExpireTime {
 			// invoice not generate and sub out of time, need expired by system
-			err := expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
+			err = expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 			if err != nil {
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
 				return nil, err

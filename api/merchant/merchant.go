@@ -139,6 +139,8 @@ type IMerchantSession interface {
 }
 
 type IMerchantSubscription interface {
+	Config(ctx context.Context, req *subscription.ConfigReq) (res *subscription.ConfigRes, err error)
+	ConfigUpdate(ctx context.Context, req *subscription.ConfigUpdateReq) (res *subscription.ConfigUpdateRes, err error)
 	Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error)
 	List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error)
 	Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error)

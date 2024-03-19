@@ -15,6 +15,7 @@ import (
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -283,6 +284,10 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
 	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
+	if !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
+		fmt.Printf("SendSubscriptionInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
+		return nil
+	}
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
 	merchant := query.GetMerchantById(ctx, one.MerchantId)
 	var merchantProductName = ""
