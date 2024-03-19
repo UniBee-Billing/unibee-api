@@ -61,7 +61,7 @@ func Init() {
 	flag.StringVar(&nacosPortArg, "nacos-port", os.Getenv("nacos.port"), "nacos port, 8848")
 	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "nacos namespace, default")
 	flag.StringVar(&nacosGroupArg, "nacos-group", os.Getenv("nacos.group"), "nacos group")
-	flag.StringVar(&nacosDataIdArg, "nacos-data-id", os.Getenv("nacos.data.id"), "nacos dataid like hk-go-settings.yaml")
+	flag.StringVar(&nacosDataIdArg, "nacos-data-id", os.Getenv("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
 
 	var ctx = gctx.New()
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(DefaultConfigFileName)
