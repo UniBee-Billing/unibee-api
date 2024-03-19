@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 	"unibee/api/user/subscription"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
@@ -18,7 +18,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 
 	//Update 可以由 Admin 操作，service 层不做用户校验
-	if !consts.GetConfigInstance().IsLocal() {
+	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")

@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
+	config2 "unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
@@ -323,7 +324,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 			DateNow:             gtime.Now(),
 			PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
-			TokenExpireMinute:   strconv.FormatInt(consts.GetConfigInstance().Auth.Login.Expire/60, 10),
+			TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 			Link:                "<a href=\"" + one.Link + "\">Link</a>",
 		})
 		utility.AssertError(err, "send email error")

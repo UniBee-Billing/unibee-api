@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	subscription2 "unibee/api/user/subscription"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 	"unibee/utility"
@@ -15,7 +15,7 @@ import (
 func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq) (res *subscription.UpdatePreviewRes, err error) {
 	//Update 可以由 Admin 操作，service 层不做用户校验
 	var merchantMemberId int64
-	if !consts.GetConfigInstance().IsLocal() {
+	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")

@@ -2,7 +2,7 @@ package redismq
 
 import (
 	"github.com/redis/go-redis/v9"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	"unibee/redismq"
 )
 
@@ -30,9 +30,9 @@ type SRedisMqConfig struct{}
 
 func (s SRedisMqConfig) GetRedisStreamConfig() (res *redis.Options) {
 	return &redis.Options{
-		Addr:     consts.GetConfigInstance().RedisConfig.Default.Address,
-		Password: consts.GetConfigInstance().RedisConfig.Default.Pass,
-		DB:       consts.GetConfigInstance().RedisConfig.Default.DB,
+		Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
+		Password: config.GetConfigInstance().RedisConfig.Default.Pass,
+		DB:       config.GetConfigInstance().RedisConfig.Default.DB,
 	}
 }
 

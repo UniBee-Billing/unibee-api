@@ -13,7 +13,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -67,15 +67,15 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 		return nil, err
 	}
 
-	minioClient, err := minio.New(consts.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(consts.GetConfigInstance().MinioConfig.AccessKey, consts.GetConfigInstance().MinioConfig.SecretKey, ""),
+	minioClient, err := minio.New(config.GetConfigInstance().MinioConfig.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.GetConfigInstance().MinioConfig.AccessKey, config.GetConfigInstance().MinioConfig.SecretKey, ""),
 		Secure: false,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = minioClient.PutObject(ctx, consts.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
+	_, err = minioClient.PutObject(ctx, config.GetConfigInstance().MinioConfig.BucketName, gfile.Join(uploadPath, uploadFileName), bytes.NewReader(data), int64(len(data)), minio.PutObjectOptions{
 		ContentType: http.DetectContentType(data),
 	})
 	if err != nil {
@@ -84,7 +84,7 @@ func UploadLocalFile(ctx context.Context, localFilePath string, uploadPath strin
 
 	toSave := entity.FileUpload{
 		UserId:     uploadUserId,
-		Url:        consts.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
+		Url:        config.GetConfigInstance().MinioConfig.Domain + "/invoice/" + gfile.Join(uploadPath, uploadFileName),
 		FileName:   uploadFileName,
 		Tag:        uploadPath,
 		CreateTime: gtime.Now().Timestamp(),

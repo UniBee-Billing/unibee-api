@@ -5,7 +5,7 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
@@ -85,7 +85,7 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	newOne = query.GetMerchantMemberById(ctx, merchantMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
 	newOne.Password = ""
-	if consts.GetConfigInstance().Mode == "cloud" {
+	if config.GetConfigInstance().Mode == "cloud" {
 		//if cloud version setup default sendgrid and vat
 		{
 			name, data := email.GetDefaultMerchantEmailConfig(ctx, 15621)

@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
@@ -12,7 +13,7 @@ import (
 )
 
 func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
+	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).User.Id > 0, "userId invalid")

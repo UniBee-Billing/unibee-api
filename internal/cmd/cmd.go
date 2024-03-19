@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/net/goai"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
+	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/swagger"
-	"unibee/internal/consts"
 	"unibee/internal/consumer/websocket"
 	"unibee/internal/controller"
 	"unibee/internal/controller/gateway_webhook_entry"
@@ -33,12 +33,6 @@ var (
 		Brief: "start server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
-
-			_, err = g.Cfg().Get(ctx, "database")
-			if err != nil {
-				return err
-			}
-
 			openapi := s.GetOpenApi()
 			openapi.Info.Description = "This is UniBee api server, For this sample, you can use the api key `EUXAgwv3Vcr1PFWt2SgBumMHXn3ImBqM` to test the authorization filters"
 			openapi.Info.Title = "OpenAPI UniBee"
@@ -248,7 +242,7 @@ var (
 						system.NewInformation(),
 					)
 				})
-				if !consts.GetConfigInstance().IsProd() {
+				if !config.GetConfigInstance().IsProd() {
 					group.Group("/subscription", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewSubscription(),
@@ -285,8 +279,8 @@ var (
 			s.BindHandler("/merchant_ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
-				g.Log().Infof(ctx, "Server port: %s ", consts.GetConfigInstance().Server.Address)
-				g.Log().Infof(ctx, "Server domainPath: %s ", consts.GetConfigInstance().Server.DomainPath)
+				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
+				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
 				_, err := g.Redis().Set(ctx, "g_check", "checked")
@@ -296,8 +290,8 @@ var (
 				_, err = g.Redis().Expire(ctx, "g_check", 10)
 				liberr.ErrIsNil(ctx, err, "Redis write expire failure")
 				g.Log().Infof(ctx, "Redis check success: %s ", value.String())
-				g.Log().Infof(ctx, "Swagger try address: http://127.0.0.1%s/swagger-ui.html", consts.GetConfigInstance().Server.Address)
-				if !consts.GetConfigInstance().IsServerDev() && !consts.GetConfigInstance().IsLocal() {
+				g.Log().Infof(ctx, "SwaggerV3 address: http://127.0.0.1%s/swagger-ui.html", config.GetConfigInstance().Server.Address)
+				if !config.GetConfigInstance().IsServerDev() && !config.GetConfigInstance().IsLocal() {
 					_ = g.Log().SetLevelStr("info") // remove debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
 				}
 				cronjob.StartCronJobs()

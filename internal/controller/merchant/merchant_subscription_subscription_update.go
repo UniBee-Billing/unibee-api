@@ -3,7 +3,7 @@ package merchant
 import (
 	"context"
 	subscription2 "unibee/api/user/subscription"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
 	"unibee/utility"
@@ -14,7 +14,7 @@ import (
 func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.UpdateReq) (res *subscription.UpdateRes, err error) {
 
 	var merchantMemberId int64
-	if !consts.GetConfigInstance().IsLocal() {
+	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
 		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")

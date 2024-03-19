@@ -1,4 +1,4 @@
-package consts
+package config
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ type Server struct {
 	DomainPath  string `yaml:"domainPath"`
 	OpenApiPath string `yaml:"openapiPath"`
 	SwaggerPath string `yaml:"swaggerPath"`
-	TokenKey    string `yaml:"tokenKey"`
+	JwtKey      string `yaml:"jwtKey"`
 }
 
 func (s *Server) GetDomainScheme() string {

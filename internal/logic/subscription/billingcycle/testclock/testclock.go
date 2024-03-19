@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"time"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
@@ -18,7 +19,7 @@ type TestClockWalkRes struct {
 }
 
 func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock int64) (*TestClockWalkRes, error) {
-	if consts.GetConfigInstance().IsProd() {
+	if config.GetConfigInstance().IsProd() {
 		return nil, gerror.New("Test Does Not Work For Prod Env")
 	}
 	//TestClock Verify

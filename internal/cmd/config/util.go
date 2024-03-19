@@ -5,7 +5,6 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"unibee/internal/consts"
 	"gopkg.in/yaml.v3"
 )
 
@@ -41,11 +40,11 @@ func GetNacosConfig(ip string, port uint64, namespace string, group string, data
 		return "", err
 	}
 
-	err = yaml.Unmarshal([]byte(content), consts.GetConfigInstance())
+	err = yaml.Unmarshal([]byte(content), GetConfigInstance())
 	if err != nil {
 		fmt.Println("Error unmarshalling YAML:", err)
 	} else {
-		fmt.Printf(`Nacos Sync Config: %+v`, consts.GetConfigInstance())
+		fmt.Printf(`Nacos Sync Config: %+v`, GetConfigInstance())
 		fmt.Println("")
 	}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"strconv"
 	"unibee/api/merchant/session"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
 	"unibee/internal/logic/jwt"
@@ -45,7 +45,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		UserId:         strconv.FormatUint(one.Id, 10),
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
-		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", consts.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
+		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", config.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
 		ClientToken:    token,
 	}, nil
 }

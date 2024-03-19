@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_gateway "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api"
@@ -135,7 +136,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	signatureHeader := r.Header.Get("Stripe-Signature")
 	var event stripe.Event
 	var err error
-	if !consts.GetConfigInstance().IsServerDev() {
+	if !config.GetConfigInstance().IsServerDev() {
 		event, err = webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
 		if err != nil {
 			g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed. %s\n", gateway.GatewayName, err.Error())

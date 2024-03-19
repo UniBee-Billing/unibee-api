@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"unibee/api/user/plan"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/plan/service"
@@ -11,7 +12,7 @@ import (
 )
 
 func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error) {
-	if !consts.GetConfigInstance().IsLocal() {
+	if !config.GetConfigInstance().IsLocal() {
 		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
 	}
 

@@ -5,12 +5,12 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"strings"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	"unibee/utility"
 )
 
 func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
-	url := fmt.Sprintf("http://127.0.0.1%s/%s", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.OpenApiPath)
+	url := fmt.Sprintf("http://127.0.0.1%s/%s", config.GetConfigInstance().Server.Address, config.GetConfigInstance().Server.OpenApiPath)
 	request, err := utility.SendRequest(url, "GET", nil, nil)
 	if err != nil {
 		r.Exit()
@@ -47,7 +47,7 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 }
 
 func UserPortalGeneratorSpecJson(r *ghttp.Request) {
-	url := fmt.Sprintf("http://127.0.0.1%s/%s", consts.GetConfigInstance().Server.Address, consts.GetConfigInstance().Server.OpenApiPath)
+	url := fmt.Sprintf("http://127.0.0.1%s/%s", config.GetConfigInstance().Server.Address, config.GetConfigInstance().Server.OpenApiPath)
 	request, err := utility.SendRequest(url, "GET", nil, nil)
 	if err != nil {
 		r.Exit()

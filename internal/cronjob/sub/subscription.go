@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"time"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
@@ -31,7 +32,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 		WhereLT(dao.Subscription.Columns().DunningTime, timeNow). //  dunning < now
 		Where(dao.Subscription.Columns().Type, consts.SubTypeUniBeeControl).
 		WhereIn(dao.Subscription.Columns().Status, status)
-	if !consts.GetConfigInstance().IsProd() {
+	if !config.GetConfigInstance().IsProd() {
 		// Test Clock Not Enable For Prod Env
 		q = q.Where(dao.Subscription.Columns().TestClock, 0)
 	}

@@ -13,6 +13,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/api/user/subscription"
 	"unibee/api/user/vat"
+	config2 "unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -621,7 +622,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	var nextPeriodInvoice *bean.InvoiceSimplify
 	if prorationDate == 0 {
 		prorationDate = time.Now().Unix()
-		if sub.TestClock > sub.CurrentPeriodStart && !consts.GetConfigInstance().IsProd() {
+		if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
 			prorationDate = sub.TestClock
 		}
 	}
@@ -959,7 +960,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(gateway != nil, "gateway not found")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	if !consts.GetConfigInstance().IsServerDev() || !consts.GetConfigInstance().IsLocal() {
+	if !config2.GetConfigInstance().IsServerDev() || !config2.GetConfigInstance().IsLocal() {
 		// todo mark will support proration invoiceNow later
 		invoiceNow = false
 		proration = false

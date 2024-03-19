@@ -2,12 +2,12 @@ package gateway
 
 import (
 	"fmt"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
 func GetPaymentWebhookEntranceUrl(gatewayId uint64) string {
-	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", consts.GetConfigInstance().Server.GetServerPath(), gatewayId)
+	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", config.GetConfigInstance().Server.GetServerPath(), gatewayId)
 }
 
 //func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
@@ -15,17 +15,17 @@ func GetPaymentWebhookEntranceUrl(gatewayId uint64) string {
 //}
 
 func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s", consts.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId)
 }
 
 func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
 	if len(pay.SubscriptionId) > 0 {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, success)
 	} else {
-		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
 	}
 }
 
 func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%v&success=%v&session_id={CHECKOUT_SESSION_ID}", consts.GetConfigInstance().Server.GetServerPath(), subscription.GatewayId, subscription.SubscriptionId, success)
+	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%v&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), subscription.GatewayId, subscription.SubscriptionId, success)
 }

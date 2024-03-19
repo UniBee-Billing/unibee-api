@@ -4,7 +4,7 @@ import (
 	"context"
 	"unibee/api/bean"
 	"unibee/api/merchant/profile"
-	"unibee/internal/consts"
+	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/currency"
 	"unibee/internal/query"
@@ -15,8 +15,8 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 	return &profile.GetRes{
 		Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))),
 		Currency: currency.GetMerchantCurrencies(),
-		Env:      consts.GetConfigInstance().Env,
-		IsProd:   consts.GetConfigInstance().IsProd(),
+		Env:      config.GetConfigInstance().Env,
+		IsProd:   config.GetConfigInstance().IsProd(),
 		TimeZone: time.GetTimeZoneList(),
 	}, nil
 }

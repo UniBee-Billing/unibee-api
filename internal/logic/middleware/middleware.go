@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_ "unibee/internal/consts"
 	_interface "unibee/internal/interface"
@@ -151,7 +152,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		r.Middleware.Next()
 		return
 	} else {
-		if consts.GetConfigInstance().IsServerDev() || consts.GetConfigInstance().IsLocal() {
+		if config.GetConfigInstance().IsServerDev() || config.GetConfigInstance().IsLocal() {
 			customCtx.MerchantId = 15621
 			r.Middleware.Next()
 			return
@@ -185,7 +186,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	customCtx := _interface.BizCtx().Get(r.Context())
-	if consts.GetConfigInstance().IsServerDev() {
+	if config.GetConfigInstance().IsServerDev() {
 		customCtx.MerchantId = 15621
 		r.Middleware.Next()
 		return

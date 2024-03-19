@@ -1,20 +1,22 @@
 package main
 
-import _ "unibee/time"
+import (
+	"unibee/internal/cmd/config"
+	_ "unibee/time"
+)
 
 import (
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 	"github.com/gogf/gf/v2/os/gctx"
 	"unibee/internal/cmd"
-	_system_config "unibee/internal/cmd/config"
 	_ "unibee/internal/consumer"
 	_ "unibee/internal/logic"
 	"unibee/redismq"
 )
 
 func main() {
-	_system_config.Init()
+	config.Init()
 	redismq.StartRedisMqConsumer()
 	cmd.Main.Run(gctx.GetInitCtx())
 }
