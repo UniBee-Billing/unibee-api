@@ -59,7 +59,7 @@ func Init() {
 	flag.StringVar(&authLoginExpire, "auth-login-expire", os.Getenv("auth.login.expire"), "login token expire time, default 600")
 	flag.StringVar(&nacosIpArg, "nacos-ip", os.Getenv("nacos.ip"), "ip or domain, env params will replaced if nacos used")
 	flag.StringVar(&nacosPortArg, "nacos-port", os.Getenv("nacos.port"), "port like 8848")
-	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "port like 8848")
+	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "namespace, default")
 	flag.StringVar(&nacosGroupArg, "nacos-group", os.Getenv("nacos.group"), "nacos group")
 	flag.StringVar(&nacosDataIdArg, "nacos-data-id", os.Getenv("nacos.data.id"), "nacos dataid like hk-go-settings.yaml")
 
