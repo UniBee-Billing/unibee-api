@@ -51,7 +51,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		g.Log().Errorf(ctx, "Webhook_SaveLog error %s\n", saveErr.Error())
 	}
 
-	return err == nil && strings.Compare(string(response), "success") == 0
+	return err == nil && strings.Compare(response, "success") == 0
 }
 
 func generateMsgId() (msgId string) {

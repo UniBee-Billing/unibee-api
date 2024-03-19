@@ -25,6 +25,7 @@ import (
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
+	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -434,6 +435,70 @@ type UpdatePreviewInternalRes struct {
 	Gateways          []*bean.GatewaySimplify `json:"gateways" `
 }
 
+func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, plan *entity.Plan, quantity int64, addonParams []*bean.PlanAddonParam) (isUpgrade bool, changed bool) {
+	//default logical，Effect Immediately for upgrade, effect at period end for downgrade
+	//situation 1，NewPlan Unit Amount >  OldPlan Unit Amount，is upgrade，ignore Quantity and addon change
+	//situation 2，NewPlan Unit Amount <  OldPlan Unit Amount，is downgrade，ignore Quantity and addon change
+	//situation 3，NewPlan Total Amount >  OldPlan Total Amount，is upgrade
+	//situation 4，NewPlan Total Amount <  OldPlan Total Amount，is downgrade
+	//situation 5，NewPlan Total Amount =  OldPlan Total Amount，see Addon changes，if new addon appended or addon quantity changed, is upgrade，otherwise downgrade
+	oldPlan := query.GetPlanById(ctx, sub.PlanId)
+	utility.Assert(oldPlan != nil, "oldPlan not found")
+	if plan.Amount > oldPlan.Amount || plan.Amount*quantity > oldPlan.Amount*sub.Quantity {
+		isUpgrade = true
+	} else if plan.Amount < oldPlan.Amount || plan.Amount*quantity < oldPlan.Amount*sub.Quantity {
+		isUpgrade = false
+	} else {
+		var oldAddonParams []*bean.PlanAddonParam
+		err := utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
+		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+		var oldAddonMap = make(map[uint64]int64)
+		for _, oldAddon := range oldAddonParams {
+			if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
+				oldAddonMap[oldAddon.AddonPlanId] = oldAddonMap[oldAddon.AddonPlanId] + oldAddon.Quantity
+			} else {
+				oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
+			}
+		}
+		var newAddonMap = make(map[uint64]int64)
+		for _, newAddon := range addonParams {
+			if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {
+				newAddonMap[newAddon.AddonPlanId] = newAddonMap[newAddon.AddonPlanId] + newAddon.Quantity
+			} else {
+				newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
+			}
+		}
+		for newAddonPlanId, newAddonQuantity := range newAddonMap {
+			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+				if oldAddonQuantity < newAddonQuantity {
+					isUpgrade = true
+					break
+				}
+			} else {
+				isUpgrade = true
+				break
+			}
+		}
+		if len(oldAddonMap) != len(newAddonMap) {
+			changed = true
+		} else {
+			for newAddonPlanId, newAddonQuantity := range newAddonMap {
+				if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+					if oldAddonQuantity != newAddonQuantity {
+						changed = true
+						break
+					}
+				} else {
+					changed = true
+					break
+				}
+			}
+		}
+		//utility.Assert(changed, "subscription update should have plan or addons changed")
+	}
+	return
+}
+
 func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
@@ -480,65 +545,67 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	//utility.Assert(oldPlanChannel != nil, "oldPlangateway not found")
 
 	var effectImmediate = false
-	//升降级判断逻辑，升级设置payImmediate=true，保障马上能够生效；降级payImmediate=false,下周期生效
-	//情况 1，NewPlan单价大于 OldPlan 单价，判断为升级，忽略Quantity 和 addon 变更
-	//情况 2，NewPlan单价小于 OldPlan 单价，判断为降级，忽略Quantity 和 addon 变更
-	//情况 3，NewPlan总价大于 OldPlan总价，判断为升级
-	//情况 4，NewPlan总价小于 OldPlan总价，判断为降级
-	//情况 5，NewPlan总价等于 OldPlan总价，则看 Addon 的变化，如果 addon 有数量增加情况或者新增 addon 情况为升级，否则降级
 
-	if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
+	//if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
+	//	effectImmediate = true
+	//} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
+	//	effectImmediate = false
+	//} else {
+	//	var oldAddonParams []*bean.PlanAddonParam
+	//	err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
+	//	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
+	//	var oldAddonMap = make(map[uint64]int64)
+	//	for _, oldAddon := range oldAddonParams {
+	//		if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
+	//			oldAddonMap[oldAddon.AddonPlanId] = oldAddonMap[oldAddon.AddonPlanId] + oldAddon.Quantity
+	//		} else {
+	//			oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
+	//		}
+	//	}
+	//	var newAddonMap = make(map[uint64]int64)
+	//	for _, newAddon := range req.AddonParams {
+	//		if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {
+	//			newAddonMap[newAddon.AddonPlanId] = newAddonMap[newAddon.AddonPlanId] + newAddon.Quantity
+	//		} else {
+	//			newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
+	//		}
+	//	}
+	//	for newAddonPlanId, newAddonQuantity := range newAddonMap {
+	//		if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+	//			if oldAddonQuantity < newAddonQuantity {
+	//				effectImmediate = true
+	//				break
+	//			}
+	//		} else {
+	//			effectImmediate = true
+	//			break
+	//		}
+	//	}
+	//	var changed = false
+	//	if len(oldAddonMap) != len(newAddonMap) {
+	//		changed = true
+	//	} else {
+	//		for newAddonPlanId, newAddonQuantity := range newAddonMap {
+	//			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
+	//				if oldAddonQuantity != newAddonQuantity {
+	//					changed = true
+	//					break
+	//				}
+	//			} else {
+	//				changed = true
+	//				break
+	//			}
+	//		}
+	//	}
+	//	utility.Assert(changed, "subscription update should have plan or addons changed")
+	//}
+
+	isUpgrade, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
+	utility.Assert(changed, "subscription update should have plan or addons changed")
+	if isUpgrade {
 		effectImmediate = true
-	} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
-		effectImmediate = false
 	} else {
-		var oldAddonParams []*bean.PlanAddonParam
-		err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
-		utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
-		var oldAddonMap = make(map[uint64]int64)
-		for _, oldAddon := range oldAddonParams {
-			if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
-				oldAddonMap[oldAddon.AddonPlanId] = oldAddonMap[oldAddon.AddonPlanId] + oldAddon.Quantity
-			} else {
-				oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
-			}
-		}
-		var newAddonMap = make(map[uint64]int64)
-		for _, newAddon := range req.AddonParams {
-			if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {
-				newAddonMap[newAddon.AddonPlanId] = newAddonMap[newAddon.AddonPlanId] + newAddon.Quantity
-			} else {
-				newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
-			}
-		}
-		for newAddonPlanId, newAddonQuantity := range newAddonMap {
-			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
-				if oldAddonQuantity < newAddonQuantity {
-					effectImmediate = true
-					break
-				}
-			} else {
-				effectImmediate = true
-				break
-			}
-		}
-		var changed = false
-		if len(oldAddonMap) != len(newAddonMap) {
-			changed = true
-		} else {
-			for newAddonPlanId, newAddonQuantity := range newAddonMap {
-				if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
-					if oldAddonQuantity != newAddonQuantity {
-						changed = true
-						break
-					}
-				} else {
-					changed = true
-					break
-				}
-			}
-		}
-		utility.Assert(changed, "subscription update should have plan or addons changed")
+		effectImmediate = config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately
 	}
 
 	if req.WithImmediateEffect > 0 {
@@ -550,19 +617,30 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		}
 	}
 
-	var totalAmount int64
-	var prorationInvoice *bean.InvoiceSimplify
+	var currentInvoice *bean.InvoiceSimplify
 	var nextPeriodInvoice *bean.InvoiceSimplify
-	if effectImmediate {
-		if prorationDate == 0 {
-			prorationDate = time.Now().Unix()
-			if sub.TestClock > sub.CurrentPeriodStart && !consts.GetConfigInstance().IsProd() {
-				prorationDate = sub.TestClock
-			}
+	if prorationDate == 0 {
+		prorationDate = time.Now().Unix()
+		if sub.TestClock > sub.CurrentPeriodStart && !consts.GetConfigInstance().IsProd() {
+			prorationDate = sub.TestClock
 		}
-		if prorationDate < sub.CurrentPeriodStart {
+	}
+	if effectImmediate {
+		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpdateProration {
+			// without proration, just generate next cycle
+			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+				InvoiceName:   "SubscriptionCycle",
+				Currency:      sub.Currency,
+				PlanId:        req.NewPlanId,
+				Quantity:      req.Quantity,
+				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+				TaxScale:      sub.TaxScale,
+				PeriodStart:   prorationDate,
+				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
+			})
+		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
-			prorationInvoice = &bean.InvoiceSimplify{
+			currentInvoice = &bean.InvoiceSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
 				TotalAmount:                    0,
 				TotalAmountExcludingTax:        0,
@@ -576,8 +654,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PeriodEnd:                      sub.CurrentPeriodEnd,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
-			// after periodEnd, is not a prorationInvoice, just use it
-			prorationInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+			// after periodEnd, is not a currentInvoice, just use it
+			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				InvoiceName:   "SubscriptionCycle",
 				Currency:      sub.Currency,
 				PlanId:        req.NewPlanId,
@@ -588,7 +666,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 			})
 		} else {
-			// prorationInvoice
+			// currentInvoice
 			var oldAddonParams []*bean.PlanAddonParam
 			err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
 			utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
@@ -614,7 +692,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 					Quantity: addonParam.Quantity,
 				})
 			}
-			prorationInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
+			currentInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 				InvoiceName:       "SubscriptionUpgrade",
 				Currency:          sub.Currency,
 				TaxScale:          sub.TaxScale,
@@ -625,28 +703,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PeriodEnd:         sub.CurrentPeriodEnd,
 			})
 		}
-		prorationDate = prorationInvoice.ProrationDate
-		totalAmount = prorationInvoice.TotalAmount
-
-		var nextPeriodStart = sub.CurrentPeriodEnd
-		if sub.TrialEnd > sub.CurrentPeriodEnd {
-			nextPeriodStart = sub.TrialEnd
-		}
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, req.NewPlanId)
-		// Generate Proration Invoice Preview
-		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			InvoiceName:   "SubscriptionCycle",
-			Currency:      sub.Currency,
-			PlanId:        req.NewPlanId,
-			Quantity:      req.Quantity,
-			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-			TaxScale:      sub.TaxScale,
-			PeriodStart:   nextPeriodStart,
-			PeriodEnd:     nextPeriodEnd,
-		})
+		prorationDate = currentInvoice.ProrationDate
 	} else {
-		prorationDate = sub.CurrentPeriodEnd
-		prorationInvoice = &bean.InvoiceSimplify{
+		prorationDate = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
+		currentInvoice = &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionUpgrade",
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
@@ -659,19 +719,20 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 			PeriodStart:                    sub.CurrentPeriodStart,
 			PeriodEnd:                      sub.CurrentPeriodEnd,
 		}
-		nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			InvoiceName:   "SubscriptionCycle",
-			Currency:      sub.Currency,
-			PlanId:        req.NewPlanId,
-			Quantity:      req.Quantity,
-			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-			TaxScale:      sub.TaxScale,
-			PeriodStart:   utility.MaxInt64(prorationInvoice.PeriodEnd, sub.TrialEnd),
-			PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(prorationInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
-		})
 	}
 
-	if prorationInvoice.TotalAmount <= 0 {
+	nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+		InvoiceName:   "SubscriptionCycle",
+		Currency:      sub.Currency,
+		PlanId:        req.NewPlanId,
+		Quantity:      req.Quantity,
+		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
+		TaxScale:      sub.TaxScale,
+		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
+	})
+
+	if currentInvoice.TotalAmount <= 0 {
 		effectImmediate = false
 	}
 
@@ -686,8 +747,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		Currency:          currency,
 		UserId:            sub.UserId,
 		OldPlan:           oldPlan,
-		TotalAmount:       totalAmount,
-		Invoice:           prorationInvoice,
+		TotalAmount:       currentInvoice.TotalAmount,
+		Invoice:           currentInvoice,
 		NextPeriodInvoice: nextPeriodInvoice,
 		ProrationDate:     prorationDate,
 		EffectImmediate:   effectImmediate,
