@@ -2,7 +2,9 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
@@ -11,6 +13,10 @@ import (
 )
 
 func (c *ControllerInvoice) ReconvertCryptoAndSend(ctx context.Context, req *invoice.ReconvertCryptoAndSendReq) (res *invoice.ReconvertCryptoAndSendRes, err error) {
+	redisKey := fmt.Sprintf("Merchant-Invoice-ReconvertCryptoAndSend:%s", req.InvoiceId)
+	if !utility.TryLock(ctx, redisKey, 10) {
+		utility.Assert(false, "click too fast, please wait for second")
+	}
 	err = handler.ReconvertCryptoDataForInvoice(ctx, req.InvoiceId)
 	if err != nil {
 		return nil, err
