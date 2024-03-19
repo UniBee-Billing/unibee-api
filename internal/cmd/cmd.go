@@ -33,6 +33,12 @@ var (
 		Brief: "start server",
 		Func: func(ctx context.Context, parser *gcmd.Parser) (err error) {
 			s := g.Server()
+
+			_, err = g.Cfg().Get(ctx, "database")
+			if err != nil {
+				return err
+			}
+
 			openapi := s.GetOpenApi()
 			openapi.Info.Description = "This is UniBee api server, For this sample, you can use the api key `EUXAgwv3Vcr1PFWt2SgBumMHXn3ImBqM` to test the authorization filters"
 			openapi.Info.Title = "OpenAPI UniBee"

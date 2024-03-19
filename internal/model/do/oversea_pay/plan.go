@@ -29,10 +29,11 @@ type Plan struct {
 	GatewayProductDescription interface{} // gateway product description
 	TaxScale                  interface{} // tax scale 1000 = 10%
 	TaxInclusive              interface{} // deperated
-	Type                      interface{} // type，1-main plan，2-addon plan
+	Type                      interface{} // type，1-main plan，2-recurring addon plan 3-onetime addon plan
 	Status                    interface{} // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 interface{} // 0-UnDeleted，1-Deleted
-	BindingAddonIds           interface{} // binded addon planIds，split with ,
+	BindingAddonIds           interface{} // binded recurring addon planIds，split with ,
+	BindingOnetimeAddonIds    interface{} // binded onetime addon planIds，split with ,
 	PublishStatus             interface{} // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                interface{} // create utc time
 	ExtraMetricData           interface{} //

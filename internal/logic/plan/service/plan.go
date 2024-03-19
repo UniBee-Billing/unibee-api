@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
-	v1 "unibee/api/merchant/plan"
+	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
@@ -47,7 +47,7 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Plan, err error) {
+func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.Plan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -75,7 +75,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 		req.HomeUrl = merchantInfo.HomeUrl
 	}
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(req.Type == 1 || req.Type == 2, "type should be 1 or 2")
+	utility.Assert(req.Type == consts.PlanTypeMain || req.Type == consts.PlanTypeRecurringAddon || req.Type == consts.PlanTypeOnetimeAddon, "type should be 1|2｜3")
 	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 	utility.Assert(req.IntervalCount > 0, "IntervalCount should > 0")
 	if strings.ToLower(req.IntervalUnit) == "day" {
@@ -102,7 +102,16 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("plan not recurring addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		}
+	}
+
+	if len(req.OnetimeAddonIds) > 0 {
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
@@ -120,6 +129,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
 		BindingAddonIds:           intListToString(req.AddonIds),
+		BindingOnetimeAddonIds:    intListToString(req.OnetimeAddonIds),
 		GatewayProductName:        req.ProductName,
 		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
@@ -144,7 +154,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *v1.NewReq) (one *entity.Pl
 	return one, nil
 }
 
-func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Plan, err error) {
+func SubscriptionPlanEdit(ctx context.Context, req *plan.EditReq) (one *entity.Plan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -194,7 +204,16 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 		var allAddonList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
-			utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("plan not recurring addon type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		}
+	}
+
+	if len(req.OnetimeAddonIds) > 0 {
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
 		}
 	}
@@ -209,6 +228,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *v1.EditReq) (one *entity.Pla
 		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
 		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
 		dao.Plan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
+		dao.Plan.Columns().BindingOnetimeAddonIds:    intListToString(req.OnetimeAddonIds),
 		dao.Plan.Columns().GatewayProductName:        req.ProductName,
 		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
 		dao.Plan.Columns().GasPayer:                  req.GasPayer,
@@ -260,7 +280,7 @@ func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Pla
 	return one, nil
 }
 
-func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq) (one *entity.Plan, err error) {
+func SubscriptionPlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *entity.Plan, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
@@ -282,36 +302,67 @@ func SubscriptionPlanAddonsBinding(ctx context.Context, req *v1.AddonsBindingReq
 			addonIdsList = append(addonIdsList, num)
 		}
 	}
+	var oneTimeAddonIdsList []int64
+	if len(one.BindingOnetimeAddonIds) > 0 {
+		//init
+		strList := strings.Split(one.BindingOnetimeAddonIds, ",")
+
+		for _, s := range strList {
+			num, err := strconv.ParseInt(s, 10, 64)
+			if err != nil {
+				fmt.Println("Internal Error converting string to int:", err)
+				return nil, err
+			}
+			oneTimeAddonIdsList = append(oneTimeAddonIdsList, num)
+		}
+	}
 	//addonIds type verify
-	var allAddonList []*entity.Plan
-	err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
-	for _, addonPlan := range allAddonList {
-		utility.Assert(addonPlan.Type == consts.PlanTypeAddon, fmt.Sprintf("plan not addon type, id:%d", addonPlan.Id))
-		utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
-		//addon interval verify
-		utility.Assert(addonPlan.IntervalUnit == one.IntervalUnit && addonPlan.IntervalCount == one.IntervalCount, fmt.Sprintf("addon not match plan's recycle interval, id:%d", addonPlan.Id))
+	{
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("plan not addon recurring type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+			//addon interval verify
+			utility.Assert(addonPlan.IntervalUnit == one.IntervalUnit && addonPlan.IntervalCount == one.IntervalCount, fmt.Sprintf("addon not match plan's recycle interval, id:%d", addonPlan.Id))
+		}
+	}
+
+	//onetime addonIds type verify
+	{
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
+		for _, addonPlan := range allAddonList {
+			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not addon onetime type, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
+		}
 	}
 
 	if req.Action == 0 {
 		//replace
 		addonIdsList = req.AddonIds
+		oneTimeAddonIdsList = req.OnetimeAddonIds
 	} else if req.Action == 1 {
 		//add
 		utility.Assert(len(req.AddonIds) > 0, "action add, addon ids is empty")
 		addonIdsList = mergeArrays(addonIdsList, req.AddonIds)
+		oneTimeAddonIdsList = mergeArrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
 	} else if req.Action == 2 {
 		//delete
 		utility.Assert(len(req.AddonIds) > 0, "action delete, addon ids is empty")
 		addonIdsList = removeArrays(addonIdsList, req.AddonIds)
+		oneTimeAddonIdsList = removeArrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
 	}
 
 	utility.Assert(len(addonIdsList) <= 10, "addon too much, should <= 10")
+	utility.Assert(len(oneTimeAddonIdsList) <= 10, "addon too much, should <= 10")
 
-	newIds := intListToString(addonIdsList)
-	one.BindingAddonIds = newIds
+	one.BindingAddonIds = intListToString(addonIdsList)
+	one.BindingOnetimeAddonIds = intListToString(oneTimeAddonIdsList)
 	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
-		dao.Plan.Columns().BindingAddonIds: one.BindingAddonIds,
-		dao.Plan.Columns().GmtModify:       gtime.Now(),
+		dao.Plan.Columns().BindingAddonIds:        one.BindingAddonIds,
+		dao.Plan.Columns().BindingOnetimeAddonIds: one.BindingOnetimeAddonIds,
+		dao.Plan.Columns().GmtModify:              gtime.Now(),
 	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err

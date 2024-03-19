@@ -53,8 +53,9 @@ func (status SubscriptionStatusEnum) Description() string {
 type SubscriptionPlanType int
 
 const (
-	PlanTypeMain  = 1
-	PlanTypeAddon = 2
+	PlanTypeMain           = 1
+	PlanTypeRecurringAddon = 2
+	PlanTypeOnetimeAddon   = 3
 )
 
 type SubscriptionPlanStatusEnum int

@@ -37,10 +37,11 @@ type PlanColumns struct {
 	GatewayProductDescription string // gateway product description
 	TaxScale                  string // tax scale 1000 = 10%
 	TaxInclusive              string // deperated
-	Type                      string // type，1-main plan，2-addon plan
+	Type                      string // type，1-main plan，2-recurring addon plan 3-onetime addon plan
 	Status                    string // status，1-editing，2-active，3-inactive，4-expired
 	IsDeleted                 string // 0-UnDeleted，1-Deleted
-	BindingAddonIds           string // binded addon planIds，split with ,
+	BindingAddonIds           string // binded recurring addon planIds，split with ,
+	BindingOnetimeAddonIds    string // binded onetime addon planIds，split with ,
 	PublishStatus             string // 1-UnPublish,2-Publish, Use For Display Plan At UserPortal
 	CreateTime                string // create utc time
 	ExtraMetricData           string //
@@ -71,6 +72,7 @@ var planColumns = PlanColumns{
 	Status:                    "status",
 	IsDeleted:                 "is_deleted",
 	BindingAddonIds:           "binding_addon_ids",
+	BindingOnetimeAddonIds:    "binding_onetime_addon_ids",
 	PublishStatus:             "publish_status",
 	CreateTime:                "create_time",
 	ExtraMetricData:           "extra_metric_data",

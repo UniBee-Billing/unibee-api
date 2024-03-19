@@ -55,7 +55,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanA
 			}
 			for _, param := range addonParams {
 				utility.Assert(mapPlans[param.AddonPlanId] != nil, fmt.Sprintf("AddonPlanId not found:%v", param.AddonPlanId))
-				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
+				utility.Assert(mapPlans[param.AddonPlanId].Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("Id:%v not Addon Type", param.AddonPlanId))
 				utility.Assert(mapPlans[param.AddonPlanId].IsDeleted == 0, fmt.Sprintf("Addon Id:%v is Deleted", param.AddonPlanId))
 				utility.Assert(param.Quantity > 0, fmt.Sprintf("Id:%v quantity invalid", param.AddonPlanId))
 				addons = append(addons, &bean.PlanAddonDetail{

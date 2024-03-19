@@ -2,7 +2,7 @@ package plan
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	merhcnatPlan "unibee/api/merchant/plan"
+	merhcnatPlan "unibee/api/bean/detail"
 )
 
 type ListReq struct {
