@@ -57,7 +57,7 @@ func Init() {
 	flag.StringVar(&databaseCharset, "database-charset", os.Getenv("database.charset"), "database charset, default utf8mb4")
 	flag.StringVar(&loggerLevel, "logger-level", os.Getenv("logger.level"), "logger level, default all")
 	flag.StringVar(&authLoginExpire, "auth-login-expire", os.Getenv("auth.login.expire"), "login token expire time, default 600")
-	flag.StringVar(&nacosIpArg, "nacos-ip", os.Getenv("nacos.ip"), "ip or domain")
+	flag.StringVar(&nacosIpArg, "nacos-ip", os.Getenv("nacos.ip"), "ip or domain, env params will replaced if nacos used")
 	flag.StringVar(&nacosPortArg, "nacos-port", os.Getenv("nacos.port"), "port like 8848")
 	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "port like 8848")
 	flag.StringVar(&nacosGroupArg, "nacos-group", os.Getenv("nacos.group"), "nacos group")
