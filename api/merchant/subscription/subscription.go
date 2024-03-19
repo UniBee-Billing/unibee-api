@@ -95,6 +95,7 @@ type CreatePreviewReq struct {
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 }
+
 type CreatePreviewRes struct {
 	Plan              *bean.PlanSimplify      `json:"plan"`
 	Quantity          int64                   `json:"quantity"`

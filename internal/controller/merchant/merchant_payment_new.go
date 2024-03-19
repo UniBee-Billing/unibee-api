@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"strings"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -19,20 +20,54 @@ import (
 
 func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error) {
 	utility.Assert(req != nil, "request req is nil")
-	utility.Assert(req.TotalAmount > 0, "amount value is nil")
-	utility.Assert(len(req.Currency) > 0, "amount currency is nil")
-	currencyNumberCheck(req.TotalAmount, req.Currency)
-	//utility.Assert(len(req.CountryCode) > 0, "countryCode is nil")
 	utility.Assert(req.GatewayId > 0, "gatewayId is nil")
-	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
-	utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId is nil")
-	utility.Assert(len(req.Email) > 0, "Email is nil")
 	req.Currency = strings.ToUpper(req.Currency)
-
 	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.MerchantId == merchantInfo.Id, "merchant gateway not match")
+
+	var user *entity.UserAccount
+	if _interface.BizCtx().Get(ctx).IsOpenApiCall {
+		if req.UserId == 0 {
+			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil")
+			utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
+			user, err = auth.QueryOrCreateUser(ctx, &auth.NewReq{
+				ExternalUserId: req.ExternalUserId,
+				Email:          req.Email,
+			})
+			utility.AssertError(err, "Server Error")
+		} else {
+			user = query.GetUserAccountById(ctx, req.UserId)
+		}
+	} else {
+		user = query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
+		utility.Assert(user != nil, "User Not Found")
+		if req.UserId > 0 {
+			utility.Assert(user.Id == req.UserId, "user not match")
+		}
+		if len(req.ExternalPaymentId) == 0 {
+			req.ExternalPaymentId = uuid.New().String()
+		}
+	}
+	if req.PlanId == 0 {
+		utility.Assert(req.TotalAmount > 0, "amount value is nil")
+		utility.Assert(len(req.Currency) > 0, "amount currency is nil")
+	} else {
+		plan := query.GetPlanById(ctx, req.PlanId)
+		utility.Assert(plan != nil, "plan not found")
+		if req.TotalAmount > 0 {
+			utility.Assert(req.TotalAmount == plan.Amount, "TotalAmount not match plan's amount")
+		}
+		if len(req.Currency) > 0 {
+			utility.Assert(req.Currency == plan.Currency, "Currency not match plan's amount")
+		}
+		req.TotalAmount = plan.Amount
+		req.Currency = plan.Currency
+	}
+	currencyNumberCheck(req.TotalAmount, req.Currency)
+	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
+	utility.Assert(user != nil, "User Not Found")
 
 	var invoice *bean.InvoiceSimplify
 	if req.Items != nil && len(req.Items) > 0 {
@@ -82,12 +117,6 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			}},
 		}
 	}
-	user, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
-		ExternalUserId: req.ExternalUserId,
-		Email:          req.Email,
-	})
-	utility.AssertError(err, "Server Error")
-	utility.Assert(user != nil, "Server Error")
 
 	createPayContext := &gateway_bean.GatewayNewPaymentReq{
 		CheckoutMode: true,
