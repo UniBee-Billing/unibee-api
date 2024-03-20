@@ -139,7 +139,7 @@ func Init() {
 	setUpDefaultConfig(loggerConfig, "stdout", true, true)
 	authLoginConfig := g.Cfg().MustGet(ctx, "auth.login").Map()
 	utility.Assert(authLoginConfig != nil, "auth login config not found")
-	setUpDefaultConfig(authLoginConfig, "expire", authLoginExpire, 600) // 10 minutes token expire time
+	setUpDefaultConfig(authLoginConfig, "expire", authLoginExpire, 600)
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 	SetConfig(utility.MarshalToJsonString(config))
 
