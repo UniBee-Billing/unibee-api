@@ -3,6 +3,7 @@ package middleware
 import (
 	"fmt"
 	"net/url"
+	"strconv"
 	"strings"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
@@ -41,6 +42,13 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header User-Agent:%s", r.GetHeader("User-Agent"))
 	r.Response.CORSDefault()
 	r.Middleware.Next()
+}
+
+func doubleRequestLimit(id string, r *ghttp.Request) {
+	md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
+	if !utility.TryLock(r.Context(), md5, 10) {
+		utility.Assert(false, "click too fast, please wait for second")
+	}
 }
 
 func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
@@ -235,6 +243,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				Email:      token.Email,
 			}
 			customCtx.MerchantId = userAccount.MerchantId
+			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			if merchantAccount == nil {
@@ -250,6 +259,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				Email:      token.Email,
 			}
 			customCtx.MerchantId = merchantAccount.MerchantId
+			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
 		} else {
 			g.Log().Infof(r.Context(), "TokenAuth invalid token type token:%v", utility.MarshalToJsonString(token))
 			_interface.JsonRedirectExit(r, 61, "invalid token type", s.LoginUrl)
