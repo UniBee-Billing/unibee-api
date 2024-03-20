@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"unibee/utility"
 )
 
 type Config struct {
@@ -70,6 +71,13 @@ func GetConfigInstance() *Config {
 		instance = &Config{}
 	})
 	return instance
+}
+
+func SetConfig(config string) {
+	err := utility.UnmarshalFromJsonString(config, &instance)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (config Config) IsServerDev() bool {
