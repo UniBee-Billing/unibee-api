@@ -379,7 +379,6 @@ func blockReceiveConsumerMessage(client *redis.Client, topic string) *Message {
 		return nil
 	}
 	if len(result) == 1 && len(result[0].Messages) == 1 {
-		//只获取一个
 		messageId := result[0].Messages[0].ID
 		value := result[0].Messages[0].Values
 		message := Message{}

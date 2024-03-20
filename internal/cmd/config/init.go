@@ -84,29 +84,26 @@ func Init() {
 		_, _ = ReplaceConfigContentUserNacos(strings.Trim(nacosIpArg, " "), uPort, strings.Trim(nacosNamespaceArg, " "), strings.Trim(nacosDataIdArg, " "), strings.Trim(nacosGroupArg, " "))
 	} else {
 		_, err := os.Stat(DefaultConfigFileName)
-		if os.IsNotExist(err) {
-			_, err = createFile(DefaultConfigFileName)
-			if err != nil {
-				panic(err)
+		if os.IsNotExist(err) || err != nil {
+			if os.IsNotExist(err) {
+				g.Log().Warningf(ctx, fmt.Sprintf("%s not found\n", DefaultConfigFileName))
 			}
-			g.Log().Error(ctx, fmt.Sprintf("%s not found\n", DefaultConfigFileName))
-		} else if err != nil {
-			panic(fmt.Sprintf("Stat %s Error:%s\n", DefaultConfigFileName, err.Error()))
+			g.Log().Warningf(ctx, "Get Config File %s Error:%s\n", DefaultConfigFileName, err.Error())
+			config := map[string]interface{}{
+				"server": map[string]interface{}{},
+				"redis": map[string]interface{}{
+					"default": map[string]interface{}{},
+				},
+				"database": map[string]interface{}{"default": map[string]interface{}{}},
+				"logger":   map[string]interface{}{},
+				"auth":     map[string]interface{}{"login": map[string]interface{}{}},
+			}
+			g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 		}
 	}
 	// init default configs
 	config := g.Cfg().MustGet(ctx, ".").Map()
-	if config == nil {
-		config = map[string]interface{}{
-			"server": map[string]interface{}{},
-			"redis": map[string]interface{}{
-				"default": map[string]interface{}{},
-			},
-			"database": map[string]interface{}{"default": map[string]interface{}{}},
-			"logger":   map[string]interface{}{},
-			"auth":     map[string]interface{}{"login": map[string]interface{}{}},
-		}
-	}
+	utility.Assert(config != nil, "config not found")
 	setUpDefaultConfig(config, "env", env, "prod")
 	setUpDefaultConfig(config, "mode", mode, "singleTon")
 	setUpDefaultConfig(config, "logger", map[string]interface{}{}, map[string]interface{}{})

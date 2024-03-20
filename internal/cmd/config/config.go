@@ -9,20 +9,20 @@ import (
 )
 
 type Config struct {
-	Env         string      `yaml:"env"`
-	Mode        string      `yaml:"mode"`
-	RedisConfig RedisConfig `yaml:"redis"`
-	MinioConfig MinioConfig `yaml:"minio"`
-	Server      Server      `yaml:"server"`
-	Auth        Auth        `yaml:"auth"`
+	Env         string      `json:"env" yaml:"env"`
+	Mode        string      `json:"mode" yaml:"mode"`
+	RedisConfig RedisConfig `json:"redis" yaml:"redis"`
+	MinioConfig MinioConfig `json:"minio" yaml:"minio"`
+	Server      Server      `json:"server" yaml:"server"`
+	Auth        Auth        `json:"auth" yaml:"auth"`
 }
 
 type Server struct {
-	Address     string `yaml:"address"`
-	DomainPath  string `yaml:"domainPath"`
-	OpenApiPath string `yaml:"openapiPath"`
-	SwaggerPath string `yaml:"swaggerPath"`
-	JwtKey      string `yaml:"jwtKey"`
+	Address     string `json:"address" yaml:"address"`
+	DomainPath  string `json:"domainPath" yaml:"domainPath"`
+	OpenApiPath string `json:"openapiPath" yaml:"openapiPath"`
+	SwaggerPath string `json:"swaggerPath" yaml:"swaggerPath"`
+	JwtKey      string `json:"jwtKey" yaml:"jwtKey"`
 }
 
 func (s *Server) GetDomainScheme() string {
@@ -38,29 +38,29 @@ func (s *Server) GetServerPath() string {
 }
 
 type RedisConfig struct {
-	Default RedisConfigDetail `yaml:"default"`
+	Default RedisConfigDetail `json:"default" yaml:"default"`
 }
 
 type RedisConfigDetail struct {
-	Address string `yaml:"address"`
-	DB      int    `yaml:"db"`
-	Pass    string `yaml:"pass"`
+	Address string `json:"address" yaml:"address"`
+	DB      int    `json:"db" yaml:"db"`
+	Pass    string `json:"pass" yaml:"pass"`
 }
 
 type Auth struct {
-	Login Login `yaml:"login"`
+	Login Login `json:"login" yaml:"login"`
 }
 
 type Login struct {
-	Expire int64 `yaml:"expire"`
+	Expire int64 `json:"expire" yaml:"expire"`
 }
 
 type MinioConfig struct {
-	Endpoint   string `yaml:"endpoint"`
-	AccessKey  string `yaml:"accessKey"`
-	SecretKey  string `yaml:"secretKey"`
-	BucketName string `yaml:"bucketName"`
-	Domain     string `yaml:"domain"`
+	Endpoint   string `json:"endpoint" yaml:"endpoint"`
+	AccessKey  string `json:"accessKey" yaml:"accessKey"`
+	SecretKey  string `json:"secretKey" yaml:"secretKey"`
+	BucketName string `json:"bucketName" yaml:"bucketName"`
+	Domain     string `json:"domain" yaml:"domain"`
 }
 
 var instance *Config
@@ -68,7 +68,9 @@ var once sync.Once
 
 func GetConfigInstance() *Config {
 	once.Do(func() {
-		instance = &Config{}
+		if instance == nil {
+			instance = &Config{}
+		}
 	})
 	return instance
 }

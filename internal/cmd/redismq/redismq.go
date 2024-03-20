@@ -29,11 +29,12 @@ var (
 type SRedisMqConfig struct{}
 
 func (s SRedisMqConfig) GetRedisStreamConfig() (res *redis.Options) {
-	return &redis.Options{
+	one := &redis.Options{
 		Addr:     config.GetConfigInstance().RedisConfig.Default.Address,
 		Password: config.GetConfigInstance().RedisConfig.Default.Pass,
 		DB:       config.GetConfigInstance().RedisConfig.Default.DB,
 	}
+	return one
 }
 
 func init() {
