@@ -18,6 +18,7 @@ import (
 	"unibee/internal/controller/user"
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/hook"
 	"unibee/utility"
 	"unibee/utility/liberr"
 
@@ -279,6 +280,7 @@ var (
 			s.BindHandler("/merchant_ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
+				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
 				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
@@ -294,10 +296,11 @@ var (
 				if !config.GetConfigInstance().IsServerDev() && !config.GetConfigInstance().IsLocal() {
 					_ = g.Log().SetLevelStr("info") // remove debug log, DEBU < INFO < NOTI < WARN < ERRO < CRIT
 				}
-				cronjob.StartCronJobs()
 			}
 			{
-				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
+				cronjob.StartCronJobs()
+				hook.DaoHookInjection(ctx)
+
 			}
 			{
 				fmt.Println(utility.MarshalToJsonString(s.GetOpenApi()))
