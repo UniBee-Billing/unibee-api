@@ -220,7 +220,7 @@ func deleteFile(path string) (err error) {
 
 func setUpDefaultConfig(config map[string]interface{}, key string, flagValue interface{}, defaultValue interface{}) {
 	if config[key] == nil {
-		if flagValue != nil {
+		if flagValue != nil && flagValue != "" {
 			config[key] = flagValue
 		} else {
 			config[key] = defaultValue
