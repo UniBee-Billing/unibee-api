@@ -85,14 +85,28 @@ func Init() {
 	} else {
 		_, err := os.Stat(DefaultConfigFileName)
 		if os.IsNotExist(err) {
-			panic(fmt.Sprintf("%s not found\n", DefaultConfigFileName))
+			_, err = createFile(DefaultConfigFileName)
+			if err != nil {
+				panic(err)
+			}
+			g.Log().Error(ctx, fmt.Sprintf("%s not found\n", DefaultConfigFileName))
 		} else if err != nil {
 			panic(fmt.Sprintf("Stat %s Error:%s\n", DefaultConfigFileName, err.Error()))
 		}
 	}
 	// init default configs
 	config := g.Cfg().MustGet(ctx, ".").Map()
-	utility.Assert(config != nil, "config not found")
+	if config == nil {
+		config = map[string]interface{}{
+			"server": map[string]interface{}{},
+			"redis": map[string]interface{}{
+				"default": map[string]interface{}{},
+			},
+			"database": map[string]interface{}{"default": map[string]interface{}{}},
+			"logger":   map[string]interface{}{},
+			"auth":     map[string]interface{}{"login": map[string]interface{}{}},
+		}
+	}
 	setUpDefaultConfig(config, "env", env, "prod")
 	setUpDefaultConfig(config, "mode", mode, "singleTon")
 	setUpDefaultConfig(config, "logger", map[string]interface{}{}, map[string]interface{}{})
@@ -126,6 +140,7 @@ func Init() {
 	authLoginConfig := g.Cfg().MustGet(ctx, "auth.login").Map()
 	utility.Assert(authLoginConfig != nil, "auth login config not found")
 	setUpDefaultConfig(authLoginConfig, "expire", authLoginExpire, 600) // 10 minutes token expire time
+	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 
 	// print configs
 	fmt.Printf("Env:")
@@ -226,4 +241,8 @@ func setUpDefaultConfig(config map[string]interface{}, key string, flagValue int
 			config[key] = defaultValue
 		}
 	}
+}
+
+func GetSystemConfig() {
+
 }

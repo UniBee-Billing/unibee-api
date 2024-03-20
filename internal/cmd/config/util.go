@@ -15,7 +15,7 @@ func GetNacosConfig(ip string, port uint64, namespace string, group string, data
 	}}
 
 	cc := constant.ClientConfig{
-		NamespaceId:         namespace, // 如果需要支持多namespace，我们可以场景多个client,它们有不同的NamespaceId。当namespace是public时，此处填空字符串。
+		NamespaceId:         namespace,
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
 		LogDir:              "log",

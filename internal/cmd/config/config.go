@@ -65,7 +65,6 @@ type MinioConfig struct {
 var instance *Config
 var once sync.Once
 
-// GetConfigInstance 返回 Singleton 的唯一实例
 func GetConfigInstance() *Config {
 	once.Do(func() {
 		instance = &Config{}
