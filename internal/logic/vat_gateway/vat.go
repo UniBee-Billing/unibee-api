@@ -99,7 +99,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	}
 	if countryRates != nil && len(countryRates) > 0 {
 		if countries == nil || len(countries) == 0 {
-			//Country
+			//Country todo mark pgsql not support replace
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
 		} else {
 			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(
