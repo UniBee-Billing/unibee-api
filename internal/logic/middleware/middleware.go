@@ -45,9 +45,11 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 }
 
 func doubleRequestLimit(id string, r *ghttp.Request) {
-	md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
-	if !utility.TryLock(r.Context(), md5, 10) {
-		utility.Assert(false, "click too fast, please wait for second")
+	if r.Method == "POST" || r.Method == "PUT" || r.Method == "DELETE" {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
+		if !utility.TryLock(r.Context(), md5, 5) {
+			utility.Assert(false, "click too fast, please wait for second")
+		}
 	}
 }
 
