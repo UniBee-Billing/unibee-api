@@ -46,7 +46,7 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 
 func doubleRequestLimit(id string, r *ghttp.Request) {
 	if r.Method == "POST" || r.Method == "PUT" || r.Method == "DELETE" {
-		if strings.HasSuffix(r.GetUrl(), "list") || strings.HasSuffix(r.GetUrl(), "get") {
+		if strings.HasSuffix(r.GetUrl(), "detail") || strings.HasSuffix(r.GetUrl(), "list") || strings.HasSuffix(r.GetUrl(), "get") {
 			return
 		}
 		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
