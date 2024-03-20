@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"os"
 	"strings"
@@ -74,7 +75,6 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 
 func SendTemplateEmailToUser(key string, mailTo string, subject string, body string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
-	subject = subject
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
 	htmlContent := "<div>" + body + " </div>"
@@ -185,6 +185,10 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	}
 
 	if len(pdfFilePath) > 0 {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
+		if !utility.TryLock(ctx, md5, 10) {
+			utility.Assert(false, "duplicate email too fast")
+		}
 		response, err := SendPdfAttachEmailToUser(key, mailTo, title, content, pdfFilePath, attachName+".pdf")
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
@@ -193,6 +197,10 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 		}
 		return err
 	} else {
+		md5 := utility.MD5(fmt.Sprintf("%s%s%s", mailTo, title, content))
+		if !utility.TryLock(ctx, md5, 10) {
+			utility.Assert(false, "duplicate email too fast")
+		}
 		response, err := SendTemplateEmailToUser(key, mailTo, title, content)
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
@@ -226,4 +234,8 @@ func SaveHistory(ctx context.Context, merchantId uint64, mailTo string, title st
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	_, _ = dao.MerchantEmailHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
+}
+
+func doubleRequestLimit(id string, r *ghttp.Request) {
+
 }
