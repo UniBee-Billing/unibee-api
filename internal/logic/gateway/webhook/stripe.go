@@ -167,7 +167,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Invoice %s\n", gateway.GatewayName, string(event.Type), stripeInvoice.ID)
 			requestId = stripeInvoice.ID
-			if stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] != strconv.FormatUint(gateway.MerchantId, 10) {
+			if stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
 				utility.Assert(stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Invoice")
 				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 				err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, gateway)

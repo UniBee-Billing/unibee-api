@@ -2,44 +2,17 @@ env: daily
 
 server:
   name: "unib"
-  address:     ":8088"
-  domainPath: "http://unibee.top/unib"
-  openapiPath: "/unib/api.json"
-  swaggerPath: "/unib/swagger"
-
-auth:
-  login:
-    expire: 300
-  
-
-logger:
-  level : "all"
-  stdout: true
-
-
+  domainPath: "http://api.unibee.top/unib"
 
 database:
-  xin:
-    link:    "mysql:unib:hn02le34lkdLKD@tcp(unibee.top:13306)/test?loc=UTC&parseTime=false"
-    debug:   true
-    type:    mysql
-    createdAt: false
-  oversea_pay:
-    link:    "mysql:unib:hn02le34lkdLKD@tcp(unibee.top:13306)/unib?loc=UTC&parseTime=false"
-    debug:   true
-    type:    mysql  
-    createdAt: false  
-
+  default:
+    link:    "mysql:unib:hn02le34lkdLKD@tcp(api.unibee.top:13306)/unib?loc=UTC&parseTime=false"
 
 # Redis Stage
 redis:
   default:
-    address: unibee.top:16379
-    db:      0
+    address: api.unibee.top:16379
     pass: p9KIMXc8OXI5HnaA
-    maxIdle: 500
-    minIdle: 10
-    idleTimeout: 1d    
     
 # Minio Stage
 minio:
