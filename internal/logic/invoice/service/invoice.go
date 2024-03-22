@@ -302,7 +302,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	}
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, "invoice not found")
-	utility.Assert(one.TotalAmount > req.RefundAmount, "not enough amount to refund")
+	utility.Assert(one.TotalAmount >= req.RefundAmount, "not enough amount to refund")
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
