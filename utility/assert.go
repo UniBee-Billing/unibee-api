@@ -19,7 +19,6 @@ func AssertError(err error, message string) {
 	}
 }
 
-// Try Cache 模拟，捕获内部异常，实际上框架已实现恢复机制
 func Try(fun func(), handler func(interface{})) {
 	defer func() {
 		if err := recover(); err != nil {
