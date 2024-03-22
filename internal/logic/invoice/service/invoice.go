@@ -295,8 +295,9 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(req.RefundAmount > 0, "refundFee should > 0")
 	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
 	utility.Assert(len(req.Reason) > 0, "reason should not be blank")
-	//utility.Assert(len(req.RefundNo) > 0, "refundNo should not be blank")
-	if len(req.RefundNo) == 0 {
+	if _interface.BizCtx().Get(ctx).IsOpenApiCall {
+		utility.Assert(len(req.RefundNo) > 0, "refundNo should not be blank")
+	} else if len(req.RefundNo) == 0 {
 		req.RefundNo = uuid.New().String()
 	}
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
