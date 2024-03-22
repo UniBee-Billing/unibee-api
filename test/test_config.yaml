@@ -1,8 +1,7 @@
 env: daily
 
 server:
-  name: "unib"
-  domainPath: "http://api.unibee.top/unib"
+  domainPath: "http://api.unibee.top"
 
 database:
   default:

@@ -882,7 +882,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	var note = "Success"
 	if effectImmediate == 1 && !subUpdateRes.Paid {
 		note = "Payment Action Required"
-	} else {
+	} else if effectImmediate == 0 {
 		note = "Will Effect At Period End"
 	}
 
