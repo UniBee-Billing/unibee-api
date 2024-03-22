@@ -11,6 +11,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 	createRes, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
 		PlanId:             req.PlanId,
 		UserId:             _interface.BizCtx().Get(ctx).User.Id,
+		MerchantId:         _interface.GetMerchantId(ctx),
 		Quantity:           req.Quantity,
 		GatewayId:          req.GatewayId,
 		AddonParams:        req.AddonParams,
