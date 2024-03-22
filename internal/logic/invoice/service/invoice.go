@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/google/uuid"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -295,6 +296,9 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
 	utility.Assert(len(req.Reason) > 0, "reason should not be blank")
 	utility.Assert(len(req.RefundNo) > 0, "refundNo should not be blank")
+	if len(req.RefundNo) == 0 {
+		req.RefundNo = uuid.New().String()
+	}
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.TotalAmount > req.RefundAmount, "not enough amount to refund")

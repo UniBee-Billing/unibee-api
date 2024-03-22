@@ -119,7 +119,7 @@ type CancelRes struct {
 type RefundReq struct {
 	g.Meta       `path:"/refund" tags:"Invoice" method:"post" summary:"Admin Create Refund From Invoice"`
 	InvoiceId    string `json:"invoiceId" dc:"InvoiceId" v:"required"`
-	RefundNo     string `json:"refundNo" dc:"RefundNo" v:"required"`
+	RefundNo     string `json:"refundNo" dc:"RefundNo"`
 	RefundAmount int64  `json:"refundAmount" dc:"Refund CaptureAmount" v:"required"`
 	Reason       string `json:"reason" dc:"Refund Reason" v:"required"`
 }
