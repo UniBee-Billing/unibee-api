@@ -112,25 +112,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 			}
 			one.Id = id
 
-			//调用远端接口，这里的正向有坑，如果远端执行成功，事务却提交失败是无法回滚的todo mark
-			gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, payment, one)
-			if err != nil {
-				//_ = transaction.Rollback()
-				return err
-			}
-
-			one.GatewayRefundId = gatewayResult.GatewayRefundId
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
-				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
-			if err != nil || result == nil {
-				//_ = transaction.Rollback()
-				return err
-			}
-			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
-				return err
-			}
 			return nil
 		})
 		if err == nil {
@@ -139,6 +120,24 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 			return redismq.RollbackTransaction, err
 		}
 	})
+	if err != nil {
+		return nil, err
+	}
+	gatewayResult, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayRefund(ctx, payment, one)
+	if err != nil {
+		return nil, err
+	}
+
+	one.GatewayRefundId = gatewayResult.GatewayRefundId
+	result, err := dao.Refund.Ctx(ctx).Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
+		g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
+	if err != nil || result == nil {
+		return nil, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil || affected != 1 {
+		return nil, err
+	}
 
 	if err != nil {
 		return nil, err

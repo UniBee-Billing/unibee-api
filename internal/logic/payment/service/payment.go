@@ -82,6 +82,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		createPayContext.Pay.CryptoAmount = trans.CryptoAmount
 		createPayContext.Pay.CryptoCurrency = trans.CryptoCurrency
 	}
+	if createPayContext.DaysUtilDue == 0 {
+		createPayContext.DaysUtilDue = 3 //default 3 days expire
+	}
 	var invoice *entity.Invoice
 	if createPayContext.Invoice != nil {
 		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
@@ -90,13 +93,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		}
 		createPayContext.Pay.InvoiceId = invoice.InvoiceId
 	}
-	if createPayContext.DaysUtilDue == 0 {
-		createPayContext.DaysUtilDue = 3 //default 3 days expire
-	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//transaction gateway refund
+			//transaction gateway payment
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
 			createPayContext.Pay.ExpireTime = createPayContext.Pay.CreateTime + int64(createPayContext.DaysUtilDue*86400)
@@ -110,42 +110,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			}
 			createPayContext.Pay.Id = id
 
-			gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayNewPayment(ctx, createPayContext)
-			if err != nil {
-				return err
-			}
-			jsonData, err := gjson.Marshal(gatewayInternalPayResult)
-			if err != nil {
-				return err
-			}
-			var automatic = 0
-			if gatewayInternalPayResult.Status == consts.PaymentSuccess && createPayContext.PayImmediate {
-				automatic = 1
-			}
-			createPayContext.Pay.PaymentData = string(jsonData)
-			createPayContext.Pay.Status = int(gatewayInternalPayResult.Status)
-			createPayContext.Pay.GatewayPaymentId = gatewayInternalPayResult.GatewayPaymentId
-			createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
-			gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
-			// unibee payment link
-			paymentLink := link.GetPaymentLink(createPayContext.Pay.PaymentId)
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{
-				dao.Payment.Columns().PaymentData:            string(jsonData),
-				dao.Payment.Columns().Automatic:              automatic,
-				dao.Payment.Columns().Link:                   paymentLink,
-				dao.Payment.Columns().GatewayLink:            gatewayInternalPayResult.Link,
-				dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
-				dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
-				g.Map{dao.Payment.Columns().Id: id, dao.Payment.Columns().Status: consts.PaymentCreated})
-			if err != nil || result == nil {
-				return err
-			}
-			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
-				return err
-			}
-			gatewayInternalPayResult.Link = paymentLink
-			createPayContext.Pay.Link = paymentLink
 			return nil
 		})
 		if err == nil {
@@ -157,6 +121,43 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	if err != nil {
 		return nil, err
 	}
+
+	gatewayInternalPayResult, err = api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayNewPayment(ctx, createPayContext)
+	if err != nil {
+		return nil, err
+	}
+	jsonData, err := gjson.Marshal(gatewayInternalPayResult)
+	if err != nil {
+		return nil, err
+	}
+	var automatic = 0
+	if gatewayInternalPayResult.Status == consts.PaymentSuccess && createPayContext.PayImmediate {
+		automatic = 1
+	}
+	createPayContext.Pay.PaymentData = string(jsonData)
+	createPayContext.Pay.Status = int(gatewayInternalPayResult.Status)
+	createPayContext.Pay.GatewayPaymentId = gatewayInternalPayResult.GatewayPaymentId
+	createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
+	gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
+	// unibee payment link
+	paymentLink := link.GetPaymentLink(createPayContext.Pay.PaymentId)
+	result, err := dao.Payment.Ctx(ctx).Update(dao.Payment.Table(), g.Map{
+		dao.Payment.Columns().PaymentData:            string(jsonData),
+		dao.Payment.Columns().Automatic:              automatic,
+		dao.Payment.Columns().Link:                   paymentLink,
+		dao.Payment.Columns().GatewayLink:            gatewayInternalPayResult.Link,
+		dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
+		dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
+		g.Map{dao.Payment.Columns().Id: createPayContext.Pay.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
+	if err != nil || result == nil {
+		return nil, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil || affected != 1 {
+		return nil, err
+	}
+	gatewayInternalPayResult.Link = paymentLink
+	createPayContext.Pay.Link = paymentLink
 
 	gatewayInternalPayResult.Invoice = invoice
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
