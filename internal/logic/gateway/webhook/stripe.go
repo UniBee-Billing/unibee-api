@@ -167,13 +167,15 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Invoice %s\n", gateway.GatewayName, string(event.Type), stripeInvoice.ID)
 			requestId = stripeInvoice.ID
-			utility.Assert(stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Invoice")
-			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
-			err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, gateway)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandleInvoiceWebhookEvent: %s\n", gateway.GatewayName, err.Error())
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
+			if stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] != strconv.FormatUint(gateway.MerchantId, 10) {
+				utility.Assert(stripeInvoice.Metadata != nil && stripeInvoice.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Invoice")
+				// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
+				err = s.processInvoiceWebhook(r.Context(), string(event.Type), stripeInvoice, gateway)
+				if err != nil {
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandleInvoiceWebhookEvent: %s\n", gateway.GatewayName, err.Error())
+					r.Response.WriteHeader(http.StatusBadRequest)
+					responseBack = http.StatusBadRequest
+				}
 			}
 		}
 	case "payment_intent.created", "payment_intent.succeeded", "payment_intent.canceled", "payment_intent.partially_funded", "payment_intent.payment_failed", "payment_intent.requires_action":
@@ -187,13 +189,15 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Payment %s\n", gateway.GatewayName, string(event.Type), stripePayment.ID)
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 			requestId = stripePayment.ID
-			utility.Assert(stripePayment.Metadata != nil && stripePayment.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Payment")
+			if stripePayment.Metadata != nil && stripePayment.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
+				utility.Assert(stripePayment.Metadata != nil && stripePayment.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Payment")
 
-			err = ProcessPaymentWebhook(r.Context(), stripePayment.Metadata["PaymentId"], stripePayment.ID, gateway)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
+				err = ProcessPaymentWebhook(r.Context(), stripePayment.Metadata["PaymentId"], stripePayment.ID, gateway)
+				if err != nil {
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ProcessPaymentWebhook: %s\n", gateway.GatewayName, err.Error())
+					r.Response.WriteHeader(http.StatusBadRequest)
+					responseBack = http.StatusBadRequest
+				}
 			}
 		}
 	case "charge.refund.updated":
@@ -207,13 +211,15 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Refund %s\n", gateway.GatewayName, string(event.Type), stripeRefund.ID)
 			requestId = stripeRefund.ID
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
-			utility.Assert(stripeRefund.Metadata != nil && stripeRefund.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Refund")
+			if stripeRefund.Metadata != nil && stripeRefund.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
+				utility.Assert(stripeRefund.Metadata != nil && stripeRefund.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_Refund")
 
-			err = ProcessRefundWebhook(r.Context(), string(event.Type), stripeRefund.ID, gateway)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
+				err = ProcessRefundWebhook(r.Context(), string(event.Type), stripeRefund.ID, gateway)
+				if err != nil {
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
+					r.Response.WriteHeader(http.StatusBadRequest)
+					responseBack = http.StatusBadRequest
+				}
 			}
 		}
 	case "checkout.session.completed":
@@ -226,13 +232,16 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		} else {
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Refund %s\n", gateway.GatewayName, string(event.Type), stripeCheckoutSession.ID)
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
-			utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
+			requestId = stripeCheckoutSession.ID
+			if stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
+				utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
 
-			err = ProcessPaymentWebhook(r.Context(), stripeCheckoutSession.Metadata["PaymentId"], stripeCheckoutSession.PaymentIntent.ID, gateway)
-			if err != nil {
-				g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
-				r.Response.WriteHeader(http.StatusBadRequest)
-				responseBack = http.StatusBadRequest
+				err = ProcessPaymentWebhook(r.Context(), stripeCheckoutSession.Metadata["PaymentId"], stripeCheckoutSession.PaymentIntent.ID, gateway)
+				if err != nil {
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
+					r.Response.WriteHeader(http.StatusBadRequest)
+					responseBack = http.StatusBadRequest
+				}
 			}
 		}
 	default:
