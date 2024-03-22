@@ -129,8 +129,8 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 	}
 
 	one.GatewayRefundId = gatewayResult.GatewayRefundId
-	result, err := dao.Refund.Ctx(ctx).Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId},
-		g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
+	result, err := dao.Refund.Ctx(ctx).Data(g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId}).
+		Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
 	if err != nil || result == nil {
 		return nil, err
 	}

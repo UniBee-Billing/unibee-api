@@ -141,14 +141,14 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 	// unibee payment link
 	paymentLink := link.GetPaymentLink(createPayContext.Pay.PaymentId)
-	result, err := dao.Payment.Ctx(ctx).Update(dao.Payment.Table(), g.Map{
+	result, err := dao.Payment.Ctx(ctx).Data(g.Map{
 		dao.Payment.Columns().PaymentData:            string(jsonData),
 		dao.Payment.Columns().Automatic:              automatic,
 		dao.Payment.Columns().Link:                   paymentLink,
 		dao.Payment.Columns().GatewayLink:            gatewayInternalPayResult.Link,
 		dao.Payment.Columns().GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
-		dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId},
-		g.Map{dao.Payment.Columns().Id: createPayContext.Pay.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
+		dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId}).
+		Where(dao.Payment.Columns().Id, createPayContext.Pay.Id).Where(dao.Payment.Columns().Status, consts.PaymentCreated).Update()
 	if err != nil || result == nil {
 		return nil, err
 	}
