@@ -7,7 +7,7 @@ import (
 )
 
 func (c *ControllerPlan) Publish(ctx context.Context, req *plan.PublishReq) (res *plan.PublishRes, err error) {
-	err = service.SubscriptionPlanPublish(ctx, req.PlanId)
+	err = service.PlanPublish(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}

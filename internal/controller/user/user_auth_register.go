@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unibee/api/user/auth"
 	_interface "unibee/internal/interface"
+	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/logic/email"
 	"unibee/utility"
 
@@ -32,18 +33,16 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	utility.Assert(newOne == nil, "Email already existed")
 
 	userStr, err := json.Marshal(
-		struct {
-			FirstName, LastName, Email, Password, Phone, Address, UserName, CountryCode, CountryName string
-		}{
+		&auth2.NewReq{
+			Email:       req.Email,
 			FirstName:   req.FirstName,
 			LastName:    req.LastName,
-			Email:       req.Email,
-			CountryCode: req.CountryCode,
-			CountryName: req.CountryName,
-			Password:    utility.PasswordEncrypt(req.Password),
+			Password:    req.Password,
 			Phone:       req.Phone,
 			Address:     req.Address,
 			UserName:    req.UserName,
+			CountryCode: req.CountryCode,
+			CountryName: req.CountryName,
 		},
 	)
 	utility.AssertError(err, "Server Error")

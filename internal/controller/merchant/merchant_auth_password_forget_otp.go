@@ -3,8 +3,6 @@ package merchant
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/internal/logic/email"
 	"unibee/internal/query"
@@ -22,14 +20,9 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 	verificationCode := utility.GenerateRandomCode(6)
 	fmt.Printf("verification %s", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-PasswordForgetOtp-Verify", verificationCode)
-	if err != nil {
-		// return nil, gerror.New("internal error")
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-PasswordForgetOtp-Verify", 3*60)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 
 	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(merchantMember != nil, "merchant member not found")

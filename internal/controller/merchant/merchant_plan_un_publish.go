@@ -7,7 +7,7 @@ import (
 )
 
 func (c *ControllerPlan) UnPublish(ctx context.Context, req *plan.UnPublishReq) (res *plan.UnPublishRes, err error) {
-	err = service.SubscriptionPlanUnPublish(ctx, req.PlanId)
+	err = service.PlanUnPublish(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}

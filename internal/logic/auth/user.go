@@ -2,12 +2,13 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
+	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -69,45 +70,83 @@ func ReleaseUser(ctx context.Context, userId int64) {
 }
 
 type NewReq struct {
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
 	Email          string `json:"email" dc:"Email" v:"required"`
 	FirstName      string `json:"firstName" dc:"First Name"`
 	LastName       string `json:"lastName" dc:"Last Name"`
 	Password       string `json:"password" dc:"Password"`
 	Phone          string `json:"phone" dc:"Phone" `
 	Address        string `json:"address" dc:"Address"`
+	UserName       string `json:"userName" dc:"UserName"`
+	CountryCode    string `json:"countryCode" dc:"CountryCode"`
+	CountryName    string `json:"countryName" dc:"CountryName"`
+	MerchantId     uint64 `json:"merchantId" dc:"MerchantId"`
+}
+
+func PasswordLogin(ctx context.Context, merchantId uint64, email string, password string) (one *entity.UserAccount, token string) {
+	one = query.GetUserAccountByEmail(ctx, merchantId, email)
+	utility.Assert(one != nil, "Email Not Found")
+	utility.Assert(one.Status == 0, "Account Status Abnormal")
+	utility.Assert(utility.ComparePasswords(one.Password, password), "Login Failed, Password Not Match")
+
+	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, one.Email)
+	fmt.Println("logged-in, save email/id in token: ", one.Email, "/", one.Id)
+	utility.AssertError(err, "Server Error")
+	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
+	return one, token
+}
+
+func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err error) {
+	utility.Assert(req.MerchantId > 0, "merchantId invalid")
+	utility.Assert(req != nil, "Server Error")
+	if len(req.ExternalUserId) > 0 {
+		one = query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
+	}
+	if one == nil {
+		one = query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+	}
+	utility.Assert(one == nil, "email or externalUserId exist")
+	emailOne := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+	utility.Assert(emailOne == nil, "email exist")
+	one = &entity.UserAccount{
+		FirstName:      req.FirstName,
+		LastName:       req.LastName,
+		Password:       utility.PasswordEncrypt(req.Password),
+		Email:          req.Email,
+		Phone:          req.Phone,
+		Address:        req.Address,
+		ExternalUserId: req.ExternalUserId,
+		CountryCode:    req.CountryCode,
+		CountryName:    req.CountryName,
+		UserName:       req.UserName,
+		MerchantId:     req.MerchantId,
+		CreateTime:     gtime.Now().Timestamp(),
+	}
+	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	utility.AssertError(err, "Server Error")
+	id, err := result.LastInsertId()
+	utility.AssertError(err, "Server Error")
+	one.Id = uint64(id)
+	return one, nil
 }
 
 func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err error) {
+	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	utility.Assert(req != nil, "Server Error")
-	one = query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
-	if one == nil {
-		one = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+	if len(req.ExternalUserId) > 0 {
+		one = query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 	}
 	if one == nil {
-		// check email not exsit
-		emailOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
-		utility.Assert(emailOne == nil, "email exist")
-		one = &entity.UserAccount{
-			FirstName:      req.FirstName,
-			LastName:       req.LastName,
-			Password:       utility.PasswordEncrypt(req.Password),
-			Email:          req.Email,
-			Phone:          req.Phone,
-			Address:        req.Address,
-			ExternalUserId: req.ExternalUserId,
-			MerchantId:     _interface.GetMerchantId(ctx),
-			CreateTime:     gtime.Now().Timestamp(),
-		}
-		result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		one = query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+	}
+	if one == nil {
+		// check email not exist
+		one, err = CreateUser(ctx, req)
 		utility.AssertError(err, "Server Error")
-		id, err := result.LastInsertId()
-		utility.AssertError(err, "Server Error")
-		one.Id = uint64(id)
 	} else {
 		if strings.Compare(one.Email, req.Email) != 0 {
 			//email changed, update email
-			emailOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+			emailOne := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
 			utility.Assert(emailOne == nil || emailOne.Id == one.Id, "email of other externalUserId exist")
 			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().Email:     req.Email,
@@ -117,7 +156,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 		}
 		if strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
 			//externalUserId not match, update externalUserId
-			otherOne := query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
+			otherOne := query.GetUserAccountByExternalUserId(ctx, req.MerchantId, req.ExternalUserId)
 			utility.Assert(otherOne == nil || otherOne.Id == one.Id, "externalUserId of other email exist")
 			_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
@@ -134,4 +173,12 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 		utility.AssertError(err, "Server Error")
 	}
 	return
+}
+
+func HardDeleteUser(ctx context.Context, userId uint64) error {
+	_, err := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().Id, userId).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
 }

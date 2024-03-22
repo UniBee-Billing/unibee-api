@@ -23,6 +23,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		Password:       req.Password,
 		Phone:          req.Phone,
 		Address:        req.Address,
+		MerchantId:     _interface.GetMerchantId(ctx),
 	})
 	utility.AssertError(err, "Server Error")
 	utility.Assert(one != nil, "Server Error")

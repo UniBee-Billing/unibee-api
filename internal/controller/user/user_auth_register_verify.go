@@ -3,12 +3,10 @@ package user
 import (
 	"context"
 	"encoding/json"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/api/user/auth"
-	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	entity "unibee/internal/model/entity/oversea_pay"
+	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -24,32 +22,12 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 	userStr, err := g.Redis().Get(ctx, CacheKeyUserRegisterPrefix+req.Email)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(userStr != nil, "Invalid Code")
-	u := struct {
-		FirstName, LastName, Email, Password, Phone, Address, UserName, CountryCode, CountryName string
-	}{}
-	err = json.Unmarshal([]byte(userStr.String()), &u)
+	var newReq *auth2.NewReq
+	err = json.Unmarshal([]byte(userStr.String()), &newReq)
+	newReq.MerchantId = _interface.GetMerchantId(ctx)
 
-	user := &entity.UserAccount{
-		FirstName:   u.FirstName,
-		LastName:    u.LastName,
-		Email:       u.Email,
-		CountryCode: u.CountryCode,
-		CountryName: u.CountryName,
-		Password:    u.Password,
-		Phone:       u.Phone,
-		Address:     u.Address,
-		UserName:    u.UserName,
-		MerchantId:  _interface.GetMerchantId(ctx),
-		CreateTime:  gtime.Now().Timestamp(),
-	}
-
-	result, err := dao.UserAccount.Ctx(ctx).Data(user).OmitNil().Insert(user)
-	utility.AssertError(err, "Server Error")
-	id, _ := result.LastInsertId()
-	user.Id = uint64(id)
-	var newOne *entity.UserAccount
-	newOne = query.GetUserAccountById(ctx, user.Id)
+	user, err := auth2.CreateUser(ctx, newReq)
+	newOne := query.GetUserAccountById(ctx, user.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	newOne.Password = ""
 	return &auth.RegisterVerifyRes{User: bean.SimplifyUserAccount(newOne)}, nil
 }

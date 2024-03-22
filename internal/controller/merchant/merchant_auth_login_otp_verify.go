@@ -29,10 +29,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	utility.Assert(newOne != nil, "Login Failed")
 
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTMember, newOne.MerchantId, newOne.Id, req.Email)
-	if err != nil {
-		return nil, gerror.NewCode(gcode.New(500, "server error", nil))
-	}
+	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
-	newOne.Password = ""
 	return &auth.LoginOtpVerifyRes{MerchantMember: bean.SimplifyMerchantMember(newOne), Token: token}, nil
 }

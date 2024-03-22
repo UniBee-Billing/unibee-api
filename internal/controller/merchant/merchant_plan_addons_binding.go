@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerPlan) AddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (res *plan.AddonsBindingRes, err error) {
-	one, err := service.SubscriptionPlanAddonsBinding(ctx, req)
+	one, err := service.PlanAddonsBinding(ctx, req)
 	if err != nil {
 		return nil, err
 	}

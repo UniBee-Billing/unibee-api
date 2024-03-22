@@ -2,6 +2,7 @@ package config
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
@@ -16,31 +17,32 @@ import (
 
 const DefaultConfigFileName = "config.yaml"
 
+var (
+	env               string
+	mode              string
+	serverAddress     string
+	serverJwtKey      string
+	swaggerPath       string
+	redisAddress      string
+	redisPass         string
+	redisDatabase     string
+	redisMaxIdle      string
+	redisMinIdle      string
+	redisIdleTimeout  string
+	databaseLink      string
+	databaseDebug     string
+	databaseCharset   string
+	authLoginExpire   string
+	loggerLevel       string
+	nacosIpArg        string
+	nacosPortArg      string
+	nacosNamespaceArg string
+	nacosGroupArg     string
+	nacosDataIdArg    string
+)
+
 func Init() {
 
-	var (
-		env               string
-		mode              string
-		serverAddress     string
-		serverJwtKey      string
-		swaggerPath       string
-		redisAddress      string
-		redisPass         string
-		redisDatabase     string
-		redisMaxIdle      string
-		redisMinIdle      string
-		redisIdleTimeout  string
-		databaseLink      string
-		databaseDebug     string
-		databaseCharset   string
-		authLoginExpire   string
-		loggerLevel       string
-		nacosIpArg        string
-		nacosPortArg      string
-		nacosNamespaceArg string
-		nacosGroupArg     string
-		nacosDataIdArg    string
-	)
 	flag.StringVar(&env, "env", os.Getenv("env"), "local|daily|prod")
 	flag.StringVar(&mode, "mode", os.Getenv("mode"), "singleTon|cloud")
 	flag.StringVar(&serverAddress, "server-address", os.Getenv("server.address"), ":80, default :8088")
@@ -101,6 +103,33 @@ func Init() {
 			g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 		}
 	}
+
+	SetupDefaultConfigs(ctx)
+
+	// print configs
+	fmt.Printf("Env:")
+	fmt.Println(gcfg.Instance().Get(ctx, "env"))
+	fmt.Printf("mode:")
+	fmt.Println(gcfg.Instance().Get(ctx, "mode"))
+	fmt.Println("Server Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "server"))
+	fmt.Println("Logger Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "logger"))
+	fmt.Println("Database Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "database"))
+	fmt.Println("Redis Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "redis"))
+	fmt.Println("Auth Config:")
+	fmt.Println(gcfg.Instance().Get(ctx, "auth"))
+}
+
+type Nacos struct {
+	ip                                       string
+	namespace, dataId, group, configFilePath string
+	port                                     uint64
+}
+
+func SetupDefaultConfigs(ctx context.Context) {
 	// init default configs
 	config := g.Cfg().MustGet(ctx, ".").Map()
 	utility.Assert(config != nil, "config not found")
@@ -139,28 +168,6 @@ func Init() {
 	setUpDefaultConfig(authLoginConfig, "expire", authLoginExpire, 600)
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 	SetConfig(utility.MarshalToJsonString(config))
-
-	// print configs
-	fmt.Printf("Env:")
-	fmt.Println(gcfg.Instance().Get(ctx, "env"))
-	fmt.Printf("mode:")
-	fmt.Println(gcfg.Instance().Get(ctx, "mode"))
-	fmt.Println("Server Config:")
-	fmt.Println(gcfg.Instance().Get(ctx, "server"))
-	fmt.Println("Logger Config:")
-	fmt.Println(gcfg.Instance().Get(ctx, "logger"))
-	fmt.Println("Database Config:")
-	fmt.Println(gcfg.Instance().Get(ctx, "database"))
-	fmt.Println("Redis Config:")
-	fmt.Println(gcfg.Instance().Get(ctx, "redis"))
-	fmt.Println("Auth Config:")
-	fmt.Println(gcfg.Instance().Get(ctx, "auth"))
-}
-
-type Nacos struct {
-	ip                                       string
-	namespace, dataId, group, configFilePath string
-	port                                     uint64
 }
 
 func ReplaceConfigContentUserNacos(ip string, port uint64, namespace, dataId, group string) (n *Nacos, err error) {

@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SubscriptionPlanActivate(ctx context.Context, planId uint64) error {
+func PlanActivate(ctx context.Context, planId uint64) error {
 	//发布 Plan
 	utility.Assert(planId > 0, "invalid planId")
 	one := query.GetPlanById(ctx, planId)

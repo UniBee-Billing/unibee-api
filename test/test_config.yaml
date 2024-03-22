@@ -6,6 +6,7 @@ server:
 database:
   default:
     link:    "mysql:unib:hn02le34lkdLKD@tcp(api.unibee.top:13306)/unib?loc=UTC&parseTime=false"
+    debug: true
 
 # Redis Stage
 redis:

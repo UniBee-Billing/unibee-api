@@ -2,7 +2,8 @@
 
  # use gotestsum without installing
  # help: go run gotest.tools/gotestsum@latest --help
- go run gotest.tools/gotestsum@latest --format=testname >> ./test/out/report.txt
+# go run gotest.tools/gotestsum@latest --format=testname >> ./test/out/report.txt
+ go run gotest.tools/gotestsum@latest --format=testname
 # open ./test/out/report.txt
  # use go test
 # go test ./... -coverprofile=./test/out/coverage.out

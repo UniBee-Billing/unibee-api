@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"unibee/api/merchant/auth"
 	"unibee/internal/logic/email"
+	"unibee/internal/logic/merchant"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -28,14 +29,11 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	}
 
 	userStr, err := json.Marshal(
-		struct {
-			FirstName, LastName, Email, Password, Phone, Address, UserName string
-			MerchantId                                                     uint64
-		}{
+		&merchant.CreateMerchantInternalReq{
 			FirstName: req.FirstName,
 			LastName:  req.LastName,
 			Email:     req.Email,
-			Password:  utility.PasswordEncrypt(req.Password),
+			Password:  req.Password,
 			Phone:     req.Phone,
 			UserName:  req.UserName,
 		},

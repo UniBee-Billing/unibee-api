@@ -8,10 +8,10 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -19,7 +19,7 @@ import (
 	"unibee/utility"
 )
 
-func SubscriptionPlanPublish(ctx context.Context, planId uint64) (err error) {
+func PlanPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
@@ -33,7 +33,7 @@ func SubscriptionPlanPublish(ctx context.Context, planId uint64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
+func PlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
@@ -47,7 +47,29 @@ func SubscriptionPlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	return nil
 }
 
-func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.Plan, err error) {
+type PlanInternalReq struct {
+	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
+	PlanId             uint64                                  `json:"planId" dc:"PlanId" `
+	PlanName           string                                  `json:"planName" dc:"Plan Name"    `
+	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"  `
+	Currency           string                                  `json:"currency"   dc:"Plan Currency"`
+	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
+	Description        string                                  `json:"description"  dc:"Description"`
+	Type               int                                     `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan" `
+	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
+	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
+	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
+	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
+}
+
+func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
+	utility.Assert(req.MerchantId > 0, "merchantId invalid")
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -67,7 +89,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.
 			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "metric type invalid")
 		}
 	}
-	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
+	merchantInfo := query.GetMerchantById(ctx, req.MerchantId)
 	if len(req.ImageUrl) == 0 {
 		req.ImageUrl = merchantInfo.CompanyLogo
 	}
@@ -118,7 +140,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.
 
 	one = &entity.Plan{
 		CompanyId:                 merchantInfo.CompanyId,
-		MerchantId:                _interface.GetMerchantId(ctx),
+		MerchantId:                req.MerchantId,
 		PlanName:                  req.PlanName,
 		Amount:                    req.Amount,
 		Currency:                  strings.ToUpper(req.Currency),
@@ -139,7 +161,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		return nil, gerror.Newf(`SubscriptionPlanCreate record insert failure %s`, err)
+		return nil, gerror.Newf(`PlanCreate record insert failure %s`, err)
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
@@ -154,7 +176,7 @@ func SubscriptionPlanCreate(ctx context.Context, req *plan.NewReq) (one *entity.
 	return one, nil
 }
 
-func SubscriptionPlanEdit(ctx context.Context, req *plan.EditReq) (one *entity.Plan, err error) {
+func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
 	intervals := []string{"day", "month", "year", "week"}
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Amount > 0, "amount value should > 0")
@@ -234,7 +256,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *plan.EditReq) (one *entity.P
 		dao.Plan.Columns().GasPayer:                  req.GasPayer,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
-		return nil, gerror.Newf(`SubscriptionPlanEdit record insert failure %s`, err)
+		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)
 	}
 	if req.Metadata != nil {
 		_, _ = dao.Plan.Ctx(ctx).Data(g.Map{
@@ -264,7 +286,7 @@ func SubscriptionPlanEdit(ctx context.Context, req *plan.EditReq) (one *entity.P
 	return one, nil
 }
 
-func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
+func PlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
 	utility.Assert(planId > 0, "planId invlaid")
 	one = query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
@@ -280,7 +302,15 @@ func SubscriptionPlanDelete(ctx context.Context, planId uint64) (one *entity.Pla
 	return one, nil
 }
 
-func SubscriptionPlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *entity.Plan, err error) {
+func HardDeletePlan(ctx context.Context, planId uint64) error {
+	_, err := dao.Plan.Ctx(ctx).Where(dao.Plan.Columns().Id, planId).Delete()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *entity.Plan, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.Action >= 0 && req.Action <= 2, "action should 0-2")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")

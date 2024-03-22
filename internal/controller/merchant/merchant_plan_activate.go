@@ -20,7 +20,7 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 	service.PlanOrAddonIntervalVerify(ctx, req.PlanId)
 
 	//Activate Plan
-	err = service.SubscriptionPlanActivate(ctx, req.PlanId)
+	err = service.PlanActivate(ctx, req.PlanId)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *ControllerPlan) Activate(ctx context.Context, req *_plan.ActivateReq) (
 				service.PlanOrAddonIntervalVerify(ctx, addonPlan.Id)
 
 				//Activate Plan
-				err = service.SubscriptionPlanActivate(ctx, addonPlan.Id)
+				err = service.PlanActivate(ctx, addonPlan.Id)
 				if err != nil {
 					return nil, err
 				}

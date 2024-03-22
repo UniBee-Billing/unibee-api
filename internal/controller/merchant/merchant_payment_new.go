@@ -35,6 +35,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			user, err = auth.QueryOrCreateUser(ctx, &auth.NewReq{
 				ExternalUserId: req.ExternalUserId,
 				Email:          req.Email,
+				MerchantId:     merchantInfo.Id,
 			})
 			utility.AssertError(err, "Server Error")
 		} else {
