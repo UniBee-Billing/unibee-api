@@ -23,9 +23,9 @@ type EndpointListRes struct {
 
 type EndpointLogListReq struct {
 	g.Meta     `path:"/endpoint_log_list" tags:"Webhook" method:"get" summary:"Merchant Webhook Endpoint Log list"`
-	EndpointId int64 `json:"endpointId" dc:"EndpointId" v:"required"`
-	Page       int   `json:"page" dc:"Page, Start WIth 0" `
-	Count      int   `json:"count" dc:"Count Of Page" `
+	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
+	Page       int    `json:"page" dc:"Page, Start WIth 0" `
+	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
 type EndpointLogListRes struct {
