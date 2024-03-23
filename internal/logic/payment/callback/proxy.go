@@ -11,7 +11,6 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	payment2 "unibee/internal/consumer/webhook/payment"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/order/calllback"
 	"unibee/internal/logic/subscription/callback"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
@@ -274,7 +273,7 @@ func (p proxy) PaymentCancelCallback(ctx context.Context, payment *entity.Paymen
 func (p proxy) GetCallbackImpl() (one _interface.PaymentBizCallbackInterface) {
 	utility.Assert(p.BizType >= 0, "bizType is not set")
 	if p.BizType == consts.BizTypeOneTime {
-		return &calllback.MerchantOneTimePaymentCallback{}
+		return &Invalid{}
 	} else if p.BizType == consts.BizTypeSubscription {
 		return &callback.SubscriptionPaymentCallback{}
 	} else {
