@@ -22,6 +22,7 @@ var TestUser *entity.UserAccount
 var TestPlan *entity.Plan
 var TestRecurringAddon *entity.Plan
 var TestOneTimeAddon *entity.Plan
+var TestGateway *entity.MerchantGateway
 
 func init() {
 	ctx := context.Background()
@@ -69,6 +70,7 @@ func init() {
 	}
 	utility.Assert(TestOneTimeAddon != nil, "TestOneTimeAddon err")
 	utility.Assert(TestOneTimeAddon.MerchantId > 0, "TestOneTimeAddon err")
+	TestGateway = prepare.CreateTestGateway(ctx, TestMerchant.Id)
 }
 
 func AssertNotNil(value interface{}) {

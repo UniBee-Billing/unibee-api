@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerInvoice) List(ctx context.Context, req *merchantInvoice.ListReq) (res *merchantInvoice.ListRes, err error) {
-	internalResult, err := service.SubscriptionInvoiceList(ctx, &service.SubscriptionInvoiceListInternalReq{
+	internalResult, err := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
 		FirstName:     req.FirstName,
 		LastName:      req.LastName,
 		Currency:      req.Currency,

@@ -215,7 +215,6 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		return nil
 	}
 
-	// 支付宝存在 TRADE_FINISHED 交易完结  https://opendocs.alipay.com/open/02ekfj?ref=api
 	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")

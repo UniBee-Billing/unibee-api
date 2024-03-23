@@ -19,7 +19,7 @@ func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res
 		utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
 	}
 
-	internalResult, err := service.SubscriptionInvoiceList(ctx, &service.SubscriptionInvoiceListInternalReq{
+	internalResult, err := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
 		UserId:        req.UserId,
 		SendEmail:     req.SendEmail,

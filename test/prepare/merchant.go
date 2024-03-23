@@ -22,10 +22,13 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	merchantInfo := &entity.Merchant{
-		CompanyId: 0,
-		Phone:     "123456",
-		Host:      "autotest.unibee.top",
-		ApiKey:    utility.GenerateRandomAlphanumeric(32), //32 bit open api key
+		CompanyId:   0,
+		Phone:       "123456",
+		Host:        "autotest.unibee.top",
+		CompanyName: "Unibee_AutoTest",
+		CompanyLogo: "http://unibee.top/files/invoice/cm/czgryizwt00wwofira.png",
+		Email:       "jack.fu@wowow.io",
+		ApiKey:      utility.GenerateRandomAlphanumeric(32), //32 bit open api key
 	}
 	// transaction create Merchant
 	err := dao.Merchant.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {

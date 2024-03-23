@@ -10,7 +10,7 @@ import (
 	"unibee/utility"
 )
 
-type SubscriptionInvoiceListInternalReq struct {
+type InvoiceListInternalReq struct {
 	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	FirstName     string `json:"firstName" dc:"FirstName" `
 	LastName      string `json:"lastName" dc:"LastName" `
@@ -27,11 +27,11 @@ type SubscriptionInvoiceListInternalReq struct {
 	Count         int    `json:"count"  dc:"Count Of Page"`
 }
 
-type SubscriptionInvoiceListInternalRes struct {
+type InvoiceListInternalRes struct {
 	Invoices []*detail.InvoiceDetail `json:"invoices" dc:"Invoice Detail List"`
 }
 
-func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListInternalReq) (res *SubscriptionInvoiceListInternalRes, err error) {
+func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *InvoiceListInternalRes, err error) {
 	var mainList []*entity.Invoice
 	if req.Count <= 0 {
 		req.Count = 20
@@ -58,7 +58,6 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
 		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency))
-	//Where(dao.Invoice.Columns().SendEmail, req.SendEmail)
 	if len(req.SendEmail) > 0 {
 		query = query.WhereLike(dao.Invoice.Columns().SendEmail, "%"+req.SendEmail+"%")
 	}
@@ -102,7 +101,7 @@ func SubscriptionInvoiceList(ctx context.Context, req *SubscriptionInvoiceListIn
 		resultList = append(resultList, detail.ConvertInvoiceToDetail(ctx, invoice))
 	}
 
-	return &SubscriptionInvoiceListInternalRes{Invoices: resultList}, nil
+	return &InvoiceListInternalRes{Invoices: resultList}, nil
 }
 
 func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.InvoiceSimplify, err error) {

@@ -66,7 +66,15 @@ func checkInvoice(one *detail.InvoiceDetail) {
 	utility.Assert(one.TotalAmount == totalAmount, "line totalAmount mistake")
 }
 
-func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRes, err error) {
+func InvoiceDetail(ctx context.Context, invoiceId string) *detail.InvoiceDetail {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	if one != nil {
+		return detail.ConvertInvoiceToDetail(ctx, one)
+	}
+	return nil
+}
+
+func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) (res *invoice.NewRes, err error) {
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
@@ -96,8 +104,8 @@ func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRe
 
 	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
-		BizType:                        consts.BizTypeSubscription,
-		MerchantId:                     _interface.GetMerchantId(ctx),
+		BizType:                        consts.BizTypeInvoice,
+		MerchantId:                     merchantId,
 		InvoiceId:                      invoiceId,
 		InvoiceName:                    req.Name,
 		UniqueId:                       invoiceId,
@@ -179,7 +187,6 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	}
 	var totalAmount = totalTax + totalAmountExcludingTax
 
-	//更新 Subscription
 	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().BizType:                        consts.BizTypeSubscription,
 		dao.Invoice.Columns().InvoiceName:                    req.Name,
@@ -198,10 +205,6 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	if err != nil {
 		return nil, err
 	}
-	//rowAffected, err := update.RowsAffected()
-	//if rowAffected != 1 {
-	//	return nil, gerror.Newf("EditInvoice update err:%s", update)
-	//}
 	one.Currency = req.Currency
 	one.TaxScale = req.TaxScale
 	one.GatewayId = req.GatewayId
@@ -250,20 +253,27 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
-	utility.Assert(len(one.PaymentId) > 0, "invoice payment not found")
-	if one.IsDeleted == 1 {
-		return nil
-	} else {
-		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-		utility.Assert(payment != nil, "payment not found")
-		gateway := query.GetGatewayById(ctx, one.GatewayId)
-		utility.Assert(gateway != nil, "gateway not found")
-		err := service.PaymentGatewayCancel(ctx, payment)
+	invoiceStatus := consts.InvoiceStatusCancelled
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().Status:    invoiceStatus,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	one.Status = invoiceStatus
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	if payment != nil {
+		err = service.PaymentGatewayCancel(ctx, payment)
 		if err != nil {
 			g.Log().Errorf(ctx, `PaymentGatewayCancel failure %s`, err.Error())
 		}
 		return err
 	}
+	return nil
+
 }
 
 func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.FinishRes, error) {
@@ -330,6 +340,14 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 			}
 		}
 	}
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
 	return refund, nil
+}
+
+func HardDeleteInvoice(ctx context.Context, merchantId uint64, invoiceId string) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
+	_, err := dao.Invoice.Ctx(ctx).Where(dao.Invoice.Columns().InvoiceId, invoiceId).Delete()
+	return err
 }
