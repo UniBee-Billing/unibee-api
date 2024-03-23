@@ -123,7 +123,7 @@ type CreatePreviewRes struct {
 	TotalAmount       int64                   `json:"totalAmount"                `
 	Currency          string                  `json:"currency"              `
 	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
-	UserId            int64                   `json:"userId" `
+	UserId            uint64                  `json:"userId" `
 	Email             string                  `json:"email" `
 	VatCountryCode    string                  `json:"vatCountryCode"              `
 	VatCountryName    string                  `json:"vatCountryName"              `
@@ -193,7 +193,7 @@ type UpdateRes struct {
 
 type UserSubscriptionDetailReq struct {
 	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"Subscription Detail"`
-	UserId int64 `json:"userId" dc:"UserId" v:"required"`
+	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
 }
 
 type UserSubscriptionDetailRes struct {

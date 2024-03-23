@@ -12,7 +12,7 @@ import (
 type Invoice struct {
 	Id                             uint64      `json:"id"                             description:""`                                                                       //
 	MerchantId                     uint64      `json:"merchantId"                     description:"merchant_id"`                                                            // merchant_id
-	UserId                         int64       `json:"userId"                         description:"userId"`                                                                 // userId
+	UserId                         uint64      `json:"userId"                         description:"userId"`                                                                 // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 description:"subscription_id"`                                                        // subscription_id
 	InvoiceId                      string      `json:"invoiceId"                      description:"invoice_id"`                                                             // invoice_id
 	InvoiceName                    string      `json:"invoiceName"                    description:"invoice name"`                                                           // invoice name

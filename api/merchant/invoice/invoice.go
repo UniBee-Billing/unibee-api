@@ -59,7 +59,7 @@ type ListRes struct {
 
 type NewReq struct {
 	g.Meta    `path:"/new" tags:"Invoice" method:"post" summary:"Admin Create New Invoice"`
-	UserId    int64                  `json:"userId" dc:"UserId" v:"required"`
+	UserId    uint64                 `json:"userId" dc:"UserId" v:"required"`
 	TaxScale  int64                  `json:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
 	GatewayId uint64                 `json:"gatewayId" dc:"Gateway Id"   v:"required" `
 	Currency  string                 `json:"currency"   dc:"Currency" v:"required" `

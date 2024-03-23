@@ -13,7 +13,7 @@ type Refund struct {
 	Id                   int64       `json:"id"                   description:"id"`                                                 // id
 	CompanyId            int64       `json:"companyId"            description:"company id"`                                         // company id
 	MerchantId           uint64      `json:"merchantId"           description:"merchant id"`                                        // merchant id
-	UserId               int64       `json:"userId"               description:"user_id"`                                            // user_id
+	UserId               uint64      `json:"userId"               description:"user_id"`                                            // user_id
 	OpenApiId            int64       `json:"openApiId"            description:"open api id"`                                        // open api id
 	GatewayId            uint64      `json:"gatewayId"            description:"gateway_id"`                                         // gateway_id
 	BizType              int         `json:"bizType"              description:"biz type, copy from payment.biz_type"`               // biz type, copy from payment.biz_type

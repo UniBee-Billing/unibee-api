@@ -17,7 +17,7 @@ type SubscriptionDetail struct {
 
 type SubscriptionTimeLineDetail struct {
 	MerchantId      uint64                  `json:"merchantId"      description:"merchant id"`             // merchant id
-	UserId          int64                   `json:"userId"          description:"userId"`                  // userId
+	UserId          uint64                  `json:"userId"          description:"userId"`                  // userId
 	SubscriptionId  string                  `json:"subscriptionId"  description:"subscription id"`         // subscription id
 	PeriodStart     int64                   `json:"periodStart"     description:"period_start"`            // period_start
 	PeriodEnd       int64                   `json:"periodEnd"       description:"period_end"`              // period_end
@@ -52,7 +52,7 @@ type SubscriptionPendingUpdateDetail struct {
 	AddonData            string                       `json:"addonData"            description:"plan addon json data"`
 	UpdateAddonData      string                       `json:"updateAddonData"     description:"UpdateAddonData"`
 	GatewayId            uint64                       `json:"gatewayId"            description:"Id"`
-	UserId               int64                        `json:"userId"               description:"UserId"`
+	UserId               uint64                       `json:"userId"               description:"UserId"`
 	GmtModify            *gtime.Time                  `json:"gmtModify"            description:"GmtModify"`
 	Paid                 int                          `json:"paid"                 description:"Paid"`
 	Link                 string                       `json:"link"                 description:"Link"`

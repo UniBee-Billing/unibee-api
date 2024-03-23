@@ -18,7 +18,7 @@ type MerchantMetricPlanLimit struct {
 
 type PlanMetricLimitDetail struct {
 	MerchantId          uint64
-	UserId              int64
+	UserId              uint64
 	MetricId            uint64
 	Code                string `json:"code"                description:"code"`                                                                        // code
 	MetricName          string `json:"metricName"          description:"metric name"`                                                                 // metric name

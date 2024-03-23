@@ -9,7 +9,7 @@ import (
 type PaymentSimplify struct {
 	PaymentId         string            `json:"paymentId"              description:"payment id"`                                                             // payment id
 	MerchantId        uint64            `json:"merchantId"             description:"merchant id"`                                                            // merchant id
-	UserId            int64             `json:"userId"                 description:"user_id"`                                                                // user_id
+	UserId            uint64            `json:"userId"                 description:"user_id"`                                                                // user_id
 	SubscriptionId    string            `json:"subscriptionId"         description:"subscription id"`                                                        // subscription id
 	ExternalPaymentId string            `json:"externalPaymentId"      description:"external_payment_id"`                                                    // external_payment_id
 	Currency          string            `json:"currency"               description:"currency，“SGD” “MYR” “PHP” “IDR” “THB”"`                                 // currency，“SGD” “MYR” “PHP” “IDR” “THB”
@@ -91,7 +91,7 @@ func SimplifyPaymentList(ones []*entity.Payment) (list []*PaymentSimplify) {
 type PaymentTimelineSimplify struct {
 	Id             uint64 `json:"id"             description:""`                                //
 	MerchantId     uint64 `json:"merchantId"     description:"merchant id"`                     // merchant id
-	UserId         int64  `json:"userId"         description:"userId"`                          // userId
+	UserId         uint64 `json:"userId"         description:"userId"`                          // userId
 	SubscriptionId string `json:"subscriptionId" description:"subscription id"`                 // subscription id
 	InvoiceId      string `json:"invoiceId"      description:"invoice id"`                      // invoice id
 	Currency       string `json:"currency"       description:"currency"`                        // currency

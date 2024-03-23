@@ -14,7 +14,7 @@ type Payment struct {
 	CompanyId              int64       `json:"companyId"              description:"company id"`                                                             // company id
 	MerchantId             uint64      `json:"merchantId"             description:"merchant id"`                                                            // merchant id
 	OpenApiId              int64       `json:"openApiId"              description:"open api id"`                                                            // open api id
-	UserId                 int64       `json:"userId"                 description:"user_id"`                                                                // user_id
+	UserId                 uint64      `json:"userId"                 description:"user_id"`                                                                // user_id
 	SubscriptionId         string      `json:"subscriptionId"         description:"subscription id"`                                                        // subscription id
 	GmtCreate              *gtime.Time `json:"gmtCreate"              description:"create time"`                                                            // create time
 	GmtModify              *gtime.Time `json:"gmtModify"              description:"update time"`                                                            // update time

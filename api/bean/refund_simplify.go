@@ -8,7 +8,7 @@ import (
 
 type RefundSimplify struct {
 	MerchantId       uint64            `json:"merchantId"           description:"merchant id"`                                        // merchant id
-	UserId           int64             `json:"userId"               description:"user_id"`                                            // user_id
+	UserId           uint64            `json:"userId"               description:"user_id"`                                            // user_id
 	GatewayId        uint64            `json:"gatewayId"            description:"gateway_id"`                                         // gateway_id
 	ExternalRefundId string            `json:"externalRefundId"     description:"external_refund_id"`                                 // external_refund_id
 	CountryCode      string            `json:"countryCode"          description:"country code"`                                       // country code

@@ -227,7 +227,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			BillingReason:     invoice.InvoiceName,
 			GasPayer:          sub.GasPayer,
 		},
-		ExternalUserId:       strconv.FormatInt(sub.UserId, 10),
+		ExternalUserId:       strconv.FormatUint(sub.UserId, 10),
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
 		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},

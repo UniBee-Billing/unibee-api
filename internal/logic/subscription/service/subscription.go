@@ -126,7 +126,7 @@ type CreatePreviewInternalRes struct {
 	TaxScale          int64                   `json:"taxScale"              `
 	VatVerifyData     string                  `json:"vatVerifyData"              `
 	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
-	UserId            int64                   `json:"userId" `
+	UserId            uint64                  `json:"userId" `
 	Email             string                  `json:"email" `
 	VatCountryRate    *bean.VatCountryRate    `json:"vatCountryRate" `
 	Gateways          []*bean.GatewaySimplify `json:"gateways" `
@@ -172,7 +172,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(user != nil, "user not found")
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(req.UserId), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
 	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
@@ -254,7 +254,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumberValidate: vatNumberValidate,
 		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
-		UserId:            int64(_interface.Context().Get(ctx).User.Id),
+		UserId:            _interface.Context().Get(ctx).User.Id,
 		Email:             user.Email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,
@@ -366,7 +366,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				ReturnUrl:         req.ReturnUrl,
 				GasPayer:          prepare.Plan.GasPayer,
 			},
-			ExternalUserId: strconv.FormatInt(one.UserId, 10),
+			ExternalUserId: strconv.FormatUint(one.UserId, 10),
 			Email:          prepare.Email,
 			Invoice:        bean.SimplifyInvoice(invoice),
 			Metadata:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
@@ -427,7 +427,7 @@ type UpdatePreviewInternalRes struct {
 	Addons            []*bean.PlanAddonDetail `json:"addons"`
 	TotalAmount       int64                   `json:"totalAmount"                `
 	Currency          string                  `json:"currency"              `
-	UserId            int64                   `json:"userId" `
+	UserId            uint64                  `json:"userId" `
 	OldPlan           *entity.Plan            `json:"oldPlan"`
 	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
 	NextPeriodInvoice *bean.InvoiceSimplify   `json:"nextPeriodInvoice"`

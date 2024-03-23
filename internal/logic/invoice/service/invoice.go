@@ -67,7 +67,7 @@ func checkInvoice(one *detail.InvoiceDetail) {
 }
 
 func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRes, err error) {
-	user := query.GetUserAccountById(ctx, uint64(req.UserId))
+	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
@@ -94,7 +94,6 @@ func CreateInvoice(ctx context.Context, req *invoice.NewReq) (res *invoice.NewRe
 	}
 	var totalAmount = totalTax + totalAmountExcludingTax
 
-	//创建
 	invoiceId := utility.CreateInvoiceId()
 	one := &entity.Invoice{
 		BizType:                        consts.BizTypeSubscription,
@@ -232,7 +231,6 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 	if one.IsDeleted == 1 {
 		return nil
 	} else {
-		//更新 Subscription
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().IsDeleted: 1,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),

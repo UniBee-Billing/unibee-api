@@ -12,7 +12,7 @@ import (
 type SubscriptionTimeline struct {
 	Id              uint64      `json:"id"              description:""`                        //
 	MerchantId      uint64      `json:"merchantId"      description:"merchant id"`             // merchant id
-	UserId          int64       `json:"userId"          description:"userId"`                  // userId
+	UserId          uint64      `json:"userId"          description:"userId"`                  // userId
 	SubscriptionId  string      `json:"subscriptionId"  description:"subscription id"`         // subscription id
 	PeriodStart     int64       `json:"periodStart"     description:"period_start"`            // period_start
 	PeriodEnd       int64       `json:"periodEnd"       description:"period_end"`              // period_end

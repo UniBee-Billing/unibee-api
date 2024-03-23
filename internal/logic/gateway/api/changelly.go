@@ -124,7 +124,7 @@ func (c Changelly) GatewayUserCreate(ctx context.Context, gateway *entity.Mercha
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (c Changelly) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -132,11 +132,11 @@ func (c Changelly) GatewayMerchantBalancesQuery(ctx context.Context, gateway *en
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
+func (c Changelly) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
+func (c Changelly) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -168,7 +168,7 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 	return &gateway_bean.GatewayUserPaymentMethodListResp{PaymentMethods: paymentMethods}, nil
 }
 
-func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 
@@ -186,7 +186,7 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 		"title":                "",
 		"description":          "",
 		"order_id":             createPayContext.Pay.PaymentId,
-		"customer_id":          strconv.FormatInt(createPayContext.Pay.UserId, 10),
+		"customer_id":          strconv.FormatUint(createPayContext.Pay.UserId, 10),
 		"customer_email":       createPayContext.Email,
 		"success_redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
 		"failure_redirect_url": webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),

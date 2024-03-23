@@ -22,7 +22,7 @@ func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.C
 	utility.Assert(len(req.SubscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.UserId == int64(_interface.Context().Get(ctx).User.Id), "no permission")
+	utility.Assert(sub.UserId == _interface.Context().Get(ctx).User.Id, "no permission")
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status == consts.SubStatusCreate, "subscription not in create status")
 

@@ -12,7 +12,7 @@ import (
 	"unibee/utility"
 )
 
-func SendMerchantUserMetricWebhookBackground(userId int64, event event.MerchantWebhookEvent) {
+func SendMerchantUserMetricWebhookBackground(userId uint64, event event.MerchantWebhookEvent) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -27,7 +27,7 @@ func SendMerchantUserMetricWebhookBackground(userId int64, event event.MerchantW
 				return
 			}
 		}()
-		user := query.GetUserAccountById(ctx, uint64(userId))
+		user := query.GetUserAccountById(ctx, userId)
 		if user != nil {
 			userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user)
 			utility.AssertError(err, "SendMerchantUserMetricWebhookBackground Error")

@@ -125,7 +125,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		Pay: &entity.Payment{
 			ExternalPaymentId: req.ExternalPaymentId,
 			BizType:           consts.BizTypeOneTime,
-			UserId:            int64(user.Id),
+			UserId:            user.Id,
 			GatewayId:         gateway.Id,
 			TotalAmount:       req.TotalAmount,
 			Currency:          req.Currency,

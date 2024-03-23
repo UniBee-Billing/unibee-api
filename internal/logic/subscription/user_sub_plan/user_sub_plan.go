@@ -19,7 +19,7 @@ const (
 
 type UserSubPlan struct {
 	MerchantId              uint64
-	UserId                  int64
+	UserId                  uint64
 	PlanId                  uint64
 	PlanType                int
 	Quantity                int64
@@ -28,7 +28,7 @@ type UserSubPlan struct {
 	SubscriptionPeriodEnd   int64
 }
 
-func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription, reloadCache bool) []*UserSubPlan {
+func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, userId uint64, sub *entity.Subscription, reloadCache bool) []*UserSubPlan {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(userId > 0, "invalid userId")
 	if sub == nil {
@@ -82,7 +82,7 @@ func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, user
 	return list
 }
 
-func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId int64) {
+func ReloadUserSubPlanCacheListBackground(merchantId uint64, userId uint64) {
 	go func() {
 		ctx := context.Background()
 		var err error

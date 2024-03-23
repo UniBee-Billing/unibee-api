@@ -78,7 +78,7 @@ type GatewayCryptoToCurrencyAmountDetailRes struct {
 }
 
 type GatewayPaymentListReq struct {
-	UserId int64 `json:"userId"         `
+	UserId uint64 `json:"userId"         `
 }
 
 // GatewayPaymentRo is the golang structure for table oversea_pay.
@@ -140,7 +140,7 @@ type GatewayUserDeAttachPaymentMethodResp struct {
 }
 
 type GatewayUserPaymentMethodReq struct {
-	UserId           int64  `json:"userId"`
+	UserId           uint64 `json:"userId"`
 	GatewayPaymentId string `json:"gatewayPaymentId"`
 }
 

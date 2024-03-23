@@ -2,32 +2,25 @@ package service
 
 import (
 	"context"
-	"fmt"
-	"github.com/gogf/gf/v2/test/gtest"
+	"github.com/stretchr/testify/require"
 	"testing"
-	"unibee/internal/query"
-	_test "unibee/test"
+	"unibee/api/merchant/invoice"
+	"unibee/test"
 )
 
-func TestGetSubscription(t *testing.T) {
-	gtest.C(t, func(t *gtest.T) {
-		one := query.GetSubscriptionBySubscriptionId(context.Background(), "sub202402045lnIGlOvznJmSSI")
-		_test.AssertNotNil(one)
-		t.Assert(one.SubscriptionId, "sub202402045lnIGlOvznJmSSI")
+func TestInvoice(t *testing.T) {
+	ctx := context.Background()
+	t.Run("Test for invoice create|edit", func(t *testing.T) {
+		res, err := CreateInvoice(ctx, &invoice.NewReq{
+			UserId:    test.TestUser.Id,
+			TaxScale:  0,
+			GatewayId: 0,
+			Currency:  "USD",
+			Name:      "test_invoice",
+			Lines:     nil,
+			Finish:    false,
+		})
+		require.Nil(t, err)
+		require.NotNil(t, res)
 	})
-}
-
-//func TestCancelInvoice(t *testing.T) {
-//	gtest.C(t, func(t *gtest.T) {
-//		err := CancelProcessingInvoice(context.Background(), "ddddd")
-//		_test.AssertNotNil(err)
-//	})
-//}
-
-func setup() {
-	fmt.Println("Before all tests")
-}
-
-func teardown() {
-	fmt.Println("After all tests")
 }

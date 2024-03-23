@@ -15,7 +15,7 @@ import (
 func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
 	// return one latest user subscription list as unique subscription
 	var subDetails []*detail.SubscriptionDetail
-	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.Context().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
+	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx))
 	if sub != nil {
 		subDetailRes, err := service.SubscriptionDetail(ctx, sub.SubscriptionId)
 		if err == nil {

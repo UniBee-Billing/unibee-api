@@ -18,7 +18,7 @@ type DetailQueryRes struct {
 
 type UserDetailQueryReq struct {
 	g.Meta    `path:"/user_balance_query" tags:"Balance" method:"get,post" summary:"Query User Balance"`
-	UserId    int64  `json:"userId" dc:"userId" v:"required"`
+	UserId    uint64 `json:"userId" dc:"userId" v:"required"`
 	GatewayId uint64 `json:"gatewayId" dc:"gatewayId" v:"required"`
 }
 

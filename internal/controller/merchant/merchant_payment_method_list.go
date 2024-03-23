@@ -26,7 +26,7 @@ func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodL
 		}
 	}
 	listQuery, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
-		UserId:           int64(req.UserId),
+		UserId:           req.UserId,
 		GatewayPaymentId: gatewayPaymentId,
 	})
 	if err != nil {

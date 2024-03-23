@@ -8,7 +8,7 @@ import (
 	"unibee/internal/query"
 )
 
-func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId int64, subscriptionId string) {
+func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, subscriptionId string) {
 	if userId > 0 && len(subscriptionId) > 0 {
 		one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 		user := query.GetUserAccountById(ctx, uint64(userId))
@@ -25,10 +25,10 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId int64, s
 	}
 }
 
-func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId int64, subscriptionId string) {
+func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId uint64, subscriptionId string) {
 	if userId > 0 && len(subscriptionId) > 0 {
 		one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-		user := query.GetUserAccountById(ctx, uint64(userId))
+		user := query.GetUserAccountById(ctx, userId)
 		var subName = ""
 		if one != nil && user != nil {
 			plan := query.GetPlanById(ctx, one.PlanId)
@@ -50,7 +50,7 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 	}
 }
 
-func UpdateUserDefaultVatNumber(ctx context.Context, userId int64, vatNumber string) {
+func UpdateUserDefaultVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 	if userId > 0 && len(vatNumber) > 0 {
 		_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().VATNumber: vatNumber,

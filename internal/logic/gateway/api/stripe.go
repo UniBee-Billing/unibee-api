@@ -50,7 +50,7 @@ func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (ico
 	return "http://unibee.top/files/invoice/stripe.png", consts.GatewayTypeDefault, result.Err()
 }
 
-func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
+func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -65,7 +65,7 @@ func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway
 	return &gateway_bean.GatewayUserAttachPaymentMethodResp{}, nil
 }
 
-func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
+func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -77,7 +77,7 @@ func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatew
 	return &gateway_bean.GatewayUserDeAttachPaymentMethodResp{}, nil
 }
 
-func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -121,7 +121,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	utility.Assert(req.UserId > 0, "userId is nil")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, int64(req.UserId))
+	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, req.UserId)
 
 	params := &stripe.CustomerListPaymentMethodsParams{
 		Customer: stripe.String(gatewayUser.GatewayUserId),
@@ -262,7 +262,7 @@ func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entit
 	}, nil
 }
 
-func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId int64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
+func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()

@@ -60,7 +60,7 @@ func InvoiceLinkEntry(r *ghttp.Request) {
 					CompanyId:         merchantInfo.CompanyId,
 					BillingReason:     one.InvoiceName,
 				},
-				ExternalUserId: strconv.FormatInt(one.UserId, 10),
+				ExternalUserId: strconv.FormatUint(one.UserId, 10),
 				Email:          user.Email,
 				Invoice:        bean.SimplifyInvoice(one),
 				Metadata:       map[string]string{"BillingReason": one.InvoiceName},

@@ -12,7 +12,7 @@ import (
 type PaymentTimeline struct {
 	Id             uint64      `json:"id"             description:""`                                //
 	MerchantId     uint64      `json:"merchantId"     description:"merchant id"`                     // merchant id
-	UserId         int64       `json:"userId"         description:"userId"`                          // userId
+	UserId         uint64      `json:"userId"         description:"userId"`                          // userId
 	SubscriptionId string      `json:"subscriptionId" description:"subscription id"`                 // subscription id
 	InvoiceId      string      `json:"invoiceId"      description:"invoice id"`                      // invoice id
 	UniqueId       string      `json:"uniqueId"       description:"unique id"`                       // unique id

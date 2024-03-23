@@ -7,10 +7,10 @@ import (
 	"unibee/utility"
 )
 
-func QueryAndCreateChannelUser(ctx context.Context, gateway *entity.MerchantGateway, userId int64) *entity.GatewayUser {
+func QueryAndCreateChannelUser(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) *entity.GatewayUser {
 	gatewayUser := query.GetGatewayUser(ctx, userId, gateway.Id)
 	if gatewayUser == nil {
-		user := query.GetUserAccountById(ctx, uint64(userId))
+		user := query.GetUserAccountById(ctx, userId)
 		utility.Assert(user != nil, "user not found")
 		utility.Assert(len(user.Email) > 0, "invalid user email")
 		create, err := GetGatewayServiceProvider(ctx, gateway.Id).GatewayUserCreate(ctx, gateway, user)
@@ -32,7 +32,7 @@ func QueryAndCreateChannelUser(ctx context.Context, gateway *entity.MerchantGate
 	}
 }
 
-func QueryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId int64) *entity.GatewayUser {
+func QueryAndCreateChannelUserWithOutPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) *entity.GatewayUser {
 	gatewayUser := query.GetGatewayUser(ctx, userId, gateway.Id)
 	if gatewayUser == nil {
 		user := query.GetUserAccountById(ctx, uint64(userId))

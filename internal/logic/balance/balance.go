@@ -8,7 +8,7 @@ import (
 	"unibee/utility"
 )
 
-func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId int64, gatewayId uint64) (*gateway_bean.GatewayUserDetailQueryResp, error) {
+func UserBalanceDetailQuery(ctx context.Context, merchantId uint64, userId uint64, gatewayId uint64) (*gateway_bean.GatewayUserDetailQueryResp, error) {
 	user := query.GetUserAccountById(ctx, uint64(userId))
 	merchant := query.GetMerchantById(ctx, merchantId)
 	gateway := query.GetGatewayById(ctx, uint64(gatewayId))

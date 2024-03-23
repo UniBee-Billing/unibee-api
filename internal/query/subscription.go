@@ -32,7 +32,7 @@ func GetLatestActiveOrIncompleteSubscriptionByUserId(ctx context.Context, userId
 	return
 }
 
-func GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx context.Context, userId int64, merchantId uint64) (one *entity.Subscription) {
+func GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil
 	}
