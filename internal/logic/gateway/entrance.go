@@ -10,10 +10,6 @@ func GetPaymentWebhookEntranceUrl(gatewayId uint64) string {
 	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", config.GetConfigInstance().Server.GetServerPath(), gatewayId)
 }
 
-//func GetPaymentWebhookEntranceUrlByPay(pay *entity.OverseaPay) string {
-//	return fmt.Sprintf("%s/payment/gateway_webhook_entry/%d/notifications", consts.GetConfigInstance().HostPath, pay.Id)
-//}
-
 func GetPaymentRedirectEntranceUrl(pay *entity.Payment) string {
 	return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId)
 }
@@ -24,8 +20,4 @@ func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) st
 	} else {
 		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
 	}
-}
-
-func GetSubscriptionRedirectEntranceUrl(subscription *entity.Subscription, success bool) string {
-	return fmt.Sprintf("%s/payment/redirect/%d/forward?subId=%v&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), subscription.GatewayId, subscription.SubscriptionId, success)
 }

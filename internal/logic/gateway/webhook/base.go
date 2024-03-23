@@ -16,7 +16,7 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 		// PaymentIntent Under UniBee Control
 		payment := query.GetPaymentByPaymentId(ctx, metaPaymentId)
 		if payment != nil {
-			paymentIntentDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, gatewayPaymentId)
+			paymentIntentDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, gatewayPaymentId, payment)
 			if err != nil {
 				return err
 			}
@@ -33,7 +33,7 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 				Reason:               paymentIntentDetail.Reason,
 				CancelReason:         paymentIntentDetail.CancelReason,
 				PaymentData:          paymentIntentDetail.PaymentData,
-				PayTime:              paymentIntentDetail.PayTime,
+				PaidTime:             paymentIntentDetail.PaidTime,
 				CreateTime:           paymentIntentDetail.CreateTime,
 				CancelTime:           paymentIntentDetail.CancelTime,
 				GatewayPaymentId:     paymentIntentDetail.GatewayPaymentId,
@@ -54,7 +54,7 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 }
 
 func ProcessRefundWebhook(ctx context.Context, eventType string, gatewayRefundId string, gateway *entity.MerchantGateway) error {
-	refundDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayRefundDetail(ctx, gateway, gatewayRefundId)
+	refundDetail, err := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayRefundDetail(ctx, gateway, gatewayRefundId, nil)
 	if err != nil {
 		return err
 	}

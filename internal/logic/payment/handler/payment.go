@@ -461,7 +461,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_be
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
 				TotalAmount:            gatewayPaymentRo.TotalAmount,
 				PayStatusEnum:          consts.PaymentSuccess,
-				PaidTime:               gatewayPaymentRo.PayTime,
+				PaidTime:               gatewayPaymentRo.PaidTime,
 				PaymentAmount:          gatewayPaymentRo.PaymentAmount,
 				CaptureAmount:          0,
 				Reason:                 gatewayPaymentRo.Reason,

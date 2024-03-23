@@ -319,7 +319,7 @@ func (p GatewayProxy) GatewayPaymentList(ctx context.Context, gateway *entity.Me
 	return res, err
 }
 
-func (p GatewayProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
+func (p GatewayProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -332,7 +332,7 @@ func (p GatewayProxy) GatewayPaymentDetail(ctx context.Context, gateway *entity.
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayPaymentDetail(ctx, gateway, gatewayPaymentId)
+	res, err = p.getRemoteGateway().GatewayPaymentDetail(ctx, gateway, gatewayPaymentId, payment)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayPaymentDetail cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())
@@ -361,7 +361,7 @@ func (p GatewayProxy) GatewayRefund(ctx context.Context, pay *entity.Payment, re
 	return res, err
 }
 
-func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -374,7 +374,7 @@ func (p GatewayProxy) GatewayRefundDetail(ctx context.Context, gateway *entity.M
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayRefundDetail(ctx, gateway, gatewayRefundId)
+	res, err = p.getRemoteGateway().GatewayRefundDetail(ctx, gateway, gatewayRefundId, refund)
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayRefundDetail cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {
 		err = gerror.NewCode(utility.GatewayError, err.Error())

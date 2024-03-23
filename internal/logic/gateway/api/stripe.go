@@ -209,7 +209,7 @@ func (s Stripe) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 	return list, nil
 }
 
-func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
+func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -666,7 +666,7 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	}, nil
 }
 
-func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (s Stripe) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, one *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
@@ -755,7 +755,7 @@ func parseStripePayment(item *stripe.PaymentIntent) *gateway_bean.GatewayPayment
 		PaymentAmount:        item.AmountReceived,
 		GatewayPaymentMethod: gatewayPaymentMethod,
 		Currency:             strings.ToUpper(string(item.Currency)),
-		PayTime:              gtime.NewFromTimeStamp(item.Created),
+		PaidTime:             gtime.NewFromTimeStamp(item.Created),
 		CreateTime:           gtime.NewFromTimeStamp(item.Created),
 		CancelTime:           gtime.NewFromTimeStamp(item.CanceledAt),
 	}

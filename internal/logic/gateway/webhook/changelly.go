@@ -90,7 +90,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 			} else {
 				returnUrl = payment.ReturnUrl
 				//find
-				paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, payment.GatewayPaymentId)
+				paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, payment.GatewayPaymentId, payment)
 				if err != nil {
 					response = fmt.Sprintf("%v", err)
 				} else {
@@ -101,7 +101,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 							GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 							TotalAmount:            paymentIntentDetail.TotalAmount,
 							PayStatusEnum:          consts.PaymentSuccess,
-							PaidTime:               paymentIntentDetail.PayTime,
+							PaidTime:               paymentIntentDetail.PaidTime,
 							PaymentAmount:          paymentIntentDetail.PaymentAmount,
 							Reason:                 paymentIntentDetail.Reason,
 							GatewayPaymentMethod:   paymentIntentDetail.GatewayPaymentMethod,

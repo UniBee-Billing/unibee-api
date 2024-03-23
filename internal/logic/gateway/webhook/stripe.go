@@ -293,7 +293,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 					if strings.Compare(result.Customer.ID, gatewayUser.GatewayUserId) != 0 {
 						response = "user not match"
 					} else if strings.Compare(string(result.Status), "complete") == 0 && result.PaymentIntent != nil && len(result.PaymentIntent.ID) > 0 {
-						paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, result.PaymentIntent.ID)
+						paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, result.PaymentIntent.ID, payment)
 						if err != nil {
 							response = fmt.Sprintf("%v", err)
 						} else {
@@ -304,7 +304,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 									GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 									TotalAmount:            paymentIntentDetail.TotalAmount,
 									PayStatusEnum:          consts.PaymentSuccess,
-									PaidTime:               paymentIntentDetail.PayTime,
+									PaidTime:               paymentIntentDetail.PaidTime,
 									PaymentAmount:          paymentIntentDetail.PaymentAmount,
 									Reason:                 paymentIntentDetail.Reason,
 									GatewayPaymentMethod:   paymentIntentDetail.GatewayPaymentMethod,
@@ -457,7 +457,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	}
 
 	if len(invoiceDetails.GatewayPaymentId) > 0 {
-		paymentIntentDetail, _ := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, invoiceDetails.GatewayPaymentId)
+		paymentIntentDetail, _ := api.GetGatewayServiceProvider(ctx, gateway.Id).GatewayPaymentDetail(ctx, gateway, invoiceDetails.GatewayPaymentId, nil)
 		if paymentIntentDetail != nil {
 			authorizeReason = paymentIntentDetail.AuthorizeReason
 			cancelReason = paymentIntentDetail.CancelReason
@@ -478,7 +478,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		Reason:               invoiceDetails.Reason,
 		CancelReason:         cancelReason,
 		PaymentData:          paymentData,
-		PayTime:              gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
+		PaidTime:             gtime.NewFromTimeStamp(invoiceDetails.PaymentTime),
 		CreateTime:           gtime.NewFromTimeStamp(invoiceDetails.CreateTime),
 		CancelTime:           gtime.NewFromTimeStamp(invoiceDetails.CancelTime),
 		GatewayPaymentId:     invoiceDetails.GatewayPaymentId,

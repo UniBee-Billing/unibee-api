@@ -11,8 +11,7 @@ type AutoTestWebhook struct {
 }
 
 func (b AutoTestWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil
 }
 
 func (b AutoTestWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {

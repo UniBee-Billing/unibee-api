@@ -228,7 +228,7 @@ func (c Changelly) GatewayPaymentList(ctx context.Context, gateway *entity.Merch
 	return nil, gerror.New("Not Support")
 }
 
-func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res *gateway_bean.GatewayPaymentRo, err error) {
+func (c Changelly) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
 	urlPath := "/api/payment/v1/payments/" + gatewayPaymentId
 	param := map[string]interface{}{}
 	responseJson, err := SendChangellyPaymentRequest(ctx, gateway.GatewayKey, gateway.GatewaySecret, "GET", urlPath, param)
@@ -249,7 +249,7 @@ func (c Changelly) GatewayRefundList(ctx context.Context, gateway *entity.Mercha
 	panic("implement me")
 }
 
-func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -309,7 +309,7 @@ func parseChangellyPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {
 		TotalAmount:          utility.ConvertDollarStrToCent(item.Get("nominal_amount").String(), item.Get("nominal_currency").String()),
 		PaymentAmount:        paymentAmount,
 		GatewayPaymentMethod: paymentMethod,
-		PayTime:              paidTime,
+		PaidTime:             paidTime,
 	}
 }
 
