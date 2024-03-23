@@ -15,9 +15,15 @@ func TestMerchantConfig(t *testing.T) {
 	t.Run("Test for Merchant Config Set|Get", func(t *testing.T) {
 		one = GetMerchantConfig(ctx, test.TestMerchant.Id, "test_config_key")
 		require.Equal(t, true, one == nil || len(one.ConfigValue) == 0)
+		err = SetMerchantConfig(ctx, test.TestMerchant.Id, "test_config_key", "test")
+		require.Nil(t, err)
+		one = GetMerchantConfig(ctx, test.TestMerchant.Id, "test_config_key")
+		require.Equal(t, true, one != nil && len(one.ConfigValue) > 0)
 	})
 	t.Run("Test for Clean Merchant Config", func(t *testing.T) {
 		err = SetMerchantConfig(ctx, test.TestMerchant.Id, "test_config_key", "")
 		require.Nil(t, err)
+		one = GetMerchantConfig(ctx, test.TestMerchant.Id, "test_config_key")
+		require.Equal(t, true, one == nil || len(one.ConfigValue) == 0)
 	})
 }

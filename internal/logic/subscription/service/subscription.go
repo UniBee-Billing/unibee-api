@@ -70,7 +70,7 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanA
 	return addons
 }
 
-func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId int64) (*vat.NumberValidateRes, error) {
+func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId uint64) (*vat.NumberValidateRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(len(req.VatNumber) > 0, "vatNumber invalid")
 	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), userId, req.VatNumber, "")
@@ -79,7 +79,7 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId i
 	}
 	if vatNumberValidate.Valid {
 		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, _interface.GetMerchantId(ctx), vatNumberValidate.CountryCode)
-		utility.Assert(err == nil, fmt.Sprintf("vatNumber vatCountryCode check error:%s", err))
+		utility.Assert(err == nil, fmt.Sprintf("verify error:%s", err))
 		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
 	}
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
@@ -175,7 +175,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(req.UserId), merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
-	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Merchant Vat VATGateway not setup")
+	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 	var vatCountryCode = req.VatCountryCode
 	var standardTaxScale int64 = 0
 	var vatCountryName = ""
@@ -183,11 +183,11 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidate *bean.ValidResult
 
 	if len(req.VatNumber) > 0 {
-		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, int64(req.UserId), req.VatNumber, "")
+		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil {
 			return nil, err
 		}
-		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("vat number validate failure:"+req.VatNumber))
+		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("validate failure:"+req.VatNumber))
 		vatCountryCode = vatNumberValidate.CountryCode
 	}
 
@@ -198,11 +198,11 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	if len(vatCountryCode) > 0 {
 		vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-		utility.Assert(err == nil, fmt.Sprintf("vat vatCountryCode check error:%s", err))
-		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vat not found for countryCode:%v", vatCountryCode))
-		vatCountryName = vatCountryRate.CountryName
-		if vatNumberValidate == nil || !vatNumberValidate.Valid {
-			standardTaxScale = vatCountryRate.StandardTaxPercentage
+		if vatNumberValidate == nil && err == nil && vatCountryRate != nil {
+			vatCountryName = vatCountryRate.CountryName
+			if vatCountryRate.StandardTaxPercentage > 0 {
+				standardTaxScale = vatCountryRate.StandardTaxPercentage
+			}
 		}
 	}
 

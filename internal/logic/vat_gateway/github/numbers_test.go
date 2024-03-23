@@ -158,21 +158,20 @@ func BenchmarkValidateFormat(b *testing.B) {
 	}
 }
 
-//
-//func TestValidateNumber(t *testing.T) {
-//	for _, test := range tests {
-//		valid, err := ValidateNumberFormat(test.number)
-//		if err != nil {
-//			if err.Error() != "CountryNotFound" {
-//				panic(err)
-//			}
-//		}
-//
-//		if test.valid != valid {
-//			t.Errorf("Expected %v for %v, got %v", test.valid, test.number, valid)
-//		}
-//	}
-//}
+func TestValidateNumber(t *testing.T) {
+	for _, test := range tests {
+		valid, err := ValidateNumberFormat(test.number)
+		if err != nil {
+			if err.Error() != ErrCountryNotFound.Error() {
+				panic(err)
+			}
+		}
+
+		if test.valid != valid {
+			t.Errorf("Expected %v for %v, got %v", test.valid, test.number, valid)
+		}
+	}
+}
 
 func ExampleValidateNumber() {
 	vatNumber := "IE6388047V"
@@ -181,30 +180,30 @@ func ExampleValidateNumber() {
 	// Output: Is IE6388047V valid: true
 }
 
-//func TestValidateNumberFormat(t *testing.T) {
-//	for _, test := range tests {
-//		valid, err := ValidateNumberFormat(test.number)
-//		if err != nil {
-//			if err.Error() != "CountryNotFound" {
-//				panic(err)
-//			}
-//		}
-//
-//		if test.valid != valid {
-//			t.Errorf("Expected %v for %v, got %v", test.valid, test.number, valid)
-//		}
-//
-//	}
-//}
-//
-//func TestValidateNumberExistence(t *testing.T) {
-//	valid, _ := ValidateNumberExistence("IE6388047V")
-//	if !valid {
-//		t.Error("IE6388047V is a valid VAT number.")
-//	}
-//
-//	valid, _ = ValidateNumberExistence("NL123456789B01")
-//	if valid {
-//		t.Error("NL123456789B01 is not a valid VAT number.")
-//	}
-//}
+func TestValidateNumberFormat(t *testing.T) {
+	for _, test := range tests {
+		valid, err := ValidateNumberFormat(test.number)
+		if err != nil {
+			if err.Error() != ErrCountryNotFound.Error() {
+				panic(err)
+			}
+		}
+
+		if test.valid != valid {
+			t.Errorf("Expected %v for %v, got %v", test.valid, test.number, valid)
+		}
+
+	}
+}
+
+func TestValidateNumberExistence(t *testing.T) {
+	valid, _ := ValidateNumberExistence("IE6388047V")
+	if !valid {
+		t.Error("IE6388047V is a valid VAT number.")
+	}
+
+	valid, _ = ValidateNumberExistence("NL123456789B01")
+	if valid {
+		t.Error("NL123456789B01 is not a valid VAT number.")
+	}
+}

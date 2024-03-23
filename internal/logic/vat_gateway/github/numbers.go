@@ -99,7 +99,6 @@ func ValidateNumberExistence(n string) (bool, error) {
 	return r.Valid, nil
 }
 
-// ValidateNumberExistenceV2 validates a VAT number by its existence using the VIES VAT API (using SOAP)
 func ValidateNumberExistenceV2(n string) (*ViesResponse, error) {
 	r, err := Lookup(n)
 	if err != nil {
@@ -124,10 +123,7 @@ func Lookup(vatNumber string) (*ViesResponse, error) {
 		return nil, ErrServiceUnavailable
 	}
 	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
+		_ = Body.Close()
 	}(res.Body)
 
 	xmlRes, err := ioutil.ReadAll(res.Body)

@@ -23,7 +23,7 @@ const (
 )
 
 const (
-	VAT_IMPLEMENT_NAMES = "vatsense|github"
+	VAT_IMPLEMENT_NAMES = "vatsense|github|vatstack"
 )
 
 func GetDefaultVatGateway(ctx context.Context, merchantId uint64) _interface.VATGateway {
@@ -52,6 +52,9 @@ func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatNam
 	if nameConfig != nil {
 		vatName = nameConfig.ConfigValue
 	}
+	if len(vatName) == 0 {
+		return
+	}
 	valueConfig := merchant_config.GetMerchantConfig(ctx, merchantId, vatName)
 	if valueConfig != nil {
 		data = valueConfig.ConfigValue
@@ -71,9 +74,15 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName stri
 	return err
 }
 
+func CleanMerchantDefaultVatConfig(ctx context.Context, merchantId uint64) error {
+	return merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantVatName, "")
+}
+
 func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+	if gateway == nil {
+		return gerror.New("Default Vat Gateway Need Setup")
+	}
 	countries, err := gateway.ListAllCountries()
 	if err != nil {
 		g.Log().Infof(ctx, "InitMerchantDefaultVatGateway ListAllCountries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
@@ -118,7 +127,7 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 	return nil
 }
 
-func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId int64, vatNumber string, requestVatNumber string) (*bean.ValidResult, error) {
+func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId uint64, vatNumber string, requestVatNumber string) (*bean.ValidResult, error) {
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
@@ -135,7 +144,9 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 		}, nil
 	}
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+	if gateway == nil {
+		return nil, gerror.New("Default Vat Gateway Need Setup")
+	}
 	result, validateError := gateway.ValidateVatNumber(vatNumber, requestVatNumber)
 	if validateError != nil {
 		return nil, validateError
@@ -164,7 +175,9 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 
 func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+	if gateway == nil {
+		return nil, gerror.New("Default Vat Gateway Need Setup")
+	}
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().MerchantId, merchantId).
@@ -195,7 +208,9 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 
 func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, countryCode string) (*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+	if gateway == nil {
+		return nil, gerror.New("Default Vat Gateway Need Setup")
+	}
 	var one *entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().MerchantId, merchantId).

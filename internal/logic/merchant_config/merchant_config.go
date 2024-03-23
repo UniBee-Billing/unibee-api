@@ -16,7 +16,7 @@ func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string,
 		ConfigKey:   configKey,
 		ConfigValue: configValue,
 	}
-	_, err := dao.MerchantConfig.Ctx(ctx).Data(one).OmitEmpty().Save(one)
+	_, err := dao.MerchantConfig.Ctx(ctx).Data(one).Save(one)
 	if err != nil {
 		err = gerror.Newf(`SetMerchantConfig %s`, err)
 		return err
