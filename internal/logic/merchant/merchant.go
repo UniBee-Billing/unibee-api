@@ -5,10 +5,8 @@ import (
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/email"
-	"unibee/internal/logic/vat_gateway"
+	"unibee/internal/logic/merchant/cloud"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -72,21 +70,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	if config.GetConfigInstance().Mode == "cloud" {
-		//if cloud version setup default sendgrid and vat
-		{
-			name, data := email.GetDefaultMerchantEmailConfig(ctx, 15621)
-			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
-			err = email.SetupMerchantEmailConfig(ctx, newOne.MerchantId, name, data, true)
-			utility.AssertError(err, "Server Error")
-		}
-		{
-			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, 15621)
-			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
-			err = vat_gateway.SetupMerchantVatConfig(ctx, newOne.MerchantId, name, data, true)
-			utility.AssertError(err, "Server Error")
-		}
-	}
+	err = cloud.MerchantSetupForCloudMode(ctx, merchantInfo.Id)
 	return merchantInfo, newOne, err
 }
 

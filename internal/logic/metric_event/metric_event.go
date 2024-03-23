@@ -94,7 +94,7 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 
 	one = &entity.MerchantMetricEvent{
 		MerchantId:                  req.MerchantId,
-		MetricId:                    int64(met.Id),
+		MetricId:                    met.Id,
 		ExternalEventId:             req.ExternalEventId,
 		UserId:                      int64(user.Id),
 		AggregationPropertyData:     req.MetricProperties.String(),

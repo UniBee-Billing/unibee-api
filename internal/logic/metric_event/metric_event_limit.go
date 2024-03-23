@@ -61,7 +61,7 @@ func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user 
 
 func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entity.UserAccount, sub *entity.Subscription, met *entity.MerchantMetric, append uint64) (uint64, uint64, bool) {
 	limitMap := GetUserMetricTotalLimits(ctx, merchantId, int64(user.Id), sub)
-	if metricLimit, ok := limitMap[int64(met.Id)]; ok {
+	if metricLimit, ok := limitMap[met.Id]; ok {
 		useValue := GetUserMetricLimitCachedUseValue(ctx, merchantId, user.Id, met, sub, false)
 		if met.AggregationType == metric.MetricAggregationTypeLatest || met.AggregationType == metric.MetricAggregationTypeMax {
 			return useValue, metricLimit.TotalLimit, append <= metricLimit.TotalLimit
@@ -74,8 +74,8 @@ func checkMetricLimitReached(ctx context.Context, merchantId uint64, user *entit
 	}
 }
 
-func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[int64]*bean.PlanMetricLimitDetail {
-	var limitMap = make(map[int64]*bean.PlanMetricLimitDetail)
+func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId int64, sub *entity.Subscription) map[uint64]*bean.PlanMetricLimitDetail {
+	var limitMap = make(map[uint64]*bean.PlanMetricLimitDetail)
 	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
 		for _, subPlan := range userSubPlans {
@@ -109,7 +109,7 @@ const (
 	UserMetricCacheKeyExpire = 15 * 24 * 60 * 60 // 15 days cache expire
 )
 
-func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64, userId int64, metricId int64) {
+func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64, userId int64, metricId uint64) {
 	go func() {
 		ctx := context.Background()
 		var err error

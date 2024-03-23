@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -25,7 +24,7 @@ const (
 	MetricAggregationTypeSum         = 5
 )
 
-func GetMerchantMetricVo(ctx context.Context, id int64) *bean.MerchantMetricSimplify {
+func GetMerchantMetricSimplify(ctx context.Context, id uint64) *bean.MerchantMetricSimplify {
 	one := query.GetMerchantMetric(ctx, id)
 	if one != nil {
 		return bean.SimplifyMerchantMetric(one)
@@ -51,7 +50,7 @@ func MerchantMetricList(ctx context.Context, merchantId uint64) []*bean.Merchant
 	return list
 }
 
-func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *bean.MerchantMetricSimplify {
+func MerchantMetricDetail(ctx context.Context, merchantId uint64, merchantMetricId uint64) *bean.MerchantMetricSimplify {
 	utility.Assert(merchantMetricId > 0, "invalid merchantMetricId")
 	if merchantMetricId > 0 {
 		var one *entity.MerchantMetric
@@ -59,7 +58,7 @@ func MerchantMetricDetail(ctx context.Context, merchantMetricId uint64) *bean.Me
 			Where(dao.MerchantMetric.Columns().Id, merchantMetricId).
 			Scan(&one)
 		if err == nil && one != nil {
-			utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
+			utility.Assert(one.MerchantId == merchantId, "wrong merchant account")
 			return bean.SimplifyMerchantMetric(one)
 		}
 	}
@@ -107,7 +106,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, name string, description string) (*bean.MerchantMetricSimplify, error) {
+func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64, name string, description string) (*bean.MerchantMetricSimplify, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
@@ -127,7 +126,7 @@ func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId int64, 
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
-func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId int64) error {
+func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricId > 0, "invalid metricId")
 	one := query.GetMerchantMetric(ctx, metricId)
@@ -136,5 +135,12 @@ func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId int64
 		dao.MerchantMetric.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetric.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
+	return err
+}
+
+func HardDeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(metricId > 0, "invalid metricId")
+	_, err := dao.MerchantMetric.Ctx(ctx).Where(dao.MerchantMetric.Columns().Id, metricId).Delete()
 	return err
 }

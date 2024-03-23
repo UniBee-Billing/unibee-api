@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantMetricPlanLimit(ctx context.Context, id int64) (one *entity.MerchantMetricPlanLimit) {
+func GetMerchantMetricPlanLimit(ctx context.Context, id uint64) (one *entity.MerchantMetricPlanLimit) {
 	if id <= 0 {
 		return nil
 	}

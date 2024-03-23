@@ -7,7 +7,7 @@ import (
 
 type NewPlanLimitReq struct {
 	g.Meta      `path:"/plan/limit/new" tags:"Metric" method:"post" summary:"New Merchant Metric Plan TotalLimit"`
-	MetricId    int64  `json:"metricId" dc:"MetricId" v:"required"`
+	MetricId    uint64 `json:"metricId" dc:"MetricId" v:"required"`
 	PlanId      uint64 `json:"planId" dc:"PlanId" v:"required"`
 	MetricLimit uint64 `json:"metricLimit" dc:"MetricLimit" v:"required"`
 }
@@ -28,7 +28,7 @@ type EditPlanLimitRes struct {
 
 type DeletePlanLimitReq struct {
 	g.Meta            `path:"/plan/limit/delete" tags:"Metric" method:"post" summary:"Delete Merchant Metric Plan TotalLimit"`
-	MetricPlanLimitId int64 `json:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
+	MetricPlanLimitId uint64 `json:"metricPlanLimitId" dc:"MetricPlanLimitId" v:"required"`
 }
 
 type DeletePlanLimitRes struct {

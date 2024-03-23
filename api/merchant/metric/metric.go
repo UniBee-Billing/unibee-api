@@ -28,7 +28,7 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta            `path:"/edit" tags:"Metric" method:"post" summary:"Edit Merchant Metric"`
-	MetricId          int64  `json:"metricId" dc:"MetricId" v:"required"`
+	MetricId          uint64 `json:"metricId" dc:"MetricId" v:"required"`
 	MetricName        string `json:"metricName" dc:"MetricName" v:"required"`
 	MetricDescription string `json:"metricDescription" dc:"MetricDescription"`
 }
@@ -39,7 +39,7 @@ type EditRes struct {
 
 type DeleteReq struct {
 	g.Meta   `path:"/delete" tags:"Metric" method:"post" summary:"Delete Merchant Metric"`
-	MetricId int64 `json:"metricId" dc:"MetricId" v:"required"`
+	MetricId uint64 `json:"metricId" dc:"MetricId" v:"required"`
 }
 
 type DeleteRes struct {

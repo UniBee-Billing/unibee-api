@@ -18,21 +18,19 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-// FileUploadInput
 type FileUploadInput struct {
-	File       *ghttp.UploadFile //
-	Path       string            //
-	Name       string            //
-	UserId     string            // UserId
-	RandomName bool              //
+	File       *ghttp.UploadFile
+	Path       string
+	Name       string
+	UserId     string
+	RandomName bool
 }
 
-// FileUploadOutput
 type FileUploadOutput struct {
-	Id   uint   //
-	Name string //
-	Path string //
-	Url  string //
+	Id   uint
+	Name string
+	Path string
+	Url  string
 }
 
 func Upload(ctx context.Context, in FileUploadInput) (*FileUploadOutput, error) {

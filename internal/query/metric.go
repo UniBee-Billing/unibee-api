@@ -6,7 +6,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantMetric(ctx context.Context, id int64) (one *entity.MerchantMetric) {
+func GetMerchantMetric(ctx context.Context, id uint64) (one *entity.MerchantMetric) {
 	if id <= 0 {
 		return nil
 	}

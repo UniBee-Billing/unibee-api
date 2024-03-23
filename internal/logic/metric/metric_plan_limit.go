@@ -47,7 +47,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 					Id:          one.Id,
 					MerchantId:  one.MerchantId,
 					MetricId:    one.MetricId,
-					Metric:      GetMerchantMetricVo(ctx, one.MetricId),
+					Metric:      GetMerchantMetricSimplify(ctx, one.MetricId),
 					PlanId:      one.PlanId,
 					MetricLimit: one.MetricLimit,
 					UpdateTime:  one.GmtModify.Timestamp(),
@@ -65,7 +65,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 
 type MerchantMetricPlanLimitInternalReq struct {
 	MerchantId        uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	MetricId          int64  `json:"metricId" dc:"MetricId" `
+	MetricId          uint64 `json:"metricId" dc:"MetricId" `
 	MetricPlanLimitId uint64 `json:"metricPlanLimitId" dc:"MetricPlanLimitId,use for edit" `
 	PlanId            uint64 `json:"planId" dc:"PlanId" `
 	MetricLimit       uint64 `json:"metricLimit" dc:"MetricLimit" `
@@ -115,7 +115,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
-		Metric:      GetMerchantMetricVo(ctx, one.MetricId),
+		Metric:      GetMerchantMetricSimplify(ctx, one.MetricId),
 		PlanId:      one.PlanId,
 		MetricLimit: one.MetricLimit,
 		CreateTime:  one.CreateTime,
@@ -149,7 +149,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
 		MetricId:    one.MetricId,
-		Metric:      GetMerchantMetricVo(ctx, one.MetricId),
+		Metric:      GetMerchantMetricSimplify(ctx, one.MetricId),
 		PlanId:      one.PlanId,
 		MetricLimit: one.MetricLimit,
 		UpdateTime:  gtime.Now().Timestamp(),
@@ -157,7 +157,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	}, nil
 }
 
-func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricPlanLimitId int64) error {
+func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricPlanLimitId uint64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(metricPlanLimitId > 0, "invalid metricPlanLimitId")
 	one := query.GetMerchantMetricPlanLimit(ctx, metricPlanLimitId)
@@ -171,6 +171,13 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	return err
 }
 
+func HardDeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metricPlanLimitId uint64) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(metricPlanLimitId > 0, "invalid metricPlanLimitId")
+	_, err := dao.MerchantMetricPlanLimit.Ctx(ctx).Where(dao.MerchantMetricPlanLimit.Columns().Id, metricPlanLimitId).Delete()
+	return err
+}
+
 func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, params []*bean.BulkMetricLimitPlanBindingParam) error {
 	utility.Assert(plan != nil, "invalid plan")
 	if len(params) > 0 {
@@ -180,7 +187,7 @@ func BulkMetricLimitPlanBindingReplace(ctx context.Context, plan *entity.Plan, p
 			Where(dao.MerchantMetricPlanLimit.Columns().PlanId, plan.Id).
 			Where(dao.MerchantMetricPlanLimit.Columns().IsDeleted, 0).
 			Scan(&oldList)
-		var oldMap = make(map[int64]*entity.MerchantMetricPlanLimit)
+		var oldMap = make(map[uint64]*entity.MerchantMetricPlanLimit)
 		for _, old := range oldList {
 			oldMap[old.MetricId] = old
 		}

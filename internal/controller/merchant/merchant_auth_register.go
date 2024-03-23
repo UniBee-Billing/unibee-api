@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee/api/merchant/auth"
-	"unibee/internal/logic/email"
 	"unibee/internal/logic/merchant"
+	"unibee/internal/logic/merchant/cloud"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -50,12 +50,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	// deploy version todo mark send to unibee api, cloud version use cloud merchantId
-	err = email.SendTemplateEmail(ctx, 15621, req.Email, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
-		CodeExpireMinute: "3",
-		Code:             verificationCode,
-	})
-	utility.AssertError(err, "Server Error")
-
+	cloud.SendMerchantRegisterEmail(ctx, req.Email, verificationCode)
 	return &auth.RegisterRes{}, nil
 }
