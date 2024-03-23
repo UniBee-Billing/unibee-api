@@ -13,7 +13,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
 		PlanId:         req.PlanId,
-		UserId:         _interface.BizCtx().Get(ctx).User.Id,
+		UserId:         _interface.Context().Get(ctx).User.Id,
 		Quantity:       req.Quantity,
 		GatewayId:      req.GatewayId,
 		AddonParams:    req.AddonParams,

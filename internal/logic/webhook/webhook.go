@@ -29,11 +29,15 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean
 			Scan(&entities)
 		if err == nil && len(entities) > 0 {
 			for _, one := range entities {
+				var events = make([]string, 0)
+				if len(one.WebhookEvents) != 0 {
+					events = strings.Split(one.WebhookEvents, SplitSep)
+				}
 				list = append(list, &bean.MerchantWebhookEndpointSimplify{
 					Id:            one.Id,
 					MerchantId:    one.MerchantId,
 					WebhookUrl:    one.WebhookUrl,
-					WebhookEvents: strings.Split(one.WebhookEvents, SplitSep),
+					WebhookEvents: events,
 					UpdateTime:    one.GmtModify.Timestamp(),
 					CreateTime:    one.CreateTime,
 				})
@@ -45,13 +49,13 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean
 
 type EndpointLogListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	EndpointId int64  `json:"endpointId" dc:"EndpointId" v:"required"`
+	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
 	Page       int    `json:"page" dc:"Page, Start WIth 0" `
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
 func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*bean.MerchantWebhookLogSimplify {
-	var mainList []*bean.MerchantWebhookLogSimplify
+	var mainList = make([]*bean.MerchantWebhookLogSimplify, 0)
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -70,7 +74,7 @@ func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInt
 	return mainList
 }
 
-func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url string, events []string) error {
+func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url string, events []string) (*entity.MerchantWebhook, error) {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(url) > 0, "url is nil")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
@@ -78,26 +82,42 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 	for _, e := range events {
 		utility.Assert(event.WebhookEventInListeningEvents(event.MerchantWebhookEvent(e)), fmt.Sprintf("Event:%s Not In Event List", e))
 	}
-	one := query.GetMerchantWebhookByUrl(ctx, url)
-	utility.Assert(one == nil, "endpoint already exist")
-	one = &entity.MerchantWebhook{
-		MerchantId:    merchantId,
-		WebhookUrl:    url,
-		WebhookEvents: strings.Join(events, SplitSep),
-		CreateTime:    gtime.Now().Timestamp(),
-	}
-	result, err := dao.MerchantWebhook.Ctx(ctx).Data(one).OmitNil().Insert(one)
-	if err != nil {
-		g.Log().Errorf(ctx, "NewMerchantWebhookEndpoint Insert err:%s", err.Error())
-		return gerror.NewCode(gcode.New(500, "server error", nil))
-	}
-	id, _ := result.LastInsertId()
-	one.Id = uint64(id)
+	one := query.GetMerchantWebhookByUrl(ctx, merchantId, url)
+	if one == nil {
+		one = &entity.MerchantWebhook{
+			MerchantId:    merchantId,
+			WebhookUrl:    url,
+			WebhookEvents: strings.Join(events, SplitSep),
+			CreateTime:    gtime.Now().Timestamp(),
+		}
+		result, err := dao.MerchantWebhook.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			g.Log().Errorf(ctx, "NewMerchantWebhookEndpoint Insert err:%s", err.Error())
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+		id, _ := result.LastInsertId()
+		one.Id = uint64(id)
 
-	return nil
+		return one, nil
+	} else {
+		utility.Assert(one.IsDeleted != 0, "endpoint already exist")
+		_, err := dao.MerchantWebhook.Ctx(ctx).Data(g.Map{
+			dao.MerchantWebhook.Columns().MerchantId:    merchantId,
+			dao.MerchantWebhook.Columns().WebhookUrl:    url,
+			dao.MerchantWebhook.Columns().WebhookEvents: strings.Join(events, SplitSep),
+			dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
+			dao.MerchantWebhook.Columns().IsDeleted:     0,
+		}).Where(dao.MerchantWebhook.Columns().Id, one.Id).Update()
+		if err != nil {
+			g.Log().Errorf(ctx, "UpdateMerchantWebhookEndpoint Update err:%s", err.Error())
+			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
+		}
+		one = query.GetMerchantWebhook(ctx, one.Id)
+		return one, nil
+	}
 }
 
-func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId int64, url string, events []string) error {
+func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId uint64, url string, events []string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(endpointId > 0, "invalid endpointId")
 	utility.Assert(strings.HasPrefix(url, "http://") || strings.HasPrefix(url, "https://"), "Invalid Url")
@@ -121,14 +141,27 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 	return nil
 }
 
-func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId int64) error {
+func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId uint64) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(endpointId > 0, "invalid endpointId")
 	one := query.GetMerchantWebhook(ctx, endpointId)
 	utility.Assert(one != nil, "endpoint not found")
+	if one.IsDeleted != 0 {
+		// already deleted
+		return nil
+	}
 	_, err := dao.MerchantWebhook.Ctx(ctx).Data(g.Map{
 		dao.MerchantWebhook.Columns().IsDeleted: 1,
 		dao.MerchantWebhook.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
+	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitNil().Update()
+	return err
+}
+
+func HardDeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpointId uint64) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(endpointId > 0, "invalid endpointId")
+	one := query.GetMerchantWebhook(ctx, endpointId)
+	utility.Assert(one != nil, "endpoint not found")
+	_, err := dao.MerchantWebhook.Ctx(ctx).Where(dao.MerchantWebhook.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitNil().Delete()
 	return err
 }

@@ -1,4 +1,4 @@
-package bizctx
+package context
 
 import (
 	"context"
@@ -10,21 +10,21 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 )
 
-type sBizCtx struct{}
+type Context struct{}
 
 func init() {
-	_interface.RegisterBizCtx(New())
+	_interface.RegisterContext(New())
 }
 
-func New() *sBizCtx {
-	return &sBizCtx{}
+func New() *Context {
+	return &Context{}
 }
 
-func (s *sBizCtx) Init(r *ghttp.Request, customCtx *model.Context) {
+func (s *Context) Init(r *ghttp.Request, customCtx *model.Context) {
 	r.SetCtxVar(consts.ContextKey, customCtx)
 }
 
-func (s *sBizCtx) Get(ctx context.Context) *model.Context {
+func (s *Context) Get(ctx context.Context) *model.Context {
 	value := ctx.Value(consts.ContextKey)
 	if value == nil {
 		return nil
@@ -35,14 +35,14 @@ func (s *sBizCtx) Get(ctx context.Context) *model.Context {
 	return nil
 }
 
-func (s *sBizCtx) SetUser(ctx context.Context, ctxUser *model.ContextUser) {
+func (s *Context) SetUser(ctx context.Context, ctxUser *model.ContextUser) {
 	s.Get(ctx).User = ctxUser
 }
 
-func (s *sBizCtx) SetMerchantMember(ctx context.Context, ctxMerchantMember *model.ContextMerchantMember) {
+func (s *Context) SetMerchantMember(ctx context.Context, ctxMerchantMember *model.ContextMerchantMember) {
 	s.Get(ctx).MerchantMember = ctxMerchantMember
 }
 
-func (s *sBizCtx) SetData(ctx context.Context, data g.Map) {
+func (s *Context) SetData(ctx context.Context, data g.Map) {
 	s.Get(ctx).Data = data
 }

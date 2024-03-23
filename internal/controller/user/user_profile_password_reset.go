@@ -11,8 +11,8 @@ import (
 
 func (c *ControllerProfile) PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error) {
 	//User 检查
-	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-	utility.Assert(_interface.BizCtx().Get(ctx).User.Id > 0, "userId invalid")
-	auth.ChangeUserPassword(ctx, _interface.GetMerchantId(ctx), _interface.BizCtx().Get(ctx).User.Email, req.OldPassword, req.NewPassword)
+	utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
+	utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
+	auth.ChangeUserPassword(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Email, req.OldPassword, req.NewPassword)
 	return &profile.PasswordResetRes{}, nil
 }

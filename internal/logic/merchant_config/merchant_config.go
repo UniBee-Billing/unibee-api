@@ -11,7 +11,6 @@ import (
 func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string, configValue string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(configKey) > 0, "invalid key")
-	utility.Assert(len(configValue) > 0, "invalid value")
 	one := &entity.MerchantConfig{
 		MerchantId:  merchantId,
 		ConfigKey:   configKey,
@@ -26,12 +25,8 @@ func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string,
 }
 
 func GetMerchantConfig(ctx context.Context, merchantId uint64, configKey string) *entity.MerchantConfig {
-	if merchantId == 0 {
-		return nil
-	}
-	if len(configKey) == 0 {
-		return nil
-	}
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(len(configKey) > 0, "invalid key")
 	var one *entity.MerchantConfig
 	err := dao.MerchantConfig.Ctx(ctx).
 		Where(dao.MerchantConfig.Columns().MerchantId, merchantId).

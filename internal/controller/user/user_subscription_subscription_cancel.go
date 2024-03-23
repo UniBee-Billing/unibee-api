@@ -15,14 +15,14 @@ import (
 func (c *ControllerSubscription) Cancel(ctx context.Context, req *subscription.CancelReq) (res *subscription.CancelRes, err error) {
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).User.Id > 0, "userId invalid")
+		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
 	}
 
 	utility.Assert(len(req.SubscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.UserId == int64(_interface.BizCtx().Get(ctx).User.Id), "no permission")
+	utility.Assert(sub.UserId == int64(_interface.Context().Get(ctx).User.Id), "no permission")
 	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
 	utility.Assert(sub.Status == consts.SubStatusCreate, "subscription not in create status")
 

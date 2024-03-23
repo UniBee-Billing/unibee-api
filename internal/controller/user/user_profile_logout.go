@@ -10,8 +10,8 @@ import (
 )
 
 func (c *ControllerProfile) Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error) {
-	utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "User Not Found")
-	utility.Assert(len(_interface.BizCtx().Get(ctx).User.Token) > 0, "Token Not Found")
-	jwt.DelAuthToken(ctx, _interface.BizCtx().Get(ctx).User.Token)
+	utility.Assert(_interface.Context().Get(ctx).User != nil, "User Not Found")
+	utility.Assert(len(_interface.Context().Get(ctx).User.Token) > 0, "Token Not Found")
+	jwt.DelAuthToken(ctx, _interface.Context().Get(ctx).User.Token)
 	return &profile.LogoutRes{}, nil
 }

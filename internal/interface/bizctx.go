@@ -7,7 +7,7 @@ import (
 	"unibee/internal/model"
 )
 
-type IBizCtx interface {
+type IContext interface {
 	Init(r *ghttp.Request, customCtx *model.Context)
 	Get(ctx context.Context) *model.Context
 	SetUser(ctx context.Context, ctxUser *model.ContextUser)
@@ -15,13 +15,13 @@ type IBizCtx interface {
 	SetData(ctx context.Context, data g.Map)
 }
 
-var localBizCtx IBizCtx
+var singleTonContext IContext
 
-func BizCtx() IBizCtx {
-	if localBizCtx == nil {
-		panic("implement not found for interface IBizCtx, forgot register?")
+func Context() IContext {
+	if singleTonContext == nil {
+		panic("implement not found for interface IContext, forgot register?")
 	}
-	return localBizCtx
+	return singleTonContext
 }
 
 const (
@@ -29,12 +29,12 @@ const (
 )
 
 func GetMerchantId(ctx context.Context) uint64 {
-	if BizCtx().Get(ctx).MerchantId <= 0 {
+	if Context().Get(ctx).MerchantId <= 0 {
 		panic(SystemAssertPrefix + "Invalid Merchant")
 	}
-	return BizCtx().Get(ctx).MerchantId
+	return Context().Get(ctx).MerchantId
 }
 
-func RegisterBizCtx(i IBizCtx) {
-	localBizCtx = i
+func RegisterContext(i IContext) {
+	singleTonContext = i
 }

@@ -28,7 +28,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(gateway.MerchantId == merchantInfo.Id, "merchant gateway not match")
 
 	var user *entity.UserAccount
-	if _interface.BizCtx().Get(ctx).IsOpenApiCall {
+	if _interface.Context().Get(ctx).IsOpenApiCall {
 		if req.UserId == 0 {
 			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil")
 			utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
@@ -42,7 +42,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			user = query.GetUserAccountById(ctx, req.UserId)
 		}
 	} else {
-		user = query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
+		user = query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 		utility.Assert(user != nil, "User Not Found")
 		if req.UserId > 0 {
 			utility.Assert(user.Id == req.UserId, "user not match")

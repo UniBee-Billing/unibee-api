@@ -6,22 +6,22 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func GetMerchantWebhook(ctx context.Context, id int64) (one *entity.MerchantWebhook) {
+func GetMerchantWebhook(ctx context.Context, id uint64) (one *entity.MerchantWebhook) {
 	if id <= 0 {
 		return nil
 	}
-	err := dao.MerchantWebhook.Ctx(ctx).Where(entity.MerchantWebhook{Id: uint64(id)}).OmitEmpty().Scan(&one)
+	err := dao.MerchantWebhook.Ctx(ctx).Where(dao.MerchantWebhook.Columns().Id, id).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}
 	return one
 }
 
-func GetMerchantWebhookByUrl(ctx context.Context, url string) (one *entity.MerchantWebhook) {
+func GetMerchantWebhookByUrl(ctx context.Context, merchantId uint64, url string) (one *entity.MerchantWebhook) {
 	if len(url) <= 0 {
 		return nil
 	}
-	err := dao.MerchantWebhook.Ctx(ctx).Where(entity.MerchantWebhook{WebhookUrl: url}).OmitEmpty().Scan(&one)
+	err := dao.MerchantWebhook.Ctx(ctx).Where(dao.MerchantWebhook.Columns().WebhookUrl, url).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
 	}

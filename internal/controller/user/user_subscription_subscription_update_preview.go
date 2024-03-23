@@ -21,8 +21,8 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 	//Update 可以由 Admin 操作，service 层不做用户校验
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match")
+		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(int64(_interface.Context().Get(ctx).User.Id) == sub.UserId, "userId not match")
 	}
 	prepare, err := service.SubscriptionUpdatePreview(ctx, req, 0, 0)
 	if err != nil {

@@ -13,7 +13,7 @@ import (
 
 func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error) {
 	if !config.GetConfigInstance().IsLocal() {
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
+		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 	}
 
 	publishPlans := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
@@ -24,7 +24,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		Page:          0,
 		Count:         10,
 	})
-	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
+	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, int64(_interface.Context().Get(ctx).User.Id), _interface.GetMerchantId(ctx))
 	if sub != nil {
 		subPlan := query.GetPlanById(ctx, sub.PlanId)
 		if subPlan != nil && subPlan.PublishStatus != consts.PlanPublishStatusPublished {

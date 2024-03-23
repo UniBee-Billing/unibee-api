@@ -426,8 +426,8 @@ func (p GatewayProxy) GatewayRefundList(ctx context.Context, gateway *entity.Mer
 
 func printChannelPanic(ctx context.Context, err error) {
 	var requestId = "init"
-	if _interface.BizCtx().Get(ctx) != nil {
-		requestId = _interface.BizCtx().Get(ctx).RequestId
+	if _interface.Context().Get(ctx) != nil {
+		requestId = _interface.Context().Get(ctx).RequestId
 	}
 	g.Log().Errorf(ctx, "ChannelException panic requestId:%s error:%s", requestId, err.Error())
 }

@@ -254,7 +254,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumberValidate: vatNumberValidate,
 		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
-		UserId:            int64(_interface.BizCtx().Get(ctx).User.Id),
+		UserId:            int64(_interface.Context().Get(ctx).User.Id),
 		Email:             user.Email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,

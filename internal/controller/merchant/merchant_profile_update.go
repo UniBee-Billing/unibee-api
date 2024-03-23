@@ -36,10 +36,10 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		dao.Merchant.Columns().TimeZone:    req.TimeZone,
 		dao.Merchant.Columns().Host:        req.Host,
 		dao.Merchant.Columns().GmtModify:   gtime.Now(),
-	}).Where(dao.Merchant.Columns().Id, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId).OmitEmpty().Update()
+	}).Where(dao.Merchant.Columns().Id, _interface.Context().Get(ctx).MerchantMember.MerchantId).OmitEmpty().Update()
 	if err != nil {
 		return nil, err
 	}
 
-	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.BizCtx().Get(ctx).MerchantMember.MerchantId))}, nil
+	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.Context().Get(ctx).MerchantMember.MerchantId))}, nil
 }

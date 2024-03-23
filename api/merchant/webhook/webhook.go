@@ -43,7 +43,7 @@ type NewEndpointRes struct {
 
 type UpdateEndpointReq struct {
 	g.Meta     `path:"/update_endpoint" tags:"Webhook" method:"post" summary:"Merchant Update Webhook Endpoint"`
-	EndpointId int64    `json:"endpointId" dc:"EndpointId" v:"required"`
+	EndpointId uint64   `json:"endpointId" dc:"EndpointId" v:"required"`
 	Url        string   `json:"url" dc:"Url To Update" v:"required"`
 	Events     []string `json:"events" dc:"Events To Update"`
 }
@@ -53,7 +53,7 @@ type UpdateEndpointRes struct {
 
 type DeleteEndpointReq struct {
 	g.Meta     `path:"/delete_endpoint" tags:"Webhook" method:"post" summary:"Merchant Delete Webhook Endpoint"`
-	EndpointId int64 `json:"endpointId" dc:"EndpointId" v:"required"`
+	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
 }
 
 type DeleteEndpointRes struct {

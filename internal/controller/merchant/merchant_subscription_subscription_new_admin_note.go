@@ -16,10 +16,10 @@ import (
 )
 
 func (c *ControllerSubscription) NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error) {
-	utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "invalid token")
+	utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "invalid token")
 	note := &entity.SubscriptionAdminNote{
 		SubscriptionId:   req.SubscriptionId,
-		MerchantMemberId: int64(_interface.BizCtx().Get(ctx).MerchantMember.Id),
+		MerchantMemberId: int64(_interface.Context().Get(ctx).MerchantMember.Id),
 		Note:             req.Note,
 		CreateTime:       gtime.Now().Timestamp(),
 	}

@@ -14,7 +14,7 @@ import (
 )
 
 func (c *ControllerProfile) Get(ctx context.Context, req *v1.GetReq) (res *v1.GetRes, err error) {
-	var newOne = query.GetUserAccountById(ctx, _interface.BizCtx().Get(ctx).User.Id)
+	var newOne = query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	if newOne == nil {
 		// return nil, gerror.New("internal err: user not found")
 		return nil, gerror.NewCode(gcode.New(400, "login failed", nil))

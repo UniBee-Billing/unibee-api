@@ -13,8 +13,8 @@ import (
 func (c *ControllerSubscription) CancelAtPeriodEnd(ctx context.Context, req *subscription.CancelAtPeriodEndReq) (res *subscription.CancelAtPeriodEndRes, err error) {
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "auth failure,not login")
-		//utility.Assert(int64(_interface.BizCtx().Get(ctx).User.Id) == sub.UserId, "userId not match") // todo mark
+		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
+		//utility.Assert(int64(_interface.Context().Get(ctx).User.Id) == sub.UserId, "userId not match") // todo mark
 	}
 	err = service.SubscriptionCancelAtPeriodEnd(ctx, req.SubscriptionId, false, 0)
 	if err != nil {

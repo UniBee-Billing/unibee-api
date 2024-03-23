@@ -62,7 +62,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		Data:    make(g.Map),
 	}
 	customCtx.RequestId = utility.CreateRequestId()
-	_interface.BizCtx().Init(r, customCtx)
+	_interface.Context().Init(r, customCtx)
 	r.Assigns(g.Map{
 		consts.ContextKey: customCtx,
 	})
@@ -89,7 +89,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 			code = gcode.CodeInternalError
 		}
 		json, _ := r.GetJson()
-		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.BizCtx().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
+		g.Log().Errorf(r.Context(), "Global_exception requestId:%s url: %s params:%s code:%d error:%s", _interface.Context().Get(r.Context()).RequestId, r.GetUrl(), json, code.Code(), err.Error())
 		r.Response.ClearBuffer() // inner panic will contain json data，need clean
 
 		message := err.Error()
@@ -112,10 +112,10 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 		} else {
 			if customCtx.IsOpenApiCall {
 				r.Response.Status = 400
-				_interface.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+				_interface.OpenApiJsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
 			} else {
 				r.Response.Status = 200 // error reply in json code, http code always 200
-				_interface.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.BizCtx().Get(r.Context()).RequestId, code.Code()))
+				_interface.JsonExit(r, code.Code(), fmt.Sprintf("Server Error-%s-%d", _interface.Context().Get(r.Context()).RequestId, code.Code()))
 			}
 		}
 	} else {
@@ -129,7 +129,7 @@ func (s *SMiddleware) ResponseHandler(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
-	customCtx := _interface.BizCtx().Get(r.Context())
+	customCtx := _interface.Context().Get(r.Context())
 	userAgent := r.Header.Get("User-Agent")
 	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
 		customCtx.IsOpenApiCall = true
@@ -142,7 +142,7 @@ func (s *SMiddleware) OpenApiDetach(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
-	customCtx := _interface.BizCtx().Get(r.Context())
+	customCtx := _interface.Context().Get(r.Context())
 	list := query.GetActiveMerchantList(r.Context())
 	userAgent := r.Header.Get("User-Agent")
 	if len(userAgent) > 0 && strings.Contains(userAgent, "OpenAPI") {
@@ -198,7 +198,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 }
 
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
-	customCtx := _interface.BizCtx().Get(r.Context())
+	customCtx := _interface.Context().Get(r.Context())
 	if config.GetConfigInstance().IsServerDev() {
 		customCtx.MerchantId = 15621
 		r.Middleware.Next()
@@ -225,7 +225,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	}
 	if !customCtx.IsOpenApiCall || jwt.IsPortalToken(tokenString) {
 		// Portal Call
-		if !jwt.IsAuthTokenExpired(r.Context(), tokenString) {
+		if !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
 			g.Log().Infof(r.Context(), "TokenAuth Invalid Token:%s", tokenString)
 			_interface.JsonRedirectExit(r, 61, "invalid token", s.LoginUrl)
 			r.Exit()

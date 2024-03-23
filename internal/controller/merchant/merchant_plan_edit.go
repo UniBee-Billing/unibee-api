@@ -14,8 +14,8 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
+		utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.Context().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 
 	one, err := service.PlanEdit(ctx, &service.PlanInternalReq{

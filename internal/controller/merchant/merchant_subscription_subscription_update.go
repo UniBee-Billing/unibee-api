@@ -16,9 +16,9 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 	var merchantMemberId int64
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-		merchantMemberId = int64(_interface.BizCtx().Get(ctx).MerchantMember.Id)
+		utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
+		utility.Assert(_interface.Context().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
+		merchantMemberId = int64(_interface.Context().Get(ctx).MerchantMember.Id)
 	}
 	update, err := service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
 		SubscriptionId:      req.SubscriptionId,

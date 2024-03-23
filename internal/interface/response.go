@@ -25,7 +25,7 @@ func portalJson(r *ghttp.Request, code int, message string, data ...interface{})
 		Code:      code,
 		Message:   message,
 		Data:      responseData,
-		RequestId: BizCtx().Get(r.Context()).RequestId,
+		RequestId: Context().Get(r.Context()).RequestId,
 	})
 }
 
@@ -38,7 +38,7 @@ func openApiJson(r *ghttp.Request, code int, message string, data ...interface{}
 	}
 	_ = responseData.Set("code", code)
 	_ = responseData.Set("message", message)
-	_ = responseData.Set("requestId", BizCtx().Get(r.Context()).RequestId)
+	_ = responseData.Set("requestId", Context().Get(r.Context()).RequestId)
 	r.Response.WriteJson(responseData)
 }
 

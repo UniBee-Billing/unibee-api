@@ -15,8 +15,8 @@ func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res
 
 	if !config.GetConfigInstance().IsLocal() {
 		//User 检查
-		utility.Assert(_interface.BizCtx().Get(ctx).User != nil, "user auth failure,not login")
-		utility.Assert(_interface.BizCtx().Get(ctx).User.Id > 0, "userId invalid")
+		utility.Assert(_interface.Context().Get(ctx).User != nil, "user auth failure,not login")
+		utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
 	}
 
 	internalResult, err := service.SubscriptionInvoiceList(ctx, &service.SubscriptionInvoiceListInternalReq{

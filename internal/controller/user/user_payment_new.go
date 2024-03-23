@@ -18,7 +18,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	utility.Assert(len(req.Type) > 0 && strings.Compare(req.Type, "card") == 0, "invalid type, should be card")
-	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, int64(_interface.BizCtx().Get(ctx).User.Id), req.Data)
+	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, int64(_interface.Context().Get(ctx).User.Id), req.Data)
 	if err != nil {
 		return nil, err
 	}

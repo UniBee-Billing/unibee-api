@@ -18,7 +18,7 @@ func (c *ControllerPayment) MethodList(ctx context.Context, req *payment.MethodL
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
-	gatewayUser := query.GetGatewayUser(ctx, int64(_interface.BizCtx().Get(ctx).User.Id), req.GatewayId)
+	gatewayUser := query.GetGatewayUser(ctx, int64(_interface.Context().Get(ctx).User.Id), req.GatewayId)
 	if gatewayUser != nil {
 		var gatewayPaymentId string
 		if len(req.PaymentId) > 0 {

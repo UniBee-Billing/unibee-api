@@ -15,7 +15,7 @@ func (c *ControllerWebhook) NewEndpoint(ctx context.Context, req *webhook.NewEnd
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	err = _webhook.NewMerchantWebhookEndpoint(ctx, _interface.GetMerchantId(ctx), req.Url, req.Events)
+	_, err = _webhook.NewMerchantWebhookEndpoint(ctx, _interface.GetMerchantId(ctx), req.Url, req.Events)
 	if err != nil {
 		return nil, err
 	}
