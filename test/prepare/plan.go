@@ -2,10 +2,12 @@ package prepare
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/plan/service"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 func GetPlanByName(ctx context.Context, name string) (one *entity.Plan) {
@@ -20,45 +22,65 @@ func GetPlanByName(ctx context.Context, name string) (one *entity.Plan) {
 }
 
 func CreateTestPlan(ctx context.Context, merchantId uint64) (one *entity.Plan, err error) {
-	return service.PlanCreate(ctx, &service.PlanInternalReq{
-		PlanName:           "autotest_x",
-		Amount:             100,
-		Currency:           "USD",
-		IntervalUnit:       "day",
-		IntervalCount:      1,
-		Description:        "autotest_x",
-		Type:               consts.PlanTypeMain,
-		ProductName:        "autotest_x",
-		ProductDescription: "autotest_x",
-		ImageUrl:           "http://api.unibee.top",
-		HomeUrl:            "http://api.unibee.top",
-		AddonIds:           nil,
-		OnetimeAddonIds:    nil,
-		MetricLimits:       nil,
-		GasPayer:           "",
-		Metadata:           map[string]string{"type": "test"},
-		MerchantId:         merchantId,
-	})
+	one = &entity.Plan{
+		MerchantId:                merchantId,
+		PlanName:                  "autotest_x",
+		Amount:                    100,
+		Currency:                  "USD",
+		IntervalUnit:              "day",
+		IntervalCount:             1,
+		Status:                    consts.PlanStatusActive,
+		Description:               "autotest_x",
+		Type:                      consts.PlanTypeMain,
+		GatewayProductName:        "autotest_x",
+		GatewayProductDescription: "autotest_x",
+		ImageUrl:                  "http://api.unibee.top",
+		HomeUrl:                   "http://api.unibee.top",
+		BindingAddonIds:           "",
+		BindingOnetimeAddonIds:    "",
+		ExtraMetricData:           "",
+		GasPayer:                  "",
+		PublishStatus:             consts.PlanPublishStatusPublished,
+		MetaData:                  utility.MarshalToJsonString(map[string]string{"type": "test"}),
+		CreateTime:                gtime.Now().Timestamp(),
+	}
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		return nil, gerror.Newf(`PlanCreate record insert failure %s`, err)
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	return one, nil
 }
 
-func CreateTestAddon(ctx context.Context, merchantId uint64) (one *entity.Plan, err error) {
-	return service.PlanCreate(ctx, &service.PlanInternalReq{
-		PlanName:           "autotest_addon_x",
-		Amount:             100,
-		Currency:           "USD",
-		IntervalUnit:       "day",
-		IntervalCount:      1,
-		Description:        "autotest_x",
-		Type:               consts.PlanTypeRecurringAddon,
-		ProductName:        "autotest_x",
-		ProductDescription: "autotest_x",
-		ImageUrl:           "http://api.unibee.top",
-		HomeUrl:            "http://api.unibee.top",
-		AddonIds:           nil,
-		OnetimeAddonIds:    nil,
-		MetricLimits:       nil,
-		GasPayer:           "",
-		Metadata:           map[string]string{"type": "test"},
-		MerchantId:         merchantId,
-	})
+func CreateTestAddon(ctx context.Context, merchantId uint64, name string, addonType int) (one *entity.Plan, err error) {
+	one = &entity.Plan{
+		MerchantId:                merchantId,
+		PlanName:                  name,
+		Amount:                    100,
+		Currency:                  "USD",
+		IntervalUnit:              "day",
+		IntervalCount:             1,
+		Status:                    consts.PlanStatusActive,
+		Description:               "autotest_x",
+		Type:                      addonType,
+		GatewayProductName:        "autotest_x",
+		GatewayProductDescription: "autotest_x",
+		ImageUrl:                  "http://api.unibee.top",
+		HomeUrl:                   "http://api.unibee.top",
+		BindingAddonIds:           "",
+		BindingOnetimeAddonIds:    "",
+		ExtraMetricData:           "",
+		GasPayer:                  "",
+		PublishStatus:             consts.PlanPublishStatusPublished,
+		MetaData:                  utility.MarshalToJsonString(map[string]string{"type": "test"}),
+		CreateTime:                gtime.Now().Timestamp(),
+	}
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		return nil, gerror.Newf(`PlanCreate record insert failure %s`, err)
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	return one, nil
 }

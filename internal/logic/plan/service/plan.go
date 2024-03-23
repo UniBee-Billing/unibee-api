@@ -21,8 +21,9 @@ import (
 
 func PlanPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
-	plan := query.GetPlanById(ctx, planId)
-	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
+	one := query.GetPlanById(ctx, planId)
+	utility.Assert(one.Status == consts.PlanStatusActive, "plan not activate")
+	PlanOrAddonIntervalVerify(ctx, planId)
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PublishStatus: consts.PlanPublishStatusPublished,
 		dao.Plan.Columns().GmtModify:     gtime.Now(),
@@ -150,8 +151,8 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		Description:               req.Description,
 		ImageUrl:                  req.ImageUrl,
 		HomeUrl:                   req.HomeUrl,
-		BindingAddonIds:           intListToString(req.AddonIds),
-		BindingOnetimeAddonIds:    intListToString(req.OnetimeAddonIds),
+		BindingAddonIds:           utility.IntListToString(req.AddonIds),
+		BindingOnetimeAddonIds:    utility.IntListToString(req.OnetimeAddonIds),
 		GatewayProductName:        req.ProductName,
 		GatewayProductDescription: req.ProductDescription,
 		Status:                    consts.PlanStatusEditable,
@@ -249,11 +250,12 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 		dao.Plan.Columns().Description:               req.Description,
 		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
 		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
-		dao.Plan.Columns().BindingAddonIds:           intListToString(req.AddonIds),
-		dao.Plan.Columns().BindingOnetimeAddonIds:    intListToString(req.OnetimeAddonIds),
+		dao.Plan.Columns().BindingAddonIds:           utility.IntListToString(req.AddonIds),
+		dao.Plan.Columns().BindingOnetimeAddonIds:    utility.IntListToString(req.OnetimeAddonIds),
 		dao.Plan.Columns().GatewayProductName:        req.ProductName,
 		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
 		dao.Plan.Columns().GasPayer:                  req.GasPayer,
+		dao.Plan.Columns().IsDeleted:                 0,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)
@@ -272,7 +274,7 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 	one.Description = req.Description
 	one.ImageUrl = req.ImageUrl
 	one.HomeUrl = req.HomeUrl
-	one.BindingAddonIds = intListToString(req.AddonIds)
+	one.BindingAddonIds = utility.IntListToString(req.AddonIds)
 	one.GatewayProductName = req.ProductName
 	one.GatewayProductDescription = req.ProductDescription
 
@@ -287,7 +289,7 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 }
 
 func PlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
-	utility.Assert(planId > 0, "planId invlaid")
+	utility.Assert(planId > 0, "planId invalid")
 	one = query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", planId))
@@ -349,7 +351,7 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 	//addonIds type verify
 	{
 		var allAddonList []*entity.Plan
-		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).OmitEmpty().Scan(&allAddonList)
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.AddonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("plan not addon recurring type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
@@ -361,7 +363,7 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 	//onetime addonIds type verify
 	{
 		var allAddonList []*entity.Plan
-		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).OmitEmpty().Scan(&allAddonList)
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, req.OnetimeAddonIds).Scan(&allAddonList)
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not addon onetime type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
@@ -375,23 +377,24 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 	} else if req.Action == 1 {
 		//add
 		utility.Assert(len(req.AddonIds) > 0, "action add, addon ids is empty")
-		addonIdsList = mergeArrays(addonIdsList, req.AddonIds)
-		oneTimeAddonIdsList = mergeArrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
+		addonIdsList = utility.MergeInt64Arrays(addonIdsList, req.AddonIds)
+		oneTimeAddonIdsList = utility.MergeInt64Arrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
 	} else if req.Action == 2 {
 		//delete
 		utility.Assert(len(req.AddonIds) > 0, "action delete, addon ids is empty")
-		addonIdsList = removeArrays(addonIdsList, req.AddonIds)
-		oneTimeAddonIdsList = removeArrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
+		addonIdsList = utility.RemoveInt64Arrays(addonIdsList, req.AddonIds)
+		oneTimeAddonIdsList = utility.RemoveInt64Arrays(oneTimeAddonIdsList, req.OnetimeAddonIds)
 	}
 
 	utility.Assert(len(addonIdsList) <= 10, "addon too much, should <= 10")
 	utility.Assert(len(oneTimeAddonIdsList) <= 10, "addon too much, should <= 10")
 
-	one.BindingAddonIds = intListToString(addonIdsList)
-	one.BindingOnetimeAddonIds = intListToString(oneTimeAddonIdsList)
+	one.BindingAddonIds = utility.IntListToString(addonIdsList)
+	one.BindingOnetimeAddonIds = utility.IntListToString(oneTimeAddonIdsList)
 	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().BindingAddonIds:        one.BindingAddonIds,
 		dao.Plan.Columns().BindingOnetimeAddonIds: one.BindingOnetimeAddonIds,
+		dao.Plan.Columns().IsDeleted:              0,
 		dao.Plan.Columns().GmtModify:              gtime.Now(),
 	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 	if err != nil {
@@ -405,46 +408,4 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 		return nil, gerror.New("internal err, publish count != 1")
 	}
 	return one, nil
-}
-
-func mergeArrays(arr1, arr2 []int64) []int64 {
-	seen := make(map[int64]bool)
-	var result []int64
-	for _, num := range arr1 {
-		if !seen[num] {
-			seen[num] = true
-			result = append(result, num)
-		}
-	}
-	for _, num := range arr2 {
-		if !seen[num] {
-			seen[num] = true
-			result = append(result, num)
-		}
-	}
-
-	return result
-}
-
-func removeArrays(arr, toRemove []int64) []int64 {
-	removeMap := make(map[int64]bool)
-	for _, num := range toRemove {
-		removeMap[num] = true
-	}
-	var result []int64
-	for _, num := range arr {
-		if !removeMap[num] {
-			result = append(result, num)
-		}
-	}
-
-	return result
-}
-
-func intListToString(arr []int64) string {
-	strArr := make([]string, len(arr))
-	for i, num := range arr {
-		strArr[i] = strconv.FormatInt(num, 10)
-	}
-	return strings.Join(strArr, ",")
 }

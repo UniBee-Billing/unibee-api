@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"strconv"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/jwt"
@@ -13,20 +12,6 @@ import (
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func UserSessionTransfer(ctx context.Context, session string) *entity.UserAccount {
-	utility.Assert(len(session) > 0, "Session Is Nil")
-	id, err := g.Redis().Get(ctx, session)
-	utility.AssertError(err, "System Error")
-	utility.Assert(id != nil && !id.IsNil() && !id.IsEmpty(), "Session Expired")
-	utility.Assert(len(id.String()) > 0, "Invalid Session")
-	userId, err := strconv.Atoi(id.String())
-	utility.AssertError(err, "System Error")
-	one := query.GetUserAccountById(ctx, uint64(userId))
-	utility.Assert(one != nil, "Invalid Session, User Not Found")
-	one.Password = ""
-	return one
-}
 
 func ChangeUserPasswordWithOutOldVerify(ctx context.Context, merchantId uint64, email string, newPassword string) {
 	one := query.GetUserAccountByEmail(ctx, merchantId, email)

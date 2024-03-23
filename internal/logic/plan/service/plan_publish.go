@@ -13,16 +13,16 @@ import (
 )
 
 func PlanActivate(ctx context.Context, planId uint64) error {
-	//发布 Plan
 	utility.Assert(planId > 0, "invalid planId")
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found, invalid planId")
+	PlanOrAddonIntervalVerify(ctx, planId)
 	if one.Status == consts.PlanStatusActive {
-		//已成功
 		return nil
 	}
 	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().Status:    consts.PlanStatusActive,
+		dao.Plan.Columns().IsDeleted: 0,
 		dao.Plan.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Plan.Columns().Id, planId).OmitNil().Update()
 	if err != nil {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"unibee/api/bean"
-	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/logic/jwt"
+	auth2 "unibee/internal/logic/session"
 	"unibee/utility"
 
 	"unibee/api/user/auth"

@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error) {
-	result, err := auth.UserAccountList(ctx, &auth.UserListInternalReq{
+	result, err := auth.UserList(ctx, &auth.UserListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
 		UserId:        req.UserId,
 		Email:         req.Email,

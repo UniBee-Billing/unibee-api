@@ -9,7 +9,6 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/plan"
 	dao "unibee/internal/dao/oversea_pay"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -18,7 +17,7 @@ import (
 
 type SubscriptionPlanListInternalReq struct {
 	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	Type          []int  `json:"type"  d:"1"  dc:"Default All，,1-main plan，2-addon plan" `
+	Type          []int  `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
 	Status        []int  `json:"status" dc:"Default All，,Status，1-Editing，2-Active，3-NonActive，4-Expired" `
 	PublishStatus int    `json:"publishStatus" dc:"Default All，,Status，1-UnPublished，2-Published" `
 	Currency      string `json:"currency" dc:"Currency"  `
@@ -28,11 +27,11 @@ type SubscriptionPlanListInternalReq struct {
 	Count         int    `json:"count" dc:"Count Of Page" `
 }
 
-func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes, error) {
+func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.DetailRes, error) {
 	one := query.GetPlanById(ctx, planId)
 	utility.Assert(one != nil, "plan not found")
-	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
-	var addonIds []int64
+	utility.Assert(one.MerchantId == merchantId, "wrong merchant account")
+	var addonIds = make([]int64, 0)
 	if len(one.BindingAddonIds) > 0 {
 		strList := strings.Split(one.BindingAddonIds, ",")
 
@@ -45,7 +44,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 			}
 		}
 	}
-	var oneTimeAddonIds []int64
+	var oneTimeAddonIds = make([]int64, 0)
 	if len(one.BindingOnetimeAddonIds) > 0 {
 		strList := strings.Split(one.BindingOnetimeAddonIds, ",")
 
@@ -70,7 +69,7 @@ func SubscriptionPlanDetail(ctx context.Context, planId uint64) (*plan.DetailRes
 	}, nil
 }
 
-func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*detail.PlanDetail) {
+func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*detail.PlanDetail) {
 	var mainList []*entity.Plan
 	if req.Count <= 0 {
 		req.Count = 20
@@ -111,7 +110,6 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 	for _, p := range mainList {
 		totalPlanIds = append(totalPlanIds, p.Id)
 		if p.Type != 1 {
-			//非主 Plan 不查询 addons
 			list = append(list, &detail.PlanDetail{
 				Plan:             bean.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
@@ -122,7 +120,6 @@ func SubscriptionPlanList(ctx context.Context, req *SubscriptionPlanListInternal
 		}
 		var addonIds []int64
 		if len(p.BindingAddonIds) > 0 {
-			//初始化
 			strList := strings.Split(p.BindingAddonIds, ",")
 
 			for _, s := range strList {

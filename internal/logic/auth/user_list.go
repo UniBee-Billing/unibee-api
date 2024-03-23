@@ -33,7 +33,7 @@ type UserListInternalRes struct {
 	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
 }
 
-func UserAccountList(ctx context.Context, req *UserListInternalReq) (res *UserListInternalRes, err error) {
+func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInternalRes, err error) {
 	var mainList []*bean.UserAccountSimplify
 	if req.Count <= 0 {
 		req.Count = 20

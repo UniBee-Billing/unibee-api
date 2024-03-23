@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gcfg"
 	_ "github.com/gogf/gf/v2/test/gtest"
 	"unibee/internal/cmd/config"
+	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/test/prepare"
@@ -19,11 +20,12 @@ var TestMerchant *entity.Merchant
 var TestMerchantMember *entity.MerchantMember
 var TestUser *entity.UserAccount
 var TestPlan *entity.Plan
-var TestAddon *entity.Plan
+var TestRecurringAddon *entity.Plan
+var TestOneTimeAddon *entity.Plan
 
 func init() {
 	ctx := context.Background()
-	err := g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetPath("/test")
+	err := g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetPath("/test/config")
 	if err != nil {
 		return
 	}
@@ -53,13 +55,20 @@ func init() {
 	}
 	utility.Assert(TestPlan != nil, "TestPlan err")
 	utility.Assert(TestPlan.MerchantId > 0, "TestPlan err")
-	TestAddon = prepare.GetPlanByName(ctx, "autotest_addon_x")
-	if TestAddon == nil {
-		TestAddon, err = prepare.CreateTestAddon(ctx, TestMerchant.Id)
+	TestRecurringAddon = prepare.GetPlanByName(ctx, "autotest_addon_x")
+	if TestRecurringAddon == nil {
+		TestRecurringAddon, err = prepare.CreateTestAddon(ctx, TestMerchant.Id, "autotest_addon_x", consts.PlanTypeRecurringAddon)
 		utility.AssertError(err, "CreateTestAddon err")
 	}
-	utility.Assert(TestAddon != nil, "TestAddon err")
-	utility.Assert(TestAddon.MerchantId > 0, "TestAddon err")
+	utility.Assert(TestRecurringAddon != nil, "TestRecurringAddon err")
+	utility.Assert(TestRecurringAddon.MerchantId > 0, "TestRecurringAddon err")
+	TestOneTimeAddon = prepare.GetPlanByName(ctx, "autotest_one_time_addon_x")
+	if TestOneTimeAddon == nil {
+		TestOneTimeAddon, err = prepare.CreateTestAddon(ctx, TestMerchant.Id, "autotest_one_time_addon_x", consts.PlanTypeOnetimeAddon)
+		utility.AssertError(err, "CreateTestAddon err")
+	}
+	utility.Assert(TestOneTimeAddon != nil, "TestOneTimeAddon err")
+	utility.Assert(TestOneTimeAddon.MerchantId > 0, "TestOneTimeAddon err")
 }
 
 func AssertNotNil(value interface{}) {

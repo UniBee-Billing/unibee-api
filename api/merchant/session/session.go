@@ -20,4 +20,5 @@ type NewRes struct {
 	Email          string `json:"email" dc:"Email"`
 	Url            string `json:"url" dc:"Url"`
 	ClientToken    string `json:"clientToken" dc:"ClientToken"`
+	ClientSession  string `json:"clientSession" dc:"ClientSession"`
 }

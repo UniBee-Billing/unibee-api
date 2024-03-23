@@ -7,14 +7,28 @@ import (
 	"strconv"
 	"unibee/api/merchant/session"
 	"unibee/internal/cmd/config"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
 	"unibee/internal/logic/jwt"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewRes, err error) {
+func UserSessionTransfer(ctx context.Context, session string) *entity.UserAccount {
+	utility.Assert(len(session) > 0, "Session Is Nil")
+	id, err := g.Redis().Get(ctx, session)
+	utility.AssertError(err, "System Error")
+	utility.Assert(id != nil && !id.IsNil() && !id.IsEmpty(), "Session Expired")
+	utility.Assert(len(id.String()) > 0, "Invalid Session")
+	userId, err := strconv.Atoi(id.String())
+	utility.AssertError(err, "System Error")
+	one := query.GetUserAccountById(ctx, uint64(userId))
+	utility.Assert(one != nil, "Invalid Session, User Not Found")
+	one.Password = ""
+	return one
+}
+
+func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq) (res *session.NewRes, err error) {
 	one, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
@@ -23,7 +37,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		Password:       req.Password,
 		Phone:          req.Phone,
 		Address:        req.Address,
-		MerchantId:     _interface.GetMerchantId(ctx),
+		MerchantId:     merchantId,
 	})
 	utility.AssertError(err, "Server Error")
 	utility.Assert(one != nil, "Server Error")
@@ -33,7 +47,7 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, ss, 3*60)
 	utility.AssertError(err, "Server Error")
-	merchantInfo := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
+	merchantInfo := query.GetMerchantById(ctx, merchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
 
@@ -48,5 +62,6 @@ func NewUserSession(ctx context.Context, req *session.NewReq) (res *session.NewR
 		Email:          req.Email,
 		Url:            fmt.Sprintf("%s://%s/session-result?session=%s", config.GetConfigInstance().Server.GetDomainScheme(), merchantInfo.Host, ss),
 		ClientToken:    token,
+		ClientSession:  ss,
 	}, nil
 }

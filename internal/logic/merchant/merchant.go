@@ -25,10 +25,12 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		Email:      req.Email,
 		Password:   utility.PasswordEncrypt(req.Password),
 		UserName:   req.UserName,
+		Mobile:     req.Phone,
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	merchantInfo := &entity.Merchant{
 		CompanyId: 0,
+		Phone:     req.Phone,
 		ApiKey:    utility.GenerateRandomAlphanumeric(32), //32 bit open api key
 	}
 	// transaction create Merchant
