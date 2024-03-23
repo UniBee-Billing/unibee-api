@@ -18,7 +18,6 @@ import (
 	"unibee/internal/controller/user"
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/hook"
 	"unibee/utility"
 	"unibee/utility/liberr"
 
@@ -299,7 +298,6 @@ var (
 			}
 			{
 				cronjob.StartCronJobs()
-				hook.DaoHookInjection(ctx)
 
 			}
 			{
