@@ -38,4 +38,5 @@ type Refund struct {
 	UniqueId             interface{} // unique id
 	SubscriptionId       interface{} // subscription id
 	CreateTime           interface{} // create utc time
+	Type                 interface{} // 1-gateway refund,2-mark refund
 }

@@ -46,6 +46,7 @@ type RefundColumns struct {
 	UniqueId             string // unique id
 	SubscriptionId       string // subscription id
 	CreateTime           string // create utc time
+	Type                 string // 1-gateway refund,2-mark refund
 }
 
 // refundColumns holds the columns for table refund.
@@ -76,6 +77,7 @@ var refundColumns = RefundColumns{
 	UniqueId:             "unique_id",
 	SubscriptionId:       "subscription_id",
 	CreateTime:           "create_time",
+	Type:                 "type",
 }
 
 // NewRefundDao creates and returns a new DAO object for table data access.

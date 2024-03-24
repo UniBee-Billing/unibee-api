@@ -48,7 +48,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
 
-	//- 退款并发调用严重，加上Redis排它锁, todo mark use db lock
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)
@@ -155,6 +154,128 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 		err = handler.CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
+	}
+	return one, nil
+}
+
+func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
+	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
+	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
+	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+	utility.Assert(payment != nil, "payment not found")
+	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
+	utility.Assert(strings.Compare(payment.Currency, req.Currency) == 0, "refund currency not match the payment error")
+	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
+
+	gateway := query.GetGatewayById(ctx, uint64(payment.GatewayId))
+	utility.Assert(gateway != nil, "gateway not found")
+
+	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
+	utility.Assert(req.RefundAmount <= payment.TotalAmount, "refund value should <= TotalAmount value")
+
+	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
+	isDuplicatedInvoke := false
+
+	defer func() {
+		if !isDuplicatedInvoke {
+			utility.ReleaseLock(ctx, redisKey)
+		}
+	}()
+
+	if !utility.TryLock(ctx, redisKey, 15) {
+		isDuplicatedInvoke = true
+		utility.Assert(false, "Submit Too Fast")
+	}
+
+	var (
+		one *entity.Refund
+	)
+	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
+		PaymentId:        req.PaymentId,
+		ExternalRefundId: req.ExternalRefundId,
+		BizType:          bizType,
+	}).OmitEmpty().Scan(&one)
+	utility.Assert(err == nil && one == nil, "Duplicate Submit")
+
+	if req.Metadata == nil {
+		req.Metadata = make(map[string]string)
+	}
+	refundId := utility.CreateRefundId()
+	req.Metadata["PaymentId"] = payment.PaymentId
+	req.Metadata["RefundId"] = refundId
+	req.Metadata["MerchantId"] = strconv.FormatUint(payment.MerchantId, 10)
+
+	one = &entity.Refund{
+		CompanyId:        payment.CompanyId,
+		MerchantId:       payment.MerchantId,
+		ExternalRefundId: req.ExternalRefundId,
+		BizType:          bizType,
+		PaymentId:        payment.PaymentId,
+		RefundId:         refundId,
+		RefundAmount:     req.RefundAmount,
+		Status:           consts.RefundCreated,
+		GatewayId:        payment.GatewayId,
+		Type:             2, //mark refund type
+		AppId:            payment.AppId,
+		Currency:         payment.Currency,
+		CountryCode:      payment.CountryCode,
+		RefundComment:    req.Reason,
+		UserId:           payment.UserId,
+		MetaData:         utility.MarshalToJsonString(req.Metadata),
+	}
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			one.UniqueId = one.RefundId
+			one.CreateTime = gtime.Now().Timestamp()
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			if err != nil {
+				//_ = transaction.Rollback()
+				return err
+			}
+			id, err := insert.LastInsertId()
+			if err != nil {
+				//_ = transaction.Rollback()
+				return err
+			}
+			one.Id = id
+
+			return nil
+		})
+		if err == nil {
+			return redismq.CommitTransaction, nil
+		} else {
+			return redismq.RollbackTransaction, err
+		}
+	})
+
+	if err != nil {
+		return nil, err
+	} else {
+		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundCreateCallback(ctx, payment, one)
+		event.SaveEvent(ctx, entity.PaymentEvent{
+			BizType:   0,
+			BizId:     payment.PaymentId,
+			Fee:       payment.TotalAmount,
+			EventType: event.SentForRefund.Type,
+			Event:     event.SentForRefund.Desc,
+			OpenApiId: one.OpenApiId,
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "SentForRefund", one.RefundId),
+		})
+		err = handler.CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
+		if err != nil {
+			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
+		err = handler.HandleRefundSuccess(ctx, &handler.HandleRefundReq{
+			RefundId:         one.RefundId,
+			GatewayRefundId:  one.RefundId,
+			RefundAmount:     one.RefundAmount,
+			RefundStatusEnum: consts.RefundSuccess,
+			RefundTime:       gtime.Now(),
+			Reason:           one.RefundComment,
+		})
+		if err != nil {
+			return nil, err
 		}
 	}
 	return one, nil

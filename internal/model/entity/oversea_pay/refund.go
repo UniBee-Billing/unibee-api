@@ -36,4 +36,5 @@ type Refund struct {
 	UniqueId             string      `json:"uniqueId"             description:"unique id"`                                          // unique id
 	SubscriptionId       string      `json:"subscriptionId"       description:"subscription id"`                                    // subscription id
 	CreateTime           int64       `json:"createTime"           description:"create utc time"`                                    // create utc time
+	Type                 int         `json:"type"                 description:"1-gateway refund,2-mark refund"`                     // 1-gateway refund,2-mark refund
 }

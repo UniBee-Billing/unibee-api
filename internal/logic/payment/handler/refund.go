@@ -192,20 +192,6 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("payment not found")
 	}
-	//if (refund.getRefundComment().equals("手动触发重复支付单退款")) {
-	//	int updateCount = overseaRefundMapper.update(new OverseaRefund(),
-	//		new UpdateWrapper<OverseaRefund>().lambda()
-	//	.set(OverseaRefund::getRefundStatus, RefundStatusEnum.REFUND_SUCCESS.getCode())
-	//	.set(OverseaRefund::getRefundTime, req.getRefundTime())
-	//	.eq(OverseaRefund::getOutRefundNo, outRefundNo)
-	//	.eq(OverseaRefund::getRefundStatus, RefundStatusEnum.REFUND_ING.getCode())
-	//);
-	//	log.info("update refund status to REFUND_SUCCESS, updateCount={}", updateCount);
-	//	if (updateCount != 1) {
-	//		return BusinessWrapper.failWithMessage("手动触发重复支付单退款失败");
-	//	}
-	//	return BusinessWrapper.success();
-	//}
 	var refundAt = gtime.Now().Timestamp()
 	if req.RefundTime != nil {
 		refundAt = req.RefundTime.Timestamp()
@@ -223,7 +209,6 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 				//_ = transaction.Rollback()
 				return err
 			}
-			//支付单补充退款金额
 			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND total_amount - refund_amount >= ?", one.RefundAmount, payment.Id, one.RefundAmount, one.RefundAmount)
 			if err != nil || update == nil {
 				//_ = transaction.Rollback()
@@ -257,17 +242,6 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			UniqueNo:  fmt.Sprintf("%d_%s_%s", payment.Status, "Refunded", one.RefundId),
 			Message:   req.Reason,
 		})
-
-		//producerWrapper.send(new Message(MqTopicEnum.RefundSuccess,refund.getId()));
-		////            mqUtil.addToMq(MqTopicEnum.RefundSuccess,refund.getId());
-		//// 为提高退款结果反馈速度，同步处理业务订单支付成功
-		//OverseaRefund queryRefund = overseaRefundMapper.selectById(refund.getId());
-		//if (queryRefund == null) {
-		//	refund.setRefundStatus(RefundStatusEnum.REFUND_SUCCESS.getCode());
-		//	refund.setRefundTime(Instant.ofEpochMilli(req.getRefundTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime());
-		//	queryRefund = refund;
-		//}
-		//com.hk.utils.BusinessWrapper result = bizOrderPayCallbackProviderFactory.getBizOrderPayCallbackServiceProvider(queryRefund.getBizType()).refundSuccessCallback(queryRefund,req.getRefundTime());
 		err = CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())

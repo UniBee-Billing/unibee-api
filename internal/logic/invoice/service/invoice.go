@@ -324,7 +324,56 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	if err != nil {
 		return nil, err
 	}
-	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+	user := query.GetUserAccountById(ctx, payment.UserId)
+	if user != nil {
+		merchant := query.GetMerchantById(ctx, payment.MerchantId)
+		if merchant != nil {
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
+				UserName:            user.FirstName + " " + user.LastName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, user.CountryCode),
+				PaymentAmount:       utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
+				Currency:            strings.ToUpper(refund.Currency),
+			})
+			if err != nil {
+				fmt.Printf("CreateInvoiceRefund SendTemplateEmail err:%s", err.Error())
+			}
+		}
+	}
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+
+	return refund, nil
+}
+
+func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity.Refund, error) {
+	utility.Assert(req.RefundAmount > 0, "refundFee should > 0")
+	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
+	utility.Assert(len(req.Reason) > 0, "reason should not be blank")
+	if _interface.Context().Get(ctx).IsOpenApiCall {
+		utility.Assert(len(req.RefundNo) > 0, "refundNo should not be blank")
+	} else if len(req.RefundNo) == 0 {
+		req.RefundNo = uuid.New().String()
+	}
+	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.TotalAmount >= req.RefundAmount, "not enough amount to refund")
+	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	utility.Assert(payment != nil, "payment not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	utility.Assert(gateway.GatewayType == consts.GatewayTypeCrypto, "mark refund only support crypto invoice")
+	refund, err := service.MarkPaymentRefundCreate(ctx, payment.BizType, &service.NewPaymentRefundInternalReq{
+		PaymentId:        one.PaymentId,
+		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
+		Reason:           req.Reason,
+		RefundAmount:     req.RefundAmount,
+		Currency:         one.Currency,
+	})
+	if err != nil {
+		return nil, err
+	}
+	user := query.GetUserAccountById(ctx, payment.UserId)
 	if user != nil {
 		merchant := query.GetMerchantById(ctx, payment.MerchantId)
 		if merchant != nil {

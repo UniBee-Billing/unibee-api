@@ -117,7 +117,7 @@ type CancelRes struct {
 }
 
 type RefundReq struct {
-	g.Meta       `path:"/refund" tags:"Invoice" method:"post" summary:"Admin Create Refund From Invoice"`
+	g.Meta       `path:"/refund" tags:"Invoice" method:"post" summary:"Admin Create Refund For Invoice"`
 	InvoiceId    string `json:"invoiceId" dc:"InvoiceId" v:"required"`
 	RefundNo     string `json:"refundNo" dc:"RefundNo"`
 	RefundAmount int64  `json:"refundAmount" dc:"Refund CaptureAmount" v:"required"`
@@ -125,5 +125,17 @@ type RefundReq struct {
 }
 
 type RefundRes struct {
+	Refund *bean.RefundSimplify `json:"refund" `
+}
+
+type MarkRefundReq struct {
+	g.Meta       `path:"/mark_refund" tags:"Invoice" method:"post" summary:"Admin Mark Refund For Invoice"`
+	InvoiceId    string `json:"invoiceId" dc:"InvoiceId" v:"required"`
+	RefundNo     string `json:"refundNo" dc:"RefundNo"`
+	RefundAmount int64  `json:"refundAmount" dc:"Refund CaptureAmount" v:"required"`
+	Reason       string `json:"reason" dc:"Refund Reason" v:"required"`
+}
+
+type MarkRefundRes struct {
 	Refund *bean.RefundSimplify `json:"refund" `
 }
