@@ -100,10 +100,10 @@ type DeleteRes struct {
 }
 
 type FinishReq struct {
-	g.Meta      `path:"/finish" tags:"Invoice" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
-	InvoiceId   string `json:"invoiceId" dc:"InvoiceId" v:"required"`
-	PayMethod   int    `json:"payMethod" dc:"PayMethod,1-manual，2-auto" v:"required"`
-	DaysUtilDue int    `json:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
+	g.Meta    `path:"/finish" tags:"Invoice" method:"post" summary:"Admin Finish Invoice，Generate Pay Link"`
+	InvoiceId string `json:"invoiceId" dc:"InvoiceId" v:"required"`
+	//PayMethod   int    `json:"payMethod" dc:"PayMethod,1-manual，2-auto" v:"required"`
+	DaysUtilDue int `json:"daysUtilDue" dc:"DaysUtilDue,Due Day Of Pay" v:"required"`
 }
 type FinishRes struct {
 	Invoice *bean.InvoiceSimplify `json:"invoice" `

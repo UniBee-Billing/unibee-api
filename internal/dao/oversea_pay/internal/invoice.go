@@ -36,7 +36,7 @@ type InvoiceColumns struct {
 	Lines                          string // lines( json)
 	GatewayId                      string // gateway_id
 	Status                         string // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
-	SendStatus                     string // email send status，0-No | 1- YES
+	SendStatus                     string // email send status，0-No | 1- YES| 2-Unnecessary
 	SendEmail                      string // email
 	SendPdf                        string // pdf link
 	IsDeleted                      string // 0-UnDeleted，1-Deleted
@@ -62,6 +62,8 @@ type InvoiceColumns struct {
 	CreateTime                     string // create utc time
 	CryptoAmount                   string // crypto_amount, cent
 	CryptoCurrency                 string // crypto_currency
+	FinishTime                     string // finish utc time
+	DayUtilDue                     string // day util due after finish
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -108,6 +110,8 @@ var invoiceColumns = InvoiceColumns{
 	CreateTime:                     "create_time",
 	CryptoAmount:                   "crypto_amount",
 	CryptoCurrency:                 "crypto_currency",
+	FinishTime:                     "finish_time",
+	DayUtilDue:                     "day_util_due",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

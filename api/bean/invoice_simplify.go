@@ -30,6 +30,8 @@ type InvoiceSimplify struct {
 	BizType                        int                    `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	CryptoAmount                   int64                  `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency                 string                 `json:"cryptoCurrency"                 description:"crypto_currency"`
+	SendStatus                     int                    `json:"sendStatus"                     description:"email send status，0-No | 1- YES| 2-Unnecessary"` // email send status，0-No | 1- YES| 2-Unnecessary
+	DayUtilDue                     int64                  `json:"dayUtilDue"                     description:"day util due after finish"`                      // day util due after finish
 }
 
 type InvoiceItemSimplify struct {
@@ -83,5 +85,7 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		BizType:                        one.BizType,
 		CryptoCurrency:                 one.CryptoCurrency,
 		CryptoAmount:                   one.CryptoAmount,
+		SendStatus:                     one.SendStatus,
+		DayUtilDue:                     one.DayUtilDue,
 	}
 }

@@ -106,12 +106,12 @@ type GatewayPaymentRo struct {
 }
 
 type GatewayCreateSubscriptionResp struct {
-	GatewayUserId         string                                   `json:"gatewayUserId"`
-	GatewaySubscriptionId string                                   `json:"gatewaySubscriptionId"`
-	Data                  string                                   `json:"data"`
-	Link                  string                                   `json:"link"`
-	Status                consts.SubscriptionGatewayPlanStatusEnum `json:"status"`
-	Paid                  bool                                     `json:"paid"`
+	GatewayUserId         string                       `json:"gatewayUserId"`
+	GatewaySubscriptionId string                       `json:"gatewaySubscriptionId"`
+	Data                  string                       `json:"data"`
+	Link                  string                       `json:"link"`
+	Status                consts.GatewayPlanStatusEnum `json:"status"`
+	Paid                  bool                         `json:"paid"`
 }
 
 type GatewayBalance struct {

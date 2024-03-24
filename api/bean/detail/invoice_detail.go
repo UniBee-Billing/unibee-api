@@ -55,6 +55,7 @@ type InvoiceDetail struct {
 	Refund                         *bean.RefundSimplify        `json:"refund"                       description:"Refund"`
 	CryptoAmount                   int64                       `json:"cryptoAmount"                   description:"crypto_amount, cent"` // crypto_amount, cent
 	CryptoCurrency                 string                      `json:"cryptoCurrency"                 description:"crypto_currency"`
+	DayUtilDue                     int64                       `json:"dayUtilDue"                     description:"day util due after finish"` // day util due after finish
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -108,5 +109,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Refund:                         bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId)),
 		CryptoCurrency:                 invoice.CryptoCurrency,
 		CryptoAmount:                   invoice.CryptoAmount,
+		DayUtilDue:                     invoice.DayUtilDue,
 	}
 }

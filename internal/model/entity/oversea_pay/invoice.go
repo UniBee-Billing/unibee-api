@@ -26,7 +26,7 @@ type Invoice struct {
 	Lines                          string      `json:"lines"                          description:"lines( json)"`                                                           // lines( json)
 	GatewayId                      uint64      `json:"gatewayId"                      description:"gateway_id"`                                                             // gateway_id
 	Status                         int         `json:"status"                         description:"status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
-	SendStatus                     int         `json:"sendStatus"                     description:"email send status，0-No | 1- YES"`                                        // email send status，0-No | 1- YES
+	SendStatus                     int         `json:"sendStatus"                     description:"email send status，0-No | 1- YES| 2-Unnecessary"`                         // email send status，0-No | 1- YES| 2-Unnecessary
 	SendEmail                      string      `json:"sendEmail"                      description:"email"`                                                                  // email
 	SendPdf                        string      `json:"sendPdf"                        description:"pdf link"`                                                               // pdf link
 	IsDeleted                      int         `json:"isDeleted"                      description:"0-UnDeleted，1-Deleted"`                                                  // 0-UnDeleted，1-Deleted
@@ -52,4 +52,6 @@ type Invoice struct {
 	CreateTime                     int64       `json:"createTime"                     description:"create utc time"`                                                        // create utc time
 	CryptoAmount                   int64       `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency                 string      `json:"cryptoCurrency"                 description:"crypto_currency"`                                                        // crypto_currency
+	FinishTime                     int64       `json:"finishTime"                     description:"finish utc time"`                                                        // finish utc time
+	DayUtilDue                     int64       `json:"dayUtilDue"                     description:"day util due after finish"`                                              // day util due after finish
 }

@@ -5,17 +5,6 @@ const (
 	SubscriptionCycleUnderUniBeeControl = true
 )
 
-type InvoiceStatusEnum int
-
-const (
-	InvoiceStatusInit       = 0
-	InvoiceStatusPending    = 1
-	InvoiceStatusProcessing = 2
-	InvoiceStatusPaid       = 3
-	InvoiceStatusFailed     = 4
-	InvoiceStatusCancelled  = 5
-)
-
 type SubscriptionStatusEnum int
 
 const (
@@ -47,60 +36,5 @@ func (status SubscriptionStatusEnum) Description() string {
 		return "SubStatusSuspended"
 	default:
 		return "SubStatusInit"
-	}
-}
-
-type SubscriptionPlanType int
-
-const (
-	PlanTypeMain           = 1
-	PlanTypeRecurringAddon = 2
-	PlanTypeOnetimeAddon   = 3
-)
-
-type SubscriptionPlanStatusEnum int
-
-const (
-	PlanStatusEditable           = 1
-	PlanStatusActive             = 2
-	PlanStatusExpired            = 3
-	PlanPublishStatusPublished   = 2
-	PlanPublishStatusUnPublished = 1
-)
-
-func (status SubscriptionPlanStatusEnum) Description() string {
-	switch status {
-	case PlanStatusEditable:
-		return "PlanStatusEditable"
-	case PlanStatusActive:
-		return "PlanStatusActive"
-	case PlanStatusExpired:
-		return "PlanStatusExpired"
-	default:
-		return "PlanStatusEditable"
-	}
-}
-
-type SubscriptionGatewayPlanStatusEnum int
-
-const (
-	GatewayPlanStatusInit     = 0
-	GatewayPlanStatusCreate   = 1
-	GatewayPlanStatusActive   = 2
-	GatewayPlanStatusInActive = 3
-)
-
-func (status SubscriptionGatewayPlanStatusEnum) Description() string {
-	switch status {
-	case GatewayPlanStatusInit:
-		return "GatewayPlanStatusInit"
-	case GatewayPlanStatusCreate:
-		return "GatewayPlanStatusCreate"
-	case GatewayPlanStatusActive:
-		return "GatewayPlanStatusActive"
-	case GatewayPlanStatusInActive:
-		return "GatewayPlanStatusInActive"
-	default:
-		return "GatewayPlanStatusInit"
 	}
 }

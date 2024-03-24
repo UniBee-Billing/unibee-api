@@ -119,7 +119,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		Lines:                          utility.MarshalToJsonString(invoiceItems),
 		GatewayId:                      req.GatewayId,
 		Status:                         consts.InvoiceStatusPending,
-		SendStatus:                     0,
+		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
 		CreateTime:                     gtime.Now().Timestamp(),
@@ -135,8 +135,8 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
-			InvoiceId:   one.InvoiceId,
-			PayMethod:   2,
+			InvoiceId: one.InvoiceId,
+			//PayMethod:   2,
 			DaysUtilDue: 3,
 		})
 		if err != nil {
@@ -211,8 +211,8 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
-			InvoiceId:   one.InvoiceId,
-			PayMethod:   2,
+			InvoiceId: one.InvoiceId,
+			//PayMethod:   2,
 			DaysUtilDue: 3,
 		})
 		if err != nil {
@@ -282,12 +282,18 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	utility.Assert(one.Status == consts.InvoiceStatusPending, "invoice not in pending status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
 	checkInvoice(detail.ConvertInvoiceToDetail(ctx, one))
+	if req.DaysUtilDue <= 0 {
+		req.DaysUtilDue = consts.DEFAULT_DAY_UTIL_DUE
+	}
 	invoiceStatus := consts.InvoiceStatusProcessing
 	invoiceLink := link.GetInvoiceLink(one.InvoiceId)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().Status:    invoiceStatus,
-		dao.Invoice.Columns().Link:      invoiceLink,
-		dao.Invoice.Columns().GmtModify: gtime.Now(),
+		dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusUnSend,
+		dao.Invoice.Columns().Status:     invoiceStatus,
+		dao.Invoice.Columns().Link:       invoiceLink,
+		dao.Invoice.Columns().DayUtilDue: req.DaysUtilDue,
+		dao.Invoice.Columns().FinishTime: gtime.Now().Timestamp(),
+		dao.Invoice.Columns().GmtModify:  gtime.Now(),
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err

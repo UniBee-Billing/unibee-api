@@ -107,8 +107,8 @@ func TestInvoice(t *testing.T) {
 		require.Equal(t, "test_invoice", one.InvoiceName)
 		require.Equal(t, int64(110), one.TotalAmount)
 		finishInvoice, err := FinishInvoice(ctx, &invoice.FinishReq{
-			InvoiceId:   one.InvoiceId,
-			PayMethod:   2,
+			InvoiceId: one.InvoiceId,
+			//PayMethod:   2,
 			DaysUtilDue: 2,
 		})
 		require.Nil(t, err)

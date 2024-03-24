@@ -3,6 +3,7 @@ package invoice
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -29,6 +30,15 @@ func InvoiceLinkEntry(r *ghttp.Request) {
 	} else if one.Status < consts.InvoiceStatusProcessing {
 		r.Response.Writeln("Invoice Not Ready")
 	} else if one.Status == consts.InvoiceStatusProcessing {
+		dayUtilDue := one.DayUtilDue
+		if dayUtilDue <= 0 {
+			dayUtilDue = consts.DEFAULT_DAY_UTIL_DUE
+		}
+		if one.FinishTime > 0 && one.FinishTime+(dayUtilDue*86400) < gtime.Now().Timestamp() {
+			// todo mark expire invoice
+			r.Response.Writeln("Invoice Expire")
+			return
+		}
 		if len(one.PaymentLink) == 0 {
 			// create payment link for this invoice
 			gateway := query.GetGatewayById(r.Context(), one.GatewayId)

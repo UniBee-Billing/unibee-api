@@ -98,6 +98,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Currency:                req.Currency,
 			TotalAmountExcludingTax: totalAmountExcludingTax,
 			TaxAmount:               totalTax,
+			SendStatus:              consts.InvoiceSendStatusUnnecessary,
+			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines:                   invoiceItems,
 		}
 	} else {
@@ -106,6 +108,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			TotalAmountExcludingTax: req.TotalAmount,
 			Currency:                req.Currency,
 			TaxAmount:               0,
+			SendStatus:              consts.InvoiceSendStatusUnnecessary,
+			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines: []*bean.InvoiceItemSimplify{{
 				Currency:               req.Currency,
 				Amount:                 req.TotalAmount,

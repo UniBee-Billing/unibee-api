@@ -79,7 +79,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Currency:                       sub.Currency,
 		GatewayId:                      sub.GatewayId,
 		Status:                         consts.InvoiceStatusProcessing,
-		SendStatus:                     0,
+		SendStatus:                     simplify.SendStatus,
 		SendEmail:                      sendEmail,
 		UniqueId:                       invoiceId,
 		TotalAmount:                    simplify.TotalAmount,
@@ -90,6 +90,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
 		Link:                           link.GetInvoiceLink(invoiceId),
 		CreateTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     gtime.Now().Timestamp(),
+		DayUtilDue:                     simplify.DayUtilDue,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -137,7 +139,6 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 		status = consts.InvoiceStatusCancelled
 	}
 	if one == nil {
-		//创建
 		one = &entity.Invoice{
 			BizType:                        payment.BizType,
 			UserId:                         payment.UserId,
@@ -153,7 +154,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			CryptoCurrency:                 payment.CryptoCurrency,
 			GatewayId:                      payment.GatewayId,
 			Status:                         status,
-			SendStatus:                     0,
+			SendStatus:                     invoice.SendStatus,
 			SendEmail:                      sendEmail,
 			GatewayPaymentId:               payment.GatewayPaymentId,
 			UniqueId:                       payment.PaymentId,
@@ -167,6 +168,8 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			Lines:                          utility.MarshalToJsonString(invoice.Lines),
 			PaymentLink:                    payment.Link,
 			CreateTime:                     gtime.Now().Timestamp(),
+			FinishTime:                     gtime.Now().Timestamp(),
+			DayUtilDue:                     invoice.DayUtilDue,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -241,7 +244,7 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", err.Error())
 			}
 		}
-		if sendUserEmail {
+		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
 			err := SendSubscriptionInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
@@ -330,7 +333,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 		utility.AssertError(err, "send email error")
 		//update send status
 		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().SendStatus: 1,
+			dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
 			dao.Invoice.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
