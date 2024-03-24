@@ -58,7 +58,7 @@ type PaymentDetail struct {
 type ListReq struct {
 	g.Meta      `path:"/list" tags:"Payment" method:"get" summary:"Query Payment List"`
 	GatewayId   uint64 `json:"gatewayId"   dc:"GatewayId"`
-	UserId      int64  `json:"userId" dc:"UserId " `
+	UserId      uint64 `json:"userId" dc:"UserId " `
 	Email       string `json:"email" dc:"Email"`
 	Status      int    `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
 	Currency    string `json:"currency" dc:"Currency"`

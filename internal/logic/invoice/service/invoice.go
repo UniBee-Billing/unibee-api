@@ -320,7 +320,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
-	refund, err := service.GatewayPaymentRefundCreate(ctx, payment.BizType, &service.NewPaymentRefundInternalReq{
+	refund, err := service.GatewayPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,
@@ -369,7 +369,7 @@ func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity
 	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeCrypto, "mark refund only support crypto invoice")
-	refund, err := service.MarkPaymentRefundCreate(ctx, payment.BizType, &service.NewPaymentRefundInternalReq{
+	refund, err := service.MarkPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
 		Reason:           req.Reason,

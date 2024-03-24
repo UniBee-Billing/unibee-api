@@ -15,12 +15,12 @@ import (
 )
 
 var GatewayNameMapping = map[string]_interface.GatewayInterface{
-	"stripe":    &Stripe{},
-	"changelly": &Changelly{},
-	"paypal":    &Paypal{},
-	"invalid":   &Invalid{},
-	"0":         &Blank{},
-	"autotest":  &AutoTest{},
+	"stripe":          &Stripe{},
+	"changelly":       &Changelly{},
+	"paypal":          &Paypal{},
+	"invalid":         &Invalid{},
+	"autotest_crypto": &AutoTestCrypto{},
+	"autotest":        &AutoTest{},
 }
 
 type GatewayProxy struct {

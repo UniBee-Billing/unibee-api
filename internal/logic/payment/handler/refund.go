@@ -50,7 +50,7 @@ func HandleRefundCancelled(ctx context.Context, req *HandleRefundReq) (err error
 		g.Log().Infof(ctx, "refund already success")
 		return gerror.New("refund already success")
 	}
-	payment := query.GetPaymentByPaymentId(ctx, one.RefundId)
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, refundId=%s", one.RefundId)
 		return gerror.New("payment not found")

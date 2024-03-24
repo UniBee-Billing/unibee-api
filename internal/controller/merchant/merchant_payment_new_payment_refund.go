@@ -18,7 +18,7 @@ func (c *ControllerPayment) NewPaymentRefund(ctx context.Context, req *payment.N
 	utility.Assert(len(req.Currency) > 0, "refund currency should not be nil")
 	currencyNumberCheck(req.RefundAmount, req.Currency)
 
-	resp, err := service.GatewayPaymentRefundCreate(ctx, consts.BizTypeOneTime, &service.NewPaymentRefundInternalReq{
+	resp, err := service.GatewayPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        req.PaymentId,
 		ExternalRefundId: req.ExternalRefundId,
 		RefundAmount:     req.RefundAmount,

@@ -42,7 +42,7 @@ type RefundListReq struct {
 	PaymentId string `json:"paymentId" dc:"PaymentId" v:"required"`
 	Status    int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`
 	GatewayId uint64 `json:"gatewayId" dc:"GatewayId"`
-	UserId    int64  `json:"userId" dc:"UserId"`
+	UserId    uint64 `json:"userId" dc:"UserId"`
 	Email     string `json:"email" dc:"Email"`
 	Currency  string `json:"currency" dc:"Currency"`
 }

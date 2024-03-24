@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
@@ -30,16 +31,17 @@ type NewPaymentRefundInternalReq struct {
 	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 
-func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
+func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
 	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
+	req.Currency = strings.ToUpper(req.Currency)
 	utility.Assert(strings.Compare(payment.Currency, req.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 
-	gateway := query.GetGatewayById(ctx, uint64(payment.GatewayId))
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
@@ -65,7 +67,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
 		PaymentId:        req.PaymentId,
 		ExternalRefundId: req.ExternalRefundId,
-		BizType:          bizType,
+		BizType:          payment.BizType,
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
@@ -81,7 +83,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 		CompanyId:        payment.CompanyId,
 		MerchantId:       payment.MerchantId,
 		ExternalRefundId: req.ExternalRefundId,
-		BizType:          bizType,
+		BizType:          payment.BizType,
 		PaymentId:        payment.PaymentId,
 		RefundId:         refundId,
 		RefundAmount:     req.RefundAmount,
@@ -99,7 +101,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 			//transaction gateway refund
 			one.UniqueId = one.RefundId
 			one.CreateTime = gtime.Now().Timestamp()
-			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -155,21 +157,38 @@ func GatewayPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymen
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
 		}
+		if gatewayResult.Status == consts.RefundSuccess {
+			err = handler.HandleRefundSuccess(ctx, &handler.HandleRefundReq{
+				RefundId:         one.RefundId,
+				GatewayRefundId:  gatewayResult.GatewayRefundId,
+				RefundAmount:     req.RefundAmount,
+				RefundStatusEnum: gatewayResult.Status,
+				RefundTime:       gtime.Now(),
+				Reason:           req.Reason,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 	return one, nil
 }
 
-func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
+func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
 	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(payment.TotalAmount > 0, "TotalAmount fee error")
+	req.Currency = strings.ToUpper(req.Currency)
 	utility.Assert(strings.Compare(payment.Currency, req.Currency) == 0, "refund currency not match the payment error")
 	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
 
-	gateway := query.GetGatewayById(ctx, uint64(payment.GatewayId))
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
+	if gateway.GatewayType != consts.GatewayTypeCrypto {
+		return nil, gerror.New("mark refund only support crypto")
+	}
 
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
 	utility.Assert(req.RefundAmount <= payment.TotalAmount, "refund value should <= TotalAmount value")
@@ -194,7 +213,7 @@ func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRe
 	err = dao.Refund.Ctx(ctx).Where(entity.Refund{
 		PaymentId:        req.PaymentId,
 		ExternalRefundId: req.ExternalRefundId,
-		BizType:          bizType,
+		BizType:          payment.BizType,
 	}).OmitEmpty().Scan(&one)
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
@@ -210,7 +229,7 @@ func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRe
 		CompanyId:        payment.CompanyId,
 		MerchantId:       payment.MerchantId,
 		ExternalRefundId: req.ExternalRefundId,
-		BizType:          bizType,
+		BizType:          payment.BizType,
 		PaymentId:        payment.PaymentId,
 		RefundId:         refundId,
 		RefundAmount:     req.RefundAmount,
@@ -228,7 +247,7 @@ func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRe
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			one.UniqueId = one.RefundId
 			one.CreateTime = gtime.Now().Timestamp()
-			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 			if err != nil {
 				//_ = transaction.Rollback()
 				return err
@@ -279,4 +298,11 @@ func MarkPaymentRefundCreate(ctx context.Context, bizType int, req *NewPaymentRe
 		}
 	}
 	return one, nil
+}
+
+func HardDeleteRefund(ctx context.Context, merchantId uint64, refundId string) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(len(refundId) > 0, "invalid refundId")
+	_, err := dao.Refund.Ctx(ctx).Where(dao.Refund.Columns().RefundId, refundId).Delete()
+	return err
 }

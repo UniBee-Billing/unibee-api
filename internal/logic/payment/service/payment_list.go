@@ -14,7 +14,7 @@ import (
 type PaymentListInternalReq struct {
 	MerchantId  uint64 `json:"merchantId"   dc:"MerchantId"`
 	GatewayId   uint64 `json:"gatewayId"   dc:"GatewayId"`
-	UserId      int64  `json:"userId" dc:"UserId " `
+	UserId      uint64 `json:"userId" dc:"UserId " `
 	Email       string `json:"email" dc:"Email"`
 	Status      int    `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
 	Currency    string `json:"currency" dc:"Currency"`
@@ -30,6 +30,7 @@ type PaymentListInternalRes struct {
 }
 
 func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*payment.PaymentDetail, err error) {
+	req.Currency = strings.ToUpper(req.Currency)
 	var mainList []*payment.PaymentDetail
 	if req.Count <= 0 {
 		req.Count = 20

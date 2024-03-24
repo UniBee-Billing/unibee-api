@@ -7,20 +7,20 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-type BlankWebhook struct {
+type AutoTestCryptoWebhook struct {
 }
 
-func (b BlankWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
+func (b AutoTestCryptoWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b BlankWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
+func (b AutoTestCryptoWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (b BlankWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
+func (b AutoTestCryptoWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

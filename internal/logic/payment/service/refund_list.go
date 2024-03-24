@@ -16,12 +16,13 @@ type RefundListInternalReq struct {
 	PaymentId  string `json:"paymentId" dc:"PaymentId" v:"required"`
 	Status     int    `json:"status" dc:"Status,10-create|20-success|30-Failed|40-Reverse"`
 	GatewayId  uint64 `json:"gatewayId"   dc:"GatewayId"`
-	UserId     int64  `json:"userId" dc:"UserId"`
+	UserId     uint64 `json:"userId" dc:"UserId"`
 	Email      string `json:"email" dc:"Email"`
 	Currency   string `json:"currency" dc:"Currency"`
 }
 
 func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails []*payment.RefundDetail, err error) {
+	req.Currency = strings.ToUpper(req.Currency)
 	var mainList []*payment.RefundDetail
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId not found")

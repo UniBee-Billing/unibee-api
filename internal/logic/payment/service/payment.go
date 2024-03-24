@@ -38,6 +38,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
+	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
+	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
 
 	createPayContext.Pay.Status = consts.PaymentCreated
@@ -100,7 +102,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
 			createPayContext.Pay.ExpireTime = createPayContext.Pay.CreateTime + int64(createPayContext.DaysUtilDue*86400)
-			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitNil().Insert(createPayContext.Pay)
+			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
 			if err != nil {
 				return err
 			}
@@ -206,6 +208,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	if merchant == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
+	invoice.Currency = strings.ToUpper(invoice.Currency)
 	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		PayImmediate: true,
 		Gateway:      gateway,
@@ -217,7 +220,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 			UserId:            sub.UserId,
 			GatewayId:         gateway.Id,
 			TotalAmount:       invoice.TotalAmount,
-			Currency:          invoice.Currency,
+			Currency:          strings.ToUpper(invoice.Currency),
 			CryptoAmount:      invoice.CryptoAmount,
 			CryptoCurrency:    invoice.CryptoCurrency,
 			CountryCode:       sub.CountryCode,
@@ -237,7 +240,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		//need send invoice for authorised
 		payment := query.GetPaymentByPaymentId(ctx, res.PaymentId)
 		if payment != nil {
-			oneUser := query.GetUserAccountById(ctx, uint64(sub.UserId))
+			oneUser := query.GetUserAccountById(ctx, sub.UserId)
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			if plan != nil && oneUser != nil {
 				err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
@@ -256,4 +259,18 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		}
 	}
 	return res, err
+}
+
+func HardDeletePayment(ctx context.Context, merchantId uint64, paymentId string) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(len(paymentId) > 0, "invalid paymentId")
+	one := query.GetPaymentByPaymentId(ctx, paymentId)
+	if one != nil && len(one.InvoiceId) > 0 {
+		_, err := dao.Invoice.Ctx(ctx).Where(dao.Invoice.Columns().InvoiceId, one.InvoiceId).Delete()
+		if err != nil {
+			return err
+		}
+	}
+	_, err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, paymentId).Delete()
+	return err
 }
