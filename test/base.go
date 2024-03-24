@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
+	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"
@@ -24,6 +25,8 @@ var TestRecurringAddon *entity.Plan
 var TestOneTimeAddon *entity.Plan
 var TestGateway *entity.MerchantGateway
 var TestCryptoGateway *entity.MerchantGateway
+var MysqlConfigFileName = "test_mysql_config.yaml"
+var PostgresConfigFileName = "test_postgres_config.yaml"
 
 func init() {
 	ctx := context.Background()
@@ -31,7 +34,7 @@ func init() {
 	if err != nil {
 		return
 	}
-	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName("test_config.yaml")
+	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(MysqlConfigFileName)
 
 	config.SetupDefaultConfigs(ctx)
 	TestMerchantMember = query.GetMerchantMemberByEmail(ctx, "test@wowow.io")

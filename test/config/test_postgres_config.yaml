@@ -1,0 +1,14 @@
+env: daily
+
+server:
+  domainPath: "http://api.unibee.top"
+
+database:
+  default:
+    link:    "pgsql:unibee:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(api.unibee.top:15432)/unibee"
+
+# Redis Stage
+redis:
+  default:
+    address: 192.168.17.188:6379
+    pass: p9KIMXc8OXI5HnaA
