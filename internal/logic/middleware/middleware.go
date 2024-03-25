@@ -50,7 +50,7 @@ func doubleRequestLimit(id string, r *ghttp.Request) {
 			return
 		}
 		md5 := utility.MD5(fmt.Sprintf("%s%s%s", id, r.GetUrl(), r.GetBodyString()))
-		if !utility.TryLock(r.Context(), md5, 5) {
+		if !utility.TryLock(r.Context(), md5, 3) {
 			utility.Assert(false, "click too fast, please wait for second")
 		}
 	}

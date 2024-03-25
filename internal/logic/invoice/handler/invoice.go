@@ -245,7 +245,7 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
-			err := SendSubscriptionInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
+			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()
@@ -281,7 +281,7 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	return err
 }
 
-func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
+func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.UserId > 0, "invoice userId not found")
@@ -289,7 +289,7 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
 	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
 	if !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
-		fmt.Printf("SendSubscriptionInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
+		fmt.Printf("SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
 		return nil
 	}
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
@@ -337,10 +337,10 @@ func SendSubscriptionInvoiceEmailToUser(ctx context.Context, invoiceId string) e
 			dao.Invoice.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			fmt.Printf("SendSubscriptionInvoiceEmailToUser update err:%s", err.Error())
+			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
 		}
 	} else {
-		fmt.Printf("SendSubscriptionInvoiceEmailToUser invoice status is pending or init, email not send")
+		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
 	}
 	return nil
 }

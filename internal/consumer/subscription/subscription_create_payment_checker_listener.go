@@ -44,7 +44,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	if sub.Status == consts.SubStatusCreate && len(sub.LatestInvoiceId) > 0 {
 		invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 		if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
-			err := handler.SendSubscriptionInvoiceEmailToUser(ctx, sub.LatestInvoiceId)
+			err := handler.SendInvoiceEmailToUser(ctx, sub.LatestInvoiceId)
 			_, _ = redismq.SendDelay(&redismq.Message{
 				Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,
 				Tag:   redismq2.TopicSubscriptionCreatePaymentCheck.Tag,
