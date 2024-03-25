@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/webhook/event"
+	subscription3 "unibee/internal/consumer/webhook/subscription"
 	dao "unibee/internal/dao/oversea_pay"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
@@ -16,6 +19,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	service2 "unibee/internal/logic/subscription/service"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -169,6 +173,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub:", utility.MarshalToJsonString(one))
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
+				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
+					trackForSubscriptionLatest(ctx, sub, timeNow)
+				}
 				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && sub.CurrentPeriodEnd < timeNow {
 					// finish the payment
 					createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, latestInvoice)
@@ -189,5 +196,27 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	} else {
 		g.Log().Print(ctx, source, "GetLock Failure", key)
 		return &BillingCycleWalkRes{WalkHasDeal: false, Message: "Sub Get Lock Failure"}, nil
+	}
+}
+
+// trackForSubscriptionLatest dunning system for subscription invoice
+func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, timeNow int64) {
+	one := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+	if one != nil && one.Status == consts.InvoiceStatusProcessing && one.FinishTime+(one.DayUtilDue*86400) < timeNow {
+		// todo mark expire invoice
+	} else if one != nil && one.Status == consts.InvoiceStatusProcessing && one.LastTrackTime+86400 < timeNow && one.FinishTime+(one.DayUtilDue*86400) > timeNow {
+		// dunning: daily resend invoice, update track time
+		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().LastTrackTime: gtime.Now().Timestamp(),
+			dao.Invoice.Columns().GmtModify:     gtime.Now(),
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+		}
+		err = handler2.SendInvoiceEmailToUser(ctx, one.InvoiceId)
+		if err != nil {
+			glog.Errorf(ctx, "trackForSubscriptionLatest error", err.Error())
+		}
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
 	}
 }

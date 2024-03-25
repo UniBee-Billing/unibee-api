@@ -56,4 +56,5 @@ type Invoice struct {
 	CryptoCurrency                 interface{} // crypto_currency
 	FinishTime                     interface{} // finish utc time
 	DayUtilDue                     interface{} // day util due after finish
+	LastTrackTime                  interface{} // last process invoice track time
 }

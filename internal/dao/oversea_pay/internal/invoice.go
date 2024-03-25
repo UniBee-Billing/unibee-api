@@ -64,6 +64,7 @@ type InvoiceColumns struct {
 	CryptoCurrency                 string // crypto_currency
 	FinishTime                     string // finish utc time
 	DayUtilDue                     string // day util due after finish
+	LastTrackTime                  string // last process invoice track time
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -112,6 +113,7 @@ var invoiceColumns = InvoiceColumns{
 	CryptoCurrency:                 "crypto_currency",
 	FinishTime:                     "finish_time",
 	DayUtilDue:                     "day_util_due",
+	LastTrackTime:                  "last_track_time",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

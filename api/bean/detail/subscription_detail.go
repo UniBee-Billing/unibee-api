@@ -12,6 +12,7 @@ type SubscriptionDetail struct {
 	Gateway                             *bean.GatewaySimplify            `json:"gateway" dc:"Gateway"`
 	AddonParams                         []*bean.PlanAddonParam           `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail          `json:"addons" dc:"Addon"`
+	LatestInvoice                       *bean.InvoiceSimplify            `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 

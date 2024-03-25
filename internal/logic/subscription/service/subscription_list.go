@@ -39,6 +39,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 		Gateway:                             bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
 		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		LatestInvoice:                       bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
 	}, nil
 }
@@ -94,20 +95,19 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			user.Password = ""
 		}
 		list = append(list, &detail.SubscriptionDetail{
-			User:         bean.SimplifyUserAccount(user),
-			Subscription: bean.SimplifySubscription(sub),
-			Gateway:      bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
-			Plan:         nil,
-			Addons:       nil,
-			AddonParams:  addonParams,
+			User:          bean.SimplifyUserAccount(user),
+			Subscription:  bean.SimplifySubscription(sub),
+			Gateway:       bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
+			Plan:          nil,
+			Addons:        nil,
+			LatestInvoice: bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)),
+			AddonParams:   addonParams,
 		})
 	}
 	if len(totalPlanIds) > 0 {
-		//查询所有 Plan
 		var allPlanList []*entity.Plan
 		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, totalPlanIds).OmitEmpty().Scan(&allPlanList)
 		if err == nil {
-			//整合进列表
 			mapPlans := make(map[uint64]*entity.Plan)
 			for _, pair := range allPlanList {
 				key := pair.Id

@@ -3,21 +3,22 @@ package event
 type MerchantWebhookEvent string
 
 const (
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED   = "subscription.created"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED   = "subscription.updated"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED = "subscription.cancelled"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED   = "subscription.expired"
-	UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED    = "user.metric.update"
-	UNIBEE_WEBHOOK_EVENT_PAYMENT_CREATED        = "payment.created"
-	UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED = "payment.authorised.need"
-	UNIBEE_WEBHOOK_EVENT_PAYMENT_SUCCESS        = "payment.success"
-	UNIBEE_WEBHOOK_EVENT_PAYMENT_CANCEL         = "payment.cancelled"
-	UNIBEE_WEBHOOK_EVENT_PAYMENT_FAILURE        = "payment.failure"
-	UNIBEE_WEBHOOK_EVENT_REFUND_CREATED         = "refund.created"
-	UNIBEE_WEBHOOK_EVENT_REFUND_SUCCESS         = "refund.success"
-	UNIBEE_WEBHOOK_EVENT_REFUND_FAILURE         = "refund.failure"
-	UNIBEE_WEBHOOK_EVENT_REFUND_CANCELLED       = "refund.cancelled"
-	UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE         = "refund.reverse"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED       = "subscription.created"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED       = "subscription.updated"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED     = "subscription.cancelled"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK = "subscription.latest_invoice.track"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED       = "subscription.expired"
+	UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED        = "user.metric.update"
+	UNIBEE_WEBHOOK_EVENT_PAYMENT_CREATED            = "payment.created"
+	UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED     = "payment.authorised.need"
+	UNIBEE_WEBHOOK_EVENT_PAYMENT_SUCCESS            = "payment.success"
+	UNIBEE_WEBHOOK_EVENT_PAYMENT_CANCEL             = "payment.cancelled"
+	UNIBEE_WEBHOOK_EVENT_PAYMENT_FAILURE            = "payment.failure"
+	UNIBEE_WEBHOOK_EVENT_REFUND_CREATED             = "refund.created"
+	UNIBEE_WEBHOOK_EVENT_REFUND_SUCCESS             = "refund.success"
+	UNIBEE_WEBHOOK_EVENT_REFUND_FAILURE             = "refund.failure"
+	UNIBEE_WEBHOOK_EVENT_REFUND_CANCELLED           = "refund.cancelled"
+	UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE             = "refund.reverse"
 )
 
 var ListeningEventList = []string{
