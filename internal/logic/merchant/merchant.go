@@ -26,14 +26,24 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		Mobile:     req.Phone,
 		CreateTime: gtime.Now().Timestamp(),
 	}
-	merchantInfo := &entity.Merchant{
-		CompanyId: 0,
-		Phone:     req.Phone,
-		ApiKey:    utility.GenerateRandomAlphanumeric(32), //32 bit open api key
+	merchant := &entity.Merchant{
+		Phone:  req.Phone,
+		ApiKey: utility.GenerateRandomAlphanumeric(32), //32 bit open api key
 	}
 	// transaction create Merchant
 	err := dao.Merchant.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		insert, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
+		insert, err := dao.Merchant.Ctx(ctx).Data(merchant).OmitNil().Insert(merchant)
+		if err != nil {
+			return err
+		}
+		merchantId, err := insert.LastInsertId()
+		if err != nil {
+			return err
+		}
+		merchant.Id = uint64(merchantId)
+		merchantMasterMember.MerchantId = merchant.Id
+
+		insert, err = dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
 		if err != nil {
 			return err
 		}
@@ -42,24 +52,13 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 			return err
 		}
 		merchantMasterMember.Id = uint64(id)
+		merchant.UserId = id
 
-		merchantInfo.UserId = id
-
-		insert, err = dao.Merchant.Ctx(ctx).Data(merchantInfo).OmitNil().Insert(merchantInfo)
-		if err != nil {
-			return err
-		}
-		merchantId, err := insert.LastInsertId()
-		if err != nil {
-			return err
-		}
-		merchantInfo.Id = uint64(merchantId)
-		merchantMasterMember.MerchantId = merchantInfo.Id
 		// bind merchantMemberAccount
-		_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
-			dao.MerchantMember.Columns().MerchantId: merchantId,
-			dao.MerchantMember.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.MerchantMember.Columns().Id, id).OmitNil().Update()
+		_, err = dao.Merchant.Ctx(ctx).Data(g.Map{
+			dao.Merchant.Columns().UserId:    merchant.UserId,
+			dao.Merchant.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Merchant.Columns().Id, id).Update()
 		if err != nil {
 			return err
 		}
@@ -70,8 +69,8 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	err = cloud.MerchantSetupForCloudMode(ctx, merchantInfo.Id)
-	return merchantInfo, newOne, err
+	err = cloud.MerchantSetupForCloudMode(ctx, merchant.Id)
+	return merchant, newOne, err
 }
 
 func HardDeleteMerchant(ctx context.Context, merchantId uint64) error {

@@ -44,7 +44,7 @@ func CreateTestPlan(ctx context.Context, merchantId uint64) (one *entity.Plan, e
 		MetaData:                  utility.MarshalToJsonString(map[string]string{"type": "test"}),
 		CreateTime:                gtime.Now().Timestamp(),
 	}
-	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`PlanCreate record insert failure %s`, err)
 	}
@@ -76,7 +76,7 @@ func CreateTestAddon(ctx context.Context, merchantId uint64, name string, addonT
 		MetaData:                  utility.MarshalToJsonString(map[string]string{"type": "test"}),
 		CreateTime:                gtime.Now().Timestamp(),
 	}
-	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`PlanCreate record insert failure %s`, err)
 	}

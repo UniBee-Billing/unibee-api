@@ -34,7 +34,7 @@ func CreateTestGateway(ctx context.Context, merchantId uint64) *entity.MerchantG
 		GatewayType:   consts.GatewayTypeDefault,
 		Logo:          "autotest",
 	}
-	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
@@ -67,7 +67,7 @@ func CreateTestCryptoGateway(ctx context.Context, merchantId uint64) *entity.Mer
 		GatewayType:   consts.GatewayTypeCrypto,
 		Logo:          "autotest_crypto",
 	}
-	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)

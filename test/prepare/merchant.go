@@ -21,7 +21,7 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 		Mobile:     "123456",
 		CreateTime: gtime.Now().Timestamp(),
 	}
-	merchantInfo := &entity.Merchant{
+	merchant := &entity.Merchant{
 		CompanyId:   0,
 		Phone:       "123456",
 		Host:        "autotest.unibee.top",
@@ -32,7 +32,18 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 	}
 	// transaction create Merchant
 	err := dao.Merchant.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		insert, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
+		insert, err := dao.Merchant.Ctx(ctx).Data(merchant).OmitEmpty().Insert(merchant)
+		if err != nil {
+			return err
+		}
+		merchantId, err := insert.LastInsertId()
+		if err != nil {
+			return err
+		}
+		merchant.Id = uint64(merchantId)
+		merchantMasterMember.MerchantId = merchant.Id
+
+		insert, err = dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitEmpty().Insert(merchantMasterMember)
 		if err != nil {
 			return err
 		}
@@ -41,24 +52,13 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 			return err
 		}
 		merchantMasterMember.Id = uint64(id)
+		merchant.UserId = id
 
-		merchantInfo.UserId = id
-
-		insert, err = dao.Merchant.Ctx(ctx).Data(merchantInfo).OmitNil().Insert(merchantInfo)
-		if err != nil {
-			return err
-		}
-		merchantId, err := insert.LastInsertId()
-		if err != nil {
-			return err
-		}
-		merchantInfo.Id = uint64(merchantId)
-		merchantMasterMember.MerchantId = merchantInfo.Id
 		// bind merchantMemberAccount
-		_, err = dao.MerchantMember.Ctx(ctx).Data(g.Map{
-			dao.MerchantMember.Columns().MerchantId: merchantId,
-			dao.MerchantMember.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.MerchantMember.Columns().Id, id).OmitNil().Update()
+		_, err = dao.Merchant.Ctx(ctx).Data(g.Map{
+			dao.Merchant.Columns().UserId:    merchant.UserId,
+			dao.Merchant.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.Merchant.Columns().Id, id).OmitEmpty().Update()
 		if err != nil {
 			return err
 		}
@@ -70,5 +70,5 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
 
-	return merchantInfo, merchantMasterMember, nil
+	return merchant, merchantMasterMember, nil
 }
