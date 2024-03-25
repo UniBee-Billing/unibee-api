@@ -23,7 +23,7 @@ func CreateTestUser(ctx context.Context, merchantId uint64) (one *entity.UserAcc
 		MerchantId:     merchantId,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
-	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "Server Error")
 	id, err := result.LastInsertId()
 	utility.AssertError(err, "Server Error")

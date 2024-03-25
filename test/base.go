@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	_ "github.com/gogf/gf/contrib/drivers/mysql/v2"
-	_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
 	_ "github.com/gogf/gf/contrib/nosql/redis/v2"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"
 	_ "github.com/gogf/gf/v2/test/gtest"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	//_ "github.com/gogf/gf/contrib/drivers/pgsql/v2"
+	_ "unibee/internal/driver/pgsql"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/test/prepare"
@@ -34,7 +35,7 @@ func init() {
 	if err != nil {
 		return
 	}
-	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(MysqlConfigFileName)
+	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(PostgresConfigFileName)
 
 	config.SetupDefaultConfigs(ctx)
 	TestMerchantMember = query.GetMerchantMemberByEmail(ctx, "test@wowow.io")

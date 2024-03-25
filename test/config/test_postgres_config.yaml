@@ -5,7 +5,7 @@ server:
 
 database:
   default:
-    link:    "pgsql:unibee:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(api.unibee.top:15432)/unibee"
+    link:    "postgres:unibee:YW1lc3BhY2UiOiJrdWJlcm5ld@tcp(api.unibee.top:15432)/unibee"
 
 # Redis Stage
 redis:

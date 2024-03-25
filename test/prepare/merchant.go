@@ -32,7 +32,7 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 	}
 	// transaction create Merchant
 	err := dao.Merchant.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		insert, err := dao.Merchant.Ctx(ctx).Data(merchant).OmitEmpty().Insert(merchant)
+		insert, err := dao.Merchant.Ctx(ctx).Data(merchant).OmitNil().Insert(merchant)
 		if err != nil {
 			return err
 		}
@@ -43,7 +43,7 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 		merchant.Id = uint64(merchantId)
 		merchantMasterMember.MerchantId = merchant.Id
 
-		insert, err = dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitEmpty().Insert(merchantMasterMember)
+		insert, err = dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
 		if err != nil {
 			return err
 		}
@@ -58,7 +58,7 @@ func CreateTestMerchantAccount(ctx context.Context) (*entity.Merchant, *entity.M
 		_, err = dao.Merchant.Ctx(ctx).Data(g.Map{
 			dao.Merchant.Columns().UserId:    merchant.UserId,
 			dao.Merchant.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.Merchant.Columns().Id, id).OmitEmpty().Update()
+		}).Where(dao.Merchant.Columns().Id, id).OmitNil().Update()
 		if err != nil {
 			return err
 		}
