@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean/detail"
@@ -84,7 +85,7 @@ func TestInvoice(t *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("Test for invoice Create|Finish", func(t *testing.T) {
+	t.Run("Test for invoice Create|Finish|Link", func(t *testing.T) {
 		res, err := CreateInvoice(ctx, test.TestMerchant.Id, &invoice.NewReq{
 			UserId:    test.TestUser.Id,
 			TaxScale:  1000,
@@ -115,8 +116,19 @@ func TestInvoice(t *testing.T) {
 		require.NotNil(t, finishInvoice)
 		require.Equal(t, consts.InvoiceStatusProcessing, finishInvoice.Invoice.Status)
 		require.NotNil(t, finishInvoice.Invoice.Link)
+		checkRes := LinkCheck(ctx, one.InvoiceId, gtime.Now().Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) > 0)
+		checkRes = LinkCheck(ctx, one.InvoiceId, gtime.Now().AddDate(0, 0, 3).Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) == 0)
+		require.Equal(t, true, len(checkRes.Message) > 0)
 		err = CancelProcessingInvoice(ctx, one.InvoiceId)
 		require.Nil(t, err)
+		checkRes = LinkCheck(ctx, one.InvoiceId, gtime.Now().Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) == 0)
+		require.Equal(t, true, len(checkRes.Message) > 0)
 		one = InvoiceDetail(ctx, one.InvoiceId)
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, "test_invoice", one.InvoiceName)

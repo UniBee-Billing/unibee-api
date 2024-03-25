@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -19,7 +20,7 @@ func TestPayment(t *testing.T) {
 	var one *entity.Payment
 	var err error
 	gateway := test.TestGateway
-	t.Run("Test for payment checkout_new|cancel", func(t *testing.T) {
+	t.Run("Test for payment checkout_new｜link|cancel", func(t *testing.T) {
 		res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 			CheckoutMode: true,
 			Pay: &entity.Payment{
@@ -59,8 +60,19 @@ func TestPayment(t *testing.T) {
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, int64(100), one.TotalAmount)
 		require.Equal(t, true, len(one.InvoiceId) > 0)
+		checkRes := LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) > 0)
+		checkRes = LinkCheck(ctx, one.PaymentId, gtime.Now().AddDate(0, 0, consts.DEFAULT_DAY_UTIL_DUE+1).Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) == 0)
+		require.Equal(t, true, len(checkRes.Message) > 0)
 		err = PaymentGatewayCancel(ctx, one)
 		require.Nil(t, err)
+		checkRes = LinkCheck(ctx, one.PaymentId, gtime.Now().Timestamp())
+		require.NotNil(t, checkRes)
+		require.Equal(t, true, len(checkRes.Link) == 0)
+		require.Equal(t, true, len(checkRes.Message) > 0)
 		one = query.GetPaymentByPaymentId(ctx, paymentId)
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.PaymentCancelled)

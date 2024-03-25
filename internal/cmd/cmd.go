@@ -269,8 +269,8 @@ var (
 			s.BindHandler("GET:/health", controller.HealthCheck)
 
 			// Invoice Link
-			s.BindHandler("GET:/in/{invoiceId}", invoice.InvoiceLinkEntry)
-			s.BindHandler("GET:/pay/{paymentId}", payment.PaymentLinkEntry)
+			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
+			s.BindHandler("GET:/pay/{paymentId}", payment.LinkEntry)
 			// Gateway Redirect
 			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
 			// Gateway Webhook
