@@ -90,6 +90,11 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
+				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
+				Body:  payment.SubscriptionId,
+			})
 			_ = handler.UpdateSubscriptionDefaultPaymentMethod(ctx, sub.SubscriptionId, payment.GatewayPaymentMethod)
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingUpdate != nil && pendingUpdate.Status == consts.PendingSubStatusCreate {
@@ -113,11 +118,6 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			} else {
 				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
 			}
-			_, _ = redismq.Send(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
-				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
-				Body:  payment.SubscriptionId,
-			})
 		}
 	}
 }
