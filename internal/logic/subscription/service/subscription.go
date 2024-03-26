@@ -447,8 +447,10 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 	utility.Assert(oldPlan != nil, "oldPlan not found")
 	if plan.Amount > oldPlan.Amount || plan.Amount*quantity > oldPlan.Amount*sub.Quantity {
 		isUpgrade = true
+		changed = true
 	} else if plan.Amount < oldPlan.Amount || plan.Amount*quantity < oldPlan.Amount*sub.Quantity {
 		isUpgrade = false
+		changed = true
 	} else {
 		var oldAddonParams []*bean.PlanAddonParam
 		err := utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
