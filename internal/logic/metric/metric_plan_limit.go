@@ -24,6 +24,7 @@ func MerchantMetricPlanLimitCachedList(ctx context.Context, merchantId uint64, p
 	utility.Assert(planId > 0, "invalid planId")
 	var list = make([]*bean.MerchantMetricPlanLimit, 0)
 	cacheKey := fmt.Sprintf("%s%d%d", MerchantMetricPlanLimitCacheKeyPrefix, merchantId, planId)
+	g.Log().Infof(ctx, "MerchantMetricPlanLimitCachedList cacheKey:%s planId:%d,reloadCache:%v", cacheKey, planId, reloadCache)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
 		if err == nil && !get.IsNil() && !get.IsEmpty() {
