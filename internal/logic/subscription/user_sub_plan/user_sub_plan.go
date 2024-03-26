@@ -35,7 +35,7 @@ func UserSubPlanCachedListForMetric(ctx context.Context, merchantId uint64, user
 		return make([]*UserSubPlan, 0)
 	}
 	var list = make([]*UserSubPlan, 0)
-	cacheKey := fmt.Sprintf("%s_%d_%d", UserSubPlanCacheKeyPrefix, merchantId, userId)
+	cacheKey := fmt.Sprintf("%s_%d_%d_%s", UserSubPlanCacheKeyPrefix, merchantId, userId, sub.SubscriptionId)
 	if !reloadCache {
 		get, err := g.Redis().Get(ctx, cacheKey)
 		if err == nil && !get.IsNil() && !get.IsEmpty() {

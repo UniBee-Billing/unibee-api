@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	user2 "unibee/internal/consumer/webhook/user"
+	"unibee/internal/logic/subscription/user_sub_plan"
 	"unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -33,6 +34,7 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	}
 	_, _ = redismq.SendDelay(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionCreatePaymentCheck.Topic,

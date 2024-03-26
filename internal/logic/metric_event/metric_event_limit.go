@@ -80,7 +80,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uin
 	if len(userSubPlans) > 0 {
 		g.Log().Infof(ctx, "GetUserMetricTotalLimits userId:%d subPlanId:%d userSubPlans:%s", userId, sub.PlanId, utility.MarshalToJsonString(userSubPlans))
 		for _, subPlan := range userSubPlans {
-			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, true)
+			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, false)
 			for _, planLimit := range list {
 				if _, ok := limitMap[planLimit.MetricId]; ok {
 					limitMap[planLimit.MetricId].TotalLimit = limitMap[planLimit.MetricId].TotalLimit + planLimit.MetricLimit
