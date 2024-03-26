@@ -475,10 +475,12 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
 				if oldAddonQuantity < newAddonQuantity {
 					isUpgrade = true
+					changed = true
 					break
 				}
 			} else {
 				isUpgrade = true
+				changed = true
 				break
 			}
 		}
