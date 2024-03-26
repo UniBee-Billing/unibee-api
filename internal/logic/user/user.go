@@ -11,11 +11,17 @@ import (
 func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, subscriptionId string) {
 	if userId > 0 && len(subscriptionId) > 0 {
 		one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-		user := query.GetUserAccountById(ctx, uint64(userId))
+		user := query.GetUserAccountById(ctx, userId)
+		var subName = ""
 		if one != nil && user != nil && user.SubscriptionId == subscriptionId {
+			plan := query.GetPlanById(ctx, one.PlanId)
+			if plan != nil {
+				subName = plan.PlanName
+			}
 			_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().SubscriptionId:     subscriptionId,
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
+				dao.UserAccount.Columns().SubscriptionName:   subName,
 				dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, userId).OmitNil().Update()
 			if err != nil {
