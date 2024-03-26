@@ -2,7 +2,6 @@ package callback
 
 import (
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
@@ -90,11 +89,6 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			_, _ = redismq.Send(&redismq.Message{
-				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
-				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
-				Body:  payment.SubscriptionId,
-			})
 			_ = handler.UpdateSubscriptionDefaultPaymentMethod(ctx, sub.SubscriptionId, payment.GatewayPaymentMethod)
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingUpdate != nil && pendingUpdate.Status == consts.PendingSubStatusCreate {
@@ -116,8 +110,14 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
 				}
 			} else {
-				utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
+				//utility.Assert(false, fmt.Sprintf("PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId))
+				g.Log().Infof(ctx, "PaymentSuccessCallback_Finish Miss Match Subscription Action:%s", payment.PaymentId)
 			}
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
+				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
+				Body:  payment.SubscriptionId,
+			})
 		}
 	}
 }
