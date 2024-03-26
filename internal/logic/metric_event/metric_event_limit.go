@@ -78,6 +78,7 @@ func GetUserMetricTotalLimits(ctx context.Context, merchantId uint64, userId uin
 	var limitMap = make(map[uint64]*bean.PlanMetricLimitDetail)
 	userSubPlans := user_sub_plan.UserSubPlanCachedListForMetric(ctx, merchantId, userId, sub, false)
 	if len(userSubPlans) > 0 {
+		g.Log().Infof(ctx, "GetUserMetricTotalLimits userId:%d subPlanId:%d userSubPlans:%s", userId, sub.PlanId, utility.MarshalToJsonString(userSubPlans))
 		for _, subPlan := range userSubPlans {
 			list := metric.MerchantMetricPlanLimitCachedList(ctx, merchantId, subPlan.PlanId, true)
 			for _, planLimit := range list {
