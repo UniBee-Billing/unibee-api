@@ -174,7 +174,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
-					trackForSubscriptionLatest(ctx, sub, timeNow)
+					//trackForSubscriptionLatest(ctx, sub, timeNow)
 				}
 				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && sub.CurrentPeriodEnd < timeNow {
 					// finish the payment
