@@ -194,7 +194,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 }
 
 func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	user := query.GetUserAccountById(ctx, sub.UserId)
 	var email = ""
 	if user != nil {
 		email = user.Email

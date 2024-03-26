@@ -215,7 +215,7 @@ func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, t
 		}
 		err = handler2.SendInvoiceEmailToUser(ctx, one.InvoiceId)
 		if err != nil {
-			glog.Errorf(ctx, "trackForSubscriptionLatest error", err.Error())
+			glog.Errorf(ctx, "trackForSubscriptionLatest error:%s", err.Error())
 		}
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
 	}

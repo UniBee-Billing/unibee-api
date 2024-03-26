@@ -92,10 +92,35 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 		country.MerchantId = merchantId
 	}
 	if countries != nil && len(countries) > 0 {
-		_, err = dao.CountryRate.Ctx(ctx).Data(countries).OmitEmpty().Save(countries)
-		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
-			return err
+		for _, newOne := range countries {
+			var one *entity.CountryRate
+			err = dao.CountryRate.Ctx(ctx).
+				Where(dao.CountryRate.Columns().MerchantId, newOne.MerchantId).
+				Where(dao.CountryRate.Columns().Gateway, newOne.Gateway).
+				Where(dao.CountryRate.Columns().CountryCode, newOne.CountryCode).
+				Scan(&one)
+			if err != nil {
+				return err
+			}
+			if one != nil {
+				_, err = dao.CountryRate.Ctx(ctx).Data(g.Map{
+					dao.CountryRate.Columns().CountryName: newOne.CountryName,
+					dao.CountryRate.Columns().Latitude:    newOne.Latitude,
+					dao.CountryRate.Columns().Longitude:   newOne.Longitude,
+					dao.CountryRate.Columns().Vat:         newOne.Vat,
+					dao.CountryRate.Columns().GmtModify:   gtime.Now(),
+				}).Where(dao.CountryRate.Columns().Id, one.Id).OmitNil().Update()
+				if err != nil {
+					g.Log().Errorf(ctx, "InitMerchantDefaultVatGateway Save Countries error:%s", err.Error())
+					return err
+				}
+			} else {
+				_, err = dao.CountryRate.Ctx(ctx).Data(newOne).OmitEmpty().Insert()
+				if err != nil {
+					g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save Countries err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+					return err
+				}
+			}
 		}
 	}
 	countryRates, err := gateway.ListAllRates()
@@ -107,20 +132,43 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 		country.MerchantId = merchantId
 	}
 	if countryRates != nil && len(countryRates) > 0 {
-		if countries == nil || len(countries) == 0 {
-			//Country todo mark pgsql not support replace
-			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OmitEmpty().Replace()
-		} else {
-			_, err = dao.CountryRate.Ctx(ctx).Data(countryRates).OnDuplicate(
-				dao.CountryRate.Columns().StandardTypes,
-				dao.CountryRate.Columns().StandardDescription,
-				dao.CountryRate.Columns().StandardTaxPercentage,
-				dao.CountryRate.Columns().Other).
-				OmitEmpty().Save()
-		}
-		if err != nil {
-			g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
-			return err
+		for _, newOne := range countryRates {
+			var one *entity.CountryRate
+			err = dao.CountryRate.Ctx(ctx).
+				Where(dao.CountryRate.Columns().MerchantId, newOne.MerchantId).
+				Where(dao.CountryRate.Columns().Gateway, newOne.Gateway).
+				Where(dao.CountryRate.Columns().CountryCode, newOne.CountryCode).
+				Scan(&one)
+			if err != nil {
+				g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+				return err
+			}
+			if one != nil {
+				_, err = dao.CountryRate.Ctx(ctx).Data(g.Map{
+					dao.CountryRate.Columns().CountryName:           newOne.CountryName,
+					dao.CountryRate.Columns().Latitude:              newOne.Latitude,
+					dao.CountryRate.Columns().Longitude:             newOne.Longitude,
+					dao.CountryRate.Columns().Vat:                   newOne.Vat,
+					dao.CountryRate.Columns().Other:                 newOne.Other,
+					dao.CountryRate.Columns().Provinces:             newOne.Provinces,
+					dao.CountryRate.Columns().Mamo:                  newOne.Mamo,
+					dao.CountryRate.Columns().Eu:                    newOne.Eu,
+					dao.CountryRate.Columns().StandardTaxPercentage: newOne.StandardTaxPercentage,
+					dao.CountryRate.Columns().StandardTypes:         newOne.StandardTypes,
+					dao.CountryRate.Columns().StandardDescription:   newOne.StandardDescription,
+					dao.CountryRate.Columns().GmtModify:             gtime.Now(),
+				}).Where(dao.CountryRate.Columns().Id, one.Id).OmitNil().Update()
+				if err != nil {
+					g.Log().Errorf(ctx, "InitMerchantDefaultVatGateway Save Countries error:%s", err.Error())
+					return err
+				}
+			} else {
+				_, err = dao.CountryRate.Ctx(ctx).Data(newOne).OmitNil().Insert()
+				if err != nil {
+					g.Log().Infof(ctx, "InitMerchantDefaultVatGateway Save All Rates err merchantId:%d gatewayName:%s err:%v", merchantId, gateway.GetGatewayName(), err)
+					return err
+				}
+			}
 		}
 	}
 

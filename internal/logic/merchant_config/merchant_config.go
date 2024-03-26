@@ -3,6 +3,8 @@ package merchant_config
 import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
@@ -11,17 +13,32 @@ import (
 func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string, configValue string) error {
 	utility.Assert(merchantId > 0, "invalid merchantId")
 	utility.Assert(len(configKey) > 0, "invalid key")
-	one := &entity.MerchantConfig{
-		MerchantId:  merchantId,
-		ConfigKey:   configKey,
-		ConfigValue: configValue,
+	one := GetMerchantConfig(ctx, merchantId, configKey)
+	if one != nil {
+		_, err := dao.MerchantConfig.Ctx(ctx).Data(g.Map{
+			dao.MerchantConfig.Columns().ConfigValue: configValue,
+			dao.MerchantConfig.Columns().GmtModify:   gtime.Now(),
+		}).Where(dao.MerchantConfig.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(ctx, "SetMerchantConfig error:%s", err.Error())
+			err = gerror.Newf(`SetMerchantConfig %s`, err.Error())
+			return err
+		}
+		return nil
+	} else {
+		one = &entity.MerchantConfig{
+			MerchantId:  merchantId,
+			ConfigKey:   configKey,
+			ConfigValue: configValue,
+		}
+		_, err := dao.MerchantConfig.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			g.Log().Errorf(ctx, "SetMerchantConfig error:%s", err.Error())
+			err = gerror.Newf(`SetMerchantConfig %s`, err.Error())
+			return err
+		}
+		return nil
 	}
-	_, err := dao.MerchantConfig.Ctx(ctx).Data(one).Save(one)
-	if err != nil {
-		err = gerror.Newf(`SetMerchantConfig %s`, err)
-		return err
-	}
-	return nil
 }
 
 func GetMerchantConfig(ctx context.Context, merchantId uint64, configKey string) *entity.MerchantConfig {

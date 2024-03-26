@@ -35,7 +35,7 @@ func init() {
 	if err != nil {
 		return
 	}
-	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(MysqlConfigFileName)
+	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(PostgresConfigFileName)
 
 	config.SetupDefaultConfigs(ctx)
 	TestMerchantMember = query.GetMerchantMemberByEmail(ctx, "test@wowow.io")
