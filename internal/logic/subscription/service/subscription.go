@@ -499,7 +499,6 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 				}
 			}
 		}
-		//utility.Assert(changed, "subscription update should have plan or addons changed")
 	}
 	return
 }
