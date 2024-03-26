@@ -16,6 +16,7 @@ func (c *ControllerSubscription) Detail(ctx context.Context, req *subscription.D
 		Subscription:                        detail.Subscription,
 		Plan:                                detail.Plan,
 		Gateway:                             detail.Gateway,
+		AddonParams:                         detail.AddonParams,
 		Addons:                              detail.Addons,
 		LatestInvoice:                       detail.LatestInvoice,
 		UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,

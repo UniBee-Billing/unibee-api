@@ -15,6 +15,7 @@ type UserCurrentSubscriptionDetailRes struct {
 	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
 	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*bean.PlanAddonParam                  `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
 	LatestInvoice                       *bean.InvoiceSimplify                   `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
@@ -30,6 +31,7 @@ type DetailRes struct {
 	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
 	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*bean.PlanAddonParam                  `json:"addonParams" dc:"AddonParams"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
 	LatestInvoice                       *bean.InvoiceSimplify                   `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`

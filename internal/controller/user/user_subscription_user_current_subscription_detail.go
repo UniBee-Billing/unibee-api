@@ -22,6 +22,7 @@ func (c *ControllerSubscription) UserCurrentSubscriptionDetail(ctx context.Conte
 				Subscription:                        detail.Subscription,
 				Plan:                                detail.Plan,
 				Gateway:                             detail.Gateway,
+				AddonParams:                         detail.AddonParams,
 				Addons:                              detail.Addons,
 				LatestInvoice:                       detail.LatestInvoice,
 				UnfinishedSubscriptionPendingUpdate: detail.UnfinishedSubscriptionPendingUpdate,
