@@ -7,16 +7,31 @@ import (
 	"unibee/internal/consts"
 )
 
+type UserCurrentSubscriptionDetailReq struct {
+	g.Meta `path:"/current/detail" tags:"User-Subscription" method:"get" summary:"User Current Subscription Detail"`
+}
+type UserCurrentSubscriptionDetailRes struct {
+	User                                *bean.UserAccountSimplify               `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
+	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	LatestInvoice                       *bean.InvoiceSimplify                   `json:"latestInvoice" dc:"LatestInvoice"`
+	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+}
+
 type DetailReq struct {
 	g.Meta         `path:"/detail" tags:"User-Subscription" method:"get,post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
+
 type DetailRes struct {
 	User                                *bean.UserAccountSimplify               `json:"user" dc:"user"`
 	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
 	Plan                                *bean.PlanSimplify                      `json:"plan" dc:"Plan"`
 	Gateway                             *bean.GatewaySimplify                   `json:"gateway" dc:"Gateway"`
 	Addons                              []*bean.PlanAddonDetail                 `json:"addons" dc:"Plan Addon"`
+	LatestInvoice                       *bean.InvoiceSimplify                   `json:"latestInvoice" dc:"LatestInvoice"`
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 

@@ -59,6 +59,7 @@ type IUserProfile interface {
 }
 
 type IUserSubscription interface {
+	UserCurrentSubscriptionDetail(ctx context.Context, req *subscription.UserCurrentSubscriptionDetailReq) (res *subscription.UserCurrentSubscriptionDetailRes, err error)
 	Detail(ctx context.Context, req *subscription.DetailReq) (res *subscription.DetailRes, err error)
 	PayCheck(ctx context.Context, req *subscription.PayCheckReq) (res *subscription.PayCheckRes, err error)
 	CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error)
