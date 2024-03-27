@@ -28,6 +28,7 @@ type DetailReq struct {
 	g.Meta         `path:"/detail" tags:"Subscription" method:"get,post" summary:"Subscription Detail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
+
 type DetailRes struct {
 	User                                *bean.UserAccountSimplify               `json:"user" dc:"User"`
 	Subscription                        *bean.SubscriptionSimplify              `json:"subscription" dc:"Subscription"`
