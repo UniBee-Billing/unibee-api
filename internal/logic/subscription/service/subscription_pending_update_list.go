@@ -45,7 +45,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx context.C
 	}
 	var metadata = make(map[string]string)
 	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		err = gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId Unmarshal Metadata error:%s", err.Error())
 		}
