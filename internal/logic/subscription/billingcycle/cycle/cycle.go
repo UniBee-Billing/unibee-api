@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -174,7 +173,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return &BillingCycleWalkRes{WalkHasDeal: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
-					//trackForSubscriptionLatest(ctx, sub, timeNow)
+					trackForSubscriptionLatest(ctx, sub, timeNow)
 				}
 				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && sub.CurrentPeriodEnd < timeNow {
 					// finish the payment
@@ -213,10 +212,10 @@ func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, t
 		if err != nil {
 			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
 		}
-		err = handler2.SendInvoiceEmailToUser(ctx, one.InvoiceId)
-		if err != nil {
-			glog.Errorf(ctx, "trackForSubscriptionLatest error:%s", err.Error())
-		}
+		//err = handler2.SendInvoiceEmailToUser(ctx, one.InvoiceId)
+		//if err != nil {
+		//	glog.Errorf(ctx, "trackForSubscriptionLatest error:%s", err.Error())
+		//}
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
 	}
 }

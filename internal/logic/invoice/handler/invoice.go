@@ -333,9 +333,8 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		utility.AssertError(err, "send email error")
 		//update send status
 		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().SendStatus:    consts.InvoiceSendStatusSend,
-			dao.Invoice.Columns().LastTrackTime: gtime.Now().Timestamp(),
-			dao.Invoice.Columns().GmtModify:     gtime.Now(),
+			dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
+			dao.Invoice.Columns().GmtModify:  gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
