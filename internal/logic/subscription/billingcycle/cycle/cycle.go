@@ -58,7 +58,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			if len(latestInvoice.PaymentId) == 0 && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) {
 				needInvoiceFirstTryPayment = true
 			}
-		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && latestInvoice.PeriodEnd > timeNow {
+		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && timeNow < latestInvoice.PeriodStart {
 			needInvoiceGenerate = false
 		} else if timeNow < sub.DunningTime {
 			needInvoiceGenerate = false
