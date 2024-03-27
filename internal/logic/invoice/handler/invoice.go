@@ -90,7 +90,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
 		Link:                           link.GetInvoiceLink(invoiceId),
 		CreateTime:                     gtime.Now().Timestamp(),
-		FinishTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,
 	}
 
@@ -168,7 +168,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			Lines:                          utility.MarshalToJsonString(invoice.Lines),
 			PaymentLink:                    payment.Link,
 			CreateTime:                     gtime.Now().Timestamp(),
-			FinishTime:                     gtime.Now().Timestamp(),
+			FinishTime:                     invoice.FinishTime,
 			DayUtilDue:                     invoice.DayUtilDue,
 		}
 

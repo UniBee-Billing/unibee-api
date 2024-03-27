@@ -119,10 +119,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice
 					plan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
-					var nextPeriodStart = sub.CurrentPeriodEnd
-					if sub.TrialEnd > sub.CurrentPeriodEnd {
-						nextPeriodStart = sub.TrialEnd
-					}
+					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingUpdate.UpdateCurrency,
@@ -133,15 +130,13 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionDowngrade",
+						FinishTime:    timeNow,
 					})
 				} else {
 					//generate cycle invoice from sub
 					plan := query.GetPlanById(ctx, sub.PlanId)
 
-					var nextPeriodStart = sub.CurrentPeriodEnd
-					if sub.TrialEnd > sub.CurrentPeriodEnd {
-						nextPeriodStart = sub.TrialEnd
-					}
+					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
@@ -153,6 +148,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionCycle",
+						FinishTime:    timeNow,
 					})
 				}
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)

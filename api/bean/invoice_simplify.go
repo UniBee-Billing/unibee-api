@@ -20,6 +20,7 @@ type InvoiceSimplify struct {
 	Lines                          []*InvoiceItemSimplify `json:"lines"`
 	PeriodEnd                      int64                  `json:"periodEnd"`
 	PeriodStart                    int64                  `json:"periodStart"`
+	FinishTime                     int64                  `json:"finishTime"`
 	ProrationDate                  int64                  `json:"prorationDate"`
 	ProrationScale                 int64                  `json:"prorationScale"`
 	Link                           string                 `json:"link"                           description:"invoice link"` // invoice link
@@ -77,6 +78,7 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		Lines:                          lines,
 		PeriodEnd:                      one.PeriodEnd,
 		PeriodStart:                    one.PeriodStart,
+		FinishTime:                     one.FinishTime,
 		Link:                           one.Link,
 		PaymentLink:                    one.PaymentLink,
 		Status:                         one.Status,

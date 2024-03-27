@@ -20,6 +20,7 @@ type CalculateInvoiceReq struct {
 	TaxScale      int64  `json:"taxScale"`
 	PeriodStart   int64  `json:"periodStart"`
 	PeriodEnd     int64  `json:"periodEnd"`
+	FinishTime    int64  `json:"finishTime"`
 	InvoiceName   string `json:"invoiceName"`
 }
 
@@ -73,6 +74,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		Lines:                          invoiceItems,
 		PeriodStart:                    req.PeriodStart,
 		PeriodEnd:                      req.PeriodEnd,
+		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     6,
 	}
@@ -89,6 +91,7 @@ type CalculateProrationInvoiceReq struct {
 	ProrationDate     int64                 `json:"prorationStart"`
 	PeriodStart       int64                 `json:"periodStart"`
 	PeriodEnd         int64                 `json:"periodEnd"`
+	FinishTime        int64                 `json:"finishTime"`
 	OldProrationPlans []*ProrationPlanParam `json:"oldPlans"`
 	NewProrationPlans []*ProrationPlanParam `json:"newPlans"`
 	InvoiceName       string                `json:"invoiceName"`
@@ -203,6 +206,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		ProrationScale:                 timeScale,
 		PeriodStart:                    req.ProrationDate,
 		PeriodEnd:                      req.PeriodEnd,
+		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     6,
 	}

@@ -279,6 +279,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		TaxScale:      standardTaxScale,
 		PeriodStart:   currentTimeStart.Timestamp(),
 		PeriodEnd:     currentTimeEnd,
+		FinishTime:    currentTimeStart.Timestamp(),
 	})
 
 	return &CreatePreviewInternalRes{
@@ -630,6 +631,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				TaxScale:      sub.TaxScale,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
+				FinishTime:    prorationDate,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -645,6 +647,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				ProrationDate:                  prorationDate,
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
+				FinishTime:                     prorationDate,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
@@ -657,6 +660,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				TaxScale:      sub.TaxScale,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
+				FinishTime:    prorationDate,
 			})
 		} else {
 			// currentInvoice
@@ -723,6 +727,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		TaxScale:      sub.TaxScale,
 		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
+		FinishTime:    utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 	})
 
 	if currentInvoice.TotalAmount <= 0 {
@@ -1172,6 +1177,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			PeriodStart:   nextPeriodStart,
 			PeriodEnd:     nextPeriodEnd,
 			InvoiceName:   "SubscriptionCycle",
+			FinishTime:    nextPeriodStart,
 		})
 		one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)
 		if err != nil {
