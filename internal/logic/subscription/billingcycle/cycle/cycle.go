@@ -200,7 +200,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 // trackForSubscriptionLatest dunning system for subscription invoice
 func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, timeNow int64) {
+	g.Log().Infof(ctx, "trackForSubscriptionLatest sub:%s", sub.SubscriptionId)
 	one := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+	g.Log().Infof(ctx, "trackForSubscriptionLatest invoiceId:%s", one.InvoiceId)
 	if one != nil && one.Status == consts.InvoiceStatusProcessing && one.FinishTime+(one.DayUtilDue*86400) < timeNow {
 		// todo mark expire invoice
 	} else if one != nil && one.Status == consts.InvoiceStatusProcessing && one.LastTrackTime+86400 < timeNow && one.FinishTime+(one.DayUtilDue*86400) > timeNow {
