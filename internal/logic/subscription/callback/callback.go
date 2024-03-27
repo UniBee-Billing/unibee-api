@@ -93,7 +93,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingUpdate != nil && pendingUpdate.Status == consts.PendingSubStatusCreate {
 				// PendingUpdate
-				_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.UpdateSubscriptionId, invoice)
+				_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.PendingUpdateId, invoice)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_Update error:%s", err.Error())
 				}
@@ -130,7 +130,7 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			utility.Assert(sub != nil, "payment sub not found")
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingSubUpdate != nil {
-				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
+				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.PendingUpdateId)
 				if err != nil {
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}
@@ -147,7 +147,7 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 			utility.Assert(sub != nil, "payment sub not found")
 			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
 			if pendingSubUpdate != nil {
-				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.UpdateSubscriptionId)
+				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.PendingUpdateId)
 				if err != nil {
 					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
 				}

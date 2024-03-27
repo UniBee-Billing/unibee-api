@@ -27,7 +27,7 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		return err
 	}
 	for _, p := range pendingUpdates {
-		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, reason)
+		err = service2.SubscriptionPendingUpdateCancel(ctx, p.PendingUpdateId, reason)
 		if err != nil {
 			fmt.Printf("MakeSubscriptionExpired SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}

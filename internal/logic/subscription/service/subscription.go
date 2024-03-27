@@ -798,30 +798,30 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 
 	one := &entity.SubscriptionPendingUpdate{
-		MerchantId:           prepare.MerchantInfo.Id,
-		GatewayId:            gatewayId,
-		UserId:               prepare.Subscription.UserId,
-		SubscriptionId:       prepare.Subscription.SubscriptionId,
-		UpdateSubscriptionId: utility.CreateSubscriptionUpdateId(),
-		Amount:               prepare.Subscription.Amount,
-		Currency:             prepare.Subscription.Currency,
-		PlanId:               prepare.Subscription.PlanId,
-		Quantity:             prepare.Subscription.Quantity,
-		AddonData:            prepare.Subscription.AddonData,
-		UpdateAmount:         prepare.NextPeriodInvoice.TotalAmount,
-		ProrationAmount:      prepare.Invoice.TotalAmount,
-		UpdateCurrency:       prepare.Currency,
-		UpdatePlanId:         prepare.Plan.Id,
-		UpdateQuantity:       prepare.Quantity,
-		UpdateAddonData:      utility.MarshalToJsonString(prepare.AddonParams),
-		Status:               consts.PendingSubStatusInit,
-		Data:                 "",
-		MerchantMemberId:     merchantMemberId,
-		ProrationDate:        req.ProrationDate,
-		EffectImmediate:      effectImmediate,
-		EffectTime:           effectTime,
-		CreateTime:           gtime.Now().Timestamp(),
-		MetaData:             utility.MarshalToJsonString(req.Metadata),
+		MerchantId:       prepare.MerchantInfo.Id,
+		GatewayId:        gatewayId,
+		UserId:           prepare.Subscription.UserId,
+		SubscriptionId:   prepare.Subscription.SubscriptionId,
+		PendingUpdateId:  utility.CreatePendingUpdateId(),
+		Amount:           prepare.Subscription.Amount,
+		Currency:         prepare.Subscription.Currency,
+		PlanId:           prepare.Subscription.PlanId,
+		Quantity:         prepare.Subscription.Quantity,
+		AddonData:        prepare.Subscription.AddonData,
+		UpdateAmount:     prepare.NextPeriodInvoice.TotalAmount,
+		ProrationAmount:  prepare.Invoice.TotalAmount,
+		UpdateCurrency:   prepare.Currency,
+		UpdatePlanId:     prepare.Plan.Id,
+		UpdateQuantity:   prepare.Quantity,
+		UpdateAddonData:  utility.MarshalToJsonString(prepare.AddonParams),
+		Status:           consts.PendingSubStatusInit,
+		Data:             "",
+		MerchantMemberId: merchantMemberId,
+		ProrationDate:    req.ProrationDate,
+		EffectImmediate:  effectImmediate,
+		EffectTime:       effectTime,
+		CreateTime:       gtime.Now().Timestamp(),
+		MetaData:         utility.MarshalToJsonString(req.Metadata),
 	}
 
 	result, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -866,7 +866,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 	// bing to subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().PendingUpdateId: one.UpdateSubscriptionId,
+		dao.Subscription.Columns().PendingUpdateId: one.PendingUpdateId,
 		dao.Subscription.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
@@ -874,7 +874,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 	// only one need, cancel others
 	// need cancel payment、 invoice and send invoice email
-	CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.UpdateSubscriptionId, "CancelByNewUpdate-"+one.UpdateSubscriptionId)
+	CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.PendingUpdateId, "CancelByNewUpdate-"+one.PendingUpdateId)
 
 	var PaidInt = 0
 	if subUpdateRes.Paid {
@@ -898,13 +898,13 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		dao.SubscriptionPendingUpdate.Columns().InvoiceId:    subUpdateRes.GatewayUpdateId,
 		dao.SubscriptionPendingUpdate.Columns().Note:         note,
 		dao.SubscriptionPendingUpdate.Columns().MetaData:     utility.MarshalToJsonString(req.Metadata),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, one.UpdateSubscriptionId).OmitNil().Update()
+	}).Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, one.PendingUpdateId).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}
 
 	if prepare.EffectImmediate && subUpdateRes.Paid {
-		_, err = handler.HandlePendingUpdatePaymentSuccess(ctx, prepare.Subscription, one.UpdateSubscriptionId, subUpdateRes.Invoice)
+		_, err = handler.HandlePendingUpdatePaymentSuccess(ctx, prepare.Subscription, one.PendingUpdateId, subUpdateRes.Invoice)
 		if err != nil {
 			return nil, err
 		}
@@ -913,36 +913,36 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 
 	return &subscription.UpdateRes{
 		SubscriptionPendingUpdate: &detail.SubscriptionPendingUpdateDetail{
-			MerchantId:           one.MerchantId,
-			SubscriptionId:       one.SubscriptionId,
-			UpdateSubscriptionId: one.UpdateSubscriptionId,
-			GmtCreate:            one.GmtCreate,
-			Amount:               one.Amount,
-			Status:               one.Status,
-			UpdateAmount:         one.UpdateAmount,
-			Currency:             one.Currency,
-			UpdateCurrency:       one.UpdateCurrency,
-			PlanId:               one.PlanId,
-			UpdatePlanId:         one.UpdatePlanId,
-			Quantity:             one.Quantity,
-			UpdateQuantity:       one.UpdateQuantity,
-			AddonData:            one.AddonData,
-			UpdateAddonData:      one.UpdateAddonData,
-			ProrationAmount:      one.ProrationAmount,
-			GatewayId:            one.GatewayId,
-			UserId:               one.UserId,
-			GmtModify:            one.GmtModify,
-			Paid:                 one.Paid,
-			Link:                 one.Link,
-			MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
-			EffectImmediate:      one.EffectImmediate,
-			EffectTime:           one.EffectTime,
-			Note:                 one.Note,
-			Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
-			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-			UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
-			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
-			Metadata:             req.Metadata,
+			MerchantId:      one.MerchantId,
+			SubscriptionId:  one.SubscriptionId,
+			PendingUpdateId: one.PendingUpdateId,
+			GmtCreate:       one.GmtCreate,
+			Amount:          one.Amount,
+			Status:          one.Status,
+			UpdateAmount:    one.UpdateAmount,
+			Currency:        one.Currency,
+			UpdateCurrency:  one.UpdateCurrency,
+			PlanId:          one.PlanId,
+			UpdatePlanId:    one.UpdatePlanId,
+			Quantity:        one.Quantity,
+			UpdateQuantity:  one.UpdateQuantity,
+			AddonData:       one.AddonData,
+			UpdateAddonData: one.UpdateAddonData,
+			ProrationAmount: one.ProrationAmount,
+			GatewayId:       one.GatewayId,
+			UserId:          one.UserId,
+			GmtModify:       one.GmtModify,
+			Paid:            one.Paid,
+			Link:            one.Link,
+			MerchantMember:  bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+			EffectImmediate: one.EffectImmediate,
+			EffectTime:      one.EffectTime,
+			Note:            one.Note,
+			Plan:            bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			UpdatePlan:      bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+			UpdateAddons:    addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+			Metadata:        req.Metadata,
 		},
 		Paid: len(subUpdateRes.Link) == 0 || subUpdateRes.Paid, // link is blank or paid is true, portal will not redirect
 		Link: subUpdateRes.Link,

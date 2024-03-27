@@ -52,7 +52,7 @@ func (t SubscriptionExpireListener) Consume(ctx context.Context, message *redism
 		return redismq.ReconsumeLater
 	}
 	for _, p := range pendingUpdates {
-		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionExpire")
+		err = service2.SubscriptionPendingUpdateCancel(ctx, p.PendingUpdateId, "SubscriptionExpire")
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}

@@ -95,7 +95,7 @@ func GetSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context, pendingU
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, pendingUpdateId).
 		OmitEmpty().Scan(&one)
 	if err != nil {
 		return nil
@@ -109,7 +109,7 @@ func GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx context.Context
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, pendingUpdateId).
 		WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 		OmitEmpty().Scan(&one)
 	if err != nil {

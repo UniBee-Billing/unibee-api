@@ -52,7 +52,7 @@ type Invoice struct {
 	CreateTime                     int64       `json:"createTime"                     description:"create utc time"`                                                        // create utc time
 	CryptoAmount                   int64       `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency                 string      `json:"cryptoCurrency"                 description:"crypto_currency"`                                                        // crypto_currency
-	FinishTime                     int64       `json:"finishTime"                     description:"finish utc time"`                                                        // finish utc time
-	DayUtilDue                     int64       `json:"dayUtilDue"                     description:"day util due after finish"`                                              // day util due after finish
+	FinishTime                     int64       `json:"finishTime"                     description:"utc time of enter process"`                                              // utc time of enter process
+	DayUtilDue                     int64       `json:"dayUtilDue"                     description:"day util due after process"`                                             // day util due after process
 	LastTrackTime                  int64       `json:"lastTrackTime"                  description:"last process invoice track time"`                                        // last process invoice track time
 }

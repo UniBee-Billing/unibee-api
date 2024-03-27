@@ -62,8 +62,8 @@ type InvoiceColumns struct {
 	CreateTime                     string // create utc time
 	CryptoAmount                   string // crypto_amount, cent
 	CryptoCurrency                 string // crypto_currency
-	FinishTime                     string // finish utc time
-	DayUtilDue                     string // day util due after finish
+	FinishTime                     string // utc time of enter process
+	DayUtilDue                     string // day util due after process
 	LastTrackTime                  string // last process invoice track time
 }
 

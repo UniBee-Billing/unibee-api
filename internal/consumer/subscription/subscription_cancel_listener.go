@@ -52,7 +52,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 		return redismq.ReconsumeLater
 	}
 	for _, p := range pendingUpdates {
-		err = service2.SubscriptionPendingUpdateCancel(ctx, p.UpdateSubscriptionId, "SubscriptionCancelled")
+		err = service2.SubscriptionPendingUpdateCancel(ctx, p.PendingUpdateId, "SubscriptionCancelled")
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionCancelListener SubscriptionPendingUpdateCancel error:%s", err.Error())
 		}

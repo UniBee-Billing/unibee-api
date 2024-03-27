@@ -18,7 +18,7 @@ import (
 func HandlePendingUpdatePaymentFailure(ctx context.Context, pendingUpdateId string) (bool, error) {
 	one := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, pendingUpdateId)
 	if one == nil {
-		return false, gerror.New("HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:" + one.UpdateSubscriptionId)
+		return false, gerror.New("HandlePendingUpdatePaymentSuccess PendingUpdate Not Found:" + one.PendingUpdateId)
 	}
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil

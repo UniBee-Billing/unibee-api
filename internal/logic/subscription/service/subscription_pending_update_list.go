@@ -28,13 +28,13 @@ type SubscriptionPendingUpdateListInternalRes struct {
 	SubscriptionPendingUpdateDetails []*detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
 }
 
-func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx context.Context, pendingUpdateId string) *detail.SubscriptionPendingUpdateDetail {
+func GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx context.Context, pendingUpdateId string) *detail.SubscriptionPendingUpdateDetail {
 	if len(pendingUpdateId) == 0 {
 		return nil
 	}
 	var one *entity.SubscriptionPendingUpdate
 	err := dao.SubscriptionPendingUpdate.Ctx(ctx).
-		Where(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+		Where(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, pendingUpdateId).
 		Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).
 		OmitEmpty().Scan(&one)
 	if err != nil {
@@ -47,40 +47,40 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx cont
 	if len(one.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
-			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId Unmarshal Metadata error:%s", err.Error())
+			fmt.Printf("GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId Unmarshal Metadata error:%s", err.Error())
 		}
 	}
 	return &detail.SubscriptionPendingUpdateDetail{
-		MerchantId:           one.MerchantId,
-		SubscriptionId:       one.SubscriptionId,
-		UpdateSubscriptionId: one.UpdateSubscriptionId,
-		GmtCreate:            one.GmtCreate,
-		Amount:               one.Amount,
-		Status:               one.Status,
-		UpdateAmount:         one.UpdateAmount,
-		Currency:             one.Currency,
-		UpdateCurrency:       one.UpdateCurrency,
-		PlanId:               one.PlanId,
-		UpdatePlanId:         one.UpdatePlanId,
-		Quantity:             one.Quantity,
-		UpdateQuantity:       one.UpdateQuantity,
-		AddonData:            one.AddonData,
-		UpdateAddonData:      one.UpdateAddonData,
-		ProrationAmount:      one.ProrationAmount,
-		GatewayId:            one.GatewayId,
-		UserId:               one.UserId,
-		GmtModify:            one.GmtModify,
-		Paid:                 one.Paid,
-		Link:                 one.Link,
-		MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
-		EffectImmediate:      one.EffectImmediate,
-		EffectTime:           one.EffectTime,
-		Note:                 one.Note,
-		Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
-		Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-		UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
-		UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
-		Metadata:             metadata,
+		MerchantId:      one.MerchantId,
+		SubscriptionId:  one.SubscriptionId,
+		PendingUpdateId: one.PendingUpdateId,
+		GmtCreate:       one.GmtCreate,
+		Amount:          one.Amount,
+		Status:          one.Status,
+		UpdateAmount:    one.UpdateAmount,
+		Currency:        one.Currency,
+		UpdateCurrency:  one.UpdateCurrency,
+		PlanId:          one.PlanId,
+		UpdatePlanId:    one.UpdatePlanId,
+		Quantity:        one.Quantity,
+		UpdateQuantity:  one.UpdateQuantity,
+		AddonData:       one.AddonData,
+		UpdateAddonData: one.UpdateAddonData,
+		ProrationAmount: one.ProrationAmount,
+		GatewayId:       one.GatewayId,
+		UserId:          one.UserId,
+		GmtModify:       one.GmtModify,
+		Paid:            one.Paid,
+		Link:            one.Link,
+		MerchantMember:  bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+		EffectImmediate: one.EffectImmediate,
+		EffectTime:      one.EffectTime,
+		Note:            one.Note,
+		Plan:            bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+		Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+		UpdatePlan:      bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+		UpdateAddons:    addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+		Metadata:        metadata,
 	}
 }
 
@@ -125,36 +125,36 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 			}
 		}
 		updateList = append(updateList, &detail.SubscriptionPendingUpdateDetail{
-			MerchantId:           one.MerchantId,
-			SubscriptionId:       one.SubscriptionId,
-			UpdateSubscriptionId: one.UpdateSubscriptionId,
-			GmtCreate:            one.GmtCreate,
-			Amount:               one.Amount,
-			Status:               one.Status,
-			UpdateAmount:         one.UpdateAmount,
-			Currency:             one.Currency,
-			UpdateCurrency:       one.UpdateCurrency,
-			PlanId:               one.PlanId,
-			UpdatePlanId:         one.UpdatePlanId,
-			Quantity:             one.Quantity,
-			UpdateQuantity:       one.UpdateQuantity,
-			AddonData:            one.AddonData,
-			UpdateAddonData:      one.UpdateAddonData,
-			ProrationAmount:      one.ProrationAmount,
-			GatewayId:            one.GatewayId,
-			UserId:               one.UserId,
-			GmtModify:            one.GmtModify,
-			Paid:                 one.Paid,
-			Link:                 one.Link,
-			MerchantMember:       bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
-			EffectImmediate:      one.EffectImmediate,
-			EffectTime:           one.EffectTime,
-			Note:                 one.Note,
-			Plan:                 bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
-			Addons:               addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-			UpdatePlan:           bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
-			UpdateAddons:         addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
-			Metadata:             metadata,
+			MerchantId:      one.MerchantId,
+			SubscriptionId:  one.SubscriptionId,
+			PendingUpdateId: one.PendingUpdateId,
+			GmtCreate:       one.GmtCreate,
+			Amount:          one.Amount,
+			Status:          one.Status,
+			UpdateAmount:    one.UpdateAmount,
+			Currency:        one.Currency,
+			UpdateCurrency:  one.UpdateCurrency,
+			PlanId:          one.PlanId,
+			UpdatePlanId:    one.UpdatePlanId,
+			Quantity:        one.Quantity,
+			UpdateQuantity:  one.UpdateQuantity,
+			AddonData:       one.AddonData,
+			UpdateAddonData: one.UpdateAddonData,
+			ProrationAmount: one.ProrationAmount,
+			GatewayId:       one.GatewayId,
+			UserId:          one.UserId,
+			GmtModify:       one.GmtModify,
+			Paid:            one.Paid,
+			Link:            one.Link,
+			MerchantMember:  bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+			EffectImmediate: one.EffectImmediate,
+			EffectTime:      one.EffectTime,
+			Note:            one.Note,
+			Plan:            bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+			Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
+			UpdatePlan:      bean.SimplifyPlan(query.GetPlanById(ctx, one.UpdatePlanId)),
+			UpdateAddons:    addon2.GetSubscriptionAddonsByAddonJson(ctx, one.UpdateAddonData),
+			Metadata:        metadata,
 		})
 	}
 

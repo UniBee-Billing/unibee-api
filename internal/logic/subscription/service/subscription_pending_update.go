@@ -64,7 +64,7 @@ func CancelOtherUnfinishedPendingUpdatesBackground(subscriptionId string, pendin
 		var mainList []*entity.SubscriptionPendingUpdate
 		err = dao.SubscriptionPendingUpdate.Ctx(ctx).
 			Where(dao.SubscriptionPendingUpdate.Columns().SubscriptionId, subscriptionId).
-			WhereNot(dao.SubscriptionPendingUpdate.Columns().UpdateSubscriptionId, pendingUpdateId).
+			WhereNot(dao.SubscriptionPendingUpdate.Columns().PendingUpdateId, pendingUpdateId).
 			WhereLT(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusFinished).
 			Limit(0, 100).
 			OmitEmpty().Scan(&mainList)
@@ -72,7 +72,7 @@ func CancelOtherUnfinishedPendingUpdatesBackground(subscriptionId string, pendin
 			g.Log().Errorf(ctx, "CancelOtherUnfinishedPendingUpdatesBackground Search List Error:%s", err.Error())
 		}
 		for _, one := range mainList {
-			err = SubscriptionPendingUpdateCancel(ctx, one.UpdateSubscriptionId, reason)
+			err = SubscriptionPendingUpdateCancel(ctx, one.PendingUpdateId, reason)
 			if err != nil {
 				g.Log().Errorf(ctx, "CancelOtherUnfinishedPendingUpdatesBackground SubscriptionPendingUpdateCancel Error:%s", err.Error())
 			}
