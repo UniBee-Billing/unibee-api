@@ -141,8 +141,8 @@ type CreateReq struct {
 	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
 	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" `
 	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
 	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
@@ -181,8 +181,8 @@ type UpdateReq struct {
 	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
 	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"          `
+	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview"   `
 	ProrationDate       int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
 	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
