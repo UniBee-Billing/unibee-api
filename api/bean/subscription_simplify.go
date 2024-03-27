@@ -9,7 +9,7 @@ import (
 
 type SubscriptionConfig struct {
 	DowngradeEffectImmediately bool  `json:"downgradeEffectImmediately" dc:"DowngradeEffectImmediately, whether subscription update should effect immediately or at period end, default at period end"`
-	UpdateProration            bool  `json:"updateProration" dc:"UpdateProration, whether subscription update generation proration invoice or not, default yes"`
+	UpgradeProration           bool  `json:"upgradeProration" dc:"UpgradeProration, whether subscription update generation proration invoice or not, default yes"`
 	IncompleteExpireTime       int64 `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
 	InvoiceEmail               bool  `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
 }

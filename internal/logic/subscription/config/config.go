@@ -9,7 +9,7 @@ import (
 
 const (
 	DowngradeEffectImmediately = "DowngradeEffectImmediately"
-	UpdateProration            = "UpdateProration"
+	UpdateProration            = "UpgradeProration"
 	IncompleteExpireTime       = "IncompleteExpireTime"
 	InvoiceEmail               = "InvoiceEmail"
 )
@@ -18,7 +18,7 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 	// default config
 	config = &bean.SubscriptionConfig{
 		DowngradeEffectImmediately: false,
-		UpdateProration:            true,
+		UpgradeProration:           true,
 		IncompleteExpireTime:       24 * 60 * 60, // 24h expire after
 		InvoiceEmail:               true,
 	}

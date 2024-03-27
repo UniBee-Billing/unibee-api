@@ -577,7 +577,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		}
 	}
 	if effectImmediate {
-		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpdateProration {
+		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 				InvoiceName:   "SubscriptionCycle",

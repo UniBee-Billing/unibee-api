@@ -17,8 +17,8 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 			return nil, err
 		}
 	}
-	if req.UpdateProration != nil {
-		err = merchant_config.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.UpdateProration, fmt.Sprintf("%v", *req.UpdateProration))
+	if req.UpgradeProration != nil {
+		err = merchant_config.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.UpdateProration, fmt.Sprintf("%v", *req.UpgradeProration))
 		if err != nil {
 			return nil, err
 		}
