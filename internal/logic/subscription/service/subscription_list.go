@@ -34,7 +34,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 	var addonParams []*bean.PlanAddonParam
 	if len(one.AddonData) > 0 {
 		err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
-		if err == nil {
+		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionDetail parse addon param:%s", err.Error())
 		}
 	}
