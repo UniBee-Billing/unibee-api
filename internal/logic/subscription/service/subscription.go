@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -97,6 +98,47 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 		utility.Assert(len(list) == 1, "gateway need specify")
 		return list[0]
 	}
+}
+
+type RenewInternalReq struct {
+	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
+}
+
+func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
+	one := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
+	utility.Assert(one != nil, "subscription not found")
+	utility.Assert(one.UserId == req.UserId, "userId not match")
+	utility.Assert(one.MerchantId == req.MerchantId, "merchantId not match")
+	utility.Assert(one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
+	var addonParams []*bean.PlanAddonParam
+	if len(one.AddonData) > 0 {
+		err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
+		if err == nil {
+			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
+		}
+	}
+	var metadata = make(map[string]string)
+	if len(one.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("SubscriptionDetail Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+	return SubscriptionCreate(ctx, &CreateInternalReq{
+		MerchantId:      one.MerchantId,
+		PlanId:          one.PlanId,
+		UserId:          one.UserId,
+		Quantity:        one.Quantity,
+		GatewayId:       one.GatewayId,
+		AddonParams:     addonParams,
+		ReturnUrl:       one.ReturnUrl,
+		VatCountryCode:  one.CountryCode,
+		VatNumber:       one.VatNumber,
+		PaymentMethodId: one.GatewayDefaultPaymentMethod,
+		Metadata:        metadata,
+	})
 }
 
 type CreatePreviewInternalReq struct {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -29,15 +30,20 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 		one.Data = ""
 		one.ResponseData = ""
 	}
-	user := query.GetUserAccountById(ctx, uint64(one.UserId))
-	if user != nil {
-		user.Password = ""
+	user := query.GetUserAccountById(ctx, one.UserId)
+	var addonParams []*bean.PlanAddonParam
+	if len(one.AddonData) > 0 {
+		err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
+		if err == nil {
+			g.Log().Errorf(ctx, "SubscriptionDetail parse addon param:%s", err.Error())
+		}
 	}
 	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        bean.SimplifySubscription(one),
 		Gateway:                             bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
 		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
+		AddonParams:                         addonParams,
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		LatestInvoice:                       bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByUpdateSubscriptionId(ctx, one.PendingUpdateId),
@@ -79,7 +85,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		totalPlanIds = append(totalPlanIds, sub.PlanId)
 		var addonParams []*bean.PlanAddonParam
 		if len(sub.AddonData) > 0 {
-			err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
+			err = utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 			if err == nil {
 				for _, s := range addonParams {
 					totalPlanIds = append(totalPlanIds, s.AddonPlanId) // 添加到整数列表中
@@ -90,7 +96,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			sub.Data = ""
 			sub.ResponseData = ""
 		}
-		user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+		user := query.GetUserAccountById(ctx, sub.UserId)
 		if user != nil {
 			user.Password = ""
 		}

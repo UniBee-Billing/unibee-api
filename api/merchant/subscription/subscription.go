@@ -107,6 +107,18 @@ type AddNewTrialStartReq struct {
 type AddNewTrialStartRes struct {
 }
 
+type RenewReq struct {
+	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"Renew Subscription, will create new subscription based on one provided "`
+	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+}
+
+type RenewRes struct {
+	Subscription *bean.SubscriptionSimplify `json:"subscription" dc:"Subscription"`
+	Paid         bool                       `json:"paid"`
+	Link         string                     `json:"link"`
+}
+
 type CreatePreviewReq struct {
 	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"Create Subscription Preview"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`

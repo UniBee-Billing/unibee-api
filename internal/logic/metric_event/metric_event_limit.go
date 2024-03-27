@@ -25,9 +25,6 @@ func GetUserMetricStat(ctx context.Context, merchantId uint64, user *entity.User
 
 func GetUserSubscriptionMetricStat(ctx context.Context, merchantId uint64, user *entity.UserAccount, one *entity.Subscription) *metric2.UserMetric {
 	var list = make([]*bean.UserMerchantMetricStat, 0)
-	if user != nil {
-		user.Password = ""
-	}
 	if one != nil {
 		limitMap := GetUserMetricTotalLimits(ctx, merchantId, user.Id, one)
 		for _, metricLimit := range limitMap {
