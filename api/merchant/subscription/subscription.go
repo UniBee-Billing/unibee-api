@@ -157,13 +157,13 @@ type CreateRes struct {
 }
 
 type UpdatePreviewReq struct {
-	g.Meta              `path:"/update_preview" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Preview"`
-	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
-	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	g.Meta          `path:"/update_preview" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Preview"`
+	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId       uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
+	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 }
 type UpdatePreviewRes struct {
 	TotalAmount       int64                 `json:"totalAmount"                `
@@ -174,17 +174,17 @@ type UpdatePreviewRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta              `path:"/update_submit" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Submit"`
-	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity            int64                  `json:"quantity" dc:"Quantity"  v:"required"`
-	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
-	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"          `
-	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview"   `
-	ProrationDate       int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
-	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	g.Meta             `path:"/update_submit" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Submit"`
+	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId          uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity"  v:"required"`
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"          `
+	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview"   `
+	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 
 type UpdateRes struct {

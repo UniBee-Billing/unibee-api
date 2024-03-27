@@ -95,13 +95,13 @@ type CreateRes struct {
 }
 
 type UpdatePreviewReq struct {
-	g.Meta              `path:"/update_preview" tags:"User-Subscription" method:"post" summary:"User Update Subscription Preview"`
-	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
-	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
-	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	g.Meta          `path:"/update_preview" tags:"User-Subscription" method:"post" summary:"User Update Subscription Preview"`
+	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId       uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
+	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 }
 type UpdatePreviewRes struct {
 	TotalAmount       int64                 `json:"totalAmount"                `
@@ -112,17 +112,17 @@ type UpdatePreviewRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta              `path:"/update_submit" tags:"User-Subscription" method:"post" summary:"User Update Subscription"`
-	SubscriptionId      string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId           uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
-	Quantity            int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId           uint64                 `json:"gatewayId" dc:"Id" `
-	AddonParams         []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount  int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency     string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate       int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
-	WithImmediateEffect int                    `json:"withImmediateEffect" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata            map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	g.Meta             `path:"/update_submit" tags:"User-Subscription" method:"post" summary:"User Update Subscription"`
+	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId          uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
+	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 type UpdateRes struct {
 	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`

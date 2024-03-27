@@ -524,10 +524,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
-	//试用期内不允许修改计划
-	//utility.Assert(sub.TrialEnd < gtime.Now().Timestamp(), "subscription is in trial period ,should end trial before update")
-	//设置了下周期取消不允许修改计划
-	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription cannot be update as it will cancel at period end, should resume subscription first")
+	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
@@ -537,7 +534,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	for _, addon := range addons {
 		utility.Assert(strings.Compare(addon.AddonPlan.Currency, currency) == 0, fmt.Sprintf("currency not match for planId:%v addonId:%v", plan.Id, addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.MerchantId == plan.MerchantId, fmt.Sprintf("Addon Id:%v Merchant not match", addon.AddonPlan.Id))
-		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("Addon Id:%v Not Publish status", addon.AddonPlan.Id))
+		utility.Assert(addon.AddonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("Addon Id:%v Not Active status", addon.AddonPlan.Id))
 		utility.Assert(addon.AddonPlan.IntervalUnit == plan.IntervalUnit, "update addon must have same recurring interval to plan")
 		utility.Assert(addon.AddonPlan.IntervalCount == plan.IntervalCount, "update addon must have same recurring interval to plan")
 	}
@@ -554,60 +551,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 
 	var effectImmediate = false
 
-	//if plan.Amount > oldPlan.Amount || plan.Amount*req.Quantity > oldPlan.Amount*sub.Quantity {
-	//	effectImmediate = true
-	//} else if plan.Amount < oldPlan.Amount || plan.Amount*req.Quantity < oldPlan.Amount*sub.Quantity {
-	//	effectImmediate = false
-	//} else {
-	//	var oldAddonParams []*bean.PlanAddonParam
-	//	err = utility.UnmarshalFromJsonString(sub.AddonData, &oldAddonParams)
-	//	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString internal err:%v", err))
-	//	var oldAddonMap = make(map[uint64]int64)
-	//	for _, oldAddon := range oldAddonParams {
-	//		if _, ok := oldAddonMap[oldAddon.AddonPlanId]; ok {
-	//			oldAddonMap[oldAddon.AddonPlanId] = oldAddonMap[oldAddon.AddonPlanId] + oldAddon.Quantity
-	//		} else {
-	//			oldAddonMap[oldAddon.AddonPlanId] = oldAddon.Quantity
-	//		}
-	//	}
-	//	var newAddonMap = make(map[uint64]int64)
-	//	for _, newAddon := range req.AddonParams {
-	//		if _, ok := newAddonMap[newAddon.AddonPlanId]; ok {
-	//			newAddonMap[newAddon.AddonPlanId] = newAddonMap[newAddon.AddonPlanId] + newAddon.Quantity
-	//		} else {
-	//			newAddonMap[newAddon.AddonPlanId] = newAddon.Quantity
-	//		}
-	//	}
-	//	for newAddonPlanId, newAddonQuantity := range newAddonMap {
-	//		if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
-	//			if oldAddonQuantity < newAddonQuantity {
-	//				effectImmediate = true
-	//				break
-	//			}
-	//		} else {
-	//			effectImmediate = true
-	//			break
-	//		}
-	//	}
-	//	var changed = false
-	//	if len(oldAddonMap) != len(newAddonMap) {
-	//		changed = true
-	//	} else {
-	//		for newAddonPlanId, newAddonQuantity := range newAddonMap {
-	//			if oldAddonQuantity, ok := oldAddonMap[newAddonPlanId]; ok {
-	//				if oldAddonQuantity != newAddonQuantity {
-	//					changed = true
-	//					break
-	//				}
-	//			} else {
-	//				changed = true
-	//				break
-	//			}
-	//		}
-	//	}
-	//	utility.Assert(changed, "subscription update should have plan or addons changed")
-	//}
-
 	isUpgrade, changed := isUpgradeForSubscription(ctx, sub, plan, req.Quantity, req.AddonParams)
 	utility.Assert(changed, "subscription update should have plan or addons changed")
 	if isUpgrade {
@@ -616,9 +559,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		effectImmediate = config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately
 	}
 
-	if req.WithImmediateEffect > 0 {
-		utility.Assert(req.WithImmediateEffect == 1 || req.WithImmediateEffect == 2, "WithImmediateEffect should be 1 or 2")
-		if req.WithImmediateEffect == 1 {
+	if req.EffectImmediate > 0 {
+		utility.Assert(req.EffectImmediate == 1 || req.EffectImmediate == 2, "EffectImmediate should be 1 or 2")
+		if req.EffectImmediate == 1 {
 			effectImmediate = true
 		} else {
 			effectImmediate = false
@@ -774,11 +717,11 @@ type UpdateSubscriptionInternalResp struct {
 
 func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
 	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.UpdatePreviewReq{
-		SubscriptionId:      req.SubscriptionId,
-		NewPlanId:           req.NewPlanId,
-		Quantity:            req.Quantity,
-		AddonParams:         req.AddonParams,
-		WithImmediateEffect: req.WithImmediateEffect,
+		SubscriptionId:  req.SubscriptionId,
+		NewPlanId:       req.NewPlanId,
+		Quantity:        req.Quantity,
+		AddonParams:     req.AddonParams,
+		EffectImmediate: req.EffectImmediate,
 	}, req.ProrationDate, merchantMemberId)
 	if err != nil {
 		return nil, err
@@ -846,7 +789,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		// createAndPayNewProrationInvoice
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
-		//utility.Assert(user != nil, "user not found")
+		// utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, gatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)

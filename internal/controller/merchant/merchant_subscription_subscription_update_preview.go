@@ -23,11 +23,11 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 	}
 	g.Log().Infof(ctx, "SubscriptionUpdatePreview merchantMemberId:%d", merchantMemberId)
 	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.UpdatePreviewReq{
-		SubscriptionId:      req.SubscriptionId,
-		NewPlanId:           req.NewPlanId,
-		Quantity:            req.Quantity,
-		AddonParams:         req.AddonParams,
-		WithImmediateEffect: req.WithImmediateEffect,
+		SubscriptionId:  req.SubscriptionId,
+		NewPlanId:       req.NewPlanId,
+		Quantity:        req.Quantity,
+		AddonParams:     req.AddonParams,
+		EffectImmediate: req.EffectImmediate,
 	}, 0, merchantMemberId)
 	if err != nil {
 		return nil, err
