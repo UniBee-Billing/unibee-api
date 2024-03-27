@@ -207,6 +207,7 @@ func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, t
 		// todo mark expire invoice
 	} else if one != nil && one.Status == consts.InvoiceStatusProcessing && one.LastTrackTime+86400 < timeNow && one.FinishTime+(one.DayUtilDue*86400) > timeNow {
 		// dunning: daily resend invoice, update track time
+		g.Log().Infof(ctx, "trackForSubscriptionLatest start track invoiceId:%s", one.InvoiceId)
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().LastTrackTime: gtime.Now().Timestamp(),
 			dao.Invoice.Columns().GmtModify:     gtime.Now(),
