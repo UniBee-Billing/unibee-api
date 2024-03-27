@@ -76,7 +76,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		PeriodEnd:                      req.PeriodEnd,
 		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
-		DayUtilDue:                     6,
+		DayUtilDue:                     3,
 	}
 }
 
@@ -208,6 +208,6 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		PeriodEnd:                      req.PeriodEnd,
 		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
-		DayUtilDue:                     6,
+		DayUtilDue:                     3,
 	}
 }
