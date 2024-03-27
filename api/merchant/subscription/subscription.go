@@ -131,7 +131,7 @@ type CreatePreviewRes struct {
 	VatCountryName    string                  `json:"vatCountryName"              `
 	TaxScale          int64                   `json:"taxScale"              `
 	VatNumber         string                  `json:"vatNumber"              `
-	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
+	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"   `
 }
 
 type CreateReq struct {

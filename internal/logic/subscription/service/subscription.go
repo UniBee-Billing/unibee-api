@@ -277,8 +277,12 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		return nil, err
 	}
 	utility.Assert(len(prepare.VatCountryCode) > 0, "CountryCode Needed")
-	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
-	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
+	if req.ConfirmTotalAmount > 0 {
+		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch preview again")
+	}
+	if len(req.ConfirmCurrency) > 0 {
+		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch preview again")
+	}
 
 	var subType = consts.SubTypeDefault
 	if consts.SubscriptionCycleUnderUniBeeControl {
@@ -781,8 +785,12 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 	}
 
 	//subscription prepare
-	utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch again")
-	utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
+	if req.ConfirmTotalAmount > 0 {
+		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch preview again")
+	}
+	if len(req.ConfirmCurrency) > 0 {
+		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch again")
+	}
 	if prepare.Invoice.TotalAmount <= 0 {
 		utility.Assert(prepare.EffectImmediate == false, "System Error, Cannot Effect Immediate With Negative CaptureAmount")
 	}
