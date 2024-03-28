@@ -18,6 +18,7 @@ import (
 	"unibee/api/merchant/payment"
 	"unibee/api/merchant/plan"
 	"unibee/api/merchant/profile"
+	"unibee/api/merchant/role"
 	"unibee/api/merchant/search"
 	"unibee/api/merchant/session"
 	"unibee/api/merchant/subscription"
@@ -77,6 +78,8 @@ type IMerchantMember interface {
 	Profile(ctx context.Context, req *member.ProfileReq) (res *member.ProfileRes, err error)
 	Logout(ctx context.Context, req *member.LogoutReq) (res *member.LogoutRes, err error)
 	PasswordReset(ctx context.Context, req *member.PasswordResetReq) (res *member.PasswordResetRes, err error)
+	List(ctx context.Context, req *member.ListReq) (res *member.ListRes, err error)
+	UpdateMemberRole(ctx context.Context, req *member.UpdateMemberRoleReq) (res *member.UpdateMemberRoleRes, err error)
 }
 
 type IMerchantMetric interface {
@@ -129,6 +132,13 @@ type IMerchantProfile interface {
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	CountryConfigList(ctx context.Context, req *profile.CountryConfigListReq) (res *profile.CountryConfigListRes, err error)
 	EditCountryConfig(ctx context.Context, req *profile.EditCountryConfigReq) (res *profile.EditCountryConfigRes, err error)
+}
+
+type IMerchantRole interface {
+	List(ctx context.Context, req *role.ListReq) (res *role.ListRes, err error)
+	New(ctx context.Context, req *role.NewReq) (res *role.NewRes, err error)
+	Edit(ctx context.Context, req *role.EditReq) (res *role.EditRes, err error)
+	Delete(ctx context.Context, req *role.DeleteReq) (res *role.DeleteRes, err error)
 }
 
 type IMerchantSearch interface {

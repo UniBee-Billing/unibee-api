@@ -24,4 +24,5 @@ type MerchantMember struct {
 	FirstName  interface{} // first name
 	LastName   interface{} // last name
 	CreateTime interface{} // create utc time
+	Role       interface{} // role
 }

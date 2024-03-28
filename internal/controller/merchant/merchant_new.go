@@ -110,3 +110,9 @@ func NewProfile() merchant.IMerchantProfile {
 	return &ControllerProfile{}
 }
 
+type ControllerRole struct{}
+
+func NewRole() merchant.IMerchantRole {
+	return &ControllerRole{}
+}
+

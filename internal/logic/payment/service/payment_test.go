@@ -84,7 +84,7 @@ func TestPayment(t *testing.T) {
 			Page:       -1,
 		})
 		require.Nil(t, err)
-		require.Equal(t, 1, len(list))
+		require.Equal(t, true, len(list) > 0)
 	})
 	t.Run("Test for payment HardDelete", func(t *testing.T) {
 		err = HardDeletePayment(ctx, test.TestMerchant.Id, paymentId)

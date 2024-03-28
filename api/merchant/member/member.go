@@ -28,3 +28,20 @@ type PasswordResetReq struct {
 
 type PasswordResetRes struct {
 }
+
+type ListReq struct {
+	g.Meta `path:"/list" tags:"Member" method:"get" summary:"Get Merchant Member List"`
+}
+
+type ListRes struct {
+	MerchantMembers []*bean.MerchantMemberSimplify `json:"merchantMembers" dc:"Merchant Members"`
+}
+
+type UpdateMemberRoleReq struct {
+	g.Meta   `path:"/update_member_role" tags:"Member" method:"post" summary:"Update Member Role"`
+	MemberId uint64 `json:"memberId"         description:"MemberId"`
+	Role     string `json:"role"         description:"Role"`
+}
+
+type UpdateMemberRoleRes struct {
+}

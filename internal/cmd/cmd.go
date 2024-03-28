@@ -156,6 +156,11 @@ var (
 						merchant.NewSession(),
 					)
 				})
+				group.Group("/role", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewRole(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"testing"
+	member2 "unibee/internal/logic/member"
 	"unibee/internal/query"
 	_ "unibee/test"
 )
@@ -25,15 +26,15 @@ func TestMerchantCreateAndDelete(t *testing.T) {
 		require.NotNil(t, merchant)
 		member = query.GetMerchantMemberById(ctx, member.Id)
 		require.NotNil(t, member)
-		one, token := PasswordLogin(ctx, member.Email, "test123456")
+		one, token := member2.PasswordLogin(ctx, member.Email, "test123456")
 		require.NotNil(t, one)
 		require.NotNil(t, token)
-		ChangeMerchantMemberPassword(ctx, member.Email, "test123456", "test654321")
-		one, token = PasswordLogin(ctx, member.Email, "test654321")
+		member2.ChangeMerchantMemberPassword(ctx, member.Email, "test123456", "test654321")
+		one, token = member2.PasswordLogin(ctx, member.Email, "test654321")
 		require.NotNil(t, one)
 		require.NotNil(t, token)
-		ChangeMerchantMemberPasswordWithOutOldVerify(ctx, member.Email, "test123456")
-		one, token = PasswordLogin(ctx, member.Email, "test123456")
+		member2.ChangeMerchantMemberPasswordWithOutOldVerify(ctx, member.Email, "test123456")
+		one, token = member2.PasswordLogin(ctx, member.Email, "test123456")
 		require.NotNil(t, one)
 		require.NotNil(t, token)
 		err = HardDeleteMerchant(ctx, merchant.Id)
