@@ -83,3 +83,17 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 		OmitNil().Update()
 	return err
 }
+
+func AddMerchantMember(ctx context.Context, email string) error {
+	one := query.GetMerchantMemberByEmail(ctx, email)
+	utility.Assert(one == nil, "email exist")
+	merchantMasterMember := &entity.MerchantMember{
+		Email:      email,
+		CreateTime: gtime.Now().Timestamp(),
+	}
+	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
+	if err != nil {
+		return err
+	}
+	return nil
+}

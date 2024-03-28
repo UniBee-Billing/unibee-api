@@ -80,6 +80,7 @@ type IMerchantMember interface {
 	PasswordReset(ctx context.Context, req *member.PasswordResetReq) (res *member.PasswordResetRes, err error)
 	List(ctx context.Context, req *member.ListReq) (res *member.ListRes, err error)
 	UpdateMemberRole(ctx context.Context, req *member.UpdateMemberRoleReq) (res *member.UpdateMemberRoleRes, err error)
+	NewMember(ctx context.Context, req *member.NewMemberReq) (res *member.NewMemberRes, err error)
 }
 
 type IMerchantMetric interface {

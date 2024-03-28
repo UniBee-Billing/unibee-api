@@ -45,3 +45,11 @@ type UpdateMemberRoleReq struct {
 
 type UpdateMemberRoleRes struct {
 }
+
+type NewMemberReq struct {
+	g.Meta `path:"/new_member" tags:"Member" method:"post" summary:"New Member"`
+	Email  string `json:"email"         description:"Email"`
+}
+
+type NewMemberRes struct {
+}
