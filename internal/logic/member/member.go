@@ -84,10 +84,11 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, email string) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
 	merchantMasterMember := &entity.MerchantMember{
+		MerchantId: merchantId,
 		Email:      email,
 		CreateTime: gtime.Now().Timestamp(),
 	}

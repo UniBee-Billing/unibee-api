@@ -2,13 +2,14 @@ package merchant
 
 import (
 	"context"
+	_interface "unibee/internal/interface"
 	member2 "unibee/internal/logic/member"
 
 	"unibee/api/merchant/member"
 )
 
 func (c *ControllerMember) NewMember(ctx context.Context, req *member.NewMemberReq) (res *member.NewMemberRes, err error) {
-	err = member2.AddMerchantMember(ctx, req.Email)
+	err = member2.AddMerchantMember(ctx, _interface.GetMerchantId(ctx), req.Email)
 	if err != nil {
 		return nil, err
 	}
