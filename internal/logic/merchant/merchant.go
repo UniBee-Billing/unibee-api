@@ -27,7 +27,7 @@ func GetMerchantFromCache(ctx context.Context, openApiKey string) *entity.Mercha
 	if err != nil {
 		return nil
 	}
-	if get != nil && get.IsUint() && get.Uint64() > 0 {
+	if get != nil && len(get.String()) > 0 {
 		one := query.GetMerchantById(ctx, get.Uint64())
 		return one
 	}

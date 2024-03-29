@@ -5,14 +5,18 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	member2 "unibee/internal/logic/member"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	_ "unibee/test"
 )
 
 func TestMerchantCreateAndDelete(t *testing.T) {
 	ctx := context.Background()
+	var merchant *entity.Merchant
+	var member *entity.MerchantMember
+	var err error
 	t.Run("Test for Merchant Create|Login|ChangePassword|Delete", func(t *testing.T) {
-		merchant, member, err := CreateMerchant(ctx, &CreateMerchantInternalReq{
+		merchant, member, err = CreateMerchant(ctx, &CreateMerchantInternalReq{
 			FirstName: "test",
 			LastName:  "test",
 			Email:     "autotest@wowow.io",
@@ -22,6 +26,8 @@ func TestMerchantCreateAndDelete(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, merchant)
+	})
+	t.Run("Test for merchant Login|ChangePassword", func(t *testing.T) {
 		merchant = query.GetMerchantById(ctx, merchant.Id)
 		require.NotNil(t, merchant)
 		member = query.GetMerchantMemberById(ctx, member.Id)
@@ -37,6 +43,19 @@ func TestMerchantCreateAndDelete(t *testing.T) {
 		one, token = member2.PasswordLogin(ctx, member.Email, "test123456")
 		require.NotNil(t, one)
 		require.NotNil(t, token)
+		oldKey := NewOpenApiKey(ctx, one.MerchantId)
+		require.NotNil(t, oldKey)
+		require.Equal(t, true, len(oldKey) > 0)
+		merchant = query.GetMerchantByApiKey(ctx, oldKey)
+		require.NotNil(t, merchant)
+		newKey := NewOpenApiKey(ctx, one.MerchantId)
+		require.NotNil(t, newKey)
+		require.Equal(t, true, len(newKey) > 0)
+		require.Nil(t, query.GetMerchantByApiKey(ctx, oldKey))
+		require.NotNil(t, GetMerchantFromCache(ctx, oldKey))
+		require.NotNil(t, query.GetMerchantByApiKey(ctx, newKey))
+	})
+	t.Run("Test for merchant HardDelete", func(t *testing.T) {
 		err = HardDeleteMerchant(ctx, merchant.Id)
 		require.Nil(t, err)
 		merchant = query.GetMerchantById(ctx, merchant.Id)
