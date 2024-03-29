@@ -2,7 +2,6 @@ package method
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/test"
@@ -22,13 +21,13 @@ func TestPayment(t *testing.T) {
 		one := QueryPaymentMethod(ctx, 15621, 200365887, 25, list[0].Id)
 		require.NotNil(t, one)
 		require.Equal(t, one.Id, list[0].Id)
-		one = NewPaymentMethod(ctx, &NewPaymentMethodInternalReq{
+		url, one := NewPaymentMethod(ctx, &NewPaymentMethodInternalReq{
 			MerchantId: 15621,
 			UserId:     200365887,
 			GatewayId:  25,
-			Type:       "card",
-			Data:       gjson.New(map[string]string{"card": "4242424242424242", "expMonth": "12", "expYear": "34", "cvc": "123"}),
+			Currency:   "USD",
 		})
-		require.NotNil(t, one)
+		require.NotNil(t, url)
+		require.Nil(t, one)
 	})
 }

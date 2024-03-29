@@ -45,3 +45,25 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 		r.Response.Writeln(utility.FormatToJsonString(redirect))
 	}
 }
+
+func GatewayPaymentMethodRedirectEntrance(r *ghttp.Request) {
+	gatewayId := r.Get("gatewayId").String()
+	gatewayIdInt, err := strconv.Atoi(gatewayId)
+	if err != nil {
+		g.Log().Errorf(r.Context(), "GatewayRedirectEntrance panic url:%s gatewayId: %s err:%s", r.GetUrl(), gatewayId, err)
+		return
+	}
+	gateway := util.GetGatewayById(r.Context(), uint64(gatewayIdInt))
+	utility.Assert(gateway != nil, "gateway invalid")
+	redirectUrl := r.Get("redirectUrl").String()
+	success := r.Get("success").Bool()
+	if len(redirectUrl) > 0 {
+		if !strings.Contains(redirectUrl, "?") {
+			r.Response.RedirectTo(fmt.Sprintf("%s?success=%v", redirectUrl, success))
+		} else {
+			r.Response.RedirectTo(fmt.Sprintf("%s&success=%v", redirectUrl, success))
+		}
+	} else {
+		r.Response.Writeln(success)
+	}
+}

@@ -12,23 +12,34 @@ import (
 )
 
 type NewPaymentMethodInternalReq struct {
-	MerchantId uint64      `json:"merchantId" dc:"MerchantId" `
-	UserId     uint64      `json:"userId" dc:"UserId" `
-	GatewayId  uint64      `json:"gatewayId" dc:"GatewayId" `
-	Type       string      `json:"type"`
-	Data       *gjson.Json `json:"data"`
+	MerchantId     uint64      `json:"merchantId" dc:"MerchantId" `
+	UserId         uint64      `json:"userId" dc:"UserId" `
+	GatewayId      uint64      `json:"gatewayId" dc:"GatewayId" `
+	Currency       string      `json:"currency" dc:""`
+	RedirectUrl    string      `json:"redirectUrl" dc:"Redirect Url"`
+	SubscriptionId string      `json:"subscriptionId" dc:"SubscriptionId"`
+	Type           string      `json:"type"`
+	Data           *gjson.Json `json:"data"`
 }
 
-func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) *bean.PaymentMethod {
+func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (url string, paymentMethod *bean.PaymentMethod) {
 	merchant := query.GetMerchantById(ctx, req.MerchantId)
 	utility.Assert(merchant != nil, "merchant not found")
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
-	utility.Assert(len(req.Type) > 0 && strings.Compare(req.Type, "card") == 0, "invalid type, should be card")
-	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Data)
+	utility.Assert(len(req.Currency) > 0, "invalid currency")
+	req.Currency = strings.ToUpper(req.Currency)
+	if req.Data == nil {
+		req.Data = gjson.New("")
+	}
+	err := req.Data.Set("redirectUrl", req.RedirectUrl)
 	utility.AssertError(err, "Server Error")
-	return createResult.PaymentMethod
+	err = req.Data.Set("subscriptionId", req.SubscriptionId)
+	utility.AssertError(err, "Server Error")
+	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Data)
+	utility.AssertError(err, "Server Error")
+	return createResult.Url, createResult.PaymentMethod
 }
 
 type PaymentMethodListInternalReq struct {

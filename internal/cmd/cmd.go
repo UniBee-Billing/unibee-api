@@ -276,8 +276,10 @@ var (
 			// Invoice Link
 			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
 			s.BindHandler("GET:/pay/{paymentId}", payment.LinkEntry)
-			// Gateway Redirect
+			// Gateway Payment Redirect
 			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
+			// Gateway Payment Method Redirect
+			s.BindHandler("GET:/payment/method/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayPaymentMethodRedirectEntrance)
 			// Gateway Webhook
 			s.BindHandler("POST:/payment/gateway_webhook_entry/{gatewayId}/notifications", gateway_webhook_entry.GatewayWebhookEntrance)
 			// Merchant Websocket

@@ -151,6 +151,7 @@ type GatewayUserPaymentMethodListResp struct {
 
 type GatewayUserPaymentMethodCreateAndBindResp struct {
 	PaymentMethod *bean.PaymentMethod `json:"paymentMethod"`
+	Url           string              `json:"url"`
 }
 
 type GatewayMerchantBalanceQueryResp struct {

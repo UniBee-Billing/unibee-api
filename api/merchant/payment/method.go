@@ -29,13 +29,17 @@ type MethodGetRes struct {
 }
 
 type MethodNewReq struct {
-	g.Meta    `path:"/method_new" tags:"Payment" method:"post" summary:"Create New Payment Method And Attach To User"`
-	UserId    uint64      `json:"userId" dc:"UserId"   v:"required" `
-	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
-	Type      string      `json:"type"`
-	Data      *gjson.Json `json:"data"`
+	g.Meta         `path:"/method_new" tags:"Payment" method:"post" summary:"Create New Payment Method And Attach To User"`
+	UserId         uint64      `json:"userId" dc:"UserId"   v:"required" `
+	GatewayId      uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	Currency       string      `json:"currency" dc:""  v:"required" `
+	SubscriptionId string      `json:"subscriptionId" dc:"" dc:"if provide, bind to it"`
+	RedirectUrl    string      `json:"redirectUrl" dc:"Redirect Url"`
+	Type           string      `json:"type"`
+	Data           *gjson.Json `json:"data"`
 }
 
 type MethodNewRes struct {
+	Url    string              `json:"url" dc:"Url" `
 	Method *bean.PaymentMethod `json:"method" dc:"Method" `
 }

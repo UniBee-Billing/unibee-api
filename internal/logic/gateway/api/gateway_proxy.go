@@ -57,7 +57,7 @@ func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	return
 }
 
-func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -70,7 +70,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayUserCreateAndBindPaymentMethod(ctx, gateway, userId, data)
+	res, err = p.getRemoteGateway().GatewayUserCreateAndBindPaymentMethod(ctx, gateway, userId, currency, data)
 
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserCreateAndBindPaymentMethod cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {

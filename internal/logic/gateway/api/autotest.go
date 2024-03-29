@@ -32,7 +32,7 @@ func (a AutoTest) GatewayRefundCancel(ctx context.Context, payment *entity.Payme
 	}, nil
 }
 
-func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &bean.PaymentMethod{
 		Id:   strconv.FormatUint(userId, 10),
 		Type: "card",

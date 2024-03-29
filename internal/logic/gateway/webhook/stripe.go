@@ -233,7 +233,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Refund %s\n", gateway.GatewayName, string(event.Type), stripeCheckoutSession.ID)
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 			requestId = stripeCheckoutSession.ID
-			if stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
+			if stripeCheckoutSession.Mode == stripe.CheckoutSessionModePayment && stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
 				utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
 
 				err = ProcessPaymentWebhook(r.Context(), stripeCheckoutSession.Metadata["PaymentId"], stripeCheckoutSession.PaymentIntent.ID, gateway)
@@ -242,6 +242,9 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
+			} else if stripeCheckoutSession.Mode == stripe.CheckoutSessionModeSetup && stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
+				utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
+
 			}
 		}
 	default:
@@ -279,10 +282,9 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				status = true
 			} else {
 				returnUrl = payment.ReturnUrl
-				params := &stripe.CheckoutSessionParams{}
 				result, err := session.Get(
 					payment.GatewayPaymentIntentId,
-					params,
+					&stripe.CheckoutSessionParams{},
 				)
 				if err != nil {
 					response = "payment not match"

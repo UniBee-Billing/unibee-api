@@ -27,12 +27,16 @@ type MethodGetRes struct {
 }
 
 type MethodNewReq struct {
-	g.Meta    `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
-	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
-	Type      string      `json:"type"`
-	Data      *gjson.Json `json:"data"`
+	g.Meta         `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
+	GatewayId      uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	Currency       string      `json:"currency" dc:""  v:"required" `
+	SubscriptionId string      `json:"subscriptionId" dc:"if provide, bind to it"`
+	RedirectUrl    string      `json:"redirectUrl" dc:"Redirect Url"`
+	Type           string      `json:"type" dc:""`
+	Data           *gjson.Json `json:"data" dc:""`
 }
 
 type MethodNewRes struct {
+	Url    string              `json:"url" dc:"Url" `
 	Method *bean.PaymentMethod `json:"method" dc:"Method" `
 }
