@@ -11,7 +11,7 @@ import (
 	"unibee/api/user/payment"
 )
 
-func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error) {
+func (c *ControllerPayment) MethodNew(ctx context.Context, req *payment.MethodNewReq) (res *payment.MethodNewRes, err error) {
 	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchant != nil, "merchant not found")
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
@@ -22,5 +22,5 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	if err != nil {
 		return nil, err
 	}
-	return &payment.NewRes{Method: createResult.PaymentMethod}, nil
+	return &payment.MethodNewRes{Method: createResult.PaymentMethod}, nil
 }

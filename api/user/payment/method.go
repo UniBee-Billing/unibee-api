@@ -16,13 +16,13 @@ type MethodListRes struct {
 	MethodList []*bean.PaymentMethod `json:"methodList" dc:"MethodList" `
 }
 
-type NewReq struct {
-	g.Meta    `path:"/new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
+type MethodNewReq struct {
+	g.Meta    `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
 	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
 	Type      string      `json:"type"`
 	Data      *gjson.Json `json:"data"`
 }
 
-type NewRes struct {
+type MethodNewRes struct {
 	Method *bean.PaymentMethod `json:"method" dc:"Method" `
 }
