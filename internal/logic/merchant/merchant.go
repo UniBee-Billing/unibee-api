@@ -35,7 +35,7 @@ func GetMerchantFromCache(ctx context.Context, openApiKey string) *entity.Mercha
 }
 
 func PutOpenApiKeyToCache(ctx context.Context, openApiKey string, merchantId uint64) bool {
-	err := g.Redis().SetEX(ctx, GetOpenApiKeyRedisKey(openApiKey), merchantId, 3600)
+	err := g.Redis().SetEX(ctx, GetOpenApiKeyRedisKey(openApiKey), merchantId, 24*3600)
 	if err != nil {
 		return false
 	}
