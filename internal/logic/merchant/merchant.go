@@ -24,6 +24,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		Password:   utility.PasswordEncrypt(req.Password),
 		UserName:   req.UserName,
 		Mobile:     req.Phone,
+		Role:       "Owner",
 		CreateTime: gtime.Now().Timestamp(),
 	}
 	merchant := &entity.Merchant{
