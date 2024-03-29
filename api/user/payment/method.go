@@ -16,6 +16,16 @@ type MethodListRes struct {
 	MethodList []*bean.PaymentMethod `json:"methodList" dc:"MethodList" `
 }
 
+type MethodGetReq struct {
+	g.Meta          `path:"/method_get" tags:"User-Payment-Method" method:"get" summary:"Query Payment Method"`
+	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId"  v:"required" `
+}
+
+type MethodGetRes struct {
+	Method *bean.PaymentMethod `json:"method" dc:"Method" `
+}
+
 type MethodNewReq struct {
 	g.Meta    `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
 	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `

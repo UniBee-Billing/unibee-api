@@ -174,9 +174,10 @@ type ResumeRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta         `path:"/change_gateway" tags:"User-Subscription" method:"post" summary:"Change Subscription Gateway" `
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	GatewayId      uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+	g.Meta          `path:"/change_gateway" tags:"User-Subscription" method:"post" summary:"Change Subscription Gateway" `
+	SubscriptionId  string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
+	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId" `
 }
 type ChangeGatewayRes struct {
 }

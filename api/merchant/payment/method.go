@@ -1,6 +1,7 @@
 package payment
 
 import (
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 )
@@ -14,4 +15,27 @@ type MethodListReq struct {
 
 type MethodListRes struct {
 	MethodList []*bean.PaymentMethod `json:"methodList" dc:"MethodList" `
+}
+
+type MethodGetReq struct {
+	g.Meta          `path:"/method_get" tags:"Payment" method:"get" summary:"Query Payment Method"`
+	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	UserId          uint64 `json:"userId" dc:"UserId"  v:"required" `
+	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId"  v:"required" `
+}
+
+type MethodGetRes struct {
+	Method *bean.PaymentMethod `json:"method" dc:"Method" `
+}
+
+type MethodNewReq struct {
+	g.Meta    `path:"/method_new" tags:"Payment" method:"post" summary:"Create New Payment Method And Attach To User"`
+	UserId    uint64      `json:"userId" dc:"UserId"   v:"required" `
+	GatewayId uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	Type      string      `json:"type"`
+	Data      *gjson.Json `json:"data"`
+}
+
+type MethodNewRes struct {
+	Method *bean.PaymentMethod `json:"method" dc:"Method" `
 }

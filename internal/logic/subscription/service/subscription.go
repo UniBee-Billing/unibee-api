@@ -24,6 +24,7 @@ import (
 	service2 "unibee/internal/logic/gateway/service"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
+	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
@@ -1220,16 +1221,23 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 	return nil
 }
 
-func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64) error {
+func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentMethodId string) error {
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == sub.GatewayId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
+	if gateway.GatewayType != consts.GatewayTypeCrypto {
+		utility.Assert(len(paymentMethodId) > 0, "paymentMethodId invalid")
+		paymentMethod := method.QueryPaymentMethod(ctx, sub.MerchantId, sub.UserId, gatewayId, paymentMethodId)
+		// todo mark user attach check
+		utility.Assert(paymentMethod != nil, "paymentMethodId not found")
+	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().GatewayId: gatewayId,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().GatewayId:                   gatewayId,
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
+		dao.Subscription.Columns().GmtModify:                   gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err

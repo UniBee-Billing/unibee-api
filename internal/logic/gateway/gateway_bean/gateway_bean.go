@@ -140,8 +140,9 @@ type GatewayUserDeAttachPaymentMethodResp struct {
 }
 
 type GatewayUserPaymentMethodReq struct {
-	UserId           uint64 `json:"userId"`
-	GatewayPaymentId string `json:"gatewayPaymentId"`
+	UserId                 uint64 `json:"userId"`
+	GatewayPaymentMethodId string `json:"gatewayPaymentMethodId"`
+	GatewayPaymentId       string `json:"gatewayPaymentId"`
 }
 
 type GatewayUserPaymentMethodListResp struct {

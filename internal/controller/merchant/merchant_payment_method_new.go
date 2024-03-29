@@ -1,16 +1,17 @@
-package user
+package merchant
 
 import (
 	"context"
-	"unibee/api/user/payment"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/method"
+
+	"unibee/api/merchant/payment"
 )
 
 func (c *ControllerPayment) MethodNew(ctx context.Context, req *payment.MethodNewReq) (res *payment.MethodNewRes, err error) {
 	return &payment.MethodNewRes{Method: method.NewPaymentMethod(ctx, &method.NewPaymentMethodInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
-		UserId:     _interface.Context().Get(ctx).User.Id,
+		UserId:     req.UserId,
 		GatewayId:  req.GatewayId,
 		Type:       req.Type,
 		Data:       req.Data,

@@ -121,33 +121,58 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 	utility.Assert(req.UserId > 0, "userId is nil")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, req.UserId)
-
-	params := &stripe.CustomerListPaymentMethodsParams{
-		Customer: stripe.String(gatewayUser.GatewayUserId),
-	}
-	params.Limit = stripe.Int64(10)
-	result := customer.ListPaymentMethods(params)
 	var paymentMethods = make([]*bean.PaymentMethod, 0)
-	for _, paymentMethod := range result.PaymentMethodList().Data {
-		// only append card type
-		if paymentMethod.Type == stripe.PaymentMethodTypeCard {
-			data := gjson.New(nil)
-			_ = data.Set("brand", paymentMethod.Card.Brand)
-			_ = data.Set("checks", paymentMethod.Card.Checks)
-			_ = data.Set("country", paymentMethod.Card.Country)
-			_ = data.Set("last4", paymentMethod.Card.Last4)
-			_ = data.Set("expMonth", paymentMethod.Card.ExpMonth)
-			_ = data.Set("expYear", paymentMethod.Card.ExpYear)
-			_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
-			_ = data.Set("description", paymentMethod.Card.Description)
-			paymentMethods = append(paymentMethods, &bean.PaymentMethod{
-				Id:   paymentMethod.ID,
-				Type: "card",
-				Data: data,
-			})
+	if len(req.GatewayPaymentMethodId) > 0 {
+		params := &stripe.PaymentMethodParams{}
+		paymentMethod, err := paymentmethod.Get(req.GatewayPaymentMethodId, params)
+		if err == nil {
+			if paymentMethod.Type == stripe.PaymentMethodTypeCard {
+				data := gjson.New(nil)
+				_ = data.Set("brand", paymentMethod.Card.Brand)
+				_ = data.Set("checks", paymentMethod.Card.Checks)
+				_ = data.Set("country", paymentMethod.Card.Country)
+				_ = data.Set("last4", paymentMethod.Card.Last4)
+				_ = data.Set("expMonth", paymentMethod.Card.ExpMonth)
+				_ = data.Set("expYear", paymentMethod.Card.ExpYear)
+				_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
+				_ = data.Set("description", paymentMethod.Card.Description)
+				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
+					Id:   paymentMethod.ID,
+					Type: "card",
+					Data: data,
+				})
+			}
+		}
+	} else {
+		gatewayUser := QueryAndCreateChannelUser(ctx, gateway, req.UserId)
+
+		params := &stripe.CustomerListPaymentMethodsParams{
+			Customer: stripe.String(gatewayUser.GatewayUserId),
+		}
+		params.Limit = stripe.Int64(10)
+		result := customer.ListPaymentMethods(params)
+
+		for _, paymentMethod := range result.PaymentMethodList().Data {
+			// only append card type
+			if paymentMethod.Type == stripe.PaymentMethodTypeCard {
+				data := gjson.New(nil)
+				_ = data.Set("brand", paymentMethod.Card.Brand)
+				_ = data.Set("checks", paymentMethod.Card.Checks)
+				_ = data.Set("country", paymentMethod.Card.Country)
+				_ = data.Set("last4", paymentMethod.Card.Last4)
+				_ = data.Set("expMonth", paymentMethod.Card.ExpMonth)
+				_ = data.Set("expYear", paymentMethod.Card.ExpYear)
+				_ = data.Set("fingerprint", paymentMethod.Card.Fingerprint)
+				_ = data.Set("description", paymentMethod.Card.Description)
+				paymentMethods = append(paymentMethods, &bean.PaymentMethod{
+					Id:   paymentMethod.ID,
+					Type: "card",
+					Data: data,
+				})
+			}
 		}
 	}
+
 	return &gateway_bean.GatewayUserPaymentMethodListResp{
 		PaymentMethods: paymentMethods,
 	}, nil
