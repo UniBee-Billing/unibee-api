@@ -133,6 +133,7 @@ type IMerchantProfile interface {
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	CountryConfigList(ctx context.Context, req *profile.CountryConfigListReq) (res *profile.CountryConfigListRes, err error)
 	EditCountryConfig(ctx context.Context, req *profile.EditCountryConfigReq) (res *profile.EditCountryConfigRes, err error)
+	NewApiKey(ctx context.Context, req *profile.NewApiKeyReq) (res *profile.NewApiKeyRes, err error)
 }
 
 type IMerchantRole interface {

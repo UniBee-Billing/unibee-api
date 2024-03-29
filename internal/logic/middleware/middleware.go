@@ -10,6 +10,7 @@ import (
 	_ "unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/jwt"
+	"unibee/internal/logic/merchant"
 	"unibee/internal/model"
 	"unibee/internal/query"
 	utility "unibee/utility"
@@ -276,6 +277,9 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		// Api Call
 		customCtx.IsOpenApiCall = true
 		merchantInfo := query.GetMerchantByApiKey(r.Context(), tokenString)
+		if merchantInfo == nil {
+			merchantInfo = merchant.GetMerchantFromCache(r.Context(), tokenString)
+		}
 		if merchantInfo == nil {
 			r.Response.Status = 401
 			_interface.OpenApiJsonExit(r, 61, "invalid token")

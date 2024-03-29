@@ -48,3 +48,10 @@ type EditCountryConfigReq struct {
 }
 type EditCountryConfigRes struct {
 }
+
+type NewApiKeyReq struct {
+	g.Meta `path:"/new_apikey" tags:"Profile" method:"post" summary:"Merchant New ApiKey, The old key will expire in one hour"`
+}
+type NewApiKeyRes struct {
+	ApiKey string `json:"apiKey" description:"ApiKey"`
+}

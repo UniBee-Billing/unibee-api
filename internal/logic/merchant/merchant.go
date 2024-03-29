@@ -2,9 +2,11 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/merchant/cloud"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -14,6 +16,43 @@ import (
 
 type CreateMerchantInternalReq struct {
 	FirstName, LastName, Email, Password, Phone, UserName string
+}
+
+func GetOpenApiKeyRedisKey(token string) string {
+	return fmt.Sprintf("openApiKey#%s#%s", config.GetConfigInstance().Env, token)
+}
+
+func GetMerchantFromCache(ctx context.Context, openApiKey string) *entity.Merchant {
+	get, err := g.Redis().Get(ctx, GetOpenApiKeyRedisKey(openApiKey))
+	if err != nil {
+		return nil
+	}
+	if get != nil && get.IsUint() && get.Uint64() > 0 {
+		one := query.GetMerchantById(ctx, get.Uint64())
+		return one
+	}
+	return nil
+}
+
+func PutOpenApiKeyToCache(ctx context.Context, openApiKey string, merchantId uint64) bool {
+	err := g.Redis().SetEX(ctx, GetOpenApiKeyRedisKey(openApiKey), merchantId, 3600)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
+	one := query.GetMerchantById(ctx, merchantId)
+	oldApikey := one.ApiKey
+	utility.Assert(PutOpenApiKeyToCache(ctx, oldApikey, merchantId), "Server Error")
+	apiKey := utility.GenerateRandomAlphanumeric(32)
+	_, err := dao.Merchant.Ctx(ctx).Data(g.Map{
+		dao.Merchant.Columns().ApiKey:    apiKey,
+		dao.Merchant.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Merchant.Columns().Id, merchantId).Update()
+	utility.AssertError(err, "Server Error")
+	return apiKey
 }
 
 func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entity.Merchant, *entity.MerchantMember, error) {
