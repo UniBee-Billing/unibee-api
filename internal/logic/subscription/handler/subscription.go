@@ -4,15 +4,41 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
 )
+
+func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentMethodId string) error {
+	utility.Assert(gatewayId > 0, "gatewayId is nil")
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
+	gateway := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(gateway.MerchantId == sub.GatewayId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
+	if gateway.GatewayType != consts.GatewayTypeCrypto {
+		utility.Assert(len(paymentMethodId) > 0, "paymentMethodId invalid")
+		paymentMethod := method.QueryPaymentMethod(ctx, sub.MerchantId, sub.UserId, gatewayId, paymentMethodId)
+		// todo mark user attach check
+		utility.Assert(paymentMethod != nil, "paymentMethodId not found")
+	}
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().GatewayId:                   gatewayId,
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
+		dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
 	utility.Assert(payment != nil, "HandleSubscriptionFirstPaymentSuccess payment is nil")

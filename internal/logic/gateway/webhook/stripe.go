@@ -24,7 +24,7 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -253,7 +253,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 					params := &stripe.SetupIntentParams{}
 					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
 					if err == nil && result.PaymentMethod != nil {
-						err = service.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
+						err = handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
 						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
 					} else {
 						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error SetupIntent: %s\n", gateway.GatewayName, err.Error())
