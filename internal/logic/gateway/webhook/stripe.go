@@ -250,6 +250,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				s.setUnibeeAppInfo()
 
 				if stripeCheckoutSession.SetupIntent != nil && len(stripeCheckoutSession.Metadata["SubscriptionId"]) > 0 {
+					//change subscription gateway payment method
 					params := &stripe.SetupIntentParams{}
 					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
 					if err == nil && result.PaymentMethod != nil {
