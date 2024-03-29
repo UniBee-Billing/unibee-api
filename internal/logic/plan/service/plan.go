@@ -36,8 +36,8 @@ func PlanPublish(ctx context.Context, planId uint64) (err error) {
 
 func PlanUnPublish(ctx context.Context, planId uint64) (err error) {
 	utility.Assert(planId > 0, "invalid planId")
-	plan := query.GetPlanById(ctx, planId)
-	utility.Assert(plan.Status == consts.PlanStatusActive, "plan not activate")
+	one := query.GetPlanById(ctx, planId)
+	utility.Assert(one.Status == consts.PlanStatusActive, "plan not activate")
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PublishStatus: consts.PlanPublishStatusUnPublished,
 		dao.Plan.Columns().GmtModify:     gtime.Now(),
@@ -99,16 +99,18 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	}
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(req.Type == consts.PlanTypeMain || req.Type == consts.PlanTypeRecurringAddon || req.Type == consts.PlanTypeOnetimeAddon, "type should be 1|2｜3")
-	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
-	utility.Assert(req.IntervalCount > 0, "IntervalCount should > 0")
-	if strings.ToLower(req.IntervalUnit) == "day" {
-		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
-	} else if strings.ToLower(req.IntervalUnit) == "month" {
-		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
-	} else if strings.ToLower(req.IntervalUnit) == "year" {
-		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
-	} else if strings.ToLower(req.IntervalUnit) == "week" {
-		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	if req.Type != consts.PlanTypeOnetimeAddon {
+		utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+		utility.Assert(req.IntervalCount > 0, "IntervalCount should > 0")
+		if strings.ToLower(req.IntervalUnit) == "day" {
+			utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+		} else if strings.ToLower(req.IntervalUnit) == "month" {
+			utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+		} else if strings.ToLower(req.IntervalUnit) == "year" {
+			utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
+		} else if strings.ToLower(req.IntervalUnit) == "week" {
+			utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+		}
 	}
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
@@ -183,20 +185,22 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
-	utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 	if len(req.GasPayer) > 0 {
 		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
 	}
-
-	if strings.ToLower(req.IntervalUnit) == "day" {
-		utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
-	} else if strings.ToLower(req.IntervalUnit) == "month" {
-		utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
-	} else if strings.ToLower(req.IntervalUnit) == "year" {
-		utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
-	} else if strings.ToLower(req.IntervalUnit) == "week" {
-		utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	if req.Type != consts.PlanTypeOnetimeAddon {
+		utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+		if strings.ToLower(req.IntervalUnit) == "day" {
+			utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+		} else if strings.ToLower(req.IntervalUnit) == "month" {
+			utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+		} else if strings.ToLower(req.IntervalUnit) == "year" {
+			utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
+		} else if strings.ToLower(req.IntervalUnit) == "week" {
+			utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+		}
 	}
+
 	if req.IntervalCount < 1 {
 		req.IntervalCount = 1
 	}
