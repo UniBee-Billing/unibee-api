@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
+	"net/url"
 	"strconv"
 	"strings"
 	"unibee/internal/logic/gateway/util"
@@ -55,7 +56,7 @@ func GatewayPaymentMethodRedirectEntrance(r *ghttp.Request) {
 	}
 	gateway := util.GetGatewayById(r.Context(), uint64(gatewayIdInt))
 	utility.Assert(gateway != nil, "gateway invalid")
-	redirectUrl := r.Get("redirectUrl").String()
+	redirectUrl, _ := url.QueryUnescape(r.Get("redirectUrl").String())
 	success := r.Get("success").Bool()
 	if len(redirectUrl) > 0 {
 		if !strings.Contains(redirectUrl, "?") {

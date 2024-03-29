@@ -10,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
+	"github.com/stripe/stripe-go/v76/setupintent"
 	"github.com/stripe/stripe-go/v76/webhook"
 	"github.com/stripe/stripe-go/v76/webhookendpoint"
 	"net/http"
@@ -23,6 +24,7 @@ import (
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -244,7 +246,19 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				}
 			} else if stripeCheckoutSession.Mode == stripe.CheckoutSessionModeSetup && stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
 				utility.Assert(stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10), "Gateway_MerchantId_NotMatch_CheckOutSession")
+				stripe.Key = gateway.GatewaySecret
+				s.setUnibeeAppInfo()
 
+				if stripeCheckoutSession.SetupIntent != nil && len(stripeCheckoutSession.Metadata["SubscriptionId"]) > 0 {
+					params := &stripe.SetupIntentParams{}
+					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
+					if err == nil && result.PaymentMethod != nil {
+						err = service.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
+						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+					} else {
+						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error SetupIntent: %s\n", gateway.GatewayName, err.Error())
+					}
+				}
 			}
 		}
 	default:
