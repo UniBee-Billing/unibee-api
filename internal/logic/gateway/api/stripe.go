@@ -118,7 +118,6 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 
 func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
-	utility.Assert(req.UserId > 0, "userId is nil")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	var paymentMethods = make([]*bean.PaymentMethod, 0)
@@ -144,6 +143,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 			}
 		}
 	} else {
+		utility.Assert(req.UserId > 0, "userId is nil")
 		gatewayUser := QueryAndCreateChannelUser(ctx, gateway, req.UserId)
 
 		params := &stripe.CustomerListPaymentMethodsParams{

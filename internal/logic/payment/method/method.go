@@ -69,6 +69,7 @@ func QueryPaymentMethod(ctx context.Context, merchantId uint64, userId uint64, g
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	listQuery, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
+		UserId:                 userId,
 		GatewayPaymentMethodId: gatewayPaymentMethodId,
 	})
 	if err != nil {
