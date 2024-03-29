@@ -5,7 +5,6 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strings"
 	"unibee/api/bean"
-	_interface "unibee/internal/interface"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/query"
@@ -21,13 +20,13 @@ type NewPaymentMethodInternalReq struct {
 }
 
 func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) *bean.PaymentMethod {
-	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
+	merchant := query.GetMerchantById(ctx, req.MerchantId)
 	utility.Assert(merchant != nil, "merchant not found")
 	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	utility.Assert(len(req.Type) > 0 && strings.Compare(req.Type, "card") == 0, "invalid type, should be card")
-	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, _interface.Context().Get(ctx).User.Id, req.Data)
+	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Data)
 	utility.AssertError(err, "Server Error")
 	return createResult.PaymentMethod
 }
