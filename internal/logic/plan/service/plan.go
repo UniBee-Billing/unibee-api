@@ -188,7 +188,15 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 	if len(req.GasPayer) > 0 {
 		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
 	}
-	if req.Type != consts.PlanTypeOnetimeAddon {
+
+	if req.IntervalCount < 1 {
+		req.IntervalCount = 1
+	}
+	utility.Assert(req.PlanId > 0, "PlanId should > 0")
+	one = query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
+	if one.Type != consts.PlanTypeOnetimeAddon {
 		utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
 		if strings.ToLower(req.IntervalUnit) == "day" {
 			utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
@@ -200,14 +208,6 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 			utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
 		}
 	}
-
-	if req.IntervalCount < 1 {
-		req.IntervalCount = 1
-	}
-	utility.Assert(req.PlanId > 0, "PlanId should > 0")
-	one = query.GetPlanById(ctx, req.PlanId)
-	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
-	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 
 	//check metricLimitList
 	if len(req.MetricLimits) > 0 {
