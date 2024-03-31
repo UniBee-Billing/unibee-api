@@ -159,7 +159,7 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusCancelled)
 	})
-	t.Run("Test for subscription upgrade|downgrade, will resume cancelAtPeriodEnd", func(t *testing.T) {
+	t.Run("Test for subscription upgrade|downgrade", func(t *testing.T) {
 		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
 			MerchantId:      test.TestMerchant.Id,
 			PlanId:          test.TestPlan.Id,
@@ -187,6 +187,40 @@ func TestSubscription(t *testing.T) {
 			GatewayId:      one.GatewayId,
 		}, 0, 0)
 		require.Nil(t, err)
+		_, err = service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
+			SubscriptionId: testSubscriptionId,
+			NewPlanId:      test.TestPlan.Id,
+			Quantity:       3, //todo mark if set to 2 will cause a bug
+			GatewayId:      one.GatewayId,
+		}, 0)
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, int64(3), one.Quantity)
+
+		//err = service.SubscriptionCancelAtPeriodEnd(ctx, testSubscriptionId, false, 0)
+		//require.Nil(t, err)
+		//one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		//require.NotNil(t, one)
+		//require.Equal(t, true, one.CancelAtPeriodEnd == 1)
+
+		_, err = service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
+			SubscriptionId: testSubscriptionId,
+			NewPlanId:      test.TestPlan.Id,
+			Quantity:       1,
+			GatewayId:      one.GatewayId,
+		}, 0)
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, int64(3), one.Quantity)
+		//require.Equal(t, true, one.CancelAtPeriodEnd == 0)
+		err = CycleWalkForSubTest(ctx, testSubscriptionId, one.CurrentPeriodEnd+1, "testcase")
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusActive)
+		require.Equal(t, int64(1), one.Quantity)
 	})
 	t.Run("Test for subscription cancel immediately", func(t *testing.T) {
 		//cancel immediately

@@ -489,6 +489,8 @@ type UpdatePreviewInternalRes struct {
 	ProrationDate     int64                   `json:"prorationDate"`
 	EffectImmediate   bool                    `json:"EffectImmediate"`
 	Gateways          []*bean.GatewaySimplify `json:"gateways" `
+	Changed           bool                    `json:"changed" `
+	IsUpgrade         bool                    `json:"isUpgrade" `
 }
 
 func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, plan *entity.Plan, quantity int64, addonParams []*bean.PlanAddonParam) (isUpgrade bool, changed bool) {
@@ -759,6 +761,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		ProrationDate:     prorationDate,
 		EffectImmediate:   effectImmediate,
 		Gateways:          service2.GetMerchantAvailableGatewaysByCountryCode(ctx, sub.MerchantId, sub.CountryCode),
+		Changed:           changed,
+		IsUpgrade:         isUpgrade,
 	}, nil
 }
 
