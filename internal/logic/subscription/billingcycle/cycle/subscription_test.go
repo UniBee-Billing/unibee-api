@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean"
+	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/consts"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
@@ -22,7 +23,6 @@ import (
 // case: billing cycle with pendingUpdate and check dunning time invoice
 // case: set subscription trialEnd and billing cycle effected, check trialEnd radius, should after max(now,periodEnd) -- todo set time not may cause sub new cycle invoice and payment
 // case: upgrade|downgrade subscription after periodEnd and before trialEnd
-// case: cancel subscription immediately
 
 // failure testcases
 // case1: create subscription with payment failure and check expired cycle
@@ -93,7 +93,7 @@ func TestSubscription(t *testing.T) {
 	t.Run("Test for vat config clean", func(t *testing.T) {
 		require.Nil(t, vat_gateway.CleanMerchantDefaultVatConfig(ctx, test.TestMerchant.Id))
 	})
-	t.Run("Test for subscription create|cancelAtPeriodEnd|billing cycle effected|upgrade|downgrade|resume cancelAtPeriodEnd", func(t *testing.T) {
+	t.Run("Test for subscription create|cancelAtPeriodEnd|billing cycle effected", func(t *testing.T) {
 		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
 			MerchantId:      test.TestMerchant.Id,
 			PlanId:          test.TestPlan.Id,
@@ -133,6 +133,7 @@ func TestSubscription(t *testing.T) {
 		invoice = query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)
 		require.NotNil(t, invoice)
 		require.Equal(t, true, invoice.Status == consts.InvoiceStatusPaid)
+		//start test cancelAtPeriodEnd
 		err = service.SubscriptionCancelAtPeriodEnd(ctx, testSubscriptionId, false, 0)
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
@@ -150,7 +151,45 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusCancelled)
 	})
-	t.Run("Test for subscription cancel", func(t *testing.T) {
+	t.Run("Test for subscription cancel immediately", func(t *testing.T) {
+		//cancel immediately
+		err := service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusCancelled)
+	})
+	t.Run("Test for subscription upgrade|downgrade, will resume cancelAtPeriodEnd", func(t *testing.T) {
+		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
+			MerchantId:      test.TestMerchant.Id,
+			PlanId:          test.TestPlan.Id,
+			UserId:          test.TestUser.Id,
+			Quantity:        testQuantity,
+			GatewayId:       test.TestGateway.Id,
+			PaymentMethodId: "testPaymentMethodId",
+			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
+		})
+		require.Nil(t, err)
+		require.NotNil(t, create)
+		require.NotNil(t, create.Subscription)
+		require.NotNil(t, create.Link)
+		require.NotNil(t, create.Paid)
+		require.Equal(t, true, create.Paid)
+		testSubscriptionId = create.Subscription.SubscriptionId
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusActive)
+		//upgrade
+		_, err = service.SubscriptionUpdatePreview(ctx, &subscription2.UpdatePreviewReq{
+			SubscriptionId: testSubscriptionId,
+			NewPlanId:      test.TestPlan.Id,
+			Quantity:       2,
+			GatewayId:      one.GatewayId,
+		}, 0, 0)
+		require.Nil(t, err)
+	})
+	t.Run("Test for subscription cancel immediately", func(t *testing.T) {
+		//cancel immediately
 		err := service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
