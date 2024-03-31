@@ -8,19 +8,21 @@ import (
 )
 
 const (
-	DowngradeEffectImmediately = "DowngradeEffectImmediately"
-	UpdateProration            = "UpgradeProration"
-	IncompleteExpireTime       = "IncompleteExpireTime"
-	InvoiceEmail               = "InvoiceEmail"
+	DowngradeEffectImmediately         = "DowngradeEffectImmediately"
+	UpdateProration                    = "UpgradeProration"
+	IncompleteExpireTime               = "IncompleteExpireTime"
+	InvoiceEmail                       = "InvoiceEmail"
+	TryAutomaticPaymentBeforePeriodEnd = "TryAutomaticPaymentBeforePeriodEnd"
 )
 
 func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (config *bean.SubscriptionConfig) {
 	// default config
 	config = &bean.SubscriptionConfig{
-		DowngradeEffectImmediately: false,
-		UpgradeProration:           true,
-		IncompleteExpireTime:       24 * 60 * 60, // 24h expire after
-		InvoiceEmail:               true,
+		DowngradeEffectImmediately:         false,
+		UpgradeProration:                   true,
+		IncompleteExpireTime:               24 * 60 * 60, // 24h expire after
+		InvoiceEmail:                       true,
+		TryAutomaticPaymentBeforePeriodEnd: 30 * 60, // 30 min before period
 	}
 	downgradeEffectImmediatelyConfig := merchant_config.GetMerchantConfig(ctx, merchantId, DowngradeEffectImmediately)
 	if downgradeEffectImmediatelyConfig != nil && downgradeEffectImmediatelyConfig.ConfigValue == "true" {
@@ -40,6 +42,13 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 	invoiceEmailConfig := merchant_config.GetMerchantConfig(ctx, merchantId, InvoiceEmail)
 	if invoiceEmailConfig != nil && invoiceEmailConfig.ConfigValue == "false" {
 		config.InvoiceEmail = false
+	}
+	tryAutomaticPaymentBeforePeriodEnd := merchant_config.GetMerchantConfig(ctx, merchantId, TryAutomaticPaymentBeforePeriodEnd)
+	if tryAutomaticPaymentBeforePeriodEnd != nil && len(incompleteExpireTimeConfig.ConfigValue) > 0 {
+		value, err := strconv.ParseInt(incompleteExpireTimeConfig.ConfigValue, 10, 64)
+		if err == nil {
+			config.TryAutomaticPaymentBeforePeriodEnd = value
+		}
 	}
 	return config
 }

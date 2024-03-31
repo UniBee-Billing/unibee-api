@@ -48,7 +48,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 		} else if walk == nil {
 			result.Error = gerror.Newf("walk is nil")
 			break
-		} else if walk.WalkHasDeal == false {
+		} else if walk.WalkUnfinished == false {
 			result.Walks = append(result.Walks, walk)
 			break
 		} else {

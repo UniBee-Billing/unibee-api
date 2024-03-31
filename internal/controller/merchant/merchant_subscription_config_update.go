@@ -35,5 +35,11 @@ func (c *ControllerSubscription) ConfigUpdate(ctx context.Context, req *subscrip
 			return nil, err
 		}
 	}
+	if req.TryAutomaticPaymentBeforePeriodEnd != nil {
+		err = merchant_config.SetMerchantConfig(ctx, _interface.GetMerchantId(ctx), config.TryAutomaticPaymentBeforePeriodEnd, fmt.Sprintf("%v", *req.TryAutomaticPaymentBeforePeriodEnd))
+		if err != nil {
+			return nil, err
+		}
+	}
 	return &subscription.ConfigUpdateRes{Config: config.GetMerchantSubscriptionConfig(ctx, _interface.GetMerchantId(ctx))}, nil
 }
