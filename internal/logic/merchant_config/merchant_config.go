@@ -43,7 +43,9 @@ func SetMerchantConfig(ctx context.Context, merchantId uint64, configKey string,
 
 func GetMerchantConfig(ctx context.Context, merchantId uint64, configKey string) *entity.MerchantConfig {
 	utility.Assert(merchantId > 0, "invalid merchantId")
-	utility.Assert(len(configKey) > 0, "invalid key")
+	if len(configKey) == 0 {
+		return nil
+	}
 	var one *entity.MerchantConfig
 	err := dao.MerchantConfig.Ctx(ctx).
 		Where(dao.MerchantConfig.Columns().MerchantId, merchantId).

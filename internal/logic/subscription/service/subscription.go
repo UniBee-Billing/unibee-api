@@ -217,7 +217,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
 
 	//vat
-	utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 	var vatCountryCode = req.VatCountryCode
 	var standardTaxScale int64 = 0
 	var vatCountryName = ""
@@ -225,6 +224,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidate *bean.ValidResult
 
 	if len(req.VatNumber) > 0 {
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil {
 			return nil, err
@@ -233,12 +233,13 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		vatCountryCode = vatNumberValidate.CountryCode
 	}
 
-	if len(vatCountryCode) == 0 && len(user.CountryCode) > 0 {
+	if len(vatCountryCode) == 0 && len(user.CountryCode) > 0 && vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
 		vatCountryCode = user.CountryCode
 		req.VatCountryCode = user.CountryCode
 	}
 
 	if len(vatCountryCode) > 0 {
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 		vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
 		if vatNumberValidate == nil && err == nil && vatCountryRate != nil {
 			vatCountryName = vatCountryRate.CountryName
@@ -297,7 +298,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumberValidate: vatNumberValidate,
 		VatVerifyData:     utility.MarshalToJsonString(vatNumberValidate),
 		TaxScale:          standardTaxScale,
-		UserId:            _interface.Context().Get(ctx).User.Id,
+		UserId:            req.UserId,
 		Email:             user.Email,
 		Invoice:           invoice,
 		VatCountryRate:    vatCountryRate,
@@ -319,7 +320,8 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if err != nil {
 		return nil, err
 	}
-	utility.Assert(len(prepare.VatCountryCode) > 0, "CountryCode Needed")
+	// todo mark countryCode is required or node
+	// utility.Assert(len(prepare.VatCountryCode) > 0, "CountryCode Needed")
 	if req.ConfirmTotalAmount > 0 {
 		utility.Assert(req.ConfirmTotalAmount == prepare.TotalAmount, "totalAmount not match , data may expired, fetch preview again")
 	}
@@ -457,6 +459,12 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Tag:   redismq2.TopicSubscriptionCreate.Tag,
 		Body:  one.SubscriptionId,
 	})
+	if createRes.Paid {
+		payment := query.GetPaymentByPaymentId(ctx, createPaymentResult.PaymentId)
+		utility.Assert(payment != nil, "Server Error")
+		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, payment)
+		utility.AssertError(err, "Finish Subscription Error")
+	}
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(one),
 		Paid:         createRes.Paid,
@@ -954,8 +962,10 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.Status != consts.SubStatusCancelled, "subscription already cancelled")
-	utility.Assert(sub.Status != consts.SubStatusExpired, "subscription already expired")
+	if sub.Status == consts.SubStatusCancelled || sub.Status == consts.SubStatusExpired {
+		g.Log().Infof(ctx, "SubscriptionCancel, subscription already cancelled or expired")
+		return nil
+	}
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	gateway := query.GetGatewayById(ctx, sub.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -981,7 +991,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		return err
 	}
 
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	user := query.GetUserAccountById(ctx, sub.UserId)
 	if user != nil {
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if merchant != nil {

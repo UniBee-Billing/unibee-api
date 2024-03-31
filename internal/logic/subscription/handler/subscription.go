@@ -45,6 +45,9 @@ func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subs
 	utility.Assert(len(payment.SubscriptionId) > 0, "HandleSubscriptionFirstPaymentSuccess payment subId is nil")
 	sub = query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
+	if sub.Status == consts.SubStatusActive {
+		return nil
+	}
 	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(invoice != nil, "HandleSubscriptionFirstPaymentSuccess invoice not found payment:"+payment.PaymentId)
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, sub.PlanId)
