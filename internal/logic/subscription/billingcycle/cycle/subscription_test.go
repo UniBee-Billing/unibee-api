@@ -16,10 +16,7 @@ import (
 )
 
 // success testcases
-// case: set cancelAtPeriodEnd subscription and billing cycle effected, and check upgrade|downgrade will resume it
-// case: upgrade subscription with addon
 // case: billing cycle without pendingUpdate and check dunning time invoice
-// case: downgrade subscription with addon
 // case: billing cycle with pendingUpdate and check dunning time invoice
 // case: set subscription trialEnd and billing cycle effected, check trialEnd radius, should after max(now,periodEnd) -- todo set time not may cause sub new cycle invoice and payment
 // case: upgrade|downgrade subscription after periodEnd and before trialEnd
