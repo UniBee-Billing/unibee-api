@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/plan"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -109,7 +110,7 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 	var totalPlanIds []uint64
 	for _, p := range mainList {
 		totalPlanIds = append(totalPlanIds, p.Id)
-		if p.Type != 1 {
+		if p.Type != consts.PlanTypeMain {
 			list = append(list, &detail.PlanDetail{
 				Plan:             bean.SimplifyPlan(p),
 				MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
@@ -132,11 +133,26 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 				}
 			}
 		}
+		var oneTimeAddonIds = make([]int64, 0)
+		if len(p.BindingOnetimeAddonIds) > 0 {
+			strList := strings.Split(p.BindingOnetimeAddonIds, ",")
+
+			for _, s := range strList {
+				num, err := strconv.ParseInt(s, 10, 64)
+				if err != nil {
+					fmt.Println("Internal Error converting string to int:", err)
+				} else {
+					oneTimeAddonIds = append(oneTimeAddonIds, num)
+				}
+			}
+		}
 		list = append(list, &detail.PlanDetail{
 			Plan:             bean.SimplifyPlan(p),
 			MetricPlanLimits: metric.MerchantMetricPlanLimitCachedList(ctx, p.MerchantId, p.Id, false),
 			Addons:           nil,
 			AddonIds:         addonIds,
+			OnetimeAddons:    nil,
+			OnetimeAddonIds:  oneTimeAddonIds,
 		})
 	}
 	if len(totalAddonIds) > 0 {
