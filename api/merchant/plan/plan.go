@@ -79,7 +79,7 @@ type ListRes struct {
 }
 
 type ActivateReq struct {
-	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"Plan Sync To Gateway And Activate"`
+	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"Activate Plan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type ActivateRes struct {
@@ -100,7 +100,7 @@ type UnPublishRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"Plan Detail"`
+	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"Query Plan Detail"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {
@@ -108,7 +108,7 @@ type DetailRes struct {
 }
 
 type ExpireReq struct {
-	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"Expire A Plan"`
+	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"Expire Plan"`
 	PlanId    uint64 `json:"planId" dc:"PlanId" v:"required"`
 	EmailCode int64  `json:"emailCode" dc:"Code From Email" v:"required"`
 }
