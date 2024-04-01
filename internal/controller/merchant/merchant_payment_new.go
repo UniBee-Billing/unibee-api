@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"strconv"
 	"strings"
 	"unibee/api/bean"
 	"unibee/internal/consts"
@@ -65,6 +66,10 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}
 		req.TotalAmount = plan.Amount
 		req.Currency = plan.Currency
+		if req.Metadata == nil {
+			req.Metadata = make(map[string]string)
+		}
+		req.Metadata["PlanId"] = strconv.FormatUint(req.PlanId, 10)
 	}
 	currencyNumberCheck(req.TotalAmount, req.Currency)
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
