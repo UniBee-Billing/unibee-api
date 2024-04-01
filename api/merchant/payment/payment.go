@@ -12,7 +12,7 @@ type NewReq struct {
 	ExternalUserId    string            `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 	Email             string            `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId            uint64            `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
-	Currency          string            `json:"currency" dc:"Currency, either Currency&Currency or PlanId needed" `
+	Currency          string            `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
 	TotalAmount       int64             `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
 	PlanId            uint64            `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
 	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
