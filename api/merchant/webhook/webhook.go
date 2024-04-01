@@ -32,6 +32,15 @@ type EndpointLogListRes struct {
 	EndpointLogList []*bean.MerchantWebhookLogSimplify `json:"endpointLogList" dc:"EndpointLogList"`
 }
 
+type ResendWebhookReq struct {
+	g.Meta `path:"/resend" tags:"Webhook" method:"post" summary:"Merchant Resent Webhook"`
+	LogId  uint64 `json:"logId" dc:"LogId" v:"required"`
+}
+
+type ResendWebhookRes struct {
+	SendResult bool `json:"sendResult" dc:"SendResult"`
+}
+
 type NewEndpointReq struct {
 	g.Meta `path:"/new_endpoint" tags:"Webhook" method:"post" summary:"Merchant New Webhook Endpoint"`
 	Url    string   `json:"url" dc:"Url" v:"required"`

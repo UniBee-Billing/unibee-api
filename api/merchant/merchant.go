@@ -195,6 +195,7 @@ type IMerchantWebhook interface {
 	EventList(ctx context.Context, req *webhook.EventListReq) (res *webhook.EventListRes, err error)
 	EndpointList(ctx context.Context, req *webhook.EndpointListReq) (res *webhook.EndpointListRes, err error)
 	EndpointLogList(ctx context.Context, req *webhook.EndpointLogListReq) (res *webhook.EndpointLogListRes, err error)
+	ResendWebhook(ctx context.Context, req *webhook.ResendWebhookReq) (res *webhook.ResendWebhookRes, err error)
 	NewEndpoint(ctx context.Context, req *webhook.NewEndpointReq) (res *webhook.NewEndpointRes, err error)
 	UpdateEndpoint(ctx context.Context, req *webhook.UpdateEndpointReq) (res *webhook.UpdateEndpointRes, err error)
 	DeleteEndpoint(ctx context.Context, req *webhook.DeleteEndpointReq) (res *webhook.DeleteEndpointRes, err error)

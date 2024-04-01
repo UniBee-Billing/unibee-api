@@ -12,6 +12,34 @@ import (
 	"unibee/utility"
 )
 
+func ResentWebhook(ctx context.Context, logId uint64) bool {
+	var one *entity.MerchantWebhookLog
+	err := dao.MerchantWebhookLog.Ctx(ctx).Where(dao.MerchantWebhookLog.Columns().Id, logId).Scan(&one)
+	if err != nil {
+		g.Log().Errorf(ctx, "ResentWebhook error:", err.Error())
+		return false
+	}
+	utility.Assert(one != nil, "webhook log not found")
+	datetime := getCurrentDateTime()
+	msgId := generateMsgId()
+	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", one.WebhookUrl, one.Body)
+	headers := map[string]string{
+		"Content-Gateway": "application/json",
+		"Msg-id":          msgId,
+		"Datetime":        datetime,
+	}
+	body := []byte(one.Body)
+	res, err := utility.SendRequest(one.WebhookUrl, "POST", body, headers)
+	var response = string(res)
+	if err != nil {
+		response = utility.MarshalToJsonString(err)
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", one.WebhookUrl, response, err.Error())
+	} else {
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", one.WebhookUrl, response)
+	}
+	return true
+}
+
 func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, reconsumeTimes int) bool {
 	utility.Assert(webhookMessage.Data != nil, "param is nil")
 	datetime := getCurrentDateTime()
