@@ -107,9 +107,8 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 		return nil
 	}
 	var totalAddonIds []int64
-	var totalPlanIds []uint64
+	var totalOneTimeAddonIds []int64
 	for _, p := range mainList {
-		totalPlanIds = append(totalPlanIds, p.Id)
 		if p.Type != consts.PlanTypeMain {
 			list = append(list, &detail.PlanDetail{
 				Plan:             bean.SimplifyPlan(p),
@@ -142,6 +141,7 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 				if err != nil {
 					fmt.Println("Internal Error converting string to int:", err)
 				} else {
+					totalOneTimeAddonIds = append(totalOneTimeAddonIds, num)
 					oneTimeAddonIds = append(oneTimeAddonIds, num)
 				}
 			}
@@ -170,6 +170,27 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 					for _, id := range planRo.AddonIds {
 						if mapPlans[id] != nil {
 							planRo.Addons = append(planRo.Addons, bean.SimplifyPlan(mapPlans[id]))
+						}
+					}
+				}
+			}
+		}
+	}
+	if len(totalOneTimeAddonIds) > 0 {
+		var allAddonList []*entity.Plan
+		err = dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, totalOneTimeAddonIds).OmitEmpty().Scan(&allAddonList)
+		if err == nil {
+			mapPlans := make(map[int64]*entity.Plan)
+			for _, pair := range allAddonList {
+				key := int64(pair.Id)
+				value := pair
+				mapPlans[key] = value
+			}
+			for _, planRo := range list {
+				if len(planRo.OnetimeAddonIds) > 0 {
+					for _, id := range planRo.OnetimeAddonIds {
+						if mapPlans[id] != nil {
+							planRo.OnetimeAddons = append(planRo.OnetimeAddons, bean.SimplifyPlan(mapPlans[id]))
 						}
 					}
 				}
