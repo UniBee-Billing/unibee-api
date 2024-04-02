@@ -1,4 +1,4 @@
-package callback
+package onetime
 
 import (
 	"context"
@@ -6,6 +6,8 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"strconv"
+	"unibee/internal/consumer/webhook/event"
+	"unibee/internal/consumer/webhook/subscription_onetimeaddon"
 	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -56,6 +58,10 @@ func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Paym
 			g.Log().Errorf(ctx, "PaymentCancelCallback HandleOnetimeAddonPaymentCancel int: %s err:%s", id, err)
 			return
 		}
+		one := handler.SubscriptionOnetimeAddonDetail(ctx, uint64(idInt))
+		if one != nil {
+			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CANCELLED)
+		}
 	}
 }
 
@@ -67,8 +73,16 @@ func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Paym
 			fmt.Printf("PaymentCreateCallback Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	if _, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
-
+	if id, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
+		idInt, err := strconv.Atoi(id)
+		if err != nil {
+			g.Log().Errorf(ctx, "PaymentCancelCallback panic int: %s err:%s", id, err)
+			return
+		}
+		one := handler.SubscriptionOnetimeAddonDetail(ctx, uint64(idInt))
+		if one != nil {
+			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CREATED)
+		}
 	}
 }
 
@@ -91,6 +105,10 @@ func (i Onetime) PaymentSuccessCallback(ctx context.Context, payment *entity.Pay
 			g.Log().Errorf(ctx, "PaymentSuccessCallback HandleOnetimeAddonPaymentCancel int: %s err:%s", id, err)
 			return
 		}
+		one := handler.SubscriptionOnetimeAddonDetail(ctx, uint64(idInt))
+		if one != nil {
+			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_SUCCESS)
+		}
 	}
 }
 
@@ -112,6 +130,10 @@ func (i Onetime) PaymentFailureCallback(ctx context.Context, payment *entity.Pay
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentFailureCallback HandleOnetimeAddonPaymentFailure int: %s err:%s", id, err)
 			return
+		}
+		one := handler.SubscriptionOnetimeAddonDetail(ctx, uint64(idInt))
+		if one != nil {
+			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_EXPIRED)
 		}
 	}
 }
