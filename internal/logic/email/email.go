@@ -42,6 +42,7 @@ const (
 	TemplateSubscriptionUpdate                              = "SubscriptionUpdate"
 	TemplateSubscriptionNeedAuthorized                      = "SubscriptionNeedAuthorized"
 	TemplateInvoiceRefundCreated                            = "InvoiceRefundCreated"
+	TemplateMerchantMemberInvite                            = "MerchantMemberInvite"
 )
 
 const (

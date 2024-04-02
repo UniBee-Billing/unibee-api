@@ -47,8 +47,10 @@ type UpdateMemberRoleRes struct {
 }
 
 type NewMemberReq struct {
-	g.Meta `path:"/new_member" tags:"Member" method:"post" summary:"New Member"`
-	Email  string `json:"email"         description:"Email"`
+	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"New Member"`
+	Email     string `json:"email"         description:"Email"`
+	FirstName string `json:"firstName"         description:"FirstName"`
+	LastName  string `json:"lastName"         description:"LastName"`
 }
 
 type NewMemberRes struct {

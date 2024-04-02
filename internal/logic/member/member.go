@@ -6,7 +6,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
+	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -84,17 +86,23 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, merchantId uint64, email string) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
 	merchantMasterMember := &entity.MerchantMember{
 		MerchantId: merchantId,
 		Email:      email,
 		CreateTime: gtime.Now().Timestamp(),
+		FirstName:  firstName,
+		LastName:   lastName,
 	}
 	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
 	if err != nil {
 		return err
 	}
+	err = email2.SendTemplateEmail(ctx, merchantId, email, "", email2.TemplateMerchantMemberInvite, "", &email2.TemplateVariable{
+		UserName: merchantMasterMember.FirstName + " " + merchantMasterMember.LastName,
+		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
+	})
 	return nil
 }

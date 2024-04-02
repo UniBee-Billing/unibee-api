@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"unibee/api/merchant/auth"
+	"unibee/internal/cmd/config"
 	"unibee/internal/logic/merchant"
 	"unibee/internal/logic/merchant/cloud"
 	"unibee/utility"
@@ -27,6 +28,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	if !utility.TryLock(ctx, redisKey, 10) {
 		utility.Assert(false, "click too fast, please wait for second")
 	}
+	utility.Assert(config.GetConfigInstance().Mode == "cloud", "unsupported")
 
 	userStr, err := json.Marshal(
 		&merchant.CreateMerchantInternalReq{

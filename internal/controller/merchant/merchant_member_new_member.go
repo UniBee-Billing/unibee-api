@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerMember) NewMember(ctx context.Context, req *member.NewMemberReq) (res *member.NewMemberRes, err error) {
-	err = member2.AddMerchantMember(ctx, _interface.GetMerchantId(ctx), req.Email)
+	err = member2.AddMerchantMember(ctx, _interface.GetMerchantId(ctx), req.Email, req.FirstName, req.LastName)
 	if err != nil {
 		return nil, err
 	}
