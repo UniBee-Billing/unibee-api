@@ -175,6 +175,8 @@ type IMerchantSubscription interface {
 	PendingUpdateList(ctx context.Context, req *subscription.PendingUpdateListReq) (res *subscription.PendingUpdateListRes, err error)
 	NewAdminNote(ctx context.Context, req *subscription.NewAdminNoteReq) (res *subscription.NewAdminNoteRes, err error)
 	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
+	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
+	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 }
 
 type IMerchantUser interface {

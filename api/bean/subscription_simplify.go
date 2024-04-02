@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -102,5 +103,43 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 		Metadata:               metadata,
 		GasPayer:               one.GasPayer,
 		DefaultPaymentMethodId: one.GatewayDefaultPaymentMethod,
+	}
+}
+
+type SubscriptionOnetimeAddonSimplify struct {
+	Id             uint64            `json:"id"             description:"id"`                                            // id
+	SubscriptionId string            `json:"subscriptionId" description:"subscription_id"`                               // subscription_id
+	AddonId        uint64            `json:"addonId"        description:"onetime addonId"`                               // onetime addonId
+	Quantity       int64             `json:"quantity"       description:"quantity"`                                      // quantity
+	Status         int               `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
+	IsDeleted      int               `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`                         // 0-UnDeleted，1-Deleted
+	CreateTime     int64             `json:"createTime"     description:"create utc time"`                               // create utc time
+	PaymentId      string            `json:"paymentId"     description:"PaymentId"`                                      // PaymentId
+	PaymentLink    string            `json:"paymentLink"     description:"PaymentLink"`                                  // PaymentLink
+	Metadata       map[string]string `json:"metadata" description:""`
+}
+
+func SimplifySubscriptionOnetimeAddonSimplify(one *entity.SubscriptionOnetimeAddon) *SubscriptionOnetimeAddonSimplify {
+	if one == nil {
+		return nil
+	}
+	var metadata = make(map[string]string)
+	if len(one.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+	return &SubscriptionOnetimeAddonSimplify{
+		Id:             one.Id,
+		SubscriptionId: one.SubscriptionId,
+		AddonId:        one.AddonId,
+		Quantity:       one.Quantity,
+		Status:         one.Status,
+		IsDeleted:      one.IsDeleted,
+		CreateTime:     one.CreateTime,
+		PaymentId:      one.PaymentId,
+		PaymentLink:    link.GetPaymentLink(one.PaymentId),
+		Metadata:       metadata,
 	}
 }

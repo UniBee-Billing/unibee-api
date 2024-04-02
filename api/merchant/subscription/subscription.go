@@ -280,3 +280,30 @@ type AdminNoteListReq struct {
 type AdminNoteListRes struct {
 	NoteLists []*AdminNoteRo `json:"noteLists"   description:""`
 }
+
+type OnetimeAddonNewReq struct {
+	g.Meta         `path:"/new_onetime_addon" tags:"Subscription" method:"post" summary:"New Subscription Onetime Addon"`
+	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	AddonId        uint64            `json:"addonId" dc:"AddonId" v:"required"`
+	Quantity       int64             `json:"quantity" dc:"Quantity"  v:"required"`
+	ReturnUrl      string            `json:"returnUrl"  dc:"RedirectUrl"  `
+	Metadata       map[string]string `json:"metadata" dc:"Metadata，Map"`
+}
+
+type OnetimeAddonNewRes struct {
+	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddonSimplify `json:"subscriptionOnetimeAddon" dc:"SubscriptionOnetimeAddon"`
+	Paid                     bool                                   `json:"paid"`
+	Link                     string                                 `json:"link"`
+	Invoice                  *bean.InvoiceSimplify                  `json:"invoice"`
+}
+
+type OnetimeAddonListReq struct {
+	g.Meta         `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"Merchant Subscription OnetimeAddon List"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
+	Count          int    `json:"count" dc:"Count Of Page" `
+}
+
+type OnetimeAddonListRes struct {
+	SubscriptionOnetimeAddons []*detail.SubscriptionOnetimeAddonDetail `json:"subscriptionOnetimeAddons" description:"SubscriptionOnetimeAddons" `
+}

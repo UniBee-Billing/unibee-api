@@ -75,6 +75,8 @@ type IUserSubscription interface {
 	Resume(ctx context.Context, req *subscription.ResumeReq) (res *subscription.ResumeRes, err error)
 	ChangeGateway(ctx context.Context, req *subscription.ChangeGatewayReq) (res *subscription.ChangeGatewayRes, err error)
 	TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error)
+	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
+	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 }
 
 type IUserVat interface {

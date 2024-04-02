@@ -19,7 +19,7 @@ type SubscriptionListInternalReq struct {
 	Status     []int  `json:"status" dc:"Default All，,Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField  string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType   string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page       int    `json:"page" dc:"Page, Start WIth 0" `
+	Page       int    `json:"page" dc:"Page, Start With 0" `
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
