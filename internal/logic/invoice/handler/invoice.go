@@ -57,7 +57,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	user := query.GetUserAccountById(ctx, sub.UserId)
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
