@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/invoice"
 	"unibee/internal/consts"
+	detail2 "unibee/internal/logic/invoice/detail"
 	"unibee/test"
 )
 
@@ -33,7 +34,7 @@ func TestInvoice(t *testing.T) {
 		require.NotNil(t, res)
 		one = res.Invoice
 		require.NotNil(t, one)
-		one = InvoiceDetail(ctx, one.InvoiceId)
+		one = detail2.InvoiceDetail(ctx, one.InvoiceId)
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, "test_invoice", one.InvoiceName)
 		require.Equal(t, int64(110), one.TotalAmount)
@@ -51,7 +52,7 @@ func TestInvoice(t *testing.T) {
 			Finish: false,
 		})
 		require.Nil(t, err)
-		one = InvoiceDetail(ctx, one.InvoiceId)
+		one = detail2.InvoiceDetail(ctx, one.InvoiceId)
 		require.Equal(t, "EUR", one.Currency)
 		require.Equal(t, "test_invoice_2", one.InvoiceName)
 		require.Equal(t, int64(100), one.TotalAmount)
@@ -103,7 +104,7 @@ func TestInvoice(t *testing.T) {
 		require.NotNil(t, res)
 		one = res.Invoice
 		require.NotNil(t, one)
-		one = InvoiceDetail(ctx, one.InvoiceId)
+		one = detail2.InvoiceDetail(ctx, one.InvoiceId)
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, "test_invoice", one.InvoiceName)
 		require.Equal(t, int64(110), one.TotalAmount)
@@ -129,7 +130,7 @@ func TestInvoice(t *testing.T) {
 		require.NotNil(t, checkRes)
 		require.Equal(t, true, len(checkRes.Link) == 0)
 		require.Equal(t, true, len(checkRes.Message) > 0)
-		one = InvoiceDetail(ctx, one.InvoiceId)
+		one = detail2.InvoiceDetail(ctx, one.InvoiceId)
 		require.Equal(t, "USD", one.Currency)
 		require.Equal(t, "test_invoice", one.InvoiceName)
 		require.Equal(t, int64(110), one.TotalAmount)

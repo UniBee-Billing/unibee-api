@@ -7,6 +7,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/consumer/webhook/message"
+	"unibee/internal/logic/payment/detail"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -28,7 +29,7 @@ func SendRefundWebhookBackground(refundId string, event event.MerchantWebhookEve
 		}()
 		one := query.GetRefundByRefundId(ctx, refundId)
 		if one != nil {
-			refundDetail := query.GetRefundDetail(ctx, one.MerchantId, one.RefundId)
+			refundDetail := detail.GetRefundDetail(ctx, one.MerchantId, one.RefundId)
 			utility.Assert(refundDetail != nil, "SendRefundWebhookBackground Error")
 
 			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(refundDetail))

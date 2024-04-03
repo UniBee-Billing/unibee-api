@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 	"unibee/api/bean"
-	"unibee/api/merchant/payment"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	query2 "unibee/internal/query"
@@ -21,9 +21,9 @@ type RefundListInternalReq struct {
 	Currency   string `json:"currency" dc:"Currency"`
 }
 
-func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails []*payment.RefundDetail, err error) {
+func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails []*detail.RefundDetail, err error) {
 	req.Currency = strings.ToUpper(req.Currency)
-	var mainList []*payment.RefundDetail
+	var mainList []*detail.RefundDetail
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId not found")
 	var sortKey = "create_time desc"
@@ -57,7 +57,7 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 		return nil, err
 	}
 	for _, one := range list {
-		mainList = append(mainList, &payment.RefundDetail{
+		mainList = append(mainList, &detail.RefundDetail{
 			User:    bean.SimplifyUserAccount(query2.GetUserAccountById(ctx, uint64(one.UserId))),
 			Payment: bean.SimplifyPayment(query2.GetPaymentByPaymentId(ctx, one.PaymentId)),
 			Refund:  bean.SimplifyRefund(one),

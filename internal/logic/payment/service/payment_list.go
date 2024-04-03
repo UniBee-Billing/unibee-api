@@ -4,11 +4,11 @@ import (
 	"context"
 	"strings"
 	"unibee/api/bean"
-	"unibee/api/merchant/payment"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/invoice/service"
+	detail2 "unibee/internal/logic/invoice/detail"
 	entity "unibee/internal/model/entity/oversea_pay"
-	query2 "unibee/internal/query"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -27,12 +27,12 @@ type PaymentListInternalReq struct {
 }
 
 type PaymentListInternalRes struct {
-	PaymentDetails []*payment.PaymentDetail `json:"paymentDetails" dc:"PaymentDetails"`
+	PaymentDetails []*detail.PaymentDetail `json:"paymentDetails" dc:"PaymentDetails"`
 }
 
-func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*payment.PaymentDetail, err error) {
+func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*detail.PaymentDetail, err error) {
 	req.Currency = strings.ToUpper(req.Currency)
-	var mainList []*payment.PaymentDetail
+	var mainList []*detail.PaymentDetail
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -51,32 +51,32 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 			sortKey = req.SortField + " desc"
 		}
 	}
-	query := dao.Payment.Ctx(ctx).
+	q := dao.Payment.Ctx(ctx).
 		Where(dao.Payment.Columns().MerchantId, req.MerchantId)
 	if req.GatewayId > 0 {
-		query = query.Where(dao.Payment.Columns().GatewayId, req.GatewayId)
+		q = q.Where(dao.Payment.Columns().GatewayId, req.GatewayId)
 	}
 	if req.UserId > 0 {
-		query = query.Where(dao.Payment.Columns().UserId, req.UserId)
+		q = q.Where(dao.Payment.Columns().UserId, req.UserId)
 	} else if len(req.Email) > 0 {
-		user := query2.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
+		user := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
 		if user != nil {
-			query = query.Where(dao.Payment.Columns().UserId, user.Id)
+			q = q.Where(dao.Payment.Columns().UserId, user.Id)
 		} else {
 			return mainList, nil
 		}
 	}
 	if req.Status > 0 {
-		query = query.Where(dao.Payment.Columns().Status, req.Status)
+		q = q.Where(dao.Payment.Columns().Status, req.Status)
 	}
 	if len(req.Currency) > 0 {
-		query = query.Where(dao.Payment.Columns().Currency, strings.ToUpper(req.Currency))
+		q = q.Where(dao.Payment.Columns().Currency, strings.ToUpper(req.Currency))
 	}
 	if len(req.CountryCode) > 0 {
-		query = query.Where(dao.Payment.Columns().CountryCode, req.CountryCode)
+		q = q.Where(dao.Payment.Columns().CountryCode, req.CountryCode)
 	}
 	var list []*entity.Payment
-	err = query.
+	err = q.
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&list)
@@ -84,10 +84,10 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		return nil, err
 	}
 	for _, one := range list {
-		mainList = append(mainList, &payment.PaymentDetail{
-			User:    bean.SimplifyUserAccount(query2.GetUserAccountById(ctx, one.UserId)),
+		mainList = append(mainList, &detail.PaymentDetail{
+			User:    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
 			Payment: bean.SimplifyPayment(one),
-			Invoice: service.InvoiceDetail(ctx, one.InvoiceId),
+			Invoice: detail2.InvoiceDetail(ctx, one.InvoiceId),
 		})
 	}
 

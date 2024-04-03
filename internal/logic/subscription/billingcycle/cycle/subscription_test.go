@@ -7,7 +7,7 @@ import (
 	"unibee/api/bean"
 	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/consts"
-	service2 "unibee/internal/logic/invoice/service"
+	service2 "unibee/internal/logic/invoice/detail"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/vat_gateway"

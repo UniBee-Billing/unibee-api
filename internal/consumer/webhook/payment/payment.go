@@ -7,6 +7,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/consumer/webhook/message"
+	"unibee/internal/logic/payment/detail"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -28,7 +29,7 @@ func SendPaymentWebhookBackground(paymentId string, event event.MerchantWebhookE
 		}()
 		one := query.GetPaymentByPaymentId(ctx, paymentId)
 		if one != nil {
-			paymentDetail := query.GetPaymentDetail(ctx, one.MerchantId, one.PaymentId)
+			paymentDetail := detail.GetPaymentDetail(ctx, one.MerchantId, one.PaymentId)
 			utility.Assert(paymentDetail != nil, "SendPaymentWebhookBackground Error")
 
 			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(paymentDetail))

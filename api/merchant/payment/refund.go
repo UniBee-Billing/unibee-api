@@ -2,7 +2,7 @@ package payment
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type NewPaymentRefundReq struct {
@@ -28,13 +28,7 @@ type RefundDetailReq struct {
 }
 
 type RefundDetailRes struct {
-	RefundDetail *RefundDetail `json:"refundDetail" dc:"RefundDetail"`
-}
-
-type RefundDetail struct {
-	User    *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Payment *bean.PaymentSimplify     `json:"payment" dc:"Payment"`
-	Refund  *bean.RefundSimplify      `json:"refund" dc:"Refund"`
+	RefundDetail *detail.RefundDetail `json:"refundDetail" dc:"RefundDetail"`
 }
 
 type RefundListReq struct {
@@ -47,5 +41,5 @@ type RefundListReq struct {
 	Currency  string `json:"currency" dc:"Currency"`
 }
 type RefundListRes struct {
-	RefundDetails []*RefundDetail `json:"refundDetails" dc:"RefundDetails"`
+	RefundDetails []*detail.RefundDetail `json:"refundDetails" dc:"RefundDetails"`
 }

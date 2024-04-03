@@ -66,14 +66,6 @@ func checkInvoice(one *detail.InvoiceDetail) {
 	utility.Assert(one.TotalAmount == totalAmount, "line totalAmount mistake")
 }
 
-func InvoiceDetail(ctx context.Context, invoiceId string) *detail.InvoiceDetail {
-	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
-	if one != nil {
-		return detail.ConvertInvoiceToDetail(ctx, one)
-	}
-	return nil
-}
-
 func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) (res *invoice.NewRes, err error) {
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
