@@ -30,7 +30,6 @@ type InvoiceDetail struct {
 	SendStatus                     int                         `json:"sendStatus"                     description:"SendStatus，0-No | 1- YES"`
 	SendEmail                      string                      `json:"sendEmail"                      description:"SendEmail"`
 	SendPdf                        string                      `json:"sendPdf"                        description:"SendPdf"`
-	Data                           string                      `json:"data"                           description:"Data"`
 	GmtModify                      *gtime.Time                 `json:"gmtModify"                      description:"GmtModify"`
 	IsDeleted                      int                         `json:"isDeleted"                      description:""`
 	Link                           string                      `json:"link"                           description:"Link"`
@@ -86,7 +85,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		SendEmail:                      invoice.SendEmail,
 		SendPdf:                        invoice.SendPdf,
 		UserId:                         invoice.UserId,
-		Data:                           invoice.Data,
 		GmtModify:                      invoice.GmtModify,
 		IsDeleted:                      invoice.IsDeleted,
 		Link:                           invoice.Link,
