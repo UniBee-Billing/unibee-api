@@ -27,7 +27,7 @@ type PlanSimplify struct {
 	ProductName            string            `json:"productName"               description:"product name"`                                              // product name
 	ProductDescription     string            `json:"productDescription"        description:"product description"`                                       // product description
 	ExtraMetricData        string            `json:"extraMetricData"           description:""`                                                          //
-	Metadata               map[string]string `json:"metadata" description:""`
+	Metadata               map[string]string `json:"metadata"                  description:""`
 	GasPayer               string            `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 }
 

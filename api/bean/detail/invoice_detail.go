@@ -20,7 +20,7 @@ type InvoiceDetail struct {
 	UniqueId                       string                      `json:"uniqueId"                       description:"UniqueId"`
 	GmtCreate                      *gtime.Time                 `json:"gmtCreate"                      description:"GmtCreate"`
 	TotalAmount                    int64                       `json:"totalAmount"                    description:"TotalAmount,Cents"`
-	DiscountAmount                 int64                       `json:"discountAmount"                    description:"DiscountAmount,Cents"`
+	DiscountAmount                 int64                       `json:"discountAmount"                 description:"DiscountAmount,Cents"`
 	TaxAmount                      int64                       `json:"taxAmount"                      description:"TaxAmount,Cents"`
 	SubscriptionAmount             int64                       `json:"subscriptionAmount"             description:"SubscriptionAmount,Cents"`
 	Currency                       string                      `json:"currency"                       description:"Currency"`
@@ -46,12 +46,12 @@ type InvoiceDetail struct {
 	PeriodEnd                      int64                       `json:"periodEnd"                      description:"period_end"`
 	PaymentId                      string                      `json:"paymentId"                      description:"PaymentId"`
 	RefundId                       string                      `json:"refundId"                       description:"refundId"`
-	Gateway                        *bean.GatewaySimplify       `json:"gateway"                       description:"Gateway"`
+	Gateway                        *bean.GatewaySimplify       `json:"gateway"                        description:"Gateway"`
 	Merchant                       *bean.MerchantSimplify      `json:"merchant"                       description:"Merchant"`
-	UserAccount                    *bean.UserAccountSimplify   `json:"userAccount"                       description:"UserAccount"`
-	Subscription                   *bean.SubscriptionSimplify  `json:"subscription"                       description:"Subscription"`
-	Payment                        *bean.PaymentSimplify       `json:"payment"                       description:"Payment"`
-	Refund                         *bean.RefundSimplify        `json:"refund"                       description:"Refund"`
+	UserAccount                    *bean.UserAccountSimplify   `json:"userAccount"                    description:"UserAccount"`
+	Subscription                   *bean.SubscriptionSimplify  `json:"subscription"                   description:"Subscription"`
+	Payment                        *bean.PaymentSimplify       `json:"payment"                        description:"Payment"`
+	Refund                         *bean.RefundSimplify        `json:"refund"                         description:"Refund"`
 	CryptoAmount                   int64                       `json:"cryptoAmount"                   description:"crypto_amount, cent"` // crypto_amount, cent
 	CryptoCurrency                 string                      `json:"cryptoCurrency"                 description:"crypto_currency"`
 	DayUtilDue                     int64                       `json:"dayUtilDue"                     description:"day util due after finish"` // day util due after finish

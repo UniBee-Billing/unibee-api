@@ -93,6 +93,7 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 			Quantity:               req.Quantity,
 			PeriodEnd:              0,
 			PeriodStart:            0,
+			Plan:                   bean.SimplifyPlan(addon),
 		}},
 	}
 

@@ -7,6 +7,7 @@ import (
 	"unibee/api/bean"
 	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/consts"
+	service2 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/vat_gateway"
@@ -113,6 +114,8 @@ func TestSubscription(t *testing.T) {
 		invoice := query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)
 		require.NotNil(t, invoice)
 		require.Equal(t, true, invoice.Status == consts.InvoiceStatusPaid)
+		invoiceDetail := service2.InvoiceDetail(ctx, one.LatestInvoiceId)
+		require.NotNil(t, invoiceDetail)
 		err = CycleWalkForSubTest(ctx, testSubscriptionId, one.CurrentPeriodEnd-config.GetMerchantSubscriptionConfig(ctx, test.TestMerchant.Id).TryAutomaticPaymentBeforePeriodEnd-1, "testcase")
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
