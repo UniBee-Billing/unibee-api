@@ -283,24 +283,24 @@ type AdminNoteListRes struct {
 
 type OnetimeAddonNewReq struct {
 	g.Meta         `path:"/new_onetime_addon_payment" tags:"Subscription" method:"post" summary:"New Subscription Onetime Addon Payment"`
-	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	AddonId        uint64            `json:"addonId" dc:"AddonId" v:"required"`
-	Quantity       int64             `json:"quantity" dc:"Quantity"  v:"required"`
-	ReturnUrl      string            `json:"returnUrl"  dc:"RedirectUrl"  `
-	Metadata       map[string]string `json:"metadata" dc:"Metadata，Map"`
+	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId, id of subscription with addon will attached" v:"required"`
+	AddonId        uint64            `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
+	Quantity       int64             `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
+	ReturnUrl      string            `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
+	Metadata       map[string]string `json:"metadata" dc:"Metadata，custom data"`
 }
 
 type OnetimeAddonNewRes struct {
-	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddonSimplify `json:"subscriptionOnetimeAddon" dc:"SubscriptionOnetimeAddon"`
-	Paid                     bool                                   `json:"paid"`
-	Link                     string                                 `json:"link"`
-	Invoice                  *bean.InvoiceSimplify                  `json:"invoice"`
+	SubscriptionOnetimeAddon *bean.SubscriptionOnetimeAddonSimplify `json:"subscriptionOnetimeAddon" dc:"SubscriptionOnetimeAddon, object of onetime-addon purchased"`
+	Paid                     bool                                   `json:"paid" dc:"true|false,automatic payment is default behavior for one-time addon purchased, payment will create attach to the purchase, when payment is success, return false, otherwise false"`
+	Link                     string                                 `json:"link" dc:"if automatic payment is false, Gateway Link will provided that manual payment needed"`
+	Invoice                  *bean.InvoiceSimplify                  `json:"invoice" dc:"invoice of one-time payment"`
 }
 
 type OnetimeAddonListReq struct {
 	g.Meta         `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"Merchant Subscription OnetimeAddon List"`
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription which one-time addon purchase history attached" v:"required"`
+	Page           int    `json:"page"  dc:"Page, Start With 0" `
 	Count          int    `json:"count" dc:"Count Of Page" `
 }
 
