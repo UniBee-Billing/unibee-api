@@ -283,7 +283,7 @@ type AdminNoteListRes struct {
 
 type OnetimeAddonNewReq struct {
 	g.Meta         `path:"/new_onetime_addon_payment" tags:"Subscription" method:"post" summary:"New Subscription Onetime Addon Payment"`
-	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId, id of subscription with addon will attached" v:"required"`
+	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
 	AddonId        uint64            `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
 	Quantity       int64             `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
 	ReturnUrl      string            `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
