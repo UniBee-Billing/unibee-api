@@ -5,6 +5,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/merchant/payment"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/invoice/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -58,8 +59,9 @@ func GetPaymentDetail(ctx context.Context, merchantId uint64, paymentId string) 
 	utility.Assert(merchantId == one.MerchantId, "merchant not match")
 	if one != nil {
 		return &payment.PaymentDetail{
-			User:    bean.SimplifyUserAccount(GetUserAccountById(ctx, uint64(one.UserId))),
+			User:    bean.SimplifyUserAccount(GetUserAccountById(ctx, one.UserId)),
 			Payment: bean.SimplifyPayment(one),
+			Invoice: service.InvoiceDetail(ctx, one.InvoiceId),
 		}
 	}
 	return nil

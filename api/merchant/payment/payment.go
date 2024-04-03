@@ -3,7 +3,6 @@ package payment
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
 )
 
 type NewReq struct {
@@ -48,11 +47,6 @@ type DetailReq struct {
 }
 type DetailRes struct {
 	PaymentDetail *PaymentDetail `json:"paymentDetail" dc:"PaymentDetail"`
-}
-
-type PaymentDetail struct {
-	User    *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Payment *bean.PaymentSimplify     `json:"payment" dc:"Payment"`
 }
 
 type ListReq struct {
