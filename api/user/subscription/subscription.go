@@ -196,7 +196,7 @@ type TimeLineListRes struct {
 }
 
 type OnetimeAddonNewReq struct {
-	g.Meta         `path:"/new_onetime_addon" tags:"User-Subscription" method:"post" summary:"New Subscription Onetime Addon"`
+	g.Meta         `path:"/new_onetime_addon_payment" tags:"User-Subscription" method:"post" summary:"New Subscription Onetime Addon Payment"`
 	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	AddonId        uint64            `json:"addonId" dc:"AddonId" v:"required"`
 	Quantity       int64             `json:"quantity" dc:"Quantity"  v:"required"`
