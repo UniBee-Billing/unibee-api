@@ -33,7 +33,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
 	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
 	utility.Assert(createPayContext.Pay != nil, "pay is nil")
-	utility.Assert(len(createPayContext.Pay.ExternalPaymentId) > 0, "BizId Invalid")
+	utility.Assert(len(createPayContext.Pay.ExternalPaymentId) > 0, "ExternalPaymentId Invalid")
 	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay gatewayId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
