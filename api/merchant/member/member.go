@@ -47,7 +47,7 @@ type UpdateMemberRoleRes struct {
 }
 
 type NewMemberReq struct {
-	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"Invite member, will send email to member email provided, member can enter admin portal by email otp login"`
+	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"Invite member" description:"Will send email to member email provided, member can enter admin portal by email otp login"`
 	Email     string `json:"email"  v:"required"   description:"Email, email of member, member otp login needs" `
 	Role      string `json:"role"    v:"required"     description:"Role, permission role of member" `
 	FirstName string `json:"firstName"     description:"FirstName, member firstName, invoice needs"`
