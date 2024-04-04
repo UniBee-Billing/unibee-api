@@ -10,12 +10,13 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant *bean.MerchantSimplify  `json:"merchant" dc:"Merchant"`
-	Env      string                  `json:"env" description:"System Env, em: daily|stage|local|prod" `
-	IsProd   bool                    `json:"isProd" description:"Check System Env Is Prod, true|false" `
-	TimeZone []string                `json:"TimeZone" description:"TimeZone List" `
-	Currency []*bean.Currency        `json:"Currency" description:"Currency List" `
-	Gateway  []*bean.GatewaySimplify `json:"gateway" description:"Gateway List" `
+	Merchant       *bean.MerchantSimplify       `json:"merchant" dc:"Merchant"`
+	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"MerchantMember"`
+	Env            string                       `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	IsProd         bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
+	TimeZone       []string                     `json:"TimeZone" description:"TimeZone List" `
+	Currency       []*bean.Currency             `json:"Currency" description:"Currency List" `
+	Gateway        []*bean.GatewaySimplify      `json:"gateway" description:"Gateway List" `
 }
 
 type UpdateReq struct {
