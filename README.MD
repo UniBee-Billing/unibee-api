@@ -55,11 +55,11 @@ nacos.data.id={your_nacos_data_id}\
 
 #### Local Run Add Program Arguments Below: 
 ```bash
---nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+--nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=api.unibee.top
 ```
 ##### ex: 
 ```bash
-go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=unibee.top
+go run main.go --nacos-port=30099 --nacos-namespace=local --nacos-group=config --nacos-data-id=unib-settings.yaml --nacos-ip=api.unibee.top
 ```
 
 If do not use nacos, should manual setting `config.yaml` in project dir, the template `config.yaml` is `manifest/config/config.yaml.template`

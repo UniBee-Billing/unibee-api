@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"
 	"github.com/gogf/gf/v2/os/gctx"
+	"github.com/gogf/gf/v2/os/genv"
 	"github.com/gogf/gf/v2/os/glog"
 	"os"
 	"strconv"
@@ -20,6 +21,7 @@ const DefaultConfigFileName = "config.yaml"
 var (
 	env               string
 	mode              string
+	unibeeApiUrl      string
 	serverAddress     string
 	serverJwtKey      string
 	swaggerPath       string
@@ -41,29 +43,39 @@ var (
 	nacosDataIdArg    string
 )
 
+func getEnvParam(name string) string {
+	v := genv.GetWithCmd(name)
+	//v := os.Getenv(name)
+	if v != nil {
+		return v.String()
+	}
+	return ""
+}
+
 func Init() {
 
-	flag.StringVar(&env, "env", os.Getenv("env"), "local|daily|prod")
-	flag.StringVar(&mode, "mode", os.Getenv("mode"), "singleTon|cloud")
-	flag.StringVar(&serverAddress, "server-address", os.Getenv("server.address"), ":80, default :8088")
-	flag.StringVar(&serverJwtKey, "server-jwtKey", os.Getenv("server.jwtKey"), "jwtKey to encrypt")
-	flag.StringVar(&swaggerPath, "server-swaggerPath", os.Getenv("server.swaggerPath"), "swaggerPath, default /swagger")
-	flag.StringVar(&redisAddress, "redis-address", os.Getenv("redis.address"), "redis address, require")
-	flag.StringVar(&redisPass, "redis-pass", os.Getenv("redis.pass"), "redis password, require")
-	flag.StringVar(&redisDatabase, "redis-database", os.Getenv("redis.database"), "redis database, default 0")
-	flag.StringVar(&redisMaxIdle, "redis-maxIdle", os.Getenv("redis.maxIdle"), "redis maxIdle, default 500")
-	flag.StringVar(&redisMinIdle, "redis-minIdle", os.Getenv("redis.minIdle"), "redis minIdle, default 10")
-	flag.StringVar(&redisIdleTimeout, "redis-idleTimeout", os.Getenv("redis.idleTimeout"), "redis idleTimeout, default 1d")
-	flag.StringVar(&databaseLink, "database-link", os.Getenv("database.link"), "database link, require")
-	flag.StringVar(&databaseDebug, "database-debug", os.Getenv("database.debug"), "database debug, default false")
-	flag.StringVar(&databaseCharset, "database-charset", os.Getenv("database.charset"), "database charset, default utf8mb4")
-	flag.StringVar(&loggerLevel, "logger-level", os.Getenv("logger.level"), "logger level, default all")
-	flag.StringVar(&authLoginExpire, "auth-login-expire", os.Getenv("auth.login.expire"), "login token expire time, default 600")
-	flag.StringVar(&nacosIpArg, "nacos-ip", os.Getenv("nacos.ip"), "ip or domain, env params will replaced if nacos used")
-	flag.StringVar(&nacosPortArg, "nacos-port", os.Getenv("nacos.port"), "nacos port, 8848")
-	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", os.Getenv("nacos.namespace"), "nacos namespace, default")
-	flag.StringVar(&nacosGroupArg, "nacos-group", os.Getenv("nacos.group"), "nacos group")
-	flag.StringVar(&nacosDataIdArg, "nacos-data-id", os.Getenv("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
+	flag.StringVar(&env, "env", getEnvParam("env"), "local|daily|prod")
+	flag.StringVar(&mode, "mode", getEnvParam("mode"), "singleTon|cloud")
+	flag.StringVar(&unibeeApiUrl, "unibee-api-url", getEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
+	flag.StringVar(&serverAddress, "server-address", getEnvParam("server.address"), "server address, default :8088")
+	flag.StringVar(&serverJwtKey, "server-jwtKey", getEnvParam("server.jwtKey"), "jwtKey to encrypt")
+	flag.StringVar(&swaggerPath, "server-swaggerPath", getEnvParam("server.swaggerPath"), "swaggerPath, default /swagger")
+	flag.StringVar(&redisAddress, "redis-address", getEnvParam("redis.address"), "redis address, require")
+	flag.StringVar(&redisPass, "redis-password", getEnvParam("redis.password"), "redis password, require")
+	flag.StringVar(&redisDatabase, "redis-database", getEnvParam("redis.database"), "redis database, default 0")
+	flag.StringVar(&redisMaxIdle, "redis-maxIdle", getEnvParam("redis.maxIdle"), "redis maxIdle, default 500")
+	flag.StringVar(&redisMinIdle, "redis-minIdle", getEnvParam("redis.minIdle"), "redis minIdle, default 10")
+	flag.StringVar(&redisIdleTimeout, "redis-idleTimeout", getEnvParam("redis.idleTimeout"), "redis idleTimeout, default 1d")
+	flag.StringVar(&databaseLink, "database-link", getEnvParam("database.link"), "database link, require")
+	flag.StringVar(&databaseDebug, "database-debug", getEnvParam("database.debug"), "database debug, default false")
+	flag.StringVar(&databaseCharset, "database-charset", getEnvParam("database.charset"), "database charset, default utf8mb4")
+	flag.StringVar(&loggerLevel, "logger-level", getEnvParam("logger.level"), "logger level, default all")
+	flag.StringVar(&authLoginExpire, "auth-login-expire", getEnvParam("auth.login.expire"), "login token expire time, default 600")
+	flag.StringVar(&nacosIpArg, "nacos-ip", getEnvParam("nacos.ip"), "ip or domain, env params will replaced if nacos used")
+	flag.StringVar(&nacosPortArg, "nacos-port", getEnvParam("nacos.port"), "nacos port, 8848")
+	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", getEnvParam("nacos.namespace"), "nacos namespace, default")
+	flag.StringVar(&nacosGroupArg, "nacos-group", getEnvParam("nacos.group"), "nacos group")
+	flag.StringVar(&nacosDataIdArg, "nacos-data-id", getEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
 
 	var ctx = gctx.New()
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(DefaultConfigFileName)
@@ -140,6 +152,7 @@ func SetupDefaultConfigs(ctx context.Context) {
 	serverConfig := g.Cfg().MustGet(ctx, "server").Map()
 	utility.Assert(serverConfig != nil, "server config not found")
 	setUpDefaultConfig(serverConfig, "address", serverAddress, ":8088")
+	setUpDefaultConfig(serverConfig, "domainPath", unibeeApiUrl, "http://127.0.0.1:8088")
 	setUpDefaultConfig(serverConfig, "jwtKey", serverJwtKey, "3^&secret-key-for-UniBee*1!8*")
 	serverConfig["openapiPath"] = "/api.json"
 	setUpDefaultConfig(serverConfig, "swaggerPath", swaggerPath, "/swagger")
