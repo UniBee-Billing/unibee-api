@@ -401,7 +401,7 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 
 	one.BindingAddonIds = utility.IntListToString(addonIdsList)
 	one.BindingOnetimeAddonIds = utility.IntListToString(oneTimeAddonIdsList)
-	update, err := dao.Plan.Ctx(ctx).Data(g.Map{
+	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().BindingAddonIds:        one.BindingAddonIds,
 		dao.Plan.Columns().BindingOnetimeAddonIds: one.BindingOnetimeAddonIds,
 		dao.Plan.Columns().IsDeleted:              0,
@@ -409,13 +409,6 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 	if err != nil {
 		return nil, err
-	}
-	affected, err := update.RowsAffected()
-	if err != nil {
-		return nil, err
-	}
-	if affected != 1 {
-		return nil, gerror.New("internal err, publish count != 1")
 	}
 	return one, nil
 }

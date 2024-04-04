@@ -25,6 +25,11 @@ func TestSubscription(t *testing.T) {
 			OnetimeAddonIds: []int64{int64(test.TestOneTimeAddon.Id)},
 		})
 		require.Nil(t, err)
+		current := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id)
+		if current != nil {
+			err := service2.SubscriptionCancel(ctx, current.SubscriptionId, false, false, "test cancel")
+			require.Nil(t, err)
+		}
 		create, err := service2.SubscriptionCreate(ctx, &service2.CreateInternalReq{
 			MerchantId:      test.TestMerchant.Id,
 			PlanId:          test.TestPlan.Id,
