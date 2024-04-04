@@ -8,7 +8,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcfg"
 	"github.com/gogf/gf/v2/os/gctx"
-	"github.com/gogf/gf/v2/os/genv"
 	"github.com/gogf/gf/v2/os/glog"
 	"os"
 	"strconv"
@@ -43,39 +42,30 @@ var (
 	nacosDataIdArg    string
 )
 
-func getEnvParam(name string) string {
-	v := genv.GetWithCmd(name)
-	//v := os.Getenv(name)
-	if v != nil {
-		return v.String()
-	}
-	return ""
-}
-
 func Init() {
 
-	flag.StringVar(&env, "env", getEnvParam("env"), "local|daily|prod")
-	flag.StringVar(&mode, "mode", getEnvParam("mode"), "singleTon|cloud")
-	flag.StringVar(&unibeeApiUrl, "unibee-api-url", getEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
-	flag.StringVar(&serverAddress, "server-address", getEnvParam("server.address"), "server address, default :8088")
-	flag.StringVar(&serverJwtKey, "server-jwtKey", getEnvParam("server.jwtKey"), "jwtKey to encrypt")
-	flag.StringVar(&swaggerPath, "server-swaggerPath", getEnvParam("server.swaggerPath"), "swaggerPath, default /swagger")
-	flag.StringVar(&redisAddress, "redis-address", getEnvParam("redis.address"), "redis address, require")
-	flag.StringVar(&redisPass, "redis-password", getEnvParam("redis.password"), "redis password, require")
-	flag.StringVar(&redisDatabase, "redis-database", getEnvParam("redis.database"), "redis database, default 0")
-	flag.StringVar(&redisMaxIdle, "redis-maxIdle", getEnvParam("redis.maxIdle"), "redis maxIdle, default 500")
-	flag.StringVar(&redisMinIdle, "redis-minIdle", getEnvParam("redis.minIdle"), "redis minIdle, default 10")
-	flag.StringVar(&redisIdleTimeout, "redis-idleTimeout", getEnvParam("redis.idleTimeout"), "redis idleTimeout, default 1d")
-	flag.StringVar(&databaseLink, "database-link", getEnvParam("database.link"), "database link, require")
-	flag.StringVar(&databaseDebug, "database-debug", getEnvParam("database.debug"), "database debug, default false")
-	flag.StringVar(&databaseCharset, "database-charset", getEnvParam("database.charset"), "database charset, default utf8mb4")
-	flag.StringVar(&loggerLevel, "logger-level", getEnvParam("logger.level"), "logger level, default all")
-	flag.StringVar(&authLoginExpire, "auth-login-expire", getEnvParam("auth.login.expire"), "login token expire time, default 600")
-	flag.StringVar(&nacosIpArg, "nacos-ip", getEnvParam("nacos.ip"), "ip or domain, env params will replaced if nacos used")
-	flag.StringVar(&nacosPortArg, "nacos-port", getEnvParam("nacos.port"), "nacos port, 8848")
-	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", getEnvParam("nacos.namespace"), "nacos namespace, default")
-	flag.StringVar(&nacosGroupArg, "nacos-group", getEnvParam("nacos.group"), "nacos group")
-	flag.StringVar(&nacosDataIdArg, "nacos-data-id", getEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
+	flag.StringVar(&env, "env", utility.GetEnvParam("env"), "local|daily|prod")
+	flag.StringVar(&mode, "mode", utility.GetEnvParam("mode"), "standalone|cloud")
+	flag.StringVar(&unibeeApiUrl, "unibee-api-url", utility.GetEnvParam("unibee.api.url"), "url, default http://127.0.0.1:8088")
+	flag.StringVar(&serverAddress, "server-address", utility.GetEnvParam("server.address"), "server address, default :8088")
+	flag.StringVar(&serverJwtKey, "server-jwtKey", utility.GetEnvParam("server.jwtKey"), "jwtKey to encrypt")
+	flag.StringVar(&swaggerPath, "server-swaggerPath", utility.GetEnvParam("server.swaggerPath"), "swaggerPath, default /swagger")
+	flag.StringVar(&redisAddress, "redis-address", utility.GetEnvParam("redis.address"), "redis address, require")
+	flag.StringVar(&redisPass, "redis-password", utility.GetEnvParam("redis.password"), "redis password, require")
+	flag.StringVar(&redisDatabase, "redis-database", utility.GetEnvParam("redis.database"), "redis database, default 0")
+	flag.StringVar(&redisMaxIdle, "redis-maxIdle", utility.GetEnvParam("redis.maxIdle"), "redis maxIdle, default 500")
+	flag.StringVar(&redisMinIdle, "redis-minIdle", utility.GetEnvParam("redis.minIdle"), "redis minIdle, default 10")
+	flag.StringVar(&redisIdleTimeout, "redis-idleTimeout", utility.GetEnvParam("redis.idleTimeout"), "redis idleTimeout, default 1d")
+	flag.StringVar(&databaseLink, "database-link", utility.GetEnvParam("database.link"), "database link, require")
+	flag.StringVar(&databaseDebug, "database-debug", utility.GetEnvParam("database.debug"), "database debug, default false")
+	flag.StringVar(&databaseCharset, "database-charset", utility.GetEnvParam("database.charset"), "database charset, default utf8mb4")
+	flag.StringVar(&loggerLevel, "logger-level", utility.GetEnvParam("logger.level"), "logger level, default all")
+	flag.StringVar(&authLoginExpire, "auth-login-expire", utility.GetEnvParam("auth.login.expire"), "login token expire time, default 600")
+	flag.StringVar(&nacosIpArg, "nacos-ip", utility.GetEnvParam("nacos.ip"), "ip or domain, env params will replaced if nacos used")
+	flag.StringVar(&nacosPortArg, "nacos-port", utility.GetEnvParam("nacos.port"), "nacos port, 8848")
+	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", utility.GetEnvParam("nacos.namespace"), "nacos namespace, default")
+	flag.StringVar(&nacosGroupArg, "nacos-group", utility.GetEnvParam("nacos.group"), "nacos group")
+	flag.StringVar(&nacosDataIdArg, "nacos-data-id", utility.GetEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
 
 	var ctx = gctx.New()
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(DefaultConfigFileName)
@@ -146,7 +136,7 @@ func SetupDefaultConfigs(ctx context.Context) {
 	config := g.Cfg().MustGet(ctx, ".").Map()
 	utility.Assert(config != nil, "config not found")
 	setUpDefaultConfig(config, "env", env, "prod")
-	setUpDefaultConfig(config, "mode", mode, "singleTon")
+	setUpDefaultConfig(config, "mode", mode, "standalone")
 	setUpDefaultConfig(config, "logger", map[string]interface{}{}, map[string]interface{}{})
 	setUpDefaultConfig(config, "auth", map[string]interface{}{"login": map[string]interface{}{}}, map[string]interface{}{"login": map[string]interface{}{}})
 	serverConfig := g.Cfg().MustGet(ctx, "server").Map()
@@ -192,7 +182,6 @@ func ReplaceConfigContentUserNacos(ip string, port uint64, namespace, dataId, gr
 		dataId:    dataId,
 		group:     group,
 	}
-	//err = n.syncToFile()
 	config, err := GetNacosConfig(n.ip, n.port, n.namespace, n.group, n.dataId)
 	if err != nil {
 		panic(err)

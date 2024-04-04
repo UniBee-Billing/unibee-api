@@ -167,7 +167,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 		return
 	} else {
 		if config.GetConfigInstance().IsServerDev() || config.GetConfigInstance().IsLocal() {
-			customCtx.MerchantId = 15621
+			customCtx.MerchantId = consts.CloudModeManagerMerchantId
 			r.Middleware.Next()
 			return
 		}
@@ -201,7 +201,7 @@ func (s *SMiddleware) UserPortalPreAuth(r *ghttp.Request) {
 func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 	customCtx := _interface.Context().Get(r.Context())
 	if config.GetConfigInstance().IsServerDev() {
-		customCtx.MerchantId = 15621
+		customCtx.MerchantId = consts.CloudModeManagerMerchantId
 		r.Middleware.Next()
 		return
 	}

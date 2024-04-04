@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"unibee/internal/consts"
 	"unibee/test"
 )
 
@@ -12,17 +13,17 @@ func TestPayment(t *testing.T) {
 	_ = test.TestGateway
 	t.Run("Test for QueryList", func(t *testing.T) {
 		list := QueryPaymentMethodList(ctx, &PaymentMethodListInternalReq{
-			MerchantId: 15621,
+			MerchantId: consts.CloudModeManagerMerchantId,
 			UserId:     200365887,
 			GatewayId:  25,
 		})
 		require.NotNil(t, list)
 		require.Equal(t, true, len(list) > 0)
-		one := QueryPaymentMethod(ctx, 15621, 200365887, 25, list[0].Id)
+		one := QueryPaymentMethod(ctx, consts.CloudModeManagerMerchantId, 200365887, 25, list[0].Id)
 		require.NotNil(t, one)
 		require.Equal(t, one.Id, list[0].Id)
 		url, one := NewPaymentMethod(ctx, &NewPaymentMethodInternalReq{
-			MerchantId: 15621,
+			MerchantId: consts.CloudModeManagerMerchantId,
 			UserId:     200365887,
 			GatewayId:  25,
 			Currency:   "USD",

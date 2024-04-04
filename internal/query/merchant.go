@@ -45,6 +45,15 @@ func GetMerchantByHost(ctx context.Context, host string) (one *entity.Merchant) 
 	return one
 }
 
+func GetMerchantList(ctx context.Context) (list []*entity.Merchant) {
+	err := dao.Merchant.Ctx(ctx).
+		Scan(&list)
+	if err != nil {
+		return make([]*entity.Merchant, 0)
+	}
+	return
+}
+
 func GetActiveMerchantList(ctx context.Context) (list []*entity.Merchant) {
 	err := dao.Merchant.Ctx(ctx).
 		Where(dao.Merchant.Columns().IsDeleted, 0).

@@ -7,8 +7,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/cmd/config"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/merchant/cloud"
+	"unibee/internal/logic/email"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -109,8 +110,20 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	err = cloud.MerchantSetupForCloudMode(ctx, merchant.Id)
+	err = MerchantSetupForCloudMode(ctx, merchant.Id)
 	return merchant, newOne, err
+}
+
+func SendMerchantRegisterEmail(ctx context.Context, to string, verificationCode string) {
+	if config.GetConfigInstance().Mode == "cloud" {
+		err := email.SendTemplateEmail(ctx, consts.CloudModeManagerMerchantId, to, "", email.TemplateMerchantRegistrationCodeVerify, "", &email.TemplateVariable{
+			CodeExpireMinute: "3",
+			Code:             verificationCode,
+		})
+		utility.AssertError(err, "Server Error")
+	} else {
+		utility.Assert(true, "not support")
+	}
 }
 
 func HardDeleteMerchant(ctx context.Context, merchantId uint64) error {

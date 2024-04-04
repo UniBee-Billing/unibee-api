@@ -18,6 +18,7 @@ import (
 	"unibee/internal/controller/user"
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic"
 	"unibee/utility"
 	"unibee/utility/liberr"
 
@@ -43,20 +44,6 @@ var (
 			}
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
-			//if consts.GetConfigInstance().IsLocal() || consts.GetConfigInstance().IsServerDev() {
-			//	openapi.Servers = &goai.Servers{goai.Server{
-			//		URL:         "http://127.0.0.1" + consts.GetConfigInstance().Server.Address,
-			//		Description: consts.GetConfigInstance().Env,
-			//	}, goai.Server{
-			//		URL:         "http://api.unibee.top",
-			//		Description: "stage",
-			//	}}
-			//} else {
-			//	openapi.Servers = &goai.Servers{goai.Server{
-			//		URL:         consts.GetConfigInstance().Server.DomainPath,
-			//		Description: consts.GetConfigInstance().Env,
-			//	}}
-			//}
 
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
@@ -305,10 +292,14 @@ var (
 			}
 			{
 				cronjob.StartCronJobs()
-
 			}
 			{
 				fmt.Println(utility.MarshalToJsonString(s.GetOpenApi()))
+			}
+
+			{
+				//logic init
+				logic.StandaloneInit(ctx)
 			}
 
 			s.Run()

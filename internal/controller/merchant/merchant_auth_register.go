@@ -7,7 +7,6 @@ import (
 	"unibee/api/merchant/auth"
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/merchant"
-	"unibee/internal/logic/merchant/cloud"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -52,6 +51,6 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	_, err = g.Redis().Expire(ctx, CacheKeyMerchantRegisterPrefix+req.Email+"-verify", 3*60)
 	utility.AssertError(err, "Server Error")
 
-	cloud.SendMerchantRegisterEmail(ctx, req.Email, verificationCode)
+	merchant.SendMerchantRegisterEmail(ctx, req.Email, verificationCode)
 	return &auth.RegisterRes{}, nil
 }

@@ -148,6 +148,7 @@ func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, ti
 	} else {
 		template = query.GetEmailDefaultTemplateByTemplateName(ctx, templateName)
 	}
+	utility.Assert(template != nil, "template not found:"+templateName)
 	utility.Assert(strings.Compare(template.Status, "Active") == 0, "template not active status")
 	utility.Assert(template != nil, "template not found")
 	utility.Assert(templateVariables != nil, "templateVariables not found")
