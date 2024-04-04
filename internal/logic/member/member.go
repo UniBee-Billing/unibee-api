@@ -86,15 +86,19 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, role string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
+	merchantRole := query.GetRoleByName(ctx, merchantId, role)
+	utility.Assert(merchantRole != nil, "role not found")
+
 	merchantMasterMember := &entity.MerchantMember{
 		MerchantId: merchantId,
 		Email:      email,
 		CreateTime: gtime.Now().Timestamp(),
 		FirstName:  firstName,
 		LastName:   lastName,
+		Role:       role,
 	}
 	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
 	if err != nil {
