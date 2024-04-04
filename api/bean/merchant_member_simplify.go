@@ -1,6 +1,8 @@
 package bean
 
-import entity "unibee/internal/model/entity/oversea_pay"
+import (
+	entity "unibee/internal/model/entity/oversea_pay"
+)
 
 type MerchantMemberSimplify struct {
 	Id         uint64 `json:"id"         description:"userId"`          // userId
@@ -11,7 +13,6 @@ type MerchantMemberSimplify struct {
 	CreateTime int64  `json:"createTime" description:"create utc time"` // create utc time
 	Mobile     string `json:"mobile"     description:"mobile"`          // mobile
 	Role       string `json:"role"       description:"role"`            // role
-
 }
 
 func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMemberSimplify {

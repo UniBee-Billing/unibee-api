@@ -3,6 +3,7 @@ package profile
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type GetReq struct {
@@ -11,7 +12,7 @@ type GetReq struct {
 
 type GetRes struct {
 	Merchant       *bean.MerchantSimplify       `json:"merchant" dc:"Merchant"`
-	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"MerchantMember"`
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"MerchantMember"`
 	Env            string                       `json:"env" description:"System Env, em: daily|stage|local|prod" `
 	IsProd         bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
 	TimeZone       []string                     `json:"TimeZone" description:"TimeZone List" `
