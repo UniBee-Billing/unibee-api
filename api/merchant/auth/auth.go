@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type LoginReq struct {
@@ -12,7 +13,7 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member"`
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Merchant Member"`
 	Token          string                       `json:"token" dc:"Token"`
 }
 
@@ -31,7 +32,7 @@ type LoginOtpVerifyReq struct {
 }
 
 type LoginOtpVerifyRes struct {
-	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member"`
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Merchant Member"`
 	Token          string                       `json:"token" dc:"Token"`
 }
 
