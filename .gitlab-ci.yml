@@ -45,8 +45,6 @@ deploy:
   script:
     - kubectl --kubeconfig /data/kubeconfigs/unib_dev_configs rollout restart deployment/yd-unib-server-daily
 
-before_script:
-  — echo “$CI_REGISTRY_PASSWORD” | docker login -u “$CI_REGISTRY_USER” — password-stdin
 
 hub_push:
   only:
@@ -54,5 +52,6 @@ hub_push:
   image: docker
   stage: hub_push
   script:
+    - echo “$CI_REGISTRY_PASSWORD” | docker login -u “$CI_REGISTRY_USER” — password-stdin
     - docker tag easzlab.io.local:5000/unibee/unibee-api:daily unibee/api:stage
     - docker push unibee/api:stage
