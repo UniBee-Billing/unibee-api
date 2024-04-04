@@ -26,7 +26,7 @@ func NewMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		PermissionData: utility.MarshalToJsonString(req.PermissionData),
 		CreateTime:     gtime.Now().Timestamp(),
 	}
-	_, err := dao.MerchantMetricEvent.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	_, err := dao.MerchantRole.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	return err
 }
 
@@ -48,5 +48,12 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, role string) err
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
+	return err
+}
+
+func HardDeleteMerchantRole(ctx context.Context, merchantId uint64, role string) error {
+	utility.Assert(merchantId > 0, "invalid merchantId")
+	utility.Assert(len(role) > 0, "invalid role")
+	_, err := dao.MerchantRole.Ctx(ctx).Where(dao.MerchantRole.Columns().Role, role).Where(dao.MerchantRole.Columns().MerchantId, merchantId).Delete()
 	return err
 }

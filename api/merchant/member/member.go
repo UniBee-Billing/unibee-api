@@ -47,11 +47,11 @@ type UpdateMemberRoleRes struct {
 }
 
 type NewMemberReq struct {
-	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"New Member"`
-	Email     string `json:"email"         description:"Email" v:"required"`
-	Role      string `json:"role"         description:"Role" v:"required"`
-	FirstName string `json:"firstName"     description:"FirstName"`
-	LastName  string `json:"lastName"      description:"LastName"`
+	g.Meta    `path:"/new_member" tags:"Member" method:"post" summary:"Invite member, will send email to member email provided, member can enter admin portal by email otp login"`
+	Email     string `json:"email"  v:"required"   description:"Email, email of member, member otp login needs" `
+	Role      string `json:"role"    v:"required"     description:"Role, permission role of member" `
+	FirstName string `json:"firstName"     description:"FirstName, member firstName, invoice needs"`
+	LastName  string `json:"lastName"      description:"LastName, member firstName, invoice needs"`
 }
 
 type NewMemberRes struct {
