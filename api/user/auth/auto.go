@@ -22,8 +22,9 @@ type SessionLoginReq struct {
 }
 
 type SessionLoginRes struct {
-	User  *bean.UserAccountSimplify `json:"user" dc:"user"`
-	Token string                    `json:"token" dc:"token string"`
+	User      *bean.UserAccountSimplify `json:"user" dc:"user"`
+	Token     string                    `json:"token" dc:"token string"`
+	ReturnUrl string                    `json:"returnUrl" dc:"ReturnUrl"`
 }
 
 type LoginOtpReq struct {

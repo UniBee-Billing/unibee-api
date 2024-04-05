@@ -14,7 +14,7 @@ import (
 	"unibee/utility"
 )
 
-func UserSessionTransfer(ctx context.Context, session string) *entity.UserAccount {
+func UserSessionTransfer(ctx context.Context, session string) (*entity.UserAccount, string) {
 	utility.Assert(len(session) > 0, "Session Is Nil")
 	id, err := g.Redis().Get(ctx, session)
 	utility.AssertError(err, "System Error")
@@ -24,7 +24,12 @@ func UserSessionTransfer(ctx context.Context, session string) *entity.UserAccoun
 	utility.AssertError(err, "System Error")
 	one := query.GetUserAccountById(ctx, uint64(userId))
 	utility.Assert(one != nil, "Invalid Session, User Not Found")
-	return one
+	var returnUrl = ""
+	returnData, err := g.Redis().Get(ctx, session+"_returnUrl")
+	if err == nil {
+		returnUrl = returnData.String()
+	}
+	return one, returnUrl
 }
 
 func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq) (res *session.NewRes, err error) {
@@ -38,6 +43,10 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 		Address:        req.Address,
 		MerchantId:     merchantId,
 	})
+	merchantInfo := query.GetMerchantById(ctx, merchantId)
+	utility.Assert(merchantInfo != nil, "merchant not found")
+	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
+
 	utility.AssertError(err, "Server Error")
 	utility.Assert(one != nil, "Server Error")
 	// create user session
@@ -46,9 +55,12 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, ss, config.GetConfigInstance().Auth.Login.Expire*60)
 	utility.AssertError(err, "Server Error")
-	merchantInfo := query.GetMerchantById(ctx, merchantId)
-	utility.Assert(merchantInfo != nil, "merchant not found")
-	utility.Assert(len(merchantInfo.Host) > 0, "user host not set")
+	if len(req.ReturnUrl) > 0 {
+		_, err = g.Redis().Set(ctx, ss+"_returnUrl", req.ReturnUrl)
+		utility.AssertError(err, "Server Error")
+		_, err = g.Redis().Expire(ctx, ss+"_returnUrl", config.GetConfigInstance().Auth.Login.Expire*60)
+		utility.AssertError(err, "Server Error")
+	}
 
 	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEUSER, one.MerchantId, one.Id, req.Email)
 	fmt.Println("logged-in, save email/id in token: ", req.Email, "/", one.Id)
