@@ -79,6 +79,11 @@ func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Paym
 			g.Log().Errorf(ctx, "PaymentCancelCallback panic int: %s err:%s", id, err)
 			return
 		}
+		err = handler.UpdateSubscriptionAddonPurchasePaymentId(ctx, uint64(idInt), payment.PaymentId)
+		if err != nil {
+			g.Log().Errorf(ctx, "PaymentCancelCallback UpdateSubscriptionAddonPurchasePaymentId int: %s err:%s", id, err)
+			return
+		}
 		one := handler.SubscriptionOnetimeAddonDetail(ctx, uint64(idInt))
 		if one != nil {
 			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CREATED)
@@ -98,6 +103,11 @@ func (i Onetime) PaymentSuccessCallback(ctx context.Context, payment *entity.Pay
 		idInt, err := strconv.Atoi(id)
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentSuccessCallback panic int: %s err:%s", id, err)
+			return
+		}
+		err = handler.UpdateSubscriptionAddonPurchasePaymentId(ctx, uint64(idInt), payment.PaymentId)
+		if err != nil {
+			g.Log().Errorf(ctx, "PaymentCancelCallback UpdateSubscriptionAddonPurchasePaymentId int: %s err:%s", id, err)
 			return
 		}
 		_, err = handler.HandleOnetimeAddonPaymentSuccess(ctx, uint64(idInt))

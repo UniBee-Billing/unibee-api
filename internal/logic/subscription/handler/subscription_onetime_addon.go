@@ -13,6 +13,24 @@ import (
 	"unibee/internal/query"
 )
 
+func UpdateSubscriptionAddonPurchasePaymentId(ctx context.Context, id uint64, paymentId string) error {
+	one := query.GetSubscriptionOnetimeAddonById(ctx, id)
+	if one == nil {
+		return gerror.New("onetimeAddon not found")
+	}
+	if len(one.PaymentId) > 0 {
+		return nil
+	}
+	_, err := dao.SubscriptionOnetimeAddon.Ctx(ctx).Data(g.Map{
+		dao.SubscriptionOnetimeAddon.Columns().PaymentId: paymentId,
+		dao.SubscriptionOnetimeAddon.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.SubscriptionOnetimeAddon.Columns().Id, id).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func SubscriptionOnetimeAddonDetail(ctx context.Context, id uint64) *detail.SubscriptionOnetimeAddonDetail {
 	one := query.GetSubscriptionOnetimeAddonById(ctx, id)
 	if one == nil {
@@ -25,6 +43,7 @@ func SubscriptionOnetimeAddonDetail(ctx context.Context, id uint64) *detail.Subs
 			g.Log().Errorf(ctx, "SimplifySubscriptionOnetimeAddon Unmarshal Metadata error:%s", err.Error())
 		}
 	}
+	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 	return &detail.SubscriptionOnetimeAddonDetail{
 		Id:             one.Id,
 		SubscriptionId: one.SubscriptionId,
@@ -34,6 +53,7 @@ func SubscriptionOnetimeAddonDetail(ctx context.Context, id uint64) *detail.Subs
 		Status:         one.Status,
 		CreateTime:     one.CreateTime,
 		Payment:        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, one.PaymentId)),
+		User:           bean.SimplifyUserAccount(query.GetUserAccountById(ctx, sub.UserId)),
 		Metadata:       metadata,
 	}
 }
