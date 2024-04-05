@@ -16,9 +16,6 @@ func GetUserAccountById(ctx context.Context, id uint64) (one *entity.UserAccount
 	if err != nil {
 		return nil
 	}
-	if one != nil {
-		one.Password = ""
-	}
 	return one
 }
 
@@ -46,9 +43,6 @@ func GetUserAccountByExternalUserId(ctx context.Context, merchantId uint64, exte
 		Scan(&one)
 	if err != nil {
 		return nil
-	}
-	if one != nil {
-		one.Password = ""
 	}
 	return one
 }

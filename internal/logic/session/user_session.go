@@ -24,7 +24,6 @@ func UserSessionTransfer(ctx context.Context, session string) *entity.UserAccoun
 	utility.AssertError(err, "System Error")
 	one := query.GetUserAccountById(ctx, uint64(userId))
 	utility.Assert(one != nil, "Invalid Session, User Not Found")
-	one.Password = ""
 	return one
 }
 
@@ -45,7 +44,7 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 	ss := utility.GenerateRandomAlphanumeric(40)
 	_, err = g.Redis().Set(ctx, ss, one.Id)
 	utility.AssertError(err, "Server Error")
-	_, err = g.Redis().Expire(ctx, ss, 3*60)
+	_, err = g.Redis().Expire(ctx, ss, config.GetConfigInstance().Auth.Login.Expire*60)
 	utility.AssertError(err, "Server Error")
 	merchantInfo := query.GetMerchantById(ctx, merchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")

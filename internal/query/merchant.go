@@ -74,9 +74,6 @@ func GetMerchantMemberById(ctx context.Context, id uint64) (one *entity.Merchant
 	if err != nil {
 		return nil
 	}
-	if one != nil {
-		one.Password = ""
-	}
 	return one
 }
 
