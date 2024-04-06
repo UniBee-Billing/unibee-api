@@ -7,41 +7,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func convertMerchantEmailTemplateToVo(emailTemplate *entity.MerchantEmailTemplate) *bean.EmailTemplateVo {
-	var status = "Active"
-	if emailTemplate.Status != 0 {
-		status = "InActive"
-	}
-	return &bean.EmailTemplateVo{
-		Id:                  emailTemplate.Id,
-		MerchantId:          emailTemplate.MerchantId,
-		TemplateName:        emailTemplate.TemplateName,
-		TemplateDescription: "",
-		TemplateTitle:       emailTemplate.TemplateTitle,
-		TemplateContent:     emailTemplate.TemplateContent,
-		TemplateAttachName:  emailTemplate.TemplateAttachName,
-		CreateTime:          emailTemplate.CreateTime,
-		UpdateTime:          emailTemplate.GmtModify.Timestamp(),
-		Status:              status,
-	}
-}
-
-func convertEmailDefaultTemplateToVo(emailTemplate *entity.EmailDefaultTemplate) *bean.EmailTemplateVo {
-	return &bean.EmailTemplateVo{
-		Id:                  emailTemplate.Id,
-		MerchantId:          0,
-		TemplateName:        emailTemplate.TemplateName,
-		TemplateDescription: emailTemplate.TemplateDescription,
-		TemplateTitle:       emailTemplate.TemplateTitle,
-		TemplateContent:     emailTemplate.TemplateContent,
-		TemplateAttachName:  emailTemplate.TemplateAttachName,
-		CreateTime:          emailTemplate.CreateTime,
-		UpdateTime:          emailTemplate.GmtModify.Timestamp(),
-		Status:              "Active",
-	}
-}
-
-func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.EmailTemplateVo {
+func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName string) *bean.MerchantEmailTemplateSimplify {
 	if len(templateName) == 0 {
 		return nil
 	}
@@ -53,13 +19,24 @@ func GetEmailDefaultTemplateByTemplateName(ctx context.Context, templateName str
 		one = nil
 	}
 	if one != nil {
-		return convertEmailDefaultTemplateToVo(one)
+		return &bean.MerchantEmailTemplateSimplify{
+			Id:                  one.Id,
+			MerchantId:          0,
+			TemplateName:        one.TemplateName,
+			TemplateDescription: one.TemplateDescription,
+			TemplateTitle:       one.TemplateTitle,
+			TemplateContent:     one.TemplateContent,
+			TemplateAttachName:  one.TemplateAttachName,
+			CreateTime:          one.CreateTime,
+			UpdateTime:          one.GmtModify.Timestamp(),
+			Status:              "Active",
+		}
 	} else {
 		return nil
 	}
 }
 
-func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *bean.EmailTemplateVo {
+func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint64, templateName string) *bean.MerchantEmailTemplateSimplify {
 	if len(templateName) == 0 || merchantId <= 0 {
 		return nil
 	}
@@ -75,5 +52,17 @@ func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint
 		// No Setting, Get Default
 		return GetEmailDefaultTemplateByTemplateName(ctx, templateName)
 	}
-	return convertMerchantEmailTemplateToVo(one)
+	return bean.SimplifyMerchantEmailTemplate(one)
+}
+
+func GetEmailDefaultTemplateList(ctx context.Context) []*bean.EmailDefaultTemplateSimplify {
+	var list = make([]*entity.EmailDefaultTemplate, 0)
+	_ = dao.EmailDefaultTemplate.Ctx(ctx).
+		Where(dao.EmailDefaultTemplate.Columns().IsDeleted, 0).
+		Scan(&list)
+	var templates = make([]*bean.EmailDefaultTemplateSimplify, 0)
+	for _, one := range list {
+		templates = append(templates, bean.SimplifyEmailDefaultTemplate(one))
+	}
+	return templates
 }

@@ -10,7 +10,7 @@ type TemplateListReq struct {
 }
 
 type TemplateListRes struct {
-	EmailTemplateList []*bean.EmailTemplateVo `json:"emailTemplateList" description:"EmailTemplateList" `
+	EmailTemplateList []*bean.MerchantEmailTemplateSimplify `json:"emailTemplateList" description:"EmailTemplateList" `
 }
 
 type TemplateUpdateReq struct {
