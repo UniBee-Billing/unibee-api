@@ -287,7 +287,7 @@ var (
 			{
 				//db check
 				_, err = query.GetMerchantList(ctx)
-				liberr.ErrIsNil(ctx, err, "DB Read check failure")
+				liberr.ErrIsNil(ctx, err, "DB Not Ready")
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
 				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
