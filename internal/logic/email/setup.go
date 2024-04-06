@@ -11,8 +11,11 @@ import (
 )
 
 func StandAloneInit(ctx context.Context) {
-	list := query.GetEmailDefaultTemplateList(ctx)
-	if len(list) == 0 {
+	list, err := query.GetEmailDefaultTemplateList(ctx)
+	if err != nil {
+		glog.Errorf(ctx, "StandAloneInit InitDefaultEmailTemplate error:%s\n", err.Error())
+	}
+	if err == nil && len(list) == 0 {
 		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate start\n")
 		InitDefaultEmailTemplate(ctx)
 		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate end\n")

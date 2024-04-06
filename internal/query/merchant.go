@@ -45,13 +45,13 @@ func GetMerchantByHost(ctx context.Context, host string) (one *entity.Merchant) 
 	return one
 }
 
-func GetMerchantList(ctx context.Context) (list []*entity.Merchant) {
-	err := dao.Merchant.Ctx(ctx).
+func GetMerchantList(ctx context.Context) (list []*entity.Merchant, err error) {
+	err = dao.Merchant.Ctx(ctx).
 		Scan(&list)
 	if err != nil {
-		return make([]*entity.Merchant, 0)
+		return make([]*entity.Merchant, 0), err
 	}
-	return
+	return list, nil
 }
 
 func GetActiveMerchantList(ctx context.Context) (list []*entity.Merchant) {

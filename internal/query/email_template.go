@@ -55,14 +55,17 @@ func GetMerchantEmailTemplateByTemplateName(ctx context.Context, merchantId uint
 	return bean.SimplifyMerchantEmailTemplate(one)
 }
 
-func GetEmailDefaultTemplateList(ctx context.Context) []*bean.EmailDefaultTemplateSimplify {
-	var list = make([]*entity.EmailDefaultTemplate, 0)
-	_ = dao.EmailDefaultTemplate.Ctx(ctx).
+func GetEmailDefaultTemplateList(ctx context.Context) (mainlist []*bean.EmailDefaultTemplateSimplify, err error) {
+	list := make([]*entity.EmailDefaultTemplate, 0)
+	err = dao.EmailDefaultTemplate.Ctx(ctx).
 		Where(dao.EmailDefaultTemplate.Columns().IsDeleted, 0).
 		Scan(&list)
+	if err != nil {
+		return nil, err
+	}
 	var templates = make([]*bean.EmailDefaultTemplateSimplify, 0)
 	for _, one := range list {
 		templates = append(templates, bean.SimplifyEmailDefaultTemplate(one))
 	}
-	return templates
+	return templates, nil
 }

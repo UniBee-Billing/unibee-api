@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/glog"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	"unibee/internal/logic/email"
@@ -46,7 +47,11 @@ func StandAloneInit(ctx context.Context) {
 	if len(password) == 0 {
 		password = "changeme"
 	}
-	if len(query.GetMerchantList(ctx)) == 0 {
+	list, err := query.GetMerchantList(ctx)
+	if err != nil {
+		glog.Errorf(ctx, "StandAloneInit adminAccount error:%s\n", err.Error())
+	}
+	if err == nil && len(list) == 0 {
 		_, _, err := CreateMerchant(ctx, &CreateMerchantInternalReq{
 			FirstName: "unibee",
 			LastName:  "unibee",
