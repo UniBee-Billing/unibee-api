@@ -21,6 +21,7 @@ import (
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic"
+	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/liberr"
 
@@ -284,12 +285,15 @@ var (
 			s.BindHandler("/merchant_ws/{merchantApiKey}", websocket.MerchantWebSocketMessageEntry)
 
 			{
+				//db check
+				_, err = query.GetMerchantList(ctx)
+				liberr.ErrIsNil(ctx, err, "DB Read check failure")
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
 				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
 				g.Log().Infof(ctx, "Server Time: %s ", gtime.Now().Layout("2006-01-02 15:04:05"))
-				_, err := g.Redis().Set(ctx, "g_check", "checked")
+				_, err = g.Redis().Set(ctx, "g_check", "checked")
 				liberr.ErrIsNil(ctx, err, "Redis write check failure")
 				value, err := g.Redis().Get(ctx, "g_check")
 				liberr.ErrIsNil(ctx, err, "Redis read check failure")
