@@ -23,7 +23,7 @@ build:
     - go get
     - GOOS=linux GOARCH=amd64 go build -o temp/linux_amd64/main main.go
     - chmod +x temp/linux_amd64/main
-    - cp temp/linux_amd64/main /data/artifacts/main
+    - cp temp/linux_amd64/main /data/artifacts/unibee_api
 
 push:
   only:
@@ -32,7 +32,7 @@ push:
   stage: push
   script:
     - mkdir -p temp/linux_amd64
-    - cp /data/artifacts/main temp/linux_amd64/main
+    - cp /data/artifacts/unibee_api temp/linux_amd64/main
     - chmod +x temp/linux_amd64/main
     - docker build -f manifest/docker/Dockerfile -t easzlab.io.local:5000/unibee/unibee-api:daily --platform linux/amd64 .
     - docker push easzlab.io.local:5000/unibee/unibee-api:daily
