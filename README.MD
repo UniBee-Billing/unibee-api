@@ -155,3 +155,5 @@ Data Access Data access objects, a layer of abstract objects used to interact wi
 
   
 TODO Mark https://github.com/golang-migrate/migrate
+TODO Mark https://medium.com/@udayakumarvdm/create-mysql-database-using-golang-b28c08e54660
+TODO Mark https://docs.cloud.coinbase.com/pay-sdk/docs/rest-api-reference
