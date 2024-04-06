@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/net/goai"
+	"github.com/gogf/gf/v2/os/glog"
 	"github.com/gogf/gf/v2/os/gtime"
+	"os"
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/cmd/swagger"
@@ -27,6 +29,14 @@ import (
 	"github.com/gogf/gf/v2/os/gcmd"
 )
 
+func readBuildVersionInfo(ctx context.Context) string {
+	buildInfo, err := os.ReadFile("./version.txt")
+	if err != nil {
+		glog.Errorf(ctx, "readBuildVersionInfo error:%s", err.Error())
+	}
+	return string(buildInfo)
+}
+
 var (
 	Main = gcmd.Command{
 		Name:  "UniBee Api",
@@ -42,6 +52,7 @@ var (
 				Name: "Apache-2.0",
 				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
 			}
+			openapi.Info.Version = readBuildVersionInfo(ctx)
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
 
