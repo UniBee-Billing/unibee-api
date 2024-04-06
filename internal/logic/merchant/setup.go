@@ -56,8 +56,10 @@ func StandAloneInit(ctx context.Context) {
 			UserName:  "",
 		})
 		if err != nil {
-			g.Log().Errorf(ctx, "StandAloneInit admin account error:%s", err.Error())
+			g.Log().Errorf(ctx, "StandAloneInit adminAccount error:%s", err.Error())
 			return
+		} else {
+			g.Log().Infof(ctx, "StandAloneInit adminAccount email:%s", merchantEmail)
 		}
 	}
 }

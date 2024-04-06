@@ -13,16 +13,21 @@ import (
 func StandAloneInit(ctx context.Context) {
 	list := query.GetEmailDefaultTemplateList(ctx)
 	if len(list) == 0 {
+		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate start\n")
 		InitDefaultEmailTemplate(ctx)
+		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate end\n")
 	}
 }
 
 func InitDefaultEmailTemplate(ctx context.Context) {
 	list := FetchDefaultEmailTemplateFromCloudApi()
+	glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate cloud template count:%d\n", len(list))
 	for _, one := range list {
 		_, err := dao.EmailDefaultTemplate.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			glog.Errorf(ctx, "InitDefaultEmailTemplate error:%s", err.Error())
+			glog.Errorf(ctx, "StandAloneInit InitDefaultEmailTemplate error:%s", err.Error())
+		} else {
+			glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate template:%s\n", one.TemplateName)
 		}
 	}
 }
