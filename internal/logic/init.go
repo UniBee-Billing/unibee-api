@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/merchant"
@@ -34,6 +35,7 @@ func StandaloneInit(ctx context.Context) {
 					return
 				}
 			}()
+			time.Sleep(10)
 			merchant.StandAloneInit(ctx)
 			email.StandAloneInit(ctx)
 		}()
