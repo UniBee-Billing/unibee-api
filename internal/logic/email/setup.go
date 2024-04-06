@@ -13,24 +13,24 @@ import (
 func StandAloneInit(ctx context.Context) {
 	list, err := query.GetEmailDefaultTemplateList(ctx)
 	if err != nil {
-		glog.Errorf(ctx, "StandAloneInit InitDefaultEmailTemplate error:%s\n", err.Error())
+		glog.Errorf(ctx, "StandAloneInit InitDefaultEmailTemplate error:%s", err.Error())
 	}
 	if err == nil && len(list) == 0 {
-		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate start\n")
+		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate start")
 		InitDefaultEmailTemplate(ctx)
-		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate end\n")
+		glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate end")
 	}
 }
 
 func InitDefaultEmailTemplate(ctx context.Context) {
 	list := FetchDefaultEmailTemplateFromCloudApi()
-	glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate cloud template count:%d\n", len(list))
+	glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate cloud template count:%d", len(list))
 	for _, one := range list {
 		_, err := dao.EmailDefaultTemplate.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			glog.Errorf(ctx, "StandAloneInit InitDefaultEmailTemplate error:%s", err.Error())
 		} else {
-			glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate template:%s\n", one.TemplateName)
+			glog.Infof(ctx, "StandAloneInit InitDefaultEmailTemplate template:%s", one.TemplateName)
 		}
 	}
 }

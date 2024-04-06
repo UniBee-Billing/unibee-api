@@ -49,7 +49,7 @@ func StandAloneInit(ctx context.Context) {
 	}
 	list, err := query.GetMerchantList(ctx)
 	if err != nil {
-		glog.Errorf(ctx, "StandAloneInit adminAccount error:%s\n", err.Error())
+		glog.Errorf(ctx, "StandAloneInit adminAccount error:%s", err.Error())
 	}
 	if err == nil && len(list) == 0 {
 		_, _, err := CreateMerchant(ctx, &CreateMerchantInternalReq{
