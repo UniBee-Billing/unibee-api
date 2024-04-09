@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/glog"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
@@ -28,6 +29,10 @@ func MerchantSetupForCloudMode(ctx context.Context, merchantId uint64) error {
 			name, data := vat_gateway.GetDefaultMerchantVatConfig(ctx, consts.CloudModeManagerMerchantId)
 			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
 			err := vat_gateway.SetupMerchantVatConfig(ctx, merchantId, name, data, true)
+			if err != nil {
+				return err
+			}
+			err = vat_gateway.InitMerchantDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 			if err != nil {
 				return err
 			}
