@@ -190,6 +190,7 @@ type IMerchantUser interface {
 
 type IMerchantVat interface {
 	SetupGateway(ctx context.Context, req *vat.SetupGatewayReq) (res *vat.SetupGatewayRes, err error)
+	InitDefaultGateway(ctx context.Context, req *vat.InitDefaultGatewayReq) (res *vat.InitDefaultGatewayRes, err error)
 	CountryList(ctx context.Context, req *vat.CountryListReq) (res *vat.CountryListRes, err error)
 }
 

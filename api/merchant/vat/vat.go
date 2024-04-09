@@ -14,6 +14,12 @@ type SetupGatewayReq struct {
 type SetupGatewayRes struct {
 }
 
+type InitDefaultGatewayReq struct {
+	g.Meta `path:"/init_default_gateway" tags:"Vat" method:"post" summary:"Init Default Vat Gateway"`
+}
+type InitDefaultGatewayRes struct {
+}
+
 type CountryListReq struct {
 	g.Meta     `path:"/country_list" tags:"Vat" method:"get,post" summary:"Vat Country List"`
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
