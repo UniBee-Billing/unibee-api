@@ -110,7 +110,7 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
 	utility.Assert(newOne != nil, "Server Error")
-	err = MerchantSetupForCloudMode(ctx, merchant.Id)
+	err = SetupForCloudMode(ctx, merchant.Id)
 	return merchant, newOne, err
 }
 

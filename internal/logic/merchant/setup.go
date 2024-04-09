@@ -9,14 +9,15 @@ import (
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/email"
+	"unibee/internal/logic/gateway/service"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
-func MerchantSetupForCloudMode(ctx context.Context, merchantId uint64) error {
+func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 	if config.GetConfigInstance().Mode == "cloud" {
-		//if cloud version setup default sendgrid and vat
+		//if cloud version setup default sendgrid, vat, stripe gateway
 		{
 			name, data := email.GetDefaultMerchantEmailConfig(ctx, consts.CloudModeManagerMerchantId)
 			utility.Assert(len(name) > 0 && len(data) > 0, "Server Error")
@@ -35,6 +36,16 @@ func MerchantSetupForCloudMode(ctx context.Context, merchantId uint64) error {
 			err = vat_gateway.InitMerchantDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 			if err != nil {
 				return err
+			}
+		}
+		{
+			stripeGateway := query.GetGatewayByGatewayName(ctx, consts.CloudModeManagerMerchantId, "stripe")
+			if stripeGateway != nil {
+				service.SetupGateway(ctx, consts.CloudModeManagerMerchantId, stripeGateway.GatewayName, stripeGateway.GatewayKey, stripeGateway.GatewaySecret)
+			}
+			changellyGateway := query.GetGatewayByGatewayName(ctx, consts.CloudModeManagerMerchantId, "changelly")
+			if changellyGateway != nil {
+				service.SetupGateway(ctx, consts.CloudModeManagerMerchantId, changellyGateway.GatewayName, changellyGateway.GatewayKey, changellyGateway.GatewaySecret)
 			}
 		}
 	}
