@@ -244,11 +244,16 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 		} else {
 			vatSupport = false
 		}
+		// disable tax for non-eu country
+		var standardTaxPercentage = countryRate.StandardTaxPercentage
+		if countryRate.Eu != 1 {
+			standardTaxPercentage = 0
+		}
 		list = append(list, &bean.VatCountryRate{
 			CountryCode:           countryRate.CountryCode,
 			CountryName:           countryRate.CountryName,
 			VatSupport:            vatSupport,
-			StandardTaxPercentage: countryRate.StandardTaxPercentage,
+			StandardTaxPercentage: standardTaxPercentage,
 		})
 	}
 	return list, nil
@@ -278,12 +283,17 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	} else {
 		vatSupport = false
 	}
+	// disable tax for non-eu country
+	var standardTaxPercentage = one.StandardTaxPercentage
+	if one.Eu != 1 {
+		standardTaxPercentage = 0
+	}
 	return &bean.VatCountryRate{
 		Id:                    one.Id,
 		Gateway:               one.Gateway,
 		CountryCode:           one.CountryCode,
 		CountryName:           one.CountryName,
 		VatSupport:            vatSupport,
-		StandardTaxPercentage: one.StandardTaxPercentage,
+		StandardTaxPercentage: standardTaxPercentage,
 	}, nil
 }
