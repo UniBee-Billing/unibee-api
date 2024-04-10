@@ -1,0 +1,27 @@
+// =================================================================================
+// Code generated and maintained by GoFrame CLI tool. DO NOT EDIT.
+// =================================================================================
+
+package entity
+
+import (
+	"github.com/gogf/gf/v2/os/gtime"
+)
+
+// MerchantUserDiscountCode is the golang structure for table merchant_user_discount_code.
+type MerchantUserDiscountCode struct {
+	Id             int64       `json:"id"             description:"ID"`                           // ID
+	MerchantId     uint64      `json:"merchantId"     description:"merchantId"`                   // merchantId
+	UserId         uint64      `json:"userId"         description:"user_id"`                      // user_id
+	Code           string      `json:"code"           description:"code"`                         // code
+	Status         int         `json:"status"         description:"status, 1-normal, 2-rollback"` // status, 1-normal, 2-rollback
+	PlanId         string      `json:"planId"         description:"plan_id"`                      // plan_id
+	SubscriptionId string      `json:"subscriptionId" description:"subscription_id"`              // subscription_id
+	PaymentId      string      `json:"paymentId"      description:"payment_id"`                   // payment_id
+	InvoiceId      string      `json:"invoiceId"      description:"invoice_id"`                   // invoice_id
+	UniqueId       string      `json:"uniqueId"       description:"unique_id"`                    // unique_id
+	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"create time"`                  // create time
+	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                  // update time
+	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`        // 0-UnDeleted，1-Deleted
+	CreateTime     int64       `json:"createTime"     description:"create utc time"`              // create utc time
+}
