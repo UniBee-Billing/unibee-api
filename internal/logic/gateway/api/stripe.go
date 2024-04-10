@@ -23,7 +23,6 @@ import (
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/log"
-	_ "unibee/internal/logic/gateway/base"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/gateway/util"
 	entity "unibee/internal/model/entity/oversea_pay"
