@@ -116,3 +116,9 @@ func NewRole() merchant.IMerchantRole {
 	return &ControllerRole{}
 }
 
+type ControllerDiscount struct{}
+
+func NewDiscount() merchant.IMerchantDiscount {
+	return &ControllerDiscount{}
+}
+

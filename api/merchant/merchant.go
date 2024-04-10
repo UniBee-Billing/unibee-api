@@ -9,6 +9,7 @@ import (
 	
 	"unibee/api/merchant/auth"
 	"unibee/api/merchant/balance"
+	"unibee/api/merchant/discount"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
 	"unibee/api/merchant/invoice"
@@ -40,6 +41,13 @@ type IMerchantAuth interface {
 type IMerchantBalance interface {
 	DetailQuery(ctx context.Context, req *balance.DetailQueryReq) (res *balance.DetailQueryRes, err error)
 	UserDetailQuery(ctx context.Context, req *balance.UserDetailQueryReq) (res *balance.UserDetailQueryRes, err error)
+}
+
+type IMerchantDiscount interface {
+	List(ctx context.Context, req *discount.ListReq) (res *discount.ListRes, err error)
+	New(ctx context.Context, req *discount.NewReq) (res *discount.NewRes, err error)
+	Edit(ctx context.Context, req *discount.EditReq) (res *discount.EditRes, err error)
+	Delete(ctx context.Context, req *discount.DeleteReq) (res *discount.DeleteRes, err error)
 }
 
 type IMerchantEmail interface {
