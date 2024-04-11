@@ -65,6 +65,8 @@ type InvoiceColumns struct {
 	FinishTime                     string // utc time of enter process
 	DayUtilDue                     string // day util due after process
 	LastTrackTime                  string // last process invoice track time
+	DiscountCode                   string // discount_code
+	DiscountAmount                 string // discount amount, cent
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -114,6 +116,8 @@ var invoiceColumns = InvoiceColumns{
 	FinishTime:                     "finish_time",
 	DayUtilDue:                     "day_util_due",
 	LastTrackTime:                  "last_track_time",
+	DiscountCode:                   "discount_code",
+	DiscountAmount:                 "discount_amount",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

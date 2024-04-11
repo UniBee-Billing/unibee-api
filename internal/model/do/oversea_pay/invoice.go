@@ -57,4 +57,6 @@ type Invoice struct {
 	FinishTime                     interface{} // utc time of enter process
 	DayUtilDue                     interface{} // day util due after process
 	LastTrackTime                  interface{} // last process invoice track time
+	DiscountCode                   interface{} // discount_code
+	DiscountAmount                 interface{} // discount amount, cent
 }

@@ -55,4 +55,6 @@ type Invoice struct {
 	FinishTime                     int64       `json:"finishTime"                     description:"utc time of enter process"`                                              // utc time of enter process
 	DayUtilDue                     int64       `json:"dayUtilDue"                     description:"day util due after process"`                                             // day util due after process
 	LastTrackTime                  int64       `json:"lastTrackTime"                  description:"last process invoice track time"`                                        // last process invoice track time
+	DiscountCode                   string      `json:"discountCode"                   description:"discount_code"`                                                          // discount_code
+	DiscountAmount                 int64       `json:"discountAmount"                 description:"discount amount, cent"`                                                  // discount amount, cent
 }

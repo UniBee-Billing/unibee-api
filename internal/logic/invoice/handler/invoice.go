@@ -92,6 +92,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,
+		DiscountAmount:                 simplify.DiscountAmount,
+		DiscountCode:                   simplify.DiscountCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -170,6 +172,8 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			CreateTime:                     gtime.Now().Timestamp(),
 			FinishTime:                     invoice.FinishTime,
 			DayUtilDue:                     invoice.DayUtilDue,
+			DiscountAmount:                 invoice.DiscountAmount,
+			DiscountCode:                   invoice.DiscountCode,
 		}
 
 		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -202,6 +206,8 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			dao.Invoice.Columns().SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(invoice.Lines),
 			dao.Invoice.Columns().PaymentLink:                    payment.Link,
+			dao.Invoice.Columns().DiscountAmount:                 invoice.DiscountAmount,
+			dao.Invoice.Columns().DiscountCode:                   invoice.DiscountCode,
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return nil, err
