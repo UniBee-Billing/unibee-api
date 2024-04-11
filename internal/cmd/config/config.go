@@ -15,6 +15,7 @@ type Config struct {
 	MinioConfig MinioConfig `json:"minio" yaml:"minio"`
 	Server      Server      `json:"server" yaml:"server"`
 	Auth        Auth        `json:"auth" yaml:"auth"`
+	VatConfig   VatConfig   `json:"vatConfig" yaml:"vatConfig"`
 }
 
 type Server struct {
@@ -61,6 +62,11 @@ type MinioConfig struct {
 	SecretKey  string `json:"secretKey" yaml:"secretKey"`
 	BucketName string `json:"bucketName" yaml:"bucketName"`
 	Domain     string `json:"domain" yaml:"domain"`
+}
+
+type VatConfig struct {
+	NonEuEnable                   string `json:"nonEuEnable" yaml:"nonEuEnable"`
+	NumberUnExemptionCountryCodes string `json:"numberUnExemptionCountryCodes" yaml:"numberUnExemptionCountryCodes"`
 }
 
 var instance *Config

@@ -250,7 +250,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		}
 	}
 
-	if vatNumberValidate != nil {
+	if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
 		standardTaxScale = 0
 	}
 

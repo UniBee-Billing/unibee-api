@@ -18,28 +18,30 @@ import (
 const DefaultConfigFileName = "config.yaml"
 
 var (
-	env               string
-	mode              string
-	unibeeApiUrl      string
-	serverAddress     string
-	serverJwtKey      string
-	swaggerPath       string
-	redisAddress      string
-	redisPass         string
-	redisDatabase     string
-	redisMaxIdle      string
-	redisMinIdle      string
-	redisIdleTimeout  string
-	databaseLink      string
-	databaseDebug     string
-	databaseCharset   string
-	authLoginExpire   string
-	loggerLevel       string
-	nacosIpArg        string
-	nacosPortArg      string
-	nacosNamespaceArg string
-	nacosGroupArg     string
-	nacosDataIdArg    string
+	env                              string
+	mode                             string
+	unibeeApiUrl                     string
+	serverAddress                    string
+	serverJwtKey                     string
+	swaggerPath                      string
+	redisAddress                     string
+	redisPass                        string
+	redisDatabase                    string
+	redisMaxIdle                     string
+	redisMinIdle                     string
+	redisIdleTimeout                 string
+	databaseLink                     string
+	databaseDebug                    string
+	databaseCharset                  string
+	authLoginExpire                  string
+	loggerLevel                      string
+	nacosIpArg                       string
+	nacosPortArg                     string
+	nacosNamespaceArg                string
+	nacosGroupArg                    string
+	nacosDataIdArg                   string
+	VatNonEuEnable                   string
+	VatNumberUnExemptionCountryCodes string
 )
 
 func Init() {
@@ -66,6 +68,8 @@ func Init() {
 	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", utility.GetEnvParam("nacos.namespace"), "nacos namespace, default")
 	flag.StringVar(&nacosGroupArg, "nacos-group", utility.GetEnvParam("nacos.group"), "nacos group")
 	flag.StringVar(&nacosDataIdArg, "nacos-data-id", utility.GetEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
+	flag.StringVar(&VatNonEuEnable, "vat-non-eu-enable", utility.GetEnvParam("vat.non.eu.enable"), "vat config, non eu country enable vat rate")
+	flag.StringVar(&VatNumberUnExemptionCountryCodes, "vat-number-un-exemption-country-codes", utility.GetEnvParam("vat.number.un.exemption.country.codes"), "vat config, vat number not exemption countryCodes")
 
 	var ctx = gctx.New()
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetFileName(DefaultConfigFileName)
@@ -98,9 +102,10 @@ func Init() {
 				"redis": map[string]interface{}{
 					"default": map[string]interface{}{},
 				},
-				"database": map[string]interface{}{"default": map[string]interface{}{}},
-				"logger":   map[string]interface{}{},
-				"auth":     map[string]interface{}{"login": map[string]interface{}{}},
+				"database":  map[string]interface{}{"default": map[string]interface{}{}},
+				"logger":    map[string]interface{}{},
+				"vatConfig": map[string]interface{}{},
+				"auth":      map[string]interface{}{"login": map[string]interface{}{}},
 			}
 			g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 		}
@@ -169,8 +174,19 @@ func SetupDefaultConfigs(ctx context.Context) {
 	authLoginConfig := g.Cfg().MustGet(ctx, "auth.login").Map()
 	utility.Assert(authLoginConfig != nil, "auth login config not found")
 	setUpDefaultConfig(authLoginConfig, "expire", authLoginExpire, 600)
+	//vatConfig := g.Cfg().MustGet(ctx, "vatConfig").Map()
+	//if vatConfig != nil {
+	//	setUpDefaultConfig(vatConfig, "nonEuEnable", VatNonEuEnable, "false")
+	//	setUpDefaultConfig(vatConfig, "numberUnExemptionCountryCodes", VatNumberUnExemptionCountryCodes, "")
+	//}
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 	SetConfig(utility.MarshalToJsonString(config))
+	if VatNonEuEnable != "" {
+		GetConfigInstance().VatConfig.NonEuEnable = VatNonEuEnable
+	}
+	if VatNumberUnExemptionCountryCodes != "" {
+		GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes = VatNumberUnExemptionCountryCodes
+	}
 }
 
 func ReplaceConfigContentUserNacos(ip string, port uint64, namespace, dataId, group string) (n *Nacos, err error) {

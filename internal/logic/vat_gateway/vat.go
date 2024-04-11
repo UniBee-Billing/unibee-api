@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
+	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
@@ -285,9 +286,12 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	}
 	// disable tax for non-eu country
 	var standardTaxPercentage = one.StandardTaxPercentage
-	if one.Eu != 1 {
-		standardTaxPercentage = 0
+	if config.GetConfigInstance().VatConfig.NonEuEnable != "true" {
+		if one.Eu != 1 {
+			standardTaxPercentage = 0
+		}
 	}
+
 	return &bean.VatCountryRate{
 		Id:                    one.Id,
 		Gateway:               one.Gateway,
