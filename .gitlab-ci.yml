@@ -3,6 +3,7 @@ stages:
   - push
   - deploy
   - hub_push
+  - nm_stage_deploy
 
 variables:
   IMAGE_GROUP: xxx
@@ -56,3 +57,11 @@ hub_push:
     - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
     - docker tag easzlab.io.local:5000/unibee/unibee-api:daily unibee/api:stage
     - docker push unibee/api:stage
+
+nm_stage_deploy:
+  only:
+    - main
+  image: registry.cn-shenzhen.aliyuncs.com/heiku/kubectl:latest
+  stage: deploy
+  script:
+    - kubectl --kubeconfig /data/kubeconfigs/nodemaven_dev_config rollout restart deployment/unibee-api
