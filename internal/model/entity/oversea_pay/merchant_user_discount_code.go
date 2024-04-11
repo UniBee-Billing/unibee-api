@@ -24,4 +24,6 @@ type MerchantUserDiscountCode struct {
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                  // update time
 	IsDeleted      int         `json:"isDeleted"      description:"0-UnDeleted，1-Deleted"`        // 0-UnDeleted，1-Deleted
 	CreateTime     int64       `json:"createTime"     description:"create utc time"`              // create utc time
+	ApplyAmount    int64       `json:"applyAmount"    description:"apply_amount"`                 // apply_amount
+	Currency       string      `json:"currency"       description:"currency"`                     // currency
 }

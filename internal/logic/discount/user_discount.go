@@ -11,17 +11,28 @@ import (
 	"unibee/internal/query"
 )
 
-func UserDiscountApplyPreview(ctx context.Context, merchantId uint64, userId uint64, code string, subscriptionId string) (canApply bool, message string) {
-	if merchantId == 0 {
+type UserDiscountApplyReq struct {
+	merchantId     uint64
+	userId         uint64
+	code           string
+	subscriptionId string
+	paymentId      string
+	invoiceId      string
+	applyAmount    int64
+	currency       string
+}
+
+func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, message string) {
+	if req.merchantId == 0 {
 		return false, "invalid merchantId"
 	}
-	if userId == 0 {
+	if req.userId == 0 {
 		return false, "invalid userId"
 	}
-	if len(code) == 0 {
+	if len(req.code) == 0 {
 		return false, "invalid code"
 	}
-	discountCode := query.GetDiscountByCode(ctx, merchantId, code)
+	discountCode := query.GetDiscountByCode(ctx, req.merchantId, req.code)
 	if discountCode == nil {
 		return false, "discount code not found"
 	}
@@ -37,9 +48,9 @@ func UserDiscountApplyPreview(ctx context.Context, merchantId uint64, userId uin
 	if discountCode.UserLimit > 0 {
 		//check user limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, merchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, userId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, code).
+			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.merchantId).
+			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.userId).
+			Where(dao.MerchantUserDiscountCode.Columns().Code, req.code).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
@@ -51,15 +62,15 @@ func UserDiscountApplyPreview(ctx context.Context, merchantId uint64, userId uin
 		}
 	}
 	if discountCode.SubscriptionLimit > 0 {
-		if len(subscriptionId) == 0 {
+		if len(req.subscriptionId) == 0 {
 			return false, "invalid subscriptionId"
 		}
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, merchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, userId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, code).
-			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, subscriptionId).
+			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.merchantId).
+			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.userId).
+			Where(dao.MerchantUserDiscountCode.Columns().Code, req.code).
+			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.subscriptionId).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
@@ -74,17 +85,19 @@ func UserDiscountApplyPreview(ctx context.Context, merchantId uint64, userId uin
 	return true, ""
 }
 
-func UserDiscountApply(ctx context.Context, merchantId uint64, userId uint64, code string, subscriptionId string, paymentId string, invoiceId string) (discountCode *entity.MerchantUserDiscountCode, err error) {
+func UserDiscountApply(ctx context.Context, req *UserDiscountApplyReq) (discountCode *entity.MerchantUserDiscountCode, err error) {
 	one := &entity.MerchantUserDiscountCode{
-		MerchantId:     merchantId,
-		UserId:         userId,
-		Code:           code,
+		MerchantId:     req.merchantId,
+		UserId:         req.userId,
+		Code:           req.code,
 		Status:         1,
-		SubscriptionId: subscriptionId,
-		PaymentId:      paymentId,
-		InvoiceId:      invoiceId,
-		UniqueId:       fmt.Sprintf("%d_%d_%s_%d_%s_%s_%s", merchantId, userId, code, 1, subscriptionId, paymentId, invoiceId),
+		SubscriptionId: req.subscriptionId,
+		PaymentId:      req.paymentId,
+		InvoiceId:      req.invoiceId,
+		UniqueId:       fmt.Sprintf("%d_%d_%s_%d_%s_%s_%s", req.merchantId, req.userId, req.code, 1, req.subscriptionId, req.paymentId, req.invoiceId),
 		CreateTime:     gtime.Now().Timestamp(),
+		ApplyAmount:    req.applyAmount,
+		Currency:       req.currency,
 	}
 	result, err := dao.MerchantUserDiscountCode.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

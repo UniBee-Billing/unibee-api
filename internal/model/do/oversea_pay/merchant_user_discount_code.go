@@ -26,4 +26,6 @@ type MerchantUserDiscountCode struct {
 	GmtModify      *gtime.Time // update time
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
 	CreateTime     interface{} // create utc time
+	ApplyAmount    interface{} // apply_amount
+	Currency       interface{} // currency
 }

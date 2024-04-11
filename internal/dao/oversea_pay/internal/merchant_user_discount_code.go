@@ -34,6 +34,8 @@ type MerchantUserDiscountCodeColumns struct {
 	GmtModify      string // update time
 	IsDeleted      string // 0-UnDeleted，1-Deleted
 	CreateTime     string // create utc time
+	ApplyAmount    string // apply_amount
+	Currency       string // currency
 }
 
 // merchantUserDiscountCodeColumns holds the columns for table merchant_user_discount_code.
@@ -52,6 +54,8 @@ var merchantUserDiscountCodeColumns = MerchantUserDiscountCodeColumns{
 	GmtModify:      "gmt_modify",
 	IsDeleted:      "is_deleted",
 	CreateTime:     "create_time",
+	ApplyAmount:    "apply_amount",
+	Currency:       "currency",
 }
 
 // NewMerchantUserDiscountCodeDao creates and returns a new DAO object for table data access.
