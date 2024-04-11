@@ -10,7 +10,9 @@ type InvoiceSimplify struct {
 	Id                             uint64                 `json:"id"                             description:""` //
 	InvoiceId                      string                 `json:"invoiceId"`
 	InvoiceName                    string                 `json:"invoiceName"`
+	DiscountCode                   string                 `json:"discountCode"`
 	TotalAmount                    int64                  `json:"totalAmount"`
+	DiscountAmount                 int64                  `json:"discountAmount"`
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
 	Currency                       string                 `json:"currency"`
 	TaxAmount                      int64                  `json:"taxAmount"`

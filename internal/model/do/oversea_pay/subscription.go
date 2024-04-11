@@ -37,7 +37,7 @@ type Subscription struct {
 	GatewayStatus               interface{} // gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	GatewayItemData             interface{} // gateway_item_data
 	CancelAtPeriodEnd           interface{} // whether cancel at period end，0-false | 1-true
-	GatewayLatestInvoiceId      interface{} // gateway latest invoice id
+	DiscountCode                interface{} // discount_code
 	LastUpdateTime              interface{} //
 	CurrentPeriodStart          interface{} // current_period_start, utc time
 	CurrentPeriodEnd            interface{} // current_period_end, utc time

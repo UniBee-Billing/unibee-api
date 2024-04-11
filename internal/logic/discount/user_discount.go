@@ -6,9 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type UserDiscountApplyReq struct {
@@ -123,4 +125,36 @@ func UserDiscountRollback(ctx context.Context, id int64) error {
 		dao.MerchantUserDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantUserDiscountCode.Columns().Id, id).OmitNil().Update()
 	return err
+}
+
+func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmount int64, currency string, discountCode string, timeNow int64) int64 {
+	if timeNow == 0 {
+		timeNow = gtime.Now().Timestamp()
+	}
+	if merchantId <= 0 {
+		return 0
+	}
+	if totalAmount <= 0 {
+		return 0
+	}
+	if len(discountCode) == 0 {
+		return 0
+	}
+	merchantDiscountCode := query.GetDiscountByCode(ctx, merchantId, discountCode)
+	if merchantDiscountCode != nil {
+		return 0
+	}
+	if merchantDiscountCode.Status != DiscountStatusActive {
+		return 0
+	}
+	if merchantDiscountCode.EndTime < timeNow || merchantDiscountCode.StartTime > timeNow {
+		return 0
+	}
+	if merchantDiscountCode.DiscountType == DiscountTypePercentage {
+		return int64(float64(totalAmount) * utility.ConvertTaxScaleToInternalFloat(merchantDiscountCode.DiscountPercentage))
+	} else if merchantDiscountCode.DiscountType == DiscountTypeFixedAmount &&
+		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
+		return merchantDiscountCode.DiscountAmount
+	}
+	return 0
 }

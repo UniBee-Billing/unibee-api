@@ -45,7 +45,7 @@ type SubscriptionColumns struct {
 	GatewayStatus               string // gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
 	GatewayItemData             string // gateway_item_data
 	CancelAtPeriodEnd           string // whether cancel at period end，0-false | 1-true
-	GatewayLatestInvoiceId      string // gateway latest invoice id
+	DiscountCode                string // discount_code
 	LastUpdateTime              string //
 	CurrentPeriodStart          string // current_period_start, utc time
 	CurrentPeriodEnd            string // current_period_end, utc time
@@ -97,7 +97,7 @@ var subscriptionColumns = SubscriptionColumns{
 	GatewayStatus:               "gateway_status",
 	GatewayItemData:             "gateway_item_data",
 	CancelAtPeriodEnd:           "cancel_at_period_end",
-	GatewayLatestInvoiceId:      "gateway_latest_invoice_id",
+	DiscountCode:                "discount_code",
 	LastUpdateTime:              "last_update_time",
 	CurrentPeriodStart:          "current_period_start",
 	CurrentPeriodEnd:            "current_period_end",
