@@ -417,8 +417,18 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 }
 
 func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity.Refund, uniqueId string) error {
-	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
+	if refund == nil {
+		return gerror.New("refund is nil")
+	}
+	if len(uniqueId) == 0 {
+		return gerror.New("uniqueId is nil")
+	}
+	payment := query.GetPaymentByPaymentId(ctx, refund.PaymentId)
+	if payment == nil {
+		return gerror.New("payment not found for refundId:" + refund.RefundId)
+	}
 
+	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 	var status = 0
 	if refund.Status == consts.RefundSuccess {
 		status = 1
@@ -429,16 +439,16 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 	}
 
 	if one == nil {
-		//创建
 		one = &entity.PaymentTimeline{
 			MerchantId:     refund.MerchantId,
 			UserId:         refund.UserId,
-			SubscriptionId: refund.SubscriptionId,
+			SubscriptionId: payment.SubscriptionId,
 			//InvoiceId:      refund.InvoiceId,
 			UniqueId:     uniqueId,
 			Currency:     refund.Currency,
 			TotalAmount:  refund.RefundAmount,
 			GatewayId:    refund.GatewayId,
+			PaymentId:    payment.PaymentId,
 			Status:       status,
 			TimelineType: 1,
 			CreateTime:   gtime.Now().Timestamp(),
@@ -452,19 +462,17 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
 	} else {
-		//更新
 		_, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
 			dao.PaymentTimeline.Columns().MerchantId:     refund.MerchantId,
 			dao.PaymentTimeline.Columns().UserId:         refund.UserId,
-			dao.PaymentTimeline.Columns().SubscriptionId: refund.SubscriptionId,
-			//dao.PaymentTimeline.Columns().InvoiceId:      refund.InvoiceId,
-			dao.PaymentTimeline.Columns().Currency:    refund.Currency,
-			dao.PaymentTimeline.Columns().TotalAmount: refund.RefundAmount,
-			dao.PaymentTimeline.Columns().GatewayId:   refund.GatewayId,
-			//dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
-			dao.PaymentTimeline.Columns().GmtModify:    gtime.Now(),
-			dao.PaymentTimeline.Columns().Status:       status,
-			dao.PaymentTimeline.Columns().TimelineType: 1,
+			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
+			dao.PaymentTimeline.Columns().Currency:       refund.Currency,
+			dao.PaymentTimeline.Columns().TotalAmount:    refund.RefundAmount,
+			dao.PaymentTimeline.Columns().GatewayId:      refund.GatewayId,
+			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
+			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),
+			dao.PaymentTimeline.Columns().Status:         status,
+			dao.PaymentTimeline.Columns().TimelineType:   1,
 		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err
