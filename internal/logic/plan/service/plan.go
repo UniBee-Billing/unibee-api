@@ -129,7 +129,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeRecurringAddon, fmt.Sprintf("plan not recurring addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
-			utility.Assert(addonPlan.Currency == one.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Currency == req.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
 		}
 	}
 
@@ -139,7 +139,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		for _, addonPlan := range allAddonList {
 			utility.Assert(addonPlan.Type == consts.PlanTypeOnetimeAddon, fmt.Sprintf("plan not onetime addon type, id:%d", addonPlan.Id))
 			utility.Assert(addonPlan.Status == consts.PlanStatusActive, fmt.Sprintf("add plan not published status, id:%d", addonPlan.Id))
-			utility.Assert(addonPlan.Currency == one.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
+			utility.Assert(addonPlan.Currency == req.Currency, fmt.Sprintf("add plan currency not match plan's currency, id:%d", addonPlan.Id))
 		}
 	}
 
