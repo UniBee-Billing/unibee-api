@@ -242,12 +242,16 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	if len(vatCountryCode) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 		vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-		if vatNumberValidate == nil && err == nil && vatCountryRate != nil {
+		if err == nil && vatCountryRate != nil {
 			vatCountryName = vatCountryRate.CountryName
 			if vatCountryRate.StandardTaxPercentage > 0 {
 				standardTaxScale = vatCountryRate.StandardTaxPercentage
 			}
 		}
+	}
+
+	if vatNumberValidate != nil {
+		standardTaxScale = 0
 	}
 
 	if req.Quantity <= 0 {
