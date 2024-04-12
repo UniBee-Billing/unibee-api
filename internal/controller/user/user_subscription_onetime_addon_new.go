@@ -16,6 +16,7 @@ func (c *ControllerSubscription) OnetimeAddonNew(ctx context.Context, req *subsc
 		Quantity:       req.Quantity,
 		RedirectUrl:    req.ReturnUrl,
 		Metadata:       req.Metadata,
+		DiscountCode:   req.DiscountCode,
 	})
 	if err != nil {
 		return nil, err

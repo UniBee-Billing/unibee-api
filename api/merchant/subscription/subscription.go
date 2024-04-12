@@ -291,6 +291,7 @@ type OnetimeAddonNewReq struct {
 	Quantity       int64             `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
 	ReturnUrl      string            `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
 	Metadata       map[string]string `json:"metadata" dc:"Metadata，custom data"`
+	DiscountCode   string            `json:"discountCode" dc:"DiscountCode"`
 }
 
 type OnetimeAddonNewRes struct {
