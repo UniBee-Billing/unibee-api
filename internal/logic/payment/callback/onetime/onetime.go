@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/subscription_onetimeaddon"
+	"unibee/internal/logic/discount"
 	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -24,7 +25,12 @@ func (i Onetime) PaymentRefundCreateCallback(ctx context.Context, payment *entit
 }
 
 func (i Onetime) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
-
+	if payment.TotalAmount <= payment.RefundAmount {
+		err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+		if err != nil {
+			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+		}
+	}
 }
 
 func (i Onetime) PaymentRefundFailureCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
@@ -62,6 +68,10 @@ func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Paym
 		if one != nil {
 			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CANCELLED)
 		}
+	}
+	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	if err != nil {
+		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
 	}
 }
 
@@ -145,5 +155,9 @@ func (i Onetime) PaymentFailureCallback(ctx context.Context, payment *entity.Pay
 		if one != nil {
 			subscription_onetimeaddon.SendMerchantSubscriptionOnetimeAddonWebhookBackground(payment.MerchantId, one, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_EXPIRED)
 		}
+	}
+	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	if err != nil {
+		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
 	}
 }
