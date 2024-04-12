@@ -57,17 +57,16 @@ func HandleRefundCancelled(ctx context.Context, req *HandleRefundReq) (err error
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundCancelled, dao.Refund.Columns().RefundComment: req.Reason},
+			_, err = transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundCancelled, dao.Refund.Columns().RefundComment: req.Reason},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
-			if err != nil || result == nil {
-				//_ = transaction.Rollback()
+			if err != nil {
 				return err
 			}
-			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
+			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Decrement(dao.Payment.Columns().RefundAmount, one.RefundAmount)
+			if err != nil {
 				return err
 			}
+
 			return nil
 		})
 		if err == nil {
@@ -128,15 +127,13 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundFailed, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundFailed, dao.Refund.Columns().RefundComment: req.Reason},
+			_, err = transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundFailed, dao.Refund.Columns().RefundComment: req.Reason},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
-			if err != nil || result == nil {
-				//_ = transaction.Rollback()
+			if err != nil {
 				return err
 			}
-			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
+			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Decrement(dao.Payment.Columns().RefundAmount, one.RefundAmount)
+			if err != nil {
 				return err
 			}
 			return nil
@@ -201,23 +198,10 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			result, err := transaction.Update(dao.Refund.Table(), g.Map{dao.Refund.Columns().Status: consts.RefundSuccess, dao.Refund.Columns().RefundTime: refundAt},
 				g.Map{dao.Refund.Columns().Id: one.Id, dao.Refund.Columns().Status: consts.RefundCreated})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
-				return err
-			}
-			update, err := transaction.Update(dao.Payment.Table(), "refund_amount = refund_amount + ?", "id = ? AND ? >= 0 AND total_amount - refund_amount >= ?", one.RefundAmount, payment.Id, one.RefundAmount, one.RefundAmount)
-			if err != nil || update == nil {
-				//_ = transaction.Rollback()
-				return err
-			}
-			payAffected, err := update.RowsAffected()
-			g.Log().Printf(ctx, "HandleRefundSuccess Blank incrTotalRefundFee, updateCount=%v", payAffected)
-			if err != nil || payAffected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -353,7 +337,6 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 	one := query.GetRefundByGatewayRefundId(ctx, details.GatewayRefundId)
 
 	if one == nil {
-		//创建
 		one = &entity.Refund{
 			CompanyId:            payment.CompanyId,
 			MerchantId:           payment.MerchantId,
@@ -383,8 +366,6 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 		id, _ := result.LastInsertId()
 		one.Id = id
 	} else {
-		//更新
-
 		_, err := dao.Refund.Ctx(ctx).Data(g.Map{
 			dao.Refund.Columns().CompanyId:            payment.CompanyId,
 			dao.Refund.Columns().MerchantId:           payment.MerchantId,
@@ -407,10 +388,6 @@ func CreateOrUpdateRefundByDetail(ctx context.Context, payment *entity.Payment, 
 		if err != nil {
 			return err
 		}
-		//rowAffected, err := update.RowsAffected()
-		//if rowAffected != 1 {
-		//	return gerror.Newf("CreateOrUpdateRefundByDetail err:%s", update)
-		//}
 	}
 
 	return nil

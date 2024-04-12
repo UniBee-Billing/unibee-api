@@ -45,7 +45,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	utility.Assert(gateway != nil, "gateway not found")
 
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
-	utility.Assert(req.RefundAmount <= payment.TotalAmount, "refund value should <= TotalAmount value")
+	utility.Assert(req.RefundAmount <= payment.TotalAmount-payment.RefundAmount, "no enough amount can refund")
 
 	redisKey := fmt.Sprintf("createRefund-paymentId:%s-bizId:%s", payment.PaymentId, req.ExternalRefundId)
 	isDuplicatedInvoke := false
@@ -98,20 +98,23 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			//transaction gateway refund
 			one.UniqueId = one.RefundId
 			one.CreateTime = gtime.Now().Timestamp()
-			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert(one)
+
+			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert()
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			id, err := insert.LastInsertId()
 			if err != nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			one.Id = id
+
+			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Increment(dao.Payment.Columns().RefundAmount, refund.RefundAmount)
+			if err != nil {
+				return err
+			}
 
 			return nil
 		})
@@ -130,7 +133,8 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}
 
 	one.GatewayRefundId = gatewayResult.GatewayRefundId
-	result, err := dao.Refund.Ctx(ctx).Data(g.Map{dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId}).
+	result, err := dao.Refund.Ctx(ctx).Data(g.Map{
+		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId}).
 		Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
 	if err != nil || result == nil {
 		return nil, err
