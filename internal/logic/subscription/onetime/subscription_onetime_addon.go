@@ -11,6 +11,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/discount"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -33,6 +34,7 @@ type SubscriptionCreateOnetimeAddonInternalReq struct {
 	Quantity       int64             `json:"quantity" dc:"Quantity"`
 	RedirectUrl    string            `json:"redirectUrl"  dc:"RedirectUrl" `
 	Metadata       map[string]string `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode   string            `json:"discountCode"        dc:"DiscountCode"`
 }
 
 func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAddonInternalReq) (*SubscriptionCreateOnetimeAddonInternalRes, error) {
@@ -74,10 +76,29 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+
+	if len(req.DiscountCode) > 0 {
+		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:     req.MerchantId,
+			UserId:         sub.UserId,
+			DiscountCode:   req.DiscountCode,
+			SubscriptionId: "",
+			PaymentId:      "",
+			InvoiceId:      "",
+			ApplyAmount:    0,
+			Currency:       "",
+		})
+		utility.Assert(canApply, message)
+		utility.Assert(!isRecurring, "not support recurring discount code")
+	}
+
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, addon.Amount*req.Quantity, sub.Currency, req.DiscountCode, gtime.Now().Timestamp()), addon.Amount*req.Quantity)
 	invoice := &bean.InvoiceSimplify{
 		InvoiceName:                    "OneTimeAddonPurchase-Subscription",
 		TotalAmount:                    addon.Amount * req.Quantity,
 		TotalAmountExcludingTax:        addon.Amount * req.Quantity,
+		DiscountCode:                   req.DiscountCode,
+		DiscountAmount:                 discountAmount,
 		Currency:                       sub.Currency,
 		TaxAmount:                      0,
 		SubscriptionAmount:             0,
@@ -134,6 +155,21 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 	}).Where(dao.SubscriptionOnetimeAddon.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
+	}
+
+	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+		MerchantId:     req.MerchantId,
+		UserId:         sub.UserId,
+		DiscountCode:   invoice.DiscountCode,
+		SubscriptionId: one.SubscriptionId,
+		PaymentId:      createRes.PaymentId,
+		InvoiceId:      invoice.InvoiceId,
+		ApplyAmount:    invoice.DiscountAmount,
+		Currency:       invoice.Currency,
+	})
+	if err != nil {
+		// todo mark success payment
+		fmt.Printf("UserDiscountApply onetimeAddon Purchase createRes:%s err:%s", utility.MarshalToJsonString(createRes), err.Error())
 	}
 
 	return &SubscriptionCreateOnetimeAddonInternalRes{
