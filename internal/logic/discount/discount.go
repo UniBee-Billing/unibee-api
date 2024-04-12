@@ -24,14 +24,14 @@ const (
 )
 
 type CreateDiscountCodeInternalReq struct {
-	MerchantId         uint64 `json:"merchantId"        description:"MerchantId"`
-	Code               string `json:"code"              description:"Code"`
+	MerchantId         uint64 `json:"MerchantId"        description:"MerchantId"`
+	Code               string `json:"Code"              description:"Code"`
 	Name               string `json:"name"              description:"name"`                                                                        // name
 	BillingType        int    `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"`                                       // billing_type, 1-one-time, 2-recurring
 	DiscountType       int    `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"`                                 // discount_type, 1-percentage, 2-fixed_amount
 	DiscountAmount     int64  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
 	DiscountPercentage int64  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string `json:"currency"          description:"currency of discount, available when discount_type is fixed_amount"`          // currency of discount, available when discount_type is fixed_amount
+	Currency           string `json:"Currency"          description:"Currency of discount, available when discount_type is fixed_amount"`          // Currency of discount, available when discount_type is fixed_amount
 	UserLimit          int    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
 	SubscriptionLimit  int    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
 	StartTime          int64  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
@@ -39,9 +39,9 @@ type CreateDiscountCodeInternalReq struct {
 }
 
 func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInternalReq) error {
-	utility.Assert(req.Code != "", "invalid code")
+	utility.Assert(req.Code != "", "invalid Code")
 	one := query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
-	utility.Assert(one == nil, "exist code:"+req.Code)
+	utility.Assert(one == nil, "exist Code:"+req.Code)
 	utility.Assert(req.BillingType == DiscountBillingTypeOnetime || req.BillingType == DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
@@ -52,11 +52,11 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	if req.DiscountType == DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage > 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
-		utility.Assert(len(req.Currency) == 0, "invalid currency")
+		utility.Assert(len(req.Currency) == 0, "invalid Currency")
 	} else if req.DiscountType == DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
-		utility.Assert(len(req.Currency) >= 0, "invalid currency")
+		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
 
 	one = &entity.MerchantDiscountCode{
@@ -80,10 +80,10 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 }
 
 func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInternalReq) error {
-	utility.Assert(req.Code != "", "invalid code")
+	utility.Assert(req.Code != "", "invalid Code")
 	one := query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
-	utility.Assert(one != nil, "code not found :"+req.Code)
-	utility.Assert(one.Status == DiscountStatusEditable, "code not editable :"+req.Code)
+	utility.Assert(one != nil, "Code not found :"+req.Code)
+	utility.Assert(one.Status == DiscountStatusEditable, "Code not editable :"+req.Code)
 	utility.Assert(req.BillingType == DiscountBillingTypeOnetime || req.BillingType == DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
 	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
@@ -94,11 +94,11 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	if req.DiscountType == DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage > 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
-		utility.Assert(len(req.Currency) == 0, "invalid currency")
+		utility.Assert(len(req.Currency) == 0, "invalid Currency")
 	} else if req.DiscountType == DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
-		utility.Assert(len(req.Currency) >= 0, "invalid currency")
+		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
 	}
 
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
@@ -119,11 +119,11 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 
 func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
 	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "code not found :"+code)
+	utility.Assert(one != nil, "Code not found :"+code)
 	if one.Status == DiscountStatusActive {
 		return nil
 	} else if one.Status == DiscountStatusExpired {
-		return gerror.New("code is expired")
+		return gerror.New("Code is expired")
 	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusActive,
@@ -134,11 +134,11 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code s
 
 func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
 	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "code not found :"+code)
+	utility.Assert(one != nil, "Code not found :"+code)
 	if one.Status == DiscountStatusDeActive {
 		return nil
 	} else if one.Status != DiscountStatusActive {
-		return gerror.New("code is not active status")
+		return gerror.New("Code is not active status")
 	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusDeActive,
@@ -149,7 +149,7 @@ func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code
 
 func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
 	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "code not found :"+code)
+	utility.Assert(one != nil, "Code not found :"+code)
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
@@ -158,8 +158,8 @@ func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code str
 }
 
 func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
-	utility.Assert(merchantId > 0, "invalid merchantId")
-	utility.Assert(len(code) > 0, "invalid code")
+	utility.Assert(merchantId > 0, "invalid MerchantId")
+	utility.Assert(len(code) > 0, "invalid Code")
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Where(dao.MerchantDiscountCode.Columns().Code, code).Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).Delete()
 	return err
 }

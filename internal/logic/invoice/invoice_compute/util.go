@@ -7,23 +7,24 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/logic/discount"
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
 type CalculateInvoiceReq struct {
-	Currency       string `json:"currency"`
-	DiscountCode   string `json:"discountCode"`
-	DiscountAmount int64  `json:"discountAmount"`
-	PlanId         uint64 `json:"planId"`
-	Quantity       int64  `json:"quantity"`
-	AddonJsonData  string `json:"addonJsonData"`
-	TaxScale       int64  `json:"taxScale"`
-	PeriodStart    int64  `json:"periodStart"`
-	PeriodEnd      int64  `json:"periodEnd"`
-	FinishTime     int64  `json:"finishTime"`
-	InvoiceName    string `json:"invoiceName"`
+	Currency      string `json:"currency"`
+	DiscountCode  string `json:"discountCode"`
+	TimeNow       int64  `json:"TimeNow"`
+	PlanId        uint64 `json:"planId"`
+	Quantity      int64  `json:"quantity"`
+	AddonJsonData string `json:"addonJsonData"`
+	TaxScale      int64  `json:"taxScale"`
+	PeriodStart   int64  `json:"periodStart"`
+	PeriodEnd     int64  `json:"periodEnd"`
+	FinishTime    int64  `json:"finishTime"`
+	InvoiceName   string `json:"invoiceName"`
 }
 
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *bean.InvoiceSimplify {
@@ -66,7 +67,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		})
 	}
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-	discountAmount := utility.MinInt64(req.DiscountAmount, totalAmountExcludingTax+taxAmount)
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax+taxAmount, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax+taxAmount)
 
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
@@ -96,7 +97,7 @@ type ProrationPlanParam struct {
 type CalculateProrationInvoiceReq struct {
 	Currency          string                `json:"currency"`
 	DiscountCode      string                `json:"discountCode"`
-	DiscountAmount    int64                 `json:"discountAmount"`
+	TimeNow           int64                 `json:"TimeNow"`
 	TaxScale          int64                 `json:"taxScale"`
 	ProrationDate     int64                 `json:"prorationStart"`
 	PeriodStart       int64                 `json:"periodStart"`
@@ -129,8 +130,10 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	timeScale := int64((float64(req.PeriodEnd-req.ProrationDate) / float64(req.PeriodEnd-req.PeriodStart)) * 10000)
 	var invoiceItems []*bean.InvoiceItemSimplify
 	var totalAmountExcludingTax int64
+	var merchantId uint64
 	for _, oldPlanSub := range req.OldProrationPlans {
 		plan := query.GetPlanById(ctx, oldPlanSub.PlanId)
+		merchantId = plan.MerchantId
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(oldPlanSub.PlanId, 10))
 		unitAmountExcludingTax := int64(float64(plan.Amount) * utility.ConvertTaxScaleToInternalFloat(timeScale))
 		if newPlanSub, ok := newMap[oldPlanSub.PlanId]; ok {
@@ -206,7 +209,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	}
 
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
-	discountAmount := utility.MinInt64(req.DiscountAmount, totalAmountExcludingTax+taxAmount)
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax+taxAmount, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax+taxAmount)
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,

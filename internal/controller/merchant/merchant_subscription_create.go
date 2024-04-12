@@ -21,6 +21,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		VatNumber:          req.VatNumber,
 		PaymentMethodId:    req.PaymentMethodId,
 		Metadata:           req.Metadata,
+		DiscountCode:       req.DiscountCode,
 	})
 	return &subscription.CreateRes{
 		Subscription: createRes.Subscription,

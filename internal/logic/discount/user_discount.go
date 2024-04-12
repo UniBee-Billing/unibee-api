@@ -14,92 +14,95 @@ import (
 )
 
 type UserDiscountApplyReq struct {
-	merchantId     uint64
-	userId         uint64
-	code           string
-	subscriptionId string
-	paymentId      string
-	invoiceId      string
-	applyAmount    int64
-	currency       string
+	MerchantId     uint64 `json:"merchantId"        description:"MerchantId"`
+	UserId         uint64 `json:"userId"        description:"UserId"`
+	DiscountCode   string `json:"discountCode"        description:"DiscountCode"`
+	SubscriptionId string `json:"subscriptionId"        description:"SubscriptionId"`
+	PaymentId      string `json:"paymentId"        description:"PaymentId"`
+	InvoiceId      string `json:"invoiceId"        description:"InvoiceId"`
+	ApplyAmount    int64  `json:"applyAmount"        description:"ApplyAmount"`
+	Currency       string `json:"currency"        description:"Currency"`
 }
 
-func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, message string) {
-	if req.merchantId == 0 {
-		return false, "invalid merchantId"
+func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, isRecurring bool, message string) {
+	if req.MerchantId == 0 {
+		return false, false, "invalid MerchantId"
 	}
-	if req.userId == 0 {
-		return false, "invalid userId"
+	if req.UserId == 0 {
+		return false, false, "invalid UserId"
 	}
-	if len(req.code) == 0 {
-		return false, "invalid code"
+	if len(req.DiscountCode) == 0 {
+		return false, false, "invalid Code"
 	}
-	discountCode := query.GetDiscountByCode(ctx, req.merchantId, req.code)
+	discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 	if discountCode == nil {
-		return false, "discount code not found"
+		return false, false, "discount Code not found"
 	}
 	if discountCode.Status != DiscountStatusActive {
-		return false, "discount code not active"
+		return false, false, "discount Code not active"
 	}
 	if discountCode.StartTime > gtime.Now().Timestamp() {
-		return false, "discount not start"
+		return false, false, "discount not start"
 	}
 	if discountCode.EndTime < gtime.Now().Timestamp() {
-		return false, "discount expired"
+		return false, false, "discount expired"
+	}
+	if discountCode.DiscountType == DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
+		return false, false, "currency not match"
 	}
 	if discountCode.UserLimit > 0 {
 		//check user limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.merchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.userId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, req.code).
+			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
 		if err != nil {
-			return false, err.Error()
+			return false, false, err.Error()
 		}
 		if discountCode.UserLimit <= count {
-			return false, "reach out the limit"
+			return false, false, "reach out the limit"
 		}
 	}
 	if discountCode.SubscriptionLimit > 0 {
-		if len(req.subscriptionId) == 0 {
-			return false, "invalid subscriptionId"
+		if len(req.SubscriptionId) == 0 {
+			return false, false, "invalid SubscriptionId"
 		}
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
-			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.merchantId).
-			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.userId).
-			Where(dao.MerchantUserDiscountCode.Columns().Code, req.code).
-			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.subscriptionId).
+			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
+			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
 			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 			Count()
 		if err != nil {
-			return false, err.Error()
+			return false, false, err.Error()
 		}
 		if discountCode.SubscriptionLimit <= count {
-			return false, "reach out the limit"
+			return false, false, "reach out the limit"
 		}
 	}
 
-	return true, ""
+	return true, discountCode.BillingType == DiscountBillingTypeRecurring, ""
 }
 
 func UserDiscountApply(ctx context.Context, req *UserDiscountApplyReq) (discountCode *entity.MerchantUserDiscountCode, err error) {
 	one := &entity.MerchantUserDiscountCode{
-		MerchantId:     req.merchantId,
-		UserId:         req.userId,
-		Code:           req.code,
+		MerchantId:     req.MerchantId,
+		UserId:         req.UserId,
+		Code:           req.DiscountCode,
 		Status:         1,
-		SubscriptionId: req.subscriptionId,
-		PaymentId:      req.paymentId,
-		InvoiceId:      req.invoiceId,
-		UniqueId:       fmt.Sprintf("%d_%d_%s_%d_%s_%s_%s", req.merchantId, req.userId, req.code, 1, req.subscriptionId, req.paymentId, req.invoiceId),
+		SubscriptionId: req.SubscriptionId,
+		PaymentId:      req.PaymentId,
+		InvoiceId:      req.InvoiceId,
+		UniqueId:       fmt.Sprintf("%d_%d_%s_%d_%s_%s_%s", req.MerchantId, req.UserId, req.DiscountCode, 1, req.SubscriptionId, req.PaymentId, req.InvoiceId),
 		CreateTime:     gtime.Now().Timestamp(),
-		ApplyAmount:    req.applyAmount,
-		Currency:       req.currency,
+		ApplyAmount:    req.ApplyAmount,
+		Currency:       req.Currency,
 	}
 	result, err := dao.MerchantUserDiscountCode.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {

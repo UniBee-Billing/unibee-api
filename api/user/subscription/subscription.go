@@ -54,6 +54,7 @@ type CreatePreviewReq struct {
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
+	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type CreatePreviewRes struct {
 	Plan              *bean.PlanSimplify      `json:"plan"`
@@ -85,6 +86,7 @@ type CreateReq struct {
 	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
 	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
+	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
 
@@ -102,6 +104,7 @@ type UpdatePreviewReq struct {
 	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
 	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type UpdatePreviewRes struct {
 	TotalAmount       int64                 `json:"totalAmount"                `
@@ -123,6 +126,7 @@ type UpdateReq struct {
 	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
 	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type UpdateRes struct {
 	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`

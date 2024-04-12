@@ -19,6 +19,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		AddonParams:    req.AddonParams,
 		VatCountryCode: req.VatCountryCode,
 		VatNumber:      req.VatNumber,
+		DiscountCode:   req.DiscountCode,
 	})
 	if err != nil {
 		return nil, err

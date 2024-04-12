@@ -28,6 +28,7 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 		Quantity:        req.Quantity,
 		AddonParams:     req.AddonParams,
 		EffectImmediate: req.EffectImmediate,
+		DiscountCode:    req.DiscountCode,
 	}, 0, merchantMemberId)
 	if err != nil {
 		return nil, err
