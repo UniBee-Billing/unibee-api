@@ -58,6 +58,7 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 	utility.Assert(user != nil, "user not found")
 
 	one := &entity.SubscriptionOnetimeAddon{
+		UserId:         sub.UserId,
 		SubscriptionId: req.SubscriptionId,
 		AddonId:        req.AddonId,
 		Quantity:       req.Quantity,

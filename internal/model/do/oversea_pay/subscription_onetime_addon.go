@@ -23,4 +23,5 @@ type SubscriptionOnetimeAddon struct {
 	CreateTime     interface{} // create utc time
 	PaymentId      interface{} // paymentId
 	MetaData       interface{} // meta_data(json)
+	UserId         interface{} // userId
 }

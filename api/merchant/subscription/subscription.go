@@ -301,10 +301,10 @@ type OnetimeAddonNewRes struct {
 }
 
 type OnetimeAddonListReq struct {
-	g.Meta         `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"Merchant Subscription OnetimeAddon List"`
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription which one-time addon purchase history attached" v:"required"`
-	Page           int    `json:"page"  dc:"Page, Start With 0" `
-	Count          int    `json:"count" dc:"Count Of Page" `
+	g.Meta `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"Merchant Subscription OnetimeAddon List"`
+	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
+	Page   int    `json:"page"  dc:"Page, Start With 0" `
+	Count  int    `json:"count" dc:"Count Of Page" `
 }
 
 type OnetimeAddonListRes struct {

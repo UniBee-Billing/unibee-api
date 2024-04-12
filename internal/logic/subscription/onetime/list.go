@@ -12,10 +12,10 @@ import (
 )
 
 type SubscriptionOnetimeAddonListInternalReq struct {
-	MerchantId     uint64 `json:"merchantId" dc:"MerchantId"`
-	SubscriptionId string `json:"subscriptionId"  dc:"SubscriptionId" `
-	Page           int    `json:"page" dc:"Page, Start With 0" `
-	Count          int    `json:"count" dc:"Count Of Page" `
+	MerchantId uint64 `json:"merchantId" dc:"MerchantId"`
+	UserId     uint64 `json:"userId"  dc:"UserId" `
+	Page       int    `json:"page" dc:"Page, Start With 0" `
+	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
 func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeAddonListInternalReq) (list []*detail.SubscriptionOnetimeAddonDetail) {
@@ -27,7 +27,7 @@ func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeA
 		req.Page = 0
 	}
 	baseQuery := dao.SubscriptionOnetimeAddon.Ctx(ctx).
-		Where(dao.SubscriptionOnetimeAddon.Columns().SubscriptionId, req.SubscriptionId).WhereIn(dao.Subscription.Columns().Status, []int{1, 2})
+		Where(dao.SubscriptionOnetimeAddon.Columns().UserId, req.UserId).WhereIn(dao.Subscription.Columns().Status, []int{1, 2})
 	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		OmitEmpty().Scan(&mainList)
 	if err != nil {

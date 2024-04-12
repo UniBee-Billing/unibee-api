@@ -216,10 +216,9 @@ type OnetimeAddonNewRes struct {
 }
 
 type OnetimeAddonListReq struct {
-	g.Meta         `path:"/onetime_addon_list" tags:"User-Subscription" method:"get" summary:"Subscription OnetimeAddon List"`
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId, id of subscription which one-time addon purchase history attached" v:"required"`
-	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
-	Count          int    `json:"count" dc:"Count Of Page" `
+	g.Meta `path:"/onetime_addon_list" tags:"User-Subscription" method:"get" summary:"Subscription OnetimeAddon List"`
+	Page   int `json:"page"  dc:"Page, Start WIth 0" `
+	Count  int `json:"count" dc:"Count Of Page" `
 }
 
 type OnetimeAddonListRes struct {

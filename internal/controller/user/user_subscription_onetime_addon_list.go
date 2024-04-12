@@ -10,9 +10,9 @@ import (
 
 func (c *ControllerSubscription) OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error) {
 	return &subscription.OnetimeAddonListRes{SubscriptionOnetimeAddons: onetime.SubscriptionOnetimeAddonList(ctx, &onetime.SubscriptionOnetimeAddonListInternalReq{
-		MerchantId:     _interface.GetMerchantId(ctx),
-		SubscriptionId: req.SubscriptionId,
-		Page:           req.Page,
-		Count:          req.Count,
+		MerchantId: _interface.GetMerchantId(ctx),
+		UserId:     _interface.Context().Get(ctx).User.Id,
+		Page:       req.Page,
+		Count:      req.Count,
 	})}, nil
 }

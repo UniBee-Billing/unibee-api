@@ -21,4 +21,5 @@ type SubscriptionOnetimeAddon struct {
 	CreateTime     int64       `json:"createTime"     description:"create utc time"`                               // create utc time
 	PaymentId      string      `json:"paymentId"      description:"paymentId"`                                     // paymentId
 	MetaData       string      `json:"metaData"       description:"meta_data(json)"`                               // meta_data(json)
+	UserId         uint64      `json:"userId"         description:"userId"`                                        // userId
 }
