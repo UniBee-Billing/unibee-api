@@ -130,6 +130,19 @@ func UserDiscountRollback(ctx context.Context, id int64) error {
 	return err
 }
 
+func UserDiscountRollbackFromPayment(ctx context.Context, paymentId string) error {
+	var one *entity.MerchantUserDiscountCode
+	err := dao.MerchantUserDiscountCode.Ctx(ctx).
+		Where(dao.MerchantUserDiscountCode.Columns().PaymentId, paymentId).
+		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+		Scan(&one)
+	if one != nil {
+		return UserDiscountRollback(ctx, one.Id)
+	}
+	return err
+}
+
 func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmount int64, currency string, discountCode string, timeNow int64) int64 {
 	if timeNow == 0 {
 		timeNow = gtime.Now().Timestamp()

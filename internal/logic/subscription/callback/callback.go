@@ -2,11 +2,13 @@ package callback
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
+	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/user"
@@ -20,8 +22,6 @@ type SubscriptionPaymentCallback struct {
 }
 
 func (s SubscriptionPaymentCallback) PaymentRefundCancelCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (s SubscriptionPaymentCallback) PaymentRefundCreateCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
@@ -30,8 +30,12 @@ func (s SubscriptionPaymentCallback) PaymentRefundCreateCallback(ctx context.Con
 }
 
 func (s SubscriptionPaymentCallback) PaymentRefundSuccessCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
-	//TODO implement me
-	panic("implement me")
+	if payment.TotalAmount <= payment.RefundAmount {
+		err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+		if err != nil {
+			fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+		}
+	}
 }
 
 func (s SubscriptionPaymentCallback) PaymentRefundFailureCallback(ctx context.Context, payment *entity.Payment, refund *entity.Refund) {
@@ -137,6 +141,10 @@ func (s SubscriptionPaymentCallback) PaymentFailureCallback(ctx context.Context,
 			}
 		}
 	}
+	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	if err != nil {
+		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
+	}
 }
 
 func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
@@ -153,5 +161,9 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 				}
 			}
 		}
+	}
+	err := discount.UserDiscountRollbackFromPayment(ctx, payment.PaymentId)
+	if err != nil {
+		fmt.Printf("UserDiscountRollbackFromPayment error:%s", err.Error())
 	}
 }

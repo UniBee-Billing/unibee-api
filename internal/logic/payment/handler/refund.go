@@ -62,11 +62,12 @@ func HandleRefundCancelled(ctx context.Context, req *HandleRefundReq) (err error
 			if err != nil {
 				return err
 			}
+			one.Status = consts.RefundCancelled
 			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Decrement(dao.Payment.Columns().RefundAmount, one.RefundAmount)
 			if err != nil {
 				return err
 			}
-
+			payment.RefundAmount = payment.RefundAmount - one.RefundAmount
 			return nil
 		})
 		if err == nil {
@@ -132,10 +133,12 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 			if err != nil {
 				return err
 			}
+			one.Status = consts.RefundFailed
 			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Decrement(dao.Payment.Columns().RefundAmount, one.RefundAmount)
 			if err != nil {
 				return err
 			}
+			payment.RefundAmount = payment.RefundAmount - one.RefundAmount
 			return nil
 		})
 		if err == nil {
@@ -200,6 +203,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 			if err != nil || result == nil {
 				return err
 			}
+			one.Status = consts.RefundSuccess
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
 				return err
