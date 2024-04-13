@@ -19,7 +19,7 @@ type CountryRate struct {
 	Longitude             string      `json:"longitude"             description:"longitude"`                                                   // longitude
 	Vat                   int         `json:"vat"                   description:"vat contains，1-yes，2-no"`                                     // vat contains，1-yes，2-no
 	Eu                    int         `json:"eu"                    description:"is eu member state, 1-yes, 2-no"`                             // is eu member state, 1-yes, 2-no
-	StandardTaxPercentage int64       `json:"standardTaxPercentage" description:"Standard Tax Scale，1000 = 10%"`                               // Standard Tax Scale，1000 = 10%
+	StandardTaxPercentage int64       `json:"standardTaxPercentage" description:"Standard Tax Percentage，1000 = 10%"`                          // Standard Tax Percentage，1000 = 10%
 	Other                 string      `json:"other"                 description:"other rates(json)"`                                           // other rates(json)
 	StandardDescription   string      `json:"standardDescription"   description:"standard_description"`                                        // standard_description
 	StandardTypes         string      `json:"standardTypes"         description:"standard_typs"`                                               // standard_typs

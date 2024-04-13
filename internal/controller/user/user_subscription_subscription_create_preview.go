@@ -36,7 +36,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatNumberValidate: prepare.VatNumberValidate,
 		VatCountryCode:    prepare.VatCountryCode,
 		VatCountryName:    prepare.VatCountryName,
-		TaxScale:          prepare.TaxScale,
+		TaxPercentage:     prepare.TaxPercentage,
 		Invoice: &bean.InvoiceSimplify{
 			InvoiceName:                    prepare.Invoice.InvoiceName,
 			TotalAmount:                    prepare.Invoice.TotalAmount,

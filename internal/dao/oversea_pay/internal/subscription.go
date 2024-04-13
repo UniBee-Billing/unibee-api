@@ -59,7 +59,7 @@ type SubscriptionColumns struct {
 	CancelReason                string //
 	CountryCode                 string //
 	VatNumber                   string //
-	TaxScale                    string // Tax Scale，1000 = 10%
+	TaxPercentage               string // taxPercentage，1000 = 10%
 	VatVerifyData               string //
 	Data                        string //
 	ResponseData                string //
@@ -111,7 +111,7 @@ var subscriptionColumns = SubscriptionColumns{
 	CancelReason:                "cancel_reason",
 	CountryCode:                 "country_code",
 	VatNumber:                   "vat_number",
-	TaxScale:                    "tax_scale",
+	TaxPercentage:               "tax_percentage",
 	VatVerifyData:               "vat_verify_data",
 	Data:                        "data",
 	ResponseData:                "response_data",

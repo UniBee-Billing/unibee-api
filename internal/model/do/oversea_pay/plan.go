@@ -27,7 +27,7 @@ type Plan struct {
 	HomeUrl                   interface{} // home_url
 	GatewayProductName        interface{} // gateway product name
 	GatewayProductDescription interface{} // gateway product description
-	TaxScale                  interface{} // tax scale 1000 = 10%
+	TaxPercentage             interface{} // taxPercentage 1000 = 10%
 	TaxInclusive              interface{} // deperated
 	Type                      interface{} // type，1-main plan，2-recurring addon plan 3-onetime addon plan
 	Status                    interface{} // status，1-editing，2-active，3-inactive，4-expired

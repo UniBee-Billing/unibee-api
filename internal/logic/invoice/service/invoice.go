@@ -52,11 +52,11 @@ func checkInvoice(one *detail.InvoiceDetail) {
 	var totalTax int64 = 0
 	for _, line := range one.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
-		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(one.TaxScale))
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(one.TaxPercentage))
 		utility.Assert(line.AmountExcludingTax == amountExcludingTax, "line amountExcludingTax mistake")
 		utility.Assert(strings.Compare(line.Currency, one.Currency) == 0, "line currency not match invoice currency")
 		utility.Assert(line.Amount == amountExcludingTax+tax, "line amount mistake")
-		//utility.Assert(line.TaxScale == one.TaxScale, "line taxScale mistake")
+		//utility.Assert(line.TaxPercentage == one.TaxPercentage, "line TaxPercentage mistake")
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
 	}
@@ -78,10 +78,10 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
-		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
-			TaxScale:               req.TaxScale,
+			TaxPercentage:          req.TaxPercentage,
 			Tax:                    tax,
 			Quantity:               line.Quantity,
 			Amount:                 amountExcludingTax + tax,
@@ -104,7 +104,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
 		TaxAmount:                      totalTax,
-		TaxScale:                       req.TaxScale,
+		TaxPercentage:                  req.TaxPercentage,
 		SubscriptionAmount:             totalAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		Currency:                       strings.ToUpper(req.Currency),
@@ -163,10 +163,10 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	var totalTax int64 = 0
 	for _, line := range req.Lines {
 		amountExcludingTax := line.UnitAmountExcludingTax * line.Quantity
-		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxScaleToInternalFloat(req.TaxScale))
+		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
-			TaxScale:               req.TaxScale,
+			TaxPercentage:          req.TaxPercentage,
 			Tax:                    tax,
 			Amount:                 amountExcludingTax + tax,
 			AmountExcludingTax:     amountExcludingTax,
@@ -189,7 +189,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		dao.Invoice.Columns().SubscriptionAmountExcludingTax: totalAmountExcludingTax,
 		dao.Invoice.Columns().Currency:                       strings.ToUpper(req.Currency),
 		dao.Invoice.Columns().Currency:                       req.Currency,
-		dao.Invoice.Columns().TaxScale:                       req.TaxScale,
+		dao.Invoice.Columns().TaxPercentage:                  req.TaxPercentage,
 		dao.Invoice.Columns().GatewayId:                      req.GatewayId,
 		dao.Invoice.Columns().Lines:                          utility.MarshalToJsonString(invoiceItems),
 		dao.Invoice.Columns().GmtModify:                      gtime.Now(),
@@ -198,7 +198,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		return nil, err
 	}
 	one.Currency = req.Currency
-	one.TaxScale = req.TaxScale
+	one.TaxPercentage = req.TaxPercentage
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	if req.Finish {

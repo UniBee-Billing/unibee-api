@@ -37,7 +37,7 @@ type InvoiceDetail struct {
 	GatewayPaymentId               string                      `json:"gatewayPaymentId"               description:"GatewayPaymentId PaymentId"`
 	GatewayUserId                  string                      `json:"gatewayUserId"                  description:"GatewayUserId Id"`
 	GatewayInvoicePdf              string                      `json:"gatewayInvoicePdf"              description:"GatewayInvoicePdf pdf"`
-	TaxScale                       int64                       `json:"taxScale"                       description:"TaxScale，1000 = 10%"`
+	TaxPercentage                  int64                       `json:"taxPercentage"                       description:"TaxPercentage，1000 = 10%"`
 	SendNote                       string                      `json:"sendNote"                       description:"SendNote"`
 	SendTerms                      string                      `json:"sendTerms"                      description:"SendTerms"`
 	TotalAmountExcludingTax        int64                       `json:"totalAmountExcludingTax"        description:"TotalAmountExcludingTax,Cents"`
@@ -62,7 +62,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 	err := bean.UnmarshalFromJsonString(invoice.Lines, &lines)
 	for _, line := range lines {
 		line.Currency = invoice.Currency
-		line.TaxScale = invoice.TaxScale
+		line.TaxPercentage = invoice.TaxPercentage
 	}
 	if err != nil {
 		fmt.Printf("ConvertInvoiceLines err:%s", err)
@@ -91,7 +91,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		GatewayStatus:                  invoice.GatewayStatus,
 		GatewayInvoiceId:               invoice.GatewayInvoiceId,
 		GatewayInvoicePdf:              invoice.GatewayInvoicePdf,
-		TaxScale:                       invoice.TaxScale,
+		TaxPercentage:                  invoice.TaxPercentage,
 		SendNote:                       invoice.SendNote,
 		SendTerms:                      invoice.SendTerms,
 		DiscountAmount:                 0,

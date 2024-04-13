@@ -29,7 +29,7 @@ type CountryRateColumns struct {
 	Longitude             string // longitude
 	Vat                   string // vat contains，1-yes，2-no
 	Eu                    string // is eu member state, 1-yes, 2-no
-	StandardTaxPercentage string // Standard Tax Scale，1000 = 10%
+	StandardTaxPercentage string // Standard Tax Percentage，1000 = 10%
 	Other                 string // other rates(json)
 	StandardDescription   string // standard_description
 	StandardTypes         string // standard_typs

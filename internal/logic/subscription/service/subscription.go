@@ -168,7 +168,7 @@ type CreatePreviewInternalRes struct {
 	VatCountryName        string                  `json:"vatCountryName"              `
 	VatNumber             string                  `json:"vatNumber"              `
 	VatNumberValidate     *bean.ValidResult       `json:"vatNumberValidate"              `
-	TaxScale              int64                   `json:"taxScale"              `
+	TaxPercentage         int64                   `json:"taxPercentage"              `
 	VatVerifyData         string                  `json:"vatVerifyData"              `
 	Invoice               *bean.InvoiceSimplify   `json:"invoice"`
 	UserId                uint64                  `json:"userId" `
@@ -224,7 +224,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	//vat
 	var vatCountryCode = req.VatCountryCode
-	var standardTaxScale int64 = 0
+	var standardTaxPercentage int64 = 0
 	var vatCountryName = ""
 	var vatCountryRate *bean.VatCountryRate
 	var vatNumberValidate *bean.ValidResult
@@ -250,13 +250,13 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if err == nil && vatCountryRate != nil {
 			vatCountryName = vatCountryRate.CountryName
 			if vatCountryRate.StandardTaxPercentage > 0 {
-				standardTaxScale = vatCountryRate.StandardTaxPercentage
+				standardTaxPercentage = vatCountryRate.StandardTaxPercentage
 			}
 		}
 	}
 
 	if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
-		standardTaxScale = 0
+		standardTaxPercentage = 0
 	}
 
 	if req.Quantity <= 0 {
@@ -308,7 +308,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-		TaxScale:      standardTaxScale,
+		TaxPercentage: standardTaxPercentage,
 		PeriodStart:   currentTimeStart.Timestamp(),
 		PeriodEnd:     currentTimeEnd,
 		FinishTime:    currentTimeStart.Timestamp(),
@@ -328,7 +328,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumber:             req.VatNumber,
 		VatNumberValidate:     vatNumberValidate,
 		VatVerifyData:         utility.MarshalToJsonString(vatNumberValidate),
-		TaxScale:              standardTaxScale,
+		TaxPercentage:         standardTaxPercentage,
 		UserId:                req.UserId,
 		Email:                 user.Email,
 		Invoice:               invoice,
@@ -387,7 +387,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		VatNumber:                   prepare.VatNumber,
 		VatVerifyData:               prepare.VatVerifyData,
 		CountryCode:                 prepare.VatCountryCode,
-		TaxScale:                    prepare.TaxScale,
+		TaxPercentage:               prepare.TaxPercentage,
 		CurrentPeriodStart:          prepare.Invoice.PeriodStart,
 		CurrentPeriodEnd:            prepare.Invoice.PeriodEnd,
 		DunningTime:                 dunningTime,
@@ -710,7 +710,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PlanId:        req.NewPlanId,
 				Quantity:      req.Quantity,
 				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxScale:      sub.TaxScale,
+				TaxPercentage: sub.TaxPercentage,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
@@ -743,7 +743,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				PlanId:        req.NewPlanId,
 				Quantity:      req.Quantity,
 				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxScale:      sub.TaxScale,
+				TaxPercentage: sub.TaxPercentage,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
@@ -780,7 +780,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 				Currency:          sub.Currency,
 				DiscountCode:      req.DiscountCode,
 				TimeNow:           prorationDate,
-				TaxScale:          sub.TaxScale,
+				TaxPercentage:     sub.TaxPercentage,
 				ProrationDate:     prorationDate,
 				OldProrationPlans: oldProrationPlanParams,
 				NewProrationPlans: newProrationPlanParams,
@@ -816,7 +816,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 		PlanId:        req.NewPlanId,
 		Quantity:      req.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-		TaxScale:      sub.TaxScale,
+		TaxPercentage: sub.TaxPercentage,
 		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
 		FinishTime:    utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
@@ -1286,7 +1286,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			PlanId:        sub.PlanId,
 			Quantity:      sub.Quantity,
 			AddonJsonData: sub.AddonData,
-			TaxScale:      sub.TaxScale,
+			TaxPercentage: sub.TaxPercentage,
 			PeriodStart:   nextPeriodStart,
 			PeriodEnd:     nextPeriodEnd,
 			InvoiceName:   "SubscriptionCycle",

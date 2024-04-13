@@ -69,7 +69,7 @@ type CreatePreviewRes struct {
 	Email             string                  `json:"email" `
 	VatCountryCode    string                  `json:"vatCountryCode"              `
 	VatCountryName    string                  `json:"vatCountryName"              `
-	TaxScale          int64                   `json:"taxScale"              `
+	TaxPercentage     int64                   `json:"taxPercentage"              `
 	VatNumber         string                  `json:"vatNumber"              `
 	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
 }

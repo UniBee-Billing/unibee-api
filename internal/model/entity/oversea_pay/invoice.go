@@ -36,7 +36,7 @@ type Invoice struct {
 	GatewayInvoiceId               string      `json:"gatewayInvoiceId"               description:""`                                                                       //
 	GatewayPaymentId               string      `json:"gatewayPaymentId"               description:""`                                                                       //
 	GatewayInvoicePdf              string      `json:"gatewayInvoicePdf"              description:""`                                                                       //
-	TaxScale                       int64       `json:"taxScale"                       description:"Tax scale，1000 = 10%"`                                                   // Tax scale，1000 = 10%
+	TaxPercentage                  int64       `json:"taxPercentage"                  description:"TaxPercentage，1000 = 10%"`                                               // TaxPercentage，1000 = 10%
 	SendNote                       string      `json:"sendNote"                       description:"send_note"`                                                              // send_note
 	SendTerms                      string      `json:"sendTerms"                      description:"send_terms"`                                                             // send_terms
 	TotalAmountExcludingTax        int64       `json:"totalAmountExcludingTax"        description:""`                                                                       //

@@ -51,7 +51,7 @@ type Subscription struct {
 	CancelReason                interface{} //
 	CountryCode                 interface{} //
 	VatNumber                   interface{} //
-	TaxScale                    interface{} // Tax Scale，1000 = 10%
+	TaxPercentage               interface{} // taxPercentage，1000 = 10%
 	VatVerifyData               interface{} //
 	Data                        interface{} //
 	ResponseData                interface{} //

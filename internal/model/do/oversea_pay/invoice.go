@@ -38,7 +38,7 @@ type Invoice struct {
 	GatewayInvoiceId               interface{} //
 	GatewayPaymentId               interface{} //
 	GatewayInvoicePdf              interface{} //
-	TaxScale                       interface{} // Tax scale，1000 = 10%
+	TaxPercentage                  interface{} // TaxPercentage，1000 = 10%
 	SendNote                       interface{} // send_note
 	SendTerms                      interface{} // send_terms
 	TotalAmountExcludingTax        interface{} //

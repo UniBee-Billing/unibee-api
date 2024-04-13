@@ -108,7 +108,7 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 			Amount:                 addon.Amount * req.Quantity,
 			Tax:                    0,
 			AmountExcludingTax:     addon.Amount * req.Quantity,
-			TaxScale:               0,
+			TaxPercentage:          0,
 			UnitAmountExcludingTax: addon.Amount,
 			Description:            addon.Description,
 			Proration:              false,

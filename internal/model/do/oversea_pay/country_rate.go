@@ -21,7 +21,7 @@ type CountryRate struct {
 	Longitude             interface{} // longitude
 	Vat                   interface{} // vat contains，1-yes，2-no
 	Eu                    interface{} // is eu member state, 1-yes, 2-no
-	StandardTaxPercentage interface{} // Standard Tax Scale，1000 = 10%
+	StandardTaxPercentage interface{} // Standard Tax Percentage，1000 = 10%
 	Other                 interface{} // other rates(json)
 	StandardDescription   interface{} // standard_description
 	StandardTypes         interface{} // standard_typs

@@ -16,7 +16,7 @@ type InvoiceSimplify struct {
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
 	Currency                       string                 `json:"currency"`
 	TaxAmount                      int64                  `json:"taxAmount"`
-	TaxScale                       int64                  `json:"taxScale"                  description:"Tax Scale，1000 = 10%"`
+	TaxPercentage                  int64                  `json:"taxPercentage"                  description:"TaxPercentage，1000 = 10%"`
 	SubscriptionAmount             int64                  `json:"subscriptionAmount"`
 	SubscriptionAmountExcludingTax int64                  `json:"subscriptionAmountExcludingTax"`
 	Lines                          []*InvoiceItemSimplify `json:"lines"`
@@ -42,7 +42,7 @@ type InvoiceItemSimplify struct {
 	Amount                 int64         `json:"amount"`
 	Tax                    int64         `json:"tax"`
 	AmountExcludingTax     int64         `json:"amountExcludingTax"`
-	TaxScale               int64         `json:"taxScale"                  description:"Tax Scale，1000 = 10%"`
+	TaxPercentage          int64         `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
 	UnitAmountExcludingTax int64         `json:"unitAmountExcludingTax"`
 	Description            string        `json:"description"`
 	Proration              bool          `json:"proration"`
@@ -92,5 +92,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		CryptoAmount:                   one.CryptoAmount,
 		SendStatus:                     one.SendStatus,
 		DayUtilDue:                     one.DayUtilDue,
+		TaxPercentage:                  one.TaxPercentage,
 	}
 }

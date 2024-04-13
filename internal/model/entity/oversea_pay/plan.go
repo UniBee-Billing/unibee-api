@@ -25,7 +25,7 @@ type Plan struct {
 	HomeUrl                   string      `json:"homeUrl"                   description:"home_url"`                                                     // home_url
 	GatewayProductName        string      `json:"gatewayProductName"        description:"gateway product name"`                                         // gateway product name
 	GatewayProductDescription string      `json:"gatewayProductDescription" description:"gateway product description"`                                  // gateway product description
-	TaxScale                  int         `json:"taxScale"                  description:"tax scale 1000 = 10%"`                                         // tax scale 1000 = 10%
+	TaxPercentage             int         `json:"taxPercentage"             description:"taxPercentage 1000 = 10%"`                                     // taxPercentage 1000 = 10%
 	TaxInclusive              int         `json:"taxInclusive"              description:"deperated"`                                                    // deperated
 	Type                      int         `json:"type"                      description:"type，1-main plan，2-recurring addon plan 3-onetime addon plan"` // type，1-main plan，2-recurring addon plan 3-onetime addon plan
 	Status                    int         `json:"status"                    description:"status，1-editing，2-active，3-inactive，4-expired"`               // status，1-editing，2-active，3-inactive，4-expired

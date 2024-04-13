@@ -18,11 +18,11 @@ func TestInvoice(t *testing.T) {
 	var err error
 	t.Run("Test for invoice Create|Edit|List|Delete", func(t *testing.T) {
 		res, err := CreateInvoice(ctx, test.TestMerchant.Id, &invoice.NewReq{
-			UserId:    test.TestUser.Id,
-			TaxScale:  1000,
-			GatewayId: test.TestGateway.Id,
-			Currency:  "USD",
-			Name:      "test_invoice",
+			UserId:        test.TestUser.Id,
+			TaxPercentage: 1000,
+			GatewayId:     test.TestGateway.Id,
+			Currency:      "USD",
+			Name:          "test_invoice",
 			Lines: []*invoice.NewInvoiceItemParam{{
 				UnitAmountExcludingTax: 100,
 				Description:            "test",
@@ -39,11 +39,11 @@ func TestInvoice(t *testing.T) {
 		require.Equal(t, "test_invoice", one.InvoiceName)
 		require.Equal(t, int64(110), one.TotalAmount)
 		_, err = EditInvoice(ctx, &invoice.EditReq{
-			InvoiceId: one.InvoiceId,
-			TaxScale:  0,
-			GatewayId: test.TestGateway.Id,
-			Currency:  "EUR",
-			Name:      "test_invoice_2",
+			InvoiceId:     one.InvoiceId,
+			TaxPercentage: 0,
+			GatewayId:     test.TestGateway.Id,
+			Currency:      "EUR",
+			Name:          "test_invoice_2",
 			Lines: []*invoice.NewInvoiceItemParam{{
 				UnitAmountExcludingTax: 100,
 				Description:            "test",
@@ -88,11 +88,11 @@ func TestInvoice(t *testing.T) {
 
 	t.Run("Test for invoice Create|Finish|Link", func(t *testing.T) {
 		res, err := CreateInvoice(ctx, test.TestMerchant.Id, &invoice.NewReq{
-			UserId:    test.TestUser.Id,
-			TaxScale:  1000,
-			GatewayId: test.TestGateway.Id,
-			Currency:  "USD",
-			Name:      "test_invoice",
+			UserId:        test.TestUser.Id,
+			TaxPercentage: 1000,
+			GatewayId:     test.TestGateway.Id,
+			Currency:      "USD",
+			Name:          "test_invoice",
 			Lines: []*invoice.NewInvoiceItemParam{{
 				UnitAmountExcludingTax: 100,
 				Description:            "test",

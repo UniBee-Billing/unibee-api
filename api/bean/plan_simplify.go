@@ -17,7 +17,7 @@ type PlanSimplify struct {
 	Description            string            `json:"description"               description:"description"`                                               // description
 	ImageUrl               string            `json:"imageUrl"                  description:"image_url"`                                                 // image_url
 	HomeUrl                string            `json:"homeUrl"                   description:"home_url"`                                                  // home_url
-	TaxScale               int               `json:"taxScale"                  description:"tax scale 1000 = 10%"`                                      // tax scale 1000 = 10%
+	TaxPercentage          int               `json:"taxPercentage"                  description:"TaxPercentage 1000 = 10%"`                             // tax scale 1000 = 10%
 	Type                   int               `json:"type"                      description:"type，1-main plan，2-addon plan"`                             // type，1-main plan，2-addon plan
 	Status                 int               `json:"status"                    description:"status，1-editing，2-active，3-inactive，4-expired"`            // status，1-editing，2-active，3-inactive，4-expired
 	BindingAddonIds        string            `json:"bindingAddonIds"           description:"binded recurring addon planIds，split with ,"`               // binded addon planIds，split with ,
@@ -53,7 +53,7 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 		Description:            one.Description,
 		ImageUrl:               one.ImageUrl,
 		HomeUrl:                one.HomeUrl,
-		TaxScale:               one.TaxScale,
+		TaxPercentage:          one.TaxPercentage,
 		Type:                   one.Type,
 		Status:                 one.Status,
 		BindingAddonIds:        one.BindingAddonIds,

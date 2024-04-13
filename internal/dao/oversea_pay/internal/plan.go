@@ -35,7 +35,7 @@ type PlanColumns struct {
 	HomeUrl                   string // home_url
 	GatewayProductName        string // gateway product name
 	GatewayProductDescription string // gateway product description
-	TaxScale                  string // tax scale 1000 = 10%
+	TaxPercentage             string // taxPercentage 1000 = 10%
 	TaxInclusive              string // deperated
 	Type                      string // type，1-main plan，2-recurring addon plan 3-onetime addon plan
 	Status                    string // status，1-editing，2-active，3-inactive，4-expired
@@ -66,7 +66,7 @@ var planColumns = PlanColumns{
 	HomeUrl:                   "home_url",
 	GatewayProductName:        "gateway_product_name",
 	GatewayProductDescription: "gateway_product_description",
-	TaxScale:                  "tax_scale",
+	TaxPercentage:             "tax_percentage",
 	TaxInclusive:              "tax_inclusive",
 	Type:                      "type",
 	Status:                    "status",

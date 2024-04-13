@@ -46,7 +46,7 @@ type SubscriptionSimplify struct {
 	CancelReason           string            `json:"cancelReason"                description:""`                                                                                                                                                               //
 	CountryCode            string            `json:"countryCode"                 description:""`                                                                                                                                                               //
 	VatNumber              string            `json:"vatNumber"                   description:""`                                                                                                                                                               //
-	TaxScale               int64             `json:"taxScale"                    description:"Tax Scale，1000 = 10%"`                                                                                                                                           // Tax Scale，1000 = 10%
+	TaxPercentage          int64             `json:"taxPercentage"               description:"TaxPercentage，1000 = 10%"`                                                                                                                                       // Tax Percentage，1000 = 10%
 	PendingUpdateId        string            `json:"pendingUpdateId"             description:""`                                                                                                                                                               //
 	CreateTime             int64             `json:"createTime"                  description:"create utc time"`                                                                                                                                                // create utc time
 	TestClock              int64             `json:"testClock"                   description:"test_clock, simulator clock for subscription, if set , sub will out of cronjob controll"`                                                                        // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
@@ -96,7 +96,7 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 		CancelReason:           one.CancelReason,
 		CountryCode:            one.CountryCode,
 		VatNumber:              one.VatNumber,
-		TaxScale:               one.TaxScale,
+		TaxPercentage:          one.TaxPercentage,
 		PendingUpdateId:        one.PendingUpdateId,
 		CreateTime:             one.CreateTime,
 		TestClock:              one.TestClock,

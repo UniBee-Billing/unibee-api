@@ -39,7 +39,7 @@ type Item struct {
 	Currency               string `json:"currency"`
 	Tax                    int64  `json:"tax" dc:"tax = amount - amountExcludingTax"`
 	AmountExcludingTax     int64  `json:"amountExcludingTax" dc:"amountExcludingTax = unitAmountExcludingTax * quantity"`
-	TaxScale               int64  `json:"taxScale" dc:"Tax Scale，1000 = 10%"`
+	TaxPercentage          int64  `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 }
 
 type DetailReq struct {

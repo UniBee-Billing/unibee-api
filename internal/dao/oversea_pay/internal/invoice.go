@@ -46,7 +46,7 @@ type InvoiceColumns struct {
 	GatewayInvoiceId               string //
 	GatewayPaymentId               string //
 	GatewayInvoicePdf              string //
-	TaxScale                       string // Tax scale，1000 = 10%
+	TaxPercentage                  string // TaxPercentage，1000 = 10%
 	SendNote                       string // send_note
 	SendTerms                      string // send_terms
 	TotalAmountExcludingTax        string //
@@ -97,7 +97,7 @@ var invoiceColumns = InvoiceColumns{
 	GatewayInvoiceId:               "gateway_invoice_id",
 	GatewayPaymentId:               "gateway_payment_id",
 	GatewayInvoicePdf:              "gateway_invoice_pdf",
-	TaxScale:                       "tax_scale",
+	TaxPercentage:                  "tax_percentage",
 	SendNote:                       "send_note",
 	SendTerms:                      "send_terms",
 	TotalAmountExcludingTax:        "total_amount_excluding_tax",

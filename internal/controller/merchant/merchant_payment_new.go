@@ -85,7 +85,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			utility.Assert(len(line.Description) > 0, "Item Description invalid")
 			invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 				Currency:               line.Currency,
-				TaxScale:               line.TaxScale,
+				TaxPercentage:          line.TaxPercentage,
 				Tax:                    line.Tax,
 				Amount:                 line.Amount,
 				AmountExcludingTax:     line.AmountExcludingTax,
@@ -120,7 +120,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				Amount:                 req.TotalAmount,
 				Tax:                    0,
 				AmountExcludingTax:     req.TotalAmount,
-				TaxScale:               0,
+				TaxPercentage:          0,
 				UnitAmountExcludingTax: req.TotalAmount,
 				Description:            merchantInfo.Name,
 				Quantity:               1,

@@ -167,7 +167,7 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmount i
 		return 0
 	}
 	if merchantDiscountCode.DiscountType == DiscountTypePercentage {
-		return int64(float64(totalAmount) * utility.ConvertTaxScaleToInternalFloat(merchantDiscountCode.DiscountPercentage))
+		return int64(float64(totalAmount) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
 	} else if merchantDiscountCode.DiscountType == DiscountTypeFixedAmount &&
 		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
 		return merchantDiscountCode.DiscountAmount

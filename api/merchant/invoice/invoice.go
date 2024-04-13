@@ -58,14 +58,14 @@ type ListRes struct {
 }
 
 type NewReq struct {
-	g.Meta    `path:"/new" tags:"Invoice" method:"post" summary:"Admin Create New Invoice"`
-	UserId    uint64                 `json:"userId" dc:"UserId" v:"required"`
-	TaxScale  int64                  `json:"taxScale"  dc:"TaxScale，1000 represent 10%" v:"required" `
-	GatewayId uint64                 `json:"gatewayId" dc:"Gateway Id"   v:"required" `
-	Currency  string                 `json:"currency"   dc:"Currency" v:"required" `
-	Name      string                 `json:"name"   dc:"Name" `
-	Lines     []*NewInvoiceItemParam `json:"lines"              `
-	Finish    bool                   `json:"finish" `
+	g.Meta        `path:"/new" tags:"Invoice" method:"post" summary:"Admin Create New Invoice"`
+	UserId        uint64                 `json:"userId" dc:"UserId" v:"required"`
+	TaxPercentage int64                  `json:"taxPercentage"  dc:"TaxPercentage，1000 represent 10%" v:"required" `
+	GatewayId     uint64                 `json:"gatewayId" dc:"Gateway Id"   v:"required" `
+	Currency      string                 `json:"currency"   dc:"Currency" v:"required" `
+	Name          string                 `json:"name"   dc:"Name" `
+	Lines         []*NewInvoiceItemParam `json:"lines"              `
+	Finish        bool                   `json:"finish" `
 }
 
 type NewInvoiceItemParam struct {
@@ -79,14 +79,14 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta    `path:"/edit" tags:"Invoice" method:"post" summary:"Admin Edit Invoice"`
-	InvoiceId string                 `json:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
-	TaxScale  int64                  `json:"taxScale"  dc:"TaxScale，1000 represent 10%"`
-	GatewayId uint64                 `json:"gatewayId" dc:"Gateway Id" `
-	Currency  string                 `json:"currency"   dc:"Currency" `
-	Name      string                 `json:"name"   dc:"Name" `
-	Lines     []*NewInvoiceItemParam `json:"lines"              `
-	Finish    bool                   `json:"finish" `
+	g.Meta        `path:"/edit" tags:"Invoice" method:"post" summary:"Admin Edit Invoice"`
+	InvoiceId     string                 `json:"invoiceId" dc:"InvoiceId" v:"required|length:4,30#请输入InvoiceId"`
+	TaxPercentage int64                  `json:"taxPercentage"  dc:"TaxPercentage，1000 represent 10%"`
+	GatewayId     uint64                 `json:"gatewayId" dc:"Gateway Id" `
+	Currency      string                 `json:"currency"   dc:"Currency" `
+	Name          string                 `json:"name"   dc:"Name" `
+	Lines         []*NewInvoiceItemParam `json:"lines"              `
+	Finish        bool                   `json:"finish" `
 }
 type EditRes struct {
 	Invoice *detail.InvoiceDetail `json:"invoice" `
