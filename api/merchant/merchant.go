@@ -48,6 +48,8 @@ type IMerchantDiscount interface {
 	New(ctx context.Context, req *discount.NewReq) (res *discount.NewRes, err error)
 	Edit(ctx context.Context, req *discount.EditReq) (res *discount.EditRes, err error)
 	Delete(ctx context.Context, req *discount.DeleteReq) (res *discount.DeleteRes, err error)
+	Activate(ctx context.Context, req *discount.ActivateReq) (res *discount.ActivateRes, err error)
+	Deactivate(ctx context.Context, req *discount.DeactivateReq) (res *discount.DeactivateRes, err error)
 }
 
 type IMerchantEmail interface {

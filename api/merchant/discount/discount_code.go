@@ -56,3 +56,19 @@ type DeleteReq struct {
 
 type DeleteRes struct {
 }
+
+type ActivateReq struct {
+	g.Meta `path:"/activate" tags:"Discount" method:"post" summary:"ActivateDiscountCode" dc:"Activate discount code, the discount code can only effect to payment or subscription after activated"`
+	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+}
+
+type ActivateRes struct {
+}
+
+type DeactivateReq struct {
+	g.Meta `path:"/deactivate" tags:"Discount" method:"post" summary:"DeactivateDiscountCode" dc:"Deactivate discount code"`
+	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+}
+
+type DeactivateRes struct {
+}
