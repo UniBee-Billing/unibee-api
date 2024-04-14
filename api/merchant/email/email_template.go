@@ -6,42 +6,42 @@ import (
 )
 
 type TemplateListReq struct {
-	g.Meta `path:"/template_list" tags:"Email-Template" method:"get" summary:"Merchant Email Template List"`
+	g.Meta `path:"/template_list" tags:"EmailTemplate" method:"get" summary:"EmailTemplateList"`
 }
 
 type TemplateListRes struct {
-	EmailTemplateList []*bean.MerchantEmailTemplateSimplify `json:"emailTemplateList" description:"EmailTemplateList" `
+	EmailTemplateList []*bean.MerchantEmailTemplateSimplify `json:"emailTemplateList" description:"Email Template Object List" `
 }
 
 type TemplateUpdateReq struct {
-	g.Meta          `path:"/template_update" tags:"Email-Template" method:"post" summary:"Merchant Email Template Update"`
-	TemplateName    string `json:"templateName" dc:"templateName"       v:"required"`
-	TemplateTitle   string `json:"templateTitle" dc:"templateTitle"      v:"required"`
-	TemplateContent string `json:"templateContent" dc:"templateContent"    v:"required"`
+	g.Meta          `path:"/template_update" tags:"EmailTemplate" method:"post" summary:"EmailTemplateUpdate" dc:"Update the email template"`
+	TemplateName    string `json:"templateName" dc:"The name of email template"       v:"required"`
+	TemplateTitle   string `json:"templateTitle" dc:"The title of email template"      v:"required"`
+	TemplateContent string `json:"templateContent" dc:"The content of email template"    v:"required"`
 }
 
 type TemplateUpdateRes struct {
 }
 
 type TemplateSetDefaultReq struct {
-	g.Meta       `path:"/template_set_default" tags:"Email-Template" method:"post" summary:"Merchant Email Template Set Default"`
-	TemplateName string `json:"templateName" dc:"templateName" v:"required"`
+	g.Meta       `path:"/template_set_default" tags:"EmailTemplate" method:"post" summary:"EmailTemplateSetDefault" dc:"Setup email template as default"`
+	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
 }
 
 type TemplateSetDefaultRes struct {
 }
 
 type TemplateActivateReq struct {
-	g.Meta       `path:"/template_activate" tags:"Email-Template" method:"post" summary:"Merchant Email Template Activate"`
-	TemplateName string `json:"templateName" dc:"templateName" v:"required"`
+	g.Meta       `path:"/template_activate" tags:"EmailTemplate" method:"post" summary:"EmailTemplateActivate" dc:"Activate the email template"`
+	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
 }
 
 type TemplateActivateRes struct {
 }
 
 type TemplateDeactivateReq struct {
-	g.Meta       `path:"/template_deactivate" tags:"Email-Template" method:"post" summary:"Merchant Email Template Deactivate"`
-	TemplateName string `json:"templateName" dc:"templateName" v:"required"`
+	g.Meta       `path:"/template_deactivate" tags:"EmailTemplate" method:"post" summary:"EmailTemplateDeactivate" dc:"Deactivate the email template"`
+	TemplateName string `json:"templateName" dc:"The name of email template" v:"required"`
 }
 
 type TemplateDeactivateRes struct {
