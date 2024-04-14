@@ -6,7 +6,7 @@ import (
 )
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/timeline/list" tags:"Payment" method:"get" summary:"Payment TimeLine List"`
+	g.Meta    `path:"/timeline/list" tags:"Payment" method:"get" summary:"PaymentTimeLineList"`
 	UserId    int64  `json:"userId" dc:"Filter UserId, Default All" `
 	SortField string `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -15,5 +15,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	PaymentTimeLines []*bean.PaymentTimelineSimplify `json:"paymentTimeLines" description:"PaymentTimeLines" `
+	PaymentTimeLines []*bean.PaymentTimelineSimplify `json:"paymentTimeLines" description:"Payment TimeLine Object List" `
 }
