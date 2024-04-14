@@ -6,52 +6,52 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Role" method:"get" summary:"Get Merchant Role List"`
+	g.Meta `path:"/list" tags:"Discount" method:"get" summary:"DiscountCodeList" dc:"Get discountCode list"`
 }
 
 type ListRes struct {
-	MerchantDiscountCodes []*bean.MerchantDiscountCodeSimplify `json:"merchantDiscountCodes" dc:"MerchantDiscountCodes"`
+	MerchantDiscountCodes []*bean.MerchantDiscountCodeSimplify `json:"merchantDiscountCodes" dc:"Discount Code Object List"`
 }
 
 type NewReq struct {
-	g.Meta             `path:"/new" tags:"DiscountCode" method:"post" summary:"New Merchant Discount Code"`
-	Code               string `json:"code" dc:"Code" v:"required"`
-	Name               string `json:"name"              description:"name"`                                                                        // name
-	BillingType        int    `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"  v:"required"`                         // billing_type, 1-one-time, 2-recurring
-	DiscountType       int    `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"  v:"required"`                   // discount_type, 1-percentage, 2-fixed_amount
-	DiscountAmount     int64  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
-	DiscountPercentage int64  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string `json:"currency"          description:"currency of discount, available when discount_type is fixed_amount"`          // currency of discount, available when discount_type is fixed_amount
-	UserLimit          int    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
-	SubscriptionLimit  int    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
-	StartTime          int64  `json:"startTime"         description:"start of discount available utc time"  v:"required"`                          // start of discount available utc time
-	EndTime            int64  `json:"endTime"           description:"end of discount available utc time"  v:"required"`
+	g.Meta             `path:"/new" tags:"Discount" method:"post" summary:"NewDiscountCode" dc:"Create a new discount code, code can used in onetime or subscription purchase to make discount"`
+	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Name               string `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                                    // name
+	BillingType        int    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"  v:"required"` // billing_type, 1-one-time, 2-recurring
+	DiscountType       int    `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"  v:"required"`                  // discount_type, 1-percentage, 2-fixed_amount
+	DiscountAmount     int64  `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                 // amount of discount, available when discount_type is fixed_amount
+	DiscountPercentage int64  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                                          // percentage of discount, 100=1%, available when discount_type is percentage
+	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                   // currency of discount, available when discount_type is fixed_amount
+	UserLimit          int    `json:"userLimit"         dc:"The limit of every customer can effect, 0-unlimited"`                                                                                                                                                                                                                                    // the limit of every user apply, 0-unlimited
+	SubscriptionLimit  int    `json:"subscriptionLimit" dc:"The limit of every subscription can effect, 0-unlimited"`                                                                                                                                                                                                                                // the limit of every subscription apply, 0-unlimited
+	StartTime          int64  `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                                                                                                                                                                                                                     // start of discount available utc time
+	EndTime            int64  `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
 }
 
 type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta             `path:"/edit" tags:"DiscountCode" method:"post" summary:"Edit Merchant Discount Code"`
-	Code               string `json:"code" dc:"Code" v:"required"`
-	Name               string `json:"name"              description:"name"`                                                                        // name
-	BillingType        int    `json:"billingType"       description:"billing_type, 1-one-time, 2-recurring"`                                       // billing_type, 1-one-time, 2-recurring
-	DiscountType       int    `json:"discountType"      description:"discount_type, 1-percentage, 2-fixed_amount"`                                 // discount_type, 1-percentage, 2-fixed_amount
-	DiscountAmount     int64  `json:"discountAmount"    description:"amount of discount, available when discount_type is fixed_amount"`            // amount of discount, available when discount_type is fixed_amount
-	DiscountPercentage int64  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
-	Currency           string `json:"currency"          description:"currency of discount, available when discount_type is fixed_amount"`          // currency of discount, available when discount_type is fixed_amount
-	UserLimit          int    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
-	SubscriptionLimit  int    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
-	StartTime          int64  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
-	EndTime            int64  `json:"endTime"           description:"end of discount available utc time"`
+	g.Meta             `path:"/edit" tags:"Discount" method:"post" summary:"EditDiscountCode" dc:"Edit the discount code before activate"`
+	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Name               string `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                      // name
+	BillingType        int    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"` // billing_type, 1-one-time, 2-recurring
+	DiscountType       int    `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"`                  // discount_type, 1-percentage, 2-fixed_amount
+	DiscountAmount     int64  `json:"discountAmount"    dc:"The discount amount of the discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                   // amount of discount, available when discount_type is fixed_amount
+	DiscountPercentage int64  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                            // percentage of discount, 100=1%, available when discount_type is percentage
+	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                     // currency of discount, available when discount_type is fixed_amount
+	UserLimit          int    `json:"userLimit"         dc:"The limit of every user effect, 0-unlimited"`                                                                                                                                                                                                                              // the limit of every user apply, 0-unlimited
+	SubscriptionLimit  int    `json:"subscriptionLimit" dc:"The limit of every subscription effect, 0-unlimited"`                                                                                                                                                                                                                      // the limit of every subscription apply, 0-unlimited
+	StartTime          int64  `json:"startTime"         dc:"The start time of discount code can effect, utc time"`                                                                                                                                                                                                                     // start of discount available utc time
+	EndTime            int64  `json:"endTime"           dc:"The end time of discount code can effect, utc time"`
 }
 
 type EditRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"DiscountCode" method:"post" summary:"Delete Merchant Discount Code"`
-	Code   string `json:"code" dc:"Code" v:"required"`
+	g.Meta `path:"/delete" tags:"Discount" method:"post" summary:"DeleteDiscountCode" dc:"Delete discount code before activate"`
+	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
 }
 
 type DeleteRes struct {

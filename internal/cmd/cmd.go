@@ -160,6 +160,11 @@ var (
 						merchant.NewRole(),
 					)
 				})
+				group.Group("/discount", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewDiscount(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {
