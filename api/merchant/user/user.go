@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"User" method:"get,post" summary:"User List"`
+	g.Meta    `path:"/list" tags:"User" method:"get,post" summary:"UserList"`
 	UserId    int    `json:"userId" dc:"Filter UserId" `
 	FirstName string `json:"firstName" dc:"Search FirstName" `
 	LastName  string `json:"lastName" dc:"Search LastName" `
@@ -25,11 +25,11 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
+	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"User Account Object List" `
 }
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"User" method:"get" summary:"Get User Profile"`
+	g.Meta `path:"/get" tags:"User" method:"get" summary:"GetUserProfile"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -38,7 +38,7 @@ type GetRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta `path:"/frozen_user" tags:"User" method:"post" summary:"Merchant Frozen User"`
+	g.Meta `path:"/frozen_user" tags:"User" method:"post" summary:"FrozenUser"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -46,7 +46,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta `path:"/release_user" tags:"User" method:"post" summary:"Merchant Release User"`
+	g.Meta `path:"/release_user" tags:"User" method:"post" summary:"ReleaseUser"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -54,7 +54,7 @@ type ReleaseRes struct {
 }
 
 type SearchReq struct {
-	g.Meta    `path:"/search" tags:"User" method:"get,post" summary:"User Search"`
+	g.Meta    `path:"/search" tags:"User" method:"get,post" summary:"UserSearch"`
 	SearchKey string `json:"searchKey" dc:"SearchKey, Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId" `
 }
 
@@ -63,7 +63,7 @@ type SearchRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta          `path:"/update" tags:"User" method:"post" summary:"Update User Profile"`
+	g.Meta          `path:"/update" tags:"User" method:"post" summary:"UpdateUserProfile"`
 	UserId          uint64 `json:"userId" dc:"User Id" v:"required"`
 	FirstName       string `json:"firstName" dc:"First name" v:"required"`
 	LastName        string `json:"lastName" dc:"Last Name" v:"required"`

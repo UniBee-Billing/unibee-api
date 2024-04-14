@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Role" method:"get" summary:"Get Merchant Role List"`
+	g.Meta `path:"/list" tags:"Role" method:"get" summary:"RoleList"`
 }
 
 type ListRes struct {
@@ -14,7 +14,7 @@ type ListRes struct {
 }
 
 type NewReq struct {
-	g.Meta      `path:"/new" tags:"Role" method:"post" summary:"New Merchant Role"`
+	g.Meta      `path:"/new" tags:"Role" method:"post" summary:"NewRole"`
 	Role        string                         `json:"role" dc:"Role" v:"required"`
 	Permissions []*bean.MerchantRolePermission `json:"permissions" dc:"Permissions" v:"required"`
 }
@@ -23,7 +23,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta      `path:"/edit" tags:"Role" method:"post" summary:"Edit Merchant Role"`
+	g.Meta      `path:"/edit" tags:"Role" method:"post" summary:"EditRole"`
 	Role        string                         `json:"role" dc:"Role" v:"required"`
 	Permissions []*bean.MerchantRolePermission `json:"permissions" dc:"Permissions" v:"required"`
 }
@@ -32,7 +32,7 @@ type EditRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"Role" method:"post" summary:"Delete Merchant Role"`
+	g.Meta `path:"/delete" tags:"Role" method:"post" summary:"DeleteRole"`
 	Role   string `json:"role" dc:"Role" v:"required"`
 }
 

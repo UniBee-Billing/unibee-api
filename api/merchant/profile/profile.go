@@ -7,7 +7,7 @@ import (
 )
 
 type GetReq struct {
-	g.Meta `path:"/get" tags:"Profile" method:"get" summary:"Get Merchant Info"`
+	g.Meta `path:"/get" tags:"Profile" method:"get" summary:"MerchantProfile"`
 }
 
 type GetRes struct {
@@ -21,7 +21,7 @@ type GetRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta      `path:"/update" tags:"Profile" method:"post" summary:"Update Merchant Info"`
+	g.Meta      `path:"/update" tags:"Profile" method:"post" summary:"UpdateMerchantProfile"`
 	CompanyName string `json:"companyName" description:"company_name"`
 	Email       string `json:"email"       description:"email"`
 	Address     string `json:"address"     description:"address"`
@@ -36,14 +36,14 @@ type UpdateRes struct {
 }
 
 type CountryConfigListReq struct {
-	g.Meta `path:"/country_config_list" tags:"Profile" method:"post" summary:"Merchant Edit Country Config"`
+	g.Meta `path:"/country_config_list" tags:"Profile" method:"post" summary:"EditCountryConfig"`
 }
 type CountryConfigListRes struct {
 	Configs []*bean.MerchantCountryConfigSimplify `json:"configs" description:"Configs"`
 }
 
 type EditCountryConfigReq struct {
-	g.Meta      `path:"/edit_country_config" tags:"Profile" method:"post" summary:"Merchant Country Config List"`
+	g.Meta      `path:"/edit_country_config" tags:"Profile" method:"post" summary:"CountryConfigList"`
 	CountryCode string `json:"countryCode"  dc:"CountryCode" v:"required"`
 	Name        string `json:"name"  dc:"name" `
 	VatEnable   *bool  `json:"vatEnable"  dc:"VatEnable, Default true" `
@@ -52,7 +52,7 @@ type EditCountryConfigRes struct {
 }
 
 type NewApiKeyReq struct {
-	g.Meta `path:"/new_apikey" tags:"Profile" method:"post" summary:"Merchant New ApiKey, The old key will expire in one hour"`
+	g.Meta `path:"/new_apikey" tags:"Profile" method:"post" summary:"GenerateNewApiKey" dc:"generate new apikey, The old one expired in one hour"`
 }
 type NewApiKeyRes struct {
 	ApiKey string `json:"apiKey" description:"ApiKey"`

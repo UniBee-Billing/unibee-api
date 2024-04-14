@@ -7,7 +7,7 @@ import (
 )
 
 type ConfigReq struct {
-	g.Meta `path:"/config" tags:"Subscription" method:"get" summary:"Get Merchant Subscription Config"`
+	g.Meta `path:"/config" tags:"Subscription" method:"get" summary:"SubscriptionConfig"`
 }
 type ConfigRes struct {
 	Config *bean.SubscriptionConfig `json:"config" dc:"Config"`
@@ -27,7 +27,7 @@ type ConfigUpdateRes struct {
 }
 
 type DetailReq struct {
-	g.Meta         `path:"/detail" tags:"Subscription" method:"get,post" summary:"Subscription Detail"`
+	g.Meta         `path:"/detail" tags:"Subscription" method:"get,post" summary:"SubscriptionDetail"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 
@@ -43,7 +43,7 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Subscription" method:"get,post" summary:"Subscription List"`
+	g.Meta    `path:"/list" tags:"Subscription" method:"get,post" summary:"SubscriptionList"`
 	UserId    int64  `json:"userId"  dc:"UserId" `
 	Status    []int  `json:"status" dc:"Filter, Default All，Status，0-Init | 1-Create｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
@@ -56,7 +56,7 @@ type ListRes struct {
 }
 
 type CancelReq struct {
-	g.Meta         `path:"/cancel" tags:"Subscription" method:"post" summary:"Merchant Cancel Subscription Immediately (Will Not Generate Proration Invoice)"`
+	g.Meta         `path:"/cancel" tags:"Subscription" method:"post" summary:"CancelSubscriptionImmediately" dc:"Cancel subscription specified without proration invoice"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	InvoiceNow     bool   `json:"invoiceNow" dc:"Default false"  deprecated:"true"`
 	Prorate        bool   `json:"prorate" dc:"Prorate Generate Invoice，Default false"  deprecated:"true"`
@@ -65,14 +65,14 @@ type CancelRes struct {
 }
 
 type CancelAtPeriodEndReq struct {
-	g.Meta         `path:"/cancel_at_period_end" tags:"Subscription" method:"post" summary:"Merchant Edit Subscription-Set Cancel Ad Period End"`
+	g.Meta         `path:"/cancel_at_period_end" tags:"Subscription" method:"post" summary:"CancelSubscriptionAtPeriodEnd"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type CancelAtPeriodEndRes struct {
 }
 
 type CancelLastCancelAtPeriodEndReq struct {
-	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"Subscription" method:"post" summary:"Merchant Edit Subscription-Cancel Last CancelAtPeriod"`
+	g.Meta         `path:"/cancel_last_cancel_at_period_end" tags:"Subscription" method:"post" summary:"CancelLastCancelSubscriptionAtPeriodEnd"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
 type CancelLastCancelAtPeriodEndRes struct {
@@ -93,7 +93,7 @@ type ResumeRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta          `path:"/change_gateway" tags:"Subscription" method:"post" summary:"Change Subscription Gateway" `
+	g.Meta          `path:"/change_gateway" tags:"Subscription" method:"post" summary:"ChangeSubscriptionGateway" `
 	SubscriptionId  string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
 	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId" `
@@ -102,7 +102,7 @@ type ChangeGatewayRes struct {
 }
 
 type AddNewTrialStartReq struct {
-	g.Meta             `path:"/add_new_trial_start" tags:"Subscription" method:"post" summary:"Merchant Edit Subscription-add appendTrialEndHour For Free"`
+	g.Meta             `path:"/add_new_trial_start" tags:"Subscription" method:"post" summary:"AppendSubscriptionTrialEnd"`
 	SubscriptionId     string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	AppendTrialEndHour int64  `json:"appendTrialEndHour" dc:"add appendTrialEndHour For Free" v:"required"`
 }
@@ -110,7 +110,7 @@ type AddNewTrialStartRes struct {
 }
 
 type RenewReq struct {
-	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"Renew Subscription, will create new subscription based on one provided "`
+	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew subscription based on one provided"`
 	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 }
@@ -122,7 +122,7 @@ type RenewRes struct {
 }
 
 type CreatePreviewReq struct {
-	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"Create Subscription Preview"`
+	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"CreateSubscriptionPreview"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
@@ -152,7 +152,7 @@ type CreatePreviewRes struct {
 }
 
 type CreateReq struct {
-	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"Create Subscription"`
+	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
 	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
@@ -175,7 +175,7 @@ type CreateRes struct {
 }
 
 type UpdatePreviewReq struct {
-	g.Meta          `path:"/update_preview" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Preview"`
+	g.Meta          `path:"/update_preview" tags:"Subscription" method:"post" summary:"UpdateSubscriptionPreview"`
 	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId       uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
@@ -193,7 +193,7 @@ type UpdatePreviewRes struct {
 }
 
 type UpdateReq struct {
-	g.Meta             `path:"/update_submit" tags:"Subscription" method:"post" summary:"Merchant Update Subscription Submit"`
+	g.Meta             `path:"/update_submit" tags:"Subscription" method:"post" summary:"UpdateSubscription"`
 	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId          uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity"  v:"required"`
@@ -213,7 +213,7 @@ type UpdateRes struct {
 }
 
 type UserSubscriptionDetailReq struct {
-	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"Subscription Detail"`
+	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"SubscriptionDetail"`
 	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
 }
 
@@ -227,7 +227,7 @@ type UserSubscriptionDetailRes struct {
 }
 
 type TimeLineListReq struct {
-	g.Meta    `path:"/timeline_list" tags:"Subscription-Timeline" method:"get,post" summary:"Merchant Subscription TimeLine List"`
+	g.Meta    `path:"/timeline_list" tags:"Subscription-Timeline" method:"get,post" summary:"SubscriptionTimeLineList"`
 	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -240,7 +240,7 @@ type TimeLineListRes struct {
 }
 
 type PendingUpdateListReq struct {
-	g.Meta         `path:"/pending_update_list" tags:"SubscriptionPendingUpdate" method:"get,post" summary:"Merchant SubscriptionPendingUpdate List"`
+	g.Meta         `path:"/pending_update_list" tags:"SubscriptionPendingUpdate" method:"get,post" summary:"SubscriptionPendingUpdateList"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	SortField      string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType       string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
@@ -253,7 +253,7 @@ type PendingUpdateListRes struct {
 }
 
 type NewAdminNoteReq struct {
-	g.Meta         `path:"/new_admin_note" tags:"Subscription-Note" method:"post" summary:"Merchant New Subscription Note"`
+	g.Meta         `path:"/new_admin_note" tags:"Subscription-Note" method:"post" summary:"NewSubscriptionNote"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	Note           string `json:"note" dc:"Note" v:"required"`
 }
@@ -274,7 +274,7 @@ type AdminNoteRo struct {
 }
 
 type AdminNoteListReq struct {
-	g.Meta         `path:"/admin_note_list" tags:"Subscription-Note" method:"get,post" summary:"Merchant Subscription Note List"`
+	g.Meta         `path:"/admin_note_list" tags:"Subscription-Note" method:"get,post" summary:"SubscriptionNoteList"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	Page           int    `json:"page"  dc:"Page, Start WIth 0" `
 	Count          int    `json:"count" dc:"Count Of Page" `
@@ -285,7 +285,7 @@ type AdminNoteListRes struct {
 }
 
 type OnetimeAddonNewReq struct {
-	g.Meta         `path:"/new_onetime_addon_payment" tags:"Subscription" method:"post" summary:"New Subscription Onetime Addon Payment" dc:"Create Payment For Subscription Onetime Addon Purchase"`
+	g.Meta         `path:"/new_onetime_addon_payment" tags:"Subscription" method:"post" summary:"NewSubscriptionOnetimeAddonPayment" dc:"Create payment for subscription onetime addon purchase"`
 	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
 	AddonId        uint64            `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
 	Quantity       int64             `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
@@ -302,7 +302,7 @@ type OnetimeAddonNewRes struct {
 }
 
 type OnetimeAddonListReq struct {
-	g.Meta `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"Merchant Subscription OnetimeAddon List"`
+	g.Meta `path:"/onetime_addon_list" tags:"Subscription" method:"get" summary:"SubscriptionOnetimeAddonList"`
 	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
 	Page   int    `json:"page"  dc:"Page, Start With 0" `
 	Count  int    `json:"count" dc:"Count Of Page" `

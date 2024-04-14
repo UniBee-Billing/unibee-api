@@ -7,7 +7,7 @@ import (
 )
 
 type NewReq struct {
-	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"Create Plan"`
+	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"CreatePlan"`
 	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                  `json:"currency"   dc:"Plan Currency" v:"required" `
@@ -30,7 +30,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"Edit Plan"`
+	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan"`
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
 	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
@@ -53,7 +53,7 @@ type EditRes struct {
 }
 
 type AddonsBindingReq struct {
-	g.Meta          `path:"/addons_binding" tags:"Plan" method:"post" summary:"Plan Binding Addons"`
+	g.Meta          `path:"/addons_binding" tags:"Plan" method:"post" summary:"AddonBinding"`
 	PlanId          uint64  `json:"planId" dc:"PlanID" v:"required"`
 	Action          int64   `json:"action" dc:"Action Type，0-override,1-add，2-delete" v:"required"`
 	AddonIds        []int64 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type"  v:"required" `
@@ -64,7 +64,7 @@ type AddonsBindingRes struct {
 }
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"Plan List"`
+	g.Meta        `path:"/list" tags:"Plan" method:"get,post" summary:"PlanList"`
 	Type          []int  `json:"type"  dc:"1-main plan，2-addon plan" `
 	Status        []int  `json:"status" dc:"Filter, Default All，,Status，1-Editing，2-Active，3-InActive，4-Expired" `
 	PublishStatus int    `json:"publishStatus" dc:"Filter, Default All，PublishStatus，1-UnPublished，2-Published" `
@@ -79,28 +79,28 @@ type ListRes struct {
 }
 
 type ActivateReq struct {
-	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"Activate Plan"`
+	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"ActivatePlan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type ActivateRes struct {
 }
 
 type PublishReq struct {
-	g.Meta `path:"/publish" tags:"Plan" method:"post" summary:"Publish Plan，Will Be Visible To UserPortal" `
+	g.Meta `path:"/publish" tags:"Plan" method:"post" summary:"PublishPlan" dc:"Publish plan，a plan will display at user portal when its published"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type PublishRes struct {
 }
 
 type UnPublishReq struct {
-	g.Meta `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublish Plan" `
+	g.Meta `path:"/unpublished" tags:"Plan" method:"post" summary:"UnPublishPlan" `
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type UnPublishRes struct {
 }
 
 type DetailReq struct {
-	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"Query Plan Detail"`
+	g.Meta `path:"/detail" tags:"Plan" method:"get,post" summary:"PlanDetail"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DetailRes struct {
@@ -108,7 +108,7 @@ type DetailRes struct {
 }
 
 type ExpireReq struct {
-	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"Expire Plan"`
+	g.Meta    `path:"/expire" tags:"Plan" method:"post" summary:"ExpirePlan"`
 	PlanId    uint64 `json:"planId" dc:"PlanId" v:"required"`
 	EmailCode int64  `json:"emailCode" dc:"Code From Email" v:"required"`
 }
@@ -116,7 +116,7 @@ type ExpireRes struct {
 }
 
 type DeleteReq struct {
-	g.Meta `path:"/delete" tags:"Plan" method:"post" summary:"Delete A Plan Before Activate"`
+	g.Meta `path:"/delete" tags:"Plan" method:"post" summary:"DeletePlan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
 }
 type DeleteRes struct {
