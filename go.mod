@@ -6,6 +6,7 @@ toolchain go1.21.3
 
 require (
 	github.com/creasty/defaults v1.7.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-pdf/fpdf v0.9.0
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/gogf/gf/contrib/drivers/mysql/v2 v2.5.6
@@ -81,4 +82,5 @@ require (
 	golang.org/x/sys v0.16.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
+	gopkg.in/yaml.v2 v2.2.2 // indirect
 )
