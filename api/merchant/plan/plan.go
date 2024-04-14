@@ -14,7 +14,7 @@ type NewReq struct {
 	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
 	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit，em: day|month|year|week"`
 	Description        string                                  `json:"description"  dc:"Description"`
-	Type               int                                     `json:"type"  d:"1"  dc:"Default 1，,1-main plan，2-addon plan, 3-onetime plan" `
+	Type               int                                     `json:"type"  d:"1"  dc:"The type of plan, 1-main plan，2-addon plan, 3-onetime plan, default main plan" `
 	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
 	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
 	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
