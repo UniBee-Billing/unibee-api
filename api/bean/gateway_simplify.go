@@ -6,6 +6,7 @@ type GatewaySimplify struct {
 	Id            uint64          `json:"gatewayId"`
 	GatewayName   string          `json:"gatewayName"`
 	GatewayLogo   string          `json:"gatewayLogo"`
+	GatewayKey    string          `json:"gatewayKey"            description:""`                                 //
 	GatewayType   int64           `json:"gatewayType"           description:"gateway type，1-Default｜ 2-Crypto"` // gateway type，1-Default｜ 2-Crypto
 	CountryConfig map[string]bool `json:"countryConfig"`
 	CreateTime    int64           `json:"createTime"            description:"create utc time"` // create utc time
