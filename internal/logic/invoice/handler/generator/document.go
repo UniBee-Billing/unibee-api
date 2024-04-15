@@ -25,6 +25,7 @@ type Document struct {
 	Customer            *Contact      `json:"customer,omitempty" validate:"required"`
 	Items               []*Item       `json:"items,omitempty"`
 	SubTotalString      string        `json:"sub_total_string,omitempty"`
+	DiscountTotalString string        `json:"discount_total_string,omitempty"`
 	TaxString           string        `json:"tax_string,omitempty"`
 	TotalString         string        `json:"total_string,omitempty"`
 	TaxPercentageString string        `json:"tax_percentage_string,omitempty"`

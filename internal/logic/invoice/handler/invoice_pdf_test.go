@@ -17,7 +17,8 @@ func TestGenerate(t *testing.T) {
 		GmtCreate:                      gtime.Now(),
 		TotalAmount:                    20000,
 		TaxAmount:                      2000,
-		SubscriptionAmountExcludingTax: 18000,
+		DiscountAmount:                 2000,
+		SubscriptionAmountExcludingTax: 20000,
 		Currency:                       "USD",
 		Lines:                          "[{\"currency\":\"USD\",\"amount\":100,\"amountExcludingTax\":100,\"tax\":0,\"unitAmountExcludingTax\":100,\"description\":\"1 × 1美金计划(测试专用) (at $1.00 / day)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":0,\"amountExcludingTax\":0,\"tax\":0,\"unitAmountExcludingTax\":0,\"description\":\"0 × 3美金Addon(测试专用) (at $3.00 / day)\",\"proration\":false,\"quantity\":0,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":350,\"amountExcludingTax\":350,\"tax\":0,\"unitAmountExcludingTax\":350,\"description\":\"1 × testUpgrade (at $3.50 / day)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916}]",
 		Status:                         consts.InvoiceStatusPaid,
@@ -46,8 +47,8 @@ func TestGenerate(t *testing.T) {
 	if err != nil {
 		return
 	}
-	//err = os.Remove("pdf_test.pdf")
-	//if err != nil {
-	//	return
-	//}
+	err = os.Remove("pdf_test.pdf")
+	if err != nil {
+		return
+	}
 }

@@ -140,13 +140,16 @@ func createInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice, merchant
 		Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage),
 	})
 	doc.SubTotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.SubscriptionAmountExcludingTax, unibInvoice.Currency))
+	if unibInvoice.DiscountAmount > 0 {
+		doc.DiscountTotalString = fmt.Sprintf("-%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.DiscountAmount, unibInvoice.Currency))
+	}
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TaxAmount, unibInvoice.Currency))
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TotalAmount, unibInvoice.Currency))
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage), "%")
 
-	// doc.SetDiscount(&generator.Discount{
-	// Percent: "90",
-	// })
+	//doc.SetDiscount(&generator2.Discount{
+	//	Percent: "90",
+	//})
 	//doc.SetDiscount(&generator2.Discount{
 	//	CaptureAmount: "0",
 	//})

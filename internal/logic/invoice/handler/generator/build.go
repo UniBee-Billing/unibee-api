@@ -5,7 +5,6 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"github.com/go-pdf/fpdf"
-	"github.com/shopspring/decimal"
 	"image"
 )
 
@@ -394,13 +393,13 @@ func (doc *Document) appendTotal() {
 		doc.Options.BaseTextColor[2],
 	)
 
-	// Draw TOTAL HT title
+	// Draw SUB TOTAL HT title
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
-	doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextTotalTotal), "0", 0, "R", false, 0, "")
+	doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextSubTotal), "0", 0, "R", false, 0, "")
 
-	// Draw TOTAL HT amount
+	// Draw SUB TOTAL HT amount
 	doc.pdf.SetX(moneyX)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
@@ -416,63 +415,22 @@ func (doc *Document) appendTotal() {
 		"",
 	)
 
-	if doc.Discount != nil {
-		baseY := doc.pdf.GetY() + 10
-
-		// Draw discounted title
-		doc.pdf.SetXY(120, baseY)
+	// Draw DISCOUNT TOTAL HT title
+	if len(doc.DiscountTotalString) > 0 {
+		doc.pdf.SetY(doc.pdf.GetY() + 10)
+		doc.pdf.SetX(120)
 		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 15, "F")
+		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
+		doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextTotalDiscounted), "0", 0, "R", false, 0, "")
 
-		// title
-		doc.pdf.CellFormat(38, 7.5, doc.encodeString(doc.Options.TextTotalDiscounted), "0", 0, "BR", false, 0, "")
-
-		// description
-		doc.pdf.SetXY(120, baseY+7.5)
-		doc.pdf.SetFont(doc.Options.Font, "", BaseTextFontSize)
-		doc.pdf.SetTextColor(
-			doc.Options.GreyTextColor[0],
-			doc.Options.GreyTextColor[1],
-			doc.Options.GreyTextColor[2],
-		)
-
-		var descString bytes.Buffer
-		discountType, discountAmount := doc.Discount.getDiscount()
-		if discountType == DiscountTypePercent {
-			descString.WriteString("-")
-			descString.WriteString(discountAmount.String())
-			descString.WriteString(" % / -")
-			descString.WriteString(doc.ac.FormatMoneyDecimal(
-				doc.TotalWithoutTaxAndWithoutDocumentDiscount().Sub(doc.TotalWithoutTax())),
-			)
-		} else {
-			descString.WriteString("-")
-			descString.WriteString(doc.ac.FormatMoneyDecimal(discountAmount))
-			descString.WriteString(" / -")
-			descString.WriteString(
-				discountAmount.Mul(decimal.NewFromFloat(100)).Div(doc.TotalWithoutTaxAndWithoutDocumentDiscount()).StringFixed(2),
-			)
-			descString.WriteString(" %")
-		}
-
-		doc.pdf.CellFormat(38, 7.5, doc.encodeString(descString.String()), "0", 0, "TR", false, 0, "")
-
-		doc.pdf.SetFont(doc.Options.Font, "", LargeTextFontSize)
-		doc.pdf.SetTextColor(
-			doc.Options.BaseTextColor[0],
-			doc.Options.BaseTextColor[1],
-			doc.Options.BaseTextColor[2],
-		)
-
-		// Draw discount amount
-		doc.pdf.SetY(baseY)
+		// Draw DISCOUNT TOTAL HT amount
 		doc.pdf.SetX(moneyX)
 		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
-		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 15, "F")
+		doc.pdf.Rect(moneyX-2, doc.pdf.GetY(), 40, 10, "F")
 		doc.pdf.CellFormat(
 			40,
-			15,
-			doc.encodeString(doc.ac.FormatMoneyDecimal(doc.TotalWithoutTax())),
+			10,
+			doc.encodeString(doc.DiscountTotalString),
 			"0",
 			0,
 			"L",
@@ -480,12 +438,10 @@ func (doc *Document) appendTotal() {
 			0,
 			"",
 		)
-		doc.pdf.SetY(doc.pdf.GetY() + 15)
-	} else {
-		doc.pdf.SetY(doc.pdf.GetY() + 10)
 	}
 
 	// Draw tax title
+	doc.pdf.SetY(doc.pdf.GetY() + 10)
 	doc.pdf.SetX(120)
 	doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 	doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
