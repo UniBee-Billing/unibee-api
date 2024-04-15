@@ -9,7 +9,7 @@ import (
 func IsNoCentCurrency(currency string) bool {
 	NOCentCurrencies := []string{"JPY", "KRW"}
 	for _, element := range NOCentCurrencies {
-		if currency == element {
+		if strings.ToUpper(currency) == element {
 			return true
 		}
 	}
