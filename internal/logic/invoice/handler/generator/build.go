@@ -421,7 +421,11 @@ func (doc *Document) appendTotal() {
 		doc.pdf.SetX(120)
 		doc.pdf.SetFillColor(doc.Options.WhiteBgColor[0], doc.Options.WhiteBgColor[1], doc.Options.WhiteBgColor[2])
 		doc.pdf.Rect(120, doc.pdf.GetY(), 40, 10, "F")
-		doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextTotalDiscounted), "0", 0, "R", false, 0, "")
+		if len(doc.DiscountTitle) > 0 {
+			doc.pdf.CellFormat(38, 10, doc.encodeString(doc.DiscountTitle), "0", 0, "R", false, 0, "")
+		} else {
+			doc.pdf.CellFormat(38, 10, doc.encodeString(doc.Options.TextTotalDiscounted), "0", 0, "R", false, 0, "")
+		}
 
 		// Draw DISCOUNT TOTAL HT amount
 		doc.pdf.SetX(moneyX)
