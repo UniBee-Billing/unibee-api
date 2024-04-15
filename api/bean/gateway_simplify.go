@@ -8,6 +8,7 @@ type GatewaySimplify struct {
 	GatewayLogo   string          `json:"gatewayLogo"`
 	GatewayType   int64           `json:"gatewayType"           description:"gateway type，1-Default｜ 2-Crypto"` // gateway type，1-Default｜ 2-Crypto
 	CountryConfig map[string]bool `json:"countryConfig"`
+	CreateTime    int64           `json:"createTime"            description:"create utc time"` // create utc time
 }
 
 func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
@@ -22,6 +23,7 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		GatewayName:   one.GatewayName,
 		GatewayType:   one.GatewayType,
 		CountryConfig: countryConfig,
+		CreateTime:    one.CreateTime,
 	}
 }
 
