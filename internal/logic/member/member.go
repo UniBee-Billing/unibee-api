@@ -89,6 +89,7 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, role string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
+	utility.Assert(strings.Compare(role, "Owner") == 0, "can not add owner member")
 	merchantRole := query.GetRoleByName(ctx, merchantId, role)
 	utility.Assert(merchantRole != nil, "role not found")
 
