@@ -240,14 +240,17 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}()
 		backgroundCtx := context.Background()
-		url := GenerateAndUploadInvoicePdf(backgroundCtx, one)
-		if len(url) > 0 {
-			_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
-				dao.Invoice.Columns().SendPdf:   url,
-				dao.Invoice.Columns().GmtModify: gtime.Now(),
-			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-			if err != nil {
-				fmt.Printf("GenerateAndUploadInvoicePdf update err:%s", err.Error())
+		filepath := GenerateInvoicePdf(backgroundCtx, one)
+		if len(filepath) > 0 {
+			url, _ := UploadInvoicePdf(backgroundCtx, one.InvoiceId, filepath)
+			if len(url) > 0 {
+				_, err = dao.Invoice.Ctx(backgroundCtx).Data(g.Map{
+					dao.Invoice.Columns().SendPdf:   url,
+					dao.Invoice.Columns().GmtModify: gtime.Now(),
+				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+				if err != nil {
+					fmt.Printf("UploadInvoice SendPdf err:%s", err.Error())
+				}
 			}
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
@@ -293,7 +296,18 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	utility.Assert(one.UserId > 0, "invoice userId not found")
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
-	utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
+
+	_, emailKey := email.GetDefaultMerchantEmailConfig(ctx, one.MerchantId)
+	utility.Assert(len(emailKey) > 0, "Email gateway not setup")
+
+	//utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
+
+	var pdfFileName string
+	if len(one.SendPdf) > 0 {
+		pdfFileName = utility.DownloadFile(one.SendPdf)
+	} else {
+		pdfFileName = GenerateInvoicePdf(ctx, one)
+	}
 	if !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
 		fmt.Printf("SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
 		return nil
@@ -311,7 +325,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		merchantProductName = plan.PlanName
 	}
 	if one.Status > consts.InvoiceStatusPending {
-		pdfFileName := utility.DownloadFile(one.SendPdf)
+
 		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
 		var template = email.TemplateNewProcessingInvoice
 		if one.Status == consts.InvoiceStatusPaid {

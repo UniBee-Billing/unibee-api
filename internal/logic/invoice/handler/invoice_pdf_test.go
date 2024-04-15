@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"os"
@@ -12,7 +11,7 @@ import (
 
 func TestGenerate(t *testing.T) {
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
-	err := createInvoicePdf(context.Background(), &entity.Invoice{
+	err := createInvoicePdf(&entity.Invoice{
 		InvoiceId:                      "in20240111j91EsJ8qGR9gBjI",
 		GmtCreate:                      gtime.Now(),
 		TotalAmount:                    20000,
