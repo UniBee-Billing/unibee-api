@@ -325,8 +325,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		merchantProductName = plan.PlanName
 	}
 	if one.Status > consts.InvoiceStatusPending {
-
-		utility.Assert(len(pdfFileName) > 0, "download pdf error:"+one.SendPdf)
+		utility.Assert(len(pdfFileName) > 0, "pdfFile download or generate error:"+one.InvoiceId)
 		var template = email.TemplateNewProcessingInvoice
 		if one.Status == consts.InvoiceStatusPaid {
 			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
