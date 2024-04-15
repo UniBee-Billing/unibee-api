@@ -143,14 +143,14 @@ func UserDiscountRollbackFromPayment(ctx context.Context, paymentId string) erro
 	return err
 }
 
-func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmount int64, currency string, discountCode string, timeNow int64) int64 {
+func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountExcludeTax int64, currency string, discountCode string, timeNow int64) int64 {
 	if timeNow == 0 {
 		timeNow = gtime.Now().Timestamp()
 	}
 	if merchantId <= 0 {
 		return 0
 	}
-	if totalAmount <= 0 {
+	if totalAmountExcludeTax <= 0 {
 		return 0
 	}
 	if len(discountCode) == 0 {
@@ -167,7 +167,7 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmount i
 		return 0
 	}
 	if merchantDiscountCode.DiscountType == DiscountTypePercentage {
-		return int64(float64(totalAmount) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
+		return int64(float64(totalAmountExcludeTax) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
 	} else if merchantDiscountCode.DiscountType == DiscountTypeFixedAmount &&
 		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
 		return merchantDiscountCode.DiscountAmount
