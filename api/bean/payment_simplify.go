@@ -32,8 +32,8 @@ type PaymentSimplify struct {
 	FailureReason     string            `json:"failureReason"          description:""`                                                                       //
 	BillingReason     string            `json:"billingReason"          description:""`                                                                       //
 	Link              string            `json:"link"                   description:""`
-	Metadata          map[string]string `json:"metadata" description:""`
-	GasPayer          string            `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
+	Metadata          map[string]string `json:"metadata"               description:""`
+	GasPayer          string            `json:"gasPayer"               description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
 }
 
 func SimplifyPayment(one *entity.Payment) *PaymentSimplify {

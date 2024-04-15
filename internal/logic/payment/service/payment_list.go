@@ -6,6 +6,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
+	detail2 "unibee/internal/logic/invoice/detail"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -86,7 +87,8 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		mainList = append(mainList, &detail.PaymentDetail{
 			User:    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
 			Payment: bean.SimplifyPayment(one),
-			//Invoice: detail2.InvoiceDetail(ctx, one.InvoiceId),
+			Gateway: bean.SimplifyGateway(query.GetGatewayById(ctx, one.GatewayId)),
+			Invoice: detail2.InvoiceDetail(ctx, one.InvoiceId),
 		})
 	}
 
