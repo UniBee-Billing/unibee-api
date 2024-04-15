@@ -296,17 +296,18 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	utility.Assert(one.UserId > 0, "invoice userId not found")
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
-
 	_, emailKey := email.GetDefaultMerchantEmailConfig(ctx, one.MerchantId)
-	utility.Assert(len(emailKey) > 0, "Email gateway not setup")
-
-	//utility.Assert(len(one.SendPdf) > 0, "pdf not generate is nil")
-
+	if len(emailKey) == 0 {
+		return gerror.New("Email gateway not setup")
+	}
 	var pdfFileName string
 	if len(one.SendPdf) > 0 {
 		pdfFileName = utility.DownloadFile(one.SendPdf)
 	} else {
 		pdfFileName = GenerateInvoicePdf(ctx, one)
+	}
+	if len(pdfFileName) == 0 {
+		return gerror.New("pdfFile download or generate error")
 	}
 	if !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
 		fmt.Printf("SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
