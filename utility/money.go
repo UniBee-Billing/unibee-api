@@ -6,8 +6,18 @@ import (
 	"strings"
 )
 
+func IsNoCentCurrency(currency string) bool {
+	NOCentCurrencies := []string{"JPY", "KRW"}
+	for _, element := range NOCentCurrencies {
+		if currency == element {
+			return true
+		}
+	}
+	return false
+}
+
 func ConvertCentToDollarStr(cents int64, currency string) string {
-	if strings.Compare(strings.ToUpper(currency), "JPY") == 0 {
+	if IsNoCentCurrency(strings.ToUpper(currency)) {
 		return fmt.Sprintf("%d", cents)
 	}
 	dollars := float64(cents) / 100.0
@@ -19,7 +29,7 @@ func ConvertDollarStrToCent(dollarStr string, currency string) int64 {
 	if err != nil {
 		panic(fmt.Sprintf("ConvertDollarStrToCent panic:%s", dollarStr))
 	}
-	if strings.Compare(strings.ToUpper(currency), "JPY") == 0 {
+	if IsNoCentCurrency(currency) {
 		return int64(dollars)
 	}
 	cents := int64(dollars * 100)
