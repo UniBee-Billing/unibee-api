@@ -150,7 +150,7 @@ func SetupDefaultConfigs(ctx context.Context) {
 	setUpDefaultConfig(serverConfig, "domainPath", unibeeApiUrl, "http://127.0.0.1:8088")
 	setUpDefaultConfig(serverConfig, "jwtKey", serverJwtKey, "3^&secret-key-for-UniBee*1!8*")
 	serverConfig["openapiPath"] = "/api.json"
-	setUpDefaultConfig(serverConfig, "swaggerPath", swaggerPath, "/swagger")
+	setUpDefaultConfig(serverConfig, "swaggerPath", swaggerPath, "") ///swagger
 	if serverConfig["domainPath"] == nil {
 		glog.Errorf(ctx, "server.domainPath not set")
 	}

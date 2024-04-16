@@ -61,6 +61,9 @@ var (
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.V3SwaggerUIPageContent)
 				})
+				group.GET("/swagger", func(r *ghttp.Request) {
+					r.Response.Write(swagger.RedoclyContent)
+				})
 				group.GET("/api.sdk.generator.json", swagger.MerchantPortalAndSDKGeneratorSpecJson)
 				group.GET("/api.sdk.generator.yaml", swagger.MerchantPortalAndSDKGeneratorSpecYaml)
 				group.GET("/api.user.portal.generator.json", swagger.UserPortalGeneratorSpecJson)
