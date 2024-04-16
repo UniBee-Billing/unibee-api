@@ -22,7 +22,7 @@ type ListRes struct {
 }
 
 type DetailReq struct {
-	g.Meta    `path:"/detail" tags:"User-Invoice" method:"get,post" summary:"InvoiceDetail" dc:"Get detail of invoice"`
+	g.Meta    `path:"/detail" tags:"User-Invoice" method:"get" summary:"InvoiceDetail" dc:"Get detail of invoice"`
 	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 }
 type DetailRes struct {
