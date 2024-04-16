@@ -11,23 +11,18 @@ import (
 )
 
 func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res *invoice.ListRes, err error) {
-	//Merchant 权限检查
-
 	if !config.GetConfigInstance().IsLocal() {
-		//User 检查
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "user auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id > 0, "userId invalid")
 	}
 
 	internalResult, err := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
-		MerchantId:    _interface.GetMerchantId(ctx),
-		UserId:        _interface.Context().Get(ctx).User.Id,
-		SendEmail:     req.SendEmail,
-		SortField:     req.SortField,
-		SortType:      req.SortType,
-		DeleteInclude: req.DeleteInclude,
-		Page:          req.Page,
-		Count:         req.Count,
+		MerchantId: _interface.GetMerchantId(ctx),
+		UserId:     _interface.Context().Get(ctx).User.Id,
+		SortField:  req.SortField,
+		SortType:   req.SortType,
+		Page:       req.Page,
+		Count:      req.Count,
 	})
 	if err != nil {
 		return nil, err
