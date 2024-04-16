@@ -285,18 +285,20 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	if len(payIdStr) > 0 {
 		response = ""
 		//Payment Redirect
+		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+		if payment != nil {
+			returnUrl = payment.ReturnUrl
+		}
 		if r.Get("success").Bool() {
 			stripe.Key = gateway.GatewaySecret
 			s.setUnibeeAppInfo()
-			payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+
 			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
 				response = "paymentId invalid"
 			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PaymentSuccess {
-				returnUrl = payment.ReturnUrl
 				response = "success"
 				status = true
 			} else {
-				returnUrl = payment.ReturnUrl
 				result, err := session.Get(
 					payment.GatewayPaymentIntentId,
 					&stripe.CheckoutSessionParams{},
