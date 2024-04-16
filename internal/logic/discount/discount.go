@@ -33,6 +33,7 @@ type CreateDiscountCodeInternalReq struct {
 	DiscountPercentage int64  `json:"discountPercentage" description:"percentage of discount, 100=1%, available when discount_type is percentage"` // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string `json:"Currency"          description:"Currency of discount, available when discount_type is fixed_amount"`          // Currency of discount, available when discount_type is fixed_amount
 	UserLimit          int    `json:"userLimit"         description:"the limit of every user apply, 0-unlimited"`                                  // the limit of every user apply, 0-unlimited
+	CycleLimit         int    `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
 	SubscriptionLimit  int    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
 	StartTime          int64  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
 	EndTime            int64  `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
@@ -70,6 +71,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		DiscountPercentage: req.DiscountPercentage,
 		Currency:           req.Currency,
 		UserLimit:          req.UserLimit,
+		CycleLimit:         req.CycleLimit,
 		SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime:          req.StartTime,
 		EndTime:            req.EndTime,
@@ -109,6 +111,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().DiscountPercentage: req.DiscountPercentage,
 		dao.MerchantDiscountCode.Columns().Currency:           req.Currency,
 		dao.MerchantDiscountCode.Columns().UserLimit:          req.UserLimit,
+		dao.MerchantDiscountCode.Columns().CycleLimit:         req.CycleLimit,
 		dao.MerchantDiscountCode.Columns().SubscriptionLimit:  req.SubscriptionLimit,
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,

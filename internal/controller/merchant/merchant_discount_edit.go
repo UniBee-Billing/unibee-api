@@ -18,10 +18,10 @@ func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (r
 		DiscountAmount:     req.DiscountAmount,
 		DiscountPercentage: req.DiscountPercentage,
 		Currency:           req.Currency,
-		UserLimit:          req.UserLimit,
-		SubscriptionLimit:  req.SubscriptionLimit,
-		StartTime:          req.StartTime,
-		EndTime:            req.EndTime,
+		CycleLimit:         req.CycleLimit,
+		//SubscriptionLimit:  req.SubscriptionLimit,
+		StartTime: req.StartTime,
+		EndTime:   req.EndTime,
 	})
 	if err != nil {
 		return nil, err
