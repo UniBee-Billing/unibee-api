@@ -1324,7 +1324,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
 	newTrialEnd := sub.CurrentPeriodStart - 1
 	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, sub.PlanId)
 	newStatus := sub.Status
 	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
 		// todo mark has unfinished pending update
