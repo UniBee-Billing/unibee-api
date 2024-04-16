@@ -28,4 +28,5 @@ type MerchantDiscountCode struct {
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`                                                                // update time
 	IsDeleted          int         `json:"isDeleted"          description:"0-UnDeleted，1-Deleted"`                                                      // 0-UnDeleted，1-Deleted
 	CreateTime         int64       `json:"createTime"         description:"create utc time"`                                                            // create utc time
+	CycleLimit         int         `json:"cycleLimit"         description:"the count limitation of subscription cycle , 0-no limit"`                    // the count limitation of subscription cycle , 0-no limit
 }

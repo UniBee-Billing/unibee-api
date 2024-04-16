@@ -86,6 +86,26 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "reach out the limit"
 		}
 	}
+	if discountCode.CycleLimit > 0 {
+		if len(req.SubscriptionId) == 0 {
+			return false, false, "invalid SubscriptionId"
+		}
+		//check user subscription limit
+		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
+			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
+			Where(dao.MerchantUserDiscountCode.Columns().UserId, req.UserId).
+			Where(dao.MerchantUserDiscountCode.Columns().Code, req.DiscountCode).
+			Where(dao.MerchantUserDiscountCode.Columns().SubscriptionId, req.SubscriptionId).
+			Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
+			Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
+			Count()
+		if err != nil {
+			return false, false, err.Error()
+		}
+		if discountCode.CycleLimit <= count {
+			return false, false, "reach out the limit"
+		}
+	}
 
 	return true, discountCode.BillingType == DiscountBillingTypeRecurring, ""
 }
@@ -166,6 +186,7 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountEx
 	if merchantDiscountCode.EndTime < timeNow || merchantDiscountCode.StartTime > timeNow {
 		return 0
 	}
+
 	if merchantDiscountCode.DiscountType == DiscountTypePercentage {
 		return int64(float64(totalAmountExcludeTax) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
 	} else if merchantDiscountCode.DiscountType == DiscountTypeFixedAmount &&

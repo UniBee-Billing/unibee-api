@@ -38,6 +38,7 @@ type MerchantDiscountCodeColumns struct {
 	GmtModify          string // update time
 	IsDeleted          string // 0-UnDeleted，1-Deleted
 	CreateTime         string // create utc time
+	CycleLimit         string // the count limitation of subscription cycle , 0-no limit
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -60,6 +61,7 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	GmtModify:          "gmt_modify",
 	IsDeleted:          "is_deleted",
 	CreateTime:         "create_time",
+	CycleLimit:         "cycle_limit",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

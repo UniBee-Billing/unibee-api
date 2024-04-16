@@ -30,4 +30,5 @@ type MerchantDiscountCode struct {
 	GmtModify          *gtime.Time // update time
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
 	CreateTime         interface{} // create utc time
+	CycleLimit         interface{} // the count limitation of subscription cycle , 0-no limit
 }

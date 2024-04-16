@@ -10,6 +10,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/discount"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/service"
@@ -115,14 +116,28 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 			if needInvoiceGenerate {
 				var invoice *bean.InvoiceSimplify
+				var discountCode = ""
+				canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+					MerchantId:     sub.MerchantId,
+					UserId:         sub.UserId,
+					DiscountCode:   sub.DiscountCode,
+					SubscriptionId: sub.SubscriptionId,
+					Currency:       sub.Currency,
+				})
+				if canApply && isRecurring {
+					discountCode = sub.DiscountCode
+				}
 				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice
 					plan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
 					var nextPeriodStart = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 					var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
+
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      pendingUpdate.UpdateCurrency,
+						DiscountCode:  discountCode,
+						TimeNow:       timeNow,
 						PlanId:        pendingUpdate.UpdatePlanId,
 						Quantity:      pendingUpdate.UpdateQuantity,
 						AddonJsonData: pendingUpdate.UpdateAddonData,
@@ -141,6 +156,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 					invoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 						Currency:      sub.Currency,
+						DiscountCode:  discountCode,
+						TimeNow:       timeNow,
 						PlanId:        sub.PlanId,
 						Quantity:      sub.Quantity,
 						AddonJsonData: sub.AddonData,
