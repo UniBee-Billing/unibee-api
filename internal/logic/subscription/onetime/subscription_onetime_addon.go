@@ -89,7 +89,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			Currency:       "",
 		})
 		utility.Assert(canApply, message)
-		utility.Assert(!isRecurring, "not support recurring discount code")
+		utility.Assert(!isRecurring, "recurring discount code not available for one-time addon")
 	}
 
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, addon.Amount*req.Quantity, sub.Currency, req.DiscountCode, gtime.Now().Timestamp()), addon.Amount*req.Quantity)
