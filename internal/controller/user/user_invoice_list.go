@@ -21,7 +21,7 @@ func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res
 
 	internalResult, err := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
-		UserId:        req.UserId,
+		UserId:        _interface.Context().Get(ctx).User.Id,
 		SendEmail:     req.SendEmail,
 		SortField:     req.SortField,
 		SortType:      req.SortType,

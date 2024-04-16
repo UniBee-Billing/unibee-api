@@ -18,7 +18,7 @@ type InvoiceListInternalReq struct {
 	Status        []int  `json:"status" dc:"Status" `
 	AmountStart   int64  `json:"amountStart" dc:"AmountStart" `
 	AmountEnd     int64  `json:"amountEnd" dc:"AmountEnd" `
-	UserId        int    `json:"userId" dc:"Filter UserId Default All" `
+	UserId        uint64 `json:"userId" dc:"Filter UserId Default All" `
 	SendEmail     string `json:"sendEmail" dc:"Filter SendEmail Default All" `
 	SortField     string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
 	SortType      string `json:"sortType" dc:"Sort Type，asc|desc" `
