@@ -59,7 +59,10 @@ var (
 			openapi.Servers = &goai.Servers{{URL: config.GetConfigInstance().Server.DomainPath}}
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
-					r.Response.Write(swagger.V3SwaggerUIPageContent)
+					r.Response.Write(swagger.LatestSwaggerUIPageContent)
+				})
+				group.GET("/swaggerv3-ui.html", func(r *ghttp.Request) {
+					r.Response.Write(swagger.LatestSwaggerUIPageContent)
 				})
 				group.GET("/swagger", func(r *ghttp.Request) {
 					r.Response.Write(swagger.RedoclyContent)
