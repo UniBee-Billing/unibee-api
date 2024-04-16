@@ -11,7 +11,7 @@ import (
 func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error) {
 	result, err := service.PaymentTimeLineList(ctx, &service.PaymentTimelineListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
-		UserId:     req.UserId,
+		UserId:     _interface.Context().Get(ctx).User.Id,
 		SortField:  req.SortField,
 		SortType:   req.SortType,
 		Page:       req.Page,

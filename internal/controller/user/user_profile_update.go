@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	_interface "unibee/internal/interface"
 	"unibee/time"
 	"unibee/utility"
 
@@ -37,7 +38,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		dao.UserAccount.Columns().CountryCode:     req.CountryCode,
 		dao.UserAccount.Columns().CountryName:     req.CountryName,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
-	}).Where(dao.UserAccount.Columns().Id, req.Id).OmitNil().Update()
+	}).Where(dao.UserAccount.Columns().Id, _interface.Context().Get(ctx).User.Id).OmitNil().Update()
 	if err != nil {
 		return nil, err
 	}

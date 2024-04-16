@@ -10,7 +10,7 @@ import (
 
 type PaymentTimelineListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int64  `json:"userId" dc:"Filter UserId, Default All " `
+	UserId     uint64 `json:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `json:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
 	SortType   string `json:"sortType" dc:"Sort Type，asc|desc" `
 	Page       int    `json:"page"  dc:"Page, Start WIth 0" `

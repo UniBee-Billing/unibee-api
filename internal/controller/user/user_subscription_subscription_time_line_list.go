@@ -10,7 +10,7 @@ import (
 func (c *ControllerSubscription) TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error) {
 	result, err := service.SubscriptionTimeLineList(ctx, &service.SubscriptionTimeLineListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
-		UserId:     req.UserId,
+		UserId:     _interface.Context().Get(ctx).User.Id,
 		SortField:  req.SortField,
 		SortType:   req.SortType,
 		Page:       req.Page,

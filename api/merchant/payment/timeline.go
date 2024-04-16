@@ -7,7 +7,7 @@ import (
 
 type TimeLineListReq struct {
 	g.Meta    `path:"/timeline/list" tags:"Payment" method:"get" summary:"PaymentTimeLineList"`
-	UserId    int64  `json:"userId" dc:"Filter UserId, Default All" `
+	UserId    uint64 `json:"userId" dc:"Filter UserId, Default All" `
 	SortField string `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page      int    `json:"page"  dc:"Page,Start 0" `

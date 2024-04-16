@@ -228,7 +228,7 @@ type UserSubscriptionDetailRes struct {
 
 type TimeLineListReq struct {
 	g.Meta    `path:"/timeline_list" tags:"Subscription-Timeline" method:"get,post" summary:"SubscriptionTimeLineList"`
-	UserId    int    `json:"userId" dc:"Filter UserId, Default All " `
+	UserId    uint64 `json:"userId" dc:"Filter UserId, Default All " `
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page      int    `json:"page"  dc:"Page, Start WIth 0" `

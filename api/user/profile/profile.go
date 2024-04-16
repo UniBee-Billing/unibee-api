@@ -22,7 +22,6 @@ type LogoutRes struct {
 
 type UpdateReq struct {
 	g.Meta          `path:"/update" tags:"User-Profile" method:"post" summary:"Update User Profile"`
-	Id              uint64 `json:"id" dc:"User Id" v:"required"`
 	FirstName       string `json:"firstName" dc:"First name"`
 	LastName        string `json:"lastName" dc:"Last Name"`
 	Email           string `json:"email" dc:"Email" v:"required"`
