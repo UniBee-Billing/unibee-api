@@ -56,7 +56,7 @@ var (
 			openapi.Info.Version = readBuildVersionInfo(ctx)
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
-
+			openapi.Servers = &goai.Servers{{URL: config.GetConfigInstance().Server.DomainPath}}
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.V3SwaggerUIPageContent)
