@@ -16,6 +16,7 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/currency"
+	"unibee/internal/logic/discount"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -140,7 +141,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Status = int(gatewayInternalPayResult.Status)
 	createPayContext.Pay.GatewayPaymentId = gatewayInternalPayResult.GatewayPaymentId
 	createPayContext.Pay.GatewayPaymentIntentId = gatewayInternalPayResult.GatewayPaymentIntentId
-	gatewayInternalPayResult.PaymentId = createPayContext.Pay.PaymentId
 	// unibee payment link
 	paymentLink := link.GetPaymentLink(createPayContext.Pay.PaymentId)
 	result, err := dao.Payment.Ctx(ctx).Data(g.Map{
@@ -178,6 +178,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	}
 	invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
 	gatewayInternalPayResult.Invoice = invoice
+	gatewayInternalPayResult.Payment = createPayContext.Pay
 	if err != nil {
 		return nil, err
 	}
@@ -236,10 +237,10 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
-	if err == nil && res.Status != consts.PaymentSuccess {
-		//need send invoice for authorised
-		payment := query.GetPaymentByPaymentId(ctx, res.PaymentId)
-		if payment != nil {
+
+	if res.Payment != nil {
+		if err == nil && res.Status != consts.PaymentSuccess {
+			//need send invoice for authorised
 			oneUser := query.GetUserAccountById(ctx, sub.UserId)
 			plan := query.GetPlanById(ctx, sub.PlanId)
 			if plan != nil && oneUser != nil {
@@ -247,7 +248,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 					UserName:            oneUser.FirstName + " " + oneUser.LastName,
 					MerchantProductName: plan.PlanName,
 					MerchantCustomEmail: merchant.Email,
-					MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
+					MerchantName:        query.GetMerchantCountryConfigName(ctx, res.Payment.MerchantId, oneUser.CountryCode),
 					PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
 					Currency:            strings.ToUpper(invoice.Currency),
 					PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
@@ -257,7 +258,23 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 				}
 			}
 		}
+		if len(invoice.DiscountCode) > 0 {
+			_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+				MerchantId:     sub.MerchantId,
+				UserId:         sub.UserId,
+				DiscountCode:   invoice.DiscountCode,
+				SubscriptionId: sub.SubscriptionId,
+				PaymentId:      res.Payment.PaymentId,
+				InvoiceId:      invoice.InvoiceId,
+				ApplyAmount:    invoice.DiscountAmount,
+				Currency:       invoice.Currency,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
+
 	return res, err
 }
 

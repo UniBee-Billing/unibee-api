@@ -42,7 +42,7 @@ func TestSubscription(t *testing.T) {
 		require.Nil(t, err)
 		one := create.Subscription
 		testSubscriptionId = one.SubscriptionId
-		addon, err := CreateSubscriptionOneTimeAddon(ctx, &SubscriptionCreateOnetimeAddonInternalReq{
+		addon, err := CreateSubOneTimeAddon(ctx, &SubscriptionCreateOnetimeAddonInternalReq{
 			MerchantId:     one.MerchantId,
 			SubscriptionId: one.SubscriptionId,
 			AddonId:        114,

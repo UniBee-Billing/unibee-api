@@ -154,7 +154,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.NewRes{
 		Status:            consts.PaymentCreated,
-		PaymentId:         resp.PaymentId,
+		PaymentId:         resp.Payment.PaymentId,
 		ExternalPaymentId: req.ExternalPaymentId,
 		Link:              resp.Link,
 		Action:            resp.Action,

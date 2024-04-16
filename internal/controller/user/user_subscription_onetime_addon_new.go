@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerSubscription) OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error) {
-	result, err := onetime.CreateSubscriptionOneTimeAddon(ctx, &onetime.SubscriptionCreateOnetimeAddonInternalReq{
+	result, err := onetime.CreateSubOneTimeAddon(ctx, &onetime.SubscriptionCreateOnetimeAddonInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
 		SubscriptionId: req.SubscriptionId,
 		AddonId:        req.AddonId,

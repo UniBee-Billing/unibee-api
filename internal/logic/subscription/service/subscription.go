@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -108,39 +107,80 @@ type RenewInternalReq struct {
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
-	one := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
-	utility.Assert(one != nil, "subscription not found")
-	utility.Assert(one.UserId == req.UserId, "userId not match")
-	utility.Assert(one.MerchantId == req.MerchantId, "merchantId not match")
-	utility.Assert(one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.UserId == req.UserId, "userId not match")
+	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
+	utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var addonParams []*bean.PlanAddonParam
-	if len(one.AddonData) > 0 {
-		err := utility.UnmarshalFromJsonString(one.AddonData, &addonParams)
+	if len(sub.AddonData) > 0 {
+		err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
 		if err == nil {
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
 	}
-	var metadata = make(map[string]string)
-	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+
+	var timeNow = gtime.Now().Timestamp()
+	if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
+		timeNow = sub.TestClock
+	}
+
+	var discountCode = ""
+	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+		MerchantId:     sub.MerchantId,
+		UserId:         sub.UserId,
+		DiscountCode:   sub.DiscountCode,
+		SubscriptionId: sub.SubscriptionId,
+		Currency:       sub.Currency,
+	})
+	if canApply && isRecurring {
+		discountCode = sub.DiscountCode
+	}
+
+	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
+		InvoiceName:   "SubscriptionCycle",
+		Currency:      sub.Currency,
+		DiscountCode:  discountCode,
+		TimeNow:       timeNow,
+		PlanId:        sub.PlanId,
+		Quantity:      sub.Quantity,
+		AddonJsonData: utility.MarshalToJsonString(addonParams),
+		TaxPercentage: sub.TaxPercentage,
+		PeriodStart:   timeNow,
+		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, timeNow, sub.PlanId),
+		FinishTime:    timeNow,
+	})
+
+	// createAndPayNewProrationInvoice
+	merchantInfo := query.GetMerchantById(ctx, sub.MerchantId)
+	utility.Assert(merchantInfo != nil, "merchantInfo not found")
+	// utility.Assert(user != nil, "user not found")
+	gateway := query.GetGatewayById(ctx, sub.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
+	utility.AssertError(err, "System Error")
+	createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, invoice)
+	if err != nil {
+		return nil, err
+	}
+
+	// need cancel payment、 invoice and send invoice email
+	CancelOtherUnfinishedPendingUpdatesBackground(sub.SubscriptionId, sub.SubscriptionId, "CancelByRenewSubscription-"+sub.SubscriptionId)
+
+	if createRes.Status == consts.PaymentSuccess && createRes.Payment != nil {
+		err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, createRes.Payment)
 		if err != nil {
-			fmt.Printf("SubscriptionDetail Unmarshal Metadata error:%s", err.Error())
+			return nil, err
 		}
 	}
-	return SubscriptionCreate(ctx, &CreateInternalReq{
-		MerchantId:      one.MerchantId,
-		PlanId:          one.PlanId,
-		UserId:          one.UserId,
-		Quantity:        one.Quantity,
-		GatewayId:       one.GatewayId,
-		AddonParams:     addonParams,
-		ReturnUrl:       one.ReturnUrl,
-		VatCountryCode:  one.CountryCode,
-		VatNumber:       one.VatNumber,
-		PaymentMethodId: one.GatewayDefaultPaymentMethod,
-		DiscountCode:    one.DiscountCode,
-		Metadata:        metadata,
-	})
+
+	sub = query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
+
+	return &CreateInternalRes{
+		Subscription: bean.SimplifySubscription(sub),
+		Paid:         createRes.Status == consts.PaymentSuccess && createRes.Payment != nil,
+		Link:         createRes.Link,
+	}, nil
 }
 
 type CreatePreviewInternalReq struct {
@@ -467,7 +507,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 
 	createRes = &gateway_bean.GatewayCreateSubscriptionResp{
-		GatewaySubscriptionId: createPaymentResult.PaymentId,
+		GatewaySubscriptionId: createPaymentResult.Payment.PaymentId,
 		Data:                  utility.MarshalToJsonString(createPaymentResult),
 		Link:                  createPaymentResult.Link,
 		Paid:                  createPaymentResult.Status == consts.PaymentSuccess,
@@ -488,19 +528,21 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Status = consts.GatewayPlanStatusCreate
 	one.Link = createRes.Link
 
-	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-		MerchantId:     req.MerchantId,
-		UserId:         req.UserId,
-		DiscountCode:   invoice.DiscountCode,
-		SubscriptionId: one.SubscriptionId,
-		PaymentId:      createPaymentResult.PaymentId,
-		InvoiceId:      invoice.InvoiceId,
-		ApplyAmount:    invoice.DiscountAmount,
-		Currency:       invoice.Currency,
-	})
-	if err != nil {
-		return nil, err
-	}
+	//if len(invoice.DiscountCode) > 0 {
+	//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+	//		MerchantId:     req.MerchantId,
+	//		UserId:         req.UserId,
+	//		DiscountCode:   invoice.DiscountCode,
+	//		SubscriptionId: one.SubscriptionId,
+	//		PaymentId:      createPaymentResult.PaymentId,
+	//		InvoiceId:      invoice.InvoiceId,
+	//		ApplyAmount:    invoice.DiscountAmount,
+	//		Currency:       invoice.Currency,
+	//	})
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//}
 
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionCreate.Topic,
@@ -508,9 +550,8 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Body:  one.SubscriptionId,
 	})
 	if createRes.Paid {
-		payment := query.GetPaymentByPaymentId(ctx, createPaymentResult.PaymentId)
-		utility.Assert(payment != nil, "Server Error")
-		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, payment)
+		utility.Assert(createPaymentResult.Payment != nil, "Server Error")
+		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, createPaymentResult.Payment)
 		utility.AssertError(err, "Finish Subscription Error")
 	}
 	return &CreateInternalRes{
@@ -695,8 +736,17 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 			RecurringDiscountCode = req.DiscountCode
 		}
 	} else if len(sub.DiscountCode) > 0 {
-		req.DiscountCode = sub.DiscountCode
-		RecurringDiscountCode = sub.DiscountCode
+		canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:     sub.MerchantId,
+			UserId:         sub.UserId,
+			DiscountCode:   sub.DiscountCode,
+			SubscriptionId: sub.SubscriptionId,
+			Currency:       sub.Currency,
+		})
+		if canApply && isRecurring {
+			req.DiscountCode = sub.DiscountCode
+			RecurringDiscountCode = sub.DiscountCode
+		}
 	}
 
 	if effectImmediate {
@@ -950,19 +1000,22 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 			Invoice:         createRes.Invoice,
 		}
 
-		_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     prepare.Subscription.MerchantId,
-			UserId:         prepare.Subscription.UserId,
-			DiscountCode:   prepare.Invoice.DiscountCode,
-			SubscriptionId: prepare.Subscription.SubscriptionId,
-			PaymentId:      createRes.PaymentId,
-			InvoiceId:      prepare.Invoice.InvoiceId,
-			ApplyAmount:    prepare.Invoice.DiscountAmount,
-			Currency:       prepare.Invoice.Currency,
-		})
-		if err != nil {
-			return nil, err
-		}
+		//if len(prepare.Invoice.DiscountCode) > 0 {
+		//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
+		//		MerchantId:     prepare.Subscription.MerchantId,
+		//		UserId:         prepare.Subscription.UserId,
+		//		DiscountCode:   prepare.Invoice.DiscountCode,
+		//		SubscriptionId: prepare.Subscription.SubscriptionId,
+		//		PaymentId:      createRes.PaymentId,
+		//		InvoiceId:      prepare.Invoice.InvoiceId,
+		//		ApplyAmount:    prepare.Invoice.DiscountAmount,
+		//		Currency:       prepare.Invoice.Currency,
+		//	})
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//}
+
 	} else {
 		prepare.EffectImmediate = false
 		subUpdateRes = &UpdateSubscriptionInternalResp{

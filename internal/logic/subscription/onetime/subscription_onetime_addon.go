@@ -37,7 +37,7 @@ type SubscriptionCreateOnetimeAddonInternalReq struct {
 	DiscountCode   string            `json:"discountCode"        dc:"DiscountCode"`
 }
 
-func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAddonInternalReq) (*SubscriptionCreateOnetimeAddonInternalRes, error) {
+func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAddonInternalReq) (*SubscriptionCreateOnetimeAddonInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
 	utility.Assert(req.AddonId > 0, "AddonId invalid")
@@ -150,7 +150,7 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 	}
 	_, err = dao.SubscriptionOnetimeAddon.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionOnetimeAddon.Columns().Status:    status,
-		dao.SubscriptionOnetimeAddon.Columns().PaymentId: createRes.PaymentId,
+		dao.SubscriptionOnetimeAddon.Columns().PaymentId: createRes.Payment.PaymentId,
 		dao.SubscriptionOnetimeAddon.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.SubscriptionOnetimeAddon.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
@@ -162,7 +162,7 @@ func CreateSubscriptionOneTimeAddon(ctx context.Context, req *SubscriptionCreate
 		UserId:         sub.UserId,
 		DiscountCode:   invoice.DiscountCode,
 		SubscriptionId: one.SubscriptionId,
-		PaymentId:      createRes.PaymentId,
+		PaymentId:      createRes.Payment.PaymentId,
 		InvoiceId:      invoice.InvoiceId,
 		ApplyAmount:    invoice.DiscountAmount,
 		Currency:       invoice.Currency,

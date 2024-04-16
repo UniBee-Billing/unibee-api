@@ -111,6 +111,9 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 }
 
 func UserDiscountApply(ctx context.Context, req *UserDiscountApplyReq) (discountCode *entity.MerchantUserDiscountCode, err error) {
+	if len(req.DiscountCode) == 0 {
+		return nil, gerror.New("invalid discountCode")
+	}
 	one := &entity.MerchantUserDiscountCode{
 		MerchantId:     req.MerchantId,
 		UserId:         req.UserId,

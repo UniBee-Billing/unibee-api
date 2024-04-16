@@ -22,8 +22,8 @@ type GatewayNewPaymentReq struct {
 }
 
 type GatewayNewPaymentResp struct {
+	Payment                *entity.Payment          `json:"payment"`
 	Status                 consts.PaymentStatusEnum `json:"status"`
-	PaymentId              string                   `json:"paymentId"`
 	GatewayPaymentId       string                   `json:"gatewayPaymentId"`
 	GatewayPaymentIntentId string                   `json:"gatewayPaymentIntentId"`
 	GatewayPaymentMethod   string                   `json:"gatewayPaymentMethod"`
