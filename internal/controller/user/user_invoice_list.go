@@ -17,12 +17,16 @@ func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res
 	}
 
 	internalResult, err := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
-		MerchantId: _interface.GetMerchantId(ctx),
-		UserId:     _interface.Context().Get(ctx).User.Id,
-		SortField:  req.SortField,
-		SortType:   req.SortType,
-		Page:       req.Page,
-		Count:      req.Count,
+		MerchantId:  _interface.GetMerchantId(ctx),
+		UserId:      _interface.Context().Get(ctx).User.Id,
+		SortField:   req.SortField,
+		SortType:    req.SortType,
+		Status:      req.Status,
+		Currency:    req.Currency,
+		AmountEnd:   req.AmountEnd,
+		AmountStart: req.AmountStart,
+		Page:        req.Page,
+		Count:       req.Count,
 	})
 	if err != nil {
 		return nil, err
