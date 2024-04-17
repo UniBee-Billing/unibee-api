@@ -220,21 +220,22 @@ type CreatePreviewInternalRes struct {
 }
 
 type CreateInternalReq struct {
-	MerchantId         uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
-	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
-	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
-	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
-	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	MerchantId         uint64                      `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	PlanId             uint64                      `json:"planId" dc:"PlanId" v:"required"`
+	UserId             uint64                      `json:"userId" dc:"UserId" v:"required"`
+	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
+	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ReturnUrl          string                      `json:"returnUrl"  dc:"RedirectUrl"  `
+	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
 }
 
 type CreateInternalRes struct {
@@ -376,6 +377,33 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 }
 
 func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
+	if req.Discount != nil {
+		// create external discount
+		one, err := discount.NewMerchantDiscountCode(ctx, &discount.CreateDiscountCodeInternalReq{
+			MerchantId:         req.MerchantId,
+			Code:               "",
+			Name:               "",
+			BillingType:        0,
+			DiscountType:       0,
+			DiscountAmount:     0,
+			DiscountPercentage: 0,
+			Currency:           "",
+			UserLimit:          0,
+			CycleLimit:         0,
+			SubscriptionLimit:  0,
+			StartTime:          0,
+			EndTime:            0,
+			Metadata:           nil,
+		})
+		utility.AssertError(err, "Create discount error")
+		err = discount.ActivateMerchantDiscountCode(ctx, req.MerchantId, one.Code)
+		utility.AssertError(err, "Create discount error")
+		req.DiscountCode = one.Code
+	} else if len(req.DiscountCode) > 0 {
+		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
+		utility.Assert(one.Type == 0, "invalid code, code is from external")
+	}
+
 	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
 		MerchantId:     req.MerchantId,
 		PlanId:         req.PlanId,

@@ -29,6 +29,7 @@ func (c *ControllerSubscription) List(ctx context.Context, req *subscription.Lis
 				AddonParams:                         addonParams,
 				Addons:                              subDetailRes.Addons,
 				LatestInvoice:                       subDetailRes.LatestInvoice,
+				Discount:                            subDetailRes.Discount,
 				UnfinishedSubscriptionPendingUpdate: subDetailRes.UnfinishedSubscriptionPendingUpdate,
 			})
 		}

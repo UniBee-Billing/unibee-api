@@ -44,7 +44,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if discountCode.StartTime > gtime.Now().Timestamp() {
 		return false, false, "discount not start"
 	}
-	if discountCode.EndTime < gtime.Now().Timestamp() {
+	if discountCode.EndTime != 0 && discountCode.EndTime < gtime.Now().Timestamp() {
 		return false, false, "discount expired"
 	}
 	if discountCode.DiscountType == DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
@@ -186,7 +186,7 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountEx
 	if merchantDiscountCode.Status != DiscountStatusActive {
 		return 0
 	}
-	if merchantDiscountCode.EndTime < timeNow || merchantDiscountCode.StartTime > timeNow {
+	if (merchantDiscountCode.EndTime != 0 && merchantDiscountCode.EndTime < timeNow) || merchantDiscountCode.StartTime > timeNow {
 		return 0
 	}
 

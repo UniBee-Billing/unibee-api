@@ -10,7 +10,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	MerchantDiscountCodes []*bean.MerchantDiscountCodeSimplify `json:"merchantDiscountCodes" dc:"Discount Code Object List"`
+	Discounts []*bean.MerchantDiscountCodeSimplify `json:"discounts" dc:"Discount Object List"`
 }
 
 type NewReq struct {
@@ -23,12 +23,14 @@ type NewReq struct {
 	DiscountPercentage int64  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                                          // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                                   // currency of discount, available when discount_type is fixed_amount
 	//UserLimit          int    `json:"userLimit"         dc:"The limit of every customer can effect, 0-unlimited"`                                                                                                                                                                                                                                    // the limit of every user apply, 0-unlimited
-	CycleLimit int   `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"` // the count limitation of subscription cycle , 0-no limit
-	StartTime  int64 `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                              // start of discount available utc time
-	EndTime    int64 `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	CycleLimit int               `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"` // the count limitation of subscription cycle , 0-no limit
+	StartTime  int64             `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                              // start of discount available utc time
+	EndTime    int64             `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	Metadata   map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 
 type NewRes struct {
+	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
 }
 
 type EditReq struct {
@@ -41,12 +43,14 @@ type EditReq struct {
 	DiscountPercentage int64  `json:"discountPercentage" dc:"The discount percentage of discount code, 100=1%, available when discount_type is percentage"`                                                                                                                                                                            // percentage of discount, 100=1%, available when discount_type is percentage
 	Currency           string `json:"currency"          dc:"The discount currency of discount code, available when discount_type is fixed_amount"`                                                                                                                                                                                     // currency of discount, available when discount_type is fixed_amount
 	//UserLimit          int    `json:"userLimit"         dc:"The limit of every user effect, 0-unlimited"`                                                                                                                                                                                                                              // the limit of every user apply, 0-unlimited
-	CycleLimit int   `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"` // the count limitation of subscription cycle , 0-no limit
-	StartTime  int64 `json:"startTime"         dc:"The start time of discount code can effect, utc time"`                                          // start of discount available utc time
-	EndTime    int64 `json:"endTime"           dc:"The end time of discount code can effect, utc time"`
+	CycleLimit int               `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"` // the count limitation of subscription cycle , 0-no limit
+	StartTime  int64             `json:"startTime"         dc:"The start time of discount code can effect, utc time"`                                          // start of discount available utc time
+	EndTime    int64             `json:"endTime"           dc:"The end time of discount code can effect, utc time"`
+	Metadata   map[string]string `json:"metadata" dc:"Metadata，Map"`
 }
 
 type EditRes struct {
+	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
 }
 
 type DeleteReq struct {

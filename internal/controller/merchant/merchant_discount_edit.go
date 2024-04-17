@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"unibee/api/bean"
 	_interface "unibee/internal/interface"
 	discount2 "unibee/internal/logic/discount"
 
@@ -9,7 +10,7 @@ import (
 )
 
 func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (res *discount.EditRes, err error) {
-	err = discount2.EditMerchantDiscountCode(ctx, &discount2.CreateDiscountCodeInternalReq{
+	one, err := discount2.EditMerchantDiscountCode(ctx, &discount2.CreateDiscountCodeInternalReq{
 		MerchantId:         _interface.GetMerchantId(ctx),
 		Code:               req.Code,
 		Name:               req.Name,
@@ -22,9 +23,10 @@ func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (r
 		//SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,
+		Metadata:  req.Metadata,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &discount.EditRes{}, nil
+	return &discount.EditRes{Discount: bean.SimplifyMerchantDiscountCode(one)}, nil
 }

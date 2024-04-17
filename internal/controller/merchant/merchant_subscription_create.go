@@ -23,6 +23,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		PaymentMethodId:    req.PaymentMethodId,
 		Metadata:           req.Metadata,
 		DiscountCode:       req.DiscountCode,
+		Discount:           req.Discount,
 	})
 	return &subscription.CreateRes{
 		Subscription: createRes.Subscription,

@@ -154,20 +154,21 @@ type CreatePreviewRes struct {
 
 type CreateReq struct {
 	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
-	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	UserId             uint64                 `json:"userId" dc:"UserId" v:"required"`
-	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
-	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"            `
-	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" `
-	ReturnUrl          string                 `json:"returnUrl"  dc:"ReturnUrl"  `
-	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
-	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
+	PlanId             uint64                      `json:"planId" dc:"PlanId" v:"required"`
+	UserId             uint64                      `json:"userId" dc:"UserId" v:"required"`
+	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"            `
+	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" `
+	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
 }
 
 type CreateRes struct {

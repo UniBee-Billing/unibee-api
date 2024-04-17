@@ -13,6 +13,7 @@ func MerchantDiscountCodeList(ctx context.Context, merchantId uint64) []*bean.Me
 	var list []*entity.MerchantDiscountCode
 	err := dao.MerchantDiscountCode.Ctx(ctx).
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
+		Where(dao.MerchantDiscountCode.Columns().Type, 0).
 		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		Scan(&list)
 	if err != nil {

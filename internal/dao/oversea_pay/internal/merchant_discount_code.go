@@ -33,12 +33,14 @@ type MerchantDiscountCodeColumns struct {
 	UserLimit          string // the limit of every user apply, 0-unlimited
 	SubscriptionLimit  string // the limit of every subscription apply, 0-unlimited
 	StartTime          string // start of discount available utc time
-	EndTime            string // end of discount available utc time
+	EndTime            string // end of discount available utc time, 0-invalid
 	GmtCreate          string // create time
 	GmtModify          string // update time
 	IsDeleted          string // 0-UnDeleted，1-Deleted
 	CreateTime         string // create utc time
 	CycleLimit         string // the count limitation of subscription cycle , 0-no limit
+	MetaData           string // meta_data(json)
+	Type               string // type, 1-external discount code
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -62,6 +64,8 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	IsDeleted:          "is_deleted",
 	CreateTime:         "create_time",
 	CycleLimit:         "cycle_limit",
+	MetaData:           "meta_data",
+	Type:               "type",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

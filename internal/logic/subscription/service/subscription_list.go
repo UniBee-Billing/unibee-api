@@ -46,6 +46,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 		AddonParams:                         addonParams,
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 		LatestInvoice:                       bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)),
+		Discount:                            bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, one.DiscountCode)),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx, one.PendingUpdateId),
 	}, nil
 }
@@ -107,6 +108,7 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			Plan:          nil,
 			Addons:        nil,
 			LatestInvoice: bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)),
+			Discount:      bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, sub.MerchantId, sub.DiscountCode)),
 			AddonParams:   addonParams,
 		})
 	}

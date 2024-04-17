@@ -25,10 +25,12 @@ type MerchantDiscountCode struct {
 	UserLimit          interface{} // the limit of every user apply, 0-unlimited
 	SubscriptionLimit  interface{} // the limit of every subscription apply, 0-unlimited
 	StartTime          interface{} // start of discount available utc time
-	EndTime            interface{} // end of discount available utc time
+	EndTime            interface{} // end of discount available utc time, 0-invalid
 	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // update time
 	IsDeleted          interface{} // 0-UnDeleted，1-Deleted
 	CreateTime         interface{} // create utc time
 	CycleLimit         interface{} // the count limitation of subscription cycle , 0-no limit
+	MetaData           interface{} // meta_data(json)
+	Type               interface{} // type, 1-external discount code
 }

@@ -6,14 +6,15 @@ import (
 )
 
 type SubscriptionDetail struct {
-	User                                *bean.UserAccountSimplify        `json:"user" dc:"user"`
-	Subscription                        *bean.SubscriptionSimplify       `json:"subscription" dc:"Subscription"`
-	Plan                                *bean.PlanSimplify               `json:"plan" dc:"Plan"`
-	Gateway                             *bean.GatewaySimplify            `json:"gateway" dc:"Gateway"`
-	AddonParams                         []*bean.PlanAddonParam           `json:"addonParams" dc:"AddonParams"`
-	Addons                              []*bean.PlanAddonDetail          `json:"addons" dc:"Addon"`
-	LatestInvoice                       *bean.InvoiceSimplify            `json:"latestInvoice" dc:"LatestInvoice"`
-	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	User                                *bean.UserAccountSimplify          `json:"user" dc:"user"`
+	Subscription                        *bean.SubscriptionSimplify         `json:"subscription" dc:"Subscription"`
+	Plan                                *bean.PlanSimplify                 `json:"plan" dc:"Plan"`
+	Gateway                             *bean.GatewaySimplify              `json:"gateway" dc:"Gateway"`
+	AddonParams                         []*bean.PlanAddonParam             `json:"addonParams" dc:"AddonParams"`
+	Addons                              []*bean.PlanAddonDetail            `json:"addons" dc:"Addon"`
+	LatestInvoice                       *bean.InvoiceSimplify              `json:"latestInvoice" dc:"LatestInvoice"`
+	Discount                            *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount"`
+	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail   `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
 type SubscriptionTimeLineDetail struct {
