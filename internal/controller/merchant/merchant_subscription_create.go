@@ -19,6 +19,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		ReturnUrl:          req.ReturnUrl,
 		VatCountryCode:     req.VatCountryCode,
 		VatNumber:          req.VatNumber,
+		TaxPercentage:      req.TaxPercentage,
 		PaymentMethodId:    req.PaymentMethodId,
 		Metadata:           req.Metadata,
 		DiscountCode:       req.DiscountCode,

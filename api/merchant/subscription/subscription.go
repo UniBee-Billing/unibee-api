@@ -130,7 +130,8 @@ type CreatePreviewReq struct {
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
-	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
+	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	DiscountCode   string                 `json:"discountCode" dc:"DiscountCode"`
 }
 
 type CreatePreviewRes struct {
@@ -160,9 +161,10 @@ type CreateReq struct {
 	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"            `
 	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" `
-	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	ReturnUrl          string                 `json:"returnUrl"  dc:"ReturnUrl"  `
 	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`

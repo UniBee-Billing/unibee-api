@@ -193,6 +193,7 @@ type CreatePreviewInternalReq struct {
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 }
 
 type CreatePreviewInternalRes struct {
@@ -202,14 +203,14 @@ type CreatePreviewInternalRes struct {
 	Merchant              *entity.Merchant        `json:"merchantInfo"`
 	AddonParams           []*bean.PlanAddonParam  `json:"addonParams"`
 	Addons                []*bean.PlanAddonDetail `json:"addons"`
-	TotalAmount           int64                   `json:"totalAmount"                `
-	Currency              string                  `json:"currency"              `
-	VatCountryCode        string                  `json:"vatCountryCode"              `
-	VatCountryName        string                  `json:"vatCountryName"              `
-	VatNumber             string                  `json:"vatNumber"              `
-	VatNumberValidate     *bean.ValidResult       `json:"vatNumberValidate"              `
-	TaxPercentage         int64                   `json:"taxPercentage"              `
-	VatVerifyData         string                  `json:"vatVerifyData"              `
+	TotalAmount           int64                   `json:"totalAmount" `
+	Currency              string                  `json:"currency" `
+	VatCountryCode        string                  `json:"vatCountryCode" `
+	VatCountryName        string                  `json:"vatCountryName" `
+	VatNumber             string                  `json:"vatNumber" `
+	VatNumberValidate     *bean.ValidResult       `json:"vatNumberValidate" `
+	TaxPercentage         int64                   `json:"taxPercentage" `
+	VatVerifyData         string                  `json:"vatVerifyData" `
 	Invoice               *bean.InvoiceSimplify   `json:"invoice"`
 	UserId                uint64                  `json:"userId" `
 	Email                 string                  `json:"email" `
@@ -231,6 +232,7 @@ type CreateInternalReq struct {
 	ReturnUrl          string                 `json:"returnUrl"  dc:"RedirectUrl"  `
 	VatCountryCode     string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 }
@@ -258,13 +260,17 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
+	req.Quantity = utility.MaxInt64(1, req.Quantity)
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "another active subscription find, only one subscription can create")
+	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another pending or active subscription exist")
 
 	//vat
+	if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
+		req.VatCountryCode = user.CountryCode
+	}
 	var vatCountryCode = req.VatCountryCode
-	var standardTaxPercentage int64 = 0
+	var subscriptionTaxPercentage int64 = 0
 	var vatCountryName = ""
 	var vatCountryRate *bean.VatCountryRate
 	var vatNumberValidate *bean.ValidResult
@@ -279,28 +285,20 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		vatCountryCode = vatNumberValidate.CountryCode
 	}
 
-	if len(vatCountryCode) == 0 && len(user.CountryCode) > 0 && vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
-		vatCountryCode = user.CountryCode
-		req.VatCountryCode = user.CountryCode
-	}
-
-	if len(vatCountryCode) > 0 {
-		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
-		vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-		if err == nil && vatCountryRate != nil {
-			vatCountryName = vatCountryRate.CountryName
-			if vatCountryRate.StandardTaxPercentage > 0 {
-				standardTaxPercentage = vatCountryRate.StandardTaxPercentage
+	if req.TaxPercentage != nil {
+		subscriptionTaxPercentage = *req.TaxPercentage
+	} else if len(vatCountryCode) > 0 {
+		if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
+			vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
+			if err == nil && vatCountryRate != nil {
+				vatCountryName = vatCountryRate.CountryName
+				if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
+					subscriptionTaxPercentage = 0
+				} else if vatCountryRate.StandardTaxPercentage > 0 {
+					subscriptionTaxPercentage = vatCountryRate.StandardTaxPercentage
+				}
 			}
 		}
-	}
-
-	if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
-		standardTaxPercentage = 0
-	}
-
-	if req.Quantity <= 0 {
-		req.Quantity = 1
 	}
 
 	var currency = plan.Currency
@@ -322,7 +320,6 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var currentTimeStart = billingCycleAnchor
 	var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, billingCycleAnchor.Timestamp(), req.PlanId)
 	var recurringDiscountCode string
-
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
 			MerchantId:     req.MerchantId,
@@ -348,7 +345,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		PlanId:        req.PlanId,
 		Quantity:      req.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-		TaxPercentage: standardTaxPercentage,
+		TaxPercentage: subscriptionTaxPercentage,
 		PeriodStart:   currentTimeStart.Timestamp(),
 		PeriodEnd:     currentTimeEnd,
 		FinishTime:    currentTimeStart.Timestamp(),
@@ -368,7 +365,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumber:             req.VatNumber,
 		VatNumberValidate:     vatNumberValidate,
 		VatVerifyData:         utility.MarshalToJsonString(vatNumberValidate),
-		TaxPercentage:         standardTaxPercentage,
+		TaxPercentage:         subscriptionTaxPercentage,
 		UserId:                req.UserId,
 		Email:                 user.Email,
 		Invoice:               invoice,
@@ -389,6 +386,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		AddonParams:    req.AddonParams,
 		VatCountryCode: req.VatCountryCode,
 		VatNumber:      req.VatNumber,
+		TaxPercentage:  req.TaxPercentage,
 	})
 	if err != nil {
 		return nil, err
@@ -527,22 +525,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.GatewaySubscriptionId = createRes.GatewaySubscriptionId
 	one.Status = consts.GatewayPlanStatusCreate
 	one.Link = createRes.Link
-
-	//if len(invoice.DiscountCode) > 0 {
-	//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-	//		MerchantId:     req.MerchantId,
-	//		UserId:         req.UserId,
-	//		DiscountCode:   invoice.DiscountCode,
-	//		SubscriptionId: one.SubscriptionId,
-	//		PaymentId:      createPaymentResult.PaymentId,
-	//		InvoiceId:      invoice.InvoiceId,
-	//		ApplyAmount:    invoice.DiscountAmount,
-	//		Currency:       invoice.Currency,
-	//	})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//}
 
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionCreate.Topic,
