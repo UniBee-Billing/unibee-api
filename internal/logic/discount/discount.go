@@ -24,6 +24,7 @@ const (
 )
 
 type CreateDiscountCodeInternalReq struct {
+	Type               int               `json:"type"               description:"type, 1-external discount code"` // type, 1-external discount code
 	MerchantId         uint64            `json:"MerchantId"        description:"MerchantId"`
 	Code               string            `json:"Code"              description:"Code"`
 	Name               string            `json:"name"              description:"name"`                                                                        // name
@@ -69,6 +70,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		BillingType:        req.BillingType,
 		DiscountType:       req.DiscountType,
 		DiscountAmount:     req.DiscountAmount,
+		Type:               req.Type,
 		DiscountPercentage: req.DiscountPercentage,
 		Currency:           req.Currency,
 		UserLimit:          req.UserLimit,

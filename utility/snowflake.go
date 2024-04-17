@@ -5,15 +5,13 @@ import (
 	"time"
 )
 
-// Snowflake 结构定义
 type Snowflake struct {
 	mu        sync.Mutex
-	timestamp int64 // 时间戳
-	workerID  int64 // 工作机器ID
-	sequence  int64 // 序列号
+	timestamp int64
+	workerID  int64
+	sequence  int64
 }
 
-// NewSnowflake 创建一个新的Snowflake实例
 func NewSnowflake(workerID int64) *Snowflake {
 	return &Snowflake{
 		timestamp: 0,
@@ -22,7 +20,6 @@ func NewSnowflake(workerID int64) *Snowflake {
 	}
 }
 
-// GenerateID 生成唯一ID
 func (s *Snowflake) GenerateID() int64 {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -16,6 +16,7 @@ func (c *ControllerDiscount) New(ctx context.Context, req *discount.NewReq) (res
 		Name:               req.Name,
 		BillingType:        req.BillingType,
 		DiscountType:       req.DiscountType,
+		Type:               0,
 		DiscountAmount:     req.DiscountAmount,
 		DiscountPercentage: req.DiscountPercentage,
 		Currency:           req.Currency,

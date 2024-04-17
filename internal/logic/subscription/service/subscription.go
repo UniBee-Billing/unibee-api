@@ -381,21 +381,59 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if req.Discount != nil {
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
+		utility.Assert(req.PlanId > 0, "planId invalid")
+		utility.Assert(req.GatewayId > 0, "Id invalid")
+		utility.Assert(req.UserId > 0, "UserId invalid")
+		plan := query.GetPlanById(ctx, req.PlanId)
+		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
+		utility.Assert(plan != nil, "invalid planId")
+
+		var cycleLimit = 0
+		var endTime int64 = 0
+		var BillingType = discount.DiscountBillingTypeOnetime
+		if req.Discount.Recurring != nil && *req.Discount.Recurring {
+			BillingType = discount.DiscountBillingTypeRecurring
+			if req.Discount.CycleLimit != nil {
+				cycleLimit = *req.Discount.CycleLimit
+			}
+			utility.Assert(cycleLimit >= 0, "invalid cycleLimit")
+			if req.Discount.EndTime != nil {
+				endTime = *req.Discount.EndTime
+			}
+			utility.Assert(endTime >= gtime.Now().Timestamp(), "invalid endTime")
+		} else {
+			utility.Assert(req.Discount.CycleLimit == nil, "cycleLimit not available as recurring not enable")
+			utility.Assert(req.Discount.EndTime == nil, "endTime not available as recurring not enable")
+		}
+		var discountType = 1
+		var discountAmount int64 = 0
+		var discountPercentage int64 = 0
+
+		if req.Discount.DiscountAmount != nil && *req.Discount.DiscountAmount > 0 {
+			discountType = discount.DiscountTypeFixedAmount
+			discountAmount = *req.Discount.DiscountAmount
+
+		} else if req.Discount.DiscountPercentage != nil && *req.Discount.DiscountPercentage > 0 {
+			discountType = discount.DiscountTypePercentage
+			discountPercentage = *req.Discount.DiscountPercentage
+			utility.Assert(discountPercentage > 0 && discountPercentage < 10000, "invalid discountPercentage")
+		} else {
+			utility.Assert(true, "one of discountAmount or discountPercentage should specified")
+		}
 		one, err := discount.NewMerchantDiscountCode(ctx, &discount.CreateDiscountCodeInternalReq{
 			MerchantId:         req.MerchantId,
-			Code:               "",
-			Name:               "",
-			BillingType:        0,
-			DiscountType:       0,
-			DiscountAmount:     0,
-			DiscountPercentage: 0,
-			Currency:           "",
-			UserLimit:          0,
-			CycleLimit:         0,
-			SubscriptionLimit:  0,
-			StartTime:          0,
-			EndTime:            0,
-			Metadata:           nil,
+			Code:               fmt.Sprintf("excode_%d_%d_%d_%d%s", req.MerchantId, req.UserId, req.PlanId, utility.CurrentTimeMillis(), utility.GenerateRandomAlphanumeric(8)),
+			Name:               fmt.Sprintf("excode_for_plan_%s_subscription", plan.PlanName),
+			BillingType:        BillingType,
+			DiscountType:       discountType,
+			DiscountAmount:     discountAmount,
+			Type:               1,
+			DiscountPercentage: discountPercentage,
+			Currency:           plan.Currency,
+			CycleLimit:         cycleLimit,
+			StartTime:          gtime.Now().Timestamp(),
+			EndTime:            endTime,
+			Metadata:           req.Discount.Metadata,
 		})
 		utility.AssertError(err, "Create discount error")
 		err = discount.ActivateMerchantDiscountCode(ctx, req.MerchantId, one.Code)
