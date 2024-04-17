@@ -287,6 +287,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	}
 
 	if req.TaxPercentage != nil {
+		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "External TaxPercentage only available for api call")
 		subscriptionTaxPercentage = *req.TaxPercentage
 	} else if len(vatCountryCode) > 0 {
 		if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
