@@ -431,7 +431,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			DiscountPercentage: discountPercentage,
 			Currency:           plan.Currency,
 			CycleLimit:         cycleLimit,
-			StartTime:          gtime.Now().Timestamp(),
+			StartTime:          gtime.Now().Timestamp() - 10,
 			EndTime:            endTime,
 			Metadata:           req.Discount.Metadata,
 		})
