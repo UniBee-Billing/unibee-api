@@ -378,6 +378,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
 	if req.Discount != nil {
+		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
 		one, err := discount.NewMerchantDiscountCode(ctx, &discount.CreateDiscountCodeInternalReq{
 			MerchantId:         req.MerchantId,
