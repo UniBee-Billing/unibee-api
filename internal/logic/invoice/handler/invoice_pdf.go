@@ -127,8 +127,8 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 		}
 		doc.DiscountTotalString = fmt.Sprintf("-%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.DiscountAmount, unibInvoice.Currency))
 	}
-	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TaxAmount, unibInvoice.Currency))
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TotalAmount, unibInvoice.Currency))
+	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TaxAmount, unibInvoice.Currency))
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage), "%")
 
 	pdf, err := doc.Build()

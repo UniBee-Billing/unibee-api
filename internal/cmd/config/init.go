@@ -190,7 +190,6 @@ func SetupDefaultConfigs(ctx context.Context) {
 }
 
 func ReplaceConfigContentUserNacos(ip string, port uint64, namespace, dataId, group string) (n *Nacos, err error) {
-
 	n = &Nacos{
 		ip:        ip,
 		port:      port,
@@ -219,9 +218,7 @@ func (n *Nacos) syncToFile() (err error) {
 		fmt.Println("nacos config load failure")
 		panic(err)
 	}
-	//创建文件
 	file, err := createFile(DefaultConfigFileName)
-	//关闭
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -232,17 +229,14 @@ func (n *Nacos) syncToFile() (err error) {
 	if file == nil {
 		panic("create or read file error")
 	}
-	//写入
 	writer := bufio.NewWriter(file)
 	_, err = writer.WriteString(config)
 	err = writer.Flush()
-	//返回
 	n.configFilePath = DefaultConfigFileName
 
 	return
 }
 
-// 创建文件
 func createFile(path string) (file *os.File, err error) {
 	file, err = os.Create(path)
 	if err != nil {

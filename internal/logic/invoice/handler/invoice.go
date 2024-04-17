@@ -85,6 +85,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		TotalAmount:                    simplify.TotalAmount,
 		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 		TaxAmount:                      simplify.TaxAmount,
+		TaxPercentage:                  simplify.TaxPercentage,
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
