@@ -29,7 +29,7 @@ type SubscriptionPendingUpdateColumns struct {
 	GmtCreate        string // create time
 	GmtModify        string // update time
 	Amount           string // amount of this period, cent
-	Status           string // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	Status           string // status，0-Init | 1-Pending｜2-Finished｜3-Cancelled
 	ProrationAmount  string // proration amount of this pending update , cent
 	UpdateAmount     string // the amount after update
 	Currency         string // currency of this period

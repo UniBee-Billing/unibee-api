@@ -166,6 +166,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			CryptoAmount:                   payment.CryptoAmount,
 			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 			TaxAmount:                      invoice.TaxAmount,
+			TaxPercentage:                  invoice.TaxPercentage,
 			SubscriptionAmount:             invoice.SubscriptionAmount,
 			SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 			Lines:                          utility.MarshalToJsonString(invoice.Lines),

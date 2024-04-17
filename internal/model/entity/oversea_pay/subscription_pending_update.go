@@ -19,7 +19,7 @@ type SubscriptionPendingUpdate struct {
 	GmtCreate        *gtime.Time `json:"gmtCreate"        description:"create time"`                                                               // create time
 	GmtModify        *gtime.Time `json:"gmtModify"        description:"update time"`                                                               // update time
 	Amount           int64       `json:"amount"           description:"amount of this period, cent"`                                               // amount of this period, cent
-	Status           int         `json:"status"           description:"status，0-Init | 1-Create｜2-Finished｜3-Cancelled"`                           // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	Status           int         `json:"status"           description:"status，0-Init | 1-Pending｜2-Finished｜3-Cancelled"`                           // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
 	ProrationAmount  int64       `json:"prorationAmount"  description:"proration amount of this pending update , cent"`                            // proration amount of this pending update , cent
 	UpdateAmount     int64       `json:"updateAmount"     description:"the amount after update"`                                                   // the amount after update
 	Currency         string      `json:"currency"         description:"currency of this period"`                                                   // currency of this period

@@ -59,7 +59,7 @@ type UserAccountColumns struct {
 	CountryName        string // country_name
 	SubscriptionName   string // subscription name
 	SubscriptionId     string // subscription id
-	SubscriptionStatus string // sub status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
+	SubscriptionStatus string // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    string // total recurring amount, cent
 	BillingType        string // 1-recurring,2-one-time
 	TimeZone           string //

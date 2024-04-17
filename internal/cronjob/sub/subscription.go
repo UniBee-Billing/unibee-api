@@ -25,7 +25,7 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
-	var status = []int{consts.SubStatusCreate, consts.SubStatusActive, consts.SubStatusIncomplete}
+	var status = []int{consts.SubStatusPending, consts.SubStatusActive, consts.SubStatusIncomplete}
 	// query sub which dunningTime expired
 	q := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).

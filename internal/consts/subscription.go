@@ -11,7 +11,7 @@ const (
 	SubTypeDefault            = 0
 	SubTypeUniBeeControl      = 1
 	SubStatusInit             = 0
-	SubStatusCreate           = 1
+	SubStatusPending          = 1
 	SubStatusActive           = 2
 	SubStatusPendingInActive  = 3 // deprecated
 	SubStatusCancelled        = 4
@@ -28,8 +28,8 @@ func (status SubscriptionStatusEnum) Description() string {
 	switch status {
 	case SubStatusInit:
 		return "SubStatusInit"
-	case SubStatusCreate:
-		return "SubStatusCreate"
+	case SubStatusPending:
+		return "SubStatusPending"
 	case SubStatusActive:
 		return "SubStatusActive"
 	case SubStatusSuspended:

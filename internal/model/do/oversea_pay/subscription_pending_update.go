@@ -21,7 +21,7 @@ type SubscriptionPendingUpdate struct {
 	GmtCreate        *gtime.Time // create time
 	GmtModify        *gtime.Time // update time
 	Amount           interface{} // amount of this period, cent
-	Status           interface{} // status，0-Init | 1-Create｜2-Finished｜3-Cancelled
+	Status           interface{} // status，0-Init | 1-Pending｜2-Finished｜3-Cancelled
 	ProrationAmount  interface{} // proration amount of this pending update , cent
 	UpdateAmount     interface{} // the amount after update
 	Currency         interface{} // currency of this period

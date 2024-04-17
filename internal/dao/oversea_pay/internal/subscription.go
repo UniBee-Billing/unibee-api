@@ -35,7 +35,7 @@ type SubscriptionColumns struct {
 	LatestInvoiceId             string // latest_invoice_id
 	Type                        string // sub type, 0-gateway sub, 1-unibee sub
 	GatewayId                   string // gateway_id
-	Status                      string // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
+	Status                      string // status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	GatewaySubscriptionId       string // gateway subscription id
 	CustomerName                string // customer_name
 	CustomerEmail               string // customer_email

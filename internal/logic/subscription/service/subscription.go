@@ -420,7 +420,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Currency:                    prepare.Currency,
 		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
 		SubscriptionId:              utility.CreateSubscriptionId(),
-		Status:                      consts.SubStatusCreate,
+		Status:                      consts.SubStatusPending,
 		CustomerEmail:               prepare.Email,
 		ReturnUrl:                   req.ReturnUrl,
 		Data:                        "", //额外参数配置
@@ -516,7 +516,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	//Update Subscription
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().GatewaySubscriptionId: createRes.GatewaySubscriptionId,
-		dao.Subscription.Columns().Status:                consts.SubStatusCreate,
+		dao.Subscription.Columns().Status:                consts.SubStatusPending,
 		dao.Subscription.Columns().Link:                  createRes.Link,
 		dao.Subscription.Columns().ResponseData:          createRes.Data,
 		dao.Subscription.Columns().GmtModify:             gtime.Now(),

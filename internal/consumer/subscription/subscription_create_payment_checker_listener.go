@@ -41,7 +41,7 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	}
 
 	// After 3min Not Pay Send Email
-	if sub.Status == consts.SubStatusCreate && len(sub.LatestInvoiceId) > 0 {
+	if sub.Status == consts.SubStatusPending && len(sub.LatestInvoiceId) > 0 {
 		invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 		if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing {
 			err := handler.SendInvoiceEmailToUser(ctx, sub.LatestInvoiceId)
