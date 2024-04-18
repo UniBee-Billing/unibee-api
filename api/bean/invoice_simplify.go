@@ -29,7 +29,6 @@ type InvoiceSimplify struct {
 	PaymentLink                    string                 `json:"paymentLink"                    description:"invoice payment link"`
 	Status                         int                    `json:"status"                         description:"status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	PaymentId                      string                 `json:"paymentId"                      description:"paymentId"`                                                              // paymentId
-	RefundId                       string                 `json:"refundId"                       description:"refundId"`                                                               // refundId
 	BizType                        int                    `json:"bizType"                        description:"biz type from payment 1-onetime payment, 3-subscription"`                // biz type from payment 1-single payment, 3-subscription
 	CryptoAmount                   int64                  `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency                 string                 `json:"cryptoCurrency"                 description:"crypto_currency"`
@@ -86,7 +85,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		PaymentLink:                    one.PaymentLink,
 		Status:                         one.Status,
 		PaymentId:                      one.PaymentId,
-		RefundId:                       one.RefundId,
 		BizType:                        one.BizType,
 		CryptoCurrency:                 one.CryptoCurrency,
 		CryptoAmount:                   one.CryptoAmount,

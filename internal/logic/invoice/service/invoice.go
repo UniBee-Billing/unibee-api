@@ -214,7 +214,6 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
-		one.RefundId = finishRes.Invoice.RefundId
 	}
 	return &invoice.EditRes{Invoice: detail.ConvertInvoiceToDetail(ctx, one)}, nil
 }
