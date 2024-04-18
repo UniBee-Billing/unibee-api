@@ -13,6 +13,7 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 		MerchantId:     _interface.GetMerchantId(ctx),
 		SubscriptionId: req.SubscriptionId,
 		UserId:         req.UserId,
+		GatewayId:      req.GatewayId,
 	})
 	return &subscription.RenewRes{
 		Subscription: renewRes.Subscription,

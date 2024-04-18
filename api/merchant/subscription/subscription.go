@@ -111,8 +111,9 @@ type AddNewTrialStartRes struct {
 
 type RenewReq struct {
 	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
-	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	UserId         uint64  `json:"userId" dc:"UserId" v:"required"`
+	SubscriptionId string  `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	GatewayId      *uint64 `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 }
 
 type RenewRes struct {

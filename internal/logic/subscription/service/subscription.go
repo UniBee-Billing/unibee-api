@@ -101,9 +101,10 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 }
 
 type RenewInternalReq struct {
-	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
+	MerchantId     uint64  `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	SubscriptionId string  `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	UserId         uint64  `json:"userId" dc:"UserId" v:"required"`
+	GatewayId      *uint64 `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
@@ -118,6 +119,10 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		if err == nil {
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
+	}
+	var gatewayId = sub.GatewayId
+	if req.GatewayId != nil {
+		gatewayId = *req.GatewayId
 	}
 
 	var timeNow = gtime.Now().Timestamp()
@@ -155,11 +160,11 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	merchantInfo := query.GetMerchantById(ctx, sub.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchantInfo not found")
 	// utility.Assert(user != nil, "user not found")
-	gateway := query.GetGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, invoice)
+	createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, invoice, gateway.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -477,7 +482,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
-		createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice)
+		createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice, gateway.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -664,7 +669,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePrev
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	gateway := query.GetGatewayById(ctx, sub.GatewayId)
+	var gatewayId = sub.GatewayId
+	if req.GatewayId > 0 {
+		gatewayId = req.GatewayId
+	}
+	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
@@ -914,6 +923,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		NewPlanId:       req.NewPlanId,
 		Quantity:        req.Quantity,
 		AddonParams:     req.AddonParams,
+		GatewayId:       req.GatewayId,
 		EffectImmediate: req.EffectImmediate,
 		DiscountCode:    req.DiscountCode,
 	}, req.ProrationDate, merchantMemberId)
@@ -988,7 +998,7 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, prepare.Subscription, invoice)
+		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, prepare.Subscription, invoice, gateway.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -1335,7 +1345,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, one)
+		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, one, sub.GatewayId)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
 			return err

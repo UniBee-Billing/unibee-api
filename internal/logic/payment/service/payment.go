@@ -194,13 +194,13 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	var email = ""
 	if user != nil {
 		email = user.Email
 	}
-	gateway := query.GetGatewayById(ctx, sub.GatewayId)
+	gateway := query.GetGatewayById(ctx, gatewayId)
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
