@@ -10,13 +10,17 @@ import (
 
 func (c *ControllerSubscription) OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error) {
 	result, err := onetime.CreateSubOneTimeAddon(ctx, &onetime.SubscriptionCreateOnetimeAddonInternalReq{
-		MerchantId:     _interface.GetMerchantId(ctx),
-		SubscriptionId: req.SubscriptionId,
-		AddonId:        req.AddonId,
-		Quantity:       req.Quantity,
-		RedirectUrl:    req.ReturnUrl,
-		Metadata:       req.Metadata,
-		DiscountCode:   req.DiscountCode,
+		MerchantId:         _interface.GetMerchantId(ctx),
+		SubscriptionId:     req.SubscriptionId,
+		AddonId:            req.AddonId,
+		Quantity:           req.Quantity,
+		RedirectUrl:        req.ReturnUrl,
+		Metadata:           req.Metadata,
+		DiscountCode:       req.DiscountCode,
+		DiscountAmount:     req.DiscountAmount,
+		DiscountPercentage: req.DiscountPercentage,
+		TaxPercentage:      req.TaxPercentage,
+		GatewayId:          req.GatewayId,
 	})
 	if err != nil {
 		return nil, err

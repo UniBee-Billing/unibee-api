@@ -2,10 +2,12 @@ package discount
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
+	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -181,4 +183,58 @@ func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code
 	utility.Assert(len(code) > 0, "invalid Code")
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Where(dao.MerchantDiscountCode.Columns().Code, code).Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).Delete()
 	return err
+}
+
+func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint64, source string, param *bean.ExternalDiscountParam, currency string) *entity.MerchantDiscountCode {
+	var cycleLimit = 0
+	var endTime int64 = 0
+	var BillingType = DiscountBillingTypeOnetime
+	if param.Recurring != nil && *param.Recurring {
+		BillingType = DiscountBillingTypeRecurring
+		if param.CycleLimit != nil {
+			cycleLimit = *param.CycleLimit
+		}
+		utility.Assert(cycleLimit >= 0, "invalid cycleLimit")
+		if param.EndTime != nil {
+			endTime = *param.EndTime
+		}
+		utility.Assert(endTime >= gtime.Now().Timestamp(), "invalid endTime")
+	} else {
+		utility.Assert(param.CycleLimit == nil, "cycleLimit not available as recurring not enable")
+		utility.Assert(param.EndTime == nil, "endTime not available as recurring not enable")
+	}
+	var discountType = 1
+	var discountAmount int64 = 0
+	var discountPercentage int64 = 0
+
+	if param.DiscountAmount != nil && *param.DiscountAmount > 0 {
+		discountType = DiscountTypeFixedAmount
+		discountAmount = *param.DiscountAmount
+
+	} else if param.DiscountPercentage != nil && *param.DiscountPercentage > 0 {
+		discountType = DiscountTypePercentage
+		discountPercentage = *param.DiscountPercentage
+		utility.Assert(discountPercentage > 0 && discountPercentage < 10000, "invalid discountPercentage")
+	} else {
+		utility.Assert(true, "one of discountAmount or discountPercentage should specified")
+	}
+	one, err := NewMerchantDiscountCode(ctx, &CreateDiscountCodeInternalReq{
+		MerchantId:         merchantId,
+		Code:               fmt.Sprintf("excode_%d_%d_%s_%d%s", merchantId, userId, source, utility.CurrentTimeMillis(), utility.GenerateRandomAlphanumeric(8)),
+		Name:               fmt.Sprintf("excode_for_plan_%s_subscription", source),
+		BillingType:        BillingType,
+		DiscountType:       discountType,
+		DiscountAmount:     discountAmount,
+		Type:               1,
+		DiscountPercentage: discountPercentage,
+		Currency:           currency,
+		CycleLimit:         cycleLimit,
+		StartTime:          gtime.Now().Timestamp() - 10,
+		EndTime:            endTime,
+		Metadata:           param.Metadata,
+	})
+	utility.AssertError(err, "Create discount error")
+	err = ActivateMerchantDiscountCode(ctx, merchantId, one.Code)
+	utility.AssertError(err, "Create discount error")
+	return one
 }

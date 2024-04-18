@@ -206,6 +206,7 @@ type OnetimeAddonNewReq struct {
 	ReturnUrl      string            `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
 	Metadata       map[string]string `json:"metadata" dc:"Metadata，custom data"`
 	DiscountCode   string            `json:"discountCode"        dc:"DiscountCode"`
+	GatewayId      *uint64           `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 }
 
 type OnetimeAddonNewRes struct {

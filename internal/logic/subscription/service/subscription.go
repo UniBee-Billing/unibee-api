@@ -288,6 +288,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	if req.TaxPercentage != nil {
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "External TaxPercentage only available for api call")
+		utility.Assert(*req.TaxPercentage > 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
 		subscriptionTaxPercentage = *req.TaxPercentage
 	} else if len(vatCountryCode) > 0 {
 		if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
@@ -387,57 +388,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		plan := query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-
-		var cycleLimit = 0
-		var endTime int64 = 0
-		var BillingType = discount.DiscountBillingTypeOnetime
-		if req.Discount.Recurring != nil && *req.Discount.Recurring {
-			BillingType = discount.DiscountBillingTypeRecurring
-			if req.Discount.CycleLimit != nil {
-				cycleLimit = *req.Discount.CycleLimit
-			}
-			utility.Assert(cycleLimit >= 0, "invalid cycleLimit")
-			if req.Discount.EndTime != nil {
-				endTime = *req.Discount.EndTime
-			}
-			utility.Assert(endTime >= gtime.Now().Timestamp(), "invalid endTime")
-		} else {
-			utility.Assert(req.Discount.CycleLimit == nil, "cycleLimit not available as recurring not enable")
-			utility.Assert(req.Discount.EndTime == nil, "endTime not available as recurring not enable")
-		}
-		var discountType = 1
-		var discountAmount int64 = 0
-		var discountPercentage int64 = 0
-
-		if req.Discount.DiscountAmount != nil && *req.Discount.DiscountAmount > 0 {
-			discountType = discount.DiscountTypeFixedAmount
-			discountAmount = *req.Discount.DiscountAmount
-
-		} else if req.Discount.DiscountPercentage != nil && *req.Discount.DiscountPercentage > 0 {
-			discountType = discount.DiscountTypePercentage
-			discountPercentage = *req.Discount.DiscountPercentage
-			utility.Assert(discountPercentage > 0 && discountPercentage < 10000, "invalid discountPercentage")
-		} else {
-			utility.Assert(true, "one of discountAmount or discountPercentage should specified")
-		}
-		one, err := discount.NewMerchantDiscountCode(ctx, &discount.CreateDiscountCodeInternalReq{
-			MerchantId:         req.MerchantId,
-			Code:               fmt.Sprintf("excode_%d_%d_%d_%d%s", req.MerchantId, req.UserId, req.PlanId, utility.CurrentTimeMillis(), utility.GenerateRandomAlphanumeric(8)),
-			Name:               fmt.Sprintf("excode_for_plan_%s_subscription", plan.PlanName),
-			BillingType:        BillingType,
-			DiscountType:       discountType,
-			DiscountAmount:     discountAmount,
-			Type:               1,
-			DiscountPercentage: discountPercentage,
-			Currency:           plan.Currency,
-			CycleLimit:         cycleLimit,
-			StartTime:          gtime.Now().Timestamp() - 10,
-			EndTime:            endTime,
-			Metadata:           req.Discount.Metadata,
-		})
-		utility.AssertError(err, "Create discount error")
-		err = discount.ActivateMerchantDiscountCode(ctx, req.MerchantId, one.Code)
-		utility.AssertError(err, "Create discount error")
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(req.PlanId, 10), req.Discount, plan.Currency)
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -1049,22 +1000,6 @@ func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, mercha
 			Paid:            createRes.Status == consts.PaymentSuccess,
 			Invoice:         createRes.Invoice,
 		}
-
-		//if len(prepare.Invoice.DiscountCode) > 0 {
-		//	_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-		//		MerchantId:     prepare.Subscription.MerchantId,
-		//		UserId:         prepare.Subscription.UserId,
-		//		DiscountCode:   prepare.Invoice.DiscountCode,
-		//		SubscriptionId: prepare.Subscription.SubscriptionId,
-		//		PaymentId:      createRes.PaymentId,
-		//		InvoiceId:      prepare.Invoice.InvoiceId,
-		//		ApplyAmount:    prepare.Invoice.DiscountAmount,
-		//		Currency:       prepare.Invoice.Currency,
-		//	})
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//}
 
 	} else {
 		prepare.EffectImmediate = false
