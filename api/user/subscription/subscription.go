@@ -123,7 +123,7 @@ type UpdateReq struct {
 	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
+	ProrationDate      *int64                 `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
 	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`

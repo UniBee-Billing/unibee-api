@@ -30,6 +30,8 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		ProrationDate:      req.ProrationDate,
 		Metadata:           req.Metadata,
 		DiscountCode:       req.DiscountCode,
+		TaxPercentage:      req.TaxPercentage,
+		Discount:           req.Discount,
 	}, merchantMemberId)
 	if err != nil {
 		return nil, err

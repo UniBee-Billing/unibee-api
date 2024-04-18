@@ -56,7 +56,7 @@ type InvoiceColumns struct {
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
 	PaymentId                      string // paymentId
-	RefundId                       string // refundId
+	RefundId                       string // refundId(deprecated)
 	Data                           string // data (json)
 	BizType                        string // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     string // create utc time

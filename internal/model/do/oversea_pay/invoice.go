@@ -48,7 +48,7 @@ type Invoice struct {
 	PeriodStartTime                *gtime.Time //
 	PeriodEndTime                  *gtime.Time //
 	PaymentId                      interface{} // paymentId
-	RefundId                       interface{} // refundId
+	RefundId                       interface{} // refundId(deprecated)
 	Data                           interface{} // data (json)
 	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     interface{} // create utc time

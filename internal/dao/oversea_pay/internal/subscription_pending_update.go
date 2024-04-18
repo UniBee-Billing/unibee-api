@@ -55,6 +55,8 @@ type SubscriptionPendingUpdateColumns struct {
 	ProrationDate    string // merchant_user_id
 	CreateTime       string // create utc time
 	MetaData         string // meta_data(json)
+	DiscountCode     string // discount_code
+	TaxPercentage    string // taxPercentage，1000 = 10%
 }
 
 // subscriptionPendingUpdateColumns holds the columns for table subscription_pending_update.
@@ -94,6 +96,8 @@ var subscriptionPendingUpdateColumns = SubscriptionPendingUpdateColumns{
 	ProrationDate:    "proration_date",
 	CreateTime:       "create_time",
 	MetaData:         "meta_data",
+	DiscountCode:     "discount_code",
+	TaxPercentage:    "tax_percentage",
 }
 
 // NewSubscriptionPendingUpdateDao creates and returns a new DAO object for table data access.

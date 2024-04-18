@@ -45,4 +45,6 @@ type SubscriptionPendingUpdate struct {
 	ProrationDate    int64       `json:"prorationDate"    description:"merchant_user_id"`                                                          // merchant_user_id
 	CreateTime       int64       `json:"createTime"       description:"create utc time"`                                                           // create utc time
 	MetaData         string      `json:"metaData"         description:"meta_data(json)"`                                                           // meta_data(json)
+	DiscountCode     string      `json:"discountCode"     description:"discount_code"`                                                             // discount_code
+	TaxPercentage    int64       `json:"taxPercentage"    description:"taxPercentage，1000 = 10%"`                                                  // taxPercentage，1000 = 10%
 }

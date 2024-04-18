@@ -101,10 +101,13 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 }
 
 type RenewInternalReq struct {
-	MerchantId     uint64  `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	SubscriptionId string  `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	UserId         uint64  `json:"userId" dc:"UserId" v:"required"`
-	GatewayId      *uint64 `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	MerchantId     uint64                      `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
+	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
@@ -113,6 +116,10 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(sub.UserId == req.UserId, "userId not match")
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
 	utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
+	var subscriptionTaxPercentage = sub.TaxPercentage
+	if req.TaxPercentage != nil {
+		subscriptionTaxPercentage = *req.TaxPercentage
+	}
 	var addonParams []*bean.PlanAddonParam
 	if len(sub.AddonData) > 0 {
 		err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
@@ -130,27 +137,51 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		timeNow = sub.TestClock
 	}
 
-	var discountCode = ""
-	canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-		MerchantId:     sub.MerchantId,
-		UserId:         sub.UserId,
-		DiscountCode:   sub.DiscountCode,
-		SubscriptionId: sub.SubscriptionId,
-		Currency:       sub.Currency,
-	})
-	if canApply && isRecurring {
-		discountCode = sub.DiscountCode
+	if req.Discount != nil {
+		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
+		// create external discount
+		utility.Assert(sub.PlanId > 0, "planId invalid")
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
+		utility.Assert(plan != nil, "invalid planId")
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency)
+		req.DiscountCode = one.Code
+	} else if len(req.DiscountCode) > 0 {
+		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
+		utility.Assert(one.Type == 0, "invalid code, code is from external")
+	}
+
+	if len(req.DiscountCode) > 0 {
+		canApply, _, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:     sub.MerchantId,
+			UserId:         sub.UserId,
+			DiscountCode:   req.DiscountCode,
+			SubscriptionId: sub.SubscriptionId,
+			Currency:       sub.Currency,
+		})
+		utility.Assert(canApply, message)
+	} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
+		canApply, isRecurring, _ := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
+			MerchantId:     sub.MerchantId,
+			UserId:         sub.UserId,
+			DiscountCode:   sub.DiscountCode,
+			SubscriptionId: sub.SubscriptionId,
+			Currency:       sub.Currency,
+		})
+		if canApply && isRecurring {
+			req.DiscountCode = sub.DiscountCode
+		}
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
 		InvoiceName:   "SubscriptionCycle",
 		Currency:      sub.Currency,
-		DiscountCode:  discountCode,
+		DiscountCode:  req.DiscountCode,
 		TimeNow:       timeNow,
 		PlanId:        sub.PlanId,
 		Quantity:      sub.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(addonParams),
-		TaxPercentage: sub.TaxPercentage,
+		TaxPercentage: subscriptionTaxPercentage,
 		PeriodStart:   timeNow,
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, timeNow, sub.PlanId),
 		FinishTime:    timeNow,
@@ -373,12 +404,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		VatNumber:             req.VatNumber,
 		VatNumberValidate:     vatNumberValidate,
 		VatVerifyData:         utility.MarshalToJsonString(vatNumberValidate),
-		TaxPercentage:         subscriptionTaxPercentage,
 		UserId:                req.UserId,
 		Email:                 user.Email,
 		Invoice:               invoice,
 		VatCountryRate:        vatCountryRate,
 		Gateways:              service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
+		TaxPercentage:         subscriptionTaxPercentage,
 		RecurringDiscountCode: recurringDiscountCode,
 	}, nil
 }
@@ -586,6 +617,7 @@ type UpdatePreviewInternalRes struct {
 	Gateways              []*bean.GatewaySimplify `json:"gateways"`
 	Changed               bool                    `json:"changed"`
 	IsUpgrade             bool                    `json:"isUpgrade"`
+	TaxPercentage         int64                   `json:"taxPercentage" `
 	RecurringDiscountCode string                  `json:"recurringDiscountCode" `
 }
 
@@ -664,6 +696,7 @@ type UpdatePreviewInternalReq struct {
 	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
+	TaxPercentage   *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -693,6 +726,10 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		req.Quantity = 1
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
+	var subscriptionTaxPercentage = sub.TaxPercentage
+	if req.TaxPercentage != nil {
+		subscriptionTaxPercentage = *req.TaxPercentage
+	}
 
 	var currency = sub.Currency
 	for _, addon := range addons {
@@ -710,9 +747,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		utility.Assert(oldPlan.IntervalUnit == plan.IntervalUnit, "newPlan must have same recurring interval to old")
 		utility.Assert(oldPlan.IntervalCount == plan.IntervalCount, "newPlan must have same recurring interval to old")
 	}
-	//暂时不开放不同通道升级功能 todo mark
-	//oldPlanChannel := query.GetGatewayPlan(ctx, int64(oldPlan.Id), sub.Id)
-	//utility.Assert(oldPlanChannel != nil, "oldPlangateway not found")
 
 	var effectImmediate = false
 
@@ -780,7 +814,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PlanId:        req.NewPlanId,
 				Quantity:      req.Quantity,
 				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxPercentage: sub.TaxPercentage,
+				TaxPercentage: subscriptionTaxPercentage,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
@@ -813,7 +847,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PlanId:        req.NewPlanId,
 				Quantity:      req.Quantity,
 				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxPercentage: sub.TaxPercentage,
+				TaxPercentage: subscriptionTaxPercentage,
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
@@ -850,7 +884,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				Currency:          sub.Currency,
 				DiscountCode:      req.DiscountCode,
 				TimeNow:           prorationDate,
-				TaxPercentage:     sub.TaxPercentage,
+				TaxPercentage:     subscriptionTaxPercentage,
 				ProrationDate:     prorationDate,
 				OldProrationPlans: oldProrationPlanParams,
 				NewProrationPlans: newProrationPlanParams,
@@ -886,7 +920,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		PlanId:        req.NewPlanId,
 		Quantity:      req.Quantity,
 		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-		TaxPercentage: sub.TaxPercentage,
+		TaxPercentage: subscriptionTaxPercentage,
 		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
 		FinishTime:    utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
@@ -915,6 +949,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		Gateways:              service2.GetMerchantAvailableGatewaysByCountryCode(ctx, sub.MerchantId, sub.CountryCode),
 		Changed:               changed,
 		IsUpgrade:             isUpgrade,
+		TaxPercentage:         subscriptionTaxPercentage,
 		RecurringDiscountCode: RecurringDiscountCode,
 	}, nil
 }
@@ -928,20 +963,43 @@ type UpdateSubscriptionInternalResp struct {
 }
 
 type UpdateInternalReq struct {
-	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId          uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
-	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
-	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
-	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
-	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
-	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
-	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
+	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId          uint64                      `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id" `
+	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate      *int64                      `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
+	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 }
 
 func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
+	prorationDate := gtime.Now().Timestamp()
+	if req.ProrationDate != nil {
+		prorationDate = *req.ProrationDate
+	}
+	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	if req.Discount != nil {
+		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
+		// create external discount
+		utility.Assert(req.NewPlanId > 0, "planId invalid")
+		utility.Assert(req.GatewayId > 0, "Id invalid")
+		utility.Assert(sub.UserId > 0, "UserId invalid")
+		plan := query.GetPlanById(ctx, req.NewPlanId)
+		utility.Assert(plan.MerchantId == sub.MerchantId, "merchant not match")
+		utility.Assert(plan != nil, "invalid planId")
+		one := discount.CreateExternalDiscount(ctx, sub.MerchantId, sub.UserId, strconv.FormatUint(req.NewPlanId, 10), req.Discount, plan.Currency)
+		req.DiscountCode = one.Code
+	} else if len(req.DiscountCode) > 0 {
+		one := query.GetDiscountByCode(ctx, sub.MerchantId, req.DiscountCode)
+		utility.Assert(one.Type == 0, "invalid code, code is from external")
+	}
 	prepare, err := SubscriptionUpdatePreview(ctx, &UpdatePreviewInternalReq{
 		SubscriptionId:  req.SubscriptionId,
 		NewPlanId:       req.NewPlanId,
@@ -950,7 +1008,8 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		GatewayId:       req.GatewayId,
 		EffectImmediate: req.EffectImmediate,
 		DiscountCode:    req.DiscountCode,
-	}, req.ProrationDate, merchantMemberId)
+		TaxPercentage:   req.TaxPercentage,
+	}, prorationDate, merchantMemberId)
 	if err != nil {
 		return nil, err
 	}
@@ -998,9 +1057,11 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		Status:           consts.PendingSubStatusInit,
 		Data:             "",
 		MerchantMemberId: merchantMemberId,
-		ProrationDate:    req.ProrationDate,
+		ProrationDate:    prorationDate,
 		EffectImmediate:  effectImmediate,
 		EffectTime:       effectTime,
+		TaxPercentage:    prepare.TaxPercentage,
+		DiscountCode:     prepare.RecurringDiscountCode,
 		CreateTime:       gtime.Now().Timestamp(),
 		MetaData:         utility.MarshalToJsonString(req.Metadata),
 	}

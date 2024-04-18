@@ -138,7 +138,6 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
-		one.RefundId = finishRes.Invoice.RefundId
 	}
 	return &invoice.NewRes{Invoice: detail.ConvertInvoiceToDetail(ctx, one)}, nil
 }

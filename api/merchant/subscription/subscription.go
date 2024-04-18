@@ -111,9 +111,12 @@ type AddNewTrialStartRes struct {
 
 type RenewReq struct {
 	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
-	UserId         uint64  `json:"userId" dc:"UserId" v:"required"`
-	SubscriptionId string  `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	GatewayId      *uint64 `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
+	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 }
 
 type RenewRes struct {
@@ -169,7 +172,7 @@ type CreateReq struct {
 	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
-	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 }
 
 type CreateRes struct {
@@ -198,18 +201,19 @@ type UpdatePreviewRes struct {
 
 type UpdateReq struct {
 	g.Meta             `path:"/update_submit" tags:"Subscription" method:"post" summary:"UpdateSubscription"`
-	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	NewPlanId          uint64                 `json:"newPlanId" dc:"New PlanId" v:"required"`
-	Quantity           int64                  `json:"quantity" dc:"Quantity"  v:"required"`
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
-	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"          `
-	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview"   `
-	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
-	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
-	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId          uint64                      `json:"newPlanId" dc:"New PlanId" v:"required"`
+	Quantity           int64                       `json:"quantity" dc:"Quantity"  v:"required"`
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id" `
+	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"          `
+	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency to verify if provide"   `
+	ProrationDate      *int64                      `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                      `json:"discountCode" dc:"DiscountCode"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 }
 
 type UpdateRes struct {

@@ -47,4 +47,6 @@ type SubscriptionPendingUpdate struct {
 	ProrationDate    interface{} // merchant_user_id
 	CreateTime       interface{} // create utc time
 	MetaData         interface{} // meta_data(json)
+	DiscountCode     interface{} // discount_code
+	TaxPercentage    interface{} // taxPercentage，1000 = 10%
 }

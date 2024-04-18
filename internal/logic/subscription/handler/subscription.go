@@ -8,6 +8,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	discount2 "unibee/internal/logic/discount"
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -83,6 +84,13 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return nil
 	}
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), sub.PlanId)
+	var recurringDiscountCode *string
+	if len(invoice.DiscountCode) > 0 {
+		discount := query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)
+		if discount.BillingType == discount2.DiscountBillingTypeRecurring {
+			recurringDiscountCode = &invoice.DiscountCode
+		}
+	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
@@ -92,6 +100,8 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
+		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
+		dao.Subscription.Columns().DiscountCode:           recurringDiscountCode,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
