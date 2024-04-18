@@ -5,7 +5,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean"
-	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/consts"
 	service2 "unibee/internal/logic/invoice/detail"
 	"unibee/internal/logic/subscription/config"
@@ -180,14 +179,14 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusActive)
 		//upgrade
-		_, err = service.SubscriptionUpdatePreview(ctx, &subscription2.UpdatePreviewReq{
+		_, err = service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       2,
 			GatewayId:      one.GatewayId,
 		}, 0, 0)
 		require.Nil(t, err)
-		_, err = service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
+		_, err = service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       3, //todo mark if set to 2 will cause a bug
@@ -204,7 +203,7 @@ func TestSubscription(t *testing.T) {
 		//require.NotNil(t, one)
 		//require.Equal(t, true, one.CancelAtPeriodEnd == 1)
 
-		_, err = service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
+		_, err = service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       1,

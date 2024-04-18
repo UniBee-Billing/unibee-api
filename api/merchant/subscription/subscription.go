@@ -160,12 +160,12 @@ type CreateReq struct {
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"            `
-	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
+	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
@@ -208,6 +208,8 @@ type UpdateReq struct {
 	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview"   `
 	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDate date to start Proration，Get From Preview" v:"required" `
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
+	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 }
 
 type UpdateRes struct {

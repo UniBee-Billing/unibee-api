@@ -23,5 +23,17 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id == sub.UserId, "userId not match")
 	}
-	return service.SubscriptionUpdate(ctx, req, 0)
+	return service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
+		SubscriptionId:     req.SubscriptionId,
+		NewPlanId:          req.NewPlanId,
+		Quantity:           req.Quantity,
+		GatewayId:          req.GatewayId,
+		AddonParams:        req.AddonParams,
+		ConfirmTotalAmount: req.ConfirmTotalAmount,
+		ConfirmCurrency:    req.ConfirmCurrency,
+		ProrationDate:      req.ProrationDate,
+		EffectImmediate:    req.EffectImmediate,
+		Metadata:           req.Metadata,
+		DiscountCode:       req.DiscountCode,
+	}, 0)
 }

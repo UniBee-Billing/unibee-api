@@ -2,7 +2,6 @@ package merchant
 
 import (
 	"context"
-	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
@@ -19,7 +18,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		utility.Assert(_interface.Context().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 		merchantMemberId = int64(_interface.Context().Get(ctx).MerchantMember.Id)
 	}
-	update, err := service.SubscriptionUpdate(ctx, &subscription2.UpdateReq{
+	update, err := service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 		SubscriptionId:     req.SubscriptionId,
 		NewPlanId:          req.NewPlanId,
 		Quantity:           req.Quantity,
@@ -30,6 +29,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		ConfirmCurrency:    req.ConfirmCurrency,
 		ProrationDate:      req.ProrationDate,
 		Metadata:           req.Metadata,
+		DiscountCode:       req.DiscountCode,
 	}, merchantMemberId)
 	if err != nil {
 		return nil, err

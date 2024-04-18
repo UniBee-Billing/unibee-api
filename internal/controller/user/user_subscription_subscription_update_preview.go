@@ -24,7 +24,15 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 		utility.Assert(_interface.Context().Get(ctx).User.Id == sub.UserId, "userId not match")
 	}
-	prepare, err := service.SubscriptionUpdatePreview(ctx, req, 0, 0)
+	prepare, err := service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
+		SubscriptionId:  req.SubscriptionId,
+		NewPlanId:       req.NewPlanId,
+		Quantity:        req.Quantity,
+		GatewayId:       req.GatewayId,
+		EffectImmediate: req.EffectImmediate,
+		AddonParams:     req.AddonParams,
+		DiscountCode:    req.DiscountCode,
+	}, 0, 0)
 	if err != nil {
 		return nil, err
 	}

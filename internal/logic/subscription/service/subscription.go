@@ -656,7 +656,17 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 	return
 }
 
-func SubscriptionUpdatePreview(ctx context.Context, req *subscription.UpdatePreviewReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
+type UpdatePreviewInternalReq struct {
+	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId       uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
+	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
+}
+
+func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.NewPlanId > 0, "PlanId invalid")
 	utility.Assert(len(req.SubscriptionId) > 0, "SubscriptionId invalid")
@@ -917,8 +927,22 @@ type UpdateSubscriptionInternalResp struct {
 	Invoice         *entity.Invoice `json:"invoice" description:""`
 }
 
-func SubscriptionUpdate(ctx context.Context, req *subscription.UpdateReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
-	prepare, err := SubscriptionUpdatePreview(ctx, &subscription.UpdatePreviewReq{
+type UpdateInternalReq struct {
+	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	NewPlanId          uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
+	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
+	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
+	ProrationDate      int64                  `json:"prorationDate" dc:"prorationDatem PaidDate Start Proration" v:"required" `
+	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
+	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
+}
+
+func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
+	prepare, err := SubscriptionUpdatePreview(ctx, &UpdatePreviewInternalReq{
 		SubscriptionId:  req.SubscriptionId,
 		NewPlanId:       req.NewPlanId,
 		Quantity:        req.Quantity,

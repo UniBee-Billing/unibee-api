@@ -128,6 +128,7 @@ type UpdateReq struct {
 	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
 }
+
 type UpdateRes struct {
 	SubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdate" dc:"SubscriptionPendingUpdate"`
 	Paid                      bool                                    `json:"paid" dc:"Paid，true|false"`

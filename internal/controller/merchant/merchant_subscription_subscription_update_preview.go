@@ -3,7 +3,6 @@ package merchant
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	subscription2 "unibee/api/user/subscription"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
@@ -22,7 +21,7 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 		merchantMemberId = int64(_interface.Context().Get(ctx).MerchantMember.Id)
 	}
 	g.Log().Infof(ctx, "SubscriptionUpdatePreview merchantMemberId:%d", merchantMemberId)
-	update, err := service.SubscriptionUpdatePreview(ctx, &subscription2.UpdatePreviewReq{
+	update, err := service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
 		SubscriptionId:  req.SubscriptionId,
 		NewPlanId:       req.NewPlanId,
 		Quantity:        req.Quantity,
