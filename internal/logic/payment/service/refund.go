@@ -111,7 +111,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 			}
 			one.Id = id
 
-			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Increment(dao.Payment.Columns().RefundAmount, refund.RefundAmount)
+			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Increment(dao.Payment.Columns().RefundAmount, req.RefundAmount)
 			if err != nil {
 				return err
 			}
