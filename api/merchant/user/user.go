@@ -5,6 +5,21 @@ import (
 	"unibee/api/bean"
 )
 
+type NewReq struct {
+	g.Meta         `path:"/new" tags:"User" method:"post" summary:"NewUser" dc:"New User"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	Email          string `json:"email" dc:"Email" v:"required"`
+	FirstName      string `json:"firstName" dc:"First Name"`
+	LastName       string `json:"lastName" dc:"Last Name"`
+	Password       string `json:"password" dc:"Password"`
+	Phone          string `json:"phone" dc:"Phone" `
+	Address        string `json:"address" dc:"Address"`
+}
+
+type NewRes struct {
+	User *bean.UserAccountSimplify `json:"user" dc:"User Object"`
+}
+
 type ListReq struct {
 	g.Meta    `path:"/list" tags:"User" method:"get,post" summary:"UserList"`
 	UserId    int    `json:"userId" dc:"Filter UserId" `

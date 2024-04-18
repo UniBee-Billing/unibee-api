@@ -190,6 +190,7 @@ type IMerchantSubscription interface {
 }
 
 type IMerchantUser interface {
+	New(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error)
 	List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error)
 	Get(ctx context.Context, req *user.GetReq) (res *user.GetRes, err error)
 	Frozen(ctx context.Context, req *user.FrozenReq) (res *user.FrozenRes, err error)
