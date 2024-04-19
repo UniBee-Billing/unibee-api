@@ -15,7 +15,7 @@ type ListRes struct {
 
 type DetailReq struct {
 	g.Meta `path:"/detail" tags:"Discount" method:"get,post" summary:"Merchant Discount Detail"`
-	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Id     uint64 `json:"id"                 dc:"The discount's Id" v:"required"`
 }
 
 type DetailRes struct {
@@ -44,7 +44,7 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Discount" method:"post" summary:"EditDiscountCode" dc:"Edit the discount code before activate"`
-	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Id                 uint64 `json:"id"                 dc:"The discount's Id" v:"required"`
 	Name               string `json:"name"              dc:"The discount's name"`                                                                                                                                                                                                                                                      // name
 	BillingType        int    `json:"billingType"       dc:"The billing type of the discount code, 1-one-time, 2-recurring, define the situation the code can be used, the code of one-time billing_type can used for all situation that effect only once, the code of recurring billing_tye can only used for subscription purchase"` // billing_type, 1-one-time, 2-recurring
 	DiscountType       int    `json:"discountType"      dc:"The discount type of the discount code, 1-percentage, 2-fixed_amount, the discountType of code, the discountPercentage will be effect when discountType is percentage, the discountAmount and currency will be effect when discountTYpe is fixed_amount"`                  // discount_type, 1-percentage, 2-fixed_amount
@@ -64,7 +64,7 @@ type EditRes struct {
 
 type DeleteReq struct {
 	g.Meta `path:"/delete" tags:"Discount" method:"post" summary:"DeleteDiscountCode" dc:"Delete discount code before activate"`
-	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
 type DeleteRes struct {
@@ -72,7 +72,7 @@ type DeleteRes struct {
 
 type ActivateReq struct {
 	g.Meta `path:"/activate" tags:"Discount" method:"post" summary:"ActivateDiscountCode" dc:"Activate discount code, the discount code can only effect to payment or subscription after activated"`
-	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
 type ActivateRes struct {
@@ -80,7 +80,7 @@ type ActivateRes struct {
 
 type DeactivateReq struct {
 	g.Meta `path:"/deactivate" tags:"Discount" method:"post" summary:"DeactivateDiscountCode" dc:"Deactivate discount code"`
-	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+	Id     uint64 `json:"id"                 description:"The discount's Id" v:"required"`
 }
 
 type DeactivateRes struct {

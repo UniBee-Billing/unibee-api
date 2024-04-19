@@ -10,7 +10,7 @@ import (
 
 // MerchantDiscountCode is the golang structure for table merchant_discount_code.
 type MerchantDiscountCode struct {
-	Id                 int64       `json:"id"                 description:"ID"`                                                                         // ID
+	Id                 uint64      `json:"id"                 description:"ID"`                                                                         // ID
 	MerchantId         uint64      `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string      `json:"name"               description:"name"`                                                                       // name
 	Code               string      `json:"code"               description:"code"`                                                                       // code

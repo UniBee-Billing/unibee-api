@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerDiscount) Deactivate(ctx context.Context, req *discount.DeactivateReq) (res *discount.DeactivateRes, err error) {
-	err = discount2.DeactivateMerchantDiscountCode(ctx, _interface.GetMerchantId(ctx), req.Code)
+	err = discount2.DeactivateMerchantDiscountCode(ctx, _interface.GetMerchantId(ctx), req.Id)
 	if err != nil {
 		return nil, err
 	}

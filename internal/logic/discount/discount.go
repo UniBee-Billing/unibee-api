@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"strings"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
@@ -26,6 +27,7 @@ const (
 )
 
 type CreateDiscountCodeInternalReq struct {
+	Id                 uint64            `json:"id"                 description:"The discount's Id"`
 	Type               int               `json:"type"               description:"type, 1-external discount code"` // type, 1-external discount code
 	MerchantId         uint64            `json:"MerchantId"        description:"MerchantId"`
 	Code               string            `json:"Code"              description:"Code"`
@@ -88,14 +90,15 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
-	one.Id = id
+	one.Id = uint64(id)
 	return one, err
 }
 
 func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInternalReq) (*entity.MerchantDiscountCode, error) {
-	utility.Assert(req.Code != "", "invalid Code")
-	one := query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
-	utility.Assert(one != nil, "Code not found :"+req.Code)
+	utility.Assert(req.Id > 0, "invalid Id")
+	one := query.GetDiscountById(ctx, req.Id)
+	utility.Assert(one != nil, "Discount not found :"+strconv.FormatUint(req.Id, 10))
+	utility.Assert(one.MerchantId == req.MerchantId, "Discount merchant not match :"+req.Code)
 	utility.Assert(one.Type == 0, "Edit not available for external code :"+req.Code)
 	utility.Assert(one.Status == DiscountStatusEditable, "Code not editable :"+req.Code)
 	utility.Assert(req.BillingType == DiscountBillingTypeOnetime || req.BillingType == DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
@@ -137,9 +140,11 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	return one, err
 }
 
-func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
-	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "Code not found :"+code)
+func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint64) error {
+	utility.Assert(id > 0, "invalid Id")
+	one := query.GetDiscountById(ctx, id)
+	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
+	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
 	if one.Status == DiscountStatusActive {
 		return nil
 	} else if one.Status == DiscountStatusExpired {
@@ -152,9 +157,11 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code s
 	return err
 }
 
-func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
-	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "Code not found :"+code)
+func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint64) error {
+	utility.Assert(id > 0, "invalid Id")
+	one := query.GetDiscountById(ctx, id)
+	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
+	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
 	if one.Status == DiscountStatusDeActive {
 		return nil
 	} else if one.Status != DiscountStatusActive {
@@ -167,10 +174,12 @@ func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, code
 	return err
 }
 
-func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
-	one := query.GetDiscountByCode(ctx, merchantId, code)
-	utility.Assert(one != nil, "Code not found :"+code)
-	utility.Assert(one.Type == 0, "Edit not available for external code :"+code)
+func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint64) error {
+	utility.Assert(id > 0, "invalid Id")
+	one := query.GetDiscountById(ctx, id)
+	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
+	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
+	utility.Assert(one.Type == 0, "Delete not available for external code :"+strconv.FormatUint(id, 10))
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 		dao.MerchantDiscountCode.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
@@ -178,10 +187,13 @@ func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code str
 	return err
 }
 
-func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, code string) error {
+func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint64) error {
 	utility.Assert(merchantId > 0, "invalid MerchantId")
-	utility.Assert(len(code) > 0, "invalid Code")
-	_, err := dao.MerchantDiscountCode.Ctx(ctx).Where(dao.MerchantDiscountCode.Columns().Code, code).Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).Delete()
+	utility.Assert(id > 0, "invalid Id")
+	one := query.GetDiscountById(ctx, id)
+	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
+	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
+	_, err := dao.MerchantDiscountCode.Ctx(ctx).Where(dao.MerchantDiscountCode.Columns().Id, id).Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).Delete()
 	return err
 }
 
@@ -234,7 +246,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		Metadata:           param.Metadata,
 	})
 	utility.AssertError(err, "Create discount error")
-	err = ActivateMerchantDiscountCode(ctx, merchantId, one.Code)
+	err = ActivateMerchantDiscountCode(ctx, merchantId, one.Id)
 	utility.AssertError(err, "Create discount error")
 	return one
 }

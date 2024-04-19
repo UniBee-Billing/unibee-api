@@ -12,7 +12,7 @@ import (
 func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (res *discount.EditRes, err error) {
 	one, err := discount2.EditMerchantDiscountCode(ctx, &discount2.CreateDiscountCodeInternalReq{
 		MerchantId:         _interface.GetMerchantId(ctx),
-		Code:               req.Code,
+		Id:                 req.Id,
 		Name:               req.Name,
 		BillingType:        req.BillingType,
 		DiscountType:       req.DiscountType,

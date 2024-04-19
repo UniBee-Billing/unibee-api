@@ -7,7 +7,7 @@ import (
 )
 
 type MerchantDiscountCodeSimplify struct {
-	Id                 int64             `json:"id"             description:"userId"`                                                                         // userId
+	Id                 uint64            `json:"id"                 description:"Id"`                                                                         // Id
 	MerchantId         uint64            `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string            `json:"name"               description:"name"`                                                                       // name
 	Code               string            `json:"code"               description:"code"`                                                                       // code
