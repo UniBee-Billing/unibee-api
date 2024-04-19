@@ -478,7 +478,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Status:                      consts.SubStatusPending,
 		CustomerEmail:               prepare.Email,
 		ReturnUrl:                   req.ReturnUrl,
-		Data:                        "", //额外参数配置
 		VatNumber:                   prepare.VatNumber,
 		VatVerifyData:               prepare.VatVerifyData,
 		CountryCode:                 prepare.VatCountryCode,
