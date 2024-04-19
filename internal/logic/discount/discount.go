@@ -53,7 +53,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
-	utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
+	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
@@ -105,7 +105,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
-	utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
+	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
