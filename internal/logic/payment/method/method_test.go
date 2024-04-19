@@ -2,6 +2,7 @@ package method
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/internal/consts"
@@ -29,6 +30,7 @@ func TestPayment(t *testing.T) {
 			Currency:   "USD",
 		})
 		require.NotNil(t, url)
+		g.Log().Printf(ctx, "Url:%s", url)
 		require.Nil(t, one)
 	})
 }

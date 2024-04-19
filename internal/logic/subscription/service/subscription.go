@@ -156,8 +156,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			MerchantId:     sub.MerchantId,
 			UserId:         sub.UserId,
 			DiscountCode:   req.DiscountCode,
-			SubscriptionId: sub.SubscriptionId,
 			Currency:       sub.Currency,
+			SubscriptionId: sub.SubscriptionId,
 		})
 		utility.Assert(canApply, message)
 	} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
@@ -165,8 +165,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			MerchantId:     sub.MerchantId,
 			UserId:         sub.UserId,
 			DiscountCode:   sub.DiscountCode,
-			SubscriptionId: sub.SubscriptionId,
 			Currency:       sub.Currency,
+			SubscriptionId: sub.SubscriptionId,
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode
@@ -362,14 +362,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var recurringDiscountCode string
 	if len(req.DiscountCode) > 0 {
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     req.MerchantId,
-			UserId:         req.UserId,
-			DiscountCode:   req.DiscountCode,
-			SubscriptionId: "",
-			PaymentId:      "",
-			InvoiceId:      "",
-			ApplyAmount:    0,
-			Currency:       "",
+			MerchantId:   req.MerchantId,
+			UserId:       req.UserId,
+			DiscountCode: req.DiscountCode,
+			Currency:     plan.Currency,
 		})
 		utility.Assert(canApply, message)
 		if isRecurring {
@@ -784,8 +780,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			MerchantId:     plan.MerchantId,
 			UserId:         sub.UserId,
 			DiscountCode:   req.DiscountCode,
-			SubscriptionId: sub.SubscriptionId,
 			Currency:       sub.Currency,
+			SubscriptionId: sub.SubscriptionId,
 		})
 		utility.Assert(canApply, message)
 		if isRecurring {
@@ -796,8 +792,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			MerchantId:     sub.MerchantId,
 			UserId:         sub.UserId,
 			DiscountCode:   sub.DiscountCode,
-			SubscriptionId: sub.SubscriptionId,
 			Currency:       sub.Currency,
+			SubscriptionId: sub.SubscriptionId,
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode

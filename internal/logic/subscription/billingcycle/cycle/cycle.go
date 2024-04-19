@@ -128,8 +128,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					MerchantId:     sub.MerchantId,
 					UserId:         sub.UserId,
 					DiscountCode:   sub.DiscountCode,
-					SubscriptionId: sub.SubscriptionId,
 					Currency:       sub.Currency,
+					SubscriptionId: sub.SubscriptionId,
 				})
 				if canApply && isRecurring {
 					discountCode = sub.DiscountCode

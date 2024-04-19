@@ -106,14 +106,10 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 		utility.Assert(discountCode.Type == 0, "invalid code, code is from external")
 		canApply, isRecurring, message := discount.UserDiscountApplyPreview(ctx, &discount.UserDiscountApplyReq{
-			MerchantId:     req.MerchantId,
-			UserId:         sub.UserId,
-			DiscountCode:   req.DiscountCode,
-			SubscriptionId: "",
-			PaymentId:      "",
-			InvoiceId:      "",
-			ApplyAmount:    0,
-			Currency:       "",
+			MerchantId:   req.MerchantId,
+			UserId:       sub.UserId,
+			DiscountCode: req.DiscountCode,
+			Currency:     plan.Currency,
 		})
 		utility.Assert(canApply, message)
 		utility.Assert(!isRecurring, "recurring discount code not available for one-time addon")

@@ -36,19 +36,22 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	}
 	discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 	if discountCode == nil {
-		return false, false, "discount Code not found"
+		return false, false, "Discount Code not found"
 	}
 	if discountCode.Status != DiscountStatusActive {
-		return false, false, "discount Code not active"
+		return false, false, "Discount Code not active"
 	}
 	if discountCode.StartTime > gtime.Now().Timestamp() {
-		return false, false, "discount not start"
+		return false, false, "Discount not start"
 	}
 	if discountCode.EndTime != 0 && discountCode.EndTime < gtime.Now().Timestamp() {
-		return false, false, "discount expired"
+		return false, false, "Discount expired"
+	}
+	if discountCode.DiscountType == DiscountTypeFixedAmount && len(discountCode.Currency) == 0 {
+		return false, false, "DiscountCode is fixed amount,but currency not set"
 	}
 	if discountCode.DiscountType == DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
-		return false, false, "currency not match"
+		return false, false, "DiscountCode Currency not match subscription"
 	}
 	if discountCode.UserLimit > 0 {
 		//check user limit
@@ -63,13 +66,10 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, err.Error()
 		}
 		if discountCode.UserLimit <= count {
-			return false, false, "reach out the limit"
+			return false, false, "DiscountCode reach out the limit"
 		}
 	}
-	if discountCode.SubscriptionLimit > 0 {
-		if len(req.SubscriptionId) == 0 {
-			return false, false, "invalid SubscriptionId"
-		}
+	if discountCode.SubscriptionLimit > 0 && len(req.SubscriptionId) > 0 {
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
@@ -83,13 +83,10 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, err.Error()
 		}
 		if discountCode.SubscriptionLimit <= count {
-			return false, false, "reach out the limit"
+			return false, false, "DiscountCode reach out the limit"
 		}
 	}
-	if discountCode.CycleLimit > 0 {
-		if len(req.SubscriptionId) == 0 {
-			return false, false, "invalid SubscriptionId"
-		}
+	if discountCode.BillingType == DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && len(req.SubscriptionId) > 0 {
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
@@ -103,7 +100,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, err.Error()
 		}
 		if discountCode.CycleLimit <= count {
-			return false, false, "reach out the limit"
+			return false, false, "DiscountCode reach out the limit"
 		}
 	}
 
@@ -180,7 +177,7 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountEx
 		return 0
 	}
 	merchantDiscountCode := query.GetDiscountByCode(ctx, merchantId, discountCode)
-	if merchantDiscountCode != nil {
+	if merchantDiscountCode == nil {
 		return 0
 	}
 	if merchantDiscountCode.Status != DiscountStatusActive {
