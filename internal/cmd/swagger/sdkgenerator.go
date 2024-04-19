@@ -42,7 +42,8 @@ func MerchantPortalAndSDKGeneratorSpecJson(r *ghttp.Request) {
 				continue
 			}
 		}
-		r.Response.WriteJson(api.String())
+		// generator error to format type of map[string]interface {}
+		r.Response.WriteJson(strings.Replace(api.String(), "map[string]interface {}", "map[string]string", -1))
 		r.Exit()
 	}
 }
@@ -89,6 +90,8 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 			r.Exit()
 			return
 		}
+		// generator error to format type of map[string]interface {}
+		r.Response.WriteJson(strings.Replace(api.String(), "map[string]interface {}", "map[string]string", -1))
 		r.Response.WriteJson(apiYaml)
 		r.Exit()
 	}
