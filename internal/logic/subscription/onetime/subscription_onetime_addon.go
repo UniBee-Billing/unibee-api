@@ -29,17 +29,17 @@ type SubscriptionCreateOnetimeAddonInternalRes struct {
 }
 
 type SubscriptionCreateOnetimeAddonInternalReq struct {
-	MerchantId         uint64            `json:"merchantId" dc:"MerchantId"`
-	SubscriptionId     string            `json:"subscriptionId"  dc:"SubscriptionId" `
-	AddonId            uint64            `json:"addonId" dc:"addonId"`
-	Quantity           int64             `json:"quantity" dc:"Quantity"`
-	RedirectUrl        string            `json:"redirectUrl"  dc:"RedirectUrl" `
-	Metadata           map[string]string `json:"metadata" dc:"Metadata，Map"`
-	DiscountCode       string            `json:"discountCode"        dc:"DiscountCode, ignore if discountAmount or discountPercentage provide"`
-	DiscountAmount     *int64            `json:"discountAmount"     dc:"Amount of discount"`
-	DiscountPercentage *int64            `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount provide"`
-	TaxPercentage      *int64            `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, use subscription's taxPercentage if not provide"`
-	GatewayId          *uint64           `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	MerchantId         uint64                 `json:"merchantId" dc:"MerchantId"`
+	SubscriptionId     string                 `json:"subscriptionId"  dc:"SubscriptionId" `
+	AddonId            uint64                 `json:"addonId" dc:"addonId"`
+	Quantity           int64                  `json:"quantity" dc:"Quantity"`
+	RedirectUrl        string                 `json:"redirectUrl"  dc:"RedirectUrl" `
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode, ignore if discountAmount or discountPercentage provide"`
+	DiscountAmount     *int64                 `json:"discountAmount"     dc:"Amount of discount"`
+	DiscountPercentage *int64                 `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount provide"`
+	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, use subscription's taxPercentage if not provide"`
+	GatewayId          *uint64                `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 }
 
 func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAddonInternalReq) (*SubscriptionCreateOnetimeAddonInternalRes, error) {
@@ -154,7 +154,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			ReturnUrl:         req.RedirectUrl,
 		},
 		Email:                user.Email,
-		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName, "SubscriptionOnetimeAddonId": strconv.FormatUint(one.Id, 10)},
+		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "SubscriptionOnetimeAddonId": strconv.FormatUint(one.Id, 10)},
 		Invoice:              invoice,
 		PayImmediate:         true,
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,

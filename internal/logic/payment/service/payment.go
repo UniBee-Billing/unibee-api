@@ -47,7 +47,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
 	createPayContext.Pay.InvoiceData = utility.MarshalToJsonString(createPayContext.Invoice)
 	if createPayContext.Metadata == nil {
-		createPayContext.Metadata = make(map[string]string)
+		createPayContext.Metadata = make(map[string]interface{})
 	}
 	createPayContext.Metadata["PaymentId"] = createPayContext.Pay.PaymentId
 	createPayContext.Metadata["MerchantId"] = strconv.FormatUint(createPayContext.Pay.MerchantId, 10)
@@ -234,7 +234,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		ExternalUserId:       strconv.FormatUint(sub.UserId, 10),
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
-		Metadata:             map[string]string{"BillingReason": invoice.InvoiceName},
+		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 

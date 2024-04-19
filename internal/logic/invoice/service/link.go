@@ -85,7 +85,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 				ExternalUserId: strconv.FormatUint(one.UserId, 10),
 				Email:          user.Email,
 				Invoice:        bean.SimplifyInvoice(one),
-				Metadata:       map[string]string{"BillingReason": one.InvoiceName},
+				Metadata:       map[string]interface{}{"BillingReason": one.InvoiceName},
 			}
 
 			createRes, err := service.GatewayPaymentCreate(ctx, createPayContext)

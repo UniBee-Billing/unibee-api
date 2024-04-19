@@ -14,7 +14,7 @@ type GatewayNewPaymentReq struct {
 	Gateway              *entity.MerchantGateway `json:"gateway"`
 	ExternalUserId       string                  `json:"externalUserId"`
 	Email                string                  `json:"email"`
-	Metadata             map[string]string       `json:"metadata"`
+	Metadata             map[string]interface{}  `json:"metadata"`
 	Invoice              *bean.InvoiceSimplify   `json:"invoice"`
 	DaysUtilDue          int                     `json:"daysUtilDue"`
 	GatewayPaymentMethod string                  `json:"gatewayPaymentMethod"`

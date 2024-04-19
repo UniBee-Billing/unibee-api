@@ -272,7 +272,7 @@ type CreateInternalReq struct {
 	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 }
 
 type CreateInternalRes struct {
@@ -542,7 +542,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			ExternalUserId: strconv.FormatUint(one.UserId, 10),
 			Email:          prepare.Email,
 			Invoice:        bean.SimplifyInvoice(invoice),
-			Metadata:       map[string]string{"BillingReason": prepare.Invoice.InvoiceName},
+			Metadata:       map[string]interface{}{"BillingReason": prepare.Invoice.InvoiceName},
 		})
 		if err != nil {
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -971,7 +971,7 @@ type UpdateInternalReq struct {
 	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ProrationDate      *int64                      `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
 	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata           map[string]string           `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`

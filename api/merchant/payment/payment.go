@@ -8,19 +8,19 @@ import (
 
 type NewReq struct {
 	g.Meta            `path:"/new" tags:"Payment" method:"post" summary:"NewPayment"`
-	ExternalPaymentId string            `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
-	ExternalUserId    string            `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
-	Email             string            `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
-	UserId            uint64            `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
-	Currency          string            `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
-	TotalAmount       int64             `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
-	PlanId            uint64            `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
-	GatewayId         uint64            `json:"gatewayId"   dc:"GatewayId" v:"required"`
-	RedirectUrl       string            `json:"redirectUrl" dc:"Redirect Url"`
-	CountryCode       string            `json:"countryCode" dc:"CountryCode"`
-	Items             []*Item           `json:"items" dc:"Items"`
-	Metadata          map[string]string `json:"metadata" dc:"Metadata，Map"`
-	GasPayer          string            `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	ExternalPaymentId string                 `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
+	ExternalUserId    string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email             string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId            uint64                 `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
+	Currency          string                 `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
+	TotalAmount       int64                  `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
+	PlanId            uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
+	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
+	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
+	Items             []*Item                `json:"items" dc:"Items"`
+	Metadata          map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	GasPayer          string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
 }
 
 type NewRes struct {

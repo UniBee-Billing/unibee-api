@@ -23,12 +23,12 @@ import (
 )
 
 type NewPaymentRefundInternalReq struct {
-	PaymentId        string            `json:"path" dc:"PaymentId" v:"required"`
-	ExternalRefundId string            `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
-	RefundAmount     int64             `json:"refundAmount" dc:"RefundAmount, Cent" v:"required"`
-	Currency         string            `json:"currency" dc:"Currency"  v:"required"`
-	Reason           string            `json:"reason" dc:"Reason"`
-	Metadata         map[string]string `json:"metadata" dc:"Metadata，Map"`
+	PaymentId        string                 `json:"path" dc:"PaymentId" v:"required"`
+	ExternalRefundId string                 `json:"externalRefundId" dc:"ExternalRefundId" v:"required"`
+	RefundAmount     int64                  `json:"refundAmount" dc:"RefundAmount, Cent" v:"required"`
+	Currency         string                 `json:"currency" dc:"Currency"  v:"required"`
+	Reason           string                 `json:"reason" dc:"Reason"`
+	Metadata         map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
@@ -72,7 +72,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
 	if req.Metadata == nil {
-		req.Metadata = make(map[string]string)
+		req.Metadata = make(map[string]interface{})
 	}
 	refundId := utility.CreateRefundId()
 	req.Metadata["PaymentId"] = payment.PaymentId
@@ -222,7 +222,7 @@ func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalR
 	utility.Assert(err == nil && one == nil, "Duplicate Submit")
 
 	if req.Metadata == nil {
-		req.Metadata = make(map[string]string)
+		req.Metadata = make(map[string]interface{})
 	}
 	refundId := utility.CreateRefundId()
 	req.Metadata["PaymentId"] = payment.PaymentId

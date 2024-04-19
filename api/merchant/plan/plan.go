@@ -23,7 +23,7 @@ type NewReq struct {
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
 }
 type NewRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
@@ -46,7 +46,7 @@ type EditReq struct {
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`

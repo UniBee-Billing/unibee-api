@@ -36,7 +36,7 @@ func SubscriptionOnetimeAddonDetail(ctx context.Context, id uint64) *detail.Subs
 	if one == nil {
 		return nil
 	}
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {

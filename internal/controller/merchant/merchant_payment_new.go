@@ -67,7 +67,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		req.TotalAmount = plan.Amount
 		req.Currency = plan.Currency
 		if req.Metadata == nil {
-			req.Metadata = make(map[string]string)
+			req.Metadata = make(map[string]interface{})
 		}
 		req.Metadata["PlanId"] = strconv.FormatUint(req.PlanId, 10)
 	}

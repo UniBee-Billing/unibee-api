@@ -34,7 +34,7 @@ func SubscriptionOnetimeAddonList(ctx context.Context, req *SubscriptionOnetimeA
 		return nil
 	}
 	for _, one := range mainList {
-		var metadata = make(map[string]string)
+		var metadata = make(map[string]interface{})
 		if len(one.MetaData) > 0 {
 			err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
 			if err != nil {

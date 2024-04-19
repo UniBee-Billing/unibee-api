@@ -66,7 +66,7 @@ type SubscriptionPendingUpdateDetail struct {
 	Addons          []*bean.PlanAddonDetail      `json:"addons" dc:"Addons"`
 	UpdatePlan      *bean.PlanSimplify           `json:"updatePlan" dc:"UpdatePlan"`
 	UpdateAddons    []*bean.PlanAddonDetail      `json:"updateAddons" dc:"UpdateAddons"`
-	Metadata        map[string]string            `json:"metadata" description:""`
+	Metadata        map[string]interface{}       `json:"metadata" description:""`
 }
 
 type SubscriptionOnetimeAddonDetail struct {
@@ -78,6 +78,6 @@ type SubscriptionOnetimeAddonDetail struct {
 	Status         int                       `json:"status"         description:"status, 1-create, 2-paid, 3-cancel, 4-expired"` // status, 1-create, 2-paid, 3-cancel, 4-expired
 	CreateTime     int64                     `json:"createTime"     description:"create utc time"`                               // create utc time
 	Payment        *bean.PaymentSimplify     `json:"payment"        description:"Payment"`
-	Metadata       map[string]string         `json:"metadata"       description:"Metadata"`
+	Metadata       map[string]interface{}    `json:"metadata"       description:"Metadata"`
 	User           *bean.UserAccountSimplify `json:"user"           description:"User"`
 }

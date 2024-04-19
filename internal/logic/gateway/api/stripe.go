@@ -391,14 +391,14 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			LineItems:  items,
 			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
-			Metadata:   createPayContext.Metadata,
+			Metadata:   utility.ConvertToStringMetadata(createPayContext.Metadata),
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
-				Metadata:         createPayContext.Metadata,
+				Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 			},
 		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
-		checkoutParams.Metadata = createPayContext.Metadata
+		checkoutParams.Metadata = utility.ConvertToStringMetadata(createPayContext.Metadata)
 		//checkoutParams.ExpiresAt
 		detail, err := session.New(checkoutParams)
 		if err != nil {
@@ -466,7 +466,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 					AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
 						Enabled: stripe.Bool(true),
 					},
-					Metadata:         createPayContext.Metadata,
+					Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
 					ReturnURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				}
@@ -509,7 +509,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		}
 		// need payment link
 		params := &stripe.InvoiceParams{
-			Metadata: createPayContext.Metadata,
+			Metadata: utility.ConvertToStringMetadata(createPayContext.Metadata),
 			Currency: stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
 			Customer: stripe.String(gatewayUser.GatewayUserId)}
 
@@ -691,14 +691,14 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	params := &stripe.RefundParams{PaymentIntent: stripe.String(payment.GatewayPaymentId)}
 	params.Reason = stripe.String("requested_by_customer")
 	params.Amount = stripe.Int64(one.RefundAmount)
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
 		err := utility.UnmarshalFromJsonString(one.MetaData, &metadata)
 		if err != nil {
 			g.Log().Errorf(ctx, "GatewayRefund Unmarshal Metadata error:%s", err.Error())
 		}
 	}
-	params.Metadata = metadata
+	params.Metadata = utility.ConvertToStringMetadata(metadata)
 	result, err := refund.New(params)
 	log.SaveChannelHttpLog("GatewayRefund", params, result, err, "refund", nil, gateway)
 	utility.Assert(err == nil, fmt.Sprintf("call stripe refund error %s", err))

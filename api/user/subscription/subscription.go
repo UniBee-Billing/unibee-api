@@ -88,7 +88,7 @@ type CreateReq struct {
 	VatNumber          string                 `json:"vatNumber" dc:"VatNumber" `
 	PaymentMethodId    string                 `json:"paymentMethodId" dc:"PaymentMethodId" `
 	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 type CreateRes struct {
@@ -127,7 +127,7 @@ type UpdateReq struct {
 	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ProrationDate      *int64                 `json:"prorationDate" dc:"The utc time to start Proration, default current time" `
 	EffectImmediate    int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
-	Metadata           map[string]string      `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 
@@ -203,13 +203,13 @@ type TimeLineListRes struct {
 
 type OnetimeAddonNewReq struct {
 	g.Meta         `path:"/new_onetime_addon_payment" tags:"User-Subscription" method:"post" summary:"New Subscription Onetime Addon Payment"`
-	SubscriptionId string            `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
-	AddonId        uint64            `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
-	Quantity       int64             `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
-	ReturnUrl      string            `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
-	Metadata       map[string]string `json:"metadata" dc:"Metadata，custom data"`
-	DiscountCode   string            `json:"discountCode"        dc:"DiscountCode"`
-	GatewayId      *uint64           `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	SubscriptionId string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
+	AddonId        uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
+	Quantity       int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
+	ReturnUrl      string                 `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
+	Metadata       map[string]interface{} `json:"metadata" dc:"Metadata，custom data"`
+	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
+	GatewayId      *uint64                `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 }
 
 type OnetimeAddonNewRes struct {

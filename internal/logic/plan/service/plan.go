@@ -66,7 +66,7 @@ type PlanInternalReq struct {
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]string                       `json:"metadata" dc:"Metadata，Map"`
+	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
 }
 
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {

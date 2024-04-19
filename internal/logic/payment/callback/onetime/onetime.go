@@ -46,7 +46,7 @@ func (i Onetime) PaymentNeedAuthorisedCallback(ctx context.Context, payment *ent
 }
 
 func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(payment.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(payment.MetaData), &metadata)
 		if err != nil {
@@ -54,7 +54,7 @@ func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Paym
 		}
 	}
 	if id, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
-		idInt, err := strconv.Atoi(id)
+		idInt, err := strconv.Atoi(fmt.Sprintf("%v", id))
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentCancelCallback panic int: %s err:%s", id, err)
 			return
@@ -76,7 +76,7 @@ func (i Onetime) PaymentCancelCallback(ctx context.Context, payment *entity.Paym
 }
 
 func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(payment.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(payment.MetaData), &metadata)
 		if err != nil {
@@ -84,7 +84,7 @@ func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Paym
 		}
 	}
 	if id, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
-		idInt, err := strconv.Atoi(id)
+		idInt, err := strconv.Atoi(fmt.Sprintf("%v", id))
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentCancelCallback panic int: %s err:%s", id, err)
 			return
@@ -102,7 +102,7 @@ func (i Onetime) PaymentCreateCallback(ctx context.Context, payment *entity.Paym
 }
 
 func (i Onetime) PaymentSuccessCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(payment.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(payment.MetaData), &metadata)
 		if err != nil {
@@ -110,7 +110,7 @@ func (i Onetime) PaymentSuccessCallback(ctx context.Context, payment *entity.Pay
 		}
 	}
 	if id, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
-		idInt, err := strconv.Atoi(id)
+		idInt, err := strconv.Atoi(fmt.Sprintf("%v", id))
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentSuccessCallback panic int: %s err:%s", id, err)
 			return
@@ -133,7 +133,7 @@ func (i Onetime) PaymentSuccessCallback(ctx context.Context, payment *entity.Pay
 }
 
 func (i Onetime) PaymentFailureCallback(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) {
-	var metadata = make(map[string]string)
+	var metadata = make(map[string]interface{})
 	if len(payment.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(payment.MetaData), &metadata)
 		if err != nil {
@@ -141,7 +141,7 @@ func (i Onetime) PaymentFailureCallback(ctx context.Context, payment *entity.Pay
 		}
 	}
 	if id, ok := metadata["SubscriptionOnetimeAddonId"]; ok {
-		idInt, err := strconv.Atoi(id)
+		idInt, err := strconv.Atoi(fmt.Sprintf("%v", id))
 		if err != nil {
 			g.Log().Errorf(ctx, "PaymentFailureCallback panic int: %s err:%s", id, err)
 			return
