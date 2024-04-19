@@ -240,6 +240,7 @@ type CreatePreviewInternalRes struct {
 	AddonParams           []*bean.PlanAddonParam  `json:"addonParams"`
 	Addons                []*bean.PlanAddonDetail `json:"addons"`
 	TotalAmount           int64                   `json:"totalAmount" `
+	DiscountAmount        int64                   `json:"discountAmount"`
 	Currency              string                  `json:"currency" `
 	VatCountryCode        string                  `json:"vatCountryCode" `
 	VatCountryName        string                  `json:"vatCountryName" `
@@ -398,6 +399,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		AddonParams:           req.AddonParams,
 		Addons:                addons,
 		TotalAmount:           invoice.TotalAmount,
+		DiscountAmount:        invoice.DiscountAmount,
 		Currency:              currency,
 		VatCountryCode:        vatCountryCode,
 		VatCountryName:        vatCountryName,
@@ -607,6 +609,7 @@ type UpdatePreviewInternalRes struct {
 	AddonParams           []*bean.PlanAddonParam  `json:"addonParams"`
 	Addons                []*bean.PlanAddonDetail `json:"addons"`
 	TotalAmount           int64                   `json:"totalAmount"`
+	DiscountAmount        int64                   `json:"discountAmount"`
 	Currency              string                  `json:"currency"`
 	UserId                uint64                  `json:"userId"`
 	OldPlan               *entity.Plan            `json:"oldPlan"`
@@ -942,6 +945,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		UserId:                sub.UserId,
 		OldPlan:               oldPlan,
 		TotalAmount:           currentInvoice.TotalAmount,
+		DiscountAmount:        currentInvoice.DiscountAmount,
 		Invoice:               currentInvoice,
 		NextPeriodInvoice:     nextPeriodInvoice,
 		ProrationDate:         prorationDate,

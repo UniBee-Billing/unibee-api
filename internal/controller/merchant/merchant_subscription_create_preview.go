@@ -32,6 +32,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		AddonParams:       prepare.AddonParams,
 		Addons:            prepare.Addons,
 		TotalAmount:       prepare.TotalAmount,
+		DiscountAmount:    prepare.DiscountAmount,
 		Currency:          prepare.Currency,
 		VatNumber:         prepare.VatNumber,
 		VatNumberValidate: prepare.VatNumberValidate,

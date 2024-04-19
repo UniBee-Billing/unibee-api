@@ -34,6 +34,7 @@ func (c *ControllerSubscription) UpdatePreview(ctx context.Context, req *subscri
 	}
 	return &subscription.UpdatePreviewRes{
 		TotalAmount:       update.TotalAmount,
+		DiscountAmount:    update.DiscountAmount,
 		Currency:          update.Currency,
 		Invoice:           update.Invoice,
 		NextPeriodInvoice: update.NextPeriodInvoice,

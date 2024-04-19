@@ -63,6 +63,7 @@ type CreatePreviewRes struct {
 	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
 	Addons            []*bean.PlanAddonDetail `json:"addons"`
 	TotalAmount       int64                   `json:"totalAmount"                `
+	DiscountAmount    int64                   `json:"discountAmount"`
 	Currency          string                  `json:"currency"              `
 	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
 	UserId            uint64                  `json:"userId" `
@@ -108,6 +109,7 @@ type UpdatePreviewReq struct {
 }
 type UpdatePreviewRes struct {
 	TotalAmount       int64                 `json:"totalAmount"                `
+	DiscountAmount    int64                 `json:"discountAmount"`
 	Currency          string                `json:"currency"              `
 	Invoice           *bean.InvoiceSimplify `json:"invoice"`
 	NextPeriodInvoice *bean.InvoiceSimplify `json:"nextPeriodInvoice"`
