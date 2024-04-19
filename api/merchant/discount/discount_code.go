@@ -13,6 +13,15 @@ type ListRes struct {
 	Discounts []*bean.MerchantDiscountCodeSimplify `json:"discounts" dc:"Discount Object List"`
 }
 
+type DetailReq struct {
+	g.Meta `path:"/detail" tags:"Discount" method:"get,post" summary:"Merchant Discount Detail"`
+	Code   string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`
+}
+
+type DetailRes struct {
+	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
+}
+
 type NewReq struct {
 	g.Meta             `path:"/new" tags:"Discount" method:"post" summary:"NewDiscountCode" dc:"Create a new discount code, code can used in onetime or subscription purchase to make discount"`
 	Code               string `json:"code" dc:"The discount's unique code, customize by merchant" v:"required"`

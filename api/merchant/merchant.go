@@ -45,6 +45,7 @@ type IMerchantBalance interface {
 
 type IMerchantDiscount interface {
 	List(ctx context.Context, req *discount.ListReq) (res *discount.ListRes, err error)
+	Detail(ctx context.Context, req *discount.DetailReq) (res *discount.DetailRes, err error)
 	New(ctx context.Context, req *discount.NewReq) (res *discount.NewRes, err error)
 	Edit(ctx context.Context, req *discount.EditReq) (res *discount.EditRes, err error)
 	Delete(ctx context.Context, req *discount.DeleteReq) (res *discount.DeleteRes, err error)
