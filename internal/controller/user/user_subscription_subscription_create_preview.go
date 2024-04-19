@@ -38,17 +38,8 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatCountryCode:    prepare.VatCountryCode,
 		VatCountryName:    prepare.VatCountryName,
 		TaxPercentage:     prepare.TaxPercentage,
-		Invoice: &bean.InvoiceSimplify{
-			InvoiceName:                    prepare.Invoice.InvoiceName,
-			TotalAmount:                    prepare.Invoice.TotalAmount,
-			TotalAmountExcludingTax:        prepare.Invoice.TotalAmountExcludingTax,
-			Currency:                       prepare.Invoice.Currency,
-			TaxAmount:                      prepare.Invoice.TaxAmount,
-			SubscriptionAmount:             prepare.Invoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: prepare.Invoice.SubscriptionAmountExcludingTax,
-			Lines:                          prepare.Invoice.Lines,
-		},
-		UserId: prepare.UserId,
-		Email:  prepare.Email,
+		Invoice:           prepare.Invoice,
+		UserId:            prepare.UserId,
+		Email:             prepare.Email,
 	}, nil
 }
