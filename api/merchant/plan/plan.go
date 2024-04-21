@@ -31,15 +31,15 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
-	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
-	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
-	Currency           *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
-	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
-	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number Of IntervalUnit" `
-	Description        *string                                 `json:"description"  dc:"Description"`
-	ProductName        *string                                 `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription *string                                 `json:"productDescription" dc:"Default Copy Description" `
+	PlanId             uint64                                  `json:"planId" dc:"Id of plan" v:"required"`
+	PlanName           *string                                 `json:"planName" dc:"Name of plan"   v:"required" `
+	Amount             *int64                                  `json:"amount"   dc:"CaptureAmount of plan, not editable when plan is active"   v:"required" `
+	Currency           *string                                 `json:"currency"   dc:"Currency of plan, not editable when plan is active" v:"required" `
+	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Interval unit of plan，em: day|month|year|week, not editable when plan is active"`
+	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number,intervalUnit of plan, not editable when plan is active" `
+	Description        *string                                 `json:"description"  dc:"Description of plan"`
+	ProductName        *string                                 `json:"productName" dc:"ProductName of plan, Default copy planName"  `
+	ProductDescription *string                                 `json:"productDescription" dc:"ProductDescription of plan, Default copy description" `
 	ImageUrl           *string                                 `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
 	HomeUrl            *string                                 `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
