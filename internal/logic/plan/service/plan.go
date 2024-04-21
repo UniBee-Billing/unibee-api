@@ -68,6 +68,9 @@ type PlanInternalReq struct {
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period"` // price of trial period
+	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
+	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 }
 
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
@@ -144,6 +147,8 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		}
 	}
 
+	utility.Assert(req.TrialDemand == "" || req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
+
 	one = &entity.Plan{
 		CompanyId:                 merchantInfo.CompanyId,
 		MerchantId:                req.MerchantId,
@@ -164,6 +169,9 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		CreateTime:                gtime.Now().Timestamp(),
 		MetaData:                  utility.MarshalToJsonString(req.Metadata),
 		GasPayer:                  req.GasPayer,
+		TrialDurationTime:         req.TrialDurationTime,
+		TrialAmount:               req.TrialAmount,
+		TrialDemand:               req.TrialDemand,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -200,6 +208,9 @@ type EditInternalReq struct {
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
+	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
+	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
@@ -306,6 +317,9 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	if req.OnetimeAddonIds != nil {
 		bindingOnetimeAddonIds = unibee.String(utility.IntListToString(req.OnetimeAddonIds))
 	}
+
+	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
+
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PlanName:                  req.PlanName,
 		dao.Plan.Columns().Amount:                    req.Amount,
@@ -321,6 +335,9 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
 		dao.Plan.Columns().GasPayer:                  req.GasPayer,
 		dao.Plan.Columns().IsDeleted:                 0,
+		dao.Plan.Columns().TrialDemand:               req.TrialDemand,
+		dao.Plan.Columns().TrialDurationTime:         req.TrialDurationTime,
+		dao.Plan.Columns().TrialAmount:               req.TrialAmount,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)

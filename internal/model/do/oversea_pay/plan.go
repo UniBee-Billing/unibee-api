@@ -39,4 +39,7 @@ type Plan struct {
 	ExtraMetricData           interface{} //
 	MetaData                  interface{} // meta_data(json)
 	GasPayer                  interface{} // who pay the gas, merchant|user
+	TrialAmount               interface{} // amount of trial, 0 for free
+	TrialDurationTime         interface{} // duration of trial
+	TrialDemand               interface{} //
 }

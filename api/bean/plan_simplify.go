@@ -29,6 +29,9 @@ type PlanSimplify struct {
 	ExtraMetricData        string                 `json:"extraMetricData"           description:""`                                                          //
 	Metadata               map[string]interface{} `json:"metadata"                  description:""`
 	GasPayer               string                 `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
+	TrialAmount            int64                  `json:"trialAmount"                description:"price of trial period"`         // price of trial period
+	TrialDurationTime      int64                  `json:"trialDurationTime"         description:"duration of trial"`              // duration of trial
+	TrialDemand            string                 `json:"trialDemand"               description:""`
 }
 
 func SimplifyPlan(one *entity.Plan) *PlanSimplify {
@@ -65,6 +68,9 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 		ExtraMetricData:        one.ExtraMetricData,
 		Metadata:               metadata,
 		GasPayer:               one.GasPayer,
+		TrialDemand:            one.TrialDemand,
+		TrialDurationTime:      one.TrialDurationTime,
+		TrialAmount:            one.TrialAmount,
 	}
 }
 

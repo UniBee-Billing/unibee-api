@@ -47,6 +47,9 @@ type PlanColumns struct {
 	ExtraMetricData           string //
 	MetaData                  string // meta_data(json)
 	GasPayer                  string // who pay the gas, merchant|user
+	TrialAmount               string // amount of trial, 0 for free
+	TrialDurationTime         string // duration of trial
+	TrialDemand               string //
 }
 
 // planColumns holds the columns for table plan.
@@ -78,6 +81,9 @@ var planColumns = PlanColumns{
 	ExtraMetricData:           "extra_metric_data",
 	MetaData:                  "meta_data",
 	GasPayer:                  "gas_payer",
+	TrialAmount:               "trial_amount",
+	TrialDurationTime:         "trial_duration_time",
+	TrialDemand:               "trial_demand",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.

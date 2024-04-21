@@ -28,6 +28,9 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 		MetricLimits:       req.MetricLimits,
 		GasPayer:           req.GasPayer,
 		Metadata:           req.Metadata,
+		TrialAmount:        req.TrialAmount,
+		TrialDurationTime:  req.TrialDurationTime,
+		TrialDemand:        req.TrialDemand,
 	})
 	if err != nil {
 		return nil, err

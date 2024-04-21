@@ -28,6 +28,9 @@ func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.N
 		GasPayer:           req.GasPayer,
 		Metadata:           req.Metadata,
 		MerchantId:         _interface.GetMerchantId(ctx),
+		TrialDemand:        req.TrialDemand,
+		TrialAmount:        req.TrialAmount,
+		TrialDurationTime:  req.TrialDurationTime,
 	})
 	if err != nil {
 		return nil, err

@@ -37,4 +37,7 @@ type Plan struct {
 	ExtraMetricData           string      `json:"extraMetricData"           description:""`                                                             //
 	MetaData                  string      `json:"metaData"                  description:"meta_data(json)"`                                              // meta_data(json)
 	GasPayer                  string      `json:"gasPayer"                  description:"who pay the gas, merchant|user"`                               // who pay the gas, merchant|user
+	TrialAmount               int64       `json:"trialAmount"               description:"amount of trial, 0 for free"`                                  // amount of trial, 0 for free
+	TrialDurationTime         int64       `json:"trialDurationTime"         description:"duration of trial"`                                            // duration of trial
+	TrialDemand               string      `json:"trialDemand"               description:""`                                                             //
 }
