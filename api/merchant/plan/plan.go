@@ -32,20 +32,20 @@ type NewRes struct {
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan"`
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
-	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
-	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
-	Currency           string                                  `json:"currency"   dc:"Plan Currency" v:"required" `
-	IntervalUnit       string                                  `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
-	IntervalCount      int                                     `json:"intervalCount"  dc:"Number Of IntervalUnit" `
-	Description        string                                  `json:"description"  dc:"Description"`
-	ProductName        string                                  `json:"productName" dc:"Default Copy PlanName"  `
-	ProductDescription string                                  `json:"productDescription" dc:"Default Copy Description" `
-	ImageUrl           string                                  `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
-	HomeUrl            string                                  `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
+	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Currency           *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
+	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number Of IntervalUnit" `
+	Description        *string                                 `json:"description"  dc:"Description"`
+	ProductName        *string                                 `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription *string                                 `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl           *string                                 `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl            *string                                 `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
 	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
-	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
+	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
 }
 type EditRes struct {

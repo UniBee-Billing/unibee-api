@@ -181,34 +181,78 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	return one, nil
 }
 
-func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
-	intervals := []string{"day", "month", "year", "week"}
-	utility.Assert(req != nil, "req not found")
-	utility.Assert(req.Amount > 0, "amount value should > 0")
-	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
-	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
-	if len(req.GasPayer) > 0 {
-		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
-	}
+type EditInternalReq struct {
+	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
+	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
+	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
+	Currency           *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
+	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Plan Interval Unit，em: day|month|year|week"`
+	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number Of IntervalUnit" `
+	Description        *string                                 `json:"description"  dc:"Description"`
+	ProductName        *string                                 `json:"productName" dc:"Default Copy PlanName"  `
+	ProductDescription *string                                 `json:"productDescription" dc:"Default Copy Description" `
+	ImageUrl           *string                                 `json:"imageUrl"    dc:"ImageUrl,Start With: http" `
+	HomeUrl            *string                                 `json:"homeUrl"    dc:"HomeUrl,Start With: http"  `
+	AddonIds           []int64                                 `json:"addonIds"  dc:"Plan Ids Of Recurring Addon Type" `
+	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
+	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
+	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
+	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+}
 
-	if req.IntervalCount < 1 {
-		req.IntervalCount = 1
-	}
+func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
+	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
 	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
-	if one.Type != consts.PlanTypeOnetimeAddon {
-		utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
-		if strings.ToLower(req.IntervalUnit) == "day" {
-			utility.Assert(req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
-		} else if strings.ToLower(req.IntervalUnit) == "month" {
-			utility.Assert(req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
-		} else if strings.ToLower(req.IntervalUnit) == "year" {
-			utility.Assert(req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
-		} else if strings.ToLower(req.IntervalUnit) == "week" {
-			utility.Assert(req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+	if one.Status == consts.PlanStatusActive {
+		utility.Assert(req.Amount == nil, "Amount is not editable as plan is active")
+		utility.Assert(req.Currency == nil, "Currency is not editable as plan is active")
+		utility.Assert(req.IntervalUnit == nil, "IntervalUint is not editable as plan is active")
+		utility.Assert(req.IntervalCount == nil, "IntervalCount is not editable as plan is active")
+	} else {
+		if req.Amount != nil {
+			utility.Assert(*req.Amount > 0, "Amount value should > 0")
 		}
+		if req.Currency != nil {
+			utility.Assert(currency.IsFiatCurrencySupport(*req.Currency), "Currency not support")
+		}
+
+		if req.IntervalCount != nil {
+			if *req.IntervalCount < 1 {
+				*req.IntervalCount = 1
+			}
+		}
+
+		if one.Type != consts.PlanTypeOnetimeAddon {
+			if req.IntervalUnit != nil {
+				intervals := []string{"day", "month", "year", "week"}
+				utility.Assert(utility.StringContainsElement(intervals, strings.ToLower(*req.IntervalUnit)), "IntervalUnit Error， must one of day｜month｜year｜week\"")
+				if req.IntervalCount != nil {
+					if strings.ToLower(*req.IntervalUnit) == "day" {
+						utility.Assert(*req.IntervalCount <= 365, "IntervalCount Must Lower Then 365 While IntervalUnit is day")
+					} else if strings.ToLower(*req.IntervalUnit) == "month" {
+						utility.Assert(*req.IntervalCount <= 12, "IntervalCount Must Lower Then 12 While IntervalUnit is month")
+					} else if strings.ToLower(*req.IntervalUnit) == "year" {
+						utility.Assert(*req.IntervalCount <= 1, "IntervalCount Must Lower Then 2 While IntervalUnit is year")
+					} else if strings.ToLower(*req.IntervalUnit) == "week" {
+						utility.Assert(*req.IntervalCount <= 52, "IntervalCount Must Lower Then 52 While IntervalUnit is week")
+					}
+				}
+			} else {
+				utility.Assert(req.IntervalCount == nil, "IntervalCount can not edit without IntervalUnit")
+			}
+		}
+	}
+
+	if req.PlanName != nil {
+		utility.Assert(len(*req.PlanName) > 0, "plan name should not blank")
+	}
+
+	if req.GasPayer != nil && len(*req.GasPayer) > 0 {
+		utility.Assert(strings.Contains("merchant|user", *req.GasPayer), "gasPayer should one of merchant|user")
 	}
 
 	//check metricLimitList
@@ -222,10 +266,10 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 		}
 	}
 
-	if len(req.ProductName) == 0 {
+	if req.ProductName == nil || len(*req.ProductName) == 0 {
 		req.ProductName = req.PlanName
 	}
-	if len(req.ProductDescription) == 0 {
+	if req.ProductDescription == nil || len(*req.ProductDescription) == 0 {
 		req.ProductDescription = req.Description
 	}
 
@@ -249,10 +293,14 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 		}
 	}
 
+	var editCurrency *string = nil
+	if req.Currency != nil {
+		*editCurrency = strings.ToUpper(*req.Currency)
+	}
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PlanName:                  req.PlanName,
 		dao.Plan.Columns().Amount:                    req.Amount,
-		dao.Plan.Columns().Currency:                  strings.ToUpper(req.Currency),
+		dao.Plan.Columns().Currency:                  editCurrency,
 		dao.Plan.Columns().IntervalUnit:              req.IntervalUnit,
 		dao.Plan.Columns().IntervalCount:             req.IntervalCount,
 		dao.Plan.Columns().Description:               req.Description,
@@ -274,17 +322,7 @@ func PlanEdit(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err 
 		}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	}
 
-	one.PlanName = req.PlanName
-	one.Amount = req.Amount
-	one.Currency = strings.ToUpper(req.Currency)
-	one.IntervalUnit = strings.ToLower(req.IntervalUnit)
-	one.IntervalCount = req.IntervalCount
-	one.Description = req.Description
-	one.ImageUrl = req.ImageUrl
-	one.HomeUrl = req.HomeUrl
-	one.BindingAddonIds = utility.IntListToString(req.AddonIds)
-	one.GatewayProductName = req.ProductName
-	one.GatewayProductDescription = req.ProductDescription
+	one = query.GetPlanById(ctx, req.PlanId)
 
 	if len(req.MetricLimits) > 0 {
 		err = metric.BulkMetricLimitPlanBindingReplace(ctx, one, req.MetricLimits)

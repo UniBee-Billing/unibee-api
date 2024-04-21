@@ -18,7 +18,7 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 		utility.Assert(_interface.Context().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
 	}
 
-	one, err := service.PlanEdit(ctx, &service.PlanInternalReq{
+	one, err := service.PlanEdit(ctx, &service.EditInternalReq{
 		PlanId:             req.PlanId,
 		PlanName:           req.PlanName,
 		Amount:             req.Amount,
