@@ -17,6 +17,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 func PlanPublish(ctx context.Context, planId uint64) (err error) {
@@ -222,10 +223,8 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 			utility.Assert(currency.IsFiatCurrencySupport(*req.Currency), "Currency not support")
 		}
 
-		if req.IntervalCount != nil {
-			if *req.IntervalCount < 1 {
-				*req.IntervalCount = 1
-			}
+		if req.IntervalCount != nil && *req.IntervalCount < 1 {
+			req.IntervalCount = unibee.Int(1)
 		}
 
 		if one.Type != consts.PlanTypeOnetimeAddon {
@@ -297,15 +296,15 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 
 	var editCurrency *string = nil
 	if req.Currency != nil {
-		*editCurrency = strings.ToUpper(*req.Currency)
+		editCurrency = unibee.String(strings.ToUpper(*req.Currency))
 	}
 	var bindingAddonIds *string = nil
 	if req.AddonIds != nil {
-		*bindingAddonIds = utility.IntListToString(req.AddonIds)
+		bindingAddonIds = unibee.String(utility.IntListToString(req.AddonIds))
 	}
 	var bindingOnetimeAddonIds *string = nil
 	if req.OnetimeAddonIds != nil {
-		*bindingOnetimeAddonIds = utility.IntListToString(req.OnetimeAddonIds)
+		bindingOnetimeAddonIds = unibee.String(utility.IntListToString(req.OnetimeAddonIds))
 	}
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PlanName:                  req.PlanName,
