@@ -21,5 +21,6 @@ func (c *ControllerAuth) SessionLogin(ctx context.Context, req *auth.SessionLogi
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("User#%d", one.Id)), "Cache Error")
 	g.RequestFromCtx(ctx).Cookie.Set("__UniBee.user.token", token)
+	jwt.AppendRequestCookieWithToken(ctx, token)
 	return &auth.SessionLoginRes{User: bean.SimplifyUserAccount(one), Token: token, ReturnUrl: returnUrl}, nil
 }

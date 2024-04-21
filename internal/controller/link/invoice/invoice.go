@@ -11,6 +11,7 @@ import (
 )
 
 func LinkEntry(r *ghttp.Request) {
+	//r.BasicAuth()
 	invoiceId := r.Get("invoiceId").String()
 	res := service.LinkCheck(r.Context(), invoiceId, gtime.Now().Timestamp())
 	if len(res.Link) > 0 {
