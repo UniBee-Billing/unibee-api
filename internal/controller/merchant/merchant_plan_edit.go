@@ -4,21 +4,14 @@ import (
 	"context"
 	"unibee/api/bean"
 	"unibee/api/merchant/plan"
-	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/plan/service"
-	"unibee/utility"
 )
 
 func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan.EditRes, err error) {
 
-	if !config.GetConfigInstance().IsLocal() {
-		//User 检查
-		utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "merchant auth failure,not login")
-		utility.Assert(_interface.Context().Get(ctx).MerchantMember.Id > 0, "merchantMemberId invalid")
-	}
-
 	one, err := service.PlanEdit(ctx, &service.EditInternalReq{
+		MerchantId:         _interface.GetMerchantId(ctx),
 		PlanId:             req.PlanId,
 		PlanName:           req.PlanName,
 		Amount:             req.Amount,

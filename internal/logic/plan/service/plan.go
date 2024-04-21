@@ -182,6 +182,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 }
 
 type EditInternalReq struct {
+	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
 	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
@@ -201,10 +202,11 @@ type EditInternalReq struct {
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
-	utility.Assert(req != nil, "req not found")
+	utility.Assert(req != nil, "Req not found")
 	utility.Assert(req.PlanId > 0, "PlanId should > 0")
 	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
+	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
 
 	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 	if one.Status == consts.PlanStatusActive {
@@ -248,21 +250,21 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	}
 
 	if req.PlanName != nil {
-		utility.Assert(len(*req.PlanName) > 0, "plan name should not blank")
+		utility.Assert(len(*req.PlanName) > 0, "Plan name should not blank")
 	}
 
 	if req.GasPayer != nil && len(*req.GasPayer) > 0 {
-		utility.Assert(strings.Contains("merchant|user", *req.GasPayer), "gasPayer should one of merchant|user")
+		utility.Assert(strings.Contains("merchant|user", *req.GasPayer), "GasPayer should one of merchant|user")
 	}
 
 	//check metricLimitList
 	if len(req.MetricLimits) > 0 {
 		for _, ml := range req.MetricLimits {
-			utility.Assert(ml.MetricId > 0, "invalid metricId")
-			utility.Assert(ml.MetricLimit > 0, "invalid MetricLimit")
+			utility.Assert(ml.MetricId > 0, "Invalid metricId")
+			utility.Assert(ml.MetricLimit > 0, "Invalid MetricLimit")
 			me := query.GetMerchantMetric(ctx, ml.MetricId)
-			utility.Assert(me != nil, "metric not found")
-			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "metric type invalid")
+			utility.Assert(me != nil, "Metric not found")
+			utility.Assert(me.Type == metric.MetricTypeLimitMetered, "Metric type invalid")
 		}
 	}
 
