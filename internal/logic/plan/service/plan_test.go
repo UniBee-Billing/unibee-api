@@ -25,8 +25,8 @@ func TestPlanCreateAndDelete(t *testing.T) {
 			IntervalCount:      2,
 			Description:        "autotest",
 			Type:               consts.PlanTypeMain,
-			ProductName:        "",
-			ProductDescription: "",
+			ProductName:        "ProductName",
+			ProductDescription: "ProductDescription",
 			AddonIds:           nil,
 			OnetimeAddonIds:    nil,
 			MetricLimits:       nil,
@@ -48,12 +48,10 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.NotNil(t, one)
 		one, err = PlanEdit(ctx, &EditInternalReq{
 			PlanId:          one.Id,
-			PlanName:        unibee.String("autotest"),
 			Amount:          unibee.Int64(200),
 			Currency:        unibee.String("USD"),
 			IntervalUnit:    unibee.String("day"),
 			IntervalCount:   unibee.Int(1),
-			Description:     unibee.String("autotest"),
 			AddonIds:        []int64{int64(test.TestRecurringAddon.Id)},
 			OnetimeAddonIds: []int64{int64(test.TestOneTimeAddon.Id)},
 			MetricLimits:    nil,
@@ -63,6 +61,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, one)
+		require.Equal(t, "ProductName", one.GatewayProductName)
 		one = query.GetPlanById(ctx, one.Id)
 		require.NotNil(t, one)
 		require.Equal(t, one.Amount, int64(200))
