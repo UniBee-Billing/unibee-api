@@ -30,7 +30,7 @@ type NewRes struct {
 }
 
 type EditReq struct {
-	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan"`
+	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
 	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
