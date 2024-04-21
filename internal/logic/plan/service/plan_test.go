@@ -9,6 +9,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/test"
+	"unibee/utility/unibee"
 )
 
 func TestPlanCreateAndDelete(t *testing.T) {
@@ -30,7 +31,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 			OnetimeAddonIds:    nil,
 			MetricLimits:       nil,
 			GasPayer:           "user",
-			Metadata:           map[string]string{"type": "test"},
+			Metadata:           map[string]interface{}{"type": "test"},
 			MerchantId:         test.TestMerchant.Id,
 		})
 		require.Nil(t, err)
@@ -45,21 +46,21 @@ func TestPlanCreateAndDelete(t *testing.T) {
 		require.Equal(t, 1, len(ones))
 		one = query.GetPlanById(ctx, one.Id)
 		require.NotNil(t, one)
-		one, err = PlanEdit(ctx, &PlanInternalReq{
+		one, err = PlanEdit(ctx, &EditInternalReq{
 			PlanId:             one.Id,
-			PlanName:           "autotest",
-			Amount:             200,
-			Currency:           "USD",
-			IntervalUnit:       "day",
-			IntervalCount:      1,
-			Description:        "autotest",
-			ProductName:        "",
-			ProductDescription: "",
+			PlanName:           unibee.String("autotest"),
+			Amount:             unibee.Int64(200),
+			Currency:           unibee.String("USD"),
+			IntervalUnit:       unibee.String("day"),
+			IntervalCount:      unibee.Int(1),
+			Description:        unibee.String("autotest"),
+			ProductName:        unibee.String(""),
+			ProductDescription: unibee.String(""),
 			AddonIds:           []int64{int64(test.TestRecurringAddon.Id)},
 			OnetimeAddonIds:    []int64{int64(test.TestOneTimeAddon.Id)},
 			MetricLimits:       nil,
-			GasPayer:           "user",
-			Metadata:           map[string]string{"type": "test"},
+			GasPayer:           unibee.String("user"),
+			Metadata:           map[string]interface{}{"type": "test"},
 			MerchantId:         test.TestMerchant.Id,
 		})
 		require.Nil(t, err)

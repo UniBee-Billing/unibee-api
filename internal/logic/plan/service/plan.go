@@ -299,6 +299,14 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	if req.Currency != nil {
 		*editCurrency = strings.ToUpper(*req.Currency)
 	}
+	var bindingAddonIds *string = nil
+	if req.AddonIds != nil {
+		*bindingAddonIds = utility.IntListToString(req.AddonIds)
+	}
+	var bindingOnetimeAddonIds *string = nil
+	if req.OnetimeAddonIds != nil {
+		*bindingOnetimeAddonIds = utility.IntListToString(req.OnetimeAddonIds)
+	}
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PlanName:                  req.PlanName,
 		dao.Plan.Columns().Amount:                    req.Amount,
@@ -308,8 +316,8 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		dao.Plan.Columns().Description:               req.Description,
 		dao.Plan.Columns().ImageUrl:                  req.ImageUrl,
 		dao.Plan.Columns().HomeUrl:                   req.HomeUrl,
-		dao.Plan.Columns().BindingAddonIds:           utility.IntListToString(req.AddonIds),
-		dao.Plan.Columns().BindingOnetimeAddonIds:    utility.IntListToString(req.OnetimeAddonIds),
+		dao.Plan.Columns().BindingAddonIds:           bindingAddonIds,
+		dao.Plan.Columns().BindingOnetimeAddonIds:    bindingOnetimeAddonIds,
 		dao.Plan.Columns().GatewayProductName:        req.ProductName,
 		dao.Plan.Columns().GatewayProductDescription: req.ProductDescription,
 		dao.Plan.Columns().GasPayer:                  req.GasPayer,
