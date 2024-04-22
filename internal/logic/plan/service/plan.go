@@ -84,6 +84,12 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
 	}
 
+	if req.Type != consts.PlanTypeMain {
+		utility.Assert(req.TrialDurationTime == 0, "Trail not available for addon")
+		utility.Assert(req.TrialAmount == 0, "Trail not available for addon")
+		utility.Assert(req.TrialDemand == "", "Trail not available for addon")
+	}
+
 	//check metricLimitList
 	if len(req.MetricLimits) > 0 {
 		for _, ml := range req.MetricLimits {
@@ -256,6 +262,12 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 			} else {
 				utility.Assert(req.IntervalCount == nil, "IntervalCount can not edit without IntervalUnit")
 			}
+		}
+
+		if one.Type != consts.PlanTypeMain {
+			utility.Assert(req.TrialDurationTime == nil, "Trail not available for addon")
+			utility.Assert(req.TrialAmount == nil, "Trail not available for addon")
+			utility.Assert(req.TrialDemand == nil, "Trail not available for addon")
 		}
 	}
 

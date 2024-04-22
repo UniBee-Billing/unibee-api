@@ -24,9 +24,9 @@ type NewReq struct {
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           string                                  `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
-	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period"` // price of trial period
-	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
-	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
+	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
+	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial， not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
 }
 type NewRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
@@ -50,9 +50,9 @@ type EditReq struct {
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
 	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
-	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
-	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
-	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
+	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
+	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
 }
 type EditRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
