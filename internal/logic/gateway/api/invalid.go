@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -19,7 +18,7 @@ func (i Invalid) GatewayRefundCancel(ctx context.Context, payment *entity.Paymen
 	panic("implement me")
 }
 
-func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (i Invalid) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -23,6 +23,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/gateway_bean"
+	handler3 "unibee/internal/logic/invoice/handler"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -254,8 +255,20 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 					params := &stripe.SetupIntentParams{}
 					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
 					if err == nil && result.PaymentMethod != nil {
-						err = handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
+						sub, err := handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
 						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+						utility.AssertError(err, "Error ChangeSubscriptionGateway")
+						if sub != nil && err == nil && len(stripeCheckoutSession.Metadata["InvoiceId"]) > 0 {
+							invoice := query.GetInvoiceByInvoiceId(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"])
+							if invoice != nil {
+								if invoice.TotalAmount == 0 {
+									invoice, err = handler3.MarkInvoiceAsPaidForZeroPayment(r.Context(), invoice.InvoiceId)
+									utility.AssertError(err, "MarkInvoiceAsPaidForZeroPayment Error")
+									err = handler.HandleSubscriptionFirstPaymentSuccess(r.Context(), sub, invoice)
+									utility.AssertError(err, "HandleSubscriptionFirstPaymentSuccess Error")
+								}
+							}
+						}
 					} else {
 						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error SetupIntent: %s\n", gateway.GatewayName, err.Error())
 					}

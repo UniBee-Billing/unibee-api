@@ -17,7 +17,7 @@ import (
 	"unibee/utility"
 )
 
-func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentMethodId string) error {
+func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatewayId uint64, paymentMethodId string) (*entity.Subscription, error) {
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
@@ -36,9 +36,9 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 		dao.Subscription.Columns().GmtModify:                   gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return sub, nil
 }
 
 func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) error {

@@ -24,6 +24,7 @@ import (
 	service2 "unibee/internal/logic/gateway/service"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
+	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
@@ -578,11 +579,29 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//totalAmount is 0, no payment need
 		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
-		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
-		utility.AssertError(err, "System Error")
-		createRes = &gateway_bean.GatewayCreateSubscriptionResp{
-			GatewaySubscriptionId: one.SubscriptionId,
-			Paid:                  true,
+		if strings.Contains(prepare.Plan.TrialDemand, "PaymentMethod") && req.PaymentMethodId == "" {
+			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need")
+			url, _ := method.NewPaymentMethod(ctx, &method.NewPaymentMethodInternalReq{
+				MerchantId:     _interface.GetMerchantId(ctx),
+				UserId:         req.UserId,
+				Currency:       prepare.Currency,
+				GatewayId:      req.GatewayId,
+				SubscriptionId: one.SubscriptionId,
+				RedirectUrl:    req.ReturnUrl,
+				Metadata:       map[string]interface{}{"InvoiceId": invoice.InvoiceId, "Action": "SubscriptionCreate"},
+			})
+			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
+				GatewaySubscriptionId: one.SubscriptionId,
+				Link:                  url,
+				Paid:                  false,
+			}
+		} else {
+			invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
+			utility.AssertError(err, "System Error")
+			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
+				GatewaySubscriptionId: one.SubscriptionId,
+				Paid:                  true,
+			}
 		}
 	} else if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice

@@ -2,7 +2,6 @@ package method
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"strings"
 	"unibee/api/bean"
 	"unibee/internal/logic/gateway/api"
@@ -12,14 +11,14 @@ import (
 )
 
 type NewPaymentMethodInternalReq struct {
-	MerchantId     uint64      `json:"merchantId" dc:"MerchantId" `
-	UserId         uint64      `json:"userId" dc:"UserId" `
-	GatewayId      uint64      `json:"gatewayId" dc:"GatewayId" `
-	Currency       string      `json:"currency" dc:""`
-	RedirectUrl    string      `json:"redirectUrl" dc:"Redirect Url"`
-	SubscriptionId string      `json:"subscriptionId" dc:"SubscriptionId"`
-	Type           string      `json:"type"`
-	Data           *gjson.Json `json:"data"`
+	MerchantId     uint64                 `json:"merchantId" dc:"MerchantId" `
+	UserId         uint64                 `json:"userId" dc:"UserId" `
+	GatewayId      uint64                 `json:"gatewayId" dc:"GatewayId" `
+	Currency       string                 `json:"currency" dc:""`
+	RedirectUrl    string                 `json:"redirectUrl" dc:"Redirect Url"`
+	SubscriptionId string                 `json:"subscriptionId" dc:"SubscriptionId"`
+	Type           string                 `json:"type"`
+	Metadata       map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (url string, paymentMethod *bean.PaymentMethod) {
@@ -30,14 +29,13 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	utility.Assert(len(req.Currency) > 0, "invalid currency")
 	req.Currency = strings.ToUpper(req.Currency)
-	if req.Data == nil {
-		req.Data = gjson.New("")
+	if req.Metadata == nil {
+		req.Metadata = map[string]interface{}{}
 	}
-	err := req.Data.Set("redirectUrl", req.RedirectUrl)
-	utility.AssertError(err, "Server Error")
-	err = req.Data.Set("subscriptionId", req.SubscriptionId)
-	utility.AssertError(err, "Server Error")
-	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Data)
+	req.Metadata["redirectUrl"] = req.RedirectUrl
+	req.Metadata["subscriptionId"] = req.SubscriptionId
+	req.Metadata["MerchantId"] = req.MerchantId
+	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Metadata)
 	utility.AssertError(err, "Server Error")
 	return createResult.Url, createResult.PaymentMethod
 }

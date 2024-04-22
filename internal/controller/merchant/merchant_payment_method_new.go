@@ -17,7 +17,7 @@ func (c *ControllerPayment) MethodNew(ctx context.Context, req *payment.MethodNe
 		SubscriptionId: req.SubscriptionId,
 		RedirectUrl:    req.RedirectUrl,
 		Type:           req.Type,
-		Data:           req.Data,
+		Metadata:       req.Metadata,
 	})
 	return &payment.MethodNewRes{Method: one, Url: url}, nil
 }

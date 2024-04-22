@@ -169,7 +169,7 @@ func (c Changelly) GatewayUserPaymentMethodListQuery(ctx context.Context, gatewa
 	return &gateway_bean.GatewayUserPaymentMethodListResp{PaymentMethods: paymentMethods}, nil
 }
 
-func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (c Changelly) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

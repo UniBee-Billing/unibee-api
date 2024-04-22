@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/plutov/paypal/v4"
 	"net/http"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -37,7 +36,7 @@ func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment
 	panic("implement me")
 }
 
-func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	//TODO implement me
 	panic("implement me")
 }
