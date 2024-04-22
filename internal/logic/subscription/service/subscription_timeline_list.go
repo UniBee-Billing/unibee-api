@@ -17,7 +17,7 @@ type SubscriptionTimeLineListInternalReq struct {
 	UserId     uint64 `json:"userId" dc:"Filter UserId, Default All " `
 	SortField  string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify" `
 	SortType   string `json:"sortType" dc:"Sort Type，asc|desc" `
-	Page       int    `json:"page"  dc:"Page, Start WIth 0" `
+	Page       int    `json:"page"  dc:"Page, Start With 0" `
 	Count      int    `json:"count"  dc:"Count" dc:"Count Of Page" `
 }
 

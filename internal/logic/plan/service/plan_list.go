@@ -24,7 +24,7 @@ type SubscriptionPlanListInternalReq struct {
 	Currency      string `json:"currency" dc:"Currency"  `
 	SortField     string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `json:"page" dc:"Page, Start WIth 0" `
+	Page          int    `json:"page" dc:"Page, Start With 0" `
 	Count         int    `json:"count" dc:"Count Of Page" `
 }
 

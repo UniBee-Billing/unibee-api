@@ -193,7 +193,7 @@ type TimeLineListReq struct {
 	g.Meta    `path:"/timeline_list" tags:"User-Subscription-Timeline" method:"get,post" summary:"Subscription TimeLine List"`
 	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page      int    `json:"page"  dc:"Page, Start WIth 0" `
+	Page      int    `json:"page"  dc:"Page, Start With 0" `
 	Count     int    `json:"count" dc:"Count Of Page" `
 }
 
@@ -221,7 +221,7 @@ type OnetimeAddonNewRes struct {
 
 type OnetimeAddonListReq struct {
 	g.Meta `path:"/onetime_addon_list" tags:"User-Subscription" method:"get" summary:"Subscription OnetimeAddon List"`
-	Page   int `json:"page"  dc:"Page, Start WIth 0" `
+	Page   int `json:"page"  dc:"Page, Start With 0" `
 	Count  int `json:"count" dc:"Count Of Page" `
 }
 

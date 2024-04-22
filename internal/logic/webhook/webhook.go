@@ -50,7 +50,7 @@ func MerchantWebhookEndpointList(ctx context.Context, merchantId uint64) []*bean
 type EndpointLogListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	EndpointId uint64 `json:"endpointId" dc:"EndpointId" v:"required"`
-	Page       int    `json:"page" dc:"Page, Start WIth 0" `
+	Page       int    `json:"page" dc:"Page, Start With 0" `
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 

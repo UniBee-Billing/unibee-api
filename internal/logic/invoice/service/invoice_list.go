@@ -23,7 +23,7 @@ type InvoiceListInternalReq struct {
 	SortField     string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
 	SortType      string `json:"sortType" dc:"Sort Type，asc|desc" `
 	DeleteInclude bool   `json:"deleteInclude" dc:"Is Delete Include" `
-	Page          int    `json:"page"  dc:"Page, Start WIth 0" `
+	Page          int    `json:"page"  dc:"Page, Start With 0" `
 	Count         int    `json:"count"  dc:"Count Of Page"`
 }
 
