@@ -51,7 +51,7 @@ func TestPayment(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, res)
-		paymentId = res.PaymentId
+		paymentId = res.Payment.PaymentId
 		require.NotNil(t, paymentId)
 		require.Equal(t, true, res.Status == consts.PaymentCreated)
 		require.Equal(t, true, len(res.Link) > 0)
@@ -123,7 +123,7 @@ func TestPayment(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, res)
-		paymentId = res.PaymentId
+		paymentId = res.Payment.PaymentId
 
 		require.Equal(t, true, res.Status == consts.PaymentSuccess)
 		require.Equal(t, true, len(res.Link) > 0)
