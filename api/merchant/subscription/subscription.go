@@ -192,6 +192,7 @@ type UpdatePreviewReq struct {
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 }
+
 type UpdatePreviewRes struct {
 	TotalAmount       int64                 `json:"totalAmount"                `
 	DiscountAmount    int64                 `json:"discountAmount"`
