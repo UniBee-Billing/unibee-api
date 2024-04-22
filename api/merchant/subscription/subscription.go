@@ -140,6 +140,7 @@ type CreatePreviewReq struct {
 
 type CreatePreviewRes struct {
 	Plan              *bean.PlanSimplify                 `json:"plan"`
+	TrialEnd          int64                              `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 	Quantity          int64                              `json:"quantity"`
 	Gateway           *bean.GatewaySimplify              `json:"gateway"`
 	AddonParams       []*bean.PlanAddonParam             `json:"addonParams"`
