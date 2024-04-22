@@ -57,22 +57,24 @@ type CreatePreviewReq struct {
 	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type CreatePreviewRes struct {
-	Plan              *bean.PlanSimplify      `json:"plan"`
-	Quantity          int64                   `json:"quantity"`
-	Gateway           *bean.GatewaySimplify   `json:"gateway"`
-	AddonParams       []*bean.PlanAddonParam  `json:"addonParams"`
-	Addons            []*bean.PlanAddonDetail `json:"addons"`
-	TotalAmount       int64                   `json:"totalAmount"                `
-	DiscountAmount    int64                   `json:"discountAmount"`
-	Currency          string                  `json:"currency"              `
-	Invoice           *bean.InvoiceSimplify   `json:"invoice"`
-	UserId            uint64                  `json:"userId" `
-	Email             string                  `json:"email" `
-	VatCountryCode    string                  `json:"vatCountryCode"              `
-	VatCountryName    string                  `json:"vatCountryName"              `
-	TaxPercentage     int64                   `json:"taxPercentage"              `
-	VatNumber         string                  `json:"vatNumber"              `
-	VatNumberValidate *bean.ValidResult       `json:"vatNumberValidate"              `
+	Plan              *bean.PlanSimplify                 `json:"plan"`
+	Quantity          int64                              `json:"quantity"`
+	Gateway           *bean.GatewaySimplify              `json:"gateway"`
+	AddonParams       []*bean.PlanAddonParam             `json:"addonParams"`
+	Addons            []*bean.PlanAddonDetail            `json:"addons"`
+	OriginAmount      int64                              `json:"originAmount"                `
+	TotalAmount       int64                              `json:"totalAmount"                `
+	DiscountAmount    int64                              `json:"discountAmount"`
+	Currency          string                             `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify              `json:"invoice"`
+	UserId            uint64                             `json:"userId" `
+	Email             string                             `json:"email" `
+	VatCountryCode    string                             `json:"vatCountryCode"              `
+	VatCountryName    string                             `json:"vatCountryName"              `
+	TaxPercentage     int64                              `json:"taxPercentage"              `
+	VatNumber         string                             `json:"vatNumber"              `
+	VatNumberValidate *bean.ValidResult                  `json:"vatNumberValidate"              `
+	Discount          *bean.MerchantDiscountCodeSimplify `json:"discount" `
 }
 
 type CreateReq struct {
@@ -108,12 +110,14 @@ type UpdatePreviewReq struct {
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type UpdatePreviewRes struct {
-	TotalAmount       int64                 `json:"totalAmount"                `
-	DiscountAmount    int64                 `json:"discountAmount"`
-	Currency          string                `json:"currency"              `
-	Invoice           *bean.InvoiceSimplify `json:"invoice"`
-	NextPeriodInvoice *bean.InvoiceSimplify `json:"nextPeriodInvoice"`
-	ProrationDate     int64                 `json:"prorationDate"`
+	OriginAmount      int64                              `json:"originAmount"                `
+	TotalAmount       int64                              `json:"totalAmount"                `
+	DiscountAmount    int64                              `json:"discountAmount"`
+	Currency          string                             `json:"currency"              `
+	Invoice           *bean.InvoiceSimplify              `json:"invoice"`
+	NextPeriodInvoice *bean.InvoiceSimplify              `json:"nextPeriodInvoice"`
+	ProrationDate     int64                              `json:"prorationDate"`
+	Discount          *bean.MerchantDiscountCodeSimplify `json:"discount" `
 }
 
 type UpdateReq struct {

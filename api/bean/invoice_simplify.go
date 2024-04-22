@@ -11,6 +11,7 @@ type InvoiceSimplify struct {
 	InvoiceId                      string                 `json:"invoiceId"`
 	InvoiceName                    string                 `json:"invoiceName"`
 	DiscountCode                   string                 `json:"discountCode"`
+	OriginAmount                   int64                  `json:"originAmount"                `
 	TotalAmount                    int64                  `json:"totalAmount"`
 	DiscountAmount                 int64                  `json:"discountAmount"`
 	TotalAmountExcludingTax        int64                  `json:"totalAmountExcludingTax"`
@@ -71,7 +72,10 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 	return &InvoiceSimplify{
 		Id:                             one.Id,
 		InvoiceId:                      one.InvoiceId,
+		OriginAmount:                   one.TotalAmount + one.DiscountAmount,
 		TotalAmount:                    one.TotalAmount,
+		DiscountCode:                   one.DiscountCode,
+		DiscountAmount:                 one.DiscountAmount,
 		TotalAmountExcludingTax:        one.TotalAmountExcludingTax,
 		Currency:                       one.Currency,
 		TaxAmount:                      one.TaxAmount,

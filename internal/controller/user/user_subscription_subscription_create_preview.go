@@ -30,6 +30,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		Gateway:           bean.SimplifyGateway(prepare.Gateway),
 		AddonParams:       prepare.AddonParams,
 		Addons:            prepare.Addons,
+		OriginAmount:      prepare.OriginAmount,
 		TotalAmount:       prepare.TotalAmount,
 		DiscountAmount:    prepare.DiscountAmount,
 		Currency:          prepare.Currency,
@@ -41,5 +42,6 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		Invoice:           prepare.Invoice,
 		UserId:            prepare.UserId,
 		Email:             prepare.Email,
+		Discount:          prepare.Discount,
 	}, nil
 }

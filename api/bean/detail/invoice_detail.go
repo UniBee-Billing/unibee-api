@@ -19,6 +19,7 @@ type InvoiceDetail struct {
 	GatewayInvoiceId               string                             `json:"gatewayInvoiceId"               description:"GatewayInvoiceId"`
 	UniqueId                       string                             `json:"uniqueId"                       description:"UniqueId"`
 	GmtCreate                      *gtime.Time                        `json:"gmtCreate"                      description:"GmtCreate"`
+	OriginAmount                   int64                              `json:"originAmount"                    description:"OriginAmount,Cents"`
 	TotalAmount                    int64                              `json:"totalAmount"                    description:"TotalAmount,Cents"`
 	DiscountAmount                 int64                              `json:"discountAmount"                 description:"DiscountAmount,Cents"`
 	TaxAmount                      int64                              `json:"taxAmount"                      description:"TaxAmount,Cents"`
@@ -75,6 +76,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		InvoiceId:                      invoice.InvoiceId,
 		InvoiceName:                    invoice.InvoiceName,
 		GmtCreate:                      invoice.GmtCreate,
+		OriginAmount:                   invoice.TotalAmount + invoice.DiscountAmount,
 		TotalAmount:                    invoice.TotalAmount,
 		TaxAmount:                      invoice.TaxAmount,
 		SubscriptionAmount:             invoice.SubscriptionAmount,
@@ -95,7 +97,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		TaxPercentage:                  invoice.TaxPercentage,
 		SendNote:                       invoice.SendNote,
 		SendTerms:                      invoice.SendTerms,
-		DiscountAmount:                 0,
+		DiscountAmount:                 invoice.DiscountAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		PeriodStart:                    invoice.PeriodStart,

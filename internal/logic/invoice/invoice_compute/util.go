@@ -73,6 +73,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		DiscountAmount:                 discountAmount,
 		DiscountCode:                   req.DiscountCode,
@@ -215,6 +216,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		DiscountAmount:                 discountAmount,
 		DiscountCode:                   req.DiscountCode,
