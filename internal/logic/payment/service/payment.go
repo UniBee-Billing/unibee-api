@@ -238,7 +238,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 
-	if res.Payment != nil {
+	if err == nil && res.Payment != nil {
 		if err == nil && res.Status != consts.PaymentSuccess {
 			//need send invoice for authorised
 			oneUser := query.GetUserAccountById(ctx, sub.UserId)

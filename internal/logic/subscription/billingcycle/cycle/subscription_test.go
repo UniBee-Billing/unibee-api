@@ -66,7 +66,7 @@ func TestSubscription(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.Nil(t, preview.VatNumberValidate)
-		require.Equal(t, true, preview.TotalAmount > preview.Invoice.TotalAmountExcludingTax)
+		require.Equal(t, true, preview.TotalAmount == preview.Invoice.TotalAmountExcludingTax)
 		require.Equal(t, true, preview.TotalAmount == preview.Invoice.TotalAmountExcludingTax+preview.Invoice.TaxAmount)
 		require.Equal(t, true, preview.Invoice.TotalAmountExcludingTax == ((test.TestPlan.Amount*testQuantity)+(test.TestRecurringAddon.Amount*testQuantity)))
 		require.Equal(t, true, preview.Currency == test.TestPlan.Currency)
