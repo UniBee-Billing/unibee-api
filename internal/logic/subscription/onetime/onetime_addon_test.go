@@ -40,6 +40,21 @@ func TestSubscription(t *testing.T) {
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: 1, AddonPlanId: test.TestRecurringAddon.Id}},
 		})
 		require.Nil(t, err)
+		current = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, test.TestUser.Id, test.TestMerchant.Id)
+		if current != nil {
+			err := service2.SubscriptionCancel(ctx, current.SubscriptionId, false, false, "test cancel")
+			require.Nil(t, err)
+		}
+		create, err = service2.SubscriptionCreate(ctx, &service2.CreateInternalReq{
+			MerchantId:      test.TestMerchant.Id,
+			PlanId:          test.TestPlan.Id,
+			UserId:          test.TestUser.Id,
+			Quantity:        1,
+			GatewayId:       test.TestGateway.Id,
+			PaymentMethodId: "testPaymentMethodId",
+			AddonParams:     []*bean.PlanAddonParam{{Quantity: 1, AddonPlanId: test.TestRecurringAddon.Id}},
+		})
+		require.Nil(t, err)
 		one := create.Subscription
 		testSubscriptionId = one.SubscriptionId
 		addon, err := CreateSubOneTimeAddon(ctx, &SubscriptionCreateOnetimeAddonInternalReq{
