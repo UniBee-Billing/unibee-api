@@ -57,6 +57,7 @@ func LinkPdfEntry(r *ghttp.Request) {
 		return
 	}
 	st := r.Get("st").String()
+	download := r.Get("download").Bool()
 	if st != "" && VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
 		r.Response.Writeln("Invalid link")
 		return
@@ -72,8 +73,12 @@ func LinkPdfEntry(r *ghttp.Request) {
 	} else {
 		pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
 	}
-	r.Response.Header().Add("Content-type", "application/octet-stream")
-	r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")
+	if download {
+		r.Response.Header().Add("Content-type", "application/octet-stream")
+		r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")
+	} else {
+		r.Response.Header().Add("Content-type", "application/pdf")
+	}
 	file, err := os.Open(pdfFileName)
 	if err != nil {
 		g.Log().Errorf(r.Context(), "LinkEntry error:%s", err.Error())
