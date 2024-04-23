@@ -232,33 +232,36 @@ type CreatePreviewInternalReq struct {
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	TrialEnd       int64                  `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	IsSubmit       bool
 }
 
 type CreatePreviewInternalRes struct {
-	Plan                  *entity.Plan                       `json:"plan"`
-	Quantity              int64                              `json:"quantity"`
-	Gateway               *entity.MerchantGateway            `json:"gateway"`
-	Merchant              *entity.Merchant                   `json:"merchantInfo"`
-	AddonParams           []*bean.PlanAddonParam             `json:"addonParams"`
-	Addons                []*bean.PlanAddonDetail            `json:"addons"`
-	OriginAmount          int64                              `json:"originAmount"                `
-	TotalAmount           int64                              `json:"totalAmount" `
-	DiscountAmount        int64                              `json:"discountAmount"`
-	Currency              string                             `json:"currency" `
-	VatCountryCode        string                             `json:"vatCountryCode" `
-	VatCountryName        string                             `json:"vatCountryName" `
-	VatNumber             string                             `json:"vatNumber" `
-	VatNumberValidate     *bean.ValidResult                  `json:"vatNumberValidate" `
-	TaxPercentage         int64                              `json:"taxPercentage" `
-	TrialEnd              int64                              `json:"trialEnd" `
-	VatVerifyData         string                             `json:"vatVerifyData" `
-	Invoice               *bean.InvoiceSimplify              `json:"invoice"`
-	UserId                uint64                             `json:"userId" `
-	Email                 string                             `json:"email" `
-	VatCountryRate        *bean.VatCountryRate               `json:"vatCountryRate" `
-	Gateways              []*bean.GatewaySimplify            `json:"gateways" `
-	RecurringDiscountCode string                             `json:"recurringDiscountCode" `
-	Discount              *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	Plan                     *entity.Plan                       `json:"plan"`
+	Quantity                 int64                              `json:"quantity"`
+	Gateway                  *entity.MerchantGateway            `json:"gateway"`
+	Merchant                 *entity.Merchant                   `json:"merchantInfo"`
+	AddonParams              []*bean.PlanAddonParam             `json:"addonParams"`
+	Addons                   []*bean.PlanAddonDetail            `json:"addons"`
+	OriginAmount             int64                              `json:"originAmount"                `
+	TotalAmount              int64                              `json:"totalAmount" `
+	DiscountAmount           int64                              `json:"discountAmount"`
+	Currency                 string                             `json:"currency" `
+	VatCountryCode           string                             `json:"vatCountryCode" `
+	VatCountryName           string                             `json:"vatCountryName" `
+	VatNumber                string                             `json:"vatNumber" `
+	VatNumberValidate        *bean.ValidResult                  `json:"vatNumberValidate" `
+	TaxPercentage            int64                              `json:"taxPercentage" `
+	TrialEnd                 int64                              `json:"trialEnd" `
+	VatVerifyData            string                             `json:"vatVerifyData" `
+	Invoice                  *bean.InvoiceSimplify              `json:"invoice"`
+	UserId                   uint64                             `json:"userId" `
+	Email                    string                             `json:"email" `
+	VatCountryRate           *bean.VatCountryRate               `json:"vatCountryRate" `
+	Gateways                 []*bean.GatewaySimplify            `json:"gateways" `
+	RecurringDiscountCode    string                             `json:"recurringDiscountCode" `
+	Discount                 *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
+	DiscountMessage          string                             `json:"discountMessage" `
 }
 
 type CreateInternalReq struct {
@@ -318,15 +321,29 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatCountryName = ""
 	var vatCountryRate *bean.VatCountryRate
 	var vatNumberValidate *bean.ValidResult
+	var vatNumberValidateMessage string
+	var discountMessage string
 
 	if len(req.VatNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
-		if err != nil {
-			return nil, err
+		if err != nil || !vatNumberValidate.Valid {
+			if err != nil {
+				g.Log().Error(ctx, "ValidateVatNumberByDefaultGateway error:%s", err.Error())
+				vatNumberValidateMessage = "Server Error"
+			} else {
+				vatNumberValidateMessage = "Validate Failure"
+			}
+		} else {
+			vatCountryCode = vatNumberValidate.CountryCode
 		}
-		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("VatNumber validate failure, number:"+req.VatNumber))
-		vatCountryCode = vatNumberValidate.CountryCode
+		//if err != nil {
+		//	return nil, err
+		//}
+		if req.IsSubmit {
+			utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("VatNumber validate failure, number:"+req.VatNumber))
+		}
+		//vatCountryCode = vatNumberValidate.CountryCode
 	}
 
 	if req.TaxPercentage != nil {
@@ -370,10 +387,20 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountCode: req.DiscountCode,
 			Currency:     plan.Currency,
 		})
-		utility.Assert(canApply, message)
-		if isRecurring {
-			recurringDiscountCode = req.DiscountCode
+		if canApply {
+			if isRecurring {
+				recurringDiscountCode = req.DiscountCode
+			}
+		} else {
+			req.DiscountCode = ""
+			discountMessage = message
 		}
+		if req.IsSubmit {
+			utility.Assert(canApply, message)
+		}
+		//if isRecurring {
+		//	recurringDiscountCode = req.DiscountCode
+		//}
 	}
 
 	var currentTimeStart = gtime.Now()
@@ -424,30 +451,32 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			FinishTime:  currentTimeStart.Timestamp(),
 		}
 		return &CreatePreviewInternalRes{
-			Plan:                  plan,
-			TrialEnd:              trialEnd,
-			Quantity:              req.Quantity,
-			Gateway:               gateway,
-			Merchant:              merchantInfo,
-			AddonParams:           req.AddonParams,
-			Addons:                addons,
-			OriginAmount:          invoice.OriginAmount,
-			TotalAmount:           invoice.TotalAmount,
-			DiscountAmount:        invoice.DiscountAmount,
-			Invoice:               invoice,
-			RecurringDiscountCode: recurringDiscountCode,
-			Discount:              bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
-			Currency:              currency,
-			VatCountryCode:        vatCountryCode,
-			VatCountryName:        vatCountryName,
-			VatNumber:             req.VatNumber,
-			VatNumberValidate:     vatNumberValidate,
-			VatVerifyData:         utility.MarshalToJsonString(vatNumberValidate),
-			UserId:                req.UserId,
-			Email:                 user.Email,
-			VatCountryRate:        vatCountryRate,
-			Gateways:              service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
-			TaxPercentage:         subscriptionTaxPercentage,
+			Plan:                     plan,
+			TrialEnd:                 trialEnd,
+			Quantity:                 req.Quantity,
+			Gateway:                  gateway,
+			Merchant:                 merchantInfo,
+			AddonParams:              req.AddonParams,
+			Addons:                   addons,
+			OriginAmount:             invoice.OriginAmount,
+			TotalAmount:              invoice.TotalAmount,
+			DiscountAmount:           invoice.DiscountAmount,
+			Invoice:                  invoice,
+			RecurringDiscountCode:    recurringDiscountCode,
+			Discount:                 bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
+			Currency:                 currency,
+			VatCountryCode:           vatCountryCode,
+			VatCountryName:           vatCountryName,
+			VatNumber:                req.VatNumber,
+			VatNumberValidate:        vatNumberValidate,
+			VatVerifyData:            utility.MarshalToJsonString(vatNumberValidate),
+			UserId:                   req.UserId,
+			Email:                    user.Email,
+			VatCountryRate:           vatCountryRate,
+			Gateways:                 service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
+			TaxPercentage:            subscriptionTaxPercentage,
+			VatNumberValidateMessage: vatNumberValidateMessage,
+			DiscountMessage:          discountMessage,
 		}, nil
 	} else {
 		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), req.PlanId)
@@ -466,30 +495,32 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		})
 
 		return &CreatePreviewInternalRes{
-			Plan:                  plan,
-			TrialEnd:              trialEnd,
-			Quantity:              req.Quantity,
-			Gateway:               gateway,
-			Merchant:              merchantInfo,
-			AddonParams:           req.AddonParams,
-			Addons:                addons,
-			OriginAmount:          invoice.OriginAmount,
-			TotalAmount:           invoice.TotalAmount,
-			DiscountAmount:        invoice.DiscountAmount,
-			Invoice:               invoice,
-			RecurringDiscountCode: recurringDiscountCode,
-			Discount:              bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
-			Currency:              currency,
-			VatCountryCode:        vatCountryCode,
-			VatCountryName:        vatCountryName,
-			VatNumber:             req.VatNumber,
-			VatNumberValidate:     vatNumberValidate,
-			VatVerifyData:         utility.MarshalToJsonString(vatNumberValidate),
-			UserId:                req.UserId,
-			Email:                 user.Email,
-			VatCountryRate:        vatCountryRate,
-			Gateways:              service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
-			TaxPercentage:         subscriptionTaxPercentage,
+			Plan:                     plan,
+			TrialEnd:                 trialEnd,
+			Quantity:                 req.Quantity,
+			Gateway:                  gateway,
+			Merchant:                 merchantInfo,
+			AddonParams:              req.AddonParams,
+			Addons:                   addons,
+			OriginAmount:             invoice.OriginAmount,
+			TotalAmount:              invoice.TotalAmount,
+			DiscountAmount:           invoice.DiscountAmount,
+			Invoice:                  invoice,
+			RecurringDiscountCode:    recurringDiscountCode,
+			Discount:                 bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, invoice.DiscountCode)),
+			Currency:                 currency,
+			VatCountryCode:           vatCountryCode,
+			VatCountryName:           vatCountryName,
+			VatNumber:                req.VatNumber,
+			VatNumberValidate:        vatNumberValidate,
+			VatVerifyData:            utility.MarshalToJsonString(vatNumberValidate),
+			UserId:                   req.UserId,
+			Email:                    user.Email,
+			VatCountryRate:           vatCountryRate,
+			Gateways:                 service2.GetMerchantAvailableGatewaysByCountryCode(ctx, req.MerchantId, req.VatCountryCode),
+			TaxPercentage:            subscriptionTaxPercentage,
+			VatNumberValidateMessage: vatNumberValidateMessage,
+			DiscountMessage:          discountMessage,
 		}, nil
 	}
 }
@@ -522,6 +553,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		VatCountryCode: req.VatCountryCode,
 		VatNumber:      req.VatNumber,
 		TaxPercentage:  req.TaxPercentage,
+		IsSubmit:       true,
 	})
 	if err != nil {
 		return nil, err

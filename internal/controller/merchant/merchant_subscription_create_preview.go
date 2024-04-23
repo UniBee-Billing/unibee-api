@@ -51,8 +51,10 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 			SubscriptionAmountExcludingTax: prepare.Invoice.SubscriptionAmountExcludingTax,
 			Lines:                          prepare.Invoice.Lines,
 		},
-		UserId:   prepare.UserId,
-		Email:    prepare.Email,
-		Discount: prepare.Discount,
+		UserId:                   prepare.UserId,
+		Email:                    prepare.Email,
+		Discount:                 prepare.Discount,
+		VatNumberValidateMessage: prepare.VatNumberValidateMessage,
+		DiscountMessage:          prepare.DiscountMessage,
 	}, nil
 }
