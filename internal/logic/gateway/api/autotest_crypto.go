@@ -38,7 +38,7 @@ func (a AutoTestCrypto) GatewayRefundCancel(ctx context.Context, payment *entity
 	}, nil
 }
 
-func (a AutoTestCrypto) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (a AutoTestCrypto) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &bean.PaymentMethod{
 		Id:   strconv.FormatUint(userId, 10),
 		Type: "card",

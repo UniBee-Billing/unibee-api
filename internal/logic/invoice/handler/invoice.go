@@ -86,6 +86,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	}
 	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
+	st := utility.CreateInvoiceId()
 	one := &entity.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		UserId:                         sub.UserId,
@@ -103,6 +104,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SendStatus:                     simplify.SendStatus,
 		SendEmail:                      sendEmail,
 		UniqueId:                       invoiceId,
+		SendTerms:                      st,
 		TotalAmount:                    simplify.TotalAmount,
 		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 		TaxAmount:                      simplify.TaxAmount,
@@ -110,7 +112,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           link.GetInvoiceLink(ctx, invoiceId),
+		Link:                           link.GetInvoiceLink(ctx, invoiceId, st),
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,

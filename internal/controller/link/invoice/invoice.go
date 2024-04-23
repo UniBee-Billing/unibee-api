@@ -1,18 +1,33 @@
 package invoice
 
 import (
+	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
 	"io"
 	"net/http"
 	"os"
-	"unibee/internal/controller/link"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/service"
 	"unibee/internal/query"
 	"unibee/utility"
 )
+
+func VerifyInvoiceLinkSecurityToken(ctx context.Context, invoiceId string, token string) bool {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	if one == nil {
+		return false
+	}
+	if token == invoiceId {
+		return true
+	}
+	if token == utility.MD5(fmt.Sprintf("%d%s%s%d", one.CreateTime, one.UniqueId, one.InvoiceId, one.Id)) {
+		return true
+	}
+	return false
+}
 
 func LinkEntry(r *ghttp.Request) {
 	invoiceId := r.Get("invoiceId").String()
@@ -20,8 +35,8 @@ func LinkEntry(r *ghttp.Request) {
 		r.Response.Writeln("InvoiceId not found")
 		return
 	}
-	token := r.Get("st").String()
-	if token != "" && link.VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, token) {
+	st := r.Get("st").String()
+	if st != "" && VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
 		r.Response.Writeln("Invalid link")
 		return
 	}
@@ -41,8 +56,8 @@ func LinkPdfEntry(r *ghttp.Request) {
 		r.Response.Writeln("InvoiceId not found")
 		return
 	}
-	token := r.Get("st").String()
-	if token != "" && link.VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, token) {
+	st := r.Get("st").String()
+	if st != "" && VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
 		r.Response.Writeln("Invalid link")
 		return
 	}
