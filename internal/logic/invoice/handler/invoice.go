@@ -149,7 +149,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 	if one == nil && len(invoice.InvoiceId) > 0 {
 		one = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
 	}
-	user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+	user := query.GetUserAccountById(ctx, payment.UserId)
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
