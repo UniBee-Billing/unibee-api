@@ -129,7 +129,9 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		TaxAmount:               taxAmount,
 		Lines: []*bean.InvoiceItemSimplify{{
 			Currency:               sub.Currency,
-			Amount:                 addon.Amount * req.Quantity,
+			OriginAmount:           addon.Amount * req.Quantity,
+			Amount:                 addon.Amount*req.Quantity - discountAmount,
+			DiscountAmount:         discountAmount,
 			UnitAmountExcludingTax: addon.Amount,
 			Description:            addon.Description,
 			Quantity:               req.Quantity,

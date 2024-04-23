@@ -27,8 +27,27 @@ type CalculateInvoiceReq struct {
 	InvoiceName   string `json:"invoiceName"`
 }
 
-func ProrationDiscountToItem(discountAmount int64, item []*bean.InvoiceItemSimplify) {
-	
+func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceItemSimplify) {
+	if len(items) == 0 {
+		return
+	}
+	var totalAmountExcludingTax int64 = 0
+	for _, item := range items {
+		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
+	}
+	var leftDiscountAmount = totalDiscountAmount
+	for _, item := range items {
+		item.OriginAmount = item.Amount
+		discountAmount := utility.MinInt64(item.AmountExcludingTax*(totalDiscountAmount/totalAmountExcludingTax), item.AmountExcludingTax)
+		item.DiscountAmount = discountAmount
+		item.Amount = item.Amount - discountAmount
+		leftDiscountAmount = leftDiscountAmount - discountAmount
+	}
+	//compensate to the first one
+	if leftDiscountAmount > 0 {
+		items[0].DiscountAmount = items[0].DiscountAmount + leftDiscountAmount
+		items[0].Amount = items[0].Amount - leftDiscountAmount
+	}
 }
 
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *bean.InvoiceSimplify {
@@ -74,6 +93,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+	ProrationDiscountToItem(discountAmount, invoiceItems)
 
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
@@ -218,6 +238,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+	ProrationDiscountToItem(discountAmount, invoiceItems)
 	return &bean.InvoiceSimplify{
 		InvoiceName:                    req.InvoiceName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
