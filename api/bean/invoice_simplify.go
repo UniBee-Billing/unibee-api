@@ -39,6 +39,8 @@ type InvoiceSimplify struct {
 
 type InvoiceItemSimplify struct {
 	Currency               string        `json:"currency"`
+	OriginAmount           int64         `json:"originAmount"`
+	DiscountAmount         int64         `json:"discountAmount"`
 	Amount                 int64         `json:"amount"`
 	Tax                    int64         `json:"tax"`
 	AmountExcludingTax     int64         `json:"amountExcludingTax"`
