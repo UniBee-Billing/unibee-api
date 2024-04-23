@@ -163,6 +163,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 
 	gatewayInternalPayResult.Invoice = invoice
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
+	err = handler2.CreateOrUpdatePaymentTimelineForPayment(ctx, createPayContext.Pay, createPayContext.Pay.PaymentId)
+	if err != nil {
+		fmt.Printf(`CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
+	}
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
 		req := &handler2.HandlePayReq{
 			PaymentId:              createPayContext.Pay.PaymentId,

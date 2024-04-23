@@ -58,9 +58,9 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 	}
 
-	err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+	err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
 	if err != nil {
-		fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+		fmt.Printf(`CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 	}
 
 	return HandlePayFailure(ctx, &HandlePayReq{
@@ -266,9 +266,9 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Cancelled"),
 			Message:   req.Reason,
 		})
-		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+		err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
 		if err != nil {
-			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+			fmt.Printf(`CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 		}
 	}
 	return err
@@ -336,9 +336,9 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 			UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Failed"),
 			Message:   req.Reason,
 		})
-		err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+		err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
 		if err != nil {
-			fmt.Printf(`CreateOrUpdatePaymentTimeline error %s`, err.Error())
+			fmt.Printf(`CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 		}
 	}
 	return err
@@ -416,9 +416,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Settled"),
 				Message:   req.Reason,
 			})
-			err = CreateOrUpdatePaymentTimeline(ctx, payment, payment.PaymentId)
+			err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
 			if err != nil {
-				g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimeline error %s`, err.Error())
+				g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 			}
 		}
 		{
@@ -504,7 +504,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_be
 	return nil
 }
 
-func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment, uniqueId string) error {
+func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entity.Payment, uniqueId string) error {
 	one := query.GetPaymentTimeLineByUniqueId(ctx, uniqueId)
 
 	var status = 0
@@ -512,12 +512,6 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 		status = 1
 	} else if payment.Status == consts.PaymentFailed {
 		status = 2
-	}
-	var timeLineType = 0
-	if payment.TotalAmount > 0 {
-		timeLineType = 0
-	} else if payment.TotalAmount < 0 {
-		timeLineType = 1
 	}
 	if one == nil {
 		one = &entity.PaymentTimeline{
@@ -531,13 +525,13 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			GatewayId:      payment.GatewayId,
 			PaymentId:      payment.PaymentId,
 			Status:         status,
-			TimelineType:   timeLineType,
+			TimelineType:   consts.TimelineTypePayment,
 			CreateTime:     gtime.Now().Timestamp(),
 		}
 
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			err = gerror.Newf(`CreateOrUpdatePaymentTimeline record insert failure %s`, err.Error())
+			err = gerror.Newf(`CreateOrUpdatePaymentTimelineForPayment record insert failure %s`, err.Error())
 			return err
 		}
 		id, _ := result.LastInsertId()
@@ -554,7 +548,7 @@ func CreateOrUpdatePaymentTimeline(ctx context.Context, payment *entity.Payment,
 			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),
 			dao.PaymentTimeline.Columns().Status:         status,
-			dao.PaymentTimeline.Columns().TimelineType:   timeLineType,
+			dao.PaymentTimeline.Columns().TimelineType:   consts.TimelineTypePayment,
 		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err

@@ -672,6 +672,7 @@ func (s Stripe) GatewayRefund(ctx context.Context, payment *entity.Payment, one 
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: result.ID,
 		Status:          consts.RefundCreated,
+		Type:            consts.RefundTypeGateway,
 	}, nil
 }
 

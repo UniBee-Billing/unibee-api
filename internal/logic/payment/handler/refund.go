@@ -419,6 +419,11 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 		status = 3
 	}
 
+	var fullRefund = 0
+	if refund.RefundAmount == payment.TotalAmount {
+		fullRefund = 1
+	}
+
 	if one == nil {
 		one = &entity.PaymentTimeline{
 			MerchantId:     refund.MerchantId,
@@ -430,8 +435,10 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			TotalAmount:  refund.RefundAmount,
 			GatewayId:    refund.GatewayId,
 			PaymentId:    payment.PaymentId,
+			RefundId:     refund.RefundId,
 			Status:       status,
-			TimelineType: 1,
+			TimelineType: consts.TimelineTypeRefund,
+			FullRefund:   fullRefund,
 			CreateTime:   gtime.Now().Timestamp(),
 		}
 
@@ -450,10 +457,12 @@ func CreateOrUpdatePaymentTimelineFromRefund(ctx context.Context, refund *entity
 			dao.PaymentTimeline.Columns().Currency:       refund.Currency,
 			dao.PaymentTimeline.Columns().TotalAmount:    refund.RefundAmount,
 			dao.PaymentTimeline.Columns().GatewayId:      refund.GatewayId,
+			dao.PaymentTimeline.Columns().RefundId:       refund.RefundId,
 			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
 			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),
 			dao.PaymentTimeline.Columns().Status:         status,
-			dao.PaymentTimeline.Columns().TimelineType:   1,
+			dao.PaymentTimeline.Columns().TimelineType:   consts.TimelineTypeRefund,
+			dao.PaymentTimeline.Columns().FullRefund:     fullRefund,
 		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			return err

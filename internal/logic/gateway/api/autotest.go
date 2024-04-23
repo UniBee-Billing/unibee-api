@@ -155,5 +155,6 @@ func (a AutoTest) GatewayRefund(ctx context.Context, pay *entity.Payment, refund
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundSuccess,
+		Type:            consts.RefundTypeMarked,
 	}, nil
 }

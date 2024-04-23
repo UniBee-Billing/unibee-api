@@ -28,4 +28,6 @@ type PaymentTimeline struct {
 	Status         interface{} // 0-pending, 1-success, 2-failure
 	TimelineType   interface{} // 0-pay, 1-refund
 	CreateTime     interface{} // create utc time
+	RefundId       interface{} // refund id
+	FullRefund     interface{} // 0-no, 1-yes
 }

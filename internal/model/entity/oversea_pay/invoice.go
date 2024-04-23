@@ -46,7 +46,7 @@ type Invoice struct {
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                       //
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                       //
 	PaymentId                      string      `json:"paymentId"                      description:"paymentId"`                                                              // paymentId
-	RefundId                       string      `json:"refundId"                       description:"refundId(deprecated)"`                                                   // refundId(deprecated)
+	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                               // refundId
 	Data                           string      `json:"data"                           description:"data (json)"`                                                            // data (json)
 	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     int64       `json:"createTime"                     description:"create utc time"`                                                        // create utc time

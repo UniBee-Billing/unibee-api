@@ -254,7 +254,11 @@ func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.Merc
 }
 
 func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	return nil, gerror.New("Not Support")
+	return &gateway_bean.GatewayPaymentRefundResp{
+		GatewayRefundId: refund.RefundId,
+		Status:          consts.RefundSuccess,
+		Type:            consts.RefundTypeMarked,
+	}, nil
 }
 
 func (c Changelly) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {

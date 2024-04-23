@@ -61,6 +61,10 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 		utility.Assert(false, "Submit Too Fast")
 	}
 
+	//create Refund Invoice
+	paymentInvoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(paymentInvoice != nil, "Payment Invoice Not found")
+
 	var (
 		one *entity.Refund
 	)
@@ -134,8 +138,9 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 
 	one.GatewayRefundId = gatewayResult.GatewayRefundId
 	result, err := dao.Refund.Ctx(ctx).Data(g.Map{
-		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId}).
-		Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
+		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId,
+		dao.Refund.Columns().Type:            gatewayResult.Type,
+	}).Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
 	if err != nil || result == nil {
 		return nil, err
 	}
@@ -239,7 +244,7 @@ func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalR
 		RefundAmount:     req.RefundAmount,
 		Status:           consts.RefundCreated,
 		GatewayId:        payment.GatewayId,
-		Type:             2, //mark refund type
+		Type:             consts.RefundTypeMarked,
 		AppId:            payment.AppId,
 		Currency:         payment.Currency,
 		CountryCode:      payment.CountryCode,

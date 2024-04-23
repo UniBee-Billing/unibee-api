@@ -59,6 +59,7 @@ type GatewayPaymentRefundResp struct {
 	RefundAmount     int64                   `json:"refundFee"              `
 	Currency         string                  `json:"currency"              `
 	RefundTime       *gtime.Time             `json:"refundTime" `
+	Type             int                     `json:"type" `
 }
 
 type GatewayCryptoFromCurrencyAmountDetailReq struct {

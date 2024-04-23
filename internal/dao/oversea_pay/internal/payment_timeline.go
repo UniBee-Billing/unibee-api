@@ -36,6 +36,8 @@ type PaymentTimelineColumns struct {
 	Status         string // 0-pending, 1-success, 2-failure
 	TimelineType   string // 0-pay, 1-refund
 	CreateTime     string // create utc time
+	RefundId       string // refund id
+	FullRefund     string // 0-no, 1-yes
 }
 
 // paymentTimelineColumns holds the columns for table payment_timeline.
@@ -56,6 +58,8 @@ var paymentTimelineColumns = PaymentTimelineColumns{
 	Status:         "status",
 	TimelineType:   "timeline_type",
 	CreateTime:     "create_time",
+	RefundId:       "refund_id",
+	FullRefund:     "full_refund",
 }
 
 // NewPaymentTimelineDao creates and returns a new DAO object for table data access.

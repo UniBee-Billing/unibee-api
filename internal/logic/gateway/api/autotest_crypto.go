@@ -161,5 +161,6 @@ func (a AutoTestCrypto) GatewayRefund(ctx context.Context, pay *entity.Payment, 
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
 		Status:          consts.RefundCreated,
+		Type:            consts.RefundTypeMarked,
 	}, nil
 }

@@ -146,7 +146,11 @@ func (c Coinbase) GatewayRefundDetail(ctx context.Context, gateway *entity.Merch
 }
 
 func (c Coinbase) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	return nil, gerror.New("Not Support")
+	return &gateway_bean.GatewayPaymentRefundResp{
+		GatewayRefundId: refund.RefundId,
+		Status:          consts.RefundSuccess,
+		Type:            consts.RefundTypeMarked,
+	}, nil
 }
 
 func (c Coinbase) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {

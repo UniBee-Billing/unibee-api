@@ -35,11 +35,15 @@ func (action PaymentStatusEnum) Description() string {
 type RefundStatusEnum int
 
 const (
-	RefundCreated   = 10
-	RefundSuccess   = 20
-	RefundFailed    = 30
-	RefundCancelled = 40
-	RefundReverse   = 50
+	RefundCreated       = 10
+	RefundSuccess       = 20
+	RefundFailed        = 30
+	RefundCancelled     = 40
+	RefundReverse       = 50
+	RefundTypeGateway   = 1
+	RefundTypeMarked    = 2
+	TimelineTypePayment = 0
+	TimelineTypeRefund  = 1
 )
 
 func (action RefundStatusEnum) Description() string {
