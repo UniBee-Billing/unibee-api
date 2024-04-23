@@ -136,6 +136,7 @@ type CreatePreviewReq struct {
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	DiscountCode   string                 `json:"discountCode" dc:"DiscountCode"`
+	TrialEnd       int64                  `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 }
 
 type CreatePreviewRes struct {
@@ -177,6 +178,7 @@ type CreateReq struct {
 	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	TrialEnd           int64                       `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 }
 
 type CreateRes struct {

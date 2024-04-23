@@ -231,6 +231,7 @@ type CreatePreviewInternalReq struct {
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	TrialEnd       int64                  `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 }
 
 type CreatePreviewInternalRes struct {
@@ -277,6 +278,7 @@ type CreateInternalReq struct {
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	TrialEnd           int64                       `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 }
 
 type CreateInternalRes struct {
@@ -376,14 +378,20 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	var currentTimeStart = gtime.Now()
 	var trialEnd = currentTimeStart.Timestamp() - 1
-	if plan.TrialDurationTime > 0 {
+	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
+		var subscriptionAmountExcludingTax = plan.TrialAmount * req.Quantity
+		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
+			req.TrialEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
+		} else {
+			// if trialEnd set, ignore plan.TrialAmount and plan.demand
+			subscriptionAmountExcludingTax = 0
+		}
 		//trial period
 		if plan.TrialAmount > 0 {
 			utility.Assert(len(addons) == 0, "addon is not available for charge trial plan")
 		}
-		var currentTimeEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
+		var currentTimeEnd = req.TrialEnd
 		trialEnd = currentTimeEnd
-		var subscriptionAmountExcludingTax = plan.TrialAmount * req.Quantity
 		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, subscriptionAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), subscriptionAmountExcludingTax)
 		var taxAmount = int64(float64(subscriptionAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
 		invoice := &bean.InvoiceSimplify{
