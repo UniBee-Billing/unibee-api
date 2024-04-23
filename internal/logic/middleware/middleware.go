@@ -43,6 +43,7 @@ func (s *SMiddleware) CORS(r *ghttp.Request) {
 	g.Log().Debugf(r.Context(), "CORS Control: HTTP Header User-Agent:%s", r.GetHeader("User-Agent"))
 	r.Response.CORSDefault()
 	r.Middleware.Next()
+	fmt.Println(r.Response.Header().Get("X-Frame-Options"))
 }
 
 func doubleRequestLimit(id string, r *ghttp.Request) {
