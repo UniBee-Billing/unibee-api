@@ -29,11 +29,16 @@ type CalculateInvoiceReq struct {
 
 func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceItemSimplify) {
 	if len(items) == 0 {
+		fmt.Printf("ProrationDiscountToItem error: items is blank")
 		return
 	}
 	var totalAmountExcludingTax int64 = 0
 	for _, item := range items {
 		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
+	}
+	if totalDiscountAmount > totalAmountExcludingTax {
+		fmt.Printf("ProrationDiscountToItem error: totalDiscountAmount > totalAmountExcludingTax")
+		return
 	}
 	var leftDiscountAmount = totalDiscountAmount
 	for _, item := range items {
@@ -45,8 +50,16 @@ func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceIte
 	}
 	//compensate to the first one
 	if leftDiscountAmount > 0 {
-		items[0].DiscountAmount = items[0].DiscountAmount + leftDiscountAmount
-		items[0].Amount = items[0].Amount - leftDiscountAmount
+		for _, item := range items {
+			if leftDiscountAmount > 0 {
+				tempLeftDiscountAmount := utility.MinInt64(leftDiscountAmount, item.Amount)
+				item.DiscountAmount = item.DiscountAmount + tempLeftDiscountAmount
+				item.Amount = item.Amount - tempLeftDiscountAmount
+				leftDiscountAmount = leftDiscountAmount - tempLeftDiscountAmount
+			} else {
+				break
+			}
+		}
 	}
 }
 
