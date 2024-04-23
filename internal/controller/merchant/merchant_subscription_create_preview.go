@@ -27,6 +27,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 	}
 	return &subscription.CreatePreviewRes{
 		Plan:              bean.SimplifyPlan(prepare.Plan),
+		TrialEnd:          prepare.TrialEnd,
 		Quantity:          prepare.Quantity,
 		Gateway:           bean.SimplifyGateway(prepare.Gateway),
 		AddonParams:       prepare.AddonParams,
@@ -50,8 +51,10 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 			SubscriptionAmountExcludingTax: prepare.Invoice.SubscriptionAmountExcludingTax,
 			Lines:                          prepare.Invoice.Lines,
 		},
-		UserId:   prepare.UserId,
-		Email:    prepare.Email,
-		Discount: prepare.Discount,
+		UserId:                   prepare.UserId,
+		Email:                    prepare.Email,
+		Discount:                 prepare.Discount,
+		VatNumberValidateMessage: prepare.VatNumberValidateMessage,
+		DiscountMessage:          prepare.DiscountMessage,
 	}, nil
 }

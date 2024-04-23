@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 )
@@ -40,7 +41,6 @@ type InvoiceDetail struct {
 	GatewayInvoicePdf              string                             `json:"gatewayInvoicePdf"              description:"GatewayInvoicePdf pdf"`
 	TaxPercentage                  int64                              `json:"taxPercentage"                       description:"TaxPercentage，1000 = 10%"`
 	SendNote                       string                             `json:"sendNote"                       description:"SendNote"`
-	SendTerms                      string                             `json:"sendTerms"                      description:"SendTerms"`
 	TotalAmountExcludingTax        int64                              `json:"totalAmountExcludingTax"        description:"TotalAmountExcludingTax,Cents"`
 	SubscriptionAmountExcludingTax int64                              `json:"subscriptionAmountExcludingTax" description:"SubscriptionAmountExcludingTax,Cents"`
 	PeriodStart                    int64                              `json:"periodStart"                    description:"period_start"`
@@ -86,7 +86,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Status:                         invoice.Status,
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      invoice.SendEmail,
-		SendPdf:                        invoice.SendPdf,
+		SendPdf:                        link.GetInvoicePdfLink(ctx, invoice.InvoiceId, invoice.SendTerms),
 		UserId:                         invoice.UserId,
 		GmtModify:                      invoice.GmtModify,
 		IsDeleted:                      invoice.IsDeleted,
@@ -96,7 +96,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		GatewayInvoicePdf:              invoice.GatewayInvoicePdf,
 		TaxPercentage:                  invoice.TaxPercentage,
 		SendNote:                       invoice.SendNote,
-		SendTerms:                      invoice.SendTerms,
 		DiscountAmount:                 invoice.DiscountAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,

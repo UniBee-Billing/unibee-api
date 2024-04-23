@@ -27,6 +27,10 @@ type CalculateInvoiceReq struct {
 	InvoiceName   string `json:"invoiceName"`
 }
 
+func ProrationDiscountToItem(discountAmount int64, item []*bean.InvoiceItemSimplify) {
+	
+}
+
 func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, req *CalculateInvoiceReq) *bean.InvoiceSimplify {
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan != nil, fmt.Sprintf("plan not found:%d", req.PlanId))

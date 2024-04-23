@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
@@ -58,7 +57,7 @@ func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	return
 }
 
-func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	defer func() {
 		if exception := recover(); exception != nil {
 			if v, ok := exception.(error); ok && gerror.HasStack(v) {
@@ -71,7 +70,7 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 		}
 	}()
 	startTime := time.Now()
-	res, err = p.getRemoteGateway().GatewayUserCreateAndBindPaymentMethod(ctx, gateway, userId, currency, data)
+	res, err = p.getRemoteGateway().GatewayUserCreateAndBindPaymentMethod(ctx, gateway, userId, currency, metadata)
 
 	glog.Infof(ctx, "MeasureChannelFunction:GatewayUserCreateAndBindPaymentMethod cost：%s \n", time.Now().Sub(startTime))
 	if err != nil {

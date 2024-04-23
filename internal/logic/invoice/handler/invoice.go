@@ -54,6 +54,28 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	return one, nil
 }
 
+func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*entity.Invoice, error) {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	if one == nil {
+		return nil, gerror.New("invoice not found, InvoiceId:" + invoiceId)
+	}
+	if one.TotalAmount != 0 {
+		return nil, gerror.New("invoice totalAmount not zero, InvoiceId:" + invoiceId)
+	}
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().Status:    consts.InvoiceStatusPaid,
+		dao.Invoice.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+	if err != nil {
+		return nil, err
+	}
+	if one.BizType == consts.BizTypeSubscription {
+		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	}
+	one.Status = consts.InvoiceStatusPaid
+	return one, nil
+}
+
 func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
@@ -62,9 +84,9 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	if user != nil {
 		sendEmail = user.Email
 	}
-
-	//Create
+	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
+	st := utility.CreateInvoiceId()
 	one := &entity.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		UserId:                         sub.UserId,
@@ -78,10 +100,11 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
 		Currency:                       sub.Currency,
 		GatewayId:                      sub.GatewayId,
-		Status:                         consts.InvoiceStatusProcessing,
+		Status:                         status,
 		SendStatus:                     simplify.SendStatus,
 		SendEmail:                      sendEmail,
 		UniqueId:                       invoiceId,
+		SendTerms:                      st,
 		TotalAmount:                    simplify.TotalAmount,
 		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 		TaxAmount:                      simplify.TaxAmount,
@@ -89,7 +112,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           link.GetInvoiceLink(invoiceId),
+		Link:                           link.GetInvoiceLink(ctx, invoiceId, st),
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,

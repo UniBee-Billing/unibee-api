@@ -57,24 +57,27 @@ type CreatePreviewReq struct {
 	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
 }
 type CreatePreviewRes struct {
-	Plan              *bean.PlanSimplify                 `json:"plan"`
-	Quantity          int64                              `json:"quantity"`
-	Gateway           *bean.GatewaySimplify              `json:"gateway"`
-	AddonParams       []*bean.PlanAddonParam             `json:"addonParams"`
-	Addons            []*bean.PlanAddonDetail            `json:"addons"`
-	OriginAmount      int64                              `json:"originAmount"                `
-	TotalAmount       int64                              `json:"totalAmount"                `
-	DiscountAmount    int64                              `json:"discountAmount"`
-	Currency          string                             `json:"currency"              `
-	Invoice           *bean.InvoiceSimplify              `json:"invoice"`
-	UserId            uint64                             `json:"userId" `
-	Email             string                             `json:"email" `
-	VatCountryCode    string                             `json:"vatCountryCode"              `
-	VatCountryName    string                             `json:"vatCountryName"              `
-	TaxPercentage     int64                              `json:"taxPercentage"              `
-	VatNumber         string                             `json:"vatNumber"              `
-	VatNumberValidate *bean.ValidResult                  `json:"vatNumberValidate"              `
-	Discount          *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	Plan                     *bean.PlanSimplify                 `json:"plan"`
+	TrialEnd                 int64                              `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	Quantity                 int64                              `json:"quantity"`
+	Gateway                  *bean.GatewaySimplify              `json:"gateway"`
+	AddonParams              []*bean.PlanAddonParam             `json:"addonParams"`
+	Addons                   []*bean.PlanAddonDetail            `json:"addons"`
+	OriginAmount             int64                              `json:"originAmount"                `
+	TotalAmount              int64                              `json:"totalAmount"                `
+	DiscountAmount           int64                              `json:"discountAmount"`
+	Currency                 string                             `json:"currency"              `
+	Invoice                  *bean.InvoiceSimplify              `json:"invoice"`
+	UserId                   uint64                             `json:"userId" `
+	Email                    string                             `json:"email" `
+	VatCountryCode           string                             `json:"vatCountryCode"              `
+	VatCountryName           string                             `json:"vatCountryName"              `
+	TaxPercentage            int64                              `json:"taxPercentage"              `
+	VatNumber                string                             `json:"vatNumber"              `
+	VatNumberValidate        *bean.ValidResult                  `json:"vatNumberValidate"              `
+	Discount                 *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
+	DiscountMessage          string                             `json:"discountMessage" `
 }
 
 type CreateReq struct {

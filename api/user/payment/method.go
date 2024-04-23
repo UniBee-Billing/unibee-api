@@ -1,7 +1,6 @@
 package payment
 
 import (
-	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 )
@@ -28,12 +27,12 @@ type MethodGetRes struct {
 
 type MethodNewReq struct {
 	g.Meta         `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
-	GatewayId      uint64      `json:"gatewayId" dc:"GatewayId"   v:"required" `
-	Currency       string      `json:"currency" dc:""  v:"required" `
-	SubscriptionId string      `json:"subscriptionId" dc:"if provide, bind to it"`
-	RedirectUrl    string      `json:"redirectUrl" dc:"Redirect Url"`
-	Type           string      `json:"type" dc:""`
-	Data           *gjson.Json `json:"data" dc:""`
+	GatewayId      uint64                 `json:"gatewayId" dc:"GatewayId"   v:"required" `
+	Currency       string                 `json:"currency" dc:""  v:"required" `
+	SubscriptionId string                 `json:"subscriptionId" dc:"if provide, bind to it"`
+	RedirectUrl    string                 `json:"redirectUrl" dc:"Redirect Url"`
+	Type           string                 `json:"type" dc:""`
+	Metadata       map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 type MethodNewRes struct {

@@ -61,7 +61,7 @@ func (c Coinbase) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway
 	return nil, gerror.New("Not Support")
 }
 
-func (c Coinbase) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (c Coinbase) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	return nil, gerror.New("Not Support")
 }
 

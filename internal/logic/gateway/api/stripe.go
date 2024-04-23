@@ -76,53 +76,19 @@ func (s Stripe) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gatew
 	return &gateway_bean.GatewayUserDeAttachPaymentMethodResp{}, nil
 }
 
-func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, data *gjson.Json) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
+func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-
-	//params := &stripe.PaymentMethodParams{
-	//	Type: stripe.String(string(stripe.PaymentMethodTypeCard)),
-	//	Card: &stripe.PaymentMethodCardParams{
-	//		Number:   stripe.String(data.Get("card").String()),
-	//		ExpMonth: stripe.Int64(data.Get("expMonth").Int64()),
-	//		ExpYear:  stripe.Int64(data.Get("expYear").Int64()),
-	//		CVC:      stripe.String(data.Get("cvc").String()),
-	//	},
-	//}
-	//paymentMethod, err := paymentmethod.New(params)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//_, err = s.GatewayUserAttachPaymentMethodQuery(ctx, gateway, userId, paymentMethod.ID)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//rData := gjson.New(nil)
-	//_ = rData.Set("brand", paymentMethod.Card.Brand)
-	//_ = rData.Set("checks", paymentMethod.Card.Checks)
-	//_ = rData.Set("country", paymentMethod.Card.Country)
-	//_ = rData.Set("last4", paymentMethod.Card.Last4)
-	//_ = rData.Set("expMonth", paymentMethod.Card.ExpMonth)
-	//_ = rData.Set("expYear", paymentMethod.Card.ExpYear)
-	//_ = rData.Set("fingerprint", paymentMethod.Card.Fingerprint)
-	//_ = rData.Set("description", paymentMethod.Card.Description)
-	//return &gateway_bean.GatewayUserPaymentMethodCreateAndBindResp{PaymentMethod: &bean.PaymentMethod{
-	//	Id:   paymentMethod.ID,
-	//	Type: "card",
-	//	Data: rData,
-	//}}, nil
-
 	utility.Assert(userId > 0, "userId is nil")
 	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, userId)
 	params := &stripe.CheckoutSessionParams{
 		Mode:       stripe.String(string(stripe.CheckoutSessionModeSetup)),
 		Currency:   stripe.String(strings.ToUpper(currency)),
 		Customer:   stripe.String(gatewayUser.GatewayUserId),
-		Metadata:   map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10), "SubscriptionId": data.Get("subscriptionId").String()},
-		SuccessURL: stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, data.Get("redirectUrl").String())),
-		CancelURL:  stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, data.Get("redirectUrl").String())),
+		Metadata:   utility.ConvertToStringMetadata(metadata),
+		SuccessURL: stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["redirectUrl"]))),
+		CancelURL:  stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["redirectUrl"]))),
 	}
 	result, err := session.New(params)
 	if err != nil {
