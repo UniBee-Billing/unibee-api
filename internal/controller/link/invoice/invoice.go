@@ -83,8 +83,8 @@ func LinkPdfEntry(r *ghttp.Request) {
 	//corsOptions := r.Response.DefaultCORSOptions()
 	//corsOptions.AllowDomain = []string{"user.unibee.top", "merchant.unibee.top"}
 	//r.Response.CORS(corsOptions)
-	merchant := query.GetMerchantById(r.Context(), one.MerchantId)
-	r.Response.Header().Set("X-Frame-Options", fmt.Sprintf("ALLOW-FROM %s", merchant.Host))
+	//merchant := query.GetMerchantById(r.Context(), one.MerchantId)
+	//r.Response.Header().Set("X-Frame-Options", fmt.Sprintf("ALLOW-FROM %s", merchant.Host))
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")
