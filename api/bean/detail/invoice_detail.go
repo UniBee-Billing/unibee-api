@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 )
@@ -86,7 +87,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Status:                         invoice.Status,
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      invoice.SendEmail,
-		SendPdf:                        invoice.SendPdf,
+		SendPdf:                        link.GetInvoicePdfLink(ctx, invoice.InvoiceId),
 		UserId:                         invoice.UserId,
 		GmtModify:                      invoice.GmtModify,
 		IsDeleted:                      invoice.IsDeleted,

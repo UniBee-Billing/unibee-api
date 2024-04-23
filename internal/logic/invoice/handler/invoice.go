@@ -110,7 +110,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           link.GetInvoiceLink(invoiceId),
+		Link:                           link.GetInvoiceLink(ctx, invoiceId),
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,

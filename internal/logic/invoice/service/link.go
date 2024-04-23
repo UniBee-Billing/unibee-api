@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
+	"unibee/internal/controller/link"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/service"
@@ -100,7 +101,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 		}
 	} else if one.Status == consts.InvoiceStatusPaid {
 		if len(one.SendPdf) > 0 {
-			res.Link = one.SendPdf
+			res.Link = link.GetInvoicePdfLink(ctx, one.InvoiceId)
 		} else {
 			res.FileName = handler.GenerateInvoicePdf(ctx, one)
 		}

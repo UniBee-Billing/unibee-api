@@ -286,6 +286,7 @@ var (
 
 			// Invoice Link
 			s.BindHandler("GET:/in/{invoiceId}", invoice.LinkEntry)
+			s.BindHandler("GET:/in/pdf/{invoiceId}", invoice.LinkPdfEntry)
 			s.BindHandler("GET:/pay/{paymentId}", payment.LinkEntry)
 			// Gateway Payment Redirect
 			s.BindHandler("GET:/payment/redirect/{gatewayId}/forward", gateway_webhook_entry.GatewayRedirectEntrance)
