@@ -73,12 +73,16 @@ func LinkPdfEntry(r *ghttp.Request) {
 	} else {
 		pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
 	}
-	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
-	r.Response.Header().Add("Content-Security-Policy", "block-all-mixed-content")
-	r.Response.Header().Add("Strict-Transport-Security", "includeSubDomains")
-	r.Response.Header().Add("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
-	r.Response.Header().Add("Access-Control-Allow-Credentials", "true")
-	r.Response.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	//r.Response.Header().Add("Access-Control-Allow-Origin", "*")
+	//r.Response.Header().Add("Content-Security-Policy", "block-all-mixed-content")
+	//r.Response.Header().Add("Strict-Transport-Security", "includeSubDomains")
+	//r.Response.Header().Add("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
+	//r.Response.Header().Add("Access-Control-Allow-Credentials", "true")
+	//r.Response.Header().Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	r.Response.CORSDefault()
+	//corsOptions := r.Response.DefaultCORSOptions()
+	//corsOptions.AllowDomain = []string{"user.unibee.top", "merchant.unibee.top"}
+	//r.Response.CORS(corsOptions)
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")
