@@ -17,7 +17,7 @@ func GetInvoicePdfLink(ctx context.Context, invoiceId string, st string) string 
 	if len(invoiceId) == 0 {
 		return ""
 	}
-	return fmt.Sprintf("%s/in/pdf/%s?sm=%s", config.GetConfigInstance().Server.GetServerPath(), invoiceId, st)
+	return fmt.Sprintf("%s/in/pdf/%s?st=%s", config.GetConfigInstance().Server.GetServerPath(), invoiceId, st)
 }
 
 func GetPaymentLink(paymentId string) string {
