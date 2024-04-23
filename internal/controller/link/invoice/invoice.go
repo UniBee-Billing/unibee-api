@@ -73,6 +73,7 @@ func LinkPdfEntry(r *ghttp.Request) {
 	} else {
 		pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
 	}
+	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 	if download {
 		r.Response.Header().Add("Content-type", "application/octet-stream")
 		r.Response.Header().Add("content-disposition", "attachment; filename=\""+pdfFileName+"\"")
