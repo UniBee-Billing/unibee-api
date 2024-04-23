@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/discount"
 	addon2 "unibee/internal/logic/subscription/addon"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -27,6 +28,50 @@ type CalculateInvoiceReq struct {
 	InvoiceName   string `json:"invoiceName"`
 }
 
+func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.InvoiceSimplify {
+	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(one != nil, "Payment Invoice Not found")
+	var items []*bean.InvoiceItemSimplify
+	err := utility.UnmarshalFromJsonString(one.Lines, &items)
+	if err != nil {
+		return nil
+	}
+	var totalAmountExcludingTax int64 = 0
+	for _, item := range items {
+		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
+	}
+	var leftRefundAmount = refund.RefundAmount
+	for _, item := range items {
+		itemRefundAmount := leftRefundAmount * (item.AmountExcludingTax / totalAmountExcludingTax)
+		item.Amount = itemRefundAmount
+		leftRefundAmount = leftRefundAmount - itemRefundAmount
+	}
+	//compensate to the first one
+	if leftRefundAmount > 0 {
+		for _, item := range items {
+			if leftRefundAmount > 0 {
+				//todo mark proration refund to lines and save the refund to items
+				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.Amount)
+				item.Amount = item.Amount + tempLeftDiscountAmount
+				leftRefundAmount = leftRefundAmount - tempLeftDiscountAmount
+			} else {
+				break
+			}
+		}
+	}
+	return &bean.InvoiceSimplify{
+		OriginAmount:            one.TotalAmount,
+		TotalAmount:             -refund.RefundAmount,
+		Currency:                one.Currency,
+		TotalAmountExcludingTax: one.TotalAmountExcludingTax,
+		TaxAmount:               one.TaxAmount,
+		DiscountAmount:          one.DiscountAmount,
+		SendStatus:              consts.InvoiceSendStatusUnSend,
+		DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
+		Lines:                   items,
+	}
+}
+
 func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceItemSimplify) {
 	if len(items) == 0 {
 		fmt.Printf("ProrationDiscountToItem error: items is blank")
@@ -43,7 +88,7 @@ func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceIte
 	var leftDiscountAmount = totalDiscountAmount
 	for _, item := range items {
 		item.OriginAmount = item.Amount
-		discountAmount := utility.MinInt64(item.AmountExcludingTax*(totalDiscountAmount/totalAmountExcludingTax), item.AmountExcludingTax)
+		discountAmount := utility.MinInt64(totalDiscountAmount*(item.AmountExcludingTax/totalAmountExcludingTax), item.AmountExcludingTax)
 		item.DiscountAmount = discountAmount
 		item.Amount = item.Amount - discountAmount
 		leftDiscountAmount = leftDiscountAmount - discountAmount

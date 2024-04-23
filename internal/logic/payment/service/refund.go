@@ -13,6 +13,8 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
+	handler2 "unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	"unibee/internal/logic/payment/handler"
@@ -61,10 +63,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 		utility.Assert(false, "Submit Too Fast")
 	}
 
-	//create Refund Invoice
-	paymentInvoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(paymentInvoice != nil, "Payment Invoice Not found")
-
 	var (
 		one *entity.Refund
 	)
@@ -100,6 +98,15 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 		UserId:           payment.UserId,
 		MetaData:         utility.MarshalToJsonString(req.Metadata),
 	}
+
+	//create Refund Invoice
+	refundInvoice := invoice_compute.CreateInvoiceSimplifyForRefund(ctx, payment, one)
+	invoice, err := handler2.CreateOrUpdateInvoiceForNewPaymentRefund(ctx, refundInvoice, one)
+	if err != nil {
+		return nil, err
+	}
+	one.InvoiceId = invoice.InvoiceId
+
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			one.UniqueId = one.RefundId
@@ -137,6 +144,8 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}
 
 	one.GatewayRefundId = gatewayResult.GatewayRefundId
+	one.Status = int(gatewayResult.Status)
+	one.Type = gatewayResult.Type
 	result, err := dao.Refund.Ctx(ctx).Data(g.Map{
 		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId,
 		dao.Refund.Columns().Type:            gatewayResult.Type,
@@ -165,6 +174,10 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 		err = handler.CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
+		}
+		invoice, err = handler2.CreateOrUpdateInvoiceForNewPaymentRefund(ctx, refundInvoice, one)
+		if err != nil {
+			return nil, err
 		}
 		if gatewayResult.Status == consts.RefundSuccess {
 			err = handler.HandleRefundSuccess(ctx, &handler.HandleRefundReq{

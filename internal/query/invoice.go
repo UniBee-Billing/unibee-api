@@ -27,3 +27,14 @@ func GetInvoiceByPaymentId(ctx context.Context, paymentId string) (one *entity.I
 	}
 	return
 }
+
+func GetInvoiceByRefundId(ctx context.Context, refundId string) (one *entity.Invoice) {
+	if len(refundId) == 0 {
+		return nil
+	}
+	err := dao.Invoice.Ctx(ctx).Where(entity.Invoice{RefundId: refundId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}

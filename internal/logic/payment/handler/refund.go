@@ -11,6 +11,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/gateway_bean"
+	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -79,6 +80,10 @@ func HandleRefundCancelled(ctx context.Context, req *HandleRefundReq) (err error
 	if err != nil {
 		return err
 	} else {
+		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundCancelCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -150,6 +155,10 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
+		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundFailureCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -219,6 +228,10 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	if err != nil {
 		return err
 	} else {
+		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
+		if err != nil {
+			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundSuccessCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -257,6 +270,10 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	if payment == nil {
 		g.Log().Infof(ctx, "pay is nil, paymentId=%s", one.PaymentId)
 		return gerror.New("payment not found")
+	}
+	_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
+	if err != nil {
+		fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 	}
 	callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundReverseCallback(ctx, payment, one)
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
