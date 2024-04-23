@@ -19,7 +19,7 @@ func mainTask(ctx context.Context) {
 	//Invoice 3 Day Out Of Pay Email
 }
 
-func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
+func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string) {
 	g.Log().Debug(ctx, taskName, "Start......")
 	var timeNow = gtime.Now().Timestamp()
 
@@ -47,9 +47,9 @@ func SubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName string
 	for _, sub := range subs {
 		walk, err := cycle.SubPipeBillingCycleWalk(ctx, sub.SubscriptionId, timeNow, taskName)
 		if err != nil {
-			g.Log().Errorf(ctx, "SubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk error:%s", err.Error())
+			g.Log().Errorf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk error:%s", err.Error())
 		}
-		g.Log().Infof(ctx, "SubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk WalkResult:%s", utility.MarshalToJsonString(walk))
+		g.Log().Infof(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk WalkResult:%s", utility.MarshalToJsonString(walk))
 		time.Sleep(10 * time.Second)
 	}
 

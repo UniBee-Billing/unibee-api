@@ -5,6 +5,9 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
+	"unibee/internal/cronjob/discount"
+	"unibee/internal/cronjob/gateway_log"
+	"unibee/internal/cronjob/invoice"
 	"unibee/internal/cronjob/sub"
 )
 
@@ -17,29 +20,39 @@ func StartCronJobs() {
 	//	return
 	//}
 	// every 10 second
-	var name = "SubscriptionBillingCycleDunningInvoice"
+	var name = "SubscriptionCycle"
 	g.Log().Print(ctx, "CronJob Start......")
 	_, err = gcron.AddSingleton(ctx, "*/10 * * * * *", func(ctx context.Context) {
-		sub.SubscriptionBillingCycleDunningInvoice(ctx, name)
+		sub.TaskForSubscriptionBillingCycleDunningInvoice(ctx, name)
 	}, name)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", name, err.Error())
 	}
 	// every 10 second
-	var backName = "SubscriptionBillingCycleDunningInvoiceBackup"
+	var backName = "SubscriptionCycleBackup"
 	_, err = gcron.AddSingleton(ctx, "*/10 * * * * *", func(ctx context.Context) {
-		sub.SubscriptionBillingCycleDunningInvoice(ctx, backName)
+		sub.TaskForSubscriptionBillingCycleDunningInvoice(ctx, backName)
 	}, backName)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", backName, err.Error())
 	}
-	// every hour
-	var httpLogDeleteTaskName = "httpLogDeleteTaskName"
-	_, err = gcron.AddSingleton(ctx, "* * */1 * * *", func(ctx context.Context) {
-
-	}, httpLogDeleteTaskName)
+	// every 10 min
+	var other10MinTask = "Other10MinTask"
+	_, err = gcron.AddSingleton(ctx, "* */10 * * * *", func(ctx context.Context) {
+		discount.TaskForExpireDiscounts(ctx)
+		invoice.TaskForExpireInvoices(ctx)
+	}, other10MinTask)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", httpLogDeleteTaskName, err.Error())
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other10MinTask, err.Error())
+	}
+
+	// every Hour
+	var hourTask = "OtherTask"
+	_, err = gcron.AddSingleton(ctx, "* * */1 * * *", func(ctx context.Context) {
+		gateway_log.TaskForDeleteChannelLogs(ctx)
+	}, hourTask)
+	if err != nil {
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
 	}
 	return
 }
