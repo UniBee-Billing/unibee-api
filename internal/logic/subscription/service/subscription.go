@@ -323,7 +323,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if err != nil {
 			return nil, err
 		}
-		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("validate failure:"+req.VatNumber))
+		utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("VatNumber validate failure, number:"+req.VatNumber))
 		vatCountryCode = vatNumberValidate.CountryCode
 	}
 
