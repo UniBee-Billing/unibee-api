@@ -508,7 +508,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 			PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
 			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
 			TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
-			Link:                "<a href=\"" + one.Link + "\">Link</a>",
+			Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
 		})
 		utility.AssertError(err, "send email error")
 		//update send status

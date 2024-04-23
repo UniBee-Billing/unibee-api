@@ -137,7 +137,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		if err != nil {
 			return nil, err
 		}
-		one.Link = finishRes.Invoice.Link
+		one.Link = link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
@@ -214,7 +214,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		if err != nil {
 			return nil, err
 		}
-		one.Link = finishRes.Invoice.Link
+		one.Link = link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
