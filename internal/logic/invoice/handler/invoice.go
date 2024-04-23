@@ -62,6 +62,7 @@ func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoi
 			Status:                         status,
 			SendStatus:                     invoice.SendStatus,
 			SendEmail:                      sendEmail,
+			SendTerms:                      utility.CreateInvoiceSt(),
 			GatewayPaymentId:               payment.GatewayPaymentId,
 			UniqueId:                       payment.PaymentId,
 			PaymentId:                      payment.PaymentId,
@@ -199,6 +200,7 @@ func CreateOrUpdateInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean
 			Status:                         status,
 			SendStatus:                     invoice.SendStatus,
 			SendEmail:                      sendEmail,
+			SendTerms:                      utility.CreateInvoiceSt(),
 			UniqueId:                       refund.RefundId,
 			PaymentId:                      refund.PaymentId,
 			RefundId:                       refund.RefundId,
@@ -322,7 +324,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	}
 	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
-	st := utility.CreateInvoiceId()
+	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		BizType:                        consts.BizTypeSubscription,
 		UserId:                         sub.UserId,
@@ -348,7 +350,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           link.GetInvoiceLink(ctx, invoiceId, st),
+		Link:                           link.GetInvoiceLink(invoiceId, st),
 		CreateTime:                     gtime.Now().Timestamp(),
 		FinishTime:                     simplify.FinishTime,
 		DayUtilDue:                     simplify.DayUtilDue,

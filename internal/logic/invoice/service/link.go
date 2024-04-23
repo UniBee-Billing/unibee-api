@@ -101,7 +101,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 		}
 	} else if one.Status == consts.InvoiceStatusPaid {
 		if len(one.SendPdf) > 0 {
-			res.Link = link.GetInvoicePdfLink(ctx, one.InvoiceId, one.SendTerms)
+			res.Link = link.GetInvoicePdfLink(one.InvoiceId, one.SendTerms)
 		} else {
 			res.FileName = handler.GenerateInvoicePdf(ctx, one)
 		}

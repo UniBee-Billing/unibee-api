@@ -67,6 +67,10 @@ func CreateInvoiceId() string {
 	return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }
 
+func CreateInvoiceSt() string {
+	return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(30))
+}
+
 func CreatePendingUpdateId() string {
 	return fmt.Sprintf("subup%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
 }

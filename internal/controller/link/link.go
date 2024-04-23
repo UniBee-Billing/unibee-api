@@ -1,19 +1,18 @@
 package link
 
 import (
-	"context"
 	"fmt"
 	"unibee/internal/cmd/config"
 )
 
-func GetInvoiceLink(ctx context.Context, invoiceId string, st string) string {
+func GetInvoiceLink(invoiceId string, st string) string {
 	if len(invoiceId) == 0 {
 		return ""
 	}
 	return fmt.Sprintf("%s/in/%s?st=%s", config.GetConfigInstance().Server.GetServerPath(), invoiceId, st)
 }
 
-func GetInvoicePdfLink(ctx context.Context, invoiceId string, st string) string {
+func GetInvoicePdfLink(invoiceId string, st string) string {
 	if len(invoiceId) == 0 {
 		return ""
 	}

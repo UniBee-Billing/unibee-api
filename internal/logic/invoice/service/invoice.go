@@ -114,6 +114,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		GatewayId:                      req.GatewayId,
 		Status:                         consts.InvoiceStatusPending,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
+		SendTerms:                      utility.CreateInvoiceSt(),
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
 		CreateTime:                     gtime.Now().Timestamp(),
@@ -280,7 +281,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 		req.DaysUtilDue = consts.DEFAULT_DAY_UTIL_DUE
 	}
 	invoiceStatus := consts.InvoiceStatusProcessing
-	invoiceLink := link.GetInvoiceLink(ctx, one.InvoiceId, one.SendTerms)
+	invoiceLink := link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusUnSend,
 		dao.Invoice.Columns().Status:     invoiceStatus,

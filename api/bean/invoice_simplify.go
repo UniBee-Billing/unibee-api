@@ -3,6 +3,7 @@ package bean
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -87,7 +88,7 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		PeriodEnd:                      one.PeriodEnd,
 		PeriodStart:                    one.PeriodStart,
 		FinishTime:                     one.FinishTime,
-		Link:                           one.Link,
+		Link:                           link.GetInvoiceLink(one.InvoiceId, one.SendTerms),
 		PaymentLink:                    one.PaymentLink,
 		Status:                         one.Status,
 		PaymentId:                      one.PaymentId,
