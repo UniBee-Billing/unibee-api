@@ -404,8 +404,11 @@ func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp
 		}
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               strings.ToUpper(string(line.Currency)),
+			OriginAmount:           line.Amount,
 			Amount:                 line.Amount,
 			AmountExcludingTax:     line.AmountExcludingTax,
+			Tax:                    0,
+			DiscountAmount:         0,
 			UnitAmountExcludingTax: int64(line.UnitAmountExcludingTax),
 			Description:            line.Description,
 			Proration:              line.Proration,

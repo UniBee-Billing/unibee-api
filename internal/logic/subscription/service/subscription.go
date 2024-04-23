@@ -421,11 +421,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		trialEnd = currentTimeEnd
 		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, subscriptionAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), subscriptionAmountExcludingTax)
 		var taxAmount = int64(float64(subscriptionAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
+		subscriptionAmountExcludingTax = subscriptionAmountExcludingTax - discountAmount
 		invoice := &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionCreate",
-			OriginAmount:                   subscriptionAmountExcludingTax + taxAmount,
-			TotalAmount:                    subscriptionAmountExcludingTax + taxAmount - discountAmount,
-			TotalAmountExcludingTax:        subscriptionAmountExcludingTax - discountAmount,
+			OriginAmount:                   subscriptionAmountExcludingTax + taxAmount + discountAmount,
+			TotalAmount:                    subscriptionAmountExcludingTax + taxAmount,
+			TotalAmountExcludingTax:        subscriptionAmountExcludingTax,
 			DiscountCode:                   req.DiscountCode,
 			DiscountAmount:                 discountAmount,
 			Currency:                       plan.Currency,
@@ -434,8 +435,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			SubscriptionAmountExcludingTax: subscriptionAmountExcludingTax,
 			Lines: []*bean.InvoiceItemSimplify{{
 				Currency:               plan.Currency,
-				OriginAmount:           subscriptionAmountExcludingTax + taxAmount,
-				Amount:                 subscriptionAmountExcludingTax + taxAmount - discountAmount,
+				OriginAmount:           subscriptionAmountExcludingTax + taxAmount + discountAmount,
+				Amount:                 subscriptionAmountExcludingTax + taxAmount,
 				DiscountAmount:         discountAmount,
 				Tax:                    taxAmount,
 				AmountExcludingTax:     subscriptionAmountExcludingTax,
@@ -975,6 +976,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			currentInvoice = &bean.InvoiceSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
+				OriginAmount:                   0,
 				TotalAmount:                    0,
 				TotalAmountExcludingTax:        0,
 				DiscountCode:                   req.DiscountCode,
@@ -1049,6 +1051,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		prorationDate = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 		currentInvoice = &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionUpgrade",
+			OriginAmount:                   0,
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
 			DiscountCode:                   req.DiscountCode,

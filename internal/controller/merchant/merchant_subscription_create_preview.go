@@ -43,8 +43,11 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		TaxPercentage:     prepare.TaxPercentage,
 		Invoice: &bean.InvoiceSimplify{
 			InvoiceName:                    prepare.Invoice.InvoiceName,
+			OriginAmount:                   prepare.Invoice.OriginAmount,
 			TotalAmount:                    prepare.Invoice.TotalAmount,
 			TotalAmountExcludingTax:        prepare.Invoice.TotalAmountExcludingTax,
+			DiscountAmount:                 prepare.Invoice.DiscountAmount,
+			DiscountCode:                   prepare.Invoice.DiscountCode,
 			Currency:                       prepare.Invoice.Currency,
 			TaxAmount:                      prepare.Invoice.TaxAmount,
 			SubscriptionAmount:             prepare.Invoice.SubscriptionAmount,
