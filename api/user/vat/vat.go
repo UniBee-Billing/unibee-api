@@ -13,7 +13,7 @@ type CountryListRes struct {
 }
 
 type NumberValidateReq struct {
-	g.Meta    `path:"/number_validate" tags:"User-Vat" method:"post" summary:"Vat Number Validate"`
+	g.Meta    `path:"/vat_number_validate" tags:"User-Vat" method:"post" summary:"Vat Number Validate"`
 	VatNumber string `json:"vatNumber" dc:"VatNumber" v:"required"`
 }
 type NumberValidateRes struct {
