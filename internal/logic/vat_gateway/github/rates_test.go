@@ -24,7 +24,7 @@ func TestCountryRates_GetRate(t *testing.T) {
 
 func TestCountryRates_GetRateOn(t *testing.T) {
 	c, _ := GetCountryRates("NL")
-	time, _ := time.Parse("2006-01-01", "2002-01-01")
+	time, _ := time.Parse("2006-01-02", "2002-01-01")
 	if r, _ := c.GetRateOn(time, "standard"); r != 19 {
 		t.Errorf("Standard VAT rate for NL in 2002 is supposed to be 19. Got %.2f", r)
 	}
