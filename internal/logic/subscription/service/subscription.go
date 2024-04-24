@@ -1547,6 +1547,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if err != nil {
 		return err
 	}
+	// send transaction message todo mark
 	if sub.Status != consts.SubStatusActive {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
