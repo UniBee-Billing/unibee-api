@@ -2,7 +2,7 @@ package payment
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type TimeLineListReq struct {
@@ -15,5 +15,5 @@ type TimeLineListReq struct {
 }
 
 type TimeLineListRes struct {
-	PaymentTimeLines []*bean.PaymentTimelineSimplify `json:"paymentTimeLines" description:"Payment TimeLine Object List" `
+	PaymentTimeLines []*detail.PaymentTimelineDetail `json:"paymentTimeLines" description:"Payment TimeLine Object List" `
 }
