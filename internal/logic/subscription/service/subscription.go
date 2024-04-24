@@ -1533,7 +1533,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if newTrialEnd > gtime.Now().Timestamp() {
 		//automatic change sub status to active
 		newStatus = consts.SubStatusActive
-		if sub.Status == consts.SubStatusPending {
+		if sub.Status != consts.SubStatusActive {
 			service3.TryCancelSubscriptionLatestInvoice(ctx, sub)
 		}
 	}
