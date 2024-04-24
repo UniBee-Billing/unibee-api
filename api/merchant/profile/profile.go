@@ -17,7 +17,10 @@ type GetRes struct {
 	IsProd         bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
 	TimeZone       []string                     `json:"TimeZone" description:"TimeZone List" `
 	Currency       []*bean.Currency             `json:"Currency" description:"Currency List" `
-	Gateway        []*bean.GatewaySimplify      `json:"gateway" description:"Gateway List" `
+	Gateways       []*bean.GatewaySimplify      `json:"gateways" description:"Gateway List" `
+	OpenApiKey     string                       `json:"openApiKey" description:"OpenApiKey" `
+	SendGridKey    string                       `json:"sendGridKey" description:"SendGridKey" `
+	VatSenseKey    string                       `json:"vatSenseKey" description:"VatSenseKey" `
 }
 
 type UpdateReq struct {
