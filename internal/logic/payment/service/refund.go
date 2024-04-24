@@ -82,6 +82,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	req.Metadata["MerchantId"] = strconv.FormatUint(payment.MerchantId, 10)
 
 	one = &entity.Refund{
+		SubscriptionId:   payment.SubscriptionId,
 		CompanyId:        payment.CompanyId,
 		MerchantId:       payment.MerchantId,
 		ExternalRefundId: req.ExternalRefundId,
@@ -248,6 +249,7 @@ func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalR
 	req.Metadata["MerchantId"] = strconv.FormatUint(payment.MerchantId, 10)
 
 	one = &entity.Refund{
+		SubscriptionId:   payment.SubscriptionId,
 		CompanyId:        payment.CompanyId,
 		MerchantId:       payment.MerchantId,
 		ExternalRefundId: req.ExternalRefundId,

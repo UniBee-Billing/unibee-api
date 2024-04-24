@@ -258,7 +258,7 @@ func CreateOrUpdateInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean
 			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 		}
 	}
-	one = query.GetInvoiceByInvoiceId(ctx, refund.InvoiceId)
+	one = query.GetInvoiceByInvoiceId(ctx, one.InvoiceId)
 	return one, nil
 }
 
