@@ -1547,11 +1547,13 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if err != nil {
 		return err
 	}
-	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
-		Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
-		Body:  sub.SubscriptionId,
-	})
+	if sub.Status != consts.SubStatusActive {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
+			Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
+			Body:  sub.SubscriptionId,
+		})
+	}
 	return nil
 }
 
