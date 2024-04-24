@@ -224,9 +224,7 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 
 func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.VatCountryRate, error) {
 	gateway := GetDefaultVatGateway(ctx, merchantId)
-	if gateway == nil {
-		return nil, gerror.New("Default Vat Gateway Need Setup")
-	}
+	utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
 	var countryRateList []*entity.CountryRate
 	err := dao.CountryRate.Ctx(ctx).
 		Where(dao.CountryRate.Columns().MerchantId, merchantId).

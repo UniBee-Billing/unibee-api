@@ -21,8 +21,7 @@ type InitDefaultGatewayRes struct {
 }
 
 type CountryListReq struct {
-	g.Meta     `path:"/country_list" tags:"Vat" method:"get,post" summary:"VatCountryList"`
-	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	g.Meta `path:"/country_list" tags:"Vat" method:"get,post" summary:"VatCountryList"`
 }
 type CountryListRes struct {
 	VatCountryList []*bean.VatCountryRate `json:"vatCountryList" dc:"VatCountryList"`
