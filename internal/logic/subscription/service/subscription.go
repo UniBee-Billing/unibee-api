@@ -24,6 +24,7 @@ import (
 	service2 "unibee/internal/logic/gateway/service"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
+	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
@@ -1514,8 +1515,8 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "sub cancelled or sub expired")
-	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
+	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "sub cancelled or sub expired")
+	//utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -1526,11 +1527,14 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 
 	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, sub.PlanId)
 	newStatus := sub.Status
 	if newTrialEnd > gtime.Now().Timestamp() {
 		//automatic change sub status to active
 		newStatus = consts.SubStatusActive
+		if sub.Status == consts.SubStatusPending {
+			service3.TryCancelSubscriptionLatestInvoice(ctx, sub)
+		}
 	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:             newStatus,
@@ -1542,6 +1546,11 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if err != nil {
 		return err
 	}
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
+		Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
+		Body:  sub.SubscriptionId,
+	})
 	return nil
 }
 

@@ -58,7 +58,7 @@ func (t SubscriptionCancelListener) Consume(ctx context.Context, message *redism
 		}
 	}
 	//Cancel All Invoice
-	service.CancelInvoiceForSubscription(ctx, sub)
+	service.TryCancelSubscriptionLatestInvoice(ctx, sub)
 	user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	handler.FinishOldTimelineBySubEnd(ctx, sub.SubscriptionId)
 	subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED)
