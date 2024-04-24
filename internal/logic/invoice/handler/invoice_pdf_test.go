@@ -51,3 +51,7 @@ func TestGenerate(t *testing.T) {
 		return
 	}
 }
+
+func TestTimeFormat(t *testing.T) {
+	fmt.Println(gtime.Now().Layout("2006-01-02 15:04:05"))
+}
