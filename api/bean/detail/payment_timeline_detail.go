@@ -3,6 +3,7 @@ package detail
 import (
 	"context"
 	"unibee/api/bean"
+	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 )
@@ -16,6 +17,7 @@ type PaymentTimelineDetail struct {
 	Currency       string                `json:"currency"       description:"currency"`                        // currency
 	TotalAmount    int64                 `json:"totalAmount"    description:"total amount"`                    // total amount
 	GatewayId      uint64                `json:"gatewayId"      description:"gateway id"`                      // gateway id
+	TransactionId  string                `json:"transactionId"      description:"TransactionId"`               // TransactionId
 	PaymentId      string                `json:"paymentId"      description:"PaymentId"`                       // PaymentId
 	Status         int                   `json:"status"         description:"0-pending, 1-success, 2-failure"` // 0-pending, 1-success, 2-failure
 	TimelineType   int                   `json:"timelineType"   description:"0-pay, 1-refund"`                 // 0-pay, 1-refund
@@ -30,8 +32,13 @@ func ConvertPaymentTimeline(ctx context.Context, one *entity.PaymentTimeline) *P
 	if one == nil {
 		return nil
 	}
+	var transactionId = one.PaymentId
+	if one.TimelineType == consts.TimelineTypeRefund {
+		transactionId = one.RefundId
+	}
 	return &PaymentTimelineDetail{
 		Id:             one.Id,
+		TransactionId:  transactionId,
 		MerchantId:     one.MerchantId,
 		UserId:         one.UserId,
 		SubscriptionId: one.SubscriptionId,
