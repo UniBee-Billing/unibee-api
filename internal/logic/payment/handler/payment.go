@@ -528,7 +528,6 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 			TimelineType:   consts.TimelineTypePayment,
 			CreateTime:     gtime.Now().Timestamp(),
 		}
-
 		result, err := dao.PaymentTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
 			err = gerror.Newf(`CreateOrUpdatePaymentTimelineForPayment record insert failure %s`, err.Error())
