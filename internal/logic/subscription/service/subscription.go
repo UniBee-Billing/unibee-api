@@ -647,6 +647,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				Paid:                  true,
 			}
 		}
+		// todo mark subscription becom active with payment mq message
 	} else if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
 		merchant := query.GetMerchantById(ctx, one.MerchantId)
