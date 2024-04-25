@@ -334,6 +334,11 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	if _interface.Context().Get(ctx).IsOpenApiCall {
+		utility.Assert(gateway.GatewayType != consts.GatewayTypeCrypto, "crypto payment refund not available, refund manual is need and then mark a payment refund")
+	}
 	refund, err := service.GatewayPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
