@@ -28,7 +28,7 @@ type InvoiceDetail struct {
 	Currency                       string                             `json:"currency"                       description:"Currency"`
 	Lines                          []*bean.InvoiceItemSimplify        `json:"lines"                          description:"lines json data"`
 	GatewayId                      uint64                             `json:"gatewayId"                      description:"Id"`
-	Status                         int                                `json:"status"                         description:"Status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"`
+	Status                         int                                `json:"status"                         description:"Status，1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"`
 	SendStatus                     int                                `json:"sendStatus"                     description:"SendStatus，0-No | 1- YES"`
 	SendEmail                      string                             `json:"sendEmail"                      description:"SendEmail"`
 	SendPdf                        string                             `json:"sendPdf"                        description:"SendPdf"`
