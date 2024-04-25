@@ -24,6 +24,7 @@ import (
 	service2 "unibee/internal/logic/gateway/service"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
+	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
@@ -231,7 +232,7 @@ type CreatePreviewInternalReq struct {
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	TrialEnd       int64                  `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	TrialEnd       int64                  `json:"trialEnd"  description:"trial_end, utc time"` // trial_end, utc time
 	IsSubmit       bool
 }
 
@@ -646,6 +647,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				Paid:                  true,
 			}
 		}
+		// todo mark subscription becom active with payment mq message
 	} else if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
 		merchant := query.GetMerchantById(ctx, one.MerchantId)
@@ -1510,12 +1512,75 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	return nil
 }
 
+//
+//type AdminAttachSubscriptionToUserEmailReq struct {
+//	ExternalUserId string                      `json:"externalUserId" dc:"ExternalUserId"`
+//	Email          string                      `json:"email" dc:"Email" v:"required"`
+//	MerchantId     uint64                      `json:"merchantId" dc:"MerchantId" v:"required"`
+//	PlanId         uint64                      `json:"planId" dc:"PlanId" v:"required"`
+//	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
+//	Quantity       int64                       `json:"quantity" dc:"Quantity，Default 1" `
+//	GatewayId      uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+//	AddonParams    []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+//}
+//
+//func AdminAttachSubscriptionToUserEmail(ctx context.Context, req *AdminAttachSubscriptionToUserEmailReq) (*entity.Subscription, error) {
+//	user, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
+//		ExternalUserId: req.ExternalUserId,
+//		Email:          req.Email,
+//		MerchantId:     req.MerchantId,
+//	})
+//	utility.AssertError(err, "QueryOrCreateUser error")
+//	var subType = consts.SubTypeDefault
+//	if consts.SubscriptionCycleUnderUniBeeControl {
+//		subType = consts.SubTypeUniBeeControl
+//	}
+//	one := &entity.Subscription{
+//		MerchantId:                  req.MerchantId,
+//		Type:                        subType,
+//		PlanId:                      prepare.Plan.Id,
+//		TrialEnd:                    prepare.TrialEnd,
+//		GatewayId:                   prepare.Gateway.Id,
+//		UserId:                      prepare.UserId,
+//		Quantity:                    prepare.Quantity,
+//		Amount:                      prepare.TotalAmount,
+//		Currency:                    prepare.Currency,
+//		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
+//		SubscriptionId:              utility.CreateSubscriptionId(),
+//		Status:                      consts.SubStatusPending,
+//		CustomerEmail:               prepare.Email,
+//		ReturnUrl:                   req.ReturnUrl,
+//		VatNumber:                   prepare.VatNumber,
+//		VatVerifyData:               prepare.VatVerifyData,
+//		CountryCode:                 prepare.VatCountryCode,
+//		TaxPercentage:               prepare.TaxPercentage,
+//		CurrentPeriodStart:          prepare.Invoice.PeriodStart,
+//		CurrentPeriodEnd:            prepare.Invoice.PeriodEnd,
+//		DunningTime:                 dunningTime,
+//		BillingCycleAnchor:          prepare.Invoice.PeriodStart,
+//		GatewayDefaultPaymentMethod: req.PaymentMethodId,
+//		DiscountCode:                prepare.RecurringDiscountCode,
+//		CreateTime:                  gtime.Now().Timestamp(),
+//		MetaData:                    utility.MarshalToJsonString(req.Metadata),
+//		GasPayer:                    prepare.Plan.GasPayer,
+//	}
+//
+//	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
+//	if err != nil {
+//		err = gerror.Newf(`SubscriptionCreate record insert failure %s`, err)
+//		return nil, err
+//	}
+//	id, _ := result.LastInsertId()
+//	one.Id = uint64(uint(id))
+//	return nil, gerror.New("not support")
+//}
+
 func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, AppendNewTrialEndByHour int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "sub cancelled or sub expired")
-	utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
+	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "sub cancelled or sub expired")
+	//utility.Assert(sub.Status == consts.SubStatusActive, "subscription not in active status")
 	plan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
@@ -1526,11 +1591,14 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 
 	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, uint64(sub.PlanId))
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, sub.PlanId)
 	newStatus := sub.Status
 	if newTrialEnd > gtime.Now().Timestamp() {
 		//automatic change sub status to active
 		newStatus = consts.SubStatusActive
+		if sub.Status != consts.SubStatusActive {
+			service3.TryCancelSubscriptionLatestInvoice(ctx, sub)
+		}
 	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:             newStatus,
@@ -1541,6 +1609,14 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
+	}
+	// send transaction message todo mark
+	if sub.Status != consts.SubStatusActive {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
+			Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
+			Body:  sub.SubscriptionId,
+		})
 	}
 	return nil
 }

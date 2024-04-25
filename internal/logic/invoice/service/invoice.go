@@ -23,26 +23,33 @@ import (
 	"unibee/utility"
 )
 
-func CancelInvoiceForSubscription(ctx context.Context, subscription *entity.Subscription) {
-	var mainList = make([]*entity.Invoice, 0)
-	m := dao.Invoice.Ctx(ctx)
-	_ = m.Where(dao.Invoice.Columns().IsDeleted, 0).
-		Where(dao.Invoice.Columns().MerchantId, subscription.MerchantId).
-		Where(dao.Invoice.Columns().SubscriptionId, subscription.SubscriptionId).
-		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
-		OmitEmpty().Scan(&mainList)
-	for _, one := range mainList {
-		if len(one.PaymentId) > 0 {
-			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-			if payment != nil {
-				gateway := query.GetGatewayById(ctx, one.GatewayId)
-				if gateway != nil {
-					err := service.PaymentGatewayCancel(ctx, payment)
-					if err != nil {
-						g.Log().Errorf(ctx, `PaymentGatewayCancel failure for CancelInvoiceForSubscription %s`, err.Error())
-					}
-				}
-			}
+func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
+	//var mainList = make([]*entity.Invoice, 0)
+	//m := dao.Invoice.Ctx(ctx)
+	//_ = m.Where(dao.Invoice.Columns().IsDeleted, 0).
+	//	Where(dao.Invoice.Columns().MerchantId, subscription.MerchantId).
+	//	Where(dao.Invoice.Columns().SubscriptionId, subscription.SubscriptionId).
+	//	Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
+	//	OmitEmpty().Scan(&mainList)
+	//for _, one := range mainList {
+	//	if len(one.PaymentId) > 0 {
+	//		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	//		if payment != nil {
+	//			gateway := query.GetGatewayById(ctx, one.GatewayId)
+	//			if gateway != nil {
+	//				err := service.PaymentGatewayCancel(ctx, payment)
+	//				if err != nil {
+	//					g.Log().Errorf(ctx, `PaymentGatewayCancel failure for TryCancelSubscriptionLatestInvoice %s`, err.Error())
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
+	if one.Status == consts.InvoiceStatusProcessing {
+		err := CancelProcessingInvoice(ctx, one.InvoiceId)
+		if err != nil {
+			g.Log().Errorf(ctx, `TryCancelSubscriptionLatestInvoice failure error:%s`, err.Error())
 		}
 	}
 }
@@ -259,14 +266,26 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	one.Status = invoiceStatus
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
-	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	if payment != nil {
-		err = service.PaymentGatewayCancel(ctx, payment)
-		if err != nil {
-			g.Log().Errorf(ctx, `PaymentGatewayCancel failure %s`, err.Error())
+	if len(one.RefundId) > 0 {
+		refund := query.GetRefundByRefundId(ctx, one.RefundId)
+		if refund != nil {
+			err = service.PaymentRefundGatewayCancel(ctx, refund)
+			if err != nil {
+				g.Log().Errorf(ctx, `PaymentRefundGatewayCancel failure %s`, err.Error())
+			}
+			return err
 		}
-		return err
+	} else if len(one.PaymentId) > 0 {
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+		if payment != nil {
+			err = service.PaymentGatewayCancel(ctx, payment)
+			if err != nil {
+				g.Log().Errorf(ctx, `PaymentGatewayCancel failure %s`, err.Error())
+			}
+			return err
+		}
 	}
+
 	return nil
 
 }
@@ -315,6 +334,11 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	utility.Assert(len(one.PaymentId) > 0, "paymentId not found")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	if _interface.Context().Get(ctx).IsOpenApiCall {
+		utility.Assert(gateway.GatewayType != consts.GatewayTypeCrypto, "crypto payment refund not available, refund manual is need and then mark a payment refund")
+	}
 	refund, err := service.GatewayPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),

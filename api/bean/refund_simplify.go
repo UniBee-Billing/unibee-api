@@ -24,6 +24,8 @@ type RefundSimplify struct {
 	SubscriptionId   string                 `json:"subscriptionId"       description:"subscription id"`                                    // subscription id
 	CreateTime       int64                  `json:"createTime"           description:"create utc time"`                                    // create utc time
 	Metadata         map[string]interface{} `json:"metadata" description:""`
+	Type             int                    `json:"type"                 description:"1-gateway refund,2-mark refund"` // 1-gateway refund,2-mark refund
+	InvoiceId        string                 `json:"invoiceId"            description:"invoice id"`                     // invoice id
 }
 
 func SimplifyRefund(one *entity.Refund) *RefundSimplify {
@@ -55,6 +57,8 @@ func SimplifyRefund(one *entity.Refund) *RefundSimplify {
 		SubscriptionId:   one.SubscriptionId,
 		CreateTime:       one.CreateTime,
 		Metadata:         metadata,
+		Type:             one.Type,
+		InvoiceId:        one.InvoiceId,
 	}
 }
 

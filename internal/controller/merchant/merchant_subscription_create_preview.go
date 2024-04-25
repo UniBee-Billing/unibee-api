@@ -4,12 +4,25 @@ import (
 	"context"
 	"unibee/api/bean"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/auth"
 	"unibee/internal/logic/subscription/service"
+	"unibee/utility"
 
 	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscription.CreatePreviewReq) (res *subscription.CreatePreviewRes, err error) {
+	if req.UserId == 0 {
+		utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
+		user, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
+			ExternalUserId: req.ExternalUserId,
+			Email:          req.Email,
+			MerchantId:     _interface.GetMerchantId(ctx),
+		})
+		utility.AssertError(err, "Server Error")
+		req.UserId = user.Id
+	}
+	utility.Assert(req.UserId > 0, "Invalid UserId")
 	prepare, err := service.SubscriptionCreatePreview(ctx, &service.CreatePreviewInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),
 		PlanId:         req.PlanId,

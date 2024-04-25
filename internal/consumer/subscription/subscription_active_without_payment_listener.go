@@ -15,27 +15,24 @@ import (
 	"unibee/utility"
 )
 
-type SubscriptionPaymentSuccessListener struct {
+type SubscriptionActiveWithoutPaymentListener struct {
 }
 
-func (t SubscriptionPaymentSuccessListener) GetTopic() string {
-	return redismq2.TopicSubscriptionPaymentSuccess.Topic
+func (t SubscriptionActiveWithoutPaymentListener) GetTopic() string {
+	return redismq2.TopicSubscriptionActiveWithoutPayment.Topic
 }
 
-func (t SubscriptionPaymentSuccessListener) GetTag() string {
-	return redismq2.TopicSubscriptionPaymentSuccess.Tag
+func (t SubscriptionActiveWithoutPaymentListener) GetTag() string {
+	return redismq2.TopicSubscriptionActiveWithoutPayment.Tag
 }
 
-func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
+func (t SubscriptionActiveWithoutPaymentListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
-	g.Log().Debugf(ctx, "SubscriptionPaymentSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
+	g.Log().Debugf(ctx, "SubscriptionActiveWithoutPaymentListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
-		user.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
-		if len(sub.VatNumber) > 0 {
-			user.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
-		}
+		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
@@ -44,10 +41,10 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 }
 
 func init() {
-	redismq.RegisterListener(NewSubscriptionPaymentSuccessListener())
-	fmt.Println("SubscriptionPaymentSuccessListener RegisterListener")
+	redismq.RegisterListener(NewSubscriptionActiveWithoutPaymentListener())
+	fmt.Println("SubscriptionActiveWithoutPaymentListener RegisterListener")
 }
 
-func NewSubscriptionPaymentSuccessListener() *SubscriptionPaymentSuccessListener {
-	return &SubscriptionPaymentSuccessListener{}
+func NewSubscriptionActiveWithoutPaymentListener() *SubscriptionActiveWithoutPaymentListener {
+	return &SubscriptionActiveWithoutPaymentListener{}
 }

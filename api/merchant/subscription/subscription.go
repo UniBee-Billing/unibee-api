@@ -127,8 +127,10 @@ type RenewRes struct {
 
 type CreatePreviewReq struct {
 	g.Meta         `path:"/create_preview" tags:"Subscription" method:"post" summary:"CreateSubscriptionPreview"`
+	ExternalUserId string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email          string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId         uint64                 `json:"userId" dc:"UserId"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
 	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
@@ -136,7 +138,7 @@ type CreatePreviewReq struct {
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	DiscountCode   string                 `json:"discountCode" dc:"DiscountCode"`
-	TrialEnd       int64                  `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	TrialEnd       int64                  `json:"trialEnd" dc:"trial_end, utc time"` // trial_end, utc time
 }
 
 type CreatePreviewRes struct {
@@ -166,7 +168,9 @@ type CreatePreviewRes struct {
 type CreateReq struct {
 	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
 	PlanId             uint64                      `json:"planId" dc:"PlanId" v:"required"`
-	UserId             uint64                      `json:"userId" dc:"UserId" v:"required"`
+	ExternalUserId     string                      `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email              string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId             uint64                      `json:"userId" dc:"UserId"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
 	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
