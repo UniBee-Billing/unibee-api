@@ -86,7 +86,7 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 	doc.SetLogo(logoBytes)
 
 	doc.SetCompany(&generator2.Contact{
-		Name: merchantInfo.Name,
+		Name: merchantInfo.CompanyName,
 		Address: &generator2.Address{
 			Address: merchantInfo.Location + " " + merchantInfo.Address,
 		},
