@@ -77,6 +77,9 @@ func ProrationDiscountToItem(totalDiscountAmount int64, items []*bean.InvoiceIte
 		fmt.Printf("ProrationDiscountToItem error: items is blank")
 		return
 	}
+	if totalDiscountAmount <= 0 {
+		return
+	}
 	var totalAmountExcludingTax int64 = 0
 	for _, item := range items {
 		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
