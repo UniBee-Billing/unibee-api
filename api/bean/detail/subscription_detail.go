@@ -42,7 +42,7 @@ type SubscriptionPendingUpdateDetail struct {
 	PendingUpdateId string                       `json:"pendingUpdateId" description:"PendingUpdateId"`
 	GmtCreate       *gtime.Time                  `json:"gmtCreate"            description:"GmtCreate"`
 	Amount          int64                        `json:"amount"               description:"CaptureAmount, Cent"`
-	Status          int                          `json:"status"               description:"Status，0-Init | 1-Pending｜2-Finished｜3-Cancelled"`
+	Status          int                          `json:"status"               description:"Status，1-Pending｜2-Finished｜3-Cancelled"`
 	UpdateAmount    int64                        `json:"updateAmount"         description:"UpdateAmount, Cents"`
 	ProrationAmount int64                        `json:"prorationAmount"      description:"ProrationAmount,Cents"`
 	Currency        string                       `json:"currency"             description:"Currency"`
