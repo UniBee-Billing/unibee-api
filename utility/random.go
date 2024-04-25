@@ -3,6 +3,7 @@ package utility
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"math/rand"
 	"runtime"
 	"time"
@@ -64,7 +65,8 @@ func CreateSubscriptionId() string {
 }
 
 func CreateInvoiceId() string {
-	return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	//return fmt.Sprintf("iv%s%s", JodaTimePrefix(), GenerateRandomAlphanumeric(15))
+	return fmt.Sprintf("8%d%03v", gtime.Now().Timestamp(), rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000))
 }
 
 func CreateInvoiceSt() string {
@@ -105,6 +107,10 @@ func GenerateRandomCode(length int) string {
 		b[i] = charset[seededRand.Intn(len(charset))]
 	}
 	return string(b)
+}
+
+func GenerateRandomNumber(length int) string {
+	return fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(1000000))
 }
 
 func GenerateRandomOpenApiKey(length int) (string, error) {
