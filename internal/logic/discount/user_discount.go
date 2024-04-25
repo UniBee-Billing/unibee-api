@@ -66,7 +66,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
 			return false, false, "Server Error"
 		}
-		if discountCode.UserLimit <= count {
+		if discountCode.UserLimit <= count+1 {
 			return false, false, "Code reach out the limit"
 		}
 	}
@@ -84,7 +84,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
 			return false, false, "Server Error"
 		}
-		if discountCode.SubscriptionLimit <= count {
+		if discountCode.SubscriptionLimit <= count+1 {
 			return false, false, "Code reach out the limit"
 		}
 	}
@@ -102,7 +102,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			g.Log().Error(ctx, "UserDiscountApplyPreview error:%s", err.Error())
 			return false, false, "Server Error"
 		}
-		if discountCode.CycleLimit <= count {
+		if discountCode.CycleLimit <= count+1 {
 			return false, false, "Code reach out the limit"
 		}
 	}
