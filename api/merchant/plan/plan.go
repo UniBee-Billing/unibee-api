@@ -27,6 +27,7 @@ type NewReq struct {
 	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
 	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
 	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial， not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd   int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscription first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 type NewRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
@@ -53,6 +54,7 @@ type EditReq struct {
 	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
 	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
 	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd   *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 type EditRes struct {
 	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`

@@ -41,6 +41,7 @@ type MerchantDiscountCodeColumns struct {
 	CycleLimit         string // the count limitation of subscription cycle , 0-no limit
 	MetaData           string // meta_data(json)
 	Type               string // type, 1-external discount code
+	PlanIds            string // Ids of plan which discount code can effect, default effect all plans if not set
 }
 
 // merchantDiscountCodeColumns holds the columns for table merchant_discount_code.
@@ -66,6 +67,7 @@ var merchantDiscountCodeColumns = MerchantDiscountCodeColumns{
 	CycleLimit:         "cycle_limit",
 	MetaData:           "meta_data",
 	Type:               "type",
+	PlanIds:            "plan_ids",
 }
 
 // NewMerchantDiscountCodeDao creates and returns a new DAO object for table data access.

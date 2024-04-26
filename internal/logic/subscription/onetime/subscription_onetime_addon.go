@@ -110,6 +110,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			UserId:       sub.UserId,
 			DiscountCode: req.DiscountCode,
 			Currency:     plan.Currency,
+			PLanId:       plan.Id,
 		})
 		utility.Assert(canApply, message)
 		utility.Assert(!isRecurring, "recurring discount code not available for one-time addon")

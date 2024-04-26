@@ -33,4 +33,5 @@ type MerchantDiscountCode struct {
 	CycleLimit         interface{} // the count limitation of subscription cycle , 0-no limit
 	MetaData           interface{} // meta_data(json)
 	Type               interface{} // type, 1-external discount code
+	PlanIds            interface{} // Ids of plan which discount code can effect, default effect all plans if not set
 }

@@ -31,6 +31,7 @@ func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.N
 		TrialDemand:        req.TrialDemand,
 		TrialAmount:        req.TrialAmount,
 		TrialDurationTime:  req.TrialDurationTime,
+		CancelAtTrialEnd:   req.CancelAtTrialEnd,
 	})
 	if err != nil {
 		return nil, err

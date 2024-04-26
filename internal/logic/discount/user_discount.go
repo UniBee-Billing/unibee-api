@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -16,6 +17,7 @@ import (
 type UserDiscountApplyReq struct {
 	MerchantId     uint64 `json:"merchantId"        description:"MerchantId"`
 	UserId         uint64 `json:"userId"        description:"UserId"`
+	PLanId         uint64 `json:"planId"        description:"PLanId"`
 	DiscountCode   string `json:"discountCode"        description:"DiscountCode"`
 	SubscriptionId string `json:"subscriptionId"        description:"SubscriptionId"`
 	PaymentId      string `json:"paymentId"        description:"PaymentId"`
@@ -52,6 +54,23 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	}
 	if discountCode.DiscountType == DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
 		return false, false, "Code currency not match plan"
+	}
+	if len(discountCode.PlanIds) > 0 {
+		if req.PLanId <= 0 {
+			return false, false, "Code not allow to use on this plan"
+		}
+		var match = false
+		planIds := strings.Split(discountCode.PlanIds, ",")
+		for _, s := range planIds {
+			planId, err := strconv.ParseUint(s, 10, 64)
+			if err == nil && planId == req.PLanId {
+				match = true
+				break
+			}
+		}
+		if !match {
+			return false, false, "Code not allow to use on this plan"
+		}
 	}
 	if discountCode.UserLimit > 0 {
 		//check user limit

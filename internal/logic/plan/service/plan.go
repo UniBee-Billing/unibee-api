@@ -71,6 +71,7 @@ type PlanInternalReq struct {
 	TrialAmount        int64                                   `json:"trialAmount"                description:"price of trial period"` // price of trial period
 	TrialDurationTime  int64                                   `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
 	TrialDemand        string                                  `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd   int                                     `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 
 func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, err error) {
@@ -178,6 +179,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		TrialDurationTime:         req.TrialDurationTime,
 		TrialAmount:               req.TrialAmount,
 		TrialDemand:               req.TrialDemand,
+		CancelAtTrialEnd:          req.CancelAtTrialEnd,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -217,6 +219,7 @@ type EditInternalReq struct {
 	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
 	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
 	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`
+	CancelAtTrialEnd   *int                                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }
 
 func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err error) {
@@ -350,6 +353,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		dao.Plan.Columns().TrialDemand:               req.TrialDemand,
 		dao.Plan.Columns().TrialDurationTime:         req.TrialDurationTime,
 		dao.Plan.Columns().TrialAmount:               req.TrialAmount,
+		dao.Plan.Columns().CancelAtTrialEnd:          req.CancelAtTrialEnd,
 	}).Where(dao.Plan.Columns().Id, req.PlanId).OmitNil().Update()
 	if err != nil {
 		return nil, gerror.Newf(`PlanEdit record insert failure %s`, err)

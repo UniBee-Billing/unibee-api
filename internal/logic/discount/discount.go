@@ -42,6 +42,7 @@ type CreateDiscountCodeInternalReq struct {
 	SubscriptionLimit  int                    `json:"subscriptionLimit" description:"the limit of every subscription apply, 0-unlimited"`                          // the limit of every subscription apply, 0-unlimited
 	StartTime          int64                  `json:"startTime"         description:"start of discount available utc time"`                                        // start of discount available utc time
 	EndTime            int64                  `json:"endTime"           description:"end of discount available utc time"`                                          // end of discount available utc time
+	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
@@ -82,6 +83,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime:          req.StartTime,
 		EndTime:            req.EndTime,
+		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
 	}
 	result, err := dao.MerchantDiscountCode.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -130,6 +132,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().SubscriptionLimit:  req.SubscriptionLimit,
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,
+		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {

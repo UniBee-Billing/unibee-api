@@ -160,6 +160,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			DiscountCode:   req.DiscountCode,
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
+			PLanId:         sub.PlanId,
 		})
 		utility.Assert(canApply, message)
 	} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
@@ -169,6 +170,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			DiscountCode:   sub.DiscountCode,
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
+			PLanId:         sub.PlanId,
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode
@@ -263,6 +265,7 @@ type CreatePreviewInternalRes struct {
 	Discount                 *bean.MerchantDiscountCodeSimplify `json:"discount" `
 	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
 	DiscountMessage          string                             `json:"discountMessage" `
+	CancelAtPeriodEnd        int                                `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"` // whether cancel at period end，0-false | 1-true
 }
 
 type CreateInternalReq struct {
@@ -387,6 +390,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			UserId:       req.UserId,
 			DiscountCode: req.DiscountCode,
 			Currency:     plan.Currency,
+			PLanId:       plan.Id,
 		})
 		if canApply {
 			if isRecurring {
@@ -406,6 +410,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 	var currentTimeStart = gtime.Now()
 	var trialEnd = currentTimeStart.Timestamp() - 1
+	var cancelAtPeriodEnd = 0
 	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
 		var subscriptionAmountExcludingTax = plan.TrialAmount * req.Quantity
 		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
@@ -418,6 +423,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if plan.TrialAmount > 0 {
 			utility.Assert(len(addons) == 0, "addon is not available for charge trial plan")
 		}
+		cancelAtPeriodEnd = plan.CancelAtTrialEnd
 		var currentTimeEnd = req.TrialEnd
 		trialEnd = currentTimeEnd
 		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, subscriptionAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), subscriptionAmountExcludingTax)
@@ -525,6 +531,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			TaxPercentage:            subscriptionTaxPercentage,
 			VatNumberValidateMessage: vatNumberValidateMessage,
 			DiscountMessage:          discountMessage,
+			CancelAtPeriodEnd:        cancelAtPeriodEnd,
 		}, nil
 	}
 }
@@ -606,6 +613,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		CreateTime:                  gtime.Now().Timestamp(),
 		MetaData:                    utility.MarshalToJsonString(req.Metadata),
 		GasPayer:                    prepare.Plan.GasPayer,
+		CancelAtPeriodEnd:           prepare.CancelAtPeriodEnd,
 	}
 
 	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -939,6 +947,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			DiscountCode:   req.DiscountCode,
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
+			PLanId:         req.NewPlanId,
 		})
 		utility.Assert(canApply, message)
 		if isRecurring {
@@ -951,6 +960,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			DiscountCode:   sub.DiscountCode,
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
+			PLanId:         req.NewPlanId,
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode

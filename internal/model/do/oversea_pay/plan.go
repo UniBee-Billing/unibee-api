@@ -42,4 +42,5 @@ type Plan struct {
 	TrialAmount               interface{} // amount of trial, 0 for free
 	TrialDurationTime         interface{} // duration of trial
 	TrialDemand               interface{} //
+	CancelAtTrialEnd          interface{} // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
 }

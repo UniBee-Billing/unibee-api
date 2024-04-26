@@ -24,6 +24,7 @@ func (c *ControllerDiscount) Edit(ctx context.Context, req *discount.EditReq) (r
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,
 		Metadata:  req.Metadata,
+		PlanIds:   req.PlanIds,
 	})
 	if err != nil {
 		return nil, err

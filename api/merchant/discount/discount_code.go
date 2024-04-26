@@ -3,6 +3,7 @@ package discount
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type ListReq struct {
@@ -19,7 +20,7 @@ type DetailReq struct {
 }
 
 type DetailRes struct {
-	Discount *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount Object"`
+	Discount *detail.MerchantDiscountCodeDetail `json:"discount" dc:"Discount Object"`
 }
 
 type NewReq struct {
@@ -35,6 +36,7 @@ type NewReq struct {
 	CycleLimit int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle, each subscription is valid separately , 0-no limit"` // the count limitation of subscription cycle , 0-no limit
 	StartTime  int64                  `json:"startTime"         dc:"The start time of discount code can effect, utc time"  v:"required"`                              // start of discount available utc time
 	EndTime    int64                  `json:"endTime"           dc:"The end time of discount code can effect, utc time"  v:"required"`
+	PlanIds    []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata   map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
@@ -55,6 +57,7 @@ type EditReq struct {
 	CycleLimit int                    `json:"cycleLimit"         dc:"The count limitation of subscription cycle，each subscription is valid separately, 0-no limit"` // the count limitation of subscription cycle , 0-no limit
 	StartTime  int64                  `json:"startTime"         dc:"The start time of discount code can effect, utc time"`                                          // start of discount available utc time
 	EndTime    int64                  `json:"endTime"           dc:"The end time of discount code can effect, utc time"`
+	PlanIds    []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
 	Metadata   map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 

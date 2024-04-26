@@ -1,14 +1,17 @@
-package bean
+package detail
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"strconv"
 	"strings"
+	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 )
 
-type MerchantDiscountCodeSimplify struct {
+type MerchantDiscountCodeDetail struct {
 	Id                 uint64                 `json:"id"                 description:"Id"`                                                                         // Id
 	MerchantId         uint64                 `json:"merchantId"         description:"merchantId"`                                                                 // merchantId
 	Name               string                 `json:"name"               description:"name"`                                                                       // name
@@ -23,11 +26,12 @@ type MerchantDiscountCodeSimplify struct {
 	StartTime          int64                  `json:"startTime"          description:"start of discount available utc time"`                                       // start of discount available utc time
 	EndTime            int64                  `json:"endTime"            description:"end of discount available utc time, 0-invalid"`                              // end of discount available utc time
 	CreateTime         int64                  `json:"createTime"         description:"create utc time"`                                                            // create utc time
-	PlanIds            []int64                `json:"planIds"  dc:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	PlanIds            []int64                `json:"planIds"  description:"Ids of plan which discount code can effect, default effect all plans if not set" `
+	Plans              []*bean.PlanSimplify   `json:"plans"         description:"plans which discount code can effect, default effect all plans if not set"` // create utc time
 	Metadata           map[string]interface{} `json:"metadata"           description:""`
 }
 
-func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDiscountCodeSimplify {
+func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.MerchantDiscountCode) *MerchantDiscountCodeDetail {
 	if one == nil {
 		return nil
 	}
@@ -51,7 +55,8 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 			}
 		}
 	}
-	return &MerchantDiscountCodeSimplify{
+
+	return &MerchantDiscountCodeDetail{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
 		Name:               one.Name,
@@ -67,6 +72,7 @@ func SimplifyMerchantDiscountCode(one *entity.MerchantDiscountCode) *MerchantDis
 		EndTime:            one.EndTime,
 		CreateTime:         one.CreateTime,
 		PlanIds:            planIds,
+		Plans:              bean.SimplifyPlanList(query.GetPlansByIds(ctx, planIds)),
 		Metadata:           metadata,
 	}
 }

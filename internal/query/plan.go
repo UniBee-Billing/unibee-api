@@ -17,6 +17,14 @@ func GetPlanById(ctx context.Context, id uint64) (one *entity.Plan) {
 	return
 }
 
+func GetPlansByIds(ctx context.Context, ids []int64) (list []*entity.Plan) {
+	err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, ids).OmitEmpty().Scan(&list)
+	if err != nil {
+		return nil
+	}
+	return list
+}
+
 func GetAddonsByIds(ctx context.Context, addonIdsList []int64) (list []*entity.Plan) {
 	err := dao.Plan.Ctx(ctx).WhereIn(dao.Plan.Columns().Id, addonIdsList).Scan(&list)
 	if err != nil {

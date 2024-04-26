@@ -24,6 +24,7 @@ func (c *ControllerDiscount) New(ctx context.Context, req *discount.NewReq) (res
 		//SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime: req.StartTime,
 		EndTime:   req.EndTime,
+		PlanIds:   req.PlanIds,
 		Metadata:  req.Metadata,
 	})
 	if err != nil {
