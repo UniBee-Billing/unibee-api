@@ -2,7 +2,6 @@ package invoice
 
 import (
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -20,10 +19,7 @@ func VerifyInvoiceLinkSecurityToken(ctx context.Context, invoiceId string, token
 	if one == nil {
 		return false
 	}
-	if token == invoiceId {
-		return true
-	}
-	if token == utility.MD5(fmt.Sprintf("%d%s%s%d", one.CreateTime, one.UniqueId, one.InvoiceId, one.Id)) {
+	if token == one.SendTerms {
 		return true
 	}
 	return false
@@ -36,7 +32,7 @@ func LinkEntry(r *ghttp.Request) {
 		return
 	}
 	st := r.Get("st").String()
-	if st != "" && VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
+	if !VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
 		r.Response.Writeln("Invalid link")
 		return
 	}
@@ -58,7 +54,7 @@ func LinkPdfEntry(r *ghttp.Request) {
 	}
 	st := r.Get("st").String()
 	download := r.Get("download").Bool()
-	if st != "" && VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
+	if !VerifyInvoiceLinkSecurityToken(r.Context(), invoiceId, st) {
 		r.Response.Writeln("Invalid link")
 		return
 	}
