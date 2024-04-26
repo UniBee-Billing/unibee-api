@@ -42,6 +42,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		} else {
 			user = query.GetUserAccountById(ctx, req.UserId)
 		}
+		utility.Assert(user != nil, "User Not Found")
 	} else {
 		user = query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 		utility.Assert(user != nil, "User Not Found")
