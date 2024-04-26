@@ -116,8 +116,8 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		discountAmount = utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, sub.Currency, req.DiscountCode, gtime.Now().Timestamp()), totalAmountExcludingTax)
 	}
 
-	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(taxPercentage))
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(taxPercentage))
 	invoice := &bean.InvoiceSimplify{
 		InvoiceName:             "OneTimeAddonPurchase-Subscription",
 		OriginAmount:            totalAmountExcludingTax + taxAmount + discountAmount,
@@ -134,6 +134,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			Amount:                 addon.Amount*req.Quantity + taxAmount - discountAmount,
 			DiscountAmount:         discountAmount,
 			Tax:                    taxAmount,
+			AmountExcludingTax:     addon.Amount*req.Quantity - discountAmount,
 			UnitAmountExcludingTax: addon.Amount,
 			Description:            addon.Description,
 			Quantity:               req.Quantity,
