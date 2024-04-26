@@ -421,8 +421,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		var currentTimeEnd = req.TrialEnd
 		trialEnd = currentTimeEnd
 		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, subscriptionAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), subscriptionAmountExcludingTax)
-		var taxAmount = int64(float64(subscriptionAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
 		subscriptionAmountExcludingTax = subscriptionAmountExcludingTax - discountAmount
+		var taxAmount = int64(float64(subscriptionAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
 		invoice := &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionCreate",
 			OriginAmount:                   subscriptionAmountExcludingTax + taxAmount + discountAmount,
