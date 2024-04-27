@@ -137,7 +137,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`CreateInvoiceByChannelDetail record insert failure %s`, err.Error())
+		err = gerror.Newf(`CreateProcessInvoiceForNewPayment record insert failure %s`, err.Error())
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
@@ -233,7 +233,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`CreateInvoiceByChannelDetail record insert failure %s`, err.Error())
+		err = gerror.Newf(`CreateProcessInvoiceForNewPaymentRefund record insert failure %s`, err.Error())
 		return nil, err
 	}
 	id, _ := result.LastInsertId()
