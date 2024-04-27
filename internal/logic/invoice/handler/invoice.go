@@ -158,6 +158,9 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if one == nil {
 		return nil, gerror.New("invoice not found, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
+	if one.Status == consts.InvoiceStatusFailed {
+		return nil, gerror.New("invoice has failed, payment:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+	}
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PaymentSuccess {
 		status = consts.InvoiceStatusPaid
@@ -258,6 +261,9 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	one := query.GetInvoiceByRefundId(ctx, refund.RefundId)
 	if one == nil {
 		return nil, gerror.New("invoice not found, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
+	}
+	if one.Status == consts.InvoiceStatusFailed {
+		return nil, gerror.New("invoice has failed, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
 	}
 	var status = consts.InvoiceStatusProcessing
 	if refund.Status == consts.RefundSuccess {

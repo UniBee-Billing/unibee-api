@@ -228,7 +228,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
-	if one.Status == consts.InvoiceStatusCancelled {
+	if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
 		return nil
 	}
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
@@ -263,9 +263,43 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 			return err
 		}
 	}
-
 	return nil
+}
 
+func ProcessingInvoiceFailure(ctx context.Context, invoiceId string) error {
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
+	if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
+		return nil
+	}
+	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
+	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().Status:     consts.InvoiceStatusFailed,
+		dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusUnnecessary,
+		dao.Invoice.Columns().GmtModify:  gtime.Now(),
+	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+
+	if len(one.RefundId) > 0 {
+		refund := query.GetRefundByRefundId(ctx, one.RefundId)
+		if refund != nil {
+			err = service.PaymentRefundGatewayCancel(ctx, refund)
+			if err != nil {
+				g.Log().Errorf(ctx, `PaymentRefundGatewayCancel failure %s`, err.Error())
+			}
+			return err
+		}
+	} else if len(one.PaymentId) > 0 {
+		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+		if payment != nil {
+			err = service.PaymentGatewayCancel(ctx, payment)
+			if err != nil {
+				g.Log().Errorf(ctx, `PaymentGatewayCancel failure %s`, err.Error())
+			}
+			return err
+		}
+	}
+	return nil
 }
 
 func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.FinishRes, error) {

@@ -37,13 +37,13 @@ func TaskForExpireInvoices(ctx context.Context) {
 					dao.Invoice.Columns().GmtModify:  gtime.Now(),
 				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 				if err != nil {
-					g.Log().Errorf(ctx, "TaskForExpireInvoices update finish error:", err.Error())
+					g.Log().Errorf(ctx, "TaskForExpireInvoices Update FinishTime error:", err.Error())
 				}
 			} else if one.FinishTime+(one.DayUtilDue*86400) < gtime.Now().Timestamp() {
 				//Invoice Expire
-				err = service.CancelProcessingInvoice(ctx, one.InvoiceId)
+				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId)
 				if err != nil {
-					g.Log().Errorf(ctx, "TaskForExpireInvoices cancel invoice error:", err.Error())
+					g.Log().Errorf(ctx, "TaskForExpireInvoices Failure invoice error:", err.Error())
 				}
 			}
 		} else {
