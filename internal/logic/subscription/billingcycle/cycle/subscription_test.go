@@ -7,6 +7,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	service2 "unibee/internal/logic/invoice/detail"
+	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/vat_gateway"
@@ -50,6 +51,7 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, preview)
 		require.NotNil(t, preview.Gateways)
 		require.NotNil(t, preview.Invoice)
+		invoice_compute.VerifyInvoiceSimplify(preview.Invoice)
 		require.Equal(t, true, preview.TotalAmount == (test.TestPlan.Amount*testQuantity)+test.TestRecurringAddon.Amount*testQuantity)
 		require.Equal(t, true, preview.Currency == test.TestPlan.Currency)
 		require.Equal(t, true, len(preview.Gateways) > 0)
@@ -66,6 +68,7 @@ func TestSubscription(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.Nil(t, preview.VatNumberValidate)
+		invoice_compute.VerifyInvoiceSimplify(preview.Invoice)
 		require.Equal(t, true, preview.TotalAmount == preview.Invoice.TotalAmountExcludingTax)
 		require.Equal(t, true, preview.TotalAmount == preview.Invoice.TotalAmountExcludingTax+preview.Invoice.TaxAmount)
 		require.Equal(t, true, preview.Invoice.TotalAmountExcludingTax == ((test.TestPlan.Amount*testQuantity)+(test.TestRecurringAddon.Amount*testQuantity)))
@@ -83,6 +86,7 @@ func TestSubscription(t *testing.T) {
 		})
 		require.Nil(t, err)
 		require.NotNil(t, preview.VatNumberValidate)
+		invoice_compute.VerifyInvoiceSimplify(preview.Invoice)
 		require.Equal(t, true, preview.TotalAmount == preview.Invoice.TotalAmountExcludingTax)
 		require.Equal(t, true, preview.Invoice.TotalAmountExcludingTax == ((test.TestPlan.Amount*testQuantity)+(test.TestRecurringAddon.Amount*testQuantity)))
 		require.Equal(t, true, preview.Currency == test.TestPlan.Currency)
@@ -179,13 +183,15 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusActive)
 		//upgrade
-		_, err = service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
+		preview, err := service.SubscriptionUpdatePreview(ctx, &service.UpdatePreviewInternalReq{
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       2,
 			GatewayId:      one.GatewayId,
 		}, 0, 0)
 		require.Nil(t, err)
+		invoice_compute.VerifyInvoiceSimplify(preview.Invoice)
+		invoice_compute.VerifyInvoiceSimplify(preview.NextPeriodInvoice)
 		_, err = service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,

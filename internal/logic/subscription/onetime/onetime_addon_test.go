@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/merchant/plan"
 	"unibee/internal/consts"
+	"unibee/internal/logic/invoice/invoice_compute"
 	"unibee/internal/logic/plan/service"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
@@ -70,6 +71,7 @@ func TestSubscription(t *testing.T) {
 		}
 		require.Nil(t, err)
 		require.NotNil(t, addon)
+		invoice_compute.VerifyInvoiceSimplify(addon.Invoice)
 	})
 
 	t.Run("Test for subscription cancel immediately", func(t *testing.T) {

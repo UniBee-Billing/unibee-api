@@ -28,6 +28,49 @@ type CalculateInvoiceReq struct {
 	InvoiceName   string `json:"invoiceName"`
 }
 
+func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
+	var totalAmount = one.TotalAmount
+	var totalOriginAmount = one.OriginAmount
+	var totalTax = one.TaxAmount
+	var totalDiscountAmount = one.DiscountAmount
+	for _, item := range one.Lines {
+		totalAmount = totalAmount - item.Amount
+		totalOriginAmount = totalOriginAmount - item.OriginAmount
+		totalTax = totalTax - item.Tax
+		totalDiscountAmount = totalDiscountAmount - item.DiscountAmount
+		utility.Assert(one.TaxPercentage == item.TaxPercentage, "taxPercentage is not match")
+		utility.Assert(item.AmountExcludingTax == item.UnitAmountExcludingTax*item.Quantity-item.DiscountAmount, "item AmountExcludingTax not match unit*quantity-discount")
+		utility.Assert(one.Currency == item.Currency, "currency not match")
+	}
+	utility.Assert(totalAmount == 0, "totalAmount is not equal to lines")
+	utility.Assert(totalOriginAmount == 0, "totalOriginAmount is not equal to lines")
+	utility.Assert(totalTax == 0, "totalTax is not equal to lines")
+	utility.Assert(totalDiscountAmount == 0, "totalDiscountAmount is not equal to lines")
+
+}
+func VerifyInvoice(one *entity.Invoice) {
+	var lines []*bean.InvoiceItemSimplify
+	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
+	utility.AssertError(err, "VerifyInvoice")
+	var totalAmount = one.TotalAmount
+	var totalOriginAmount = one.TotalAmount + one.TaxAmount
+	var totalTax = one.TaxAmount
+	var totalDiscountAmount = one.DiscountAmount
+	for _, item := range lines {
+		totalAmount = totalAmount - item.Amount
+		totalOriginAmount = totalOriginAmount - item.OriginAmount
+		totalTax = totalTax - item.Tax
+		totalDiscountAmount = totalDiscountAmount - item.DiscountAmount
+		utility.Assert(one.TaxPercentage == item.TaxPercentage, "taxPercentage is not match")
+		utility.Assert(item.AmountExcludingTax == item.UnitAmountExcludingTax*item.Quantity-item.DiscountAmount, "item AmountExcludingTax not match unit*quantity-discount")
+		utility.Assert(one.Currency == item.Currency, "currency not match")
+	}
+	utility.Assert(totalAmount == 0, "totalAmount is not equal to lines")
+	utility.Assert(totalOriginAmount == 0, "totalOriginAmount is not equal to lines")
+	utility.Assert(totalTax == 0, "totalTax is not equal to lines")
+	utility.Assert(totalDiscountAmount == 0, "totalDiscountAmount is not equal to lines")
+}
+
 func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.InvoiceSimplify {
 	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
 	utility.Assert(one != nil, "Payment Invoice Not found")
