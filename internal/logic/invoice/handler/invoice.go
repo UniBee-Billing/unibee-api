@@ -142,7 +142,6 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	one = query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {
 		return nil, err
@@ -239,7 +238,6 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	one = query.GetInvoiceByRefundId(ctx, refund.RefundId)
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {
 		return nil, err
