@@ -46,6 +46,9 @@ func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
 	utility.Assert(totalOriginAmount == 0, "totalOriginAmount is not equal to lines")
 	utility.Assert(totalTax == 0, "totalTax is not equal to lines")
 	utility.Assert(totalDiscountAmount == 0, "totalDiscountAmount is not equal to lines")
+	if one.Status >= consts.InvoiceStatusProcessing {
+		utility.Assert(one.FinishTime != 0, "process invoice has no finishTime")
+	}
 
 }
 func VerifyInvoice(one *entity.Invoice) {
@@ -69,6 +72,9 @@ func VerifyInvoice(one *entity.Invoice) {
 	utility.Assert(totalOriginAmount == 0, "totalOriginAmount is not equal to lines")
 	utility.Assert(totalTax == 0, "totalTax is not equal to lines")
 	utility.Assert(totalDiscountAmount == 0, "totalDiscountAmount is not equal to lines")
+	if one.Status >= consts.InvoiceStatusProcessing {
+		utility.Assert(one.FinishTime != 0, "process invoice has no finishTime")
+	}
 }
 
 func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.InvoiceSimplify {

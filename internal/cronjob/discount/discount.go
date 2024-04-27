@@ -14,7 +14,7 @@ import (
 func TaskForExpireDiscounts(ctx context.Context) {
 	var list []*entity.MerchantDiscountCode
 	err := dao.MerchantDiscountCode.Ctx(ctx).
-		Where(dao.MerchantDiscountCode.Columns().Status, discount.DiscountStatusDeActive).
+		Where(dao.MerchantDiscountCode.Columns().Status, discount.DiscountStatusActive).
 		WhereLT(dao.MerchantDiscountCode.Columns().EndTime, gtime.Now().Timestamp()).
 		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		Scan(&list)

@@ -22,113 +22,138 @@ import (
 	"unibee/utility"
 )
 
-func CreateOrUpdateInvoiceForNewPayment(ctx context.Context, invoice *bean.InvoiceSimplify, payment *entity.Payment) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
+	utility.Assert(simplify != nil, "invoice data is nil")
+	utility.Assert(sub != nil, "sub is nil")
+	user := query.GetUserAccountById(ctx, sub.UserId)
+	var sendEmail = ""
+	if user != nil {
+		sendEmail = user.Email
+	}
+	status := consts.InvoiceStatusProcessing
+	invoiceId := utility.CreateInvoiceId()
+	st := utility.CreateInvoiceSt()
+	one := &entity.Invoice{
+		BizType:                        consts.BizTypeSubscription,
+		UserId:                         sub.UserId,
+		MerchantId:                     sub.MerchantId,
+		SubscriptionId:                 sub.SubscriptionId,
+		InvoiceName:                    simplify.InvoiceName,
+		InvoiceId:                      invoiceId,
+		PeriodStart:                    simplify.PeriodStart,
+		PeriodEnd:                      simplify.PeriodEnd,
+		PeriodStartTime:                gtime.NewFromTimeStamp(simplify.PeriodStart),
+		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
+		Currency:                       sub.Currency,
+		GatewayId:                      sub.GatewayId,
+		Status:                         status,
+		SendStatus:                     simplify.SendStatus,
+		SendEmail:                      sendEmail,
+		UniqueId:                       invoiceId,
+		SendTerms:                      st,
+		TotalAmount:                    simplify.TotalAmount,
+		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
+		TaxAmount:                      simplify.TaxAmount,
+		TaxPercentage:                  simplify.TaxPercentage,
+		SubscriptionAmount:             simplify.SubscriptionAmount,
+		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
+		Lines:                          utility.MarshalToJsonString(simplify.Lines),
+		Link:                           link.GetInvoiceLink(invoiceId, st),
+		CreateTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     gtime.Now().Timestamp(),
+		DayUtilDue:                     simplify.DayUtilDue,
+		DiscountAmount:                 simplify.DiscountAmount,
+		DiscountCode:                   simplify.DiscountCode,
+	}
+
+	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		err = gerror.Newf(`CreateProcessingInvoiceForSub record insert failure %s`, err.Error())
+		return nil, err
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().LatestInvoiceId: invoiceId,
+	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+	if err != nil {
+		utility.AssertError(err, "CreateProcessingInvoiceForSub")
+	}
+	//todo mark cancel other sub processing invoice
+	//New Invoice Send Email
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	if err != nil {
+		return nil, err
+	}
+	return one, nil
+}
+
+func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.InvoiceSimplify, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
-	if one == nil && len(invoice.InvoiceId) > 0 {
-		one = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
-	}
+	utility.Assert(len(payment.PaymentId) > 0, "paymentId is nil")
+	utility.Assert(len(payment.InvoiceId) > 0, "payment InvoiceId is nil")
 	user := query.GetUserAccountById(ctx, payment.UserId)
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
-	} else if one != nil && len(one.SendEmail) > 0 {
-		sendEmail = one.SendEmail
 	}
-	var status = consts.InvoiceStatusProcessing
-	if payment.Status == consts.PaymentSuccess {
-		status = consts.InvoiceStatusPaid
-	} else if payment.Status == consts.PaymentFailed {
-		status = consts.InvoiceStatusFailed
-	} else if payment.Status == consts.PaymentCancelled {
-		status = consts.InvoiceStatusCancelled
+	one := &entity.Invoice{
+		BizType:                        payment.BizType,
+		UserId:                         payment.UserId,
+		MerchantId:                     payment.MerchantId,
+		SubscriptionId:                 payment.SubscriptionId,
+		InvoiceName:                    payment.BillingReason,
+		InvoiceId:                      payment.InvoiceId,
+		UniqueId:                       payment.PaymentId,
+		PaymentId:                      payment.PaymentId,
+		PeriodStart:                    invoice.PeriodStart,
+		PeriodEnd:                      invoice.PeriodEnd,
+		PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
+		PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		Currency:                       payment.Currency,
+		CryptoCurrency:                 payment.CryptoCurrency,
+		GatewayId:                      payment.GatewayId,
+		Status:                         consts.InvoiceStatusProcessing,
+		SendStatus:                     invoice.SendStatus,
+		SendEmail:                      sendEmail,
+		SendTerms:                      utility.CreateInvoiceSt(),
+		GatewayPaymentId:               payment.GatewayPaymentId,
+		TotalAmount:                    invoice.TotalAmount,
+		CryptoAmount:                   payment.CryptoAmount,
+		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
+		TaxAmount:                      invoice.TaxAmount,
+		TaxPercentage:                  invoice.TaxPercentage,
+		SubscriptionAmount:             invoice.SubscriptionAmount,
+		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
+		Lines:                          utility.MarshalToJsonString(invoice.Lines),
+		PaymentLink:                    payment.Link,
+		CreateTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     gtime.Now().Timestamp(),
+		DayUtilDue:                     invoice.DayUtilDue,
+		DiscountAmount:                 invoice.DiscountAmount,
+		DiscountCode:                   invoice.DiscountCode,
 	}
-	if one == nil {
-		one = &entity.Invoice{
-			BizType:                        payment.BizType,
-			UserId:                         payment.UserId,
-			MerchantId:                     payment.MerchantId,
-			SubscriptionId:                 payment.SubscriptionId,
-			InvoiceName:                    payment.BillingReason,
-			InvoiceId:                      utility.CreateInvoiceId(),
-			PeriodStart:                    invoice.PeriodStart,
-			PeriodEnd:                      invoice.PeriodEnd,
-			PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
-			PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
-			Currency:                       payment.Currency,
-			CryptoCurrency:                 payment.CryptoCurrency,
-			GatewayId:                      payment.GatewayId,
-			Status:                         status,
-			SendStatus:                     invoice.SendStatus,
-			SendEmail:                      sendEmail,
-			SendTerms:                      utility.CreateInvoiceSt(),
-			GatewayPaymentId:               payment.GatewayPaymentId,
-			UniqueId:                       payment.PaymentId,
-			PaymentId:                      payment.PaymentId,
-			TotalAmount:                    invoice.TotalAmount,
-			CryptoAmount:                   payment.CryptoAmount,
-			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-			TaxAmount:                      invoice.TaxAmount,
-			TaxPercentage:                  invoice.TaxPercentage,
-			SubscriptionAmount:             invoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-			Lines:                          utility.MarshalToJsonString(invoice.Lines),
-			PaymentLink:                    payment.Link,
-			CreateTime:                     gtime.Now().Timestamp(),
-			FinishTime:                     invoice.FinishTime,
-			DayUtilDue:                     invoice.DayUtilDue,
-			DiscountAmount:                 invoice.DiscountAmount,
-			DiscountCode:                   invoice.DiscountCode,
-		}
 
-		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateInvoiceByChannelDetail record insert failure %s`, err.Error())
-			return nil, err
-		}
-		id, _ := result.LastInsertId()
-		one.Id = uint64(uint(id))
-		if one.BizType == consts.BizTypeSubscription {
-			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		}
-	} else {
-		//Update
-		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().BizType:                        payment.BizType,
-			dao.Invoice.Columns().MerchantId:                     payment.MerchantId,
-			dao.Invoice.Columns().UserId:                         payment.UserId,
-			dao.Invoice.Columns().SubscriptionId:                 payment.SubscriptionId,
-			dao.Invoice.Columns().GatewayId:                      payment.GatewayId,
-			dao.Invoice.Columns().PaymentId:                      payment.PaymentId,
-			dao.Invoice.Columns().UniqueId:                       payment.PaymentId,
-			dao.Invoice.Columns().Status:                         status,
-			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-			dao.Invoice.Columns().GatewayPaymentId:               payment.GatewayPaymentId,
-			dao.Invoice.Columns().TotalAmount:                    invoice.TotalAmount,
-			dao.Invoice.Columns().TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-			dao.Invoice.Columns().TaxAmount:                      invoice.TaxAmount,
-			dao.Invoice.Columns().SubscriptionAmount:             invoice.SubscriptionAmount,
-			dao.Invoice.Columns().SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(invoice.Lines),
-			dao.Invoice.Columns().PaymentLink:                    payment.Link,
-			dao.Invoice.Columns().DiscountAmount:                 invoice.DiscountAmount,
-			dao.Invoice.Columns().DiscountCode:                   invoice.DiscountCode,
-		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return nil, err
-		}
-		if one.Status != status && one.BizType == consts.BizTypeSubscription {
-			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		}
+	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		err = gerror.Newf(`CreateInvoiceByChannelDetail record insert failure %s`, err.Error())
+		return nil, err
 	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
 	one = query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	if err != nil {
+		return nil, err
+	}
 	return one, nil
 }
 
 func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*entity.Invoice, error) {
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(len(payment.PaymentId) > 0, "paymentId is nil")
+	one := query.GetInvoiceByPaymentId(ctx, payment.PaymentId)
 	if one == nil {
 		return nil, gerror.New("invoice not found, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
@@ -158,115 +183,77 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	return one, nil
 }
 
-func CreateOrUpdateInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.InvoiceSimplify, refund *entity.Refund) (*entity.Invoice, error) {
+func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.InvoiceSimplify, refund *entity.Refund) (*entity.Invoice, error) {
 	utility.Assert(invoice != nil, "invoice data is nil")
 	utility.Assert(refund != nil, "refund data is nil")
+	utility.Assert(len(refund.RefundId) > 0, "refundId is nil")
+	utility.Assert(len(refund.PaymentId) > 0, "paymentId is nil")
+	utility.Assert(len(refund.InvoiceId) > 0, "refund InvoiceId is nil")
 	payment := query.GetPaymentByPaymentId(ctx, refund.PaymentId)
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByRefundId(ctx, refund.RefundId)
-	if one == nil && len(invoice.InvoiceId) > 0 {
-		one = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
-	}
 	user := query.GetUserAccountById(ctx, refund.UserId)
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
-	} else if one != nil && len(one.SendEmail) > 0 {
-		sendEmail = one.SendEmail
 	}
-	var status = consts.InvoiceStatusProcessing
-	if refund.Status == consts.RefundSuccess {
-		status = consts.InvoiceStatusPaid
-	} else if refund.Status == consts.RefundFailed {
-		status = consts.InvoiceStatusFailed
-	} else if refund.Status == consts.RefundCancelled {
-		status = consts.InvoiceStatusCancelled
+	one := &entity.Invoice{
+		BizType:                        refund.BizType,
+		UserId:                         refund.UserId,
+		MerchantId:                     refund.MerchantId,
+		SubscriptionId:                 refund.SubscriptionId,
+		InvoiceName:                    payment.BillingReason,
+		InvoiceId:                      refund.InvoiceId,
+		UniqueId:                       refund.RefundId,
+		PaymentId:                      refund.PaymentId,
+		RefundId:                       refund.RefundId,
+		PeriodStart:                    invoice.PeriodStart,
+		PeriodEnd:                      invoice.PeriodEnd,
+		PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
+		PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		Currency:                       refund.Currency,
+		CryptoCurrency:                 payment.CryptoCurrency,
+		GatewayId:                      refund.GatewayId,
+		Status:                         consts.InvoiceStatusProcessing,
+		SendStatus:                     invoice.SendStatus,
+		SendEmail:                      sendEmail,
+		SendTerms:                      utility.CreateInvoiceSt(),
+		TotalAmount:                    invoice.TotalAmount,
+		CryptoAmount:                   payment.CryptoAmount,
+		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
+		TaxAmount:                      invoice.TaxAmount,
+		TaxPercentage:                  invoice.TaxPercentage,
+		SubscriptionAmount:             invoice.SubscriptionAmount,
+		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
+		Lines:                          utility.MarshalToJsonString(invoice.Lines),
+		CreateTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     gtime.Now().Timestamp(),
+		DayUtilDue:                     invoice.DayUtilDue,
+		DiscountAmount:                 invoice.DiscountAmount,
+		DiscountCode:                   invoice.DiscountCode,
 	}
-	if one == nil {
-		one = &entity.Invoice{
-			BizType:                        refund.BizType,
-			UserId:                         refund.UserId,
-			MerchantId:                     refund.MerchantId,
-			SubscriptionId:                 refund.SubscriptionId,
-			InvoiceName:                    payment.BillingReason,
-			InvoiceId:                      utility.CreateInvoiceId(),
-			PeriodStart:                    invoice.PeriodStart,
-			PeriodEnd:                      invoice.PeriodEnd,
-			PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
-			PeriodEndTime:                  gtime.NewFromTimeStamp(invoice.PeriodEnd),
-			Currency:                       refund.Currency,
-			CryptoCurrency:                 payment.CryptoCurrency,
-			GatewayId:                      refund.GatewayId,
-			Status:                         status,
-			SendStatus:                     invoice.SendStatus,
-			SendEmail:                      sendEmail,
-			SendTerms:                      utility.CreateInvoiceSt(),
-			UniqueId:                       refund.RefundId,
-			PaymentId:                      refund.PaymentId,
-			RefundId:                       refund.RefundId,
-			TotalAmount:                    invoice.TotalAmount,
-			CryptoAmount:                   payment.CryptoAmount,
-			TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-			TaxAmount:                      invoice.TaxAmount,
-			TaxPercentage:                  invoice.TaxPercentage,
-			SubscriptionAmount:             invoice.SubscriptionAmount,
-			SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-			Lines:                          utility.MarshalToJsonString(invoice.Lines),
-			CreateTime:                     gtime.Now().Timestamp(),
-			FinishTime:                     invoice.FinishTime,
-			DayUtilDue:                     invoice.DayUtilDue,
-			DiscountAmount:                 invoice.DiscountAmount,
-			DiscountCode:                   invoice.DiscountCode,
-		}
 
-		result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
-		if err != nil {
-			err = gerror.Newf(`CreateOrUpdateInvoiceByChannelDetail record insert failure %s`, err.Error())
-			return nil, err
-		}
-		id, _ := result.LastInsertId()
-		one.Id = uint64(uint(id))
-		if one.BizType == consts.BizTypeSubscription {
-			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		}
-	} else {
-		//Update
-		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().BizType:                        refund.BizType,
-			dao.Invoice.Columns().MerchantId:                     refund.MerchantId,
-			dao.Invoice.Columns().UserId:                         refund.UserId,
-			dao.Invoice.Columns().SubscriptionId:                 refund.SubscriptionId,
-			dao.Invoice.Columns().GatewayId:                      refund.GatewayId,
-			dao.Invoice.Columns().PaymentId:                      refund.PaymentId,
-			dao.Invoice.Columns().RefundId:                       refund.RefundId,
-			dao.Invoice.Columns().UniqueId:                       refund.RefundId,
-			dao.Invoice.Columns().Status:                         status,
-			dao.Invoice.Columns().GmtModify:                      gtime.Now(),
-			dao.Invoice.Columns().TotalAmount:                    invoice.TotalAmount,
-			dao.Invoice.Columns().TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
-			dao.Invoice.Columns().TaxAmount:                      invoice.TaxAmount,
-			dao.Invoice.Columns().SubscriptionAmount:             invoice.SubscriptionAmount,
-			dao.Invoice.Columns().SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
-			dao.Invoice.Columns().Lines:                          utility.FormatToJsonString(invoice.Lines),
-			dao.Invoice.Columns().DiscountAmount:                 invoice.DiscountAmount,
-			dao.Invoice.Columns().DiscountCode:                   invoice.DiscountCode,
-		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			return nil, err
-		}
-		if one.Status != status && one.BizType == consts.BizTypeSubscription {
-			_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		}
+	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		err = gerror.Newf(`CreateInvoiceByChannelDetail record insert failure %s`, err.Error())
+		return nil, err
 	}
-	one = query.GetInvoiceByInvoiceId(ctx, one.InvoiceId)
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	one = query.GetInvoiceByRefundId(ctx, refund.RefundId)
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	if err != nil {
+		return nil, err
+	}
 	return one, nil
 }
 
 func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) (*entity.Invoice, error) {
 	utility.Assert(refund != nil, "refund data is nil")
+	utility.Assert(len(refund.RefundId) > 0, "refundId is nil")
+	utility.Assert(len(refund.PaymentId) > 0, "paymentId is nil")
 	payment := query.GetPaymentByPaymentId(ctx, refund.PaymentId)
 	utility.Assert(payment != nil, "payment data is nil")
-	one := query.GetInvoiceByInvoiceId(ctx, refund.InvoiceId)
+	one := query.GetInvoiceByRefundId(ctx, refund.RefundId)
 	if one == nil {
 		return nil, gerror.New("invoice not found, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
 	}
@@ -311,72 +298,6 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = consts.InvoiceStatusPaid
-	return one, nil
-}
-
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
-	utility.Assert(simplify != nil, "invoice data is nil")
-	utility.Assert(sub != nil, "sub is nil")
-	user := query.GetUserAccountById(ctx, sub.UserId)
-	var sendEmail = ""
-	if user != nil {
-		sendEmail = user.Email
-	}
-	status := consts.InvoiceStatusProcessing
-	invoiceId := utility.CreateInvoiceId()
-	st := utility.CreateInvoiceSt()
-	one := &entity.Invoice{
-		BizType:                        consts.BizTypeSubscription,
-		UserId:                         sub.UserId,
-		MerchantId:                     sub.MerchantId,
-		SubscriptionId:                 sub.SubscriptionId,
-		InvoiceName:                    simplify.InvoiceName,
-		InvoiceId:                      invoiceId,
-		PeriodStart:                    simplify.PeriodStart,
-		PeriodEnd:                      simplify.PeriodEnd,
-		PeriodStartTime:                gtime.NewFromTimeStamp(simplify.PeriodStart),
-		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
-		Currency:                       sub.Currency,
-		GatewayId:                      sub.GatewayId,
-		Status:                         status,
-		SendStatus:                     simplify.SendStatus,
-		SendEmail:                      sendEmail,
-		UniqueId:                       invoiceId,
-		SendTerms:                      st,
-		TotalAmount:                    simplify.TotalAmount,
-		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
-		TaxAmount:                      simplify.TaxAmount,
-		TaxPercentage:                  simplify.TaxPercentage,
-		SubscriptionAmount:             simplify.SubscriptionAmount,
-		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
-		Lines:                          utility.MarshalToJsonString(simplify.Lines),
-		Link:                           link.GetInvoiceLink(invoiceId, st),
-		CreateTime:                     gtime.Now().Timestamp(),
-		FinishTime:                     simplify.FinishTime,
-		DayUtilDue:                     simplify.DayUtilDue,
-		DiscountAmount:                 simplify.DiscountAmount,
-		DiscountCode:                   simplify.DiscountCode,
-	}
-
-	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
-	if err != nil {
-		err = gerror.Newf(`CreateProcessingInvoiceForSub record insert failure %s`, err.Error())
-		return nil, err
-	}
-	id, _ := result.LastInsertId()
-	one.Id = uint64(uint(id))
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().LatestInvoiceId: invoiceId,
-	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
-	if err != nil {
-		utility.AssertError(err, "CreateProcessingInvoiceForSub")
-	}
-	//todo mark cancel other sub processing invoice
-	//New Invoice Send Email
-	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-	if err != nil {
-		return nil, err
-	}
 	return one, nil
 }
 

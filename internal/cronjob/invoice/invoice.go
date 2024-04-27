@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
-	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -15,7 +14,6 @@ func TaskForExpireInvoices(ctx context.Context) {
 	var list []*entity.Invoice
 	err := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
-		WhereLT(dao.Invoice.Columns().FinishTime, gtime.Now().Timestamp()).
 		Where(dao.Invoice.Columns().IsDeleted, 0).
 		Scan(&list)
 	if err != nil {

@@ -39,6 +39,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
+	utility.Assert(createPayContext.Invoice != nil, "invoice is nil")
 	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
 	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
@@ -88,13 +89,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	if createPayContext.DaysUtilDue == 0 {
 		createPayContext.DaysUtilDue = 3 //default 3 days expire
 	}
+
 	var invoice *entity.Invoice
-	if createPayContext.Invoice != nil {
-		invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-		if err != nil {
-			return nil, err
-		}
-		createPayContext.Pay.InvoiceId = invoice.InvoiceId
+	if createPayContext.Invoice.Id > 0 {
+		createPayContext.Pay.InvoiceId = createPayContext.Invoice.InvoiceId
+	} else {
+		createPayContext.Pay.InvoiceId = utility.CreateInvoiceId()
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
@@ -112,7 +112,21 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 				return err
 			}
 			createPayContext.Pay.Id = id
-
+			if createPayContext.Invoice.Id > 0 {
+				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+					dao.Invoice.Columns().PaymentId: createPayContext.Pay.PaymentId,
+					dao.Invoice.Columns().GmtModify: gtime.Now(),
+				}).Where(dao.Invoice.Columns().Id, createPayContext.Invoice.Id).OmitNil().Update()
+				if err != nil {
+					return err
+				}
+				invoice = query.GetInvoiceByInvoiceId(ctx, createPayContext.Invoice.InvoiceId)
+			} else {
+				invoice, err = handler.CreateProcessInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
+				if err != nil {
+					return err
+				}
+			}
 			return nil
 		})
 		if err == nil {
@@ -160,8 +174,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	}
 	gatewayInternalPayResult.Link = paymentLink
 	createPayContext.Pay.Link = paymentLink
-
 	gatewayInternalPayResult.Invoice = invoice
+	gatewayInternalPayResult.Payment = createPayContext.Pay
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	err = handler2.CreateOrUpdatePaymentTimelineForPayment(ctx, createPayContext.Pay, createPayContext.Pay.PaymentId)
 	if err != nil {
@@ -179,12 +193,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			PaidTime:               gtime.Now(),
 		}
 		err = handler2.HandlePaySuccess(ctx, req)
-	}
-	invoice, err = handler.CreateOrUpdateInvoiceForNewPayment(ctx, createPayContext.Invoice, createPayContext.Pay)
-	gatewayInternalPayResult.Invoice = invoice
-	gatewayInternalPayResult.Payment = createPayContext.Pay
-	if err != nil {
-		return nil, err
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{

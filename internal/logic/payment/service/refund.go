@@ -101,18 +101,11 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	}
 
 	//create Refund Invoice
-	refundInvoice := invoice_compute.CreateInvoiceSimplifyForRefund(ctx, payment, one)
-	invoice, err := handler2.CreateOrUpdateInvoiceForNewPaymentRefund(ctx, refundInvoice, one)
-	if err != nil {
-		return nil, err
-	}
-	one.InvoiceId = invoice.InvoiceId
-
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicRefundCreated, one.RefundId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Refund.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
+			one.InvoiceId = utility.CreateInvoiceId()
 			one.UniqueId = one.RefundId
 			one.CreateTime = gtime.Now().Timestamp()
-
 			insert, err := dao.Refund.Ctx(ctx).Data(one).OmitEmpty().Insert()
 			if err != nil {
 				return err
@@ -122,12 +115,14 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 				return err
 			}
 			one.Id = id
-
 			_, err = dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).Increment(dao.Payment.Columns().RefundAmount, req.RefundAmount)
 			if err != nil {
 				return err
 			}
-
+			_, err = handler2.CreateProcessInvoiceForNewPaymentRefund(ctx, invoice_compute.CreateInvoiceSimplifyForRefund(ctx, payment, one), one)
+			if err != nil {
+				return err
+			}
 			return nil
 		})
 		if err == nil {
@@ -175,10 +170,6 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 		err = handler.CreateOrUpdatePaymentTimelineFromRefund(ctx, one, one.RefundId)
 		if err != nil {
 			fmt.Printf(`CreateOrUpdatePaymentTimelineFromRefund error %s`, err.Error())
-		}
-		invoice, err = handler2.CreateOrUpdateInvoiceForNewPaymentRefund(ctx, refundInvoice, one)
-		if err != nil {
-			return nil, err
 		}
 		if gatewayResult.Status == consts.RefundSuccess {
 			err = handler.HandleRefundSuccess(ctx, &handler.HandleRefundReq{
