@@ -9,6 +9,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/invoice/invoice_compute"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/test"
@@ -29,7 +30,7 @@ func TestPayment(t *testing.T) {
 				UserId:            test.TestUser.Id,
 				GatewayId:         gateway.Id,
 				TotalAmount:       100,
-				Currency:          "usd",
+				Currency:          "USD",
 				CountryCode:       "CN",
 				MerchantId:        test.TestMerchant.Id,
 				CompanyId:         test.TestMerchant.CompanyId,
@@ -41,17 +42,29 @@ func TestPayment(t *testing.T) {
 			DaysUtilDue:    consts.DEFAULT_DAY_UTIL_DUE,
 			PayImmediate:   false,
 			Invoice: &bean.InvoiceSimplify{
+				OriginAmount:            100,
 				TotalAmount:             100,
-				Currency:                "usd",
+				Currency:                "USD",
 				TotalAmountExcludingTax: 0,
 				TaxAmount:               0,
 				SendStatus:              consts.InvoiceSendStatusUnnecessary,
 				DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
+				Lines: []*bean.InvoiceItemSimplify{{
+					Amount:                 100,
+					AmountExcludingTax:     100,
+					UnitAmountExcludingTax: 100,
+					Quantity:               1,
+					Tax:                    0,
+					DiscountAmount:         0,
+					OriginAmount:           100,
+					Currency:               "USD",
+				}},
 			},
 		})
 		require.Nil(t, err)
 		require.NotNil(t, res)
 		paymentId = res.Payment.PaymentId
+		invoice_compute.VerifyInvoice(res.Invoice)
 		require.NotNil(t, paymentId)
 		require.Equal(t, true, res.Status == consts.PaymentCreated)
 		require.Equal(t, true, len(res.Link) > 0)
@@ -101,7 +114,7 @@ func TestPayment(t *testing.T) {
 				UserId:            test.TestUser.Id,
 				GatewayId:         gateway.Id,
 				TotalAmount:       100,
-				Currency:          "usd",
+				Currency:          "USD",
 				CountryCode:       "CN",
 				MerchantId:        test.TestMerchant.Id,
 				CompanyId:         test.TestMerchant.CompanyId,
@@ -114,7 +127,7 @@ func TestPayment(t *testing.T) {
 			PayImmediate:   true,
 			Invoice: &bean.InvoiceSimplify{
 				TotalAmount:             100,
-				Currency:                "usd",
+				Currency:                "USD",
 				TotalAmountExcludingTax: 0,
 				TaxAmount:               0,
 				SendStatus:              consts.InvoiceSendStatusUnnecessary,
@@ -137,7 +150,7 @@ func TestPayment(t *testing.T) {
 			PaymentId:        one.PaymentId,
 			ExternalRefundId: uuid.New().String(),
 			RefundAmount:     100,
-			Currency:         "usd",
+			Currency:         "USD",
 			Reason:           "test",
 		})
 		require.Nil(t, err)
@@ -146,14 +159,14 @@ func TestPayment(t *testing.T) {
 		refund := query.GetRefundByRefundId(ctx, refundId)
 		require.NotNil(t, refund)
 		require.Equal(t, true, refund.Status == consts.RefundSuccess)
-		require.Equal(t, 1, refund.Type)
+		require.Equal(t, consts.RefundTypeMarked, refund.Type)
 		list, err := RefundList(ctx, &RefundListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			PaymentId:  refund.PaymentId,
 			GatewayId:  gateway.Id,
 			UserId:     test.TestUser.Id,
 			Email:      test.TestUser.Email,
-			Currency:   "usd",
+			Currency:   "USD",
 		})
 		require.Nil(t, err)
 		require.NotNil(t, list)

@@ -8,7 +8,7 @@ import (
 )
 
 type InvoiceSimplify struct {
-	Id                             uint64                 `json:"id"                             description:""` //
+	Id                             uint64                 `json:"id"                             description:""`
 	InvoiceId                      string                 `json:"invoiceId"`
 	InvoiceName                    string                 `json:"invoiceName"`
 	DiscountCode                   string                 `json:"discountCode"`

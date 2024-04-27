@@ -28,7 +28,7 @@ func TestCryptoPayment(t *testing.T) {
 				UserId:            test.TestUser.Id,
 				GatewayId:         gateway.Id,
 				TotalAmount:       100,
-				Currency:          "usd",
+				Currency:          "USD",
 				CountryCode:       "CN",
 				MerchantId:        test.TestMerchant.Id,
 				CompanyId:         test.TestMerchant.CompanyId,
@@ -41,7 +41,7 @@ func TestCryptoPayment(t *testing.T) {
 			PayImmediate:   false,
 			Invoice: &bean.InvoiceSimplify{
 				TotalAmount:             100,
-				Currency:                "usd",
+				Currency:                "USD",
 				TotalAmountExcludingTax: 0,
 				TaxAmount:               0,
 				SendStatus:              consts.InvoiceSendStatusUnnecessary,
@@ -82,7 +82,7 @@ func TestCryptoPayment(t *testing.T) {
 				UserId:            test.TestUser.Id,
 				GatewayId:         gateway.Id,
 				TotalAmount:       100,
-				Currency:          "usd",
+				Currency:          "USD",
 				CountryCode:       "CN",
 				MerchantId:        test.TestMerchant.Id,
 				CompanyId:         test.TestMerchant.CompanyId,
@@ -95,7 +95,7 @@ func TestCryptoPayment(t *testing.T) {
 			PayImmediate:   true,
 			Invoice: &bean.InvoiceSimplify{
 				TotalAmount:             100,
-				Currency:                "usd",
+				Currency:                "USD",
 				TotalAmountExcludingTax: 0,
 				TaxAmount:               0,
 				SendStatus:              consts.InvoiceSendStatusUnnecessary,
@@ -118,7 +118,7 @@ func TestCryptoPayment(t *testing.T) {
 			PaymentId:        one.PaymentId,
 			ExternalRefundId: uuid.New().String(),
 			RefundAmount:     100,
-			Currency:         "usd",
+			Currency:         "USD",
 			Reason:           "test",
 		})
 		require.Nil(t, err)
@@ -127,7 +127,7 @@ func TestCryptoPayment(t *testing.T) {
 		refund := query.GetRefundByRefundId(ctx, refundId)
 		require.NotNil(t, refund)
 		require.Equal(t, true, refund.Status == consts.RefundCreated)
-		require.Equal(t, 1, refund.Type)
+		require.Equal(t, consts.RefundTypeMarked, refund.Type)
 		err = PaymentRefundGatewayCancel(ctx, refund)
 		require.Nil(t, err)
 		err = HardDeleteRefund(ctx, test.TestMerchant.Id, refundId)
@@ -136,7 +136,7 @@ func TestCryptoPayment(t *testing.T) {
 			PaymentId:        one.PaymentId,
 			ExternalRefundId: uuid.New().String(),
 			RefundAmount:     100,
-			Currency:         "usd",
+			Currency:         "USD",
 			Reason:           "test",
 		})
 		require.Nil(t, err)
