@@ -24,27 +24,6 @@ import (
 )
 
 func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
-	//var mainList = make([]*entity.Invoice, 0)
-	//m := dao.Invoice.Ctx(ctx)
-	//_ = m.Where(dao.Invoice.Columns().IsDeleted, 0).
-	//	Where(dao.Invoice.Columns().MerchantId, subscription.MerchantId).
-	//	Where(dao.Invoice.Columns().SubscriptionId, subscription.SubscriptionId).
-	//	Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
-	//	OmitEmpty().Scan(&mainList)
-	//for _, one := range mainList {
-	//	if len(one.PaymentId) > 0 {
-	//		payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	//		if payment != nil {
-	//			gateway := query.GetGatewayById(ctx, one.GatewayId)
-	//			if gateway != nil {
-	//				err := service.PaymentGatewayCancel(ctx, payment)
-	//				if err != nil {
-	//					g.Log().Errorf(ctx, `PaymentGatewayCancel failure for TryCancelSubscriptionLatestInvoice %s`, err.Error())
-	//				}
-	//			}
-	//		}
-	//	}
-	//}
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
 	if one.Status == consts.InvoiceStatusProcessing {
 		err := CancelProcessingInvoice(ctx, one.InvoiceId)
@@ -121,7 +100,6 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		GatewayId:                      req.GatewayId,
 		Status:                         consts.InvoiceStatusPending,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
-		SendTerms:                      utility.CreateInvoiceSt(),
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
 		CreateTime:                     gtime.Now().Timestamp(),
@@ -144,7 +122,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		if err != nil {
 			return nil, err
 		}
-		one.Link = link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
+		one.Link = finishRes.Invoice.Link
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
@@ -221,7 +199,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		if err != nil {
 			return nil, err
 		}
-		one.Link = link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
+		one.Link = finishRes.Invoice.Link
 		one.PaymentLink = finishRes.Invoice.PaymentLink
 		one.Status = finishRes.Invoice.Status
 		one.PaymentId = finishRes.Invoice.PaymentId
@@ -300,10 +278,12 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 		req.DaysUtilDue = consts.DEFAULT_DAY_UTIL_DUE
 	}
 	invoiceStatus := consts.InvoiceStatusProcessing
-	invoiceLink := link.GetInvoiceLink(one.InvoiceId, one.SendTerms)
+	st := utility.CreateInvoiceSt()
+	invoiceLink := link.GetInvoiceLink(one.InvoiceId, st)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusUnSend,
 		dao.Invoice.Columns().Status:     invoiceStatus,
+		dao.Invoice.Columns().SendTerms:  st,
 		dao.Invoice.Columns().Link:       invoiceLink,
 		dao.Invoice.Columns().DayUtilDue: req.DaysUtilDue,
 		dao.Invoice.Columns().FinishTime: gtime.Now().Timestamp(),

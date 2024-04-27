@@ -98,6 +98,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	if user != nil {
 		sendEmail = user.Email
 	}
+	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		BizType:                        payment.BizType,
 		UserId:                         payment.UserId,
@@ -107,6 +108,8 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		InvoiceId:                      payment.InvoiceId,
 		UniqueId:                       payment.PaymentId,
 		PaymentId:                      payment.PaymentId,
+		Link:                           link.GetInvoiceLink(payment.InvoiceId, st),
+		SendTerms:                      st,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
 		PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
@@ -117,7 +120,6 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		Status:                         consts.InvoiceStatusProcessing,
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      sendEmail,
-		SendTerms:                      utility.CreateInvoiceSt(),
 		GatewayPaymentId:               payment.GatewayPaymentId,
 		TotalAmount:                    invoice.TotalAmount,
 		CryptoAmount:                   payment.CryptoAmount,
@@ -195,6 +197,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	if user != nil {
 		sendEmail = user.Email
 	}
+	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		BizType:                        refund.BizType,
 		UserId:                         refund.UserId,
@@ -205,6 +208,8 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		UniqueId:                       refund.RefundId,
 		PaymentId:                      refund.PaymentId,
 		RefundId:                       refund.RefundId,
+		Link:                           link.GetInvoiceLink(refund.InvoiceId, st),
+		SendTerms:                      st,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
 		PeriodStartTime:                gtime.NewFromTimeStamp(invoice.PeriodStart),
@@ -215,7 +220,6 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		Status:                         consts.InvoiceStatusProcessing,
 		SendStatus:                     invoice.SendStatus,
 		SendEmail:                      sendEmail,
-		SendTerms:                      utility.CreateInvoiceSt(),
 		TotalAmount:                    invoice.TotalAmount,
 		CryptoAmount:                   payment.CryptoAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
