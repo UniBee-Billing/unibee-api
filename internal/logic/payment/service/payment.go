@@ -195,7 +195,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		err = handler2.HandlePaySuccess(ctx, req)
 		gatewayInternalPayResult.Invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
 	}
-
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     createPayContext.Pay.PaymentId,
