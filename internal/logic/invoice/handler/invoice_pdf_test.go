@@ -1,13 +1,34 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"os"
 	"testing"
 	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	_ "unibee/test"
+	"unibee/utility"
 )
+
+func TestGenerateInvoicePdf(t *testing.T) {
+	ctx := context.Background()
+	one := query.GetInvoiceByInvoiceId(ctx, "iv20240202ERExKnb6OhMfyyY")
+	utility.Assert(one != nil, "one not found")
+	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
+	err := createInvoicePdf(one, query.GetMerchantById(ctx, one.MerchantId), query.GetUserAccountById(ctx, one.UserId), savePath)
+	utility.AssertError(err, "Pdf")
+	err = os.Remove("f18f4fce-802b-471c-9418-9640384594f6.jpg")
+	if err != nil {
+		return
+	}
+	err = os.Remove("pdf_test.pdf")
+	if err != nil {
+		return
+	}
+}
 
 func TestGenerate(t *testing.T) {
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")

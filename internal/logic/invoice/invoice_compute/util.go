@@ -78,10 +78,10 @@ func VerifyInvoice(one *entity.Invoice) {
 }
 
 func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) *bean.InvoiceSimplify {
-	one := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(one != nil, "Payment Invoice Not found")
+	originalInvoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	utility.Assert(originalInvoice != nil, "Payment Invoice Not found")
 	var items []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString(one.Lines, &items)
+	err := utility.UnmarshalFromJsonString(originalInvoice.Lines, &items)
 	if err != nil {
 		return nil
 	}
@@ -90,18 +90,24 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		totalAmountExcludingTax = totalAmountExcludingTax + item.AmountExcludingTax
 	}
 	var leftRefundAmount = refund.RefundAmount
+	//proration to the items
 	for _, item := range items {
-		itemRefundAmount := leftRefundAmount * (item.AmountExcludingTax / totalAmountExcludingTax)
-		item.Amount = itemRefundAmount
+		item.Tax = 0
+		item.DiscountAmount = 0
+		itemRefundAmount := utility.MinInt64(int64(float64(leftRefundAmount)*float64(item.AmountExcludingTax)/float64(totalAmountExcludingTax)), item.AmountExcludingTax)
+		item.Amount = -itemRefundAmount
+		item.AmountExcludingTax = -itemRefundAmount
+		item.OriginAmount = -itemRefundAmount
 		leftRefundAmount = leftRefundAmount - itemRefundAmount
 	}
-	//compensate to the first one
+	//compensate to the items
 	if leftRefundAmount > 0 {
 		for _, item := range items {
 			if leftRefundAmount > 0 {
-				//todo mark proration refund to lines and save the refund to items
 				tempLeftDiscountAmount := utility.MinInt64(leftRefundAmount, item.Amount)
-				item.Amount = item.Amount + tempLeftDiscountAmount
+				item.Amount = item.Amount - tempLeftDiscountAmount
+				item.AmountExcludingTax = item.AmountExcludingTax - tempLeftDiscountAmount
+				item.OriginAmount = item.OriginAmount - tempLeftDiscountAmount
 				leftRefundAmount = leftRefundAmount - tempLeftDiscountAmount
 			} else {
 				break
@@ -109,15 +115,20 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		}
 	}
 	return &bean.InvoiceSimplify{
-		OriginAmount:            one.TotalAmount,
-		TotalAmount:             -refund.RefundAmount,
-		Currency:                one.Currency,
-		TotalAmountExcludingTax: one.TotalAmountExcludingTax,
-		TaxAmount:               one.TaxAmount,
-		DiscountAmount:          one.DiscountAmount,
-		SendStatus:              consts.InvoiceSendStatusUnSend,
-		DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
-		Lines:                   items,
+		Currency:                       originalInvoice.Currency,
+		OriginAmount:                   -refund.RefundAmount,
+		TotalAmount:                    -refund.RefundAmount,
+		TotalAmountExcludingTax:        -refund.RefundAmount,
+		SubscriptionAmount:             -refund.RefundAmount,
+		SubscriptionAmountExcludingTax: -refund.RefundAmount,
+		TaxAmount:                      0,
+		DiscountAmount:                 0,
+		SendStatus:                     consts.InvoiceSendStatusUnSend,
+		DayUtilDue:                     consts.DEFAULT_DAY_UTIL_DUE,
+		Lines:                          items,
+		SendNote:                       originalInvoice.InvoiceId,
+		PaymentId:                      payment.PaymentId,
+		RefundId:                       refund.RefundId,
 	}
 }
 

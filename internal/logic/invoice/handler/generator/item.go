@@ -9,10 +9,11 @@ import (
 type Item struct {
 	Name string `json:"name,omitempty" validate:"required"`
 	//Description string    `json:"description,omitempty"`
-	UnitCost string    `json:"unit_cost,omitempty"`
-	Quantity string    `json:"quantity,omitempty"`
-	Tax      *Tax      `json:"tax,omitempty"`
-	Discount *Discount `json:"discount,omitempty"`
+	UnitCost     string    `json:"unit_cost,omitempty"`
+	Quantity     string    `json:"quantity,omitempty"`
+	AmountString string    `json:"amountString,omitempty"`
+	Tax          *Tax      `json:"tax,omitempty"`
+	Discount     *Discount `json:"discount,omitempty"`
 
 	_unitCost decimal.Decimal
 	_quantity decimal.Decimal
@@ -380,7 +381,7 @@ func (i *Item) appendColTo(options *Options, doc *Document) {
 	doc.pdf.CellFormat(
 		190-ItemColTotalTTCOffset,
 		colHeight,
-		doc.encodeString(doc.ac.FormatMoneyDecimal(i.TotalWithTaxAndDiscount())),
+		doc.encodeString(i.AmountString),
 		"0",
 		0,
 		"",
