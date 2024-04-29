@@ -19,7 +19,7 @@ func TestGenerateInvoicePdf(t *testing.T) {
 	utility.Assert(one != nil, "one not found")
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	err := createInvoicePdf(one, query.GetMerchantById(ctx, one.MerchantId), query.GetUserAccountById(ctx, one.UserId), savePath)
-	utility.AssertError(err, "Pdf")
+	utility.AssertError(err, "Pdf Generator Error")
 	err = os.Remove("f18f4fce-802b-471c-9418-9640384594f6.jpg")
 	if err != nil {
 		return
