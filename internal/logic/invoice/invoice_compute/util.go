@@ -98,6 +98,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		item.Amount = -itemRefundAmount
 		item.AmountExcludingTax = -itemRefundAmount
 		item.OriginAmount = -itemRefundAmount
+		item.UnitAmountExcludingTax = int64(float64(-itemRefundAmount) / float64(item.Quantity))
 		leftRefundAmount = leftRefundAmount - itemRefundAmount
 	}
 	//compensate to the items

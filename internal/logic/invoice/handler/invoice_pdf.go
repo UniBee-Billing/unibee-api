@@ -8,7 +8,6 @@ import (
 	"golang.org/x/text/currency"
 	"golang.org/x/text/number"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 	"unibee/api/bean"
@@ -109,13 +108,20 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
 
-	for i, line := range lines {
-		doc.AppendItem(&generator2.Item{
-			Name:         fmt.Sprintf("%s #%d", line.Description, i),
-			UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
-			Quantity:     strconv.FormatInt(line.Quantity, 10),
-			AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, unibInvoice.Currency)),
-		})
+	if len(unibInvoice.RefundId) > 0 {
+		for i, line := range lines {
+			doc.AppendItem(&generator2.Item{
+				Name:         fmt.Sprintf("%s #%d", line.Description, i),
+				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, unibInvoice.Currency)),
+			})
+		}
+	} else {
+		for i, line := range lines {
+			doc.AppendItem(&generator2.Item{
+				Name:         fmt.Sprintf("%s #%d", line.Description, i),
+				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, unibInvoice.Currency)),
+			})
+		}
 	}
 
 	doc.SetDefaultTax(&generator2.Tax{
