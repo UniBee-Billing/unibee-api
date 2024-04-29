@@ -193,6 +193,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			PaidTime:               gtime.Now(),
 		}
 		err = handler2.HandlePaySuccess(ctx, req)
+		gatewayInternalPayResult.Invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{
