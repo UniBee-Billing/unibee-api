@@ -629,7 +629,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	utility.AssertError(err, "System Error")
 	if prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
 		if strings.Contains(prepare.Plan.TrialDemand, "PaymentMethod") && req.PaymentMethodId == "" {
 			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need")
@@ -663,7 +662,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
-		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
 		var createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice, gateway.Id)
 		if err != nil {
@@ -680,7 +678,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		if gateway == nil {
 			return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 		}
-		invoice, err = handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 		utility.AssertError(err, "System Error")
 		var createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 			CheckoutMode: true,
