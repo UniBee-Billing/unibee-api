@@ -310,12 +310,6 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 }
 
 func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
-	one := query.GetInvoiceByInvoiceId(context.Background(), invoiceId)
-	utility.Assert(one != nil, "invoice not found")
-	if len(one.Lines) == 0 {
-		// invoice with valid lines will send emails
-		return gerror.New("invalid lines")
-	}
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -328,6 +322,12 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 				return
 			}
 		}()
+		one := query.GetInvoiceByInvoiceId(context.Background(), invoiceId)
+		utility.Assert(one != nil, "invoice not found")
+		if len(one.Lines) == 0 {
+			// invoice with valid lines will send emails
+			return
+		}
 		backgroundCtx := context.Background()
 		filepath := GenerateInvoicePdf(backgroundCtx, one)
 		if len(filepath) > 0 {
