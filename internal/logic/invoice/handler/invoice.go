@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"time"
 	"unibee/api/bean"
 	config2 "unibee/internal/cmd/config"
 	"unibee/internal/consts"
@@ -322,13 +323,19 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 				return
 			}
 		}()
-		one := query.GetInvoiceByInvoiceId(context.Background(), invoiceId)
-		utility.Assert(one != nil, "invoice not found")
-		if len(one.Lines) == 0 {
-			// invoice with valid lines will send emails
+		backgroundCtx := context.Background()
+		time.Sleep(2 * time.Second)
+		one := query.GetInvoiceByInvoiceId(backgroundCtx, invoiceId)
+		if one == nil {
+			g.Log().Errorf(backgroundCtx, "InvoicePdfGenerateAndEmailSendBackground Error one is null")
 			return
 		}
-		backgroundCtx := context.Background()
+		if len(one.Lines) == 0 {
+			// invoice with valid lines will send emails
+			g.Log().Errorf(backgroundCtx, "InvoicePdfGenerateAndEmailSendBackground Error one.lines is null")
+			return
+		}
+
 		filepath := GenerateInvoicePdf(backgroundCtx, one)
 		if len(filepath) > 0 {
 			url, _ := UploadInvoicePdf(backgroundCtx, one.InvoiceId, filepath)
