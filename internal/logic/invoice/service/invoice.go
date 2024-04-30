@@ -362,23 +362,6 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	if err != nil {
 		return nil, err
 	}
-	//user := query.GetUserAccountById(ctx, payment.UserId)
-	//if user != nil {
-	//	merchant := query.GetMerchantById(ctx, payment.MerchantId)
-	//	if merchant != nil {
-	//		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
-	//			UserName:            user.FirstName + " " + user.LastName,
-	//			MerchantCustomEmail: merchant.Email,
-	//			MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, user.CountryCode),
-	//			RefundAmount:        utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
-	//			Currency:            strings.ToUpper(refund.Currency),
-	//		})
-	//		if err != nil {
-	//			fmt.Printf("CreateInvoiceRefund SendTemplateEmail err:%s", err.Error())
-	//		}
-	//	}
-	//}
-	//_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
 	return refund, nil
 }
@@ -411,23 +394,6 @@ func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity
 	if err != nil {
 		return nil, err
 	}
-	//user := query.GetUserAccountById(ctx, payment.UserId)
-	//if user != nil {
-	//	merchant := query.GetMerchantById(ctx, payment.MerchantId)
-	//	if merchant != nil {
-	//		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateInvoiceRefundCreated, "", &email.TemplateVariable{
-	//			UserName:            user.FirstName + " " + user.LastName,
-	//			MerchantCustomEmail: merchant.Email,
-	//			MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, user.CountryCode),
-	//			PaymentAmount:       utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
-	//			Currency:            strings.ToUpper(refund.Currency),
-	//		})
-	//		if err != nil {
-	//			fmt.Printf("CreateInvoiceRefund SendTemplateEmail err:%s", err.Error())
-	//		}
-	//	}
-	//}
-	//_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 
 	return refund, nil
 }

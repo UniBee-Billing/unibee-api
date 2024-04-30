@@ -179,7 +179,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if err != nil {
 		return nil, err
 	}
-	if one.Status != status && one.BizType == consts.BizTypeSubscription {
+	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status
@@ -282,7 +282,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	if err != nil {
 		return nil, err
 	}
-	if one.Status != status && one.BizType == consts.BizTypeSubscription {
+	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status
@@ -304,9 +304,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	if err != nil {
 		return nil, err
 	}
-	if one.BizType == consts.BizTypeSubscription {
-		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-	}
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	one.Status = consts.InvoiceStatusPaid
 	return one, nil
 }
