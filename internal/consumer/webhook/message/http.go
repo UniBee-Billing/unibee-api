@@ -53,6 +53,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	merchant := query.GetMerchantById(ctx, webhookMessage.MerchantId)
 	if merchant == nil {
 		g.Log().Errorf(ctx, "Webhook_Send %s %s merchant not found\n", "POST", webhookMessage.Url)
+		return false
 	}
 	jsonString, err := webhookMessage.Data.ToJsonString()
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
