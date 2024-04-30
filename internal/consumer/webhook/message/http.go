@@ -89,7 +89,6 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	if saveErr != nil {
 		g.Log().Errorf(ctx, "Webhook_SaveLog error %s\n", saveErr.Error())
 	}
-
 	return err == nil && strings.Compare(response, "success") == 0
 }
 
