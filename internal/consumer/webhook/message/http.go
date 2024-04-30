@@ -9,6 +9,7 @@ import (
 	"time"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -49,6 +50,10 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		g.Log().Errorf(ctx, "Webhook_Send %s %s error %s\n", "POST", webhookMessage.Url, err.Error())
 		return false
 	}
+	merchant := query.GetMerchantById(ctx, webhookMessage.MerchantId)
+	if merchant == nil {
+		g.Log().Errorf(ctx, "Webhook_Send %s %s merchant not found\n", "POST", webhookMessage.Url)
+	}
 	jsonString, err := webhookMessage.Data.ToJsonString()
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
@@ -57,6 +62,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Content-Gateway": "application/json",
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
+		"Authorization":   fmt.Sprintf("Bear %s", merchant.ApiKey),
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
 	var response = string(res)
