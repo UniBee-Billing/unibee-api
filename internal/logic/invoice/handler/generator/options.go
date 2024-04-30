@@ -17,7 +17,7 @@ type Options struct {
 	TextTypeDeliveryNote string `default:"DELIVERY NOTE" json:"text_type_delivery_note,omitempty"`
 
 	TextInvoiceNumberTitle       string `default:"Invoice Number" json:"text_number_title,omitempty"`
-	TextOriginInvoiceNumberTitle string `default:"Origin Invoice Number" json:"text_origin_number_title,omitempty"`
+	TextOriginInvoiceNumberTitle string `default:"Original Invoice Number" json:"text_origin_number_title,omitempty"`
 	TextInvoiceDateTitle         string `default:"Invoice Date" json:"text_data_title,omitempty"`
 	TextInvoicePaidDateTitle     string `default:"Invoice Paid Date" json:"text_paid_date_title,omitempty"`
 	TextPaymentTermTitle         string `default:"Payment term" json:"text_payment_term_title,omitempty"`
