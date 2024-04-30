@@ -217,10 +217,11 @@ type UpdatePreviewRes struct {
 
 type UpdateReq struct {
 	g.Meta             `path:"/update_submit" tags:"Subscription" method:"post" summary:"UpdateSubscription"`
-	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId, either SubscriptionId or UserId needed, The only one active subscription of userId will update"`
+	UserId             uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
 	NewPlanId          uint64                      `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity"  v:"required"`
-	GatewayId          uint64                      `json:"gatewayId" dc:"Id" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id of gateway" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"          `
@@ -312,7 +313,8 @@ type AdminNoteListRes struct {
 
 type OnetimeAddonNewReq struct {
 	g.Meta             `path:"/new_onetime_addon_payment" tags:"Subscription" method:"post" summary:"NewSubscriptionOnetimeAddonPayment" dc:"Create payment for subscription onetime addon purchase"`
-	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached" v:"required"`
+	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription of userId will attach the addon"`
+	UserId             uint64                 `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
 	AddonId            uint64                 `json:"addonId" dc:"AddonId, id of one-time addon, the new payment will created base on the addon's amount'" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity, quantity of the new payment which one-time addon purchased"  v:"required"`
 	ReturnUrl          string                 `json:"returnUrl"  dc:"ReturnUrl, the addon's payment will redirect based on the returnUrl provided when it's back from gateway side"  `
