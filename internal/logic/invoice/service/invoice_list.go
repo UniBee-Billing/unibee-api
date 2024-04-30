@@ -57,6 +57,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	}
 	query := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().MerchantId, req.MerchantId).
+		WhereGT(dao.Invoice.Columns().TotalAmount, 0).
 		Where(dao.Invoice.Columns().Currency, strings.ToUpper(req.Currency))
 	if len(req.SendEmail) > 0 {
 		query = query.WhereLike(dao.Invoice.Columns().SendEmail, "%"+req.SendEmail+"%")
