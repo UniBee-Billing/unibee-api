@@ -63,7 +63,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Content-Gateway": "application/json",
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
-		"Authorization":   fmt.Sprintf("Bear %s", merchant.ApiKey),
+		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
 	var response = string(res)
