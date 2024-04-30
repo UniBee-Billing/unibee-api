@@ -131,7 +131,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     consts.DEFAULT_DAY_UTIL_DUE,
 		Lines:                          items,
-		SendNote:                       fmt.Sprintf("%s(%s)", originalInvoice.InvoiceId, refundType),
+		SendNote:                       fmt.Sprintf("%s (%s)", originalInvoice.InvoiceId, refundType),
 		PaymentId:                      payment.PaymentId,
 		RefundId:                       refund.RefundId,
 	}
