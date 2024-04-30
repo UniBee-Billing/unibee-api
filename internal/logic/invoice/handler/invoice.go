@@ -469,6 +469,8 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 					template = email.TemplateInvoiceRefundCreated
 				} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
 					template = email.TemplateInvoiceCancel
+				} else if one.Status == consts.InvoiceStatusPaid {
+					template = email.TemplateInvoiceRefundPaid
 				} else {
 					return nil
 				}
