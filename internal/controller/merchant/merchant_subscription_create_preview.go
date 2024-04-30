@@ -34,6 +34,7 @@ func (c *ControllerSubscription) CreatePreview(ctx context.Context, req *subscri
 		VatNumber:      req.VatNumber,
 		TaxPercentage:  req.TaxPercentage,
 		DiscountCode:   req.DiscountCode,
+		TrialEnd:       req.TrialEnd,
 	})
 	if err != nil {
 		return nil, err
