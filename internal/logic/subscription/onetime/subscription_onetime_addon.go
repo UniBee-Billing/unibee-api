@@ -165,7 +165,6 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
-
 	//update paymentId
 	status := 1
 	if createRes.Status == consts.PaymentSuccess {
