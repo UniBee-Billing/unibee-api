@@ -66,7 +66,6 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	} else {
 		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
 	}
-
 	one := &entity.MerchantWebhookLog{
 		MerchantId:     webhookMessage.MerchantId,
 		EndpointId:     int64(webhookMessage.EndpointId),
