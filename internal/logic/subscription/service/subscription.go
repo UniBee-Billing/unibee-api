@@ -1453,7 +1453,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 		return err
 	}
 
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	user := query.GetUserAccountById(ctx, sub.UserId)
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 	// SendEmail
 	if merchantMemberId > 0 {
