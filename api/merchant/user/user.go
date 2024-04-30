@@ -7,7 +7,7 @@ import (
 
 type NewReq struct {
 	g.Meta         `path:"/new" tags:"User" method:"post" summary:"NewUser" dc:"New User"`
-	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId" v:"required"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId"`
 	Email          string `json:"email" dc:"Email" v:"required"`
 	FirstName      string `json:"firstName" dc:"First Name"`
 	LastName       string `json:"lastName" dc:"Last Name"`
