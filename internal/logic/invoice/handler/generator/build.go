@@ -160,6 +160,14 @@ func (doc *Document) appendMetas() {
 		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
 	}
 
+	// Append InvoiceType
+	if len(doc.InvoiceType) > 0 {
+		dataString := fmt.Sprintf("Invoice Type: %s", doc.InvoiceType)
+		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
+		doc.pdf.SetFont(doc.Options.Font, "", 10)
+		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
+	}
+
 	// Append InvoiceDate
 	if len(doc.InvoiceDate) > 0 {
 		dataString := fmt.Sprintf("%s: %s", doc.Options.TextInvoiceDateTitle, doc.InvoiceDate)

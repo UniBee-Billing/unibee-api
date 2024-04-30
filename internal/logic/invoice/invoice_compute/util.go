@@ -115,6 +115,10 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 			}
 		}
 	}
+	var refundType = "Partial Refund"
+	if payment.TotalAmount == refund.RefundAmount {
+		refundType = "Full Refund"
+	}
 	return &bean.InvoiceSimplify{
 		Currency:                       originalInvoice.Currency,
 		OriginAmount:                   -refund.RefundAmount,
@@ -127,7 +131,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     consts.DEFAULT_DAY_UTIL_DUE,
 		Lines:                          items,
-		SendNote:                       originalInvoice.InvoiceId,
+		SendNote:                       fmt.Sprintf("%s(%s)", originalInvoice.InvoiceId, refundType),
 		PaymentId:                      payment.PaymentId,
 		RefundId:                       refund.RefundId,
 	}
