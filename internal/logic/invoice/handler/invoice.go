@@ -213,6 +213,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		PaymentId:                      refund.PaymentId,
 		RefundId:                       refund.RefundId,
 		Link:                           link.GetInvoiceLink(refund.InvoiceId, st),
+		SendNote:                       invoice.SendNote,
 		SendTerms:                      st,
 		PeriodStart:                    invoice.PeriodStart,
 		PeriodEnd:                      invoice.PeriodEnd,
