@@ -422,42 +422,82 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchantProductName = plan.PlanName
 	}
-	if one.Status > consts.InvoiceStatusPending {
-		utility.Assert(len(pdfFileName) > 0, "pdfFile download or generate error:"+one.InvoiceId)
-		var template = email.TemplateNewProcessingInvoice
-		if one.Status == consts.InvoiceStatusPaid {
-			payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-			if payment.Automatic == 0 {
-				template = email.TemplateInvoiceManualPaid
-			} else {
-				template = email.TemplateInvoiceAutomaticPaid
+	if len(one.RefundId) == 0 {
+		if one.Status > consts.InvoiceStatusPending {
+			utility.Assert(len(pdfFileName) > 0, "pdfFile download or generate error:"+one.InvoiceId)
+			var template = email.TemplateNewProcessingInvoice
+			if one.Status == consts.InvoiceStatusPaid {
+				payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+				if payment.Automatic == 0 {
+					template = email.TemplateInvoiceManualPaid
+				} else {
+					template = email.TemplateInvoiceAutomaticPaid
+				}
+			} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
+				template = email.TemplateInvoiceCancel
 			}
-		} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
-			template = email.TemplateInvoiceCancel
-		}
-		err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
-			InvoiceId:           one.InvoiceId,
-			UserName:            user.FirstName + " " + user.LastName,
-			MerchantProductName: merchantProductName,
-			MerchantCustomEmail: merchant.Email,
-			MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
-			DateNow:             gtime.Now(),
-			PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
-			PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
-			TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
-			Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
-		})
-		utility.AssertError(err, "send email error")
-		//update send status
-		_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-			dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
-			dao.Invoice.Columns().GmtModify:  gtime.Now(),
-		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
-			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
+				InvoiceId:           one.InvoiceId,
+				UserName:            user.FirstName + " " + user.LastName,
+				MerchantProductName: merchantProductName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
+				DateNow:             gtime.Now(),
+				PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
+				PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
+				TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
+				Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+			})
+			utility.AssertError(err, "send email error")
+			//update send status
+			_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+				dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
+				dao.Invoice.Columns().GmtModify:  gtime.Now(),
+			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+			if err != nil {
+				fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+			}
+		} else {
+			fmt.Printf("SendInvoiceEmailToUser payment invoice status is pending or init, email not send")
 		}
 	} else {
-		fmt.Printf("SendInvoiceEmailToUser invoice status is pending or init, email not send")
+		refund := query.GetRefundByRefundId(ctx, one.RefundId)
+		if refund != nil {
+			if one.Status > consts.InvoiceStatusPending {
+				var template = email.TemplateInvoiceRefundCreated
+				if one.Status == consts.InvoiceStatusProcessing {
+					template = email.TemplateInvoiceRefundCreated
+				} else if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
+					template = email.TemplateInvoiceCancel
+				} else {
+					return nil
+				}
+				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
+					InvoiceId:           one.InvoiceId,
+					UserName:            user.FirstName + " " + user.LastName,
+					MerchantProductName: merchantProductName,
+					MerchantCustomEmail: merchant.Email,
+					MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
+					DateNow:             gtime.Now(),
+					PeriodEnd:           gtime.Now().AddDate(0, 0, 5),
+					RefundAmount:        utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
+					TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
+					Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+				})
+				utility.AssertError(err, "send email error")
+				//update send status
+				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+					dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
+					dao.Invoice.Columns().GmtModify:  gtime.Now(),
+				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+				if err != nil {
+					fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+				}
+			} else {
+				fmt.Printf("SendInvoiceEmailToUser refund invoice status is pending or init, email not send")
+			}
+		}
 	}
+
 	return nil
 }
