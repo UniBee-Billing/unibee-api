@@ -16,10 +16,11 @@ type Options struct {
 	TextTypeQuotation    string `default:"QUOTATION" json:"text_type_quotation,omitempty"`
 	TextTypeDeliveryNote string `default:"DELIVERY NOTE" json:"text_type_delivery_note,omitempty"`
 
-	TextInvoiceNumberTitle   string `default:"Invoice Number" json:"text_number_title,omitempty"`
-	TextInvoiceDateTitle     string `default:"Invoice Date" json:"text_data_title,omitempty"`
-	TextInvoicePaidDateTitle string `default:"Invoice Paid Date" json:"text_paid_date_title,omitempty"`
-	TextPaymentTermTitle     string `default:"Payment term" json:"text_payment_term_title,omitempty"`
+	TextInvoiceNumberTitle       string `default:"Invoice Number" json:"text_number_title,omitempty"`
+	TextOriginInvoiceNumberTitle string `default:"Origin Invoice Number" json:"text_origin_number_title,omitempty"`
+	TextInvoiceDateTitle         string `default:"Invoice Date" json:"text_data_title,omitempty"`
+	TextInvoicePaidDateTitle     string `default:"Invoice Paid Date" json:"text_paid_date_title,omitempty"`
+	TextPaymentTermTitle         string `default:"Payment term" json:"text_payment_term_title,omitempty"`
 
 	TextItemsNameTitle     string `default:"Description" json:"text_items_name_title,omitempty"`
 	TextItemsUnitCostTitle string `default:"Unit price" json:"text_items_unit_cost_title,omitempty"`

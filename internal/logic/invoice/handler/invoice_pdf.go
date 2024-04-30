@@ -63,6 +63,9 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 
 	doc.SetInvoiceNumber(unibInvoice.InvoiceId)
 	doc.SetInvoiceDate(unibInvoice.GmtCreate.Layout("2006-01-02"))
+	if len(unibInvoice.RefundId) > 0 {
+		doc.SetOriginInvoiceNumber(unibInvoice.SendNote)
+	}
 
 	if unibInvoice.Status == consts.InvoiceStatusProcessing {
 		doc.SetStatus("Process")

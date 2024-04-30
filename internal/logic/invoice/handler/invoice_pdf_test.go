@@ -17,6 +17,8 @@ func TestGenerateInvoicePdf(t *testing.T) {
 	ctx := context.Background()
 	one := query.GetInvoiceByInvoiceId(ctx, "iv20240202ERExKnb6OhMfyyY")
 	utility.Assert(one != nil, "one not found")
+	one.RefundId = "refundId"
+	one.SendNote = "iv20240202ERExKnb6OhMfyyY"
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	err := createInvoicePdf(one, query.GetMerchantById(ctx, one.MerchantId), query.GetUserAccountById(ctx, one.UserId), savePath)
 	utility.AssertError(err, "Pdf Generator Error")

@@ -24,6 +24,12 @@ func (d *Document) SetInvoiceNumber(InvoiceNumber string) *Document {
 	return d
 }
 
+// SetOriginInvoiceNumber of document
+func (d *Document) SetOriginInvoiceNumber(number string) *Document {
+	d.InvoiceOriginNumber = number
+	return d
+}
+
 func (d *Document) SetLogo(logo []byte) *Document {
 	d.Logo = logo
 	return d

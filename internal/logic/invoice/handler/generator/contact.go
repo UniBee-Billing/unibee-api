@@ -110,7 +110,12 @@ func (c *Contact) appendContactTODoc(
 // appendCompanyContactToDoc append the company contact to the document
 func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
 	x, _, _, _ := doc.pdf.GetMargins()
-	return c.appendContactTODoc(x, y, true, doc, "Issued By:")
+	if len(doc.InvoiceOriginNumber) > 0 {
+		return c.appendContactTODoc(x, y, true, doc, "Refund From:")
+	} else {
+		return c.appendContactTODoc(x, y, true, doc, "Issued By:")
+	}
+
 }
 
 // appendCustomerContactToDoc append the customer contact to the document

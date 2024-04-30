@@ -17,6 +17,7 @@ type Document struct {
 	InvoiceNumber       string        `json:"ref,omitempty" validate:"required,min=1,max=32"`
 	Logo                []byte        `json:"logo,omitempty"` // Logo byte array
 	InvoiceDate         string        `json:"invoiceDate,omitempty" validate:"max=32"`
+	InvoiceOriginNumber string        `json:"invoiceOriginNumber,omitempty"`
 	Status              string        `json:"status,omitempty" validate:"max=32"`
 	ClientRef           string        `json:"client_ref,omitempty" validate:"max=64"`
 	Description         string        `json:"description,omitempty" validate:"max=1024"`
