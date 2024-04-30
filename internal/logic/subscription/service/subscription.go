@@ -565,6 +565,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		VatNumber:      req.VatNumber,
 		TaxPercentage:  req.TaxPercentage,
 		IsSubmit:       true,
+		TrialEnd:       req.TrialEnd,
 	})
 	if err != nil {
 		return nil, err
@@ -746,6 +747,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		utility.Assert(invoice.Id > 0, "Server Error")
 		oneInvoice := query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
 		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, oneInvoice)
+		one = query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 		utility.AssertError(err, "Finish Subscription Error")
 	}
 	return &CreateInternalRes{

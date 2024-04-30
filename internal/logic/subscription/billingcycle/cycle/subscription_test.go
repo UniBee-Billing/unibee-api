@@ -2,6 +2,7 @@ package cycle
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"unibee/api/bean"
@@ -157,6 +158,33 @@ func TestSubscription(t *testing.T) {
 	t.Run("Test for subscription cancel immediately", func(t *testing.T) {
 		//cancel immediately
 		err := service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusCancelled)
+	})
+	t.Run("Test for subscription trialEnd", func(t *testing.T) {
+		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
+			MerchantId:      test.TestMerchant.Id,
+			PlanId:          test.TestPlan.Id,
+			UserId:          test.TestUser.Id,
+			Quantity:        testQuantity,
+			GatewayId:       test.TestGateway.Id,
+			PaymentMethodId: "testPaymentMethodId",
+			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
+			TrialEnd:        gtime.Now().Timestamp() + 86400,
+		})
+		require.Nil(t, err)
+		require.NotNil(t, create)
+		require.NotNil(t, create.Subscription)
+		require.NotNil(t, create.Link)
+		require.NotNil(t, create.Paid)
+		require.Equal(t, true, create.Paid)
+		testSubscriptionId = create.Subscription.SubscriptionId
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.Equal(t, one.Status, consts.SubStatusActive)
+		//cancel immediately
+		err = service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
 		require.NotNil(t, one)
