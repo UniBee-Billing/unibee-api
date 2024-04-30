@@ -44,6 +44,11 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	utility.Assert(webhookMessage.Data != nil, "param is nil")
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
+	err := webhookMessage.Data.Set("eventType", webhookMessage.Event)
+	if err != nil {
+		g.Log().Errorf(ctx, "Webhook_Send %s %s error %s\n", "POST", webhookMessage.Url, err.Error())
+		return false
+	}
 	jsonString, err := webhookMessage.Data.ToJsonString()
 	utility.Assert(err == nil, fmt.Sprintf("json format error %s param %s", err, webhookMessage.Data))
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", webhookMessage.Url, jsonString)
