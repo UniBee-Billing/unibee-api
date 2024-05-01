@@ -1394,7 +1394,6 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		utility.Assert(invoiceNow == false && proration == false, "cancel subscription with proration invoice immediate not support for this version")
 	}
 	var nextStatus = consts.SubStatusCancelled
-	// cancel will generate proration invoice need compute todo mark
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:       nextStatus,
 		dao.Subscription.Columns().CancelReason: reason,
@@ -1409,7 +1408,12 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	if user != nil {
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if merchant != nil {
-			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionImmediateCancel, "", &email.TemplateVariable{
+			var template = email.TemplateSubscriptionImmediateCancel
+			if sub.CancelAtPeriodEnd == 1 && sub.TrialEnd == sub.CurrentPeriodEnd {
+				//first trial period without payment
+				template = email.TemplateSubscriptionCancelledByTrialEndWithoutPayment
+			}
+			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, template, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,
 				MerchantProductName: plan.PlanName,
 				MerchantCustomEmail: merchant.Email,

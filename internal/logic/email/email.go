@@ -37,6 +37,7 @@ const (
 	TemplateUserOTPLogin                                    = "UserOTPLogin"
 	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
 	TemplateSubscriptionCancelledAtPeriodEndByUser          = "SubscriptionCancelledAtPeriodEndByUser"
+	TemplateSubscriptionCancelledByTrialEndWithoutPayment   = "SubscriptionCancelledByTrialEndWithoutPayment"
 	TemplateSubscriptionCancelLastCancelledAtPeriodEnd      = "SubscriptionCancelLastCancelledAtPeriodEnd"
 	TemplateSubscriptionImmediateCancel                     = "SubscriptionImmediateCancel"
 	TemplateSubscriptionUpdate                              = "SubscriptionUpdate"
