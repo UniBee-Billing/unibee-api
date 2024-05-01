@@ -297,7 +297,7 @@ type CreateInternalRes struct {
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.GatewayId > 0, "Id invalid")
+	utility.Assert(req.GatewayId > 0, "GatewayId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
@@ -540,8 +540,8 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if req.Discount != nil {
 		//utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call") // todo mark enable for test automatic
 		// create external discount
-		utility.Assert(req.PlanId > 0, "planId invalid")
-		utility.Assert(req.GatewayId > 0, "Id invalid")
+		utility.Assert(req.PlanId > 0, "PlanId invalid")
+		utility.Assert(req.GatewayId > 0, "GatewayId invalid")
 		utility.Assert(req.UserId > 0, "UserId invalid")
 		plan := query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
@@ -1135,7 +1135,7 @@ type UpdateInternalReq struct {
 	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId          uint64                      `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                      `json:"gatewayId" dc:"Id" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"GatewayId" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -1158,7 +1158,6 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
 		// create external discount
 		utility.Assert(req.NewPlanId > 0, "planId invalid")
-		utility.Assert(req.GatewayId > 0, "Id invalid")
 		utility.Assert(sub.UserId > 0, "UserId invalid")
 		plan := query.GetPlanById(ctx, req.NewPlanId)
 		utility.Assert(plan.MerchantId == sub.MerchantId, "merchant not match")

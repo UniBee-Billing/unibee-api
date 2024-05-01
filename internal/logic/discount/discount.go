@@ -61,6 +61,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		utility.Assert(req.DiscountPercentage > 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
+		req.Currency = ""
 	} else if req.DiscountType == DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
