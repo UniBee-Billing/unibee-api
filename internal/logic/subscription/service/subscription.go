@@ -594,7 +594,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		GatewayId:                   prepare.Gateway.Id,
 		UserId:                      prepare.UserId,
 		Quantity:                    prepare.Quantity,
-		Amount:                      prepare.TotalAmount,
+		Amount:                      prepare.TotalAmount, // todo mark should use originAmount
 		Currency:                    prepare.Currency,
 		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
 		SubscriptionId:              utility.CreateSubscriptionId(),
