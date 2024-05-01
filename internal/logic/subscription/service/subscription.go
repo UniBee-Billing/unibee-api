@@ -538,7 +538,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 
 func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInternalRes, error) {
 	if req.Discount != nil {
-		//utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
+		//utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call") // todo mark enable for test automatic
 		// create external discount
 		utility.Assert(req.PlanId > 0, "planId invalid")
 		utility.Assert(req.GatewayId > 0, "Id invalid")
