@@ -1634,6 +1634,25 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	return nil
 }
 
+func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, expireTime int64) error {
+	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
+	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(sub != nil, "subscription not found")
+	utility.Assert(sub.Status == consts.SubStatusPending, "subscription not in pending status")
+	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
+	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:            consts.SubStatusIncomplete,
+		dao.Subscription.Columns().CurrentPeriodPaid: expireTime,
+		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)

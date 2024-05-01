@@ -301,6 +301,15 @@ type AdminNoteRo struct {
 	LastName       string `json:"lastName"   description:"LastName"`
 }
 
+type ActiveTemporarilyReq struct {
+	g.Meta         `path:"/active_temporarily" tags:"Subscription" method:"post" summary:"Subscription active temporarily, status will transmit from pending to incomplete"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	ExpireTime     int64  `json:"expireTime"  dc:"ExpireTime, the expire utc time if not paid"  v:"required"`
+}
+
+type ActiveTemporarilyRes struct {
+}
+
 type AdminNoteListReq struct {
 	g.Meta         `path:"/admin_note_list" tags:"Subscription-Note" method:"get,post" summary:"SubscriptionNoteList"`
 	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
