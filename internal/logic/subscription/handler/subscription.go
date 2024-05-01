@@ -51,6 +51,7 @@ func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subs
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, invoice.PeriodEnd, sub.PlanId)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
@@ -92,6 +93,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
 		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,

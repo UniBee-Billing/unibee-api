@@ -56,6 +56,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
 		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,

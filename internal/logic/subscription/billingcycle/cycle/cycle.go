@@ -97,7 +97,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionCancel At Billing Cycle End By CurrentPeriodEnd Set"}, nil
 			}
-		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).IncompleteExpireTime {
+		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && isSubscriptionExpireExcludePending(ctx, sub, timeNow) {
 			// invoice not generate and sub out of time, need expired by system
 			err = expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 			if err != nil {
@@ -242,4 +242,15 @@ func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, t
 		//}
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
 	}
+}
+
+func isSubscriptionExpireExcludePending(ctx context.Context, sub *entity.Subscription, timeNow int64) bool {
+	if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).IncompleteExpireTime {
+		// expire after periodEnd or trialEnd, depends on incompleteExpireTime config
+		return true
+	} else if sub.Status == consts.SubStatusIncomplete && timeNow < sub.CurrentPeriodEnd {
+		// manual set sub status to incomplete for several days
+
+	}
+	return false
 }

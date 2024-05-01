@@ -333,7 +333,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		bindingOnetimeAddonIds = unibee.String(utility.IntListToString(req.OnetimeAddonIds))
 	}
 
-	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
+	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "" || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
 		dao.Plan.Columns().PlanName:                  req.PlanName,
