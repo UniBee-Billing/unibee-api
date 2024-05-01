@@ -84,8 +84,9 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
-			URL:      stripe.String(webhookUrl),
+			Metadata:   map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
+			URL:        stripe.String(webhookUrl),
+			APIVersion: stripe.String(stripe.APIVersion),
 		}
 		result, err := webhookendpoint.New(params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, "", nil, gateway)
@@ -120,8 +121,9 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			URL:      stripe.String(webhookUrl),
-			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
+			URL:        stripe.String(webhookUrl),
+			Metadata:   map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
+			APIVersion: stripe.String(stripe.APIVersion),
 		}
 		result, err := webhookendpoint.Update(one.ID, params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, one.ID, nil, gateway)
