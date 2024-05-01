@@ -68,7 +68,7 @@ type SubscriptionColumns struct {
 	TestClock                   string // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	MetaData                    string // meta_data(json)
 	GasPayer                    string // who pay the gas, merchant|user
-	CurrentPeriodPaid           string // current period paid or not, 1-paid, other-no
+	CurrentPeriodPaid           string // current period paid or not, 1-paid, other-the utc time to expire
 }
 
 // subscriptionColumns holds the columns for table subscription.

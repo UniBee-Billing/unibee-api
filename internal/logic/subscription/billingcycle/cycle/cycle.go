@@ -248,9 +248,9 @@ func isSubscriptionExpireExcludePending(ctx context.Context, sub *entity.Subscri
 	if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).IncompleteExpireTime {
 		// expire after periodEnd or trialEnd, depends on incompleteExpireTime config
 		return true
-	} else if sub.Status == consts.SubStatusIncomplete && timeNow < sub.CurrentPeriodEnd {
+	} else if sub.Status == consts.SubStatusIncomplete && sub.CurrentPeriodPaid != 1 && timeNow > sub.CurrentPeriodPaid {
 		// manual set sub status to incomplete for several days
-
+		return true
 	}
 	return false
 }
