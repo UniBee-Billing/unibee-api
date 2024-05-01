@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -13,6 +14,7 @@ import (
 	"unibee/api/bean"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
+	"unibee/internal/consumer/webhook/log"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/currency"
@@ -254,22 +256,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Su
 	if err == nil && res.Payment != nil {
 		if err == nil && res.Status != consts.PaymentSuccess {
 			//need send invoice for authorised
-			oneUser := query.GetUserAccountById(ctx, sub.UserId)
-			plan := query.GetPlanById(ctx, sub.PlanId)
-			if plan != nil && oneUser != nil {
-				err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
-					UserName:            oneUser.FirstName + " " + oneUser.LastName,
-					MerchantProductName: plan.PlanName,
-					MerchantCustomEmail: merchant.Email,
-					MerchantName:        query.GetMerchantCountryConfigName(ctx, res.Payment.MerchantId, oneUser.CountryCode),
-					PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
-					Currency:            strings.ToUpper(invoice.Currency),
-					PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
-				})
-				if err != nil {
-					g.Log().Errorf(ctx, "CreateSubInvoicePaymentDefaultAutomatic SendTemplateEmail err:%s", err.Error())
-				}
-			}
+			SendAuthorizedEmailBackground(sub, invoice, res.Payment)
 		}
 		if len(invoice.DiscountCode) > 0 {
 			_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
@@ -303,4 +290,40 @@ func HardDeletePayment(ctx context.Context, merchantId uint64, paymentId string)
 	}
 	_, err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().PaymentId, paymentId).Delete()
 	return err
+}
+
+func SendAuthorizedEmailBackground(sub *entity.Subscription, invoice *entity.Invoice, payment *entity.Payment) {
+	ctx := context.Background()
+	go func() {
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				log.PrintPanic(ctx, err)
+				return
+			}
+		}()
+		merchant := query.GetMerchantById(ctx, sub.MerchantId)
+		oneUser := query.GetUserAccountById(ctx, sub.UserId)
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		if plan != nil && oneUser != nil && merchant != nil {
+			err := email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
+				UserName:            oneUser.FirstName + " " + oneUser.LastName,
+				MerchantProductName: plan.PlanName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
+				PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
+				Currency:            strings.ToUpper(invoice.Currency),
+				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+			})
+			if err != nil {
+				g.Log().Errorf(ctx, "CreateSubInvoicePaymentDefaultAutomatic SendTemplateEmail err:%s", err.Error())
+			}
+		}
+	}()
+
 }
