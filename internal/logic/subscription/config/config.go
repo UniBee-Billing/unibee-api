@@ -30,7 +30,7 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 	}
 	updateProrationConfig := merchant_config.GetMerchantConfig(ctx, merchantId, UpdateProration)
 	if updateProrationConfig != nil && updateProrationConfig.ConfigValue == "false" {
-		config.DowngradeEffectImmediately = false
+		config.UpgradeProration = false
 	}
 	incompleteExpireTimeConfig := merchant_config.GetMerchantConfig(ctx, merchantId, IncompleteExpireTime)
 	if incompleteExpireTimeConfig != nil && len(incompleteExpireTimeConfig.ConfigValue) > 0 {

@@ -217,6 +217,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 	} else {
 		utility.Assert(param.CycleLimit == nil, "cycleLimit not available as recurring not enable")
 		utility.Assert(param.EndTime == nil, "endTime not available as recurring not enable")
+		endTime = gtime.Now().Timestamp() + 10
 	}
 	var discountType = 1
 	var discountAmount int64 = 0
