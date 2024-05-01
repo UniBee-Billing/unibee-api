@@ -111,12 +111,13 @@ type AddNewTrialStartRes struct {
 
 type RenewReq struct {
 	g.Meta         `path:"/renew" tags:"Subscription" method:"post" summary:"RenewSubscription" dc:"renew an exist subscription "`
-	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
-	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId, id of subscription which addon will attached, either SubscriptionId or UserId needed, The only one active subscription of userId will attach the addon"`
+	UserId         uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
 	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
 	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
 }
 
 type RenewRes struct {
@@ -232,6 +233,7 @@ type UpdateReq struct {
 	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	DiscountCode       string                      `json:"discountCode" dc:"DiscountCode"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 }
 
 type UpdateRes struct {

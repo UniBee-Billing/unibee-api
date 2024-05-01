@@ -45,5 +45,8 @@ func ConvertTaxPercentageToPercentageFloat(taxPercentage int64) float64 {
 }
 
 func ConvertTaxPercentageToInternalFloat(taxPercentage int64) float64 {
+	if taxPercentage == 0 {
+		return 0
+	}
 	return float64(taxPercentage) / 10000
 }

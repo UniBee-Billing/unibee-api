@@ -206,7 +206,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64, manualPayment bool) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	var email = ""
 	if user != nil {
@@ -223,7 +223,8 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 	}
 	invoice.Currency = strings.ToUpper(invoice.Currency)
 	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-		PayImmediate: true,
+		PayImmediate: !manualPayment,
+		CheckoutMode: manualPayment,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
 			SubscriptionId:    sub.SubscriptionId,
@@ -266,7 +267,7 @@ func CreateSubInvoiceAutomaticPayment(ctx context.Context, sub *entity.Subscript
 					PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 				})
 				if err != nil {
-					g.Log().Errorf(ctx, "CreateSubInvoiceAutomaticPayment SendTemplateEmail err:%s", err.Error())
+					g.Log().Errorf(ctx, "CreateSubInvoicePaymentDefaultAutomatic SendTemplateEmail err:%s", err.Error())
 				}
 			}
 		}

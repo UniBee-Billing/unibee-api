@@ -58,7 +58,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
-		utility.Assert(req.DiscountPercentage > 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
+		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
 		req.Currency = ""
@@ -112,9 +112,10 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
-		utility.Assert(req.DiscountPercentage > 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
+		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
-		utility.Assert(len(req.Currency) == 0, "invalid Currency")
+		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
+		req.Currency = ""
 	} else if req.DiscountType == DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
@@ -220,7 +221,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		utility.Assert(param.EndTime == nil, "endTime not available as recurring not enable")
 		endTime = gtime.Now().Timestamp() + 10
 	}
-	var discountType = 1
+	var discountType = DiscountTypePercentage
 	var discountAmount int64 = 0
 	var discountPercentage int64 = 0
 

@@ -103,19 +103,19 @@ func MerchantGatewayCheck(ctx context.Context, merchantId uint64, reqGatewayId u
 }
 
 type RenewInternalReq struct {
-	MerchantId     uint64                      `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	SubscriptionId string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
-	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
-	GatewayId      *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
-	TaxPercentage  *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
-	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+	//UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
+	GatewayId     *uint64                     `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	TaxPercentage *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	DiscountCode  string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
+	Discount      *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.UserId == req.UserId, "userId not match")
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
 	utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
@@ -146,7 +146,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency)
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency)
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -199,7 +199,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, invoice, gateway.Id)
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment)
 	if err != nil {
 		return nil, err
 	}
@@ -664,7 +664,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.CreateSubInvoiceAutomaticPayment(ctx, one, invoice, gateway.Id)
+		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false)
 		if err != nil {
 			return nil, err
 		}
@@ -1145,6 +1145,7 @@ type UpdateInternalReq struct {
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 }
 
 func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
@@ -1251,7 +1252,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, prepare.Subscription, invoice, gateway.Id)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment)
 		if err != nil {
 			return nil, err
 		}
@@ -1704,9 +1705,9 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoiceAutomaticPayment(ctx, sub, one, sub.GatewayId)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false)
 		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment err:", err.Error())
+			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err
 		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -1719,7 +1720,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		if err != nil {
 			return err
 		}
-		g.Log().Print(ctx, "EndTrialManual CreateSubInvoiceAutomaticPayment:", utility.MarshalToJsonString(createRes))
+		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic:", utility.MarshalToJsonString(createRes))
 		err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual HandleSubscriptionIncomplete err:", err.Error())
