@@ -38,6 +38,8 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 			g.Log().Errorf(ctx, "SubscriptionDetail parse addon param:%s", err.Error())
 		}
 	}
+	latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId))
+	latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, latestInvoiceOne.DiscountCode))
 	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        bean.SimplifySubscription(one),
@@ -45,7 +47,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 		Plan:                                bean.SimplifyPlan(query.GetPlanById(ctx, one.PlanId)),
 		AddonParams:                         addonParams,
 		Addons:                              addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
-		LatestInvoice:                       bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId)),
+		LatestInvoice:                       latestInvoiceOne,
 		Discount:                            bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, one.DiscountCode)),
 		UnfinishedSubscriptionPendingUpdate: GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx, one.PendingUpdateId),
 	}, nil
@@ -101,13 +103,15 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		if user != nil {
 			user.Password = ""
 		}
+		latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId))
+		latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, sub.MerchantId, latestInvoiceOne.DiscountCode))
 		list = append(list, &detail.SubscriptionDetail{
 			User:          bean.SimplifyUserAccount(user),
 			Subscription:  bean.SimplifySubscription(sub),
 			Gateway:       bean.SimplifyGateway(query.GetGatewayById(ctx, sub.GatewayId)),
 			Plan:          nil,
 			Addons:        nil,
-			LatestInvoice: bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)),
+			LatestInvoice: latestInvoiceOne,
 			Discount:      bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, sub.MerchantId, sub.DiscountCode)),
 			AddonParams:   addonParams,
 		})
