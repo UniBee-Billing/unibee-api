@@ -15,6 +15,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/test"
+	"unibee/utility/unibee"
 )
 
 // success testcases
@@ -104,6 +105,12 @@ func TestSubscription(t *testing.T) {
 			GatewayId:       test.TestGateway.Id,
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
+			Discount: &bean.ExternalDiscountParam{
+				Recurring:          unibee.Bool(false),
+				DiscountAmount:     nil,
+				DiscountPercentage: unibee.Int64(100),
+				Metadata:           nil,
+			},
 		})
 		require.Nil(t, err)
 		require.NotNil(t, create)
