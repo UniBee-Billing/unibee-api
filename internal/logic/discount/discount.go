@@ -84,6 +84,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		SubscriptionLimit:  req.SubscriptionLimit,
 		StartTime:          req.StartTime,
 		EndTime:            req.EndTime,
+		MetaData:           utility.MarshalToJsonString(req.Metadata),
 		PlanIds:            utility.IntListToString(req.PlanIds),
 		CreateTime:         gtime.Now().Timestamp(),
 	}
@@ -135,6 +136,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		dao.MerchantDiscountCode.Columns().StartTime:          req.StartTime,
 		dao.MerchantDiscountCode.Columns().EndTime:            req.EndTime,
 		dao.MerchantDiscountCode.Columns().PlanIds:            utility.IntListToString(req.PlanIds),
+		dao.MerchantDiscountCode.Columns().MetaData:           utility.MarshalToJsonString(req.Metadata),
 		dao.MerchantDiscountCode.Columns().GmtModify:          gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {

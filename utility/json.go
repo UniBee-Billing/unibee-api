@@ -3,6 +3,7 @@ package utility
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"unibee/utility/unibee"
 )
 
 func FormatToJsonString(target interface{}) string {
@@ -32,6 +33,17 @@ func MarshalToJsonString(target interface{}) string {
 		return ""
 	}
 	return string(marshal)
+}
+
+func MarshalMetadataToJsonString(target interface{}) *string {
+	if target == nil {
+		return nil
+	}
+	marshal, err := gjson.Marshal(target)
+	if err != nil {
+		return nil
+	}
+	return unibee.String(string(marshal))
 }
 
 func UnmarshalFromJsonString(target string, one interface{}) error {
