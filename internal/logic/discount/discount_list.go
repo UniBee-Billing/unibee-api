@@ -15,6 +15,7 @@ func MerchantDiscountCodeList(ctx context.Context, merchantId uint64) []*bean.Me
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, merchantId).
 		Where(dao.MerchantDiscountCode.Columns().Type, 0).
 		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
+		OrderDesc(dao.MerchantDiscountCode.Columns().GmtCreate).
 		Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantDiscountCodeList err:%s", err.Error())
