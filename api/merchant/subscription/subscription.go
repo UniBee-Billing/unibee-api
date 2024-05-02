@@ -186,7 +186,7 @@ type CreateReq struct {
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	TrialEnd           int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
-	StartIncomplete    bool                        `json:"StartIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
+	StartIncomplete    bool                        `json:"startIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
 }
 
 type CreateRes struct {
