@@ -25,6 +25,7 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 		DiscountCode:   req.DiscountCode,
 		Discount:       req.Discount,
 		ManualPayment:  req.ManualPayment,
+		ReturnUrl:      req.ReturnUrl,
 	})
 	return &subscription.RenewRes{
 		Subscription: renewRes.Subscription,

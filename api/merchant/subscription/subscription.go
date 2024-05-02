@@ -118,6 +118,7 @@ type RenewReq struct {
 	DiscountCode   string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl      string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 }
 
 type RenewRes struct {
@@ -234,6 +235,7 @@ type UpdateReq struct {
 	DiscountCode       string                      `json:"discountCode" dc:"DiscountCode"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 }
 
 type UpdateRes struct {

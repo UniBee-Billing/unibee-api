@@ -111,6 +111,7 @@ type RenewInternalReq struct {
 	DiscountCode  string                      `json:"discountCode" dc:"DiscountCode, override subscription discount"`
 	Discount      *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl     string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
@@ -199,7 +200,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment)
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -665,7 +666,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false)
+		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false, req.ReturnUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -1150,6 +1151,7 @@ type UpdateInternalReq struct {
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
+	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 }
 
 func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
@@ -1256,7 +1258,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl)
 		if err != nil {
 			return nil, err
 		}
@@ -1709,7 +1711,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false, "")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

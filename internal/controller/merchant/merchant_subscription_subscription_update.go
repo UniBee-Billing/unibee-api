@@ -31,6 +31,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		TaxPercentage:      req.TaxPercentage,
 		Discount:           req.Discount,
 		ManualPayment:      req.ManualPayment,
+		ReturnUrl:          req.ReturnUrl,
 	}, -1)
 	if err != nil {
 		return nil, err
