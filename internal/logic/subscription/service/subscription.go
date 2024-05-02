@@ -426,6 +426,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		if plan.TrialAmount > 0 {
 			utility.Assert(len(addons) == 0, "addon is not available for charge trial plan")
 		}
+
 		cancelAtPeriodEnd = plan.CancelAtTrialEnd
 		var currentTimeEnd = req.TrialEnd
 		trialEnd = currentTimeEnd
