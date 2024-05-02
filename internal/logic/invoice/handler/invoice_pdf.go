@@ -140,7 +140,7 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 		if len(unibInvoice.DiscountCode) > 0 {
 			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(%s)", unibInvoice.DiscountCode)
 		}
-		doc.DiscountTotalString = fmt.Sprintf("-%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.DiscountAmount, unibInvoice.Currency))
+		doc.DiscountTotalString = fmt.Sprintf("%s -%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.DiscountAmount, unibInvoice.Currency))
 	}
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TotalAmount, unibInvoice.Currency))
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TaxAmount, unibInvoice.Currency))
