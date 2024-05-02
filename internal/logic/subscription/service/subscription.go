@@ -118,6 +118,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.MerchantId == req.MerchantId, "merchantId not match")
+	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
 	if req.TaxPercentage != nil {
