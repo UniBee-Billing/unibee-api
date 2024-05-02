@@ -127,7 +127,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	var addonParams []*bean.PlanAddonParam
 	if len(sub.AddonData) > 0 {
 		err := utility.UnmarshalFromJsonString(sub.AddonData, &addonParams)
-		if err == nil {
+		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
 	}
