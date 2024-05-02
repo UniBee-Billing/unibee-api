@@ -109,7 +109,7 @@ func TestSubscription(t *testing.T) {
 				Recurring:          unibee.Bool(false),
 				DiscountAmount:     nil,
 				DiscountPercentage: unibee.Int64(100),
-				Metadata:           nil,
+				Metadata:           map[string]interface{}{"freeTraffic": 5},
 			},
 		})
 		require.Nil(t, err)
