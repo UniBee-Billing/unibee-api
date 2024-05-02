@@ -40,6 +40,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		DiscountCode:       req.DiscountCode,
 		Discount:           req.Discount,
 		TrialEnd:           req.TrialEnd,
+		StartIncomplete:    req.StartIncomplete,
 	})
 	return &subscription.CreateRes{
 		Subscription: createRes.Subscription,

@@ -286,6 +286,7 @@ type CreateInternalReq struct {
 	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
 	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	TrialEnd           int64                       `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
+	StartIncomplete    bool                        `json:"StartIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
 }
 
 type CreateInternalRes struct {
@@ -749,6 +750,9 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, oneInvoice)
 		one = query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 		utility.AssertError(err, "Finish Subscription Error")
+	} else if req.StartIncomplete {
+		err = SubscriptionActiveTemporarily(ctx, one.SubscriptionId, one.CurrentPeriodEnd)
+		utility.AssertError(err, "Start Active Temporarily")
 	}
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(one),

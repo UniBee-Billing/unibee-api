@@ -167,26 +167,26 @@ type CreatePreviewRes struct {
 }
 
 type CreateReq struct {
-	g.Meta                  `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
-	PlanId                  uint64                      `json:"planId" dc:"PlanId" v:"required"`
-	ExternalUserId          string                      `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
-	Email                   string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
-	UserId                  uint64                      `json:"userId" dc:"UserId"`
-	Quantity                int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId               uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
-	AddonParams             []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
-	ConfirmTotalAmount      int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
-	ConfirmCurrency         string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
-	ReturnUrl               string                      `json:"returnUrl"  dc:"ReturnUrl"  `
-	VatCountryCode          string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber               string                      `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage           *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
-	PaymentMethodId         string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
-	Metadata                map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
-	DiscountCode            string                      `json:"discountCode"        dc:"DiscountCode"`
-	Discount                *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
-	TrialEnd                int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
-	IncompleteUtilPeriodEnd string                      `json:"incompleteUtilPeriodEnd"        dc:"IncompleteUtilPeriodEnd, use now pay later, subscription will generate invoice and stay incomplete status if set"`
+	g.Meta             `path:"/create_submit" tags:"Subscription" method:"post" summary:"CreateSubscription"`
+	PlanId             uint64                      `json:"planId" dc:"PlanId" v:"required"`
+	ExternalUserId     string                      `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email              string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId             uint64                      `json:"userId" dc:"UserId"`
+	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
+	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
+	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
+	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	PaymentMethodId    string                      `json:"paymentMethodId" dc:"PaymentMethodId" `
+	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
+	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
+	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
+	TrialEnd           int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
+	StartIncomplete    bool                        `json:"StartIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
 }
 
 type CreateRes struct {
