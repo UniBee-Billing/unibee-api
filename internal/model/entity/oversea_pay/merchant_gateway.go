@@ -34,4 +34,7 @@ type MerchantGateway struct {
 	IsDeleted             int         `json:"isDeleted"             description:"0-UnDeleted，1-Deleted"`                       // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency string      `json:"cryptoReceiveCurrency" description:""`                                            //
 	CountryConfig         string      `json:"countryConfig"         description:""`                                            //
+	Currency              string      `json:"currency"              description:"currency"`                                    // currency
+	MinimumAmount         int64       `json:"minimumAmount"         description:"minimum amount, cent"`                        // minimum amount, cent
+	BankData              string      `json:"bankData"              description:"bank credentials data"`                       // bank credentials data
 }

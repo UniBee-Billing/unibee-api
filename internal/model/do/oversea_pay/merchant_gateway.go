@@ -36,4 +36,7 @@ type MerchantGateway struct {
 	IsDeleted             interface{} // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency interface{} //
 	CountryConfig         interface{} //
+	Currency              interface{} // currency
+	MinimumAmount         interface{} // minimum amount, cent
+	BankData              interface{} // bank credentials data
 }

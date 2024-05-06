@@ -44,6 +44,9 @@ type MerchantGatewayColumns struct {
 	IsDeleted             string // 0-UnDeleted，1-Deleted
 	CryptoReceiveCurrency string //
 	CountryConfig         string //
+	Currency              string // currency
+	MinimumAmount         string // minimum amount, cent
+	BankData              string // bank credentials data
 }
 
 // merchantGatewayColumns holds the columns for table merchant_gateway.
@@ -72,6 +75,9 @@ var merchantGatewayColumns = MerchantGatewayColumns{
 	IsDeleted:             "is_deleted",
 	CryptoReceiveCurrency: "crypto_receive_currency",
 	CountryConfig:         "country_config",
+	Currency:              "currency",
+	MinimumAmount:         "minimum_amount",
+	BankData:              "bank_data",
 }
 
 // NewMerchantGatewayDao creates and returns a new DAO object for table data access.

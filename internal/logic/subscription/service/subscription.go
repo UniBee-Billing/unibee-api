@@ -582,6 +582,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if len(req.ConfirmCurrency) > 0 {
 		utility.Assert(strings.Compare(strings.ToUpper(req.ConfirmCurrency), prepare.Currency) == 0, "currency not match , data may expired, fetch preview again")
 	}
+	utility.Assert(prepare.Invoice.TotalAmount >= prepare.Gateway.MinimumAmount, "Total Amount not reach the gateway's minimum amount")
 
 	var subType = consts.SubTypeDefault
 	if consts.SubscriptionCycleUnderUniBeeControl {
