@@ -16,6 +16,7 @@ func (c *ControllerSubscription) CancelLastCancelAtPeriodEnd(ctx context.Context
 		utility.Assert(one != nil, "no active or incomplete subscription found")
 		req.SubscriptionId = one.SubscriptionId
 	}
+
 	err = service.SubscriptionCancelLastCancelAtPeriodEnd(ctx, req.SubscriptionId, false)
 	if err != nil {
 		return nil, err
