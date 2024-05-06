@@ -21,6 +21,7 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"autotest_crypto": &AutoTestCrypto{},
 	"autotest":        &AutoTest{},
 	"coinbase":        &Coinbase{},
+	"wire":            &Wire{},
 }
 
 type GatewayProxy struct {
@@ -53,7 +54,7 @@ func (p GatewayProxy) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_
 func (p GatewayProxy) getRemoteGateway() (one _interface.GatewayInterface) {
 	utility.Assert(len(p.GatewayName) > 0, "gateway is not set")
 	one = GatewayNameMapping[p.GatewayName]
-	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal|changelly")
+	utility.Assert(one != nil, "gateway not support:"+p.GatewayName+" should be stripe|paypal|changelly|wire")
 	return
 }
 

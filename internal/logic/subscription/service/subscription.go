@@ -635,7 +635,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
 		utility.AssertError(err, "System Error")
-		if strings.Contains(prepare.Plan.TrialDemand, "PaymentMethod") && req.PaymentMethodId == "" {
+		if strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
 			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need")
 			url, _ := method.NewPaymentMethod(ctx, &method.NewPaymentMethodInternalReq{
 				MerchantId:     _interface.GetMerchantId(ctx),
