@@ -2,13 +2,18 @@ package merchant
 
 import (
 	"context"
-
-	"github.com/gogf/gf/v2/errors/gcode"
-	"github.com/gogf/gf/v2/errors/gerror"
+	_interface "unibee/internal/interface"
+	gateway2 "unibee/internal/logic/gateway/service"
 
 	"unibee/api/merchant/gateway"
 )
 
 func (c *ControllerGateway) WireTransferSetup(ctx context.Context, req *gateway.WireTransferSetupReq) (res *gateway.WireTransferSetupRes, err error) {
-	return nil, gerror.NewCode(gcode.CodeNotImplemented)
+	gateway2.SetupWireTransferGateway(ctx, &gateway2.WireTransferSetupReq{
+		MerchantId:    _interface.GetMerchantId(ctx),
+		Currency:      req.Currency,
+		MinimumAmount: req.MinimumAmount,
+		Bank:          req.Bank,
+	})
+	return &gateway.WireTransferSetupRes{}, nil
 }

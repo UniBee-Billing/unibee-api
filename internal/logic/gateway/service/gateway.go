@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
@@ -101,4 +102,56 @@ func GetMerchantAvailableGatewaysByCountryCode(ctx context.Context, merchantId u
 		}
 	}
 	return availableGateways
+}
+
+type WireTransferSetupReq struct {
+	GatewayId     uint64            `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	MerchantId    uint64            `json:"merchantId"   dc:"The merchantId of wire transfer" v:"required" `
+	Currency      string            `json:"currency"   dc:"The currency of wire transfer " v:"required" `
+	MinimumAmount int64             `json:"minimumAmount"   dc:"The minimum amount of wire transfer" v:"required" `
+	Bank          *bean.GatewayBank `json:"bank"   dc:"The receiving bank of wire transfer " v:"required" `
+}
+type WireTransferSetupRes struct {
+}
+
+func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
+	gatewayName := "wire transfer"
+	one := query.GetGatewayByGatewayName(ctx, req.MerchantId, gatewayName)
+	utility.Assert(one == nil, "exist same gateway")
+	if config.GetConfigInstance().IsProd() {
+		err := dao.MerchantGateway.Ctx(ctx).
+			Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
+			OmitEmpty().
+			Scan(&one)
+		utility.AssertError(err, "system error")
+		utility.Assert(one == nil, "same gateway exist")
+	}
+	one = &entity.MerchantGateway{
+		MerchantId:    req.MerchantId,
+		GatewayName:   gatewayName,
+		Name:          "Wire Transfer",
+		Currency:      req.Currency,
+		MinimumAmount: req.MinimumAmount,
+		GatewayType:   consts.GatewayTypeWireTransfer,
+		BankData:      utility.MarshalToJsonString(req.Bank),
+	}
+	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	utility.AssertError(err, "system error")
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
+}
+
+func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
+	utility.Assert(req.GatewayId > 0, "gatewayId invalid")
+	one := query.GetGatewayById(ctx, req.GatewayId)
+	utility.Assert(one != nil, "gateway not found")
+	utility.Assert(one.MerchantId == req.MerchantId, "merchant not match")
+
+	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
+		dao.MerchantGateway.Columns().BankData:      utility.MarshalToJsonString(req.Bank),
+		dao.MerchantGateway.Columns().Currency:      req.Currency,
+		dao.MerchantGateway.Columns().MinimumAmount: req.MinimumAmount,
+		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
+	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
+	utility.AssertError(err, "system error")
 }
