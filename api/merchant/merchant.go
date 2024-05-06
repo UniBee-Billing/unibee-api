@@ -68,6 +68,8 @@ type IMerchantGateway interface {
 	Edit(ctx context.Context, req *gateway.EditReq) (res *gateway.EditRes, err error)
 	EditCountryConfig(ctx context.Context, req *gateway.EditCountryConfigReq) (res *gateway.EditCountryConfigRes, err error)
 	SetupWebhook(ctx context.Context, req *gateway.SetupWebhookReq) (res *gateway.SetupWebhookRes, err error)
+	WireTransferSetup(ctx context.Context, req *gateway.WireTransferSetupReq) (res *gateway.WireTransferSetupRes, err error)
+	WireTransferEdit(ctx context.Context, req *gateway.WireTransferEditReq) (res *gateway.WireTransferEditRes, err error)
 }
 
 type IMerchantInvoice interface {

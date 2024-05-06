@@ -45,3 +45,27 @@ type SetupWebhookReq struct {
 type SetupWebhookRes struct {
 	GatewayWebhookUrl string `json:"gatewayWebhookUrl"  dc:"The webhook endpoint url of payment gateway, if gateway is stripe, the url will setting to stripe by api automaticly"`
 }
+
+type WireTransferSetupReq struct {
+	g.Meta        `path:"/wire_transfer_setup" tags:"Gateway" method:"post" summary:"WireTransferSetup" dc:"Setup the wire transfer"`
+	Currency      string `json:"currency"   dc:"The currency of wire transfer " v:"required" `
+	MinimumAmount uint64 `json:"minimumAmount"   dc:"The minimum amount of wire transfer" v:"required" `
+	AccountHolder string `json:"accountHolder"   dc:"The AccountHolder of wire transfer " v:"required" `
+	BIC           string `json:"bic"   dc:"The BIC of wire transfer " v:"required" `
+	IBAN          string `json:"iban"   dc:"The IBAN of wire transfer " v:"required" `
+	Address       string `json:"address"   dc:"The address of wire transfer " v:"required" `
+}
+type WireTransferSetupRes struct {
+}
+
+type WireTransferEditReq struct {
+	g.Meta        `path:"/wire_transfer_edit" tags:"Gateway" method:"post" summary:"WireTransferEdit" dc:"Edit the wire transfer"`
+	Currency      string `json:"currency"   dc:"The currency of wire transfer " v:"required" `
+	MinimumAmount uint64 `json:"minimumAmount"   dc:"The minimum amount of wire transfer" v:"required" `
+	AccountHolder string `json:"accountHolder"   dc:"The AccountHolder of wire transfer " v:"required" `
+	BIC           string `json:"bic"   dc:"The BIC of wire transfer " v:"required" `
+	IBAN          string `json:"iban"   dc:"The IBAN of wire transfer " v:"required" `
+	Address       string `json:"address"   dc:"The address of wire transfer " v:"required" `
+}
+type WireTransferEditRes struct {
+}

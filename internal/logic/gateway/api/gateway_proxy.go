@@ -21,7 +21,7 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"autotest_crypto": &AutoTestCrypto{},
 	"autotest":        &AutoTest{},
 	"coinbase":        &Coinbase{},
-	"wire":            &Wire{},
+	"wire_transfer":   &Wire{},
 }
 
 type GatewayProxy struct {

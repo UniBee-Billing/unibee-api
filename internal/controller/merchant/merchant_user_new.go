@@ -5,11 +5,15 @@ import (
 	"unibee/api/bean"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
+	"unibee/internal/query"
+	"unibee/utility"
 
 	"unibee/api/merchant/user"
 )
 
 func (c *ControllerUser) New(ctx context.Context, req *user.NewReq) (res *user.NewRes, err error) {
+	existOne := query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email)
+	utility.Assert(existOne == nil, "same email exist")
 	one, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
