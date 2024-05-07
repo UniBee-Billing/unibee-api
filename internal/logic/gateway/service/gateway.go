@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strings"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
@@ -115,7 +116,7 @@ type WireTransferSetupRes struct {
 }
 
 func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *entity.MerchantGateway {
-	gatewayName := "wire transfer"
+	gatewayName := "wire_transfer"
 	one := query.GetGatewayByGatewayName(ctx, req.MerchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
 	if config.GetConfigInstance().IsProd() {
@@ -130,7 +131,7 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *e
 		MerchantId:    req.MerchantId,
 		GatewayName:   gatewayName,
 		Name:          "Wire Transfer",
-		Currency:      req.Currency,
+		Currency:      strings.ToUpper(req.Currency),
 		MinimumAmount: req.MinimumAmount,
 		GatewayType:   consts.GatewayTypeWireTransfer,
 		BankData:      utility.MarshalToJsonString(req.Bank),
@@ -150,7 +151,7 @@ func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *en
 
 	_, err := dao.MerchantGateway.Ctx(ctx).Data(g.Map{
 		dao.MerchantGateway.Columns().BankData:      utility.MarshalToJsonString(req.Bank),
-		dao.MerchantGateway.Columns().Currency:      req.Currency,
+		dao.MerchantGateway.Columns().Currency:      strings.ToUpper(req.Currency),
 		dao.MerchantGateway.Columns().MinimumAmount: req.MinimumAmount,
 		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()

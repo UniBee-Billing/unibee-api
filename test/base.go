@@ -26,6 +26,7 @@ var TestRecurringAddon *entity.Plan
 var TestOneTimeAddon *entity.Plan
 var TestGateway *entity.MerchantGateway
 var TestCryptoGateway *entity.MerchantGateway
+var TestWireTransferGateway *entity.MerchantGateway
 var MysqlConfigFileName = "test_mysql_config.yaml"
 var PostgresConfigFileName = "test_postgres_config.yaml"
 
@@ -77,6 +78,7 @@ func init() {
 	utility.Assert(TestOneTimeAddon.MerchantId > 0, "TestOneTimeAddon err")
 	TestGateway = prepare.CreateTestGateway(ctx, TestMerchant.Id)
 	TestCryptoGateway = prepare.CreateTestCryptoGateway(ctx, TestMerchant.Id)
+	TestWireTransferGateway = prepare.CreateTestWireTransferGateway(ctx, TestMerchant.Id)
 }
 
 func AssertNotNil(value interface{}) {

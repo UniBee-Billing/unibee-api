@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	service2 "unibee/internal/logic/invoice/detail"
 	"unibee/internal/logic/invoice/invoice_compute"
+	service3 "unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/vat_gateway"
@@ -263,6 +264,41 @@ func TestSubscription(t *testing.T) {
 		require.Equal(t, int64(1), one.Quantity)
 	})
 	t.Run("Test for subscription cancel immediately", func(t *testing.T) {
+		//cancel immediately
+		err := service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusCancelled)
+	})
+	t.Run("Test for wire transfer subscription upgrade|downgrade", func(t *testing.T) {
+		create, err := service.SubscriptionCreate(ctx, &service.CreateInternalReq{
+			MerchantId:      test.TestMerchant.Id,
+			PlanId:          test.TestPlan.Id,
+			UserId:          test.TestUser.Id,
+			Quantity:        testQuantity,
+			GatewayId:       test.TestWireTransferGateway.Id,
+			PaymentMethodId: "testPaymentMethodId",
+			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
+		})
+		require.Nil(t, err)
+		require.NotNil(t, create)
+		require.NotNil(t, create.Subscription)
+		require.NotNil(t, create.Link)
+		require.NotNil(t, create.Paid)
+		require.Equal(t, false, create.Paid)
+		testSubscriptionId = create.Subscription.SubscriptionId
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusPending)
+		require.NotNil(t, one.LatestInvoiceId)
+		_, err = service3.MarkWireTransferInvoiceAsSuccess(ctx, one.LatestInvoiceId, "automatic_transfer_number")
+		require.Nil(t, err)
+		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
+		require.NotNil(t, one)
+		require.Equal(t, true, one.Status == consts.SubStatusActive)
+	})
+	t.Run("Test for wire transfer subscription cancel immediately", func(t *testing.T) {
 		//cancel immediately
 		err := service.SubscriptionCancel(ctx, testSubscriptionId, false, false, "test cancel")
 		require.Nil(t, err)

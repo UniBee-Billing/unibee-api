@@ -12,7 +12,7 @@ import (
 func TestEditGateway(t *testing.T) {
 	ctx := context.Background()
 	t.Run("Wire Transfer", func(t *testing.T) {
-		gatewayName := "wire transfer"
+		gatewayName := "wire_transfer"
 		one := query.GetGatewayByGatewayName(ctx, test.TestMerchant.Id, gatewayName)
 		if one == nil {
 			one = SetupWireTransferGateway(ctx, &WireTransferSetupReq{

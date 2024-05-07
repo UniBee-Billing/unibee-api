@@ -2,6 +2,7 @@ package prepare
 
 import (
 	"context"
+	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
@@ -72,6 +73,37 @@ func CreateTestCryptoGateway(ctx context.Context, merchantId uint64) *entity.Mer
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	one = query.GetGatewayByGatewayName(ctx, merchantId, "autotest_crypto")
+	utility.Assert(one != nil, "autotest gateway error")
+	return one
+}
+
+func CreateTestWireTransferGateway(ctx context.Context, merchantId uint64) *entity.MerchantGateway {
+	one := query.GetGatewayByGatewayName(ctx, merchantId, "wire_transfer")
+	if one != nil {
+		return one
+	}
+	one = &entity.MerchantGateway{
+		MerchantId:    merchantId,
+		GatewayName:   "wire_transfer",
+		Name:          "autotest_wire_transfer",
+		GatewayKey:    "autotest_wire_transfer",
+		GatewaySecret: "autotest_wire_transfer",
+		GatewayType:   consts.GatewayTypeWireTransfer,
+		Logo:          "autotest_wire_transfer",
+		Currency:      "USD",
+		MinimumAmount: 10,
+		BankData: utility.MarshalToJsonString(&bean.GatewayBank{
+			AccountHolder: "testAccountHolder",
+			BIC:           "testBic",
+			IBAN:          "testIBAN",
+			Address:       "testAddress",
+		}),
+	}
+	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	utility.AssertError(err, "system error")
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
+	one = query.GetGatewayByGatewayName(ctx, merchantId, "autotest_wire_transfer")
 	utility.Assert(one != nil, "autotest gateway error")
 	return one
 }
