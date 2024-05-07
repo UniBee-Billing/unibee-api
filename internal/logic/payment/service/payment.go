@@ -58,6 +58,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	redisKey := fmt.Sprintf("createPay-merchantId:%d-externalPaymentId:%s", createPayContext.Pay.MerchantId, createPayContext.Pay.ExternalPaymentId)
 	isDuplicatedInvoke := false
 
+	if createPayContext.Gateway.GatewayType == consts.GatewayTypeWireTransfer {
+		utility.Assert(createPayContext.Pay.TotalAmount >= createPayContext.Gateway.MinimumAmount, "Total Amount not reach the gateway's minimum amount")
+	}
+
 	defer func() {
 		if !isDuplicatedInvoke {
 			utility.ReleaseLock(ctx, redisKey)

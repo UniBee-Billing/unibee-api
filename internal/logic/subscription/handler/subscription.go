@@ -24,7 +24,7 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == sub.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
-	if gateway.GatewayType != consts.GatewayTypeCrypto {
+	if gateway.GatewayType == consts.GatewayTypeDefault {
 		utility.Assert(len(paymentMethodId) > 0, "paymentMethodId invalid")
 		paymentMethod := method.QueryPaymentMethod(ctx, sub.MerchantId, sub.UserId, gatewayId, paymentMethodId)
 		// todo mark user attach check

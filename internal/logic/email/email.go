@@ -29,8 +29,9 @@ import (
 const (
 	TemplateInvoiceAutomaticPaid                            = "InvoiceAutomaticPaid"
 	TemplateInvoiceManualPaid                               = "InvoiceManualPaid"
-	TemplateNewProcessingInvoice                            = "NewProcessingInvoice "
-	TemplateInvoiceCancel                                   = "InvoiceCancel "
+	TemplateNewProcessingInvoice                            = "NewProcessingInvoice"
+	TemplateNewProcessingInvoiceForWireTransfer             = "NewProcessingInvoiceForWireTransfer"
+	TemplateInvoiceCancel                                   = "InvoiceCancel"
 	TemplateMerchantRegistrationCodeVerify                  = "MerchantRegistrationCodeVerify"
 	TemplateMerchantOTPLogin                                = "MerchantOTPLogin"
 	TemplateUserRegistrationCodeVerify                      = "UserRegistrationCodeVerify"
@@ -140,6 +141,10 @@ type TemplateVariable struct {
 	CodeExpireMinute    string      `json:"CodeExpireMinute"`
 	Code                string      `json:"Code"`
 	Link                string      `json:"Link"`
+	AccountHolder       string      `json:"Account Holder"`
+	BIC                 string      `json:"BIC"`
+	IBAN                string      `json:"IBAN"`
+	Address             string      `json:"Address"`
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html

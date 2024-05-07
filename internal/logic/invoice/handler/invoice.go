@@ -424,6 +424,21 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 		if one.Status > consts.InvoiceStatusPending {
 			utility.Assert(len(pdfFileName) > 0, "pdfFile download or generate error:"+one.InvoiceId)
 			var template = email.TemplateNewProcessingInvoice
+			var accountHolder string
+			var bic string
+			var iban string
+			var address string
+			gateway := query.GetGatewayById(ctx, one.GatewayId)
+			if gateway != nil && gateway.GatewayType == consts.GatewayTypeWireTransfer {
+				template = email.TemplateNewProcessingInvoiceForWireTransfer
+				gatewaySimplify := bean.SimplifyGateway(gateway)
+				if gatewaySimplify != nil {
+					accountHolder = gatewaySimplify.Bank.AccountHolder
+					bic = gatewaySimplify.Bank.BIC
+					iban = gatewaySimplify.Bank.IBAN
+					address = gatewaySimplify.Bank.Address
+				}
+			}
 			if one.Status == consts.InvoiceStatusPaid {
 				payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 				if payment.Automatic == 0 {
@@ -445,6 +460,10 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 				PaymentAmount:       strconv.FormatInt(one.TotalAmount, 10),
 				TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 				Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
+				AccountHolder:       accountHolder,
+				BIC:                 bic,
+				IBAN:                iban,
+				Address:             address,
 			})
 			utility.AssertError(err, "send email error")
 			//update send status

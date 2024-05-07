@@ -200,8 +200,8 @@ func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalR
 
 	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	if gateway.GatewayType != consts.GatewayTypeCrypto {
-		return nil, gerror.New("mark refund only support crypto")
+	if gateway.GatewayType != consts.GatewayTypeCrypto && gateway.GatewayType != consts.GatewayTypeWireTransfer {
+		return nil, gerror.New("mark refund only support crypto or wire transfer")
 	}
 
 	utility.Assert(req.RefundAmount > 0, "refund value should > 0")
