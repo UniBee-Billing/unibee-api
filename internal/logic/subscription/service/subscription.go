@@ -415,12 +415,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var trialEnd = currentTimeStart.Timestamp() - 1
 	var cancelAtPeriodEnd = 0
 	if plan.TrialDurationTime > 0 || req.TrialEnd > 0 {
-		var subscriptionAmountExcludingTax = plan.TrialAmount * req.Quantity
+		var totalAmountExcludingTax = plan.TrialAmount * req.Quantity
 		if plan.TrialDurationTime > 0 && req.TrialEnd == 0 {
 			req.TrialEnd = currentTimeStart.Timestamp() + plan.TrialDurationTime
 		} else {
 			// if trialEnd set, ignore plan.TrialAmount and plan.demand
-			subscriptionAmountExcludingTax = 0
+			totalAmountExcludingTax = 0
 		}
 		//trial period
 		if plan.TrialAmount > 0 {
@@ -430,27 +430,27 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		cancelAtPeriodEnd = plan.CancelAtTrialEnd
 		var currentTimeEnd = req.TrialEnd
 		trialEnd = currentTimeEnd
-		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, subscriptionAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), subscriptionAmountExcludingTax)
-		subscriptionAmountExcludingTax = subscriptionAmountExcludingTax - discountAmount
-		var taxAmount = int64(float64(subscriptionAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
+		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), totalAmountExcludingTax)
+		totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+		var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
 		invoice := &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionCreate",
-			OriginAmount:                   subscriptionAmountExcludingTax + taxAmount + discountAmount,
-			TotalAmount:                    subscriptionAmountExcludingTax + taxAmount,
-			TotalAmountExcludingTax:        subscriptionAmountExcludingTax,
+			OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
+			TotalAmount:                    totalAmountExcludingTax + taxAmount,
+			TotalAmountExcludingTax:        totalAmountExcludingTax,
 			DiscountCode:                   req.DiscountCode,
 			DiscountAmount:                 discountAmount,
 			Currency:                       plan.Currency,
 			TaxAmount:                      taxAmount,
-			SubscriptionAmount:             subscriptionAmountExcludingTax + taxAmount,
-			SubscriptionAmountExcludingTax: subscriptionAmountExcludingTax,
+			SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
+			SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
 			Lines: []*bean.InvoiceItemSimplify{{
 				Currency:               plan.Currency,
-				OriginAmount:           subscriptionAmountExcludingTax + taxAmount + discountAmount,
-				Amount:                 subscriptionAmountExcludingTax + taxAmount,
+				OriginAmount:           totalAmountExcludingTax + taxAmount + discountAmount,
+				Amount:                 totalAmountExcludingTax + taxAmount,
 				DiscountAmount:         discountAmount,
 				Tax:                    taxAmount,
-				AmountExcludingTax:     subscriptionAmountExcludingTax,
+				AmountExcludingTax:     totalAmountExcludingTax,
 				TaxPercentage:          subscriptionTaxPercentage,
 				UnitAmountExcludingTax: plan.TrialAmount,
 				Description:            plan.Description,
@@ -640,7 +640,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//totalAmount is 0, no payment need
 		utility.AssertError(err, "System Error")
 		if strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
-			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need")
+			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need") // todo mark
 			url, _ := method.NewPaymentMethod(ctx, &method.NewPaymentMethodInternalReq{
 				MerchantId:     _interface.GetMerchantId(ctx),
 				UserId:         req.UserId,
