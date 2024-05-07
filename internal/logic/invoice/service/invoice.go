@@ -16,6 +16,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
+	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -406,4 +407,31 @@ func HardDeleteInvoice(ctx context.Context, merchantId uint64, invoiceId string)
 	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
 	_, err := dao.Invoice.Ctx(ctx).Where(dao.Invoice.Columns().InvoiceId, invoiceId).Delete()
 	return err
+}
+
+func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, transferNumber string) (*entity.Invoice, error) {
+	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
+	utility.Assert(len(transferNumber) > 0, "invalid transferNumber")
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, "invoice not found, InvoiceId:"+invoiceId)
+	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not process status, InvoiceId:"+invoiceId)
+	utility.Assert(one.TotalAmount != 0, "invoice totalAmount not zero, InvoiceId:"+invoiceId)
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	utility.Assert(payment != nil, "invoice payment not found")
+	gateway := query.GetGatewayById(ctx, one.GatewayId)
+	utility.Assert(gateway != nil, "invoice gateway not found")
+	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
+	err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
+		PaymentId:              payment.PaymentId,
+		GatewayPaymentIntentId: transferNumber,
+		GatewayPaymentId:       transferNumber,
+		TotalAmount:            payment.TotalAmount,
+		PayStatusEnum:          consts.PaymentSuccess,
+		PaidTime:               gtime.Now(),
+		PaymentAmount:          payment.TotalAmount,
+		Reason:                 "mark success manual by " + transferNumber,
+	})
+	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
+	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	return one, nil
 }

@@ -17,7 +17,6 @@ import (
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
-	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -307,33 +306,6 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	one.Status = consts.InvoiceStatusPaid
-	return one, nil
-}
-
-func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, transferNumber string) (*entity.Invoice, error) {
-	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
-	utility.Assert(len(transferNumber) > 0, "invalid transferNumber")
-	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
-	utility.Assert(one != nil, "invoice not found, InvoiceId:"+invoiceId)
-	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not process status, InvoiceId:"+invoiceId)
-	utility.Assert(one.TotalAmount != 0, "invoice totalAmount not zero, InvoiceId:"+invoiceId)
-	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	utility.Assert(payment != nil, "invoice payment not found")
-	gateway := query.GetGatewayById(ctx, one.GatewayId)
-	utility.Assert(gateway != nil, "invoice gateway not found")
-	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
-	err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
-		PaymentId:              payment.PaymentId,
-		GatewayPaymentIntentId: transferNumber,
-		GatewayPaymentId:       transferNumber,
-		TotalAmount:            payment.TotalAmount,
-		PayStatusEnum:          consts.PaymentSuccess,
-		PaidTime:               gtime.Now(),
-		PaymentAmount:          payment.TotalAmount,
-		Reason:                 "mark success manual by " + transferNumber,
-	})
-	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
-	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	return one, nil
 }
 
