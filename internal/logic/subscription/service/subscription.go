@@ -587,6 +587,10 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	//	utility.Assert(prepare.Invoice.TotalAmount >= prepare.Gateway.MinimumAmount, "Total Amount not reach the wire transfer's minimum amount")
 	//}
 
+	if prepare.Invoice.TotalAmount == 0 && strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
+		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need") // todo mark
+	}
+
 	var subType = consts.SubTypeDefault
 	if consts.SubscriptionCycleUnderUniBeeControl {
 		subType = consts.SubTypeUniBeeControl
@@ -606,7 +610,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Currency:                    prepare.Currency,
 		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
 		SubscriptionId:              utility.CreateSubscriptionId(),
-		Status:                      consts.SubStatusPending,
+		Status:                      consts.SubStatusInit,
 		CustomerEmail:               prepare.Email,
 		ReturnUrl:                   req.ReturnUrl,
 		VatNumber:                   prepare.VatNumber,
@@ -640,7 +644,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//totalAmount is 0, no payment need
 		utility.AssertError(err, "System Error")
 		if strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
-			utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need") // todo mark
 			url, _ := method.NewPaymentMethod(ctx, &method.NewPaymentMethodInternalReq{
 				MerchantId:     _interface.GetMerchantId(ctx),
 				UserId:         req.UserId,
@@ -663,7 +666,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				Paid:                  true,
 			}
 		}
-		// todo mark subscription becom active with payment mq message
+		// todo mark subscription become active with payment mq message
 	} else if len(req.PaymentMethodId) > 0 {
 		// createAndPayNewProrationInvoice
 		merchant := query.GetMerchantById(ctx, one.MerchantId)
@@ -743,7 +746,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		return nil, err
 	}
 	one.GatewaySubscriptionId = createRes.GatewaySubscriptionId
-	one.Status = consts.GatewayPlanStatusCreate
+	one.Status = consts.SubStatusPending
 	one.Link = createRes.Link
 
 	_, _ = redismq.Send(&redismq.Message{
