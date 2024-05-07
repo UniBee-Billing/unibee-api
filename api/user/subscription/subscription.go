@@ -235,3 +235,11 @@ type OnetimeAddonListReq struct {
 type OnetimeAddonListRes struct {
 	SubscriptionOnetimeAddons []*detail.SubscriptionOnetimeAddonDetail `json:"subscriptionOnetimeAddons" description:"SubscriptionOnetimeAddons" `
 }
+
+type MarkWireTransferPaidReq struct {
+	g.Meta         `path:"/mark_wire_transfer_paid" tags:"User-Subscription" method:"post" summary:"MarkWireTransferInvoiceSuccess" dc:"Mark wire transfer subscription as paid, subscription will change to 8-Processed "`
+	SubscriptionId string `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
+}
+
+type MarkWireTransferPaidRes struct {
+}

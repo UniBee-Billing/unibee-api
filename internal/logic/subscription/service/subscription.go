@@ -1752,3 +1752,21 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 	}
 	return nil
 }
+
+func MarkSubscriptionProcessed(ctx context.Context, subscriptionId string) error {
+	utility.Assert(len(subscriptionId) > 0, "invalid subscriptionId")
+	one := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
+	utility.Assert(one != nil, "subscription not found")
+	utility.Assert(one.Status == consts.SubStatusPending, "sub not pending status")
+	gateway := query.GetGatewayById(ctx, one.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "not wire transfer type of subscription")
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().Status:    consts.SubStatusProcessed,
+		dao.Subscription.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	if err != nil {
+		return err
+	}
+	return nil
+}
