@@ -40,8 +40,8 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 			req.RedirectUrl = fmt.Sprintf("%s&subId=%s", req.RedirectUrl, req.SubscriptionId)
 		}
 	}
-	req.Metadata["redirectUrl"] = req.RedirectUrl
-	req.Metadata["subscriptionId"] = req.SubscriptionId
+	req.Metadata["RedirectUrl"] = req.RedirectUrl
+	req.Metadata["SubscriptionId"] = req.SubscriptionId
 	req.Metadata["MerchantId"] = req.MerchantId
 	createResult, err := api.GetGatewayServiceProvider(ctx, req.GatewayId).GatewayUserCreateAndBindPaymentMethod(ctx, gateway, req.UserId, req.Currency, req.Metadata)
 	utility.AssertError(err, "Server Error")
