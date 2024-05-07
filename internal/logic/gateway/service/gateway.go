@@ -114,7 +114,7 @@ type WireTransferSetupReq struct {
 type WireTransferSetupRes struct {
 }
 
-func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
+func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *entity.MerchantGateway {
 	gatewayName := "wire transfer"
 	one := query.GetGatewayByGatewayName(ctx, req.MerchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
@@ -139,9 +139,10 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+	return one
 }
 
-func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
+func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *entity.MerchantGateway {
 	utility.Assert(req.GatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(one != nil, "gateway not found")
@@ -154,4 +155,6 @@ func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) {
 		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
 	utility.AssertError(err, "system error")
+	one = query.GetGatewayById(ctx, req.GatewayId)
+	return one
 }
