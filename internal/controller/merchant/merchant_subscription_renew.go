@@ -14,8 +14,13 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
 		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
-		utility.Assert(one != nil, "no active or incomplete subscription found")
-		req.SubscriptionId = one.SubscriptionId
+		if one != nil {
+			req.SubscriptionId = one.SubscriptionId
+		} else {
+			one = query.GetLatestSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+			utility.Assert(one != nil, "no subscription found")
+			req.SubscriptionId = one.SubscriptionId
+		}
 	}
 	renewRes, err := service.SubscriptionRenew(ctx, &service.RenewInternalReq{
 		MerchantId:     _interface.GetMerchantId(ctx),

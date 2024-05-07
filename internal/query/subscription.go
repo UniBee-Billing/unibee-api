@@ -15,6 +15,22 @@ import (
 //	return
 //}
 
+func GetLatestSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
+	if userId <= 0 || merchantId <= 0 {
+		return nil
+	}
+	err := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().UserId, userId).
+		Where(dao.Subscription.Columns().MerchantId, merchantId).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		OrderDesc(dao.Subscription.Columns().GmtCreate).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func GetLatestActiveOrIncompleteSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil
