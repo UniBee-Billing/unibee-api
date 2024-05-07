@@ -2,6 +2,7 @@ package method
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"unibee/api/bean"
 	"unibee/internal/logic/gateway/api"
@@ -31,6 +32,13 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.Metadata == nil {
 		req.Metadata = map[string]interface{}{}
+	}
+	if len(req.RedirectUrl) > 0 && len(req.SubscriptionId) > 0 {
+		if !strings.Contains(req.RedirectUrl, "?") {
+			req.RedirectUrl = fmt.Sprintf("%s?subId=%s", req.RedirectUrl, req.SubscriptionId)
+		} else {
+			req.RedirectUrl = fmt.Sprintf("%s&subId=%s", req.RedirectUrl, req.SubscriptionId)
+		}
 	}
 	req.Metadata["redirectUrl"] = req.RedirectUrl
 	req.Metadata["subscriptionId"] = req.SubscriptionId

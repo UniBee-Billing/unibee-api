@@ -60,9 +60,9 @@ func GatewayPaymentMethodRedirectEntrance(r *ghttp.Request) {
 	success := r.Get("success").Bool()
 	if len(redirectUrl) > 0 {
 		if !strings.Contains(redirectUrl, "?") {
-			r.Response.RedirectTo(fmt.Sprintf("%s", redirectUrl))
+			r.Response.RedirectTo(fmt.Sprintf("%ssuccess=%v", redirectUrl, success))
 		} else {
-			r.Response.RedirectTo(fmt.Sprintf("%s", redirectUrl))
+			r.Response.RedirectTo(fmt.Sprintf("%s&success=%v", redirectUrl, success))
 		}
 	} else {
 		r.Response.Writeln(success)
