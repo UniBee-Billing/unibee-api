@@ -32,6 +32,10 @@ func TestGenerateInvoicePdf(t *testing.T) {
 	}
 }
 
+func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
+	_ = SendInvoiceEmailToUser(context.Background(), "iv20240316QYuw5DQGcABgHDn")
+}
+
 func TestGenerate(t *testing.T) {
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	err := createInvoicePdf(&entity.Invoice{
