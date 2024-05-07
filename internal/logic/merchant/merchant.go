@@ -105,7 +105,6 @@ func CreateMerchant(ctx context.Context, req *CreateMerchantInternalReq) (*entit
 		}
 		return nil
 	})
-
 	utility.AssertError(err, "Server Error")
 	var newOne *entity.MerchantMember
 	newOne = query.GetMerchantMemberById(ctx, merchantMasterMember.Id)
