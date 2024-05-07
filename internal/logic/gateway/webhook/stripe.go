@@ -258,10 +258,12 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
 					if err == nil && result.PaymentMethod != nil {
 						sub, err := handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
-						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+						if err != nil {
+							g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+						}
 						utility.AssertError(err, "Error ChangeSubscriptionGateway")
 						if sub != nil && err == nil && len(stripeCheckoutSession.Metadata["InvoiceId"]) > 0 {
-							invoice := query.GetInvoiceByInvoiceId(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"])
+							invoice := query.GetInvoiceByInvoiceId(r.Context(), stripeCheckoutSession.Metadata["InvoiceId"])
 							if invoice != nil {
 								if invoice.TotalAmount == 0 {
 									invoice, err = handler3.MarkInvoiceAsPaidForZeroPayment(r.Context(), invoice.InvoiceId)
