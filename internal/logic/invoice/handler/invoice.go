@@ -65,6 +65,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		DayUtilDue:                     simplify.DayUtilDue,
 		DiscountAmount:                 simplify.DiscountAmount,
 		DiscountCode:                   simplify.DiscountCode,
+		TrialEnd:                       simplify.TrialEnd,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

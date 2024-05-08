@@ -39,6 +39,7 @@ type InvoiceSimplify struct {
 	SendStatus                     int                           `json:"sendStatus"                     description:"email send status，0-No | 1- YES| 2-Unnecessary"` // email send status，0-No | 1- YES| 2-Unnecessary
 	DayUtilDue                     int64                         `json:"dayUtilDue"                     description:"day util due after finish"`                      // day util due after finish
 	Discount                       *MerchantDiscountCodeSimplify `json:"discount" dc:"Discount"`
+	TrialEnd                       int64                         `json:"trialEnd"                       description:"trial_end, utc time"` // trial_end, utc time
 }
 
 type InvoiceItemSimplify struct {
@@ -103,5 +104,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		SendStatus:                     one.SendStatus,
 		DayUtilDue:                     one.DayUtilDue,
 		TaxPercentage:                  one.TaxPercentage,
+		TrialEnd:                       one.TrialEnd,
 	}
 }

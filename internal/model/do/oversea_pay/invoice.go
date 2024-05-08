@@ -59,4 +59,5 @@ type Invoice struct {
 	LastTrackTime                  interface{} // last process invoice track time
 	DiscountCode                   interface{} // discount_code
 	DiscountAmount                 interface{} // discount amount, cent
+	TrialEnd                       interface{} // trial_end, utc time
 }
