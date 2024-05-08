@@ -35,7 +35,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	}
 
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "gmt_modify desc"
+	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
 		utility.Assert(strings.Contains("gmt_create|gmt_modify", req.SortField), "sortField should one of gmt_create|gmt_modify")
 		if len(req.SortType) > 0 {

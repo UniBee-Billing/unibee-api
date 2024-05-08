@@ -45,7 +45,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		isDeletes = append(isDeletes, 1)
 	}
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "gmt_modify desc"
+	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
 		utility.Assert(strings.Contains("invoice_id|gmt_create|gmt_modify|period_end|total_amount", req.SortField), "sortField should one of invoice_id|gmt_create|period_end|total_amount")
 		if len(req.SortType) > 0 {

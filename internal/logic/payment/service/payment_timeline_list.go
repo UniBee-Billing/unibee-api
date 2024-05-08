@@ -32,7 +32,7 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 	}
 
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "gmt_modify desc"
+	var sortKey = "gmt_create desc"
 	if len(req.SortField) > 0 {
 		utility.Assert(strings.Contains("merchant_id|gmt_create|gmt_modify|user_id", req.SortField), "sortField should one of merchant_id|gmt_create|gmt_modify|user_id")
 		if len(req.SortType) > 0 {
