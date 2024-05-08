@@ -41,7 +41,7 @@ func SetupForCloudMode(ctx context.Context, merchantId uint64) error {
 		{
 			stripeGateway := query.GetGatewayByGatewayName(ctx, consts.CloudModeManagerMerchantId, "stripe")
 			if stripeGateway != nil {
-				service.SetupGateway(ctx, consts.CloudModeManagerMerchantId, stripeGateway.GatewayName, stripeGateway.GatewayKey, stripeGateway.GatewaySecret)
+				service.SetupGateway(ctx, merchantId, stripeGateway.GatewayName, stripeGateway.GatewayKey, stripeGateway.GatewaySecret)
 			}
 		}
 	}
