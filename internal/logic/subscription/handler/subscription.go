@@ -60,7 +60,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().FirstPaidTime:          gtime.Now().Timestamp(),
-		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
+		dao.Subscription.Columns().TrialEnd:               invoice.TrialEnd,
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
