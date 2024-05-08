@@ -448,6 +448,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountAmount:                 discountAmount,
 			Currency:                       plan.Currency,
 			TaxAmount:                      taxAmount,
+			BizType:                        consts.BizTypeSubscription,
 			SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
 			SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
 			Lines: []*bean.InvoiceItemSimplify{{
