@@ -389,8 +389,8 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
-	if one.TotalAmount == 0 {
-		fmt.Printf("SendInvoiceEmailToUser invoice totalAmount is zero, email not send")
+	if one.TotalAmount <= 0 {
+		g.Log().Infof(ctx, "SendInvoiceEmailToUser invoice totalAmount lower then zero, email not send")
 		return nil
 	}
 	utility.Assert(one.UserId > 0, "invoice userId not found")
@@ -443,9 +443,12 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 					iban = gatewaySimplify.Bank.IBAN
 					address = gatewaySimplify.Bank.Address
 				}
-			} else if one.TrialEnd != 0 && one.TrialEnd > one.PeriodStart {
+			} else if one.TrialEnd > 0 && one.TrialEnd > one.PeriodStart {
 				// paid trial invoice
 				template = email.TemplateNewProcessingInvoiceForPaidTrial
+			} else if one.TrialEnd == -2 {
+				// first cycle invoice after trial
+				template = email.TemplateNewProcessingInvoiceAfterTrial
 			}
 			if one.Status == consts.InvoiceStatusPaid {
 				payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)

@@ -176,6 +176,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						FinishTime:    timeNow,
 					})
 				}
+				if sub.TrialEnd > 0 && sub.TrialEnd > -sub.CurrentPeriodEnd {
+					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
+				}
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())

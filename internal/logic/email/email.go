@@ -32,6 +32,7 @@ const (
 	TemplateInvoiceManualPaid                               = "InvoiceManualPaid"
 	TemplateNewProcessingInvoice                            = "NewProcessingInvoice"
 	TemplateNewProcessingInvoiceForPaidTrial                = "NewProcessingInvoiceForPaidTrial"
+	TemplateNewProcessingInvoiceAfterTrial                  = "NewProcessingInvoiceAfterTrial"
 	TemplateNewProcessingInvoiceForWireTransfer             = "NewProcessingInvoiceForWireTransfer"
 	TemplateInvoiceCancel                                   = "InvoiceCancel"
 	TemplateMerchantRegistrationCodeVerify                  = "MerchantRegistrationCodeVerify"
