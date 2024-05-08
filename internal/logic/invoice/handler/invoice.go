@@ -389,6 +389,14 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
+	var isTrialInvoice = false
+	if one.TrialEnd != 0 && one.TrialEnd > one.PeriodStart {
+		isTrialInvoice = true
+	}
+	if !isTrialInvoice && one.TotalAmount == 0 {
+		fmt.Printf("SendInvoiceEmailToUser invoice not trial and invoice totalAmount is zero, email not send")
+		return nil
+	}
 	utility.Assert(one.UserId > 0, "invoice userId not found")
 	utility.Assert(one.MerchantId > 0, "invoice merchantId not found")
 	utility.Assert(len(one.SendEmail) > 0, "SendEmail Is Nil, InvoiceId:"+one.InvoiceId)
