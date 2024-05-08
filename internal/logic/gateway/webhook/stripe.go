@@ -268,8 +268,8 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 								if invoice.TotalAmount == 0 {
 									invoice, err = handler3.MarkInvoiceAsPaidForZeroPayment(r.Context(), invoice.InvoiceId)
 									utility.AssertError(err, "MarkInvoiceAsPaidForZeroPayment Error")
-									err = handler.HandleSubscriptionFirstPaymentSuccess(r.Context(), sub, invoice)
-									utility.AssertError(err, "HandleSubscriptionFirstPaymentSuccess Error")
+									err = handler.HandleSubscriptionFirstInvoicePaid(r.Context(), sub, invoice)
+									utility.AssertError(err, "HandleSubscriptionFirstInvoicePaid Error")
 								}
 							}
 						}

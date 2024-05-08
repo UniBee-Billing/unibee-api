@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 	"unibee/api/bean"
+	log2 "unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/merchant_config"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -30,6 +31,7 @@ const (
 	TemplateInvoiceAutomaticPaid                            = "InvoiceAutomaticPaid"
 	TemplateInvoiceManualPaid                               = "InvoiceManualPaid"
 	TemplateNewProcessingInvoice                            = "NewProcessingInvoice"
+	TemplateNewProcessingInvoiceForPaidTrial                = "NewProcessingInvoiceForPaidTrial"
 	TemplateNewProcessingInvoiceForWireTransfer             = "NewProcessingInvoiceForWireTransfer"
 	TemplateInvoiceCancel                                   = "InvoiceCancel"
 	TemplateMerchantRegistrationCodeVerify                  = "MerchantRegistrationCodeVerify"
@@ -38,11 +40,12 @@ const (
 	TemplateUserOTPLogin                                    = "UserOTPLogin"
 	TemplateSubscriptionCancelledAtPeriodEndByMerchantAdmin = "SubscriptionCancelledAtPeriodEndByMerchantAdmin"
 	TemplateSubscriptionCancelledAtPeriodEndByUser          = "SubscriptionCancelledAtPeriodEndByUser"
-	TemplateSubscriptionCancelledByTrialEndWithoutPayment   = "SubscriptionCancelledByTrialEndWithoutPayment"
+	TemplateSubscriptionCancelledByTrialEnd                 = "SubscriptionCancelledByTrialEnd"
 	TemplateSubscriptionCancelLastCancelledAtPeriodEnd      = "SubscriptionCancelLastCancelledAtPeriodEnd"
 	TemplateSubscriptionImmediateCancel                     = "SubscriptionImmediateCancel"
 	TemplateSubscriptionUpdate                              = "SubscriptionUpdate"
 	TemplateSubscriptionNeedAuthorized                      = "SubscriptionNeedAuthorized"
+	TemplateSubscriptionTrialStart                          = "SubscriptionTrialStart"
 	TemplateInvoiceRefundCreated                            = "InvoiceRefundCreated"
 	TemplateInvoiceRefundPaid                               = "InvoiceRefundPaid"
 	TemplateMerchantMemberInvite                            = "MerchantMemberInvite"
@@ -148,7 +151,28 @@ type TemplateVariable struct {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(_ context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+	ctx := context.Background()
+	go func() {
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				log2.PrintPanic(ctx, err)
+				return
+			}
+		}()
+		err = sendTemplateEmailInternal(ctx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables)
+		utility.AssertError(err, "sendTemplateEmailInternal")
+	}()
+	return nil
+}
+
+func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
 	var template *bean.MerchantEmailTemplateSimplify
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)

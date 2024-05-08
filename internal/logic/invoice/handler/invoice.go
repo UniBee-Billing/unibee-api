@@ -445,7 +445,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 				}
 			} else if one.TrialEnd != 0 && one.TrialEnd > one.PeriodStart {
 				// paid trial invoice
-				template = email.TemplateNewProcessingInvoice
+				template = email.TemplateNewProcessingInvoiceForPaidTrial
 			}
 			if one.Status == consts.InvoiceStatusPaid {
 				payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)

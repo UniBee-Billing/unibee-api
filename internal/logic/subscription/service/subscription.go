@@ -765,7 +765,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	if createRes.Paid {
 		utility.Assert(invoice.Id > 0, "Server Error")
 		oneInvoice := query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
-		err = handler.HandleSubscriptionFirstPaymentSuccess(ctx, one, oneInvoice)
+		err = handler.HandleSubscriptionFirstInvoicePaid(ctx, one, oneInvoice)
 		one = query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 		utility.AssertError(err, "Finish Subscription Error")
 	} else if req.StartIncomplete {
@@ -1434,7 +1434,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 			var template = email.TemplateSubscriptionImmediateCancel
 			if sub.CancelAtPeriodEnd == 1 && sub.TrialEnd == sub.CurrentPeriodEnd {
 				//first trial period without payment
-				template = email.TemplateSubscriptionCancelledByTrialEndWithoutPayment
+				template = email.TemplateSubscriptionCancelledByTrialEnd
 			}
 			err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, template, "", &email.TemplateVariable{
 				UserName:            user.FirstName + " " + user.LastName,
@@ -1646,7 +1646,6 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	if err != nil {
 		return err
 	}
-	// send transaction message todo mark
 	if sub.Status != consts.SubStatusActive {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
@@ -1664,11 +1663,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	utility.Assert(sub.Status == consts.SubStatusPending, "subscription not in pending status")
 	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
 	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
-	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:            consts.SubStatusIncomplete,
-		dao.Subscription.Columns().CurrentPeriodPaid: expireTime,
-		dao.Subscription.Columns().GmtModify:         gtime.Now(),
-	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	err := handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
 	if err != nil {
 		return err
 	}

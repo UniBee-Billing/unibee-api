@@ -109,7 +109,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else if strings.Compare(payment.BillingReason, "SubscriptionCreate") == 0 {
 				// SubscriptionCycle
-				err := handler.HandleSubscriptionFirstPaymentSuccess(ctx, sub, invoice)
+				err := handler.HandleSubscriptionFirstInvoicePaid(ctx, sub, invoice)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
 				}

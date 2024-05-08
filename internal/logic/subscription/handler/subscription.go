@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	discount2 "unibee/internal/logic/discount"
+	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -21,7 +22,7 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
-	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
+	utility.Assert(sub != nil, "HandleSubscriptionFirstInvoicePaid sub not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == sub.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
 	if gateway.GatewayType == consts.GatewayTypeDefault {
@@ -41,10 +42,10 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 	return sub, nil
 }
 
-func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) error {
-	utility.Assert(invoice != nil, "HandleSubscriptionFirstPaymentSuccess invoice is nil")
+func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice) error {
+	utility.Assert(invoice != nil, "HandleSubscriptionFirstInvoicePaid invoice is nil")
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
-	utility.Assert(sub != nil, "HandleSubscriptionFirstPaymentSuccess sub not found")
+	utility.Assert(sub != nil, "HandleSubscriptionFirstInvoicePaid sub not found")
 	if sub.Status == consts.SubStatusActive {
 		return nil
 	}
@@ -65,6 +66,30 @@ func HandleSubscriptionFirstPaymentSuccess(ctx context.Context, sub *entity.Subs
 		return err
 	}
 	SubscriptionNewTimeline(ctx, invoice)
+	if invoice.Status == consts.InvoiceStatusPaid && invoice.TotalAmount == 0 && len(invoice.PaymentId) == 0 {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
+			Tag:   redismq2.TopicSubscriptionActiveWithoutPayment.Tag,
+			Body:  sub.SubscriptionId,
+		})
+	}
+	if invoice.TrialEnd > 0 && invoice.TrialEnd > invoice.PeriodStart {
+		// trial start
+		oneUser := query.GetUserAccountById(ctx, sub.UserId)
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		merchant := query.GetMerchantById(ctx, sub.MerchantId)
+		if oneUser != nil && plan != nil && merchant != nil {
+			err := email2.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionTrialStart, "", &email2.TemplateVariable{
+				UserName:            oneUser.FirstName + " " + oneUser.LastName,
+				MerchantProductName: plan.PlanName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, sub.MerchantId, oneUser.CountryCode),
+			})
+			if err != nil {
+				g.Log().Errorf(ctx, "SendTemplateEmail TemplateSubscriptionTrialStart:%s", err.Error())
+			}
+		}
+	}
 	return nil
 }
 
@@ -114,6 +139,14 @@ func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, no
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd) < nowTimeStamp, "subscription not incomplete base on time now")
+	err := MakeSubscriptionIncomplete(ctx, subscriptionId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) error {
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:    consts.SubStatusIncomplete,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
@@ -124,7 +157,7 @@ func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, no
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicSubscriptionIncomplete.Topic,
 		Tag:   redismq2.TopicSubscriptionIncomplete.Tag,
-		Body:  sub.SubscriptionId,
+		Body:  subscriptionId,
 	})
 	return nil
 }
