@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/internal/consts"
@@ -13,7 +14,7 @@ type Wire struct {
 }
 
 func (w Wire) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
-	return "", consts.GatewayTypeWireTransfer, nil
+	return "", consts.GatewayTypeWireTransfer, gerror.New("Please setup by wire transfer setup api")
 }
 
 func (w Wire) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {

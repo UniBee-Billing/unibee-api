@@ -220,6 +220,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 
 	_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
+		dao.Subscription.Columns().TrialEnd:          sub.CurrentPeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 
@@ -447,6 +448,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountAmount:                 discountAmount,
 			Currency:                       plan.Currency,
 			TaxAmount:                      taxAmount,
+			BizType:                        consts.BizTypeSubscription,
 			SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
 			SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
 			TrialEnd:                       trialEnd,
