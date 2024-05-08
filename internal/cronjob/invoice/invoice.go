@@ -24,7 +24,7 @@ func TaskForExpireInvoices(ctx context.Context) {
 		return
 	}
 	for _, one := range list {
-		key := fmt.Sprintf("TaskForExpireInvoices-%s", one.Id)
+		key := fmt.Sprintf("TaskForExpireInvoices-%v", one.Id)
 		if utility.TryLock(ctx, key, 60) {
 			g.Log().Print(ctx, "TaskForExpireInvoices GetLock 60s", key)
 			defer func() {
