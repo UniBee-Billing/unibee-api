@@ -72,7 +72,8 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 				Gateway: gateway,
 				Pay: &entity.Payment{
 					ExternalPaymentId: one.InvoiceId,
-					BizType:           consts.BizTypeInvoice,
+					SubscriptionId:    one.SubscriptionId,
+					BizType:           one.BizType,
 					AuthorizeStatus:   consts.Authorized,
 					UserId:            one.UserId,
 					GatewayId:         gateway.Id,
