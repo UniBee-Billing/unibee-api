@@ -218,6 +218,11 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 
 	sub = query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 
+	_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().CancelAtPeriodEnd: 0,
+		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(sub),
 		Paid:         createRes.Status == consts.PaymentSuccess && createRes.Payment != nil,
@@ -1525,7 +1530,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	if err != nil {
 		return err
 	}
-	user := query.GetUserAccountById(ctx, uint64(sub.UserId))
+	user := query.GetUserAccountById(ctx, sub.UserId)
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelLastCancelledAtPeriodEnd, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
