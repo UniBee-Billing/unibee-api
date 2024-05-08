@@ -1432,7 +1432,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if merchant != nil {
 			var template = email.TemplateSubscriptionImmediateCancel
-			if sub.TrialEnd == sub.CurrentPeriodEnd {
+			if sub.TrialEnd >= sub.CurrentPeriodEnd {
 				//first trial period without payment
 				template = email.TemplateSubscriptionCancelledByTrialEnd
 			}
