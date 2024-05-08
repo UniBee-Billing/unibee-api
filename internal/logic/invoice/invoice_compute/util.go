@@ -120,6 +120,8 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		refundType = "Full Refund"
 	}
 	return &bean.InvoiceSimplify{
+		BizType: originalInvoice.BizType,
+
 		Currency:                       originalInvoice.Currency,
 		OriginAmount:                   -refund.RefundAmount,
 		TotalAmount:                    -refund.RefundAmount,
@@ -250,6 +252,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
 
 	return &bean.InvoiceSimplify{
+		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
@@ -406,6 +409,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
 	return &bean.InvoiceSimplify{
+		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
