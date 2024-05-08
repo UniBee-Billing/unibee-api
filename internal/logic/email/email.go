@@ -81,13 +81,13 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 	return err
 }
 
-func SendTemplateEmailToUser(key string, mailTo string, subject string, body string) (result string, err error) {
+func SendTemplateEmailToUser(emailGatewayKey string, mailTo string, subject string, body string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
 	htmlContent := "<div>" + body + " </div>"
 	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(key)
+	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
 	if err != nil {
 		log.Println(err)
@@ -100,7 +100,7 @@ func SendTemplateEmailToUser(key string, mailTo string, subject string, body str
 	return utility.MarshalToJsonString(response), nil
 }
 
-func SendPdfAttachEmailToUser(key string, mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
+func SendPdfAttachEmailToUser(emailGatewayKey string, mailTo string, subject string, body string, pdfFilePath string, pdfFileName string) (result string, err error) {
 	from := mail.NewEmail("no-reply", "no-reply@unibee.dev")
 	to := mail.NewEmail(mailTo, mailTo)
 	plainTextContent := body
@@ -117,7 +117,7 @@ func SendPdfAttachEmailToUser(key string, mailTo string, subject string, body st
 	attach.SetFilename(pdfFileName)
 	attach.SetDisposition("attachment")
 	message.AddAttachment(attach)
-	client := sendgrid.NewSendClient(key)
+	client := sendgrid.NewSendClient(emailGatewayKey)
 	response, err := client.Send(message)
 	if err != nil {
 		fmt.Printf("SendPdfAttachEmailToUser error:%s\n", err.Error())
@@ -152,7 +152,15 @@ type TemplateVariable struct {
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html
-func SendTemplateEmail(_ context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+	_, emailGatewayKey := GetDefaultMerchantEmailConfig(superCtx, merchantId)
+	if len(emailGatewayKey) == 0 {
+		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
+			utility.Assert(false, "Default Email Gateway Need Setup")
+		} else {
+			return gerror.New("Default Email Gateway Need Setup")
+		}
+	}
 	ctx := context.Background()
 	go func() {
 		var err error
@@ -167,13 +175,13 @@ func SendTemplateEmail(_ context.Context, merchantId uint64, mailTo string, time
 				return
 			}
 		}()
-		err = sendTemplateEmailInternal(ctx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables)
+		err = sendTemplateEmailInternal(ctx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables, emailGatewayKey)
 		utility.AssertError(err, "sendTemplateEmailInternal")
 	}()
 	return nil
 }
 
-func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable) error {
+func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo string, timezone string, templateName string, pdfFilePath string, templateVariables *TemplateVariable, emailGatewayKey string) error {
 	var template *bean.MerchantEmailTemplateSimplify
 	if merchantId > 0 {
 		template = query.GetMerchantEmailTemplateByTemplateName(ctx, merchantId, templateName)
@@ -209,21 +217,13 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 	if len(pdfFilePath) > 0 && len(attachName) == 0 {
 		attachName = "attach"
 	}
-	_, key := GetDefaultMerchantEmailConfig(ctx, merchantId)
-	if len(key) == 0 {
-		if strings.Compare(templateName, TemplateUserOTPLogin) == 0 || strings.Compare(templateName, TemplateUserRegistrationCodeVerify) == 0 {
-			utility.Assert(false, "Default Email Gateway Need Setup")
-		} else {
-			return gerror.New("Default Email Gateway Need Setup")
-		}
-	}
 
 	if len(pdfFilePath) > 0 {
 		md5 := utility.MD5(fmt.Sprintf("%s%s%s%s", mailTo, title, content, attachName))
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		response, err := SendPdfAttachEmailToUser(key, mailTo, title, content, pdfFilePath, attachName+".pdf")
+		response, err := SendPdfAttachEmailToUser(emailGatewayKey, mailTo, title, content, pdfFilePath, attachName+".pdf")
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, attachName+".pdf", err.Error())
 		} else {
@@ -235,7 +235,7 @@ func sendTemplateEmailInternal(ctx context.Context, merchantId uint64, mailTo st
 		if !utility.TryLock(ctx, md5, 10) {
 			utility.Assert(false, "duplicate email too fast")
 		}
-		response, err := SendTemplateEmailToUser(key, mailTo, title, content)
+		response, err := SendTemplateEmailToUser(emailGatewayKey, mailTo, title, content)
 		if err != nil {
 			SaveHistory(ctx, merchantId, mailTo, title, content, "", err.Error())
 		} else {

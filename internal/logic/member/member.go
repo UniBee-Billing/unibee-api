@@ -109,5 +109,6 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		UserName: merchantMasterMember.FirstName + " " + merchantMasterMember.LastName,
 		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
 	})
+	utility.AssertError(err, "AddMerchantMember")
 	return nil
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -90,7 +89,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {
-		fmt.Printf("SendTemplateEmail err:%s", err.Error())
+		g.Log().Errorf(ctx, "SendTemplateEmail HandlePendingUpdatePaymentSuccess:%s", err.Error())
 	}
 
 	return true, nil

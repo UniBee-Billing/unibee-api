@@ -69,7 +69,7 @@ func (s SubscriptionPaymentCallback) PaymentNeedAuthorisedCallback(ctx context.C
 						PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 					})
 					if err != nil {
-						g.Log().Errorf(ctx, "PaymentNeedAuthorisedCallback SendTemplateEmail err:%s", err.Error())
+						g.Log().Errorf(ctx, "SendTemplateEmail PaymentNeedAuthorisedCallback err:%s", err.Error())
 					}
 				}
 			}

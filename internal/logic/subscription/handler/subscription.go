@@ -79,7 +79,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		merchant := query.GetMerchantById(ctx, sub.MerchantId)
 		if oneUser != nil && plan != nil && merchant != nil {
-			err := email2.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionTrialStart, "", &email2.TemplateVariable{
+			err = email2.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionTrialStart, "", &email2.TemplateVariable{
 				UserName:            oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName: plan.PlanName,
 				MerchantCustomEmail: merchant.Email,

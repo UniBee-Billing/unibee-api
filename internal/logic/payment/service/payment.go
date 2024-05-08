@@ -316,7 +316,7 @@ func SendAuthorizedEmailBackground(sub *entity.Subscription, invoice *entity.Inv
 		oneUser := query.GetUserAccountById(ctx, sub.UserId)
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		if plan != nil && oneUser != nil && merchant != nil {
-			err := email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
+			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
 				UserName:            oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName: plan.PlanName,
 				MerchantCustomEmail: merchant.Email,
@@ -326,7 +326,7 @@ func SendAuthorizedEmailBackground(sub *entity.Subscription, invoice *entity.Inv
 				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 			})
 			if err != nil {
-				g.Log().Errorf(ctx, "CreateSubInvoicePaymentDefaultAutomatic SendTemplateEmail err:%s", err.Error())
+				g.Log().Errorf(ctx, "SendTemplateEmail SendAuthorizedEmailBackground err:%s", err.Error())
 			}
 		}
 	}()

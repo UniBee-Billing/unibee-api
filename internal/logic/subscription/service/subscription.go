@@ -1444,7 +1444,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 			})
 			if err != nil {
-				fmt.Printf("SendTemplateEmail err:%s", err.Error())
+				g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancel:%s", err.Error())
 			}
 		}
 	}
@@ -1493,7 +1493,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
-			fmt.Printf("SendTemplateEmail err:%s", err.Error())
+			g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelAtPeriodEnd:%s", err.Error())
 		}
 	} else {
 		err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionCancelledAtPeriodEndByUser, "", &email.TemplateVariable{
@@ -1504,7 +1504,7 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 		})
 		if err != nil {
-			fmt.Printf("SendTemplateEmail err:%s", err.Error())
+			g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelAtPeriodEnd:%s", err.Error())
 		}
 	}
 	return nil
@@ -1543,7 +1543,7 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 		PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
 	})
 	if err != nil {
-		fmt.Printf("SendTemplateEmail err:%s", err.Error())
+		g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelLastCancelAtPeriodEnd:%s", err.Error())
 	}
 	return nil
 }

@@ -476,17 +476,20 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 				IBAN:                iban,
 				Address:             address,
 			})
-			utility.AssertError(err, "send email error")
-			//update send status
-			_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
-				dao.Invoice.Columns().GmtModify:  gtime.Now(),
-			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 			if err != nil {
-				fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+				g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())
+			} else {
+				//update send status
+				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+					dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
+					dao.Invoice.Columns().GmtModify:  gtime.Now(),
+				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+				if err != nil {
+					fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+				}
 			}
 		} else {
-			fmt.Printf("SendInvoiceEmailToUser payment invoice status is pending or init, email not send")
+			g.Log().Errorf(ctx, "SendInvoiceEmailToUser payment invoice status is pending or init, email not send")
 		}
 	} else {
 		refund := query.GetRefundByRefundId(ctx, one.RefundId)
@@ -514,17 +517,20 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 					TokenExpireMinute:   strconv.FormatInt(config2.GetConfigInstance().Auth.Login.Expire/60, 10),
 					Link:                "<a href=\"" + link.GetInvoiceLink(one.InvoiceId, one.SendTerms) + "\">Link</a>",
 				})
-				utility.AssertError(err, "send email error")
-				//update send status
-				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-					dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
-					dao.Invoice.Columns().GmtModify:  gtime.Now(),
-				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 				if err != nil {
-					fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+					g.Log().Errorf(ctx, "SendTemplateEmail SendInvoiceEmailToUser err:%s", err.Error())
+				} else {
+					//update send status
+					_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+						dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusSend,
+						dao.Invoice.Columns().GmtModify:  gtime.Now(),
+					}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+					if err != nil {
+						g.Log().Errorf(ctx, "SendInvoiceEmailToUser update err:%s", err.Error())
+					}
 				}
 			} else {
-				fmt.Printf("SendInvoiceEmailToUser refund invoice status is pending or init, email not send")
+				g.Log().Errorf(ctx, "SendInvoiceEmailToUser refund invoice status is pending or init, email not send")
 			}
 		}
 	}
