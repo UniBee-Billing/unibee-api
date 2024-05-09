@@ -113,7 +113,10 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Lines:                   invoiceItems,
 		}
 	} else {
-		var description = merchantInfo.Name
+		var description = req.Description
+		if len(description) == 0 {
+			description = merchantInfo.Name
+		}
 		if len(description) == 0 {
 			description = merchantInfo.CompanyName
 		}

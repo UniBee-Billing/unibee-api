@@ -18,6 +18,7 @@ type NewReq struct {
 	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
 	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
+	Description       string                 `json:"description" dc:"Description"`
 	Items             []*Item                `json:"items" dc:"Items"`
 	Metadata          map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	GasPayer          string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
