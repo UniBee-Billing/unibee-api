@@ -213,6 +213,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						//Try cancel payment
 						err = handler3.RemovePaymentInvoiceId(ctx, lastPayment)
 						if err != nil {
+							g.Log().Print(ctx, "AutomaticPaymentByCycle RemovePaymentInvoiceId err:", err.Error())
+						} else {
 							err = service.PaymentGatewayCancel(ctx, lastPayment)
 							if err != nil {
 								g.Log().Print(ctx, "AutomaticPaymentByCycle PaymentGatewayCancel err:", err.Error())
