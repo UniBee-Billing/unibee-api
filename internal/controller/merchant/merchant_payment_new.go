@@ -80,6 +80,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	if req.Items != nil && len(req.Items) > 0 {
 		var invoiceItems []*bean.InvoiceItemSimplify
 		var totalAmountExcludingTax int64 = 0
+		var totalAmount int64 = 0
 		var totalTax int64 = 0
 		for _, line := range req.Items {
 			utility.Assert(line.Amount > 0, "Item Amount invalid, should > 0")
@@ -97,9 +98,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				Quantity:               line.Quantity,
 			})
 			totalTax = totalTax + line.Tax
-			totalAmountExcludingTax = totalAmountExcludingTax + (line.Amount - line.Tax)
+			totalAmountExcludingTax = totalAmountExcludingTax + line.AmountExcludingTax
+			totalAmount = totalAmount + line.Amount
 		}
-		var totalAmount = totalTax + totalAmountExcludingTax
 		utility.Assert(totalAmount == req.TotalAmount, "sum(items.amount) should match totalAmount")
 		invoice = &bean.InvoiceSimplify{
 			OriginAmount:            req.TotalAmount,
