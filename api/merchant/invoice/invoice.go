@@ -144,6 +144,7 @@ type MarkWireTransferSuccessReq struct {
 	g.Meta         `path:"/mark_wire_transfer_success" tags:"Invoice" method:"post" summary:"MarkWireTransferInvoiceSuccess" dc:"Mark wire transfer pending invoice as success"`
 	InvoiceId      string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 	TransferNumber string `json:"transferNumber" dc:"The transfer number of invoice" v:"required"`
+	Reason         string `json:"reason" dc:"The reason of mark action"`
 }
 
 type MarkWireTransferSuccessRes struct {

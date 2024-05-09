@@ -7,7 +7,7 @@ import (
 )
 
 func (c *ControllerInvoice) MarkWireTransferSuccess(ctx context.Context, req *invoice.MarkWireTransferSuccessReq) (res *invoice.MarkWireTransferSuccessRes, err error) {
-	_, err = service.MarkWireTransferInvoiceAsSuccess(ctx, req.InvoiceId, req.TransferNumber)
+	_, err = service.MarkWireTransferInvoiceAsSuccess(ctx, req.InvoiceId, req.TransferNumber, req.Reason)
 	if err != nil {
 		return nil, err
 	}

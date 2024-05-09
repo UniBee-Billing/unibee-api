@@ -409,7 +409,7 @@ func HardDeleteInvoice(ctx context.Context, merchantId uint64, invoiceId string)
 	return err
 }
 
-func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, transferNumber string) (*entity.Invoice, error) {
+func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, transferNumber string, reason string) (*entity.Invoice, error) {
 	utility.Assert(len(invoiceId) > 0, "invalid invoiceId")
 	utility.Assert(len(transferNumber) > 0, "invalid transferNumber")
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
@@ -429,7 +429,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 		PayStatusEnum:          consts.PaymentSuccess,
 		PaidTime:               gtime.Now(),
 		PaymentAmount:          payment.TotalAmount,
-		Reason:                 "mark success manual by " + transferNumber,
+		Reason:                 reason,
 	})
 	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
 	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
