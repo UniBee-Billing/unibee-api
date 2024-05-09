@@ -35,6 +35,7 @@ type NewPaymentRefundInternalReq struct {
 
 func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
+	g.Log().Infof(ctx, "GatewayPaymentRefundCreate:%s", req.PaymentId)
 	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
@@ -190,6 +191,7 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 
 func MarkPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundInternalReq) (refund *entity.Refund, err error) {
 	utility.Assert(len(req.PaymentId) > 0, "invalid paymentId")
+	g.Log().Infof(ctx, "MarkPaymentRefundCreate:%s", req.PaymentId)
 	utility.Assert(len(req.ExternalRefundId) > 0, "invalid merchantRefundId")
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	utility.Assert(payment != nil, "payment not found")
