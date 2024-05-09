@@ -35,6 +35,17 @@ type HandlePayReq struct {
 	GatewayPaymentMethod   string
 }
 
+func RemovePaymentInvoiceId(ctx context.Context, payment *entity.Payment) error {
+	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
+		dao.Payment.Columns().InvoiceId: "",
+	}).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
+	if err != nil {
+		g.Log().Errorf(ctx, `RemovePaymentInvoiceId failure %s`, err.Error())
+		return err
+	}
+	return nil
+}
+
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
@@ -248,7 +259,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayCancel sendResult err=%s", err)
 	if err == nil {
-		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
@@ -319,7 +330,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 
 	g.Log().Infof(ctx, "HandlePayFailure sendResult err=%s", err)
 	if err == nil {
-		payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
+		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())

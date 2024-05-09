@@ -13,6 +13,7 @@ import (
 	"unibee/internal/logic/discount"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
+	handler3 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/billingcycle/expire"
@@ -63,7 +64,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		var needInvoiceFirstTryPayment = false
 		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing) {
 			needInvoiceGenerate = false
-			if len(latestInvoice.PaymentId) == 0 && timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).TryAutomaticPaymentBeforePeriodEnd {
+			if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).TryAutomaticPaymentBeforePeriodEnd {
 				needInvoiceFirstTryPayment = true
 			}
 		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && timeNow < latestInvoice.PeriodStart {
@@ -199,7 +200,25 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
 					trackForSubscriptionLatest(ctx, sub, timeNow)
 				}
-				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
+				var lastAutomaticTryTime int64 = 0
+				var lastPayment *entity.Payment
+				if len(latestInvoice.PaymentId) > 0 {
+					lastPayment = query.GetPaymentByPaymentId(ctx, latestInvoice.PaymentId)
+					if lastPayment != nil {
+						lastAutomaticTryTime = lastPayment.CreateTime
+					}
+				}
+				if latestInvoice != nil && (timeNow-lastAutomaticTryTime) > 86400 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
+					if lastPayment != nil {
+						//Try cancel payment
+						err = handler3.RemovePaymentInvoiceId(ctx, lastPayment)
+						if err != nil {
+							err = service.PaymentGatewayCancel(ctx, lastPayment)
+							if err != nil {
+								g.Log().Print(ctx, "AutomaticPaymentByCycle PaymentGatewayCancel err:", err.Error())
+							}
+						}
+					}
 					// finish the payment
 					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, latestInvoice, sub.GatewayId, false, "", "SubscriptionBillingCycle")
 					if err != nil {
