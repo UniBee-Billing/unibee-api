@@ -8,7 +8,7 @@ import (
 type MethodListReq struct {
 	g.Meta    `path:"/method_list" tags:"Payment" method:"get" summary:"PaymentMethodList" dc:"The method list of payment gateway"`
 	GatewayId uint64 `json:"gatewayId" dc:"The unique id of gateway"   v:"required" `
-	UserId    uint64 `json:"userId" dc:"The customer's unique id" `
+	UserId    uint64 `json:"userId" dc:"The id of user" `
 	PaymentId string `json:"paymentId" dc:"The unique id of payment"  `
 }
 

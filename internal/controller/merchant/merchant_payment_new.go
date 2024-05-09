@@ -113,6 +113,13 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Lines:                   invoiceItems,
 		}
 	} else {
+		var description = merchantInfo.Name
+		if len(description) == 0 {
+			description = merchantInfo.CompanyName
+		}
+		if len(description) == 0 {
+			description = "Default Product"
+		}
 		invoice = &bean.InvoiceSimplify{
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
@@ -131,7 +138,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				AmountExcludingTax:     req.TotalAmount,
 				TaxPercentage:          0,
 				UnitAmountExcludingTax: req.TotalAmount,
-				Description:            merchantInfo.Name,
+				Description:            description,
 				Quantity:               1,
 			}},
 		}
