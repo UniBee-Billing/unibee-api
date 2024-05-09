@@ -28,6 +28,17 @@ func GetPaymentByPaymentId(ctx context.Context, paymentId string) (one *entity.P
 	return
 }
 
+func GetPaymentByUniqueId(ctx context.Context, uniqueId string) (one *entity.Payment) {
+	if len(uniqueId) == 0 {
+		return nil
+	}
+	err := dao.Payment.Ctx(ctx).Where(dao.Payment.Columns().UniqueId, uniqueId).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func GetPaymentByGatewayPaymentId(ctx context.Context, gatewayPaymentId string) (one *entity.Payment) {
 	if len(gatewayPaymentId) == 0 {
 		return nil

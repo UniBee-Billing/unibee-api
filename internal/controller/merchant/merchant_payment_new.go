@@ -150,6 +150,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			}},
 		}
 	}
+	var uniqueId = fmt.Sprintf("%d_%s", merchantInfo.Id, req.ExternalPaymentId)
+	exsitPayment := query.GetPaymentByUniqueId(ctx, uniqueId)
+	utility.Assert(exsitPayment == nil, "same ExternalPaymentId exist:"+req.ExternalPaymentId)
 
 	resp, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		CheckoutMode: true,
@@ -166,7 +169,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			CompanyId:         merchantInfo.CompanyId,
 			ReturnUrl:         req.RedirectUrl,
 			GasPayer:          req.GasPayer,
-			UniqueId:          fmt.Sprintf("%d_%s", merchantInfo.Id, req.ExternalPaymentId),
+			UniqueId:          uniqueId,
 		},
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
