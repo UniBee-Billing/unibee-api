@@ -201,9 +201,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				if latestInvoice != nil && len(latestInvoice.PaymentId) == 0 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
 					// finish the payment
-					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, latestInvoice, sub.GatewayId, false, "")
+					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, latestInvoice, sub.GatewayId, false, "", "SubscriptionBillingCycle")
 					if err != nil {
-						g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
+						g.Log().Print(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 						return nil, err
 					}
 

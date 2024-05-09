@@ -201,8 +201,9 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl)
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
 	if err != nil {
+		g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 		return nil, err
 	}
 
@@ -683,8 +684,9 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false, req.ReturnUrl)
+		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
+			g.Log().Print(ctx, "SubscriptionCreate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
 		}
 		createRes = &gateway_bean.GatewayCreateSubscriptionResp{
@@ -1275,8 +1277,9 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
 		if err != nil {
+			g.Log().Print(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
 		}
 		// Upgrade
@@ -1723,7 +1726,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false, "")
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false, "", "SubscriptionEndTrialManual")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

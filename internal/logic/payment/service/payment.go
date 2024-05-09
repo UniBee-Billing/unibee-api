@@ -212,7 +212,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	var email = ""
 	if user != nil {
@@ -254,7 +254,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Su
 		ExternalUserId:       strconv.FormatUint(sub.UserId, 10),
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
-		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName},
+		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment},
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
 	})
 
