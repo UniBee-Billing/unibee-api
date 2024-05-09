@@ -106,7 +106,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway payment
-			createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
+			if len(createPayContext.Pay.UniqueId) == 0 {
+				createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
+			}
 			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
 			createPayContext.Pay.ExpireTime = createPayContext.Pay.CreateTime + int64(createPayContext.DaysUtilDue*86400)
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)

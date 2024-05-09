@@ -148,7 +148,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		}
 	}
 
-	createPayContext := &gateway_bean.GatewayNewPaymentReq{
+	resp, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		CheckoutMode: true,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
@@ -163,14 +163,13 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			CompanyId:         merchantInfo.CompanyId,
 			ReturnUrl:         req.RedirectUrl,
 			GasPayer:          req.GasPayer,
+			UniqueId:          fmt.Sprintf("%d_%s", merchantInfo.Id, req.ExternalPaymentId),
 		},
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		Metadata:       req.Metadata,
 		Invoice:        invoice,
-	}
-
-	resp, err := service.GatewayPaymentCreate(ctx, createPayContext)
+	})
 	utility.Assert(err == nil, fmt.Sprintf("%+v", err))
 	res = &payment.NewRes{
 		Status:            consts.PaymentCreated,
