@@ -23,31 +23,6 @@ import (
 	"unibee/utility"
 )
 
-func ClearInvoicePayment(ctx context.Context, invoice *entity.Invoice) error {
-	if len(invoice.PaymentId) > 0 {
-		lastPayment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
-		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
-			//Try cancel latest payment
-			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().PaymentId: "",
-			}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
-			if err != nil {
-				g.Log().Errorf(ctx, `ClearInvoicePayment update failure %s`, err.Error())
-				return err
-			}
-			invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
-			if len(invoice.PaymentId) == 0 {
-				err = service.PaymentGatewayCancel(ctx, lastPayment)
-				if err != nil {
-					g.Log().Print(ctx, "ClearInvoicePayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
 func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
 	if one.Status == consts.InvoiceStatusProcessing {

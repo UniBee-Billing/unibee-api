@@ -23,7 +23,6 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
@@ -215,11 +214,38 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
+func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.Payment, error) {
+	if len(invoice.PaymentId) > 0 {
+		lastPayment := query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
+		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
+			//Try cancel latest payment
+			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+				dao.Invoice.Columns().PaymentId: "",
+			}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
+			if err != nil {
+				g.Log().Errorf(ctx, `ClearInvoicePayment update failure %s`, err.Error())
+				return nil, err
+			}
+			invoice = query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
+			if len(invoice.PaymentId) == 0 {
+				return lastPayment, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
 func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod string, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
-	err = service.ClearInvoicePayment(ctx, invoice)
+	lastPayment, err := clearInvoicePayment(ctx, invoice)
 	if err != nil {
 		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%d err:%s", invoice.InvoiceId, err.Error())
+	}
+	if lastPayment != nil {
+		err = PaymentGatewayCancel(ctx, lastPayment)
+		if err != nil {
+			g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic CancelLastPayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
+		}
 	}
 	user := query.GetUserAccountById(ctx, invoice.UserId)
 	var email = ""
