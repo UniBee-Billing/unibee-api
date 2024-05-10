@@ -56,7 +56,7 @@ func GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx context.Context
 		Where(dao.Subscription.Columns().UserId, userId).
 		Where(dao.Subscription.Columns().MerchantId, merchantId).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
-		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusPending, consts.SubStatusActive, consts.SubStatusIncomplete}).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusPending, consts.SubStatusProcessed, consts.SubStatusActive, consts.SubStatusIncomplete}).
 		OrderDesc(dao.Subscription.Columns().GmtModify).
 		Scan(&one)
 	if err != nil {
