@@ -548,19 +548,11 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 		one.Id = uint64(id)
 	} else {
 		_, err := dao.PaymentTimeline.Ctx(ctx).Data(g.Map{
-			dao.PaymentTimeline.Columns().MerchantId:     payment.MerchantId,
-			dao.PaymentTimeline.Columns().UserId:         payment.UserId,
-			dao.PaymentTimeline.Columns().SubscriptionId: payment.SubscriptionId,
-			dao.PaymentTimeline.Columns().InvoiceId:      payment.InvoiceId,
-			dao.PaymentTimeline.Columns().Currency:       payment.Currency,
-			dao.PaymentTimeline.Columns().TotalAmount:    payment.TotalAmount,
-			dao.PaymentTimeline.Columns().GatewayId:      payment.GatewayId,
-			dao.PaymentTimeline.Columns().PaymentId:      payment.PaymentId,
-			dao.PaymentTimeline.Columns().GmtModify:      gtime.Now(),
-			dao.PaymentTimeline.Columns().Status:         status,
-			dao.PaymentTimeline.Columns().TimelineType:   consts.TimelineTypePayment,
+			dao.PaymentTimeline.Columns().GmtModify: gtime.Now(),
+			dao.PaymentTimeline.Columns().Status:    status,
 		}).Where(dao.PaymentTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
+			err = gerror.Newf(`CreateOrUpdatePaymentTimelineForPayment record update failure %s`, err.Error())
 			return err
 		}
 	}
