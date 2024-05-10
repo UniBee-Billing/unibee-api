@@ -91,6 +91,7 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 		CancelURL:  stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
 	}
 	result, err := session.New(params)
+	log.SaveChannelHttpLog("GatewayUserCreateAndBindPaymentMethod", params, result, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -362,6 +363,9 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 			},
+		}
+		if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
+			checkoutParams.PaymentMethodConfiguration = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
 		}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
 		checkoutParams.Metadata = utility.ConvertToStringMetadata(createPayContext.Metadata)

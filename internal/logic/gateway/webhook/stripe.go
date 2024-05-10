@@ -252,10 +252,20 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				stripe.Key = gateway.GatewaySecret
 				s.setUnibeeAppInfo()
 
+				params := &stripe.SetupIntentParams{}
+				result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
+				one := query.GetGatewayUserByGatewayUserId(r.Context(), result.Customer.ID, gateway.Id)
+				if one != nil {
+					_, err = query.CreateOrUpdateGatewayUser(r.Context(), one.UserId, gateway.Id, result.Customer.ID, result.PaymentMethod.ID)
+					if err != nil {
+						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error CreateOrUpdateGatewayUser: %s\n", gateway.GatewayName, err.Error())
+					}
+				} else {
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error GetGatewayUserByGatewayUserId not found: %s\n", gateway.GatewayName, result.Customer.ID)
+				}
+
 				if stripeCheckoutSession.SetupIntent != nil && len(stripeCheckoutSession.Metadata["SubscriptionId"]) > 0 {
 					//change subscription gateway payment method
-					params := &stripe.SetupIntentParams{}
-					result, err := setupintent.Get(stripeCheckoutSession.SetupIntent.ID, params)
 					if err == nil && result.PaymentMethod != nil {
 						sub, err := handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
 						if err != nil {
