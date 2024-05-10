@@ -63,33 +63,6 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 				res.Message = "Server Error"
 				return res
 			}
-
-			//merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
-			//user := query.GetUserAccountById(ctx, one.UserId)
-			//createRes, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-			//	CheckoutMode: true,
-			//	Gateway:      gateway,
-			//	Pay: &entity.Payment{
-			//		SubscriptionId:    one.SubscriptionId,
-			//		ExternalPaymentId: one.SubscriptionId,
-			//		BizType:           one.BizType,
-			//		UserId:            one.UserId,
-			//		GatewayId:         gateway.Id,
-			//		TotalAmount:       one.TotalAmount,
-			//		Currency:          one.Currency,
-			//		CryptoAmount:      one.CryptoAmount,
-			//		CryptoCurrency:    one.CryptoCurrency,
-			//		CountryCode:       one.CountryCode,
-			//		MerchantId:        one.MerchantId,
-			//		CompanyId:         merchantInfo.CompanyId,
-			//		BillingReason:     one.InvoiceName,
-			//		ReturnUrl:         "",
-			//	},
-			//	ExternalUserId: strconv.FormatUint(one.UserId, 10),
-			//	Email:          user.Email,
-			//	Invoice:        bean.SimplifyInvoice(one),
-			//	Metadata:       map[string]interface{}{"BillingReason": one.InvoiceName},
-			//})
 			createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", one, one.GatewayId, true, "", "InvoiceLink")
 			if err != nil {
 				g.Log().Infof(ctx, "GatewayPaymentCreate Error:%s", err.Error())

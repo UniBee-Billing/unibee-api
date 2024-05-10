@@ -23,6 +23,7 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
@@ -216,26 +217,10 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 
 func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod string, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
-	var lastPayment *entity.Payment
-	if len(invoice.PaymentId) > 0 {
-		lastPayment = query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
-		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
-			//Try cancel payment
-			err = handler2.RemovePaymentInvoiceId(ctx, lastPayment)
-			if err != nil {
-				g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic RemovePaymentInvoiceId:%s err:", lastPayment.PaymentId, err.Error())
-			} else {
-				lastPayment = query.GetPaymentByPaymentId(ctx, lastPayment.PaymentId)
-				if len(lastPayment.InvoiceId) == 0 {
-					err = PaymentGatewayCancel(ctx, lastPayment)
-					if err != nil {
-						g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
-					}
-				}
-			}
-		}
+	err = service.ClearInvoicePayment(ctx, invoice)
+	if err != nil {
+		g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic ClearInvoicePayment invoiceId:%d err:%s", invoice.InvoiceId, err.Error())
 	}
-
 	user := query.GetUserAccountById(ctx, invoice.UserId)
 	var email = ""
 	if user != nil {

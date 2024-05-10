@@ -13,7 +13,6 @@ import (
 	"unibee/internal/logic/discount"
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
-	handler3 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/billingcycle/expire"
@@ -209,18 +208,6 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					}
 				}
 				if latestInvoice != nil && (timeNow-lastAutomaticTryTime) > 86400 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
-					if lastPayment != nil {
-						//Try cancel payment
-						err = handler3.RemovePaymentInvoiceId(ctx, lastPayment)
-						if err != nil {
-							g.Log().Print(ctx, "AutomaticPaymentByCycle RemovePaymentInvoiceId err:", err.Error())
-						} else {
-							err = service.PaymentGatewayCancel(ctx, lastPayment)
-							if err != nil {
-								g.Log().Print(ctx, "AutomaticPaymentByCycle PaymentGatewayCancel err:", err.Error())
-							}
-						}
-					}
 					// finish the payment
 					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub.GatewayDefaultPaymentMethod, latestInvoice, sub.GatewayId, false, "", "SubscriptionBillingCycle")
 					if err != nil {

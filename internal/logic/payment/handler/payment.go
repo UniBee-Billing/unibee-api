@@ -35,17 +35,6 @@ type HandlePayReq struct {
 	GatewayPaymentMethod   string
 }
 
-func RemovePaymentInvoiceId(ctx context.Context, payment *entity.Payment) error {
-	_, err := dao.Payment.Ctx(ctx).Data(g.Map{
-		dao.Payment.Columns().InvoiceId: "",
-	}).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
-	if err != nil {
-		g.Log().Errorf(ctx, `RemovePaymentInvoiceId failure %s`, err.Error())
-		return err
-	}
-	return nil
-}
-
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
@@ -121,12 +110,10 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.Authorized, dao.Payment.Columns().GatewayPaymentId: payment.GatewayPaymentId},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated, dao.Payment.Columns().AuthorizeStatus: consts.WaitingAuthorized})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -236,12 +223,10 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PaymentCancelled, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			payment.Status = consts.PaymentCancelled
@@ -521,7 +506,7 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 	var status = 0
 	if payment.Status == consts.PaymentSuccess {
 		status = 1
-	} else if payment.Status == consts.PaymentFailed {
+	} else if payment.Status == consts.PaymentFailed || payment.Status == consts.PaymentCancelled {
 		status = 2
 	}
 	if one == nil {
