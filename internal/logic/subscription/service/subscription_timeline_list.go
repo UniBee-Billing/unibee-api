@@ -23,10 +23,12 @@ type SubscriptionTimeLineListInternalReq struct {
 
 type SubscriptionTimeLineListInternalRes struct {
 	SubscriptionTimelines []*detail.SubscriptionTimeLineDetail
+	Total                 int `json:"total" dc:"Total"`
 }
 
 func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineListInternalReq) (res *SubscriptionTimeLineListInternalRes, err error) {
 	var mainList []*entity.SubscriptionTimeline
+	var total = 0
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -51,7 +53,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 		Where(dao.SubscriptionTimeline.Columns().UserId, req.UserId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}
@@ -77,5 +79,5 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 		})
 	}
 
-	return &SubscriptionTimeLineListInternalRes{SubscriptionTimelines: timelines}, nil
+	return &SubscriptionTimeLineListInternalRes{SubscriptionTimelines: timelines, Total: total}, nil
 }

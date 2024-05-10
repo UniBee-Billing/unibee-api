@@ -32,24 +32,6 @@ func GetMerchantMetricSimplify(ctx context.Context, id uint64) *bean.MerchantMet
 	return nil
 }
 
-func MerchantMetricList(ctx context.Context, merchantId uint64) []*bean.MerchantMetricSimplify {
-	utility.Assert(merchantId > 0, "invalid merchantId")
-	var list = make([]*bean.MerchantMetricSimplify, 0)
-	if merchantId > 0 {
-		var entities []*entity.MerchantMetric
-		err := dao.MerchantMetric.Ctx(ctx).
-			Where(dao.MerchantMetric.Columns().MerchantId, merchantId).
-			Where(dao.MerchantMetric.Columns().IsDeleted, 0).
-			Scan(&entities)
-		if err == nil && len(entities) > 0 {
-			for _, one := range entities {
-				list = append(list, bean.SimplifyMerchantMetric(one))
-			}
-		}
-	}
-	return list
-}
-
 func MerchantMetricDetail(ctx context.Context, merchantId uint64, merchantMetricId uint64) *bean.MerchantMetricSimplify {
 	utility.Assert(merchantMetricId > 0, "invalid merchantMetricId")
 	if merchantMetricId > 0 {

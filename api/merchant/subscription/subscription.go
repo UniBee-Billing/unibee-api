@@ -53,6 +53,7 @@ type ListReq struct {
 }
 type ListRes struct {
 	Subscriptions []*detail.SubscriptionDetail `json:"subscriptions" dc:"Subscriptions"`
+	Total         int                          `json:"total" dc:"Total"`
 }
 
 type CancelReq struct {
@@ -272,6 +273,7 @@ type TimeLineListReq struct {
 
 type TimeLineListRes struct {
 	SubscriptionTimeLines []*detail.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	Total                 int                                  `json:"total" dc:"Total"`
 }
 
 type PendingUpdateListReq struct {
@@ -285,6 +287,7 @@ type PendingUpdateListReq struct {
 
 type PendingUpdateListRes struct {
 	SubscriptionPendingUpdateDetails []*detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	Total                            int                                       `json:"total" dc:"Total"`
 }
 
 type NewAdminNoteReq struct {

@@ -41,6 +41,7 @@ type ListReq struct {
 
 type ListRes struct {
 	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"User Account Object List" `
+	Total        int                         `json:"total" dc:"Total"`
 }
 
 type GetReq struct {

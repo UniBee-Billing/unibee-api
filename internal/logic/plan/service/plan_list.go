@@ -70,7 +70,7 @@ func PlanDetail(ctx context.Context, merchantId uint64, planId uint64) (*plan.De
 	}, nil
 }
 
-func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*detail.PlanDetail) {
+func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list []*detail.PlanDetail, total int) {
 	var mainList []*entity.Plan
 	if req.Count <= 0 {
 		req.Count = 20
@@ -102,9 +102,9 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 		OmitEmpty().
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		Scan(&mainList)
+		ScanAndCount(&mainList, &total, true)
 	if err != nil {
-		return nil
+		return nil, 0
 	}
 	var totalAddonIds []int64
 	var totalOneTimeAddonIds []int64
@@ -197,5 +197,5 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 			}
 		}
 	}
-	return list
+	return list, total
 }

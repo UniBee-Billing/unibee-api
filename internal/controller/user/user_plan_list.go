@@ -16,7 +16,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
 	}
 
-	publishPlans := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
+	publishPlans, total := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
@@ -34,5 +34,5 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 			}
 		}
 	}
-	return &plan.ListRes{Plans: publishPlans}, nil
+	return &plan.ListRes{Plans: publishPlans, Total: total}, nil
 }

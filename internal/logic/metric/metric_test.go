@@ -15,7 +15,7 @@ func TestMerchantMetric(t *testing.T) {
 	var limit *bean.MerchantMetricPlanLimit
 	var err error
 	t.Run("Test for merchant metric New|Get|Detail|Edit|Delete|List", func(t *testing.T) {
-		list := MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ := MerchantMetricList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, 0, len(list))
 		one, err = NewMerchantMetric(ctx, &NewMerchantMetricInternalReq{
@@ -34,7 +34,7 @@ func TestMerchantMetric(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, "test", one.MetricName)
 		require.Equal(t, "test", one.MetricDescription)
-		list = MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ = MerchantMetricList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, 1, len(list))
 		one, err = EditMerchantMetric(ctx, test.TestMerchant.Id, one.Id, "test2", "test2")
@@ -44,7 +44,7 @@ func TestMerchantMetric(t *testing.T) {
 		require.Equal(t, "test2", one.MetricDescription)
 		err = DeleteMerchantMetric(ctx, test.TestMerchant.Id, one.Id)
 		require.Nil(t, err)
-		list = MerchantMetricList(ctx, test.TestMerchant.Id)
+		list, _ = MerchantMetricList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, 0, len(list))
 		oldOne := one

@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
-	return &subscription.ListRes{Subscriptions: service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
+	list, total := service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		Status:     req.Status,
@@ -17,5 +17,6 @@ func (c *ControllerSubscription) List(ctx context.Context, req *subscription.Lis
 		SortType:   req.SortType,
 		Page:       req.Page,
 		Count:      req.Count,
-	})}, nil
+	})
+	return &subscription.ListRes{Subscriptions: list, Total: total}, nil
 }

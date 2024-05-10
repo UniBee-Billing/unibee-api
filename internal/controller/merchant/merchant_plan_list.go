@@ -8,7 +8,7 @@ import (
 )
 
 func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.ListRes, err error) {
-	plans := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
+	plans, total := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
 		MerchantId:    _interface.Context().Get(ctx).MerchantId,
 		Type:          req.Type,
 		Status:        req.Status,
@@ -19,5 +19,5 @@ func (c *ControllerPlan) List(ctx context.Context, req *v1.ListReq) (res *v1.Lis
 		Page:          req.Page,
 		Count:         req.Count,
 	})
-	return &v1.ListRes{Plans: plans}, nil
+	return &v1.ListRes{Plans: plans, Total: total}, nil
 }

@@ -16,4 +16,5 @@ type TimeLineListReq struct {
 
 type TimeLineListRes struct {
 	PaymentTimeLines []*detail.PaymentTimelineDetail `json:"paymentTimeLines" description:"Payment TimeLine Object List" `
+	Total            int                             `json:"total" dc:"Total"`
 }

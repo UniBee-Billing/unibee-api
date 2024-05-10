@@ -10,7 +10,7 @@ import (
 	"unibee/utility"
 )
 
-func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*bean.MerchantEmailTemplateSimplify {
+func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) ([]*bean.MerchantEmailTemplateSimplify, int) {
 	var list = make([]*bean.MerchantEmailTemplateSimplify, 0)
 	if merchantId > 0 {
 		var defaultTemplateList []*entity.EmailDefaultTemplate
@@ -51,7 +51,7 @@ func GetMerchantEmailTemplateList(ctx context.Context, merchantId uint64) []*bea
 			}
 		}
 	}
-	return list
+	return list, len(list)
 }
 
 func UpdateMerchantEmailTemplate(ctx context.Context, merchantId uint64, templateName string, templateTitle string, templateContent string) error {

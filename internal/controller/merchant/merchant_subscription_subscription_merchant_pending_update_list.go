@@ -20,5 +20,5 @@ func (c *ControllerSubscription) PendingUpdateList(ctx context.Context, req *sub
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.PendingUpdateListRes{SubscriptionPendingUpdateDetails: result.SubscriptionPendingUpdateDetails}, nil
+	return &subscription.PendingUpdateListRes{SubscriptionPendingUpdateDetails: result.SubscriptionPendingUpdateDetails, Total: result.Total}, nil
 }

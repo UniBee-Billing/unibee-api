@@ -9,5 +9,6 @@ import (
 )
 
 func (c *ControllerRole) List(ctx context.Context, req *role.ListReq) (res *role.ListRes, err error) {
-	return &role.ListRes{MerchantRoles: role2.MerchantRoleList(ctx, _interface.GetMerchantId(ctx))}, nil
+	list, total := role2.MerchantRoleList(ctx, _interface.GetMerchantId(ctx))
+	return &role.ListRes{MerchantRoles: list, Total: total}, nil
 }

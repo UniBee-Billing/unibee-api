@@ -8,6 +8,6 @@ import (
 )
 
 func (c *ControllerEmail) TemplateList(ctx context.Context, req *email.TemplateListReq) (res *email.TemplateListRes, err error) {
-	list := email2.GetMerchantEmailTemplateList(ctx, _interface.GetMerchantId(ctx))
-	return &email.TemplateListRes{EmailTemplateList: list}, nil
+	list, total := email2.GetMerchantEmailTemplateList(ctx, _interface.GetMerchantId(ctx))
+	return &email.TemplateListRes{EmailTemplateList: list, Total: total}, nil
 }

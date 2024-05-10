@@ -12,4 +12,5 @@ type ListReq struct {
 }
 type ListRes struct {
 	Plans []*merhcnatPlan.PlanDetail `json:"plans" dc:"Plan Detail"`
+	Total int                        `json:"total" dc:"Total"`
 }

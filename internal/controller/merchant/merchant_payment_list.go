@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerPayment) List(ctx context.Context, req *payment.ListReq) (res *payment.ListRes, err error) {
-	paymentDetails, err := service.PaymentList(ctx, &service.PaymentListInternalReq{
+	paymentDetails, total, err := service.PaymentList(ctx, &service.PaymentListInternalReq{
 		MerchantId:  _interface.GetMerchantId(ctx),
 		GatewayId:   req.GatewayId,
 		UserId:      req.UserId,
@@ -25,5 +25,5 @@ func (c *ControllerPayment) List(ctx context.Context, req *payment.ListReq) (res
 	if err != nil {
 		return nil, err
 	}
-	return &payment.ListRes{PaymentDetails: paymentDetails}, nil
+	return &payment.ListRes{PaymentDetails: paymentDetails, Total: total}, nil
 }

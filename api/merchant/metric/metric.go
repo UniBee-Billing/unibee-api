@@ -11,6 +11,7 @@ type ListReq struct {
 
 type ListRes struct {
 	MerchantMetrics []*bean.MerchantMetricSimplify `json:"merchantMetrics" dc:"MerchantMetrics"`
+	Total           int                            `json:"total" dc:"Total"`
 }
 
 type NewReq struct {

@@ -89,7 +89,7 @@ func TestPayment(t *testing.T) {
 		one = query.GetPaymentByPaymentId(ctx, paymentId)
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.PaymentCancelled)
-		list, err := PaymentList(ctx, &PaymentListInternalReq{
+		list, _, err := PaymentList(ctx, &PaymentListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			GatewayId:  gateway.Id,
 			UserId:     test.TestUser.Id,

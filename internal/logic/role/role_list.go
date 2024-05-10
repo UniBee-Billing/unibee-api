@@ -8,7 +8,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-func MerchantRoleList(ctx context.Context, merchantId uint64) []*bean.MerchantRoleSimplify {
+func MerchantRoleList(ctx context.Context, merchantId uint64) ([]*bean.MerchantRoleSimplify, int) {
 	var mainList = make([]*bean.MerchantRoleSimplify, 0)
 	var list []*entity.MerchantRole
 	err := dao.MerchantRole.Ctx(ctx).
@@ -17,11 +17,11 @@ func MerchantRoleList(ctx context.Context, merchantId uint64) []*bean.MerchantRo
 		Scan(&list)
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantRoleList err:%s", err.Error())
-		return mainList
+		return mainList, len(mainList)
 	}
 	for _, one := range list {
 		mainList = append(mainList, bean.SimplifyMerchantRole(one))
 	}
 
-	return mainList
+	return mainList, len(mainList)
 }

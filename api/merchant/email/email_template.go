@@ -11,6 +11,7 @@ type TemplateListReq struct {
 
 type TemplateListRes struct {
 	EmailTemplateList []*bean.MerchantEmailTemplateSimplify `json:"emailTemplateList" description:"Email Template Object List" `
+	Total             int                                   `json:"total" dc:"Total"`
 }
 
 type TemplateUpdateReq struct {

@@ -26,6 +26,7 @@ type SubscriptionPendingUpdateListInternalReq struct {
 
 type SubscriptionPendingUpdateListInternalRes struct {
 	SubscriptionPendingUpdateDetails []*detail.SubscriptionPendingUpdateDetail `json:"subscriptionPendingUpdateDetails" dc:"SubscriptionPendingUpdateDetails"`
+	Total                            int                                       `json:"total" dc:"Total"`
 }
 
 func GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx context.Context, pendingUpdateId string) *detail.SubscriptionPendingUpdateDetail {
@@ -86,6 +87,7 @@ func GetUnfinishedSubscriptionPendingUpdateDetailByPendingUpdateId(ctx context.C
 
 func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPendingUpdateListInternalReq) (res *SubscriptionPendingUpdateListInternalRes, err error) {
 	var mainList []*entity.SubscriptionPendingUpdate
+	var total = 0
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -110,7 +112,7 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		WhereNotNull(dao.SubscriptionPendingUpdate.Columns().MerchantMemberId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}
@@ -158,5 +160,5 @@ func SubscriptionPendingUpdateList(ctx context.Context, req *SubscriptionPending
 		})
 	}
 
-	return &SubscriptionPendingUpdateListInternalRes{SubscriptionPendingUpdateDetails: updateList}, nil
+	return &SubscriptionPendingUpdateListInternalRes{SubscriptionPendingUpdateDetails: updateList, Total: total}, nil
 }

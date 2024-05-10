@@ -20,10 +20,12 @@ type PaymentTimelineListInternalReq struct {
 
 type PaymentTimeLineListInternalRes struct {
 	PaymentTimelines []*detail.PaymentTimelineDetail `json:"paymentTimeline" dc:"paymentTimelines"`
+	Total            int                             `json:"total" dc:"Total"`
 }
 
 func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalReq) (res *PaymentTimeLineListInternalRes, err error) {
 	var mainList []*entity.PaymentTimeline
+	var total int
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -47,7 +49,7 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 		Where(dao.PaymentTimeline.Columns().UserId, req.UserId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}
@@ -57,5 +59,5 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 		resultList = append(resultList, detail.ConvertPaymentTimeline(ctx, one))
 	}
 
-	return &PaymentTimeLineListInternalRes{PaymentTimelines: resultList}, nil
+	return &PaymentTimeLineListInternalRes{PaymentTimelines: resultList, Total: total}, nil
 }

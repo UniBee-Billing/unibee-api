@@ -206,6 +206,7 @@ type TimeLineListReq struct {
 
 type TimeLineListRes struct {
 	SubscriptionTimeLines []*detail.SubscriptionTimeLineDetail `json:"subscriptionTimeLines" description:"SubscriptionTimeLines" `
+	Total                 int                                  `json:"total" dc:"Total"`
 }
 
 type OnetimeAddonNewReq struct {

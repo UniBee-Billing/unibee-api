@@ -53,7 +53,7 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 	}, nil
 }
 
-func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*detail.SubscriptionDetail) {
+func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (list []*detail.SubscriptionDetail, total int) {
 	var mainList []*entity.Subscription
 	if req.Count <= 0 {
 		req.Count = 20
@@ -79,9 +79,9 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	}
 	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		Order(sortKey).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
-		return nil
+		return nil, 0
 	}
 	var totalPlanIds []uint64
 	for _, sub := range mainList {
@@ -141,5 +141,5 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			}
 		}
 	}
-	return list
+	return list, total
 }

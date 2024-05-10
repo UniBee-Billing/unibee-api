@@ -67,4 +67,5 @@ type ListReq struct {
 
 type ListRes struct {
 	PaymentDetails []*detail.PaymentDetail `json:"paymentDetails" dc:"Payment Detail Object List"`
+	Total          int                     `json:"total" dc:"Total"`
 }

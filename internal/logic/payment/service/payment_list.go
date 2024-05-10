@@ -30,7 +30,7 @@ type PaymentListInternalRes struct {
 	PaymentDetails []*detail.PaymentDetail `json:"paymentDetails" dc:"PaymentDetails"`
 }
 
-func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*detail.PaymentDetail, err error) {
+func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetails []*detail.PaymentDetail, total int, err error) {
 	req.Currency = strings.ToUpper(req.Currency)
 	var mainList []*detail.PaymentDetail
 	if req.Count <= 0 {
@@ -63,7 +63,7 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		if user != nil {
 			q = q.Where(dao.Payment.Columns().UserId, user.Id)
 		} else {
-			return mainList, nil
+			return mainList, 0, nil
 		}
 	}
 	if req.Status > 0 {
@@ -79,9 +79,9 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 	err = q.
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&list)
+		OmitEmpty().ScanAndCount(&list, &total, true)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	for _, one := range list {
 		mainList = append(mainList, &detail.PaymentDetail{
@@ -92,5 +92,5 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 		})
 	}
 
-	return mainList, nil
+	return mainList, total, nil
 }

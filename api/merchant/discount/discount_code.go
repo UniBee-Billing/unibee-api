@@ -12,6 +12,7 @@ type ListReq struct {
 
 type ListRes struct {
 	Discounts []*bean.MerchantDiscountCodeSimplify `json:"discounts" dc:"Discount Object List"`
+	Total     int                                  `json:"total" dc:"Total"`
 }
 
 type DetailReq struct {

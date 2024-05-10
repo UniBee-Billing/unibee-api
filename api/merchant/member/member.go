@@ -35,6 +35,7 @@ type ListReq struct {
 
 type ListRes struct {
 	MerchantMembers []*bean.MerchantMemberSimplify `json:"merchantMembers" dc:"Merchant Member Object List"`
+	Total           int                            `json:"total" dc:"Total"`
 }
 
 type UpdateMemberRoleReq struct {

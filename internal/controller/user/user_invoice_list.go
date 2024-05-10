@@ -31,5 +31,5 @@ func (c *ControllerInvoice) List(ctx context.Context, req *invoice.ListReq) (res
 	if err != nil {
 		return nil, err
 	}
-	return &invoice.ListRes{Invoices: internalResult.Invoices}, nil
+	return &invoice.ListRes{Invoices: internalResult.Invoices, Total: internalResult.Total}, nil
 }

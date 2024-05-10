@@ -20,5 +20,5 @@ func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeL
 	if err != nil {
 		return nil, err
 	}
-	return &payment.TimeLineListRes{PaymentTimeLines: result.PaymentTimelines}, nil
+	return &payment.TimeLineListRes{PaymentTimeLines: result.PaymentTimelines, Total: result.Total}, nil
 }

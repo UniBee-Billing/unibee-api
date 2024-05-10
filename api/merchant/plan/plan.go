@@ -84,6 +84,7 @@ type ListReq struct {
 }
 type ListRes struct {
 	Plans []*detail.PlanDetail `json:"plans" dc:"Plans"`
+	Total int                  `json:"total" dc:"Total"`
 }
 
 type ActivateReq struct {

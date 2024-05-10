@@ -20,5 +20,5 @@ func (c *ControllerSubscription) TimeLineList(ctx context.Context, req *subscrip
 	if err != nil {
 		return nil, err
 	}
-	return &subscription.TimeLineListRes{SubscriptionTimeLines: result.SubscriptionTimelines}, nil
+	return &subscription.TimeLineListRes{SubscriptionTimeLines: result.SubscriptionTimelines, Total: result.Total}, nil
 }

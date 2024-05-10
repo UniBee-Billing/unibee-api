@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerPayment) RefundList(ctx context.Context, req *payment.RefundListReq) (res *payment.RefundListRes, err error) {
-	list, err := service.RefundList(ctx, &service.RefundListInternalReq{
+	list, total, err := service.RefundList(ctx, &service.RefundListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		PaymentId:  req.PaymentId,
 		Status:     req.Status,
@@ -21,5 +21,5 @@ func (c *ControllerPayment) RefundList(ctx context.Context, req *payment.RefundL
 	if err != nil {
 		return nil, err
 	}
-	return &payment.RefundListRes{RefundDetails: list}, nil
+	return &payment.RefundListRes{RefundDetails: list, Total: total}, nil
 }

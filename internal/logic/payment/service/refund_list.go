@@ -21,7 +21,7 @@ type RefundListInternalReq struct {
 	Currency   string `json:"currency" dc:"Currency"`
 }
 
-func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails []*detail.RefundDetail, err error) {
+func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails []*detail.RefundDetail, total int, err error) {
 	req.Currency = strings.ToUpper(req.Currency)
 	var mainList []*detail.RefundDetail
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
@@ -39,7 +39,7 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 		if user != nil {
 			query = query.Where(dao.Refund.Columns().UserId, user.Id)
 		} else {
-			return mainList, nil
+			return mainList, 0, nil
 		}
 	}
 	if req.Status > 0 {
@@ -52,9 +52,9 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 	var list []*entity.Refund
 	err = query.
 		Order(sortKey).
-		OmitEmpty().Scan(&list)
+		OmitEmpty().ScanAndCount(&list, &total, true)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	for _, one := range list {
 		mainList = append(mainList, &detail.RefundDetail{
@@ -64,5 +64,5 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 		})
 	}
 
-	return mainList, nil
+	return mainList, total, nil
 }

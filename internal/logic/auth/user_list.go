@@ -31,10 +31,12 @@ type UserListInternalReq struct {
 
 type UserListInternalRes struct {
 	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
+	Total        int                         `json:"total" dc:"Total"`
 }
 
 func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInternalRes, err error) {
 	var mainList []*bean.UserAccountSimplify
+	var total = 0
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -82,11 +84,11 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	}
 	err = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}
-	return &UserListInternalRes{UserAccounts: mainList}, nil
+	return &UserListInternalRes{UserAccounts: mainList, Total: total}, nil
 }
 
 func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.UserAccountSimplify, err error) {

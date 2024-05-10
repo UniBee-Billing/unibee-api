@@ -15,5 +15,6 @@ func (c *ControllerMetric) List(ctx context.Context, req *metric.ListReq) (res *
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	return &metric.ListRes{MerchantMetrics: metric2.MerchantMetricList(ctx, _interface.GetMerchantId(ctx))}, nil
+	list, total := metric2.MerchantMetricList(ctx, _interface.GetMerchantId(ctx))
+	return &metric.ListRes{MerchantMetrics: list, Total: total}, nil
 }

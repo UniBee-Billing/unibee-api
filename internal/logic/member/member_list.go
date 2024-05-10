@@ -7,15 +7,15 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 )
 
-func MerchantMemberList(ctx context.Context, merchantId uint64) []*bean.MerchantMemberSimplify {
-	var mainList []*bean.MerchantMemberSimplify
+func MerchantMemberList(ctx context.Context, merchantId uint64) ([]*bean.MerchantMemberSimplify, int) {
+	var mainList = make([]*bean.MerchantMemberSimplify, 0)
 	err := dao.MerchantMember.Ctx(ctx).
 		Where(dao.MerchantMember.Columns().MerchantId, merchantId).
 		Where(dao.MerchantMember.Columns().IsDeleted, 0).
 		Scan(&mainList)
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantMemberList err:%s", err.Error())
-		return mainList
+		return mainList, len(mainList)
 	}
-	return mainList
+	return mainList, len(mainList)
 }

@@ -14,7 +14,7 @@ func TestMerchantRole(t *testing.T) {
 	var testRole = "TestRole"
 	var err error
 	t.Run("Test for merchant role New|Get|Edit|Delete|List", func(t *testing.T) {
-		list := MerchantRoleList(ctx, test.TestMerchant.Id)
+		list, _ := MerchantRoleList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, true, len(list) == 0)
 		err = NewMerchantRole(ctx, &CreateRoleInternalReq{
@@ -33,7 +33,7 @@ func TestMerchantRole(t *testing.T) {
 			}},
 		})
 		require.Nil(t, err)
-		list = MerchantRoleList(ctx, test.TestMerchant.Id)
+		list, _ = MerchantRoleList(ctx, test.TestMerchant.Id)
 		require.NotNil(t, list)
 		require.Equal(t, true, len(list) > 0)
 	})

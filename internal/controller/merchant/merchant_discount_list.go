@@ -8,5 +8,6 @@ import (
 )
 
 func (c *ControllerDiscount) List(ctx context.Context, req *discount.ListReq) (res *discount.ListRes, err error) {
-	return &discount.ListRes{Discounts: discount2.MerchantDiscountCodeList(ctx, _interface.GetMerchantId(ctx))}, nil
+	list, total := discount2.MerchantDiscountCodeList(ctx, _interface.GetMerchantId(ctx))
+	return &discount.ListRes{Discounts: list, Total: total}, nil
 }

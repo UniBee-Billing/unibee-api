@@ -42,4 +42,5 @@ type RefundListReq struct {
 }
 type RefundListRes struct {
 	RefundDetails []*detail.RefundDetail `json:"refundDetails" dc:"Refund Detail Object List"`
+	Total         int                    `json:"total" dc:"Total"`
 }

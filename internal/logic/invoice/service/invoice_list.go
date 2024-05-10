@@ -29,10 +29,12 @@ type InvoiceListInternalReq struct {
 
 type InvoiceListInternalRes struct {
 	Invoices []*detail.InvoiceDetail `json:"invoices" dc:"Invoice Detail List"`
+	Total    int                     `json:"total" dc:"Total"`
 }
 
 func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *InvoiceListInternalRes, err error) {
 	var mainList []*entity.Invoice
+	var total = 0
 	if req.Count <= 0 {
 		req.Count = 20
 	}
@@ -93,7 +95,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	err = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +104,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		resultList = append(resultList, detail.ConvertInvoiceToDetail(ctx, invoice))
 	}
 
-	return &InvoiceListInternalRes{Invoices: resultList}, nil
+	return &InvoiceListInternalRes{Invoices: resultList, Total: total}, nil
 }
 
 func SearchInvoice(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.InvoiceSimplify, err error) {

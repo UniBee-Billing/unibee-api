@@ -24,5 +24,5 @@ func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user
 	if err != nil {
 		return nil, err
 	}
-	return &user.ListRes{UserAccounts: result.UserAccounts}, nil
+	return &user.ListRes{UserAccounts: result.UserAccounts, Total: result.Total}, nil
 }
