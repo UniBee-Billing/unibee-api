@@ -133,7 +133,6 @@ func TestStrip(t *testing.T) {
 			result := customer.ListPaymentMethods(params)
 			fmt.Println(utility.MarshalToJsonString(result))
 		}
-
 		{
 			params := &stripe.CustomerRetrievePaymentMethodParams{
 				Customer: stripe.String(gatewayUser.GatewayUserId),
