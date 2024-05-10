@@ -542,8 +542,8 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			return nil, err
 		}
 		if createPayContext.PayImmediate {
-			params := &stripe.InvoicePayParams{}
-			response, payErr := invoice.Pay(result.ID, params)
+			//params = &stripe.InvoicePayParams{}
+			response, payErr := invoice.Pay(result.ID, &stripe.InvoicePayParams{})
 			log.SaveChannelHttpLog("GatewayNewPayment", params, response, payErr, "PayInvoice", nil, createPayContext.Gateway)
 			if response != nil {
 				detail.Status = response.Status
