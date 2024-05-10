@@ -364,9 +364,9 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 			},
 		}
-		if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
-			checkoutParams.PaymentMethodConfiguration = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
-		}
+		//if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
+		//	checkoutParams.PaymentMethodConfiguration = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
+		//}
 		checkoutParams.Mode = stripe.String(string(stripe.CheckoutSessionModePayment))
 		checkoutParams.Metadata = utility.ConvertToStringMetadata(createPayContext.Metadata)
 		//checkoutParams.ExpiresAt
