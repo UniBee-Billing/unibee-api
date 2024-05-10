@@ -7,16 +7,16 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/balance"
-	"github.com/stripe/stripe-go/v76/checkout/session"
-	"github.com/stripe/stripe-go/v76/customer"
-	"github.com/stripe/stripe-go/v76/invoice"
-	"github.com/stripe/stripe-go/v76/invoiceitem"
-	"github.com/stripe/stripe-go/v76/paymentintent"
-	"github.com/stripe/stripe-go/v76/paymentmethod"
-	"github.com/stripe/stripe-go/v76/product"
-	"github.com/stripe/stripe-go/v76/refund"
+	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/balance"
+	"github.com/stripe/stripe-go/v78/checkout/session"
+	"github.com/stripe/stripe-go/v78/customer"
+	"github.com/stripe/stripe-go/v78/invoice"
+	"github.com/stripe/stripe-go/v78/invoiceitem"
+	"github.com/stripe/stripe-go/v78/paymentintent"
+	"github.com/stripe/stripe-go/v78/paymentmethod"
+	"github.com/stripe/stripe-go/v78/product"
+	"github.com/stripe/stripe-go/v78/refund"
 	"strconv"
 	"strings"
 	"unibee/api/bean"
@@ -83,12 +83,13 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	utility.Assert(userId > 0, "userId is nil")
 	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, userId)
 	params := &stripe.CheckoutSessionParams{
-		Mode:       stripe.String(string(stripe.CheckoutSessionModeSetup)),
-		Currency:   stripe.String(strings.ToUpper(currency)),
-		Customer:   stripe.String(gatewayUser.GatewayUserId),
-		Metadata:   utility.ConvertToStringMetadata(metadata),
-		SuccessURL: stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
-		CancelURL:  stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		Mode:              stripe.String(string(stripe.CheckoutSessionModeSetup)),
+		Currency:          stripe.String(strings.ToUpper(currency)),
+		Customer:          stripe.String(gatewayUser.GatewayUserId),
+		Metadata:          utility.ConvertToStringMetadata(metadata),
+		PaymentMethodData: &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
+		SuccessURL:        stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		CancelURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
 	}
 	result, err := session.New(params)
 	log.SaveChannelHttpLog("GatewayUserCreateAndBindPaymentMethod", params, result, err, "", nil, gateway)
@@ -353,12 +354,13 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			})
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
-			Customer:   stripe.String(gatewayUser.GatewayUserId),
-			Currency:   stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
-			LineItems:  items,
-			SuccessURL: stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
-			CancelURL:  stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
-			Metadata:   utility.ConvertToStringMetadata(createPayContext.Metadata),
+			Customer:          stripe.String(gatewayUser.GatewayUserId),
+			Currency:          stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
+			LineItems:         items,
+			PaymentMethodData: &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
+			SuccessURL:        stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true)),
+			CancelURL:         stripe.String(webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false)),
+			Metadata:          utility.ConvertToStringMetadata(createPayContext.Metadata),
 			PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 				Metadata:         utility.ConvertToStringMetadata(createPayContext.Metadata),
 				SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),

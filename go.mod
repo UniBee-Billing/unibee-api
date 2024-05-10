@@ -24,7 +24,7 @@ require (
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.2
-	github.com/stripe/stripe-go/v76 v76.9.0
+	github.com/stripe/stripe-go/v78 v78.6.0
 	golang.org/x/crypto v0.18.0
 	golang.org/x/text v0.14.0
 	gopkg.in/yaml.v3 v3.0.1

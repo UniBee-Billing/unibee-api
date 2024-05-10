@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/stripe/stripe-go/v76"
-	"github.com/stripe/stripe-go/v76/checkout/session"
-	"github.com/stripe/stripe-go/v76/customer"
-	"github.com/stripe/stripe-go/v76/paymentmethod"
+	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/checkout/session"
+	"github.com/stripe/stripe-go/v78/customer"
+	"github.com/stripe/stripe-go/v78/paymentmethod"
 	"strings"
 	"unibee/utility"
 
@@ -41,8 +41,9 @@ func TestCheckout(t *testing.T) {
 		//}
 		//
 		{
-			//params := &stripe.PaymentMethodParams{}
-			//params.Al
+			params := &stripe.PaymentMethodParams{}
+			params.AllowRedisplay = stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))
+			_, _ = paymentmethod.Update("pm_1PEt9GHhgikz9ijM0lfdhg2Y", params)
 		}
 
 		{
@@ -73,8 +74,9 @@ func TestCheckout(t *testing.T) {
 					"card",
 					"link",
 				}),
-				SuccessURL: stripe.String("http://merchant.unibee.top"),
-				CancelURL:  stripe.String("http://merchant.unibee.top"),
+				PaymentMethodData: &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
+				SuccessURL:        stripe.String("http://merchant.unibee.top"),
+				CancelURL:         stripe.String("http://merchant.unibee.top"),
 				PaymentIntentData: &stripe.CheckoutSessionPaymentIntentDataParams{
 					SetupFutureUsage: stripe.String(string(stripe.PaymentIntentSetupFutureUsageOffSession)),
 				},
