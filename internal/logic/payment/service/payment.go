@@ -282,7 +282,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod 
 	})
 
 	if err == nil && res.Payment != nil {
-		if err == nil && res.Status != consts.PaymentSuccess {
+		if err == nil && res.Status != consts.PaymentSuccess && !manualPayment {
 			//need send invoice for authorised
 			SendAuthorizedEmailBackground(invoice, res.Payment)
 		}
