@@ -35,11 +35,12 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	invoiceId := utility.CreateInvoiceId()
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
+		SubscriptionId:                 sub.SubscriptionId,
 		BizType:                        consts.BizTypeSubscription,
 		UserId:                         sub.UserId,
 		MerchantId:                     sub.MerchantId,
-		SubscriptionId:                 sub.SubscriptionId,
 		InvoiceName:                    simplify.InvoiceName,
+		ProductName:                    simplify.ProductName,
 		InvoiceId:                      invoiceId,
 		PeriodStart:                    simplify.PeriodStart,
 		PeriodEnd:                      simplify.PeriodEnd,
@@ -66,6 +67,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		DiscountAmount:                 simplify.DiscountAmount,
 		DiscountCode:                   simplify.DiscountCode,
 		TrialEnd:                       simplify.TrialEnd,
+		CountryCode:                    sub.CountryCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -102,11 +104,12 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	}
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
+		SubscriptionId:                 payment.SubscriptionId,
 		BizType:                        payment.BizType,
 		UserId:                         payment.UserId,
 		MerchantId:                     payment.MerchantId,
-		SubscriptionId:                 payment.SubscriptionId,
 		InvoiceName:                    payment.BillingReason,
+		ProductName:                    invoice.ProductName,
 		InvoiceId:                      payment.InvoiceId,
 		UniqueId:                       payment.PaymentId,
 		PaymentId:                      payment.PaymentId,
@@ -137,6 +140,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		DayUtilDue:                     invoice.DayUtilDue,
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
+		CountryCode:                    payment.CountryCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -204,11 +208,12 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	}
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
-		BizType:                        refund.BizType,
+		SubscriptionId:                 payment.SubscriptionId,
+		BizType:                        payment.BizType,
 		UserId:                         refund.UserId,
 		MerchantId:                     refund.MerchantId,
-		SubscriptionId:                 refund.SubscriptionId,
 		InvoiceName:                    payment.BillingReason,
+		ProductName:                    invoice.ProductName,
 		InvoiceId:                      refund.InvoiceId,
 		UniqueId:                       refund.RefundId,
 		PaymentId:                      refund.PaymentId,
@@ -239,6 +244,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		DayUtilDue:                     invoice.DayUtilDue,
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
+		CountryCode:                    payment.CountryCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
@@ -415,16 +421,6 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	}
 	user := query.GetUserAccountById(ctx, one.UserId)
 	merchant := query.GetMerchantById(ctx, one.MerchantId)
-	var merchantProductName = ""
-	sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
-	if sub == nil {
-		// todo mark invoice not relative to subscription
-		sub = query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, merchant.Id)
-	}
-	if sub != nil {
-		plan := query.GetPlanById(ctx, sub.PlanId)
-		merchantProductName = plan.PlanName
-	}
 	if len(one.RefundId) == 0 {
 		if one.Status > consts.InvoiceStatusPending {
 			utility.Assert(len(pdfFileName) > 0, "pdfFile download or generate error:"+one.InvoiceId)
@@ -463,7 +459,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 			err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
 				InvoiceId:           one.InvoiceId,
 				UserName:            user.FirstName + " " + user.LastName,
-				MerchantProductName: merchantProductName,
+				MerchantProductName: one.ProductName,
 				MerchantCustomEmail: merchant.Email,
 				MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
 				DateNow:             gtime.Now(),
@@ -508,7 +504,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 				err := email.SendTemplateEmail(ctx, merchant.Id, one.SendEmail, user.TimeZone, template, pdfFileName, &email.TemplateVariable{
 					InvoiceId:           one.InvoiceId,
 					UserName:            user.FirstName + " " + user.LastName,
-					MerchantProductName: merchantProductName,
+					MerchantProductName: one.ProductName,
 					MerchantCustomEmail: merchant.Email,
 					MerchantName:        query.GetMerchantCountryConfigName(ctx, one.MerchantId, user.CountryCode),
 					DateNow:             gtime.Now(),

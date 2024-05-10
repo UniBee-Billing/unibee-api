@@ -254,6 +254,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	return &bean.InvoiceSimplify{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
+		ProductName:                    plan.PlanName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -290,6 +291,7 @@ type CalculateProrationInvoiceReq struct {
 	OldProrationPlans []*ProrationPlanParam `json:"oldPlans"`
 	NewProrationPlans []*ProrationPlanParam `json:"newPlans"`
 	InvoiceName       string                `json:"invoiceName"`
+	ProductName       string                `json:"productName"`
 }
 
 func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
@@ -411,6 +413,7 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 	return &bean.InvoiceSimplify{
 		BizType:                        consts.BizTypeSubscription,
 		InvoiceName:                    req.InvoiceName,
+		ProductName:                    req.ProductName,
 		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 		TotalAmount:                    totalAmountExcludingTax + taxAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,

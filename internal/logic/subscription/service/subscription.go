@@ -201,7 +201,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub.GatewayDefaultPaymentMethod, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
 	if err != nil {
 		g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 		return nil, err
@@ -442,6 +442,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
 		invoice := &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionCreate",
+			ProductName:                    plan.PlanName,
 			OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 			TotalAmount:                    totalAmountExcludingTax + taxAmount,
 			TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -684,7 +685,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
+		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one.GatewayDefaultPaymentMethod, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionCreate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -701,31 +702,32 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 		}
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-			CheckoutMode: true,
-			Gateway:      prepare.Gateway,
-			Pay: &entity.Payment{
-				SubscriptionId:    one.SubscriptionId,
-				ExternalPaymentId: one.SubscriptionId,
-				BizType:           consts.BizTypeSubscription,
-				UserId:            prepare.UserId,
-				GatewayId:         prepare.Gateway.Id,
-				TotalAmount:       prepare.Invoice.TotalAmount,
-				Currency:          prepare.Invoice.Currency,
-				CryptoAmount:      prepare.Invoice.CryptoAmount,
-				CryptoCurrency:    prepare.Invoice.CryptoCurrency,
-				CountryCode:       prepare.VatCountryCode,
-				MerchantId:        prepare.Merchant.Id,
-				CompanyId:         prepare.Merchant.CompanyId,
-				BillingReason:     prepare.Invoice.InvoiceName,
-				ReturnUrl:         req.ReturnUrl,
-				GasPayer:          prepare.Plan.GasPayer,
-			},
-			ExternalUserId: strconv.FormatUint(one.UserId, 10),
-			Email:          prepare.Email,
-			Invoice:        bean.SimplifyInvoice(invoice),
-			Metadata:       map[string]interface{}{"BillingReason": prepare.Invoice.InvoiceName},
-		})
+		//var createPaymentResult, err = service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
+		//	CheckoutMode: true,
+		//	Gateway:      prepare.Gateway,
+		//	Pay: &entity.Payment{
+		//		SubscriptionId:    one.SubscriptionId,
+		//		ExternalPaymentId: one.SubscriptionId,
+		//		BizType:           consts.BizTypeSubscription,
+		//		UserId:            prepare.UserId,
+		//		GatewayId:         prepare.Gateway.Id,
+		//		TotalAmount:       prepare.Invoice.TotalAmount,
+		//		Currency:          prepare.Invoice.Currency,
+		//		CryptoAmount:      prepare.Invoice.CryptoAmount,
+		//		CryptoCurrency:    prepare.Invoice.CryptoCurrency,
+		//		CountryCode:       prepare.VatCountryCode,
+		//		MerchantId:        prepare.Merchant.Id,
+		//		CompanyId:         prepare.Merchant.CompanyId,
+		//		BillingReason:     prepare.Invoice.InvoiceName,
+		//		ReturnUrl:         req.ReturnUrl,
+		//		GasPayer:          prepare.Plan.GasPayer,
+		//	},
+		//	ExternalUserId: strconv.FormatUint(one.UserId, 10),
+		//	Email:          prepare.Email,
+		//	Invoice:        bean.SimplifyInvoice(invoice),
+		//	Metadata:       map[string]interface{}{"BillingReason": prepare.Invoice.InvoiceName},
+		//})
+		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", invoice, one.GatewayId, true, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
 				dao.Subscription.Columns().Status:    consts.SubStatusCancelled,
@@ -1011,6 +1013,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
 			currentInvoice = &bean.InvoiceSimplify{
 				InvoiceName:                    "SubscriptionUpgrade",
+				ProductName:                    plan.PlanName,
 				OriginAmount:                   0,
 				TotalAmount:                    0,
 				TotalAmountExcludingTax:        0,
@@ -1070,6 +1073,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			}
 			currentInvoice = invoice_compute.ComputeSubscriptionProrationInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
 				InvoiceName:       "SubscriptionUpgrade",
+				ProductName:       plan.PlanName,
 				Currency:          sub.Currency,
 				DiscountCode:      req.DiscountCode,
 				TimeNow:           prorationDate,
@@ -1086,6 +1090,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		prorationDate = utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)
 		currentInvoice = &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionUpgrade",
+			ProductName:                    plan.PlanName,
 			OriginAmount:                   0,
 			TotalAmount:                    0,
 			TotalAmountExcludingTax:        0,
@@ -1277,7 +1282,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription.GatewayDefaultPaymentMethod, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -1726,7 +1731,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub, one, sub.GatewayId, false, "", "SubscriptionEndTrialManual")
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub.GatewayDefaultPaymentMethod, one, sub.GatewayId, false, "", "SubscriptionEndTrialManual")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

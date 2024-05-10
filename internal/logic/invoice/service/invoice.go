@@ -88,6 +88,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		MerchantId:                     merchantId,
 		InvoiceId:                      invoiceId,
 		InvoiceName:                    req.Name,
+		ProductName:                    req.Name,
 		UniqueId:                       invoiceId,
 		TotalAmount:                    totalAmount,
 		TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -103,6 +104,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		SendEmail:                      user.Email,
 		UserId:                         req.UserId,
 		CreateTime:                     gtime.Now().Timestamp(),
+		CountryCode:                    user.CountryCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

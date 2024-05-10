@@ -34,6 +34,7 @@ type InvoiceColumns struct {
 	SubscriptionAmount             string // sub amount,cent
 	Currency                       string // currency
 	Lines                          string // lines( json)
+	PaymentId                      string // paymentId
 	GatewayId                      string // gateway_id
 	Status                         string // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     string // email send status，0-No | 1- YES| 2-Unnecessary
@@ -53,9 +54,9 @@ type InvoiceColumns struct {
 	SubscriptionAmountExcludingTax string //
 	PeriodStart                    string // period_start, utc time
 	PeriodEnd                      string // period_end utc time
+	TrialEnd                       string // trial_end, utc time
 	PeriodStartTime                string //
 	PeriodEndTime                  string //
-	PaymentId                      string // paymentId
 	RefundId                       string // refundId
 	Data                           string // data (json)
 	BizType                        string // biz type from payment 1-single payment, 3-subscription
@@ -67,7 +68,10 @@ type InvoiceColumns struct {
 	LastTrackTime                  string // last process invoice track time
 	DiscountCode                   string // discount_code
 	DiscountAmount                 string // discount amount, cent
-	TrialEnd                       string // trial_end, utc time
+	CountryCode                    string //
+	ProductName                    string // product name
+	GasPayer                       string // gas_payer
+	GatewayPaymentMethod           string // gateway_payment_method
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -86,6 +90,7 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmount:             "subscription_amount",
 	Currency:                       "currency",
 	Lines:                          "lines",
+	PaymentId:                      "payment_id",
 	GatewayId:                      "gateway_id",
 	Status:                         "status",
 	SendStatus:                     "send_status",
@@ -105,9 +110,9 @@ var invoiceColumns = InvoiceColumns{
 	SubscriptionAmountExcludingTax: "subscription_amount_excluding_tax",
 	PeriodStart:                    "period_start",
 	PeriodEnd:                      "period_end",
+	TrialEnd:                       "trial_end",
 	PeriodStartTime:                "period_start_time",
 	PeriodEndTime:                  "period_end_time",
-	PaymentId:                      "payment_id",
 	RefundId:                       "refund_id",
 	Data:                           "data",
 	BizType:                        "biz_type",
@@ -119,7 +124,10 @@ var invoiceColumns = InvoiceColumns{
 	LastTrackTime:                  "last_track_time",
 	DiscountCode:                   "discount_code",
 	DiscountAmount:                 "discount_amount",
-	TrialEnd:                       "trial_end",
+	CountryCode:                    "country_code",
+	ProductName:                    "product_name",
+	GasPayer:                       "gas_payer",
+	GatewayPaymentMethod:           "gateway_payment_method",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

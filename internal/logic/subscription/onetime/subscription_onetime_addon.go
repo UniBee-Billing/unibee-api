@@ -159,7 +159,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			ReturnUrl:         req.RedirectUrl,
 		},
 		Email:                user.Email,
-		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "SubscriptionOnetimeAddonId": strconv.FormatUint(one.Id, 10)},
+		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": "CreateSubOneTimeAddon", "SubscriptionOnetimeAddonId": strconv.FormatUint(one.Id, 10)},
 		Invoice:              invoice,
 		PayImmediate:         true,
 		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,

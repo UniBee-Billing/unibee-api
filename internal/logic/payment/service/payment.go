@@ -214,9 +214,26 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	return gatewayInternalPayResult, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Subscription, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
-	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic:%s", sub.SubscriptionId)
-	user := query.GetUserAccountById(ctx, sub.UserId)
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod string, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
+	var lastPayment *entity.Payment
+	if len(invoice.PaymentId) > 0 {
+		lastPayment = query.GetPaymentByPaymentId(ctx, invoice.PaymentId)
+		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
+			//Try cancel payment
+			err = handler2.RemovePaymentInvoiceId(ctx, lastPayment)
+			if err != nil {
+				g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic RemovePaymentInvoiceId:%s err:", lastPayment.PaymentId, err.Error())
+			} else {
+				err = PaymentGatewayCancel(ctx, lastPayment)
+				if err != nil {
+					g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
+				}
+			}
+		}
+	}
+
+	user := query.GetUserAccountById(ctx, invoice.UserId)
 	var email = ""
 	if user != nil {
 		email = user.Email
@@ -226,52 +243,55 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, sub *entity.Su
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
 
-	merchant := query.GetMerchantById(ctx, sub.MerchantId)
+	merchant := query.GetMerchantById(ctx, invoice.MerchantId)
 	if merchant == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
 	}
 	invoice.Currency = strings.ToUpper(invoice.Currency)
+	var automatic = 1
+	if manualPayment {
+		automatic = 0
+	}
 	res, err := GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
 		PayImmediate: !manualPayment,
 		CheckoutMode: manualPayment,
 		Gateway:      gateway,
 		Pay: &entity.Payment{
-			SubscriptionId:    sub.SubscriptionId,
-			ExternalPaymentId: sub.SubscriptionId,
-			BizType:           consts.BizTypeSubscription,
+			SubscriptionId:    invoice.SubscriptionId,
+			BizType:           invoice.BizType,
+			ExternalPaymentId: invoice.InvoiceId,
 			AuthorizeStatus:   consts.Authorized,
-			UserId:            sub.UserId,
+			UserId:            invoice.UserId,
 			GatewayId:         gateway.Id,
 			TotalAmount:       invoice.TotalAmount,
 			Currency:          strings.ToUpper(invoice.Currency),
 			CryptoAmount:      invoice.CryptoAmount,
 			CryptoCurrency:    invoice.CryptoCurrency,
-			CountryCode:       sub.CountryCode,
-			MerchantId:        sub.MerchantId,
+			CountryCode:       invoice.CountryCode,
+			MerchantId:        invoice.MerchantId,
 			CompanyId:         merchant.CompanyId,
-			Automatic:         1,
+			Automatic:         automatic,
 			BillingReason:     invoice.InvoiceName,
 			ReturnUrl:         returnUrl,
-			GasPayer:          sub.GasPayer,
 		},
-		ExternalUserId:       strconv.FormatUint(sub.UserId, 10),
+		ExternalUserId:       strconv.FormatUint(invoice.UserId, 10),
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
 		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment},
-		GatewayPaymentMethod: sub.GatewayDefaultPaymentMethod,
+		GatewayPaymentMethod: paymentMethod,
 	})
 
 	if err == nil && res.Payment != nil {
 		if err == nil && res.Status != consts.PaymentSuccess {
 			//need send invoice for authorised
-			SendAuthorizedEmailBackground(sub, invoice, res.Payment)
+			SendAuthorizedEmailBackground(invoice, res.Payment)
 		}
 		if len(invoice.DiscountCode) > 0 {
 			_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
-				MerchantId:     sub.MerchantId,
-				UserId:         sub.UserId,
+				MerchantId:     invoice.MerchantId,
+				UserId:         invoice.UserId,
 				DiscountCode:   invoice.DiscountCode,
-				SubscriptionId: sub.SubscriptionId,
+				SubscriptionId: invoice.SubscriptionId,
 				PaymentId:      res.Payment.PaymentId,
 				InvoiceId:      invoice.InvoiceId,
 				ApplyAmount:    invoice.DiscountAmount,
@@ -300,7 +320,7 @@ func HardDeletePayment(ctx context.Context, merchantId uint64, paymentId string)
 	return err
 }
 
-func SendAuthorizedEmailBackground(sub *entity.Subscription, invoice *entity.Invoice, payment *entity.Payment) {
+func SendAuthorizedEmailBackground(invoice *entity.Invoice, payment *entity.Payment) {
 	ctx := context.Background()
 	go func() {
 		var err error
@@ -315,18 +335,17 @@ func SendAuthorizedEmailBackground(sub *entity.Subscription, invoice *entity.Inv
 				return
 			}
 		}()
-		merchant := query.GetMerchantById(ctx, sub.MerchantId)
-		oneUser := query.GetUserAccountById(ctx, sub.UserId)
-		plan := query.GetPlanById(ctx, sub.PlanId)
-		if plan != nil && oneUser != nil && merchant != nil {
+		merchant := query.GetMerchantById(ctx, invoice.MerchantId)
+		oneUser := query.GetUserAccountById(ctx, invoice.UserId)
+		if oneUser != nil && merchant != nil {
 			err = email2.SendTemplateEmail(ctx, merchant.Id, oneUser.Email, oneUser.TimeZone, email2.TemplateSubscriptionNeedAuthorized, "", &email2.TemplateVariable{
 				UserName:            oneUser.FirstName + " " + oneUser.LastName,
-				MerchantProductName: plan.PlanName,
+				MerchantProductName: invoice.ProductName,
 				MerchantCustomEmail: merchant.Email,
 				MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
 				PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
 				Currency:            strings.ToUpper(invoice.Currency),
-				PeriodEnd:           gtime.NewFromTimeStamp(sub.CurrentPeriodEnd),
+				PeriodEnd:           gtime.NewFromTimeStamp(invoice.PeriodEnd),
 			})
 			if err != nil {
 				g.Log().Errorf(ctx, "SendTemplateEmail SendAuthorizedEmailBackground err:%s", err.Error())

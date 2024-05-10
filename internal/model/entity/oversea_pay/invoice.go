@@ -24,6 +24,7 @@ type Invoice struct {
 	SubscriptionAmount             int64       `json:"subscriptionAmount"             description:"sub amount,cent"`                                                        // sub amount,cent
 	Currency                       string      `json:"currency"                       description:"currency"`                                                               // currency
 	Lines                          string      `json:"lines"                          description:"lines( json)"`                                                           // lines( json)
+	PaymentId                      string      `json:"paymentId"                      description:"paymentId"`                                                              // paymentId
 	GatewayId                      uint64      `json:"gatewayId"                      description:"gateway_id"`                                                             // gateway_id
 	Status                         int         `json:"status"                         description:"status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     int         `json:"sendStatus"                     description:"email send status，0-No | 1- YES| 2-Unnecessary"`                         // email send status，0-No | 1- YES| 2-Unnecessary
@@ -43,9 +44,9 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax int64       `json:"subscriptionAmountExcludingTax" description:""`                                                                       //
 	PeriodStart                    int64       `json:"periodStart"                    description:"period_start, utc time"`                                                 // period_start, utc time
 	PeriodEnd                      int64       `json:"periodEnd"                      description:"period_end utc time"`                                                    // period_end utc time
+	TrialEnd                       int64       `json:"trialEnd"                       description:"trial_end, utc time"`                                                    // trial_end, utc time
 	PeriodStartTime                *gtime.Time `json:"periodStartTime"                description:""`                                                                       //
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                       //
-	PaymentId                      string      `json:"paymentId"                      description:"paymentId"`                                                              // paymentId
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                               // refundId
 	Data                           string      `json:"data"                           description:"data (json)"`                                                            // data (json)
 	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
@@ -57,5 +58,8 @@ type Invoice struct {
 	LastTrackTime                  int64       `json:"lastTrackTime"                  description:"last process invoice track time"`                                        // last process invoice track time
 	DiscountCode                   string      `json:"discountCode"                   description:"discount_code"`                                                          // discount_code
 	DiscountAmount                 int64       `json:"discountAmount"                 description:"discount amount, cent"`                                                  // discount amount, cent
-	TrialEnd                       int64       `json:"trialEnd"                       description:"trial_end, utc time"`                                                    // trial_end, utc time
+	CountryCode                    string      `json:"countryCode"                    description:""`                                                                       //
+	ProductName                    string      `json:"productName"                    description:"product name"`                                                           // product name
+	GasPayer                       string      `json:"gasPayer"                       description:"gas_payer"`                                                              // gas_payer
+	GatewayPaymentMethod           string      `json:"gatewayPaymentMethod"           description:"gateway_payment_method"`                                                 // gateway_payment_method
 }

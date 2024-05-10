@@ -26,6 +26,7 @@ type Invoice struct {
 	SubscriptionAmount             interface{} // sub amount,cent
 	Currency                       interface{} // currency
 	Lines                          interface{} // lines( json)
+	PaymentId                      interface{} // paymentId
 	GatewayId                      interface{} // gateway_id
 	Status                         interface{} // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	SendStatus                     interface{} // email send status，0-No | 1- YES| 2-Unnecessary
@@ -45,9 +46,9 @@ type Invoice struct {
 	SubscriptionAmountExcludingTax interface{} //
 	PeriodStart                    interface{} // period_start, utc time
 	PeriodEnd                      interface{} // period_end utc time
+	TrialEnd                       interface{} // trial_end, utc time
 	PeriodStartTime                *gtime.Time //
 	PeriodEndTime                  *gtime.Time //
-	PaymentId                      interface{} // paymentId
 	RefundId                       interface{} // refundId
 	Data                           interface{} // data (json)
 	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
@@ -59,5 +60,8 @@ type Invoice struct {
 	LastTrackTime                  interface{} // last process invoice track time
 	DiscountCode                   interface{} // discount_code
 	DiscountAmount                 interface{} // discount amount, cent
-	TrialEnd                       interface{} // trial_end, utc time
+	CountryCode                    interface{} //
+	ProductName                    interface{} // product name
+	GasPayer                       interface{} // gas_payer
+	GatewayPaymentMethod           interface{} // gateway_payment_method
 }

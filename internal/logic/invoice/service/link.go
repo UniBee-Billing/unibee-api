@@ -3,11 +3,9 @@ package service
 import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
-	"strconv"
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
-	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -66,34 +64,33 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 				return res
 			}
 
-			merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
-			user := query.GetUserAccountById(ctx, one.UserId)
-
-			createRes, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
-				CheckoutMode: true,
-				Gateway:      gateway,
-				Pay: &entity.Payment{
-					SubscriptionId:    one.SubscriptionId,
-					BizType:           one.BizType,
-					ExternalPaymentId: one.SubscriptionId,
-					UserId:            one.UserId,
-					GatewayId:         gateway.Id,
-					TotalAmount:       one.TotalAmount,
-					Currency:          one.Currency,
-					CryptoAmount:      one.CryptoAmount,
-					CryptoCurrency:    one.CryptoCurrency,
-					CountryCode:       user.CountryCode,
-					MerchantId:        one.MerchantId,
-					CompanyId:         merchantInfo.CompanyId,
-					BillingReason:     one.InvoiceName,
-					ReturnUrl:         "",
-					//GasPayer:          one.GasPayer, // todo mark
-				},
-				ExternalUserId: strconv.FormatUint(one.UserId, 10),
-				Email:          user.Email,
-				Invoice:        bean.SimplifyInvoice(one),
-				Metadata:       map[string]interface{}{"BillingReason": one.InvoiceName},
-			})
+			//merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
+			//user := query.GetUserAccountById(ctx, one.UserId)
+			//createRes, err := service.GatewayPaymentCreate(ctx, &gateway_bean.GatewayNewPaymentReq{
+			//	CheckoutMode: true,
+			//	Gateway:      gateway,
+			//	Pay: &entity.Payment{
+			//		SubscriptionId:    one.SubscriptionId,
+			//		ExternalPaymentId: one.SubscriptionId,
+			//		BizType:           one.BizType,
+			//		UserId:            one.UserId,
+			//		GatewayId:         gateway.Id,
+			//		TotalAmount:       one.TotalAmount,
+			//		Currency:          one.Currency,
+			//		CryptoAmount:      one.CryptoAmount,
+			//		CryptoCurrency:    one.CryptoCurrency,
+			//		CountryCode:       one.CountryCode,
+			//		MerchantId:        one.MerchantId,
+			//		CompanyId:         merchantInfo.CompanyId,
+			//		BillingReason:     one.InvoiceName,
+			//		ReturnUrl:         "",
+			//	},
+			//	ExternalUserId: strconv.FormatUint(one.UserId, 10),
+			//	Email:          user.Email,
+			//	Invoice:        bean.SimplifyInvoice(one),
+			//	Metadata:       map[string]interface{}{"BillingReason": one.InvoiceName},
+			//})
+			createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", one, one.GatewayId, true, "", "InvoiceLink")
 			if err != nil {
 				g.Log().Infof(ctx, "GatewayPaymentCreate Error:%s", err.Error())
 				res.Message = "Server Error"
