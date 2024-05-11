@@ -94,12 +94,12 @@ func MerchantPortalAndSDKGeneratorSpecYaml(r *ghttp.Request) {
 			r.Exit()
 			return
 		}
-		// generator error to format type of map[string]interface {}
-		response := strings.Replace(api.String(), "map[string]interface {}", "map[string]string", -1)
-		mapTarget := `"additionalProperties":{"$ref":"#/components/schemas/interface"},`
-		mapReplace := `"additionalProperties":{"format":"string","properties":{},"type":"string"},`
-		response = strings.Replace(response, mapTarget, mapReplace, -1)
-		r.Response.WriteJson(response)
+		//// generator error to format type of map[string]interface {}
+		//response := strings.Replace(api.String(), "map[string]interface {}", "map[string]string", -1)
+		//mapTarget := `"additionalProperties":{"$ref":"#/components/schemas/interface"},`
+		//mapReplace := `"additionalProperties":{"format":"string","properties":{},"type":"string"},`
+		//response = strings.Replace(response, mapTarget, mapReplace, -1)
+		//r.Response.WriteJson(response)
 		r.Response.WriteJson(apiYaml)
 		r.Exit()
 	}
