@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/discount"
+	subscription2 "unibee/internal/logic/subscription"
 	addon2 "unibee/internal/logic/subscription/addon"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -294,7 +295,7 @@ type CalculateProrationInvoiceReq struct {
 	ProductName       string                `json:"productName"`
 }
 
-func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
+func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
 	if req.OldProrationPlans == nil {
 		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
 	}
@@ -302,10 +303,6 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 		req.NewProrationPlans = make([]*ProrationPlanParam, 0)
 	}
 	newMap := make(map[uint64]*ProrationPlanParam)
-	//oldMap := make(map[int64]*ProrationPlanParam)
-	//for _, planSub := range req.OldProrationPlans {
-	//	oldMap[planSub.PlanId] = planSub
-	//}
 	for _, planSub := range req.NewProrationPlans {
 		newMap[planSub.PlanId] = planSub
 	}
@@ -404,6 +401,111 @@ func ComputeSubscriptionProrationInvoiceDetailSimplify(ctx context.Context, req 
 			Plan:                   bean.SimplifyPlan(plan),
 		})
 		totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
+	}
+
+	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
+	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
+	return &bean.InvoiceSimplify{
+		BizType:                        consts.BizTypeSubscription,
+		InvoiceName:                    req.InvoiceName,
+		ProductName:                    req.ProductName,
+		OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
+		TotalAmount:                    totalAmountExcludingTax + taxAmount,
+		TotalAmountExcludingTax:        totalAmountExcludingTax,
+		DiscountAmount:                 discountAmount,
+		DiscountCode:                   req.DiscountCode,
+		TaxAmount:                      taxAmount,
+		Currency:                       req.Currency,
+		TaxPercentage:                  req.TaxPercentage,
+		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
+		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
+		Lines:                          invoiceItems,
+		ProrationDate:                  req.ProrationDate,
+		ProrationScale:                 timeScale,
+		PeriodStart:                    req.ProrationDate,
+		PeriodEnd:                      req.PeriodEnd,
+		FinishTime:                     req.FinishTime,
+		SendStatus:                     consts.InvoiceSendStatusUnSend,
+		DayUtilDue:                     3,
+	}
+}
+
+func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
+	if req.OldProrationPlans == nil {
+		req.OldProrationPlans = make([]*ProrationPlanParam, 0)
+	}
+	if req.NewProrationPlans == nil {
+		req.NewProrationPlans = make([]*ProrationPlanParam, 0)
+	}
+	newMap := make(map[uint64]*ProrationPlanParam)
+	for _, planSub := range req.NewProrationPlans {
+		newMap[planSub.PlanId] = planSub
+	}
+
+	utility.Assert(req.ProrationDate > 0, "Invalid ProrationDate")
+	utility.Assert(req.PeriodStart <= req.ProrationDate && req.ProrationDate <= req.PeriodEnd, "System Error, Subscription Need Update")
+
+	timeScale := int64((float64(req.PeriodEnd-req.ProrationDate) / float64(req.PeriodEnd-req.PeriodStart)) * 10000)
+	var invoiceItems []*bean.InvoiceItemSimplify
+	var totalAmountExcludingTax int64
+	var merchantId uint64
+	for _, oldPlanSub := range req.OldProrationPlans {
+		plan := query.GetPlanById(ctx, oldPlanSub.PlanId)
+		merchantId = plan.MerchantId
+		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(oldPlanSub.PlanId, 10))
+		unitAmountExcludingTax := int64(float64(plan.Amount) * utility.ConvertTaxPercentageToInternalFloat(timeScale))
+		//old removed
+		quantityDiff := oldPlanSub.Quantity
+		unitAmountExcludingTax = -unitAmountExcludingTax
+		var amountExcludingTax = quantityDiff * unitAmountExcludingTax
+		var taxAmount = int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+			Currency:               req.Currency,
+			OriginAmount:           amountExcludingTax + taxAmount,
+			Amount:                 amountExcludingTax + taxAmount,
+			AmountExcludingTax:     amountExcludingTax,
+			Tax:                    taxAmount,
+			TaxPercentage:          req.TaxPercentage,
+			UnitAmountExcludingTax: unitAmountExcludingTax,
+			Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
+			Quantity:               quantityDiff,
+			Plan:                   bean.SimplifyPlan(plan),
+		})
+		totalAmountExcludingTax = totalAmountExcludingTax + (quantityDiff * unitAmountExcludingTax)
+	}
+	var newPeriodEnd int64 = 0
+	for _, newPlanSub := range newMap {
+		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
+		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
+		if plan.Type == consts.PlanTypeMain {
+			newPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, req.ProrationDate, plan.Id)
+		}
+	}
+	utility.Assert(newPeriodEnd > 0, "no main plan for upgrade")
+	//change periodEnd
+	req.PeriodEnd = newPeriodEnd
+
+	for _, newPlanSub := range newMap {
+		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
+		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
+		unitAmountExcludingTax := plan.Amount
+		var amountExcludingTax = newPlanSub.Quantity * unitAmountExcludingTax
+		var taxAmount = int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
+			Currency:               req.Currency,
+			OriginAmount:           amountExcludingTax + taxAmount,
+			Amount:                 amountExcludingTax + taxAmount,
+			AmountExcludingTax:     amountExcludingTax,
+			Tax:                    taxAmount,
+			TaxPercentage:          req.TaxPercentage,
+			UnitAmountExcludingTax: unitAmountExcludingTax,
+			Description:            fmt.Sprintf("%d * %s %s", newPlanSub.Quantity, plan.PlanName, gtime.NewFromTimeStamp(newPeriodEnd).Layout("2006-01-02")),
+			Quantity:               newPlanSub.Quantity,
+			Plan:                   bean.SimplifyPlan(plan),
+		})
+		totalAmountExcludingTax = totalAmountExcludingTax + (newPlanSub.Quantity * unitAmountExcludingTax)
 	}
 
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
