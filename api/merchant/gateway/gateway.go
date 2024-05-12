@@ -39,8 +39,9 @@ type EditCountryConfigRes struct {
 }
 
 type SetupWebhookReq struct {
-	g.Meta    `path:"/setup_webhook" tags:"Gateway" method:"post" summary:"PaymentGatewayWebhookSetup"`
-	GatewayId uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	g.Meta        `path:"/setup_webhook" tags:"Gateway" method:"post" summary:"PaymentGatewayWebhookSetup"`
+	GatewayId     uint64 `json:"gatewayId"  dc:"The id of payment gateway" v:"required"`
+	WebhookSecret string `json:"webhookSecret"  dc:"The secret of gateway webhook"`
 }
 type SetupWebhookRes struct {
 	GatewayWebhookUrl string `json:"gatewayWebhookUrl"  dc:"The webhook endpoint url of payment gateway, if gateway is stripe, the url will setting to stripe by api automaticly"`
