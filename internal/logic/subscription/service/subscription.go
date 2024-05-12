@@ -818,6 +818,10 @@ func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, pla
 	//situation 5，NewPlan Total Amount =  OldPlan Total Amount，see Addon changes，if new addon appended or addon quantity changed, is upgrade，otherwise downgrade
 	oldPlan := query.GetPlanById(ctx, sub.PlanId)
 	utility.Assert(oldPlan != nil, "oldPlan not found")
+	//if plan.IntervalUnit != oldPlan.IntervalUnit || plan.IntervalCount != oldPlan.IntervalCount {
+	//	isUpgrade = true
+	//	changed = true
+	//} else
 	if plan.Amount > oldPlan.Amount || plan.Amount*quantity > oldPlan.Amount*sub.Quantity {
 		isUpgrade = true
 		changed = true
