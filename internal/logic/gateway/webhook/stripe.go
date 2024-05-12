@@ -88,14 +88,14 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			URL:        stripe.String(webhookUrl),
 			APIVersion: stripe.String(stripe.APIVersion),
 		}
-		result, err := webhookendpoint.New(params)
+		newResult, err := webhookendpoint.New(params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, "", nil, gateway)
 		if err != nil {
 			return nil
 		}
 		//更新 secret
-		utility.Assert(len(result.Secret) > 0, "secret is nil")
-		err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, result.Secret)
+		utility.Assert(len(newResult.Secret) > 0, "secret is nil")
+		err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, newResult.Secret)
 		if err != nil {
 			return err
 		}
@@ -125,12 +125,12 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			Metadata:   map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
 			APIVersion: stripe.String(stripe.APIVersion),
 		}
-		result, err := webhookendpoint.Update(one.ID, params)
-		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, result, err, one.ID, nil, gateway)
+		updateResult, err := webhookendpoint.Update(one.ID, params)
+		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, updateResult, err, one.ID, nil, gateway)
 		if err != nil {
 			return err
 		}
-		utility.Assert(strings.Compare(result.Status, "enabled") == 0, "webhook not status enabled after updated")
+		utility.Assert(strings.Compare(updateResult.Status, "enabled") == 0, "webhook not status enabled after updated")
 	}
 
 	return nil
