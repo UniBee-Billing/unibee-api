@@ -136,6 +136,7 @@ type IMerchantPlan interface {
 	Edit(ctx context.Context, req *plan.EditReq) (res *plan.EditRes, err error)
 	AddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (res *plan.AddonsBindingRes, err error)
 	List(ctx context.Context, req *plan.ListReq) (res *plan.ListRes, err error)
+	Copy(ctx context.Context, req *plan.CopyReq) (res *plan.CopyRes, err error)
 	Activate(ctx context.Context, req *plan.ActivateReq) (res *plan.ActivateRes, err error)
 	Publish(ctx context.Context, req *plan.PublishReq) (res *plan.PublishRes, err error)
 	UnPublish(ctx context.Context, req *plan.UnPublishReq) (res *plan.UnPublishRes, err error)

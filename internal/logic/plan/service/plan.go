@@ -376,6 +376,44 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	return one, nil
 }
 
+func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
+	utility.Assert(planId > 0, "PlanId should > 0")
+	one = query.GetPlanById(ctx, planId)
+	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", planId))
+	one = &entity.Plan{
+		CompanyId:                 one.CompanyId,
+		MerchantId:                one.MerchantId,
+		PlanName:                  one.PlanName + "(Copy)",
+		Amount:                    one.Amount,
+		Currency:                  one.Currency,
+		IntervalUnit:              one.IntervalUnit,
+		IntervalCount:             one.IntervalCount,
+		Type:                      one.Type,
+		Description:               one.Description,
+		ImageUrl:                  one.ImageUrl,
+		HomeUrl:                   one.HomeUrl,
+		BindingAddonIds:           one.BindingAddonIds,
+		BindingOnetimeAddonIds:    one.BindingOnetimeAddonIds,
+		GatewayProductName:        one.GatewayProductName,
+		GatewayProductDescription: one.GatewayProductDescription,
+		Status:                    consts.PlanStatusEditable,
+		CreateTime:                gtime.Now().Timestamp(),
+		MetaData:                  one.MetaData,
+		GasPayer:                  one.GasPayer,
+		TrialDurationTime:         one.TrialDurationTime,
+		TrialAmount:               one.TrialAmount,
+		TrialDemand:               one.TrialDemand,
+		CancelAtTrialEnd:          one.CancelAtTrialEnd,
+	}
+	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		return nil, gerror.Newf(`PlanCopy record insert failure %s`, err)
+	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	return one, nil
+}
+
 func PlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error) {
 	utility.Assert(planId > 0, "planId invalid")
 	one = query.GetPlanById(ctx, planId)

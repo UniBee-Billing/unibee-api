@@ -87,6 +87,14 @@ type ListRes struct {
 	Total int                  `json:"total" dc:"Total"`
 }
 
+type CopyReq struct {
+	g.Meta `path:"/copy" tags:"Plan" method:"post" summary:"CopyPlan"`
+	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
+}
+type CopyRes struct {
+	Plan *bean.PlanSimplify `json:"plan" dc:"Plan"`
+}
+
 type ActivateReq struct {
 	g.Meta `path:"/activate" tags:"Plan" method:"post" summary:"ActivatePlan"`
 	PlanId uint64 `json:"planId" dc:"PlanId" v:"required"`
