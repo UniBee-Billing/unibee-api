@@ -1676,6 +1676,24 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 		return err
 	}
 
+	if sub.TrialEnd > 0 && sub.TrialEnd > sub.CurrentPeriodStart {
+		// trial start
+		oneUser := query.GetUserAccountById(ctx, sub.UserId)
+		plan := query.GetPlanById(ctx, sub.PlanId)
+		merchant := query.GetMerchantById(ctx, sub.MerchantId)
+		if oneUser != nil && plan != nil && merchant != nil {
+			err := email.SendTemplateEmail(ctx, sub.MerchantId, oneUser.Email, oneUser.TimeZone, email.TemplateSubscriptionTrialStart, "", &email.TemplateVariable{
+				UserName:            oneUser.FirstName + " " + oneUser.LastName,
+				MerchantProductName: plan.PlanName,
+				MerchantCustomEmail: merchant.Email,
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, sub.MerchantId, oneUser.CountryCode),
+			})
+			if err != nil {
+				g.Log().Errorf(ctx, "SendTemplateEmail TemplateSubscriptionTrialStart:%s", err.Error())
+			}
+		}
+	}
+
 	return nil
 }
 
