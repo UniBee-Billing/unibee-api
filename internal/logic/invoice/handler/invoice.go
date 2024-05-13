@@ -185,6 +185,9 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return nil, err
 	}
 	if one.Status != status {
+		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
+			dao.Invoice.Columns().SendPdf: "",
+		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	}
 	one.Status = status
