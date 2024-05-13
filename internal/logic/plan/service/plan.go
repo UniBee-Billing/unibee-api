@@ -215,7 +215,7 @@ type EditInternalReq struct {
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	Metadata           *map[string]interface{}                 `json:"metadata" dc:"Metadata，Map"`
 	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period"` // price of trial period
 	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial"`      // duration of trial
 	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, example, paymentMethod, payment method will ask for subscription trial start"`

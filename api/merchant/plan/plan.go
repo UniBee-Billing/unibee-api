@@ -36,9 +36,9 @@ type NewRes struct {
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
 	PlanId             uint64                                  `json:"planId" dc:"Id of plan" v:"required"`
-	PlanName           *string                                 `json:"planName" dc:"Name of plan"   v:"required" `
-	Amount             *int64                                  `json:"amount"   dc:"CaptureAmount of plan, not editable when plan is active"   v:"required" `
-	Currency           *string                                 `json:"currency"   dc:"Currency of plan, not editable when plan is active" v:"required" `
+	PlanName           *string                                 `json:"planName" dc:"Name of plan" `
+	Amount             *int64                                  `json:"amount"   dc:"CaptureAmount of plan, not editable when plan is active" `
+	Currency           *string                                 `json:"currency"   dc:"Currency of plan, not editable when plan is active"`
 	IntervalUnit       *string                                 `json:"intervalUnit" dc:"Interval unit of plan，em: day|month|year|week, not editable when plan is active"`
 	IntervalCount      *int                                    `json:"intervalCount"  dc:"Number,intervalUnit of plan, not editable when plan is active" `
 	Description        *string                                 `json:"description"  dc:"Description of plan"`
@@ -50,7 +50,7 @@ type EditReq struct {
 	OnetimeAddonIds    []int64                                 `json:"onetimeAddonIds"  dc:"Plan Ids Of Onetime Addon Type" `
 	MetricLimits       []*bean.BulkMetricLimitPlanBindingParam `json:"metricLimits"  dc:"Plan's MetricLimit List" `
 	GasPayer           *string                                 `json:"gasPayer" dc:"who pay the gas for crypto payment, merchant|user"`
-	Metadata           map[string]interface{}                  `json:"metadata" dc:"Metadata，Map"`
+	Metadata           *map[string]interface{}                 `json:"metadata" dc:"Metadata，Map"`
 	TrialAmount        *int64                                  `json:"trialAmount"                description:"price of trial period， not available for addon"` // price of trial period
 	TrialDurationTime  *int64                                  `json:"trialDurationTime"         description:"duration of trial， not available for addon"`      // duration of trial
 	TrialDemand        *string                                 `json:"trialDemand"               description:"demand of trial, not available for addon, example, paymentMethod, payment method will ask for subscription trial start"`
