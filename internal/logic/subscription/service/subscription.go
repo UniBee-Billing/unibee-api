@@ -1817,7 +1817,7 @@ func MarkSubscriptionProcessed(ctx context.Context, subscriptionId string) error
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "not wire transfer type of subscription")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:    consts.SubStatusProcessed,
+		dao.Subscription.Columns().Status:    consts.SubStatusProcessing,
 		dao.Subscription.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {

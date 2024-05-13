@@ -18,7 +18,7 @@ const (
 	SubStatusExpired          = 5
 	SubStatusSuspended        = 6
 	SubStatusIncomplete       = 7
-	SubStatusProcessed        = 8
+	SubStatusProcessing       = 8
 	PendingSubStatusInit      = 0
 	PendingSubStatusCreate    = 1
 	PendingSubStatusFinished  = 2

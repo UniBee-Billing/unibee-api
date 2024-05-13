@@ -73,7 +73,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		}
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
-		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessed {
+		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing {
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
 				// first time create sub expired
 				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
