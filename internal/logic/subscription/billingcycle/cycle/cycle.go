@@ -76,7 +76,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessed {
 			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
 				// first time create sub expired
-				err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
+				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
 					return nil, err
