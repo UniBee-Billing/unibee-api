@@ -160,7 +160,7 @@ func TestPayment(t *testing.T) {
 		require.NotNil(t, refund)
 		require.Equal(t, true, refund.Status == consts.RefundSuccess)
 		require.Equal(t, consts.RefundTypeMarked, refund.Type)
-		list, err := RefundList(ctx, &RefundListInternalReq{
+		list, _, err := RefundList(ctx, &RefundListInternalReq{
 			MerchantId: test.TestMerchant.Id,
 			PaymentId:  refund.PaymentId,
 			GatewayId:  gateway.Id,

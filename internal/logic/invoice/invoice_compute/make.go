@@ -49,8 +49,8 @@ func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *
 			TaxPercentage:          req.TaxPercentage,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: item.UnitAmountExcludingTax,
-			Description:            item.Description,
 			Quantity:               item.Quantity,
+			Description:            item.Description,
 			Plan:                   item.Plan,
 		})
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax

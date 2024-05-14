@@ -67,14 +67,14 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
-			TaxPercentage:          req.TaxPercentage,
-			Tax:                    tax,
-			Quantity:               line.Quantity,
 			OriginAmount:           amountExcludingTax + tax,
-			DiscountAmount:         0,
 			Amount:                 amountExcludingTax + tax,
+			DiscountAmount:         0,
+			Tax:                    tax,
+			TaxPercentage:          req.TaxPercentage,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
+			Quantity:               line.Quantity,
 			Description:            line.Description,
 		})
 		totalTax = totalTax + tax
@@ -155,15 +155,15 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 		tax := int64(float64(amountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               req.Currency,
-			TaxPercentage:          req.TaxPercentage,
-			Tax:                    tax,
-			DiscountAmount:         0,
 			OriginAmount:           amountExcludingTax + tax,
 			Amount:                 amountExcludingTax + tax,
+			DiscountAmount:         0,
+			Tax:                    tax,
+			TaxPercentage:          req.TaxPercentage,
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
-			Description:            line.Description,
 			Quantity:               line.Quantity,
+			Description:            line.Description,
 		})
 		totalTax = totalTax + tax
 		totalAmountExcludingTax = totalAmountExcludingTax + amountExcludingTax
