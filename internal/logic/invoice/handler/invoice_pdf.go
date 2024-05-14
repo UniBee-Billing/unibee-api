@@ -131,7 +131,6 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 			})
 		}
 	}
-
 	doc.SetDefaultTax(&generator2.Tax{
 		Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage),
 	})
