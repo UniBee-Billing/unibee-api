@@ -250,7 +250,8 @@ func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, t
 		//if err != nil {
 		//	glog.Errorf(ctx, "trackForSubscriptionLatest error:%s", err.Error())
 		//}
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
+		dayLeft := int((sub.CurrentPeriodEnd - timeNow + 7200) % 86400)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
 	}
 }
 

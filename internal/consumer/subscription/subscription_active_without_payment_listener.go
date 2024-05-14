@@ -34,7 +34,7 @@ func (t SubscriptionActiveWithoutPaymentListener) Consume(ctx context.Context, m
 	if sub != nil {
 		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -100, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
 	}
 	return redismq.CommitMessage

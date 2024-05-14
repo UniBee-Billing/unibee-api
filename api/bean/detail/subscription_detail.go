@@ -15,6 +15,7 @@ type SubscriptionDetail struct {
 	LatestInvoice                       *bean.InvoiceSimplify              `json:"latestInvoice" dc:"LatestInvoice"`
 	Discount                            *bean.MerchantDiscountCodeSimplify `json:"discount" dc:"Discount"`
 	UnfinishedSubscriptionPendingUpdate *SubscriptionPendingUpdateDetail   `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
+	DayLeft                             int                                `json:"dayLeft" dc:"DayLeft, only available for webhook"`
 }
 
 type SubscriptionTimeLineDetail struct {
