@@ -2,6 +2,7 @@ package cycle
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -29,6 +30,11 @@ import (
 // case1: create subscription with payment failure and check expired cycle
 // case2: billing cycle with payment failure after periodEnd, sub should change to incomplete, else may set trialEnd
 // case3: incomplete status situations todo
+
+func TestDayLeft(t *testing.T) {
+	fmt.Println(int((1718300535 - gtime.Now().Timestamp() + 7200) / 86400))
+
+}
 
 func TestSubscription(t *testing.T) {
 	ctx := context.Background()
@@ -292,7 +298,7 @@ func TestSubscription(t *testing.T) {
 		require.NotNil(t, one)
 		require.Equal(t, true, one.Status == consts.SubStatusPending)
 		require.NotNil(t, one.LatestInvoiceId)
-		_, err = service3.MarkWireTransferInvoiceAsSuccess(ctx, one.LatestInvoiceId, "automatic_transfer_number")
+		_, err = service3.MarkWireTransferInvoiceAsSuccess(ctx, one.LatestInvoiceId, "automatic_transfer_number", "automatic_transfer_number")
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
 		require.NotNil(t, one)
