@@ -510,6 +510,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
+	utility.Assert(totalAmountExcludingTax >= 0, "not available for downgrade plan with different interval")
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
 	ProrationDiscountToItem(discountAmount, taxAmount, invoiceItems)
 	return &bean.InvoiceSimplify{
