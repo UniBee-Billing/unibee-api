@@ -153,7 +153,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			return
 		}
 	} else {
-		if err := json.Unmarshal(r.GetBody(), &event); err != nil {
+		if err = json.Unmarshal(r.GetBody(), &event); err != nil {
 			g.Log().Errorf(r.Context(), "GatewayId:%d, GatewayName:%s, Failed to parse webhook body json: %s", gateway.Id, gateway.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusOK)
 			return
