@@ -239,7 +239,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			r.Response.WriteHeader(http.StatusBadRequest)
 			responseBack = http.StatusBadRequest
 		} else {
-			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Refund %s\n", gateway.GatewayName, string(event.Type), stripeCheckoutSession.ID)
+			g.Log().Infof(r.Context(), "Webhook Gateway:%s, Event %s for Payment %s\n", gateway.GatewayName, string(event.Type), stripeCheckoutSession.ID)
 			// Then define and call a func to handle the successful attachment of a GatewayDefaultPaymentMethod.
 			requestId = stripeCheckoutSession.ID
 			if stripeCheckoutSession.Mode == stripe.CheckoutSessionModePayment && stripeCheckoutSession.Metadata != nil && stripeCheckoutSession.Metadata["MerchantId"] == strconv.FormatUint(gateway.MerchantId, 10) {
@@ -247,7 +247,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 
 				err = ProcessPaymentWebhook(r.Context(), stripeCheckoutSession.Metadata["PaymentId"], stripeCheckoutSession.PaymentIntent.ID, gateway)
 				if err != nil {
-					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error HandlePaymentWebhookEvent: %s\n", gateway.GatewayName, err.Error())
 					r.Response.WriteHeader(http.StatusBadRequest)
 					responseBack = http.StatusBadRequest
 				}
@@ -262,10 +262,10 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				if one != nil {
 					_, err = query.CreateOrUpdateGatewayUser(r.Context(), one.UserId, gateway.Id, result.Customer.ID, result.PaymentMethod.ID)
 					if err != nil {
-						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error CreateOrUpdateGatewayUser: %s\n", gateway.GatewayName, err.Error())
+						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error CreateOrUpdateGatewayUser: %s\n", gateway.GatewayName, err.Error())
 					}
 				} else {
-					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error GetGatewayUserByGatewayUserId not found: %s\n", gateway.GatewayName, result.Customer.ID)
+					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error GetGatewayUserByGatewayUserId not found: %s\n", gateway.GatewayName, result.Customer.ID)
 				}
 
 				if stripeCheckoutSession.SetupIntent != nil && len(stripeCheckoutSession.Metadata["SubscriptionId"]) > 0 {
@@ -273,7 +273,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 					if err == nil && result.PaymentMethod != nil {
 						sub, err := handler.ChangeSubscriptionGateway(r.Context(), stripeCheckoutSession.Metadata["SubscriptionId"], gateway.Id, result.PaymentMethod.ID)
 						if err != nil {
-							g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
+							g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error ChangeSubscriptionGateway: %s\n", gateway.GatewayName, err.Error())
 						}
 						utility.AssertError(err, "Error ChangeSubscriptionGateway")
 						if sub != nil && err == nil && len(stripeCheckoutSession.Metadata["InvoiceId"]) > 0 {
@@ -288,7 +288,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 							}
 						}
 					} else {
-						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Error SetupIntent: %s\n", gateway.GatewayName, err.Error())
+						g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error SetupIntent: %s\n", gateway.GatewayName, err.Error())
 					}
 				}
 			}
