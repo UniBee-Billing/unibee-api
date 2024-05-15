@@ -3,8 +3,12 @@ package webhook
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
+	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -33,4 +37,33 @@ func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
 		g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
 	}
 	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
+}
+
+func SetupAllWebhooksBackground() {
+	go func() {
+		ctx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(ctx, err)
+				return
+			}
+		}()
+		var list []*entity.MerchantGateway
+		err = dao.MerchantGateway.Ctx(ctx).
+			Where(dao.MerchantGateway.Columns().GatewayName, "stripe").
+			Where(dao.MerchantGateway.Columns().IsDeleted, 0).
+			Scan(&list)
+		if err != nil {
+			g.Log().Errorf(ctx, "SetupAllWebhooksBackground error:%s", err)
+		}
+		for _, gateway := range list {
+			CheckAndSetupGatewayWebhooks(ctx, gateway.Id)
+		}
+	}()
 }

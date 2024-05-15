@@ -53,15 +53,20 @@ func (s StripeWebhook) setUnibeeAppInfo() {
 func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	utility.Assert(gateway != nil, "gateway is nil")
 	stripe.Key = gateway.GatewaySecret
-	params := &stripe.WebhookEndpointListParams{}
-	params.Limit = stripe.Int64(10)
-	result := webhookendpoint.List(params)
+	listParams := &stripe.WebhookEndpointListParams{}
+	listParams.Limit = stripe.Int64(10)
+	result := webhookendpoint.List(listParams)
 	webhookUrl := _gateway.GetPaymentWebhookEntranceUrl(gateway.Id)
 	var one *stripe.WebhookEndpoint
 	for _, endpoint := range result.WebhookEndpointList().Data {
 		if strings.Compare(endpoint.URL, webhookUrl) == 0 {
-			one = endpoint
-			break
+			if endpoint.APIVersion != stripe.APIVersion {
+				params := &stripe.WebhookEndpointParams{}
+				_, _ = webhookendpoint.Del(endpoint.ID, params)
+			} else {
+				one = endpoint
+				break
+			}
 		}
 	}
 	if one == nil {
@@ -93,7 +98,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 		if err != nil {
 			return nil
 		}
-		//更新 secret
+		//Update Secret
 		utility.Assert(len(newResult.Secret) > 0, "secret is nil")
 		err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, newResult.Secret)
 		if err != nil {
@@ -144,14 +149,14 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	if !config.GetConfigInstance().IsServerDev() {
 		event, err = webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
 		if err != nil {
-			g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed. %s\n", gateway.GatewayName, err.Error())
-			r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+			g.Log().Errorf(r.Context(), "⚠️  Webhook GatewayId:%d, GatewayName:%s, Webhook signature verification failed. %s\n", gateway.Id, gateway.GatewayName, err.Error())
+			r.Response.WriteHeader(http.StatusOK)
 			return
 		}
 	} else {
 		if err := json.Unmarshal(r.GetBody(), &event); err != nil {
-			g.Log().Errorf(r.Context(), "Failed to parse webhook body json: %s", err.Error())
-			r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
+			g.Log().Errorf(r.Context(), "GatewayId:%d, GatewayName:%s, Failed to parse webhook body json: %s", gateway.Id, gateway.GatewayName, err.Error())
+			r.Response.WriteHeader(http.StatusOK)
 			return
 		}
 	}

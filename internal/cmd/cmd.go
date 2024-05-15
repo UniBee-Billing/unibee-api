@@ -21,6 +21,7 @@ import (
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic"
+	"unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"
 	"unibee/utility"
 	"unibee/utility/liberr"
@@ -329,6 +330,8 @@ var (
 			{
 				//logic init
 				logic.StandaloneInit(ctx)
+				//SetupAllWebhooks
+				webhook.SetupAllWebhooksBackground()
 			}
 
 			s.Run()
