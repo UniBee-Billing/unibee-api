@@ -341,14 +341,40 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 
 	if createPayContext.CheckoutMode {
 		var items []*stripe.CheckoutSessionLineItemParams
+		var containNegative = false
 		for _, line := range createPayContext.Invoice.Lines {
+			if line.Amount <= 0 {
+				containNegative = true
+			}
+		}
+		if !containNegative {
+			for _, line := range createPayContext.Invoice.Lines {
+				items = append(items, &stripe.CheckoutSessionLineItemParams{
+					PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+						Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
+						ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+							Name: stripe.String(fmt.Sprintf("%s", line.Description)),
+						},
+						UnitAmount: stripe.Int64(line.Amount),
+					},
+					Quantity: stripe.Int64(1),
+				})
+			}
+		} else {
+			var productName = createPayContext.Invoice.ProductName
+			if len(productName) == 0 {
+				productName = createPayContext.Invoice.InvoiceName
+			}
+			if len(productName) == 0 {
+				productName = "DefaultProduct"
+			}
 			items = append(items, &stripe.CheckoutSessionLineItemParams{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(fmt.Sprintf("%s", line.Description)),
+						Name: stripe.String(fmt.Sprintf("%s", productName)),
 					},
-					UnitAmount: stripe.Int64(line.Amount),
+					UnitAmount: stripe.Int64(createPayContext.Invoice.TotalAmount),
 				},
 				Quantity: stripe.Int64(1),
 			})
