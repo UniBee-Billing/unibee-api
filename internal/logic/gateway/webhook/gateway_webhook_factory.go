@@ -54,6 +54,7 @@ func SetupAllWebhooksBackground() {
 				return
 			}
 		}()
+
 		var list []*entity.MerchantGateway
 		err = dao.MerchantGateway.Ctx(ctx).
 			Where(dao.MerchantGateway.Columns().GatewayName, "stripe").
