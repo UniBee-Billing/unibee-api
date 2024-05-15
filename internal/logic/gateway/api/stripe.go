@@ -515,10 +515,10 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			}
 		}
 		result, err := invoice.New(params)
+		log.SaveChannelHttpLog("GatewayNewPayment", params, result, err, "NewInvoice", nil, createPayContext.Gateway)
 		if err != nil {
 			return nil, err
 		}
-		log.SaveChannelHttpLog("GatewayNewPayment", params, result, err, "NewInvoice", nil, createPayContext.Gateway)
 
 		for _, line := range createPayContext.Invoice.Lines {
 			ItemParams := &stripe.InvoiceItemParams{
