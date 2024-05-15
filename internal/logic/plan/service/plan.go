@@ -180,6 +180,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		TrialAmount:               req.TrialAmount,
 		TrialDemand:               req.TrialDemand,
 		CancelAtTrialEnd:          req.CancelAtTrialEnd,
+		PublishStatus:             consts.PlanPublishStatusUnPublished,
 	}
 	result, err := dao.Plan.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
