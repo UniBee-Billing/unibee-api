@@ -373,10 +373,10 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		checkoutParams.Metadata = utility.ConvertToStringMetadata(createPayContext.Metadata)
 		//checkoutParams.ExpiresAt
 		detail, err := session.New(checkoutParams)
+		log.SaveChannelHttpLog("GatewayNewPayment", checkoutParams, detail, err, "CheckoutSession", nil, createPayContext.Gateway)
 		if err != nil {
 			return nil, err
 		}
-		log.SaveChannelHttpLog("GatewayNewPayment", checkoutParams, detail, err, "CheckoutSession", nil, createPayContext.Gateway)
 		var status consts.PaymentStatusEnum = consts.PaymentCreated
 		if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusOpen)) == 0 {
 		} else if strings.Compare(string(detail.Status), string(stripe.CheckoutSessionStatusComplete)) == 0 {
