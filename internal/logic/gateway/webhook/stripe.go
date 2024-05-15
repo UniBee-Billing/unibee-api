@@ -126,9 +126,8 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 				stripe.String("checkout.session.completed"),
 				stripe.String("charge.refund.updated"),
 			},
-			URL:        stripe.String(webhookUrl),
-			Metadata:   map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
-			APIVersion: stripe.String(stripe.APIVersion),
+			URL:      stripe.String(webhookUrl),
+			Metadata: map[string]string{"MerchantId": strconv.FormatUint(gateway.MerchantId, 10)},
 		}
 		updateResult, err := webhookendpoint.Update(one.ID, params)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", params, updateResult, err, one.ID, nil, gateway)
