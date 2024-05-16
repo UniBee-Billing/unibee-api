@@ -1691,7 +1691,7 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
-	utility.Assert(sub.Status == consts.SubStatusPending, "subscription not in pending status")
+	utility.Assert(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing, "subscription not in pending or processing status")
 	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
 	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
 	err := handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
