@@ -25,7 +25,7 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 
 	var subs []*entity.Subscription
 	var sortKey = "task_time asc"
-	var status = []int{consts.SubStatusPending, consts.SubStatusActive, consts.SubStatusIncomplete}
+	var status = []int{consts.SubStatusPending, consts.SubStatusProcessing, consts.SubStatusActive, consts.SubStatusIncomplete}
 	// query sub which dunningTime expired
 	q := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
@@ -54,4 +54,42 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 	}
 
 	g.Log().Debug(ctx, taskName, "End......")
+}
+
+func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskName string) {
+	g.Log().Debug(ctx, taskName, "TaskForSubscriptionTrackAfterCancelledOrExpired Start......")
+	var timeNow = gtime.Now().Timestamp()
+
+	var subs []*entity.Subscription
+	var sortKey = "task_time asc"
+	var status = []int{consts.SubStatusCancelled, consts.SubStatusExpired}
+	// query sub which dunningTime expired
+	q := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		WhereLT(dao.Subscription.Columns().DunningTime, timeNow).                //  dunning < now
+		WhereGT(dao.Subscription.Columns().CurrentPeriodEnd, timeNow-(5*86400)). //  in 5 days
+		Where(dao.Subscription.Columns().Type, consts.SubTypeUniBeeControl).
+		WhereIn(dao.Subscription.Columns().Status, status)
+	if !config.GetConfigInstance().IsProd() {
+		// Test Clock Not Enable For Prod Env
+		q = q.Where(dao.Subscription.Columns().TestClock, 0)
+	}
+	err := q.Limit(0, 10).
+		Order(sortKey).
+		OmitEmpty().Scan(&subs)
+	if err != nil {
+		g.Log().Errorf(ctx, "%s Error:%s", taskName, err.Error())
+		return
+	}
+
+	for _, sub := range subs {
+		walk, err := cycle.SubPipeBillingCycleWalk(ctx, sub.SubscriptionId, timeNow, taskName)
+		if err != nil {
+			g.Log().Errorf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired error:%s", err.Error())
+		}
+		g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired WalkResult:%s", utility.MarshalToJsonString(walk))
+		time.Sleep(10 * time.Second)
+	}
+
+	g.Log().Debug(ctx, taskName, "TaskForSubscriptionTrackAfterCancelledOrExpired End......")
 }

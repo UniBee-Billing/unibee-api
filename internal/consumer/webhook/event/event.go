@@ -3,13 +3,14 @@ package event
 type MerchantWebhookEvent string
 
 const (
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED          = "subscription.created"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED          = "subscription.updated"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED        = "subscription.cancelled"
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK            = "subscription.track"                // 3 days before period end
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL = "subscription.track.willcancel"     // track will cancel at period end
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK    = "subscription.latest_invoice.track" // pending every day at 3 days before period end
-	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED          = "subscription.expired"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED                   = "subscription.created"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED                   = "subscription.updated"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED                 = "subscription.cancelled"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK                     = "subscription.track" // 3 days before period end
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL          = "subscription.track.willcancel"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE = "subscription.track.user.outofsubscribe" // track will cancel at period end
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK             = "subscription.latest_invoice.track"      // pending every day at 3 days before period end
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED                   = "subscription.expired"
 
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CREATED   = "subscription.onetime_addon.created"
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_SUCCESS   = "subscription.onetime_addon.success"
@@ -36,6 +37,7 @@ var ListeningEventList = []string{
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CANCELLED,
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK,
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL,
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE,
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK,
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED,
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CREATED,

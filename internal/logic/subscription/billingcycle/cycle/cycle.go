@@ -266,8 +266,12 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 		}
 		dayLeft := int((one.CurrentPeriodEnd - timeNow + 7200) / 86400)
 		subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK)
-		if one.CancelAtPeriodEnd == 1 {
+		if one.CancelAtPeriodEnd == 1 && one.Status != consts.SubStatusCancelled {
 			subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL)
+		} else if one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusCancelled {
+			if query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, one.MerchantId) == nil {
+				subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
+			}
 		}
 	}
 }

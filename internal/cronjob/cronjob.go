@@ -37,10 +37,19 @@ func StartCronJobs() {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", backName, err.Error())
 	}
 	// every 1 min
-	var other10MinTask = "Other10MinTask"
+	var other1MinTask = "Other1MinTask"
 	_, err = gcron.AddSingleton(ctx, "@every 1m", func(ctx context.Context) {
 		discount.TaskForExpireDiscounts(ctx)
 		invoice.TaskForExpireInvoices(ctx)
+	}, other1MinTask)
+	if err != nil {
+		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
+	}
+
+	// every 10 min
+	var other10MinTask = "Other10MinTask"
+	_, err = gcron.AddSingleton(ctx, "@every 10m", func(ctx context.Context) {
+		sub.TaskForSubscriptionTrackAfterCancelledOrExpired(ctx, other10MinTask)
 	}, other10MinTask)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other10MinTask, err.Error())
