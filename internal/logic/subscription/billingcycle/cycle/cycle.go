@@ -59,6 +59,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		//	return &BillingCycleWalkRes{WalkUnfinished: true, Message: "Subscription LatestInvoice Expired"}, nil
 		//}
 
+		trackForSubscription(ctx, sub, timeNow)
+
 		var needInvoiceGenerate = true
 		var needInvoiceFirstTryPayment = false
 		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing) {
@@ -196,7 +198,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Generate Invoice Result:%s", utility.MarshalToJsonString(one))}, nil
 			} else {
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
-					trackForSubscriptionLatest(ctx, sub, timeNow)
+					trackForSubscriptionLatestProcessInvoice(ctx, sub, timeNow)
 				}
 				var lastAutomaticTryTime int64 = 0
 				var lastPayment *entity.Payment
@@ -229,27 +231,44 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	}
 }
 
-// trackForSubscriptionLatest dunning system for subscription invoice
-func trackForSubscriptionLatest(ctx context.Context, sub *entity.Subscription, timeNow int64) {
-	g.Log().Infof(ctx, "trackForSubscriptionLatest sub:%s", sub.SubscriptionId)
+// trackForSubscriptionLatestProcessInvoice dunning system for subscription invoice
+func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.Subscription, timeNow int64) {
+	g.Log().Infof(ctx, "trackForSubscriptionLatestProcessInvoice sub:%s", sub.SubscriptionId)
 	one := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
-	g.Log().Infof(ctx, "trackForSubscriptionLatest invoiceId:%s", one.InvoiceId)
+	g.Log().Infof(ctx, "trackForSubscriptionLatestProcessInvoice invoiceId:%s", one.InvoiceId)
 	if one != nil && one.Status == consts.InvoiceStatusProcessing && one.LastTrackTime+86400 < timeNow {
 		// dunning: daily resend invoice, update track time
-		g.Log().Infof(ctx, "trackForSubscriptionLatest start track invoiceId:%s", one.InvoiceId)
+		g.Log().Infof(ctx, "trackForSubscriptionLatestProcessInvoice start track invoiceId:%s", one.InvoiceId)
 		_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().LastTrackTime: timeNow,
 			dao.Invoice.Columns().GmtModify:     gtime.Now(),
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			fmt.Printf("SendInvoiceEmailToUser update err:%s", err.Error())
+			fmt.Printf("trackForSubscriptionLatestProcessInvoice update err:%s", err.Error())
 		}
-		//err = handler2.SendInvoiceEmailToUser(ctx, one.InvoiceId)
-		//if err != nil {
-		//	glog.Errorf(ctx, "trackForSubscriptionLatest error:%s", err.Error())
-		//}
 		dayLeft := int((sub.CurrentPeriodEnd - timeNow + 7200) / 86400)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK)
+	}
+}
+
+// trackForSubscription dunning system for subscription
+func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow int64) {
+	g.Log().Infof(ctx, "trackForSubscription sub:%s", one.SubscriptionId)
+	if one.LastTrackTime+86400 < timeNow {
+		// dunning: daily resend invoice, update track time
+		g.Log().Infof(ctx, "trackForSubscription start track SubscriptionId:%s", one.SubscriptionId)
+		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().LastTrackTime: timeNow,
+			dao.Subscription.Columns().GmtModify:     gtime.Now(),
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+		if err != nil {
+			fmt.Printf("trackForSubscription update err:%s", err.Error())
+		}
+		dayLeft := int((one.CurrentPeriodEnd - timeNow + 7200) / 86400)
+		subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK)
+		if one.CancelAtPeriodEnd == 1 {
+			subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL)
+		}
 	}
 }
 

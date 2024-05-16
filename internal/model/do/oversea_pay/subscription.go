@@ -61,4 +61,5 @@ type Subscription struct {
 	MetaData                    interface{} // meta_data(json)
 	GasPayer                    interface{} // who pay the gas, merchant|user
 	CurrentPeriodPaid           interface{} // current period paid or not, 1-paid, other-the utc time to expire
+	LastTrackTime               interface{} // last subscription track time
 }

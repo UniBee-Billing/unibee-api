@@ -165,8 +165,6 @@ func (p proxy) PaymentNeedAuthorisedCallback(ctx context.Context, payment *entit
 			}
 		}()
 		startTime := time.Now()
-
-		payment2.SendPaymentWebhookBackground(payment.PaymentId, event.UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED)
 		p.GetCallbackImpl().PaymentNeedAuthorisedCallback(backgroundCtx, payment, invoice)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentNeedAuthorisedCallback cost：%s \n", time.Now().Sub(startTime))

@@ -10,6 +10,8 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
+	event2 "unibee/internal/consumer/webhook/event"
+	payment2 "unibee/internal/consumer/webhook/payment"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
@@ -183,6 +185,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
+		payment2.SendPaymentWebhookBackground(payment.PaymentId, event2.UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED)
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentNeedAuthorisedCallback(ctx, payment, invoice)
 
 		if err != nil {
