@@ -19,6 +19,7 @@ type SetupReq struct {
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 }
 type SetupRes struct {
+	Gateway *bean.GatewaySimplify `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type EditReq struct {
@@ -28,6 +29,7 @@ type EditReq struct {
 	GatewaySecret string `json:"gatewaySecret"  dc:"The secret of payment gateway" `
 }
 type EditRes struct {
+	Gateway *bean.GatewaySimplify `json:"gateway" dc:"Payment Gateway Object"`
 }
 
 type EditCountryConfigReq struct {
@@ -44,7 +46,7 @@ type SetupWebhookReq struct {
 	WebhookSecret string `json:"webhookSecret"  dc:"The secret of gateway webhook"`
 }
 type SetupWebhookRes struct {
-	GatewayWebhookUrl string `json:"gatewayWebhookUrl"  dc:"The webhook endpoint url of payment gateway, if gateway is stripe, the url will setting to stripe by api automaticly"`
+	GatewayWebhookUrl string `json:"gatewayWebhookUrl"  dc:"The webhook endpoint url of payment gateway, if gateway is stripe, the url will setting to stripe by api automatic"`
 }
 
 type WireTransferSetupReq struct {

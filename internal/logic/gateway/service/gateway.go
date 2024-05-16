@@ -16,14 +16,14 @@ import (
 	"unibee/utility"
 )
 
-func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string) {
+func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, gatewayKey string, gatewaySecret string) *entity.MerchantGateway {
 	utility.Assert(len(gatewayName) > 0, "gatewayName invalid")
 	icon, gatewayType, err := api.GetGatewayWebhookServiceProviderByGatewayName(ctx, gatewayName).GatewayTest(ctx, gatewayKey, gatewaySecret)
 	utility.AssertError(err, "gateway test error, key or secret invalid")
 	one := query.GetGatewayByGatewayName(ctx, merchantId, gatewayName)
 	utility.Assert(one == nil, "exist same gateway")
 	if config.GetConfigInstance().IsProd() {
-		err := dao.MerchantGateway.Ctx(ctx).
+		err = dao.MerchantGateway.Ctx(ctx).
 			Where(dao.MerchantGateway.Columns().GatewayName, gatewayName).
 			Where(dao.MerchantGateway.Columns().GatewayKey, gatewayKey).
 			Where(dao.MerchantGateway.Columns().GatewaySecret, gatewaySecret).
@@ -47,9 +47,10 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	one.Id = uint64(id)
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+	return one
 }
 
-func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatewayKey string, gatewaySecret string) {
+func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatewayKey string, gatewaySecret string) *entity.MerchantGateway {
 	utility.Assert(gatewayId > 0, "gatewayId invalid")
 	one := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(one != nil, "gateway not found")
@@ -66,6 +67,8 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 	utility.AssertError(err, "system error")
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
+	one = query.GetGatewayById(ctx, gatewayId)
+	return one
 }
 
 func EditGatewayCountryConfig(ctx context.Context, merchantId uint64, gatewayId uint64, countryConfig map[string]bool) (err error) {
