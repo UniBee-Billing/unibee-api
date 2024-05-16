@@ -91,13 +91,13 @@ func PlanList(ctx context.Context, req *SubscriptionPlanListInternalReq) (list [
 	q := dao.Plan.Ctx(ctx).
 		Where(dao.Plan.Columns().MerchantId, req.MerchantId)
 	if len(req.Type) > 0 {
-		q = q.Where(dao.Plan.Columns().Type, req.Type)
+		q = q.WhereIn(dao.Plan.Columns().Type, req.Type)
 	}
 	if len(req.Status) > 0 {
-		q = q.Where(dao.Plan.Columns().Status, req.Status)
+		q = q.WhereIn(dao.Plan.Columns().Status, req.Status)
 	}
 	err := q.Where(dao.Plan.Columns().PublishStatus, req.PublishStatus).
-		Where(dao.Plan.Columns().Currency, strings.ToLower(req.Currency)).
+		Where(dao.Plan.Columns().Currency, strings.ToUpper(req.Currency)).
 		WhereIn(dao.Plan.Columns().IsDeleted, []int{0}).
 		OmitEmpty().
 		Order(sortKey).
