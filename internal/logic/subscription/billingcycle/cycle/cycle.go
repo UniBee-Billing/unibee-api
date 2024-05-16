@@ -272,7 +272,7 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 			if query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, one.MerchantId) == nil {
 				key := fmt.Sprintf("UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%d-%d", one.MerchantId, one.UserId)
 				if utility.TryLock(ctx, key, 1800) {
-					g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE", "GetLock 1800s", key)
+					g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
 					subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
 				}
 			}
