@@ -59,6 +59,7 @@ func StartCronJobs() {
 	var hourTask = "OtherTask"
 	_, err = gcron.AddSingleton(ctx, "@hourly", func(ctx context.Context) {
 		gateway_log.TaskForDeleteChannelLogs(ctx)
+		gateway_log.TaskForDeleteWebhookMessage(ctx)
 	}, hourTask)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
