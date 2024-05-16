@@ -230,7 +230,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
 
-	utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
+	//utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 	if one.Status == consts.PlanStatusActive {
 		utility.Assert(req.Amount == nil, "Amount is not editable as plan is active")
 		utility.Assert(req.Currency == nil, "Currency is not editable as plan is active")
