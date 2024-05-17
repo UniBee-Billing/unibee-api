@@ -79,14 +79,15 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 
 	doc.SetPaidDate(unibInvoice.GmtModify.Layout("2006-01-02"))
 
-	tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
-	utility.Assert(len(tempLogoPath) > 0, "download Logo error")
-	logoBytes, err := os.ReadFile(tempLogoPath)
-	if err != nil {
-		return err
+	if len(merchantInfo.CompanyLogo) > 0 {
+		tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
+		utility.Assert(len(tempLogoPath) > 0, "download Logo error")
+		logoBytes, err := os.ReadFile(tempLogoPath)
+		if err != nil {
+			return err
+		}
+		doc.SetLogo(logoBytes)
 	}
-
-	doc.SetLogo(logoBytes)
 
 	doc.SetCompany(&generator2.Contact{
 		Name: merchantInfo.CompanyName,
