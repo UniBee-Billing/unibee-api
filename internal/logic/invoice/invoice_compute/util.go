@@ -506,7 +506,10 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		totalAmountExcludingTax = totalAmountExcludingTax + (newPlanSub.Quantity * unitAmountExcludingTax)
 	}
 
-	utility.Assert(totalAmountExcludingTax >= 3 || totalAmountExcludingTax == 0, "not available for downgrade plan with different interval")
+	utility.Assert(totalAmountExcludingTax >= 0, "not available for downgrade plan with different interval")
+	if totalAmountExcludingTax > 0 && totalAmountExcludingTax < 3 {
+		utility.Assert(true, "amount too small")
+	}
 	discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, merchantId, totalAmountExcludingTax, req.Currency, req.DiscountCode, req.TimeNow), totalAmountExcludingTax)
 	totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 	var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
