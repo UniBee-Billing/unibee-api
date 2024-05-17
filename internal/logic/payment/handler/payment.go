@@ -35,6 +35,7 @@ type HandlePayReq struct {
 	CaptureAmount          int64
 	Reason                 string
 	GatewayPaymentMethod   string
+	PaymentCode            string
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
@@ -145,7 +146,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	return err
 }
 
-func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string, paymentData string) (err error) {
+func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string, paymentData string, paymentCode string) (err error) {
 	g.Log().Infof(ctx, "HandlePayNeedAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil")
@@ -158,6 +159,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 				dao.Payment.Columns().AuthorizeStatus:  consts.WaitingAuthorized,
 				dao.Payment.Columns().AuthorizeReason:  authorizeReason,
 				dao.Payment.Columns().PaymentData:      paymentData,
+				dao.Payment.Columns().Code:             paymentCode,
 				dao.Payment.Columns().GatewayPaymentId: payment.GatewayPaymentId},
 				g.Map{dao.Payment.Columns().Id: payment.Id,
 					dao.Payment.Columns().Status: consts.PaymentCreated})
@@ -373,6 +375,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().GatewayPaymentId:       req.GatewayPaymentId,
 				dao.Payment.Columns().GatewayPaymentMethod:   req.GatewayPaymentMethod,
 				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
+				dao.Payment.Columns().Code:                   req.PaymentCode,
 			},
 				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
@@ -464,6 +467,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_be
 				CaptureAmount:          0,
 				Reason:                 gatewayPaymentRo.Reason,
 				GatewayPaymentMethod:   gatewayPaymentRo.GatewayPaymentMethod,
+				PaymentCode:            gatewayPaymentRo.PaymentCode,
 			})
 			if err != nil {
 				return err
@@ -475,6 +479,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_be
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
 				PayStatusEnum:          consts.PaymentFailed,
 				Reason:                 gatewayPaymentRo.Reason,
+				PaymentCode:            gatewayPaymentRo.PaymentCode,
 			})
 			if err != nil {
 				return err
@@ -486,12 +491,13 @@ func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_be
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
 				PayStatusEnum:          consts.PaymentCancelled,
 				Reason:                 gatewayPaymentRo.Reason,
+				PaymentCode:            gatewayPaymentRo.PaymentCode,
 			})
 			if err != nil {
 				return err
 			}
 		} else if gatewayPaymentRo.AuthorizeStatus == consts.WaitingAuthorized {
-			err := HandlePayNeedAuthorized(ctx, one, gatewayPaymentRo.AuthorizeReason, gatewayPaymentRo.PaymentData)
+			err := HandlePayNeedAuthorized(ctx, one, gatewayPaymentRo.AuthorizeReason, gatewayPaymentRo.PaymentData, gatewayPaymentRo.PaymentCode)
 			if err != nil {
 				return err
 			}

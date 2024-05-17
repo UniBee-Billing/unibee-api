@@ -30,6 +30,7 @@ type GatewayNewPaymentResp struct {
 	Link                   string                   `json:"link"`
 	Action                 *gjson.Json              `json:"action"`
 	Invoice                *entity.Invoice          `json:"invoice"`
+	PaymentCode            string
 }
 
 // GatewayPaymentCaptureResp is the golang structure for table oversea_pay.
@@ -101,6 +102,7 @@ type GatewayPaymentRo struct {
 	CancelTime           *gtime.Time `json:"cancelTime" `
 	CancelReason         string      `json:"cancelReason" `
 	PaymentData          string      `json:"paymentData" `
+	PaymentCode          string      `json:"paymentCode" `
 	GatewayId            uint64      `json:"gatewayId"         `
 	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
 	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `

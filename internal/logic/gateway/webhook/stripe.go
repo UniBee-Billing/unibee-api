@@ -358,6 +358,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 									PaymentAmount:          paymentIntentDetail.PaymentAmount,
 									Reason:                 paymentIntentDetail.Reason,
 									GatewayPaymentMethod:   paymentIntentDetail.GatewayPaymentMethod,
+									PaymentCode:            paymentIntentDetail.PaymentCode,
 								})
 								if err != nil {
 									response = fmt.Sprintf("%v", err)
@@ -372,6 +373,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 									GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
 									PayStatusEnum:          consts.PaymentFailed,
 									Reason:                 paymentIntentDetail.Reason,
+									PaymentCode:            paymentIntentDetail.PaymentCode,
 								})
 								if err != nil {
 									response = fmt.Sprintf("%v", err)

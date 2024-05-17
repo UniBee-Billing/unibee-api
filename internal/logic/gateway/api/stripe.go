@@ -196,7 +196,7 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	log.SaveChannelHttpLog("GatewayPaymentList", params, paymentList, err, "", nil, gateway)
 	var list []*gateway_bean.GatewayPaymentRo
 	for _, item := range paymentList.PaymentIntentList().Data {
-		list = append(list, parseStripePayment(item))
+		list = append(list, s.parseStripePayment(ctx, gateway, item))
 	}
 
 	return list, nil
@@ -231,7 +231,7 @@ func (s Stripe) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 		return nil, err
 	}
 
-	return parseStripePayment(response), nil
+	return s.parseStripePayment(ctx, gateway, response), nil
 }
 
 func (s Stripe) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
@@ -428,6 +428,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			var targetIntent *stripe.PaymentIntent
 			var gatewayPaymentId = ""
 			var paymentMethod = ""
+			var paymentCode = ""
 			var link = ""
 			var cancelErr error
 			paymentMethods := make([]*bean.PaymentMethod, 0)
@@ -495,12 +496,19 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			if success && targetIntent != nil && len(gatewayPaymentId) > 0 {
 				if targetIntent.PaymentMethod != nil {
 					paymentMethod = targetIntent.PaymentMethod.ID
+					if len(paymentMethod) > 0 {
+						query, _ := s.GatewayUserPaymentMethodListQuery(ctx, createPayContext.Gateway, &gateway_bean.GatewayUserPaymentMethodReq{GatewayPaymentMethodId: paymentMethod})
+						if query != nil {
+							paymentCode = utility.MarshalToJsonString(query)
+						}
+					}
 				}
 				return &gateway_bean.GatewayNewPaymentResp{
 					Status:                 consts.PaymentSuccess,
 					GatewayPaymentId:       gatewayPaymentId,
 					GatewayPaymentIntentId: targetIntent.ID,
 					GatewayPaymentMethod:   paymentMethod,
+					PaymentCode:            paymentCode,
 					Link:                   link,
 				}, nil
 			}
@@ -667,7 +675,7 @@ func (s Stripe) GatewayCancel(ctx context.Context, payment *entity.Payment) (res
 		if err != nil {
 			return nil, err
 		}
-		paymentDetails := parseStripePayment(result)
+		paymentDetails := s.parseStripePayment(ctx, gateway, result)
 		status = paymentDetails.Status
 		gatewayCancelId = paymentDetails.GatewayPaymentId
 	}
@@ -761,7 +769,7 @@ func parseStripeRefund(item *stripe.Refund) *gateway_bean.GatewayPaymentRefundRe
 	}
 }
 
-func parseStripePayment(item *stripe.PaymentIntent) *gateway_bean.GatewayPaymentRo {
+func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.MerchantGateway, item *stripe.PaymentIntent) *gateway_bean.GatewayPaymentRo {
 	var status = consts.PaymentCreated
 	if strings.Compare(string(item.Status), "succeeded") == 0 {
 		status = consts.PaymentSuccess
@@ -783,8 +791,15 @@ func parseStripePayment(item *stripe.PaymentIntent) *gateway_bean.GatewayPayment
 		paymentData = utility.MarshalToJsonString(item.NextAction)
 	}
 	var gatewayPaymentMethod string
+	var paymentCode string
 	if item.PaymentMethod != nil {
 		gatewayPaymentMethod = item.PaymentMethod.ID
+		if len(gatewayPaymentMethod) > 0 {
+			query, _ := s.GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{GatewayPaymentMethodId: gatewayPaymentMethod})
+			if query != nil {
+				paymentCode = utility.MarshalToJsonString(query)
+			}
+		}
 	}
 	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.ID,
@@ -796,6 +811,7 @@ func parseStripePayment(item *stripe.PaymentIntent) *gateway_bean.GatewayPayment
 		TotalAmount:          item.Amount,
 		PaymentAmount:        item.AmountReceived,
 		GatewayPaymentMethod: gatewayPaymentMethod,
+		PaymentCode:          paymentCode,
 		Currency:             strings.ToUpper(string(item.Currency)),
 		PaidTime:             gtime.NewFromTimeStamp(item.Created),
 		CreateTime:           gtime.NewFromTimeStamp(item.Created),

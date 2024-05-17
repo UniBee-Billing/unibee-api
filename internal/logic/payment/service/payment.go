@@ -195,6 +195,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId,
 			GatewayPaymentId:       gatewayInternalPayResult.GatewayPaymentId,
 			GatewayPaymentMethod:   gatewayInternalPayResult.GatewayPaymentMethod,
+			PaymentCode:            gatewayInternalPayResult.PaymentCode,
 			PayStatusEnum:          consts.PaymentSuccess,
 			TotalAmount:            createPayContext.Pay.TotalAmount,
 			PaymentAmount:          createPayContext.Pay.TotalAmount,
