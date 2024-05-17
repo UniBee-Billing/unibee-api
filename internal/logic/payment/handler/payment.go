@@ -187,7 +187,6 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 		}
 		payment2.SendPaymentWebhookBackground(payment.PaymentId, event2.UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED)
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentNeedAuthorisedCallback(ctx, payment, invoice)
-
 		if err != nil {
 			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
 		}
