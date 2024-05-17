@@ -25,7 +25,7 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
 	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
-	utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
+	//utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
 	err := createInvoicePdf(unibInvoice, merchantInfo, user, savePath)
