@@ -783,7 +783,7 @@ func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.Merchant
 	var captureStatus = consts.Authorized
 	var authorizeReason = ""
 	var paymentData = ""
-	if strings.Compare(string(item.Status), "requires_payment_method") == 0 {
+	if strings.Compare(string(item.Status), "requires_payment_method") == 0 || strings.Compare(string(item.Status), "requires_action") == 0 {
 		captureStatus = consts.WaitingAuthorized
 		if item.LastPaymentError != nil {
 			authorizeReason = item.LastPaymentError.Msg
