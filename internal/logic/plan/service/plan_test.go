@@ -56,7 +56,7 @@ func TestPlanCreateAndDelete(t *testing.T) {
 			OnetimeAddonIds: []int64{int64(test.TestOneTimeAddon.Id)},
 			MetricLimits:    nil,
 			GasPayer:        unibee.String("user"),
-			Metadata:        map[string]interface{}{"type": "test"},
+			Metadata:        &map[string]interface{}{"type": "test"},
 			MerchantId:      test.TestMerchant.Id,
 		})
 		require.Nil(t, err)

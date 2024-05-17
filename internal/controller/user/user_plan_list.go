@@ -21,8 +21,8 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
 		Currency:      req.Currency,
-		Page:          0,
-		Count:         10,
+		Page:          req.Page,
+		Count:         req.Count,
 	})
 	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, _interface.Context().Get(ctx).User.Id, _interface.GetMerchantId(ctx))
 	if sub != nil {
