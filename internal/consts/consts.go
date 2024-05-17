@@ -6,5 +6,5 @@ const (
 	ContextKey                 = "ContextKey"         //
 	FileMaxUploadCountMinute   = 10                   //
 	ApiKey                     = "key"
-	CloudModeManagerMerchantId = 15621
+	CloudModeManagerMerchantId = 15656
 )
