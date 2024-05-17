@@ -61,6 +61,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().FirstPaidTime:          gtime.Now().Timestamp(),
 		dao.Subscription.Columns().TrialEnd:               invoice.TrialEnd,
+		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
@@ -126,6 +127,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
 		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           recurringDiscountCode,
+		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
@@ -148,8 +150,9 @@ func HandleSubscriptionIncomplete(ctx context.Context, subscriptionId string, no
 
 func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) error {
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:    consts.SubStatusIncomplete,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().Status:         consts.SubStatusIncomplete,
+		dao.Subscription.Columns().GmtModify:      gtime.Now(),
+		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err

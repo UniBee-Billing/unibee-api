@@ -58,10 +58,11 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	}
 	//Expire Subscription UnFinished Invoice, May No Need
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:       consts.SubStatusExpired,
-		dao.Subscription.Columns().CancelReason: reason,
-		dao.Subscription.Columns().TrialEnd:     sub.CurrentPeriodStart - 1,
-		dao.Subscription.Columns().GmtModify:    gtime.Now(),
+		dao.Subscription.Columns().Status:         consts.SubStatusExpired,
+		dao.Subscription.Columns().CancelReason:   reason,
+		dao.Subscription.Columns().TrialEnd:       sub.CurrentPeriodStart - 1,
+		dao.Subscription.Columns().GmtModify:      gtime.Now(),
+		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		fmt.Printf("SubscriptionExpire error:%s", err.Error())

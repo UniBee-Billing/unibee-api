@@ -1449,10 +1449,11 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	}
 	var nextStatus = consts.SubStatusCancelled
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:       nextStatus,
-		dao.Subscription.Columns().CancelReason: reason,
-		dao.Subscription.Columns().TrialEnd:     sub.CurrentPeriodStart - 1,
-		dao.Subscription.Columns().GmtModify:    gtime.Now(),
+		dao.Subscription.Columns().Status:         nextStatus,
+		dao.Subscription.Columns().CancelReason:   reason,
+		dao.Subscription.Columns().TrialEnd:       sub.CurrentPeriodStart - 1,
+		dao.Subscription.Columns().GmtModify:      gtime.Now(),
+		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
@@ -1800,6 +1801,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			dao.Subscription.Columns().DunningTime:        dunningTime,
 			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
 			dao.Subscription.Columns().GmtModify:          gtime.Now(),
+			dao.Subscription.Columns().LastUpdateTime:     gtime.Now().Timestamp(),
 		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 		if err != nil {
 			return err
@@ -1817,8 +1819,9 @@ func MarkSubscriptionProcessed(ctx context.Context, subscriptionId string) error
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "not wire transfer type of subscription")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:    consts.SubStatusProcessing,
-		dao.Subscription.Columns().GmtModify: gtime.Now(),
+		dao.Subscription.Columns().Status:         consts.SubStatusProcessing,
+		dao.Subscription.Columns().GmtModify:      gtime.Now(),
+		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
 		return err
