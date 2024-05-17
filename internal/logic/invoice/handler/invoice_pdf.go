@@ -110,8 +110,8 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 	})
 
 	var lines []*bean.InvoiceItemSimplify
-	err = utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
-	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString Logo error:%v", err))
+	err := utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
+	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
 	if len(unibInvoice.RefundId) > 0 {
 		for i, line := range lines {
