@@ -164,12 +164,10 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 				g.Map{dao.Payment.Columns().Id: payment.Id,
 					dao.Payment.Columns().Status: consts.PaymentCreated})
 			if err != nil || result == nil {
-				//_ = transaction.Rollback()
 				return err
 			}
 			affected, err := result.RowsAffected()
 			if err != nil || affected != 1 {
-				//_ = transaction.Rollback()
 				return err
 			}
 			return nil
@@ -452,8 +450,11 @@ func SaveChannelUserDefaultPaymentMethod(ctx context.Context, req *HandlePayReq,
 	return err
 }
 
-func HandlePaymentWebhookEvent(ctx context.Context, gatewayPaymentRo *gateway_bean.GatewayPaymentRo) error {
-	one := query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
+func HandlePaymentWebhookEvent(ctx context.Context, paymentId string, gatewayPaymentRo *gateway_bean.GatewayPaymentRo) error {
+	one := query.GetPaymentByPaymentId(ctx, paymentId)
+	if one == nil {
+		one = query.GetPaymentByGatewayPaymentId(ctx, gatewayPaymentRo.GatewayPaymentId)
+	}
 	if one != nil {
 		if gatewayPaymentRo.Status == consts.PaymentSuccess {
 			err := HandlePaySuccess(ctx, &HandlePayReq{

@@ -20,7 +20,7 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 			if err != nil {
 				return err
 			}
-			err = handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
+			err = handler2.HandlePaymentWebhookEvent(ctx, payment.PaymentId, &gateway_bean.GatewayPaymentRo{
 				Status:               paymentIntentDetail.Status,
 				AuthorizeStatus:      paymentIntentDetail.AuthorizeStatus,
 				AuthorizeReason:      paymentIntentDetail.AuthorizeReason,

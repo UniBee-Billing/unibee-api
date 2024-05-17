@@ -520,7 +520,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		}
 	}
 
-	err := handler2.HandlePaymentWebhookEvent(ctx, &gateway_bean.GatewayPaymentRo{
+	err := handler2.HandlePaymentWebhookEvent(ctx, invoice.Metadata["PaymentId"], &gateway_bean.GatewayPaymentRo{
 		Status:               status,
 		AuthorizeStatus:      authorizeStatus,
 		AuthorizeReason:      authorizeReason,
