@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
+	config2 "unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
@@ -271,7 +272,12 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 		} else if one.Status == consts.SubStatusExpired || one.Status == consts.SubStatusCancelled {
 			if query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.UserId, one.MerchantId) == nil {
 				key := fmt.Sprintf("UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%d-%d", one.MerchantId, one.UserId)
-				if utility.TryLock(ctx, key, 1800) {
+				if config2.GetConfigInstance().IsProd() {
+					if utility.TryLock(ctx, key, 1800) {
+						g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
+						subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
+					}
+				} else {
 					g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
 					subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
 				}
