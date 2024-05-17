@@ -264,7 +264,7 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 		if err != nil {
 			fmt.Printf("trackForSubscription update err:%s", err.Error())
 		}
-		dayLeft := int((one.CurrentPeriodEnd - timeNow + 7200) / 86400)
+		dayLeft := int((one.LastUpdateTime - timeNow + 7200) / 86400)
 		subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK)
 		if one.CancelAtPeriodEnd == 1 && (one.Status != consts.SubStatusCancelled && one.Status != consts.SubStatusExpired) {
 			subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_WILLCANCEL)
