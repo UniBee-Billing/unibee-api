@@ -123,7 +123,7 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		}
 		payment := query.GetPaymentByPaymentId(ctx, searchKey)
 		if payment != nil && payment.UserId > 0 && payment.MerchantId == merchantId {
-			user := query.GetUserAccountById(ctx, uint64(payment.UserId))
+			user := query.GetUserAccountById(ctx, payment.UserId)
 			if user != nil && mainMap[user.Id] == nil {
 				mainList = append(mainList, bean.SimplifyUserAccount(user))
 				mainMap[user.Id] = bean.SimplifyUserAccount(user)
