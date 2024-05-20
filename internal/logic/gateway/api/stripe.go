@@ -349,11 +349,20 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		}
 		if !containNegative {
 			for _, line := range createPayContext.Invoice.Lines {
+				var name = ""
+				var description = ""
+				if len(line.Name) == 0 {
+					name = line.Description
+				} else {
+					name = line.Name
+					description = line.Description
+				}
 				items = append(items, &stripe.CheckoutSessionLineItemParams{
 					PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 						Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 						ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-							Name: stripe.String(fmt.Sprintf("%s", line.Description)),
+							Name:        stripe.String(fmt.Sprintf("%s", name)),
+							Description: stripe.String(fmt.Sprintf("%s", description)),
 						},
 						UnitAmount: stripe.Int64(line.Amount),
 					},

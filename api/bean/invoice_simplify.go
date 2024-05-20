@@ -53,6 +53,7 @@ type InvoiceItemSimplify struct {
 	AmountExcludingTax     int64         `json:"amountExcludingTax"`
 	TaxPercentage          int64         `json:"taxPercentage"                  description:"Tax Percentage，1000 = 10%"`
 	UnitAmountExcludingTax int64         `json:"unitAmountExcludingTax"`
+	Name                   string        `json:"name"`
 	Description            string        `json:"description"`
 	Proration              bool          `json:"proration"`
 	Quantity               int64         `json:"quantity"`

@@ -225,6 +225,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		AmountExcludingTax:     planAmountExcludingTax,
 		UnitAmountExcludingTax: plan.Amount,
 		Quantity:               req.Quantity,
+		Name:                   plan.PlanName,
 		Description:            fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period),
 		Plan:                   bean.SimplifyPlan(plan),
 	})
@@ -240,6 +241,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 			AmountExcludingTax:     addonAmountExcludingTax,
 			UnitAmountExcludingTax: addon.AddonPlan.Amount,
 			Quantity:               addon.Quantity,
+			Name:                   addon.AddonPlan.PlanName,
 			Description:            fmt.Sprintf("%d * %s %s", addon.Quantity, addon.AddonPlan.PlanName, period),
 			Plan:                   addon.AddonPlan,
 		})
@@ -333,6 +335,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 					AmountExcludingTax:     amountExcludingTax,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
 					Quantity:               quantityDiff,
+					Name:                   plan.PlanName,
 					Description:            fmt.Sprintf("Remaining Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.ProrationDate).Layout("2006-01-02")),
 					Plan:                   bean.SimplifyPlan(plan),
 				})
@@ -352,6 +355,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 					AmountExcludingTax:     amountExcludingTax,
 					UnitAmountExcludingTax: unitAmountExcludingTax,
 					Quantity:               quantityDiff,
+					Name:                   plan.PlanName,
 					Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 					Plan:                   bean.SimplifyPlan(plan),
 				})
@@ -373,6 +377,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 				AmountExcludingTax:     amountExcludingTax,
 				UnitAmountExcludingTax: unitAmountExcludingTax,
 				Quantity:               quantityDiff,
+				Name:                   plan.PlanName,
 				Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 				Plan:                   bean.SimplifyPlan(plan),
 			})
@@ -395,6 +400,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: unitAmountExcludingTax,
 			Quantity:               quantityDiff,
+			Name:                   plan.PlanName,
 			Description:            fmt.Sprintf("Remaining Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.ProrationDate).Layout("2006-01-02")),
 			Plan:                   bean.SimplifyPlan(plan),
 		})
@@ -468,6 +474,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: unitAmountExcludingTax,
 			Quantity:               quantityDiff,
+			Name:                   plan.PlanName,
 			Description:            fmt.Sprintf("Unused Time On %d * %s After %s", quantityDiff, plan.PlanName, gtime.NewFromTimeStamp(req.PeriodEnd).Layout("2006-01-02")),
 			Plan:                   bean.SimplifyPlan(plan),
 		})
@@ -500,6 +507,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: unitAmountExcludingTax,
 			Quantity:               newPlanSub.Quantity,
+			Name:                   plan.PlanName,
 			Description:            fmt.Sprintf("%d * %s %s", newPlanSub.Quantity, plan.PlanName, gtime.NewFromTimeStamp(newPeriodEnd).Layout("2006-01-02")),
 			Plan:                   bean.SimplifyPlan(plan),
 		})

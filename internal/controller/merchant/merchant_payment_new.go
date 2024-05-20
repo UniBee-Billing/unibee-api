@@ -108,6 +108,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				AmountExcludingTax:     line.AmountExcludingTax,
 				UnitAmountExcludingTax: line.UnitAmountExcludingTax,
 				Quantity:               line.Quantity,
+				Name:                   line.Name,
 				Description:            line.Description,
 			})
 			totalTax = totalTax + line.Tax
@@ -149,6 +150,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				AmountExcludingTax:     req.TotalAmount,
 				TaxPercentage:          0,
 				UnitAmountExcludingTax: req.TotalAmount,
+				Name:                   description,
 				Description:            description,
 				Quantity:               1,
 			}},

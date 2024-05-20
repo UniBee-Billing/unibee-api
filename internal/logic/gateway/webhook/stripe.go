@@ -422,12 +422,17 @@ func parseStripeInvoice(detail stripe.Invoice) *GatewayDetailInvoiceInternalResp
 			start = line.Period.Start
 			end = line.Period.End
 		}
+		var planName = ""
+		if line.Plan != nil && line.Plan.Product != nil {
+			planName = line.Plan.Product.Name
+		}
 		invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 			Currency:               strings.ToUpper(string(line.Currency)),
 			OriginAmount:           line.Amount,
 			Amount:                 line.Amount,
 			Tax:                    0,
 			DiscountAmount:         0,
+			Name:                   planName,
 			Description:            line.Description,
 			Proration:              line.Proration,
 			AmountExcludingTax:     line.AmountExcludingTax,

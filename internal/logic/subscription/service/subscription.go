@@ -464,6 +464,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				AmountExcludingTax:     totalAmountExcludingTax,
 				TaxPercentage:          subscriptionTaxPercentage,
 				UnitAmountExcludingTax: plan.TrialAmount,
+				Name:                   plan.PlanName,
 				Description:            plan.Description,
 				Proration:              false,
 				Quantity:               req.Quantity,

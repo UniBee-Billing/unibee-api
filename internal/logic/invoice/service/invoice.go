@@ -75,6 +75,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
 			Quantity:               line.Quantity,
+			Name:                   line.Name,
 			Description:            line.Description,
 		})
 		totalTax = totalTax + tax
@@ -163,6 +164,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: line.UnitAmountExcludingTax,
 			Quantity:               line.Quantity,
+			Name:                   line.Name,
 			Description:            line.Description,
 		})
 		totalTax = totalTax + tax

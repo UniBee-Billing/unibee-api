@@ -29,6 +29,7 @@ type InvoiceSimplifyInternalReq struct {
 type InvoiceItemSimplifyInternalReq struct {
 	UnitAmountExcludingTax int64              `json:"unitAmountExcludingTax"`
 	Quantity               int64              `json:"quantity"`
+	Name                   string             `json:"name"`
 	Description            string             `json:"description"`
 	Plan                   *bean.PlanSimplify `json:"plan"`
 }
@@ -50,6 +51,7 @@ func MakeInvoiceSimplify(ctx context.Context, req *InvoiceSimplifyInternalReq) *
 			AmountExcludingTax:     amountExcludingTax,
 			UnitAmountExcludingTax: item.UnitAmountExcludingTax,
 			Quantity:               item.Quantity,
+			Name:                   item.Name,
 			Description:            item.Description,
 			Plan:                   item.Plan,
 		})

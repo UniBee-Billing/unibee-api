@@ -71,6 +71,7 @@ type NewReq struct {
 
 type NewInvoiceItemParam struct {
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
+	Name                   string `json:"name"`
 	Description            string `json:"description"`
 	Quantity               int64  `json:"quantity"`
 }

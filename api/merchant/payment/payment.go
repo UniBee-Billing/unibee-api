@@ -34,7 +34,8 @@ type NewRes struct {
 
 type Item struct {
 	Amount                 int64  `json:"amount" dc:"item total amount, sum(item.amount) should equal to totalAmount, cent"  v:"required"`
-	Description            string `json:"description" dc:"The item description of payment" v:"required" `
+	Name                   string `json:"name" dc:"The item name of payment" `
+	Description            string `json:"description" dc:"The item description of payment"`
 	Quantity               int64  `json:"quantity" dc:"The item quantity of payment" `
 	UnitAmountExcludingTax int64  `json:"unitAmountExcludingTax"`
 	Currency               string `json:"currency" dc:"The item currency of payment" `
