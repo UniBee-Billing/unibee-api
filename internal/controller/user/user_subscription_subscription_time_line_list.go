@@ -4,11 +4,11 @@ import (
 	"context"
 	"unibee/api/user/subscription"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/timeline"
 )
 
 func (c *ControllerSubscription) TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error) {
-	result, err := service.SubscriptionTimeLineList(ctx, &service.SubscriptionTimeLineListInternalReq{
+	result, err := timeline.SubscriptionTimeLineList(ctx, &timeline.SubscriptionTimeLineListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     _interface.Context().Get(ctx).User.Id,
 		SortField:  req.SortField,

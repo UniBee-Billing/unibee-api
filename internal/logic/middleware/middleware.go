@@ -239,7 +239,11 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			userAccount := query.GetUserAccountById(r.Context(), token.Id)
 			if userAccount == nil {
 				g.Log().Infof(r.Context(), "TokenAuth user not found :%v", utility.MarshalToJsonString(token))
-				_interface.JsonRedirectExit(r, 61, "user not found", s.LoginUrl)
+				_interface.JsonRedirectExit(r, 61, "account not found", s.LoginUrl)
+				r.Exit()
+			} else if userAccount.Status == 2 {
+				g.Log().Infof(r.Context(), "TokenAuth user has suspend :%v", utility.MarshalToJsonString(token))
+				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
 			}
 			customCtx.User = &model.ContextUser{

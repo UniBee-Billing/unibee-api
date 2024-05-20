@@ -12,6 +12,7 @@ import (
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/subscription/timeline"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -66,7 +67,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	if err != nil {
 		return err
 	}
-	SubscriptionNewTimeline(ctx, invoice)
+	timeline.SubscriptionNewTimeline(ctx, invoice)
 	if invoice.Status == consts.InvoiceStatusPaid && invoice.TotalAmount == 0 && len(invoice.PaymentId) == 0 {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
@@ -132,7 +133,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	if err != nil {
 		return err
 	}
-	SubscriptionNewTimeline(ctx, invoice)
+	timeline.SubscriptionNewTimeline(ctx, invoice)
 	return nil
 }
 

@@ -24,6 +24,7 @@ func UserSessionTransfer(ctx context.Context, session string) (*entity.UserAccou
 	utility.AssertError(err, "System Error")
 	one := query.GetUserAccountById(ctx, uint64(userId))
 	utility.Assert(one != nil, "Invalid Session, User Not Found")
+	utility.Assert(one.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
 	var returnUrl = ""
 	returnData, err := g.Redis().Get(ctx, session+"_returnUrl")
 	if err == nil {
@@ -49,6 +50,7 @@ func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq)
 
 	utility.AssertError(err, "Server Error")
 	utility.Assert(one != nil, "Server Error")
+	utility.Assert(one.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
 	// create user session
 	ss := utility.GenerateRandomAlphanumeric(40)
 	_, err = g.Redis().Set(ctx, ss, one.Id)

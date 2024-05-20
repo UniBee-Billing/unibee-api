@@ -9,6 +9,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
 	subscription2 "unibee/internal/logic/subscription"
+	"unibee/internal/logic/subscription/timeline"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -80,7 +81,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	merchant := query.GetMerchantById(ctx, sub.MerchantId)
 
-	SubscriptionNewTimeline(ctx, invoice)
+	timeline.SubscriptionNewTimeline(ctx, invoice)
 	err = email.SendTemplateEmail(ctx, merchant.Id, user.Email, user.TimeZone, email.TemplateSubscriptionUpdate, "", &email.TemplateVariable{
 		UserName:            user.FirstName + " " + user.LastName,
 		MerchantProductName: query.GetPlanById(ctx, one.UpdatePlanId).GatewayProductName,

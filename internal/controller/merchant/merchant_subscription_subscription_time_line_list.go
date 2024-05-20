@@ -3,13 +3,13 @@ package merchant
 import (
 	"context"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/subscription/timeline"
 
 	"unibee/api/merchant/subscription"
 )
 
 func (c *ControllerSubscription) TimeLineList(ctx context.Context, req *subscription.TimeLineListReq) (res *subscription.TimeLineListRes, err error) {
-	result, err := service.SubscriptionTimeLineList(ctx, &service.SubscriptionTimeLineListInternalReq{
+	result, err := timeline.SubscriptionTimeLineList(ctx, &timeline.SubscriptionTimeLineListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		UserId:     req.UserId,
 		SortField:  req.SortField,

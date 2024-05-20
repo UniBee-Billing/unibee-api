@@ -54,7 +54,7 @@ type GetRes struct {
 }
 
 type FrozenReq struct {
-	g.Meta `path:"/frozen_user" tags:"User" method:"post" summary:"FrozenUser"`
+	g.Meta `path:"/suspend_user" tags:"User" method:"post" summary:"SuspendUser"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 
@@ -62,7 +62,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta `path:"/release_user" tags:"User" method:"post" summary:"ReleaseUser"`
+	g.Meta `path:"/resume_user" tags:"User" method:"post" summary:"ResumeUser"`
 	UserId int64 `json:"userId" dc:"UserId" `
 }
 

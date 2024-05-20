@@ -46,7 +46,7 @@ type UserAccountSimplify struct {
 	TimeZone           string `json:"timeZone"           description:""`                                                                                                                 //
 	CreateTime         int64  `json:"createTime"         description:"create utc time"`                                                                                                  // create utc time
 	ExternalUserId     string `json:"externalUserId"     description:"external_user_id"`                                                                                                 // external_user_id
-	Status             int    `json:"status"             description:"0-Active, 2-Frozen"`
+	Status             int    `json:"status"             description:"0-Active, 2-Suspend"`
 }
 
 func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {

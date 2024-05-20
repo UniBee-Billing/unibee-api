@@ -8,6 +8,7 @@ import (
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/jwt"
+	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -37,11 +38,17 @@ func ChangeUserPassword(ctx context.Context, merchantId uint64, email string, ol
 func FrozenUser(ctx context.Context, userId int64) {
 	one := query.GetUserAccountById(ctx, uint64(userId))
 	utility.Assert(one != nil, "user not found")
+	utility.Assert(one.Status != 2, "user already suspend")
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Status:    2,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "server error")
+	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.Id, one.MerchantId)
+	if sub != nil {
+		err = service.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "User suspend by Admin")
+		utility.AssertError(err, "server error")
+	}
 }
 
 func ReleaseUser(ctx context.Context, userId int64) {
