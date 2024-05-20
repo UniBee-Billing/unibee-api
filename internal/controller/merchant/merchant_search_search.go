@@ -15,6 +15,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 	if len(req.SearchKey) == 0 {
 		return &search.SearchRes{}, nil
 	}
+	req.SearchKey = strings.Trim(req.SearchKey, " ")
 	searchResult := &search.SearchRes{
 		PrecisionMatchObject: nil,
 		UserAccounts:         nil,
