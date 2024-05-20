@@ -18,6 +18,7 @@ type GatewaySimplify struct {
 	Currency           string          `json:"currency"   description:"The currency of wire transfer " `
 	Bank               *GatewayBank    `json:"bank"   dc:"The receiving bank of wire transfer" `
 	WebhookEndpointUrl string          `json:"webhookEndpointUrl"   description:"The endpoint url of gateway webhook " `
+	WebhookSecret      string          `json:"webhookSecret"  dc:"The secret of gateway webhook"`
 }
 
 type GatewayBank struct {
@@ -50,6 +51,7 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		MinimumAmount:      one.MinimumAmount,
 		Bank:               bank,
 		WebhookEndpointUrl: webhookEndpointUrl,
+		WebhookSecret:      one.WebhookSecret,
 	}
 }
 
