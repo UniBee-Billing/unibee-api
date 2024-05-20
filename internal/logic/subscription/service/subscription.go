@@ -31,6 +31,7 @@ import (
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
+	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -650,6 +651,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
 	utility.AssertError(err, "System Error")
+	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
 		utility.AssertError(err, "System Error")
@@ -729,6 +731,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//})
 		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", invoice, one.GatewayId, true, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
+			// todo mark use method
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
 				dao.Subscription.Columns().Status:    consts.SubStatusCancelled,
 				dao.Subscription.Columns().GmtModify: gtime.Now(),

@@ -39,3 +39,11 @@ func (status SubscriptionStatusEnum) Description() string {
 		return "SubStatusInit"
 	}
 }
+
+const (
+	SubTimeLineStatusPending    = 0
+	SubTimeLineStatusProcessing = 1
+	SubTimeLineStatusFinished   = 2
+	SubTimeLineStatusCancelled  = 3
+	SubTimeLineStatusExpired    = 4
+)

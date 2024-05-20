@@ -67,7 +67,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	if err != nil {
 		return err
 	}
-	timeline.SubscriptionNewTimeline(ctx, invoice)
+	timeline.SubscriptionFirstPaidTimeline(ctx, invoice)
 	if invoice.Status == consts.InvoiceStatusPaid && invoice.TotalAmount == 0 && len(invoice.PaymentId) == 0 {
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicSubscriptionActiveWithoutPayment.Topic,
