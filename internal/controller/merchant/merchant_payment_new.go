@@ -79,15 +79,15 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(user != nil, "User Not Found")
 
-	var description = req.Description
-	if len(description) == 0 {
-		description = merchantInfo.Name
+	var name = req.Name
+	if len(name) == 0 {
+		name = merchantInfo.Name
 	}
-	if len(description) == 0 {
-		description = merchantInfo.CompanyName
+	if len(name) == 0 {
+		name = merchantInfo.CompanyName
 	}
-	if len(description) == 0 {
-		description = "Default Product"
+	if len(name) == 0 {
+		name = "Default Product"
 	}
 	var invoice *bean.InvoiceSimplify
 	if req.Items != nil && len(req.Items) > 0 {
@@ -120,8 +120,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			Currency:                req.Currency,
-			InvoiceName:             description,
-			ProductName:             description,
+			InvoiceName:             name,
+			ProductName:             name,
 			TotalAmountExcludingTax: totalAmountExcludingTax,
 			TaxAmount:               totalTax,
 			DiscountAmount:          0,
@@ -134,8 +134,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			OriginAmount:            req.TotalAmount,
 			TotalAmount:             req.TotalAmount,
 			TotalAmountExcludingTax: req.TotalAmount,
-			InvoiceName:             description,
-			ProductName:             description,
+			InvoiceName:             name,
+			ProductName:             name,
 			Currency:                req.Currency,
 			TaxAmount:               0,
 			DiscountAmount:          0,
@@ -150,8 +150,8 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				AmountExcludingTax:     req.TotalAmount,
 				TaxPercentage:          0,
 				UnitAmountExcludingTax: req.TotalAmount,
-				Name:                   description,
-				Description:            description,
+				Name:                   name,
+				Description:            req.Description,
 				Quantity:               1,
 			}},
 		}

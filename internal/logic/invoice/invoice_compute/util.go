@@ -16,17 +16,18 @@ import (
 )
 
 type CalculateInvoiceReq struct {
-	Currency      string `json:"currency"`
-	DiscountCode  string `json:"discountCode"`
-	TimeNow       int64  `json:"TimeNow"`
-	PlanId        uint64 `json:"planId"`
-	Quantity      int64  `json:"quantity"`
-	AddonJsonData string `json:"addonJsonData"`
-	TaxPercentage int64  `json:"taxPercentage"`
-	PeriodStart   int64  `json:"periodStart"`
-	PeriodEnd     int64  `json:"periodEnd"`
-	FinishTime    int64  `json:"finishTime"`
-	InvoiceName   string `json:"invoiceName"`
+	Currency      string                 `json:"currency"`
+	DiscountCode  string                 `json:"discountCode"`
+	TimeNow       int64                  `json:"TimeNow"`
+	PlanId        uint64                 `json:"planId"`
+	Quantity      int64                  `json:"quantity"`
+	AddonJsonData string                 `json:"addonJsonData"`
+	TaxPercentage int64                  `json:"taxPercentage"`
+	PeriodStart   int64                  `json:"periodStart"`
+	PeriodEnd     int64                  `json:"periodEnd"`
+	FinishTime    int64                  `json:"finishTime"`
+	InvoiceName   string                 `json:"invoiceName"`
+	ProductData   *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 }
 
 func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
@@ -216,6 +217,12 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	var invoiceItems []*bean.InvoiceItemSimplify
 	var planAmountExcludingTax = req.Quantity * plan.Amount
 	var planTaxAmount = int64(float64(planAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(req.TaxPercentage))
+	var name = plan.PlanName
+	var description = fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period)
+	if req.ProductData != nil && len(req.ProductData.Name) > 0 {
+		name = req.ProductData.Name
+		description = req.ProductData.Description
+	}
 	invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 		Currency:               req.Currency,
 		OriginAmount:           planAmountExcludingTax + planTaxAmount,
@@ -225,8 +232,8 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		AmountExcludingTax:     planAmountExcludingTax,
 		UnitAmountExcludingTax: plan.Amount,
 		Quantity:               req.Quantity,
-		Name:                   plan.PlanName,
-		Description:            fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period),
+		Name:                   name,
+		Description:            description,
 		Plan:                   bean.SimplifyPlan(plan),
 	})
 	for _, addon := range addons {

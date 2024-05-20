@@ -113,6 +113,7 @@ type RenewInternalReq struct {
 	Discount      *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl     string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	ProductData   *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
@@ -192,6 +193,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		PeriodStart:   timeNow,
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, timeNow, sub.PlanId),
 		FinishTime:    timeNow,
+		ProductData:   req.ProductData,
 	})
 
 	// createAndPayNewProrationInvoice
@@ -246,6 +248,7 @@ type CreatePreviewInternalReq struct {
 	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
 	TrialEnd       int64                  `json:"trialEnd"  description:"trial_end, utc time"` // trial_end, utc time
 	IsSubmit       bool
+	ProductData    *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 }
 
 type CreatePreviewInternalRes struct {
@@ -297,6 +300,7 @@ type CreateInternalReq struct {
 	Metadata           map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 	TrialEnd           int64                       `json:"trialEnd"                    description:"trial_end, utc time"` // trial_end, utc time
 	StartIncomplete    bool                        `json:"StartIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
+	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 type CreateInternalRes struct {
@@ -441,9 +445,15 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		discountAmount := utility.MinInt64(discount.ComputeDiscountAmount(ctx, plan.MerchantId, totalAmountExcludingTax, plan.Currency, req.DiscountCode, currentTimeStart.Timestamp()), totalAmountExcludingTax)
 		totalAmountExcludingTax = totalAmountExcludingTax - discountAmount
 		var taxAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(subscriptionTaxPercentage))
+		var name = plan.PlanName
+		var description = plan.Description
+		if req.ProductData != nil && len(req.ProductData.Name) > 0 {
+			name = req.ProductData.Name
+			description = req.ProductData.Description
+		}
 		invoice := &bean.InvoiceSimplify{
 			InvoiceName:                    "SubscriptionCreate",
-			ProductName:                    plan.PlanName,
+			ProductName:                    name,
 			OriginAmount:                   totalAmountExcludingTax + taxAmount + discountAmount,
 			TotalAmount:                    totalAmountExcludingTax + taxAmount,
 			TotalAmountExcludingTax:        totalAmountExcludingTax,
@@ -464,8 +474,8 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				AmountExcludingTax:     totalAmountExcludingTax,
 				TaxPercentage:          subscriptionTaxPercentage,
 				UnitAmountExcludingTax: plan.TrialAmount,
-				Name:                   plan.PlanName,
-				Description:            plan.Description,
+				Name:                   name,
+				Description:            description,
 				Proration:              false,
 				Quantity:               req.Quantity,
 				PeriodEnd:              currentTimeEnd,
@@ -518,6 +528,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			PeriodStart:   currentTimeStart.Timestamp(),
 			PeriodEnd:     currentTimeEnd,
 			FinishTime:    currentTimeStart.Timestamp(),
+			ProductData:   req.ProductData,
 		})
 
 		return &CreatePreviewInternalRes{
@@ -582,6 +593,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		TaxPercentage:  req.TaxPercentage,
 		IsSubmit:       true,
 		TrialEnd:       req.TrialEnd,
+		ProductData:    req.ProductData,
 	})
 	if err != nil {
 		return nil, err
@@ -892,6 +904,7 @@ type UpdatePreviewInternalReq struct {
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 	TaxPercentage   *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
+	ProductData     *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -1019,6 +1032,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
+				ProductData:   req.ProductData,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -1054,6 +1068,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PeriodStart:   prorationDate,
 				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
 				FinishTime:    prorationDate,
+				ProductData:   req.ProductData,
 			})
 		} else {
 			// currentInvoice
@@ -1146,6 +1161,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
 		FinishTime:    utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+		ProductData:   req.ProductData,
 	})
 
 	if currentInvoice.TotalAmount <= 0 {
@@ -1203,6 +1219,7 @@ type UpdateInternalReq struct {
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
@@ -1235,6 +1252,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		EffectImmediate: req.EffectImmediate,
 		DiscountCode:    req.DiscountCode,
 		TaxPercentage:   req.TaxPercentage,
+		ProductData:     req.ProductData,
 	}, prorationDate, merchantMemberId)
 	if err != nil {
 		return nil, err

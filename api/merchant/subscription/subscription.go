@@ -123,6 +123,7 @@ type RenewReq struct {
 	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl      string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	ProductData    *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 type RenewRes struct {
@@ -192,6 +193,7 @@ type CreateReq struct {
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	TrialEnd           int64                       `json:"trialEnd"                    dc:"trial_end, utc time"` // trial_end, utc time
 	StartIncomplete    bool                        `json:"startIncomplete"        dc:"StartIncomplete, use now pay later, subscription will generate invoice and start with incomplete status if set"`
+	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 type CreateRes struct {
@@ -240,6 +242,7 @@ type UpdateReq struct {
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
 type UpdateRes struct {
