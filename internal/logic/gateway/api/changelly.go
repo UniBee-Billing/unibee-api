@@ -181,11 +181,23 @@ func (c Changelly) GatewayNewPayment(ctx context.Context, createPayContext *gate
 	} else {
 		gasPayer = "CUSTOMER"
 	}
+	var name = ""
+	var description = ""
+	if len(createPayContext.Invoice.Lines) > 0 {
+		var line = createPayContext.Invoice.Lines[0]
+		if len(line.Name) == 0 {
+			name = line.Description
+		} else {
+			name = line.Name
+			description = line.Description
+		}
+	}
+
 	param := map[string]interface{}{
 		"nominal_currency":     createPayContext.Pay.CryptoCurrency,
 		"nominal_amount":       utility.ConvertCentToDollarStr(createPayContext.Pay.CryptoAmount, createPayContext.Pay.CryptoCurrency),
-		"title":                "",
-		"description":          "",
+		"title":                name,
+		"description":          description,
 		"order_id":             createPayContext.Pay.PaymentId,
 		"customer_id":          strconv.FormatUint(createPayContext.Pay.UserId, 10),
 		"customer_email":       createPayContext.Email,
