@@ -25,6 +25,11 @@ var (
 	TopicSubscriptionPaymentSuccess       = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}
 	TopicSubscriptionActiveWithoutPayment = redismq.MQTopicEnum{"unibee_subscription", "subscription_active_without_payment", "subscription become active without payment"}
 	TopicMerchantWebhook                  = redismq.MQTopicEnum{"unibee_merchant_webhook", "webhook", "merchant webhook"}
+	TopicInvoiceCreated                   = redismq.MQTopicEnum{"unibee_invoice", "invoicecreated", "invoice created"}
+	TopicInvoiceProcessed                 = redismq.MQTopicEnum{"unibee_invoice", "invoiceprocessed", "invoice processed"}
+	TopicInvoicePaid                      = redismq.MQTopicEnum{"unibee_invoice", "invoicepaid", "invoice paid"}
+	TopicInvoiceCancelled                 = redismq.MQTopicEnum{"unibee_invoice", "invoicecancelled", "invoice cancelled"}
+	TopicInvoiceFailed                    = redismq.MQTopicEnum{"unibee_invoice", "invoicecanfailed", "invoice failed"}
 )
 
 type SRedisMqConfig struct{}

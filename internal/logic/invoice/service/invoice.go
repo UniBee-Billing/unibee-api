@@ -11,6 +11,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/invoice"
+	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
@@ -20,6 +21,7 @@ import (
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/redismq"
 	"unibee/utility"
 )
 
@@ -116,6 +118,11 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 	one.Id = uint64(uint(id))
 
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceCreated.Topic,
+		Tag:   redismq2.TopicInvoiceCreated.Tag,
+		Body:  one.InvoiceId,
+	})
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
 			InvoiceId: one.InvoiceId,
@@ -284,6 +291,12 @@ func ProcessingInvoiceFailure(ctx context.Context, invoiceId string) error {
 		dao.Invoice.Columns().GmtModify:  gtime.Now(),
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceFailed.Topic,
+		Tag:   redismq2.TopicInvoiceFailed.Tag,
+		Body:  one.InvoiceId,
+	})
+
 	if len(one.RefundId) > 0 {
 		refund := query.GetRefundByRefundId(ctx, one.RefundId)
 		if refund != nil {
@@ -333,6 +346,11 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	one.Status = invoiceStatus
 	one.Link = invoiceLink
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceProcessed.Topic,
+		Tag:   redismq2.TopicInvoiceProcessed.Tag,
+		Body:  one.InvoiceId,
+	})
 
 	return &invoice.FinishRes{Invoice: bean.SimplifyInvoice(one)}, nil
 }

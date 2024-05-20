@@ -11,6 +11,7 @@ import (
 	"time"
 	"unibee/api/bean"
 	config2 "unibee/internal/cmd/config"
+	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
@@ -20,6 +21,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/redismq"
 	"unibee/utility"
 )
 
@@ -83,6 +85,16 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	if err != nil {
 		utility.AssertError(err, "CreateProcessingInvoiceForSub")
 	}
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceCreated.Topic,
+		Tag:   redismq2.TopicInvoiceCreated.Tag,
+		Body:  one.InvoiceId,
+	})
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceProcessed.Topic,
+		Tag:   redismq2.TopicInvoiceProcessed.Tag,
+		Body:  one.InvoiceId,
+	})
 	//todo mark cancel other sub processing invoice
 	//New Invoice Send Email
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
@@ -150,6 +162,16 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceCreated.Topic,
+		Tag:   redismq2.TopicInvoiceCreated.Tag,
+		Body:  one.InvoiceId,
+	})
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceProcessed.Topic,
+		Tag:   redismq2.TopicInvoiceProcessed.Tag,
+		Body:  one.InvoiceId,
+	})
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {
 		return nil, err
@@ -189,6 +211,25 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		if one.Status == consts.InvoiceStatusPaid {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoicePaid.Topic,
+				Tag:   redismq2.TopicInvoicePaid.Tag,
+				Body:  one.InvoiceId,
+			})
+		} else if one.Status == consts.InvoiceStatusCancelled {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoiceCancelled.Topic,
+				Tag:   redismq2.TopicInvoiceCancelled.Tag,
+				Body:  one.InvoiceId,
+			})
+		} else if one.Status == consts.InvoiceStatusFailed {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoiceFailed.Topic,
+				Tag:   redismq2.TopicInvoiceFailed.Tag,
+				Body:  one.InvoiceId,
+			})
+		}
 	}
 	one.Status = status
 	one.GatewayPaymentId = payment.GatewayPaymentId
@@ -257,6 +298,16 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceCreated.Topic,
+		Tag:   redismq2.TopicInvoiceCreated.Tag,
+		Body:  one.InvoiceId,
+	})
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceProcessed.Topic,
+		Tag:   redismq2.TopicInvoiceProcessed.Tag,
+		Body:  one.InvoiceId,
+	})
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {
 		return nil, err
@@ -294,6 +345,25 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	}
 	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		if one.Status == consts.InvoiceStatusPaid {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoicePaid.Topic,
+				Tag:   redismq2.TopicInvoicePaid.Tag,
+				Body:  one.InvoiceId,
+			})
+		} else if one.Status == consts.InvoiceStatusCancelled {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoiceCancelled.Topic,
+				Tag:   redismq2.TopicInvoiceCancelled.Tag,
+				Body:  one.InvoiceId,
+			})
+		} else if one.Status == consts.InvoiceStatusFailed {
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicInvoiceFailed.Topic,
+				Tag:   redismq2.TopicInvoiceFailed.Tag,
+				Body:  one.InvoiceId,
+			})
+		}
 	}
 	one.Status = status
 	return one, nil
@@ -316,6 +386,11 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	one.Status = consts.InvoiceStatusPaid
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoicePaid.Topic,
+		Tag:   redismq2.TopicInvoicePaid.Tag,
+		Body:  one.InvoiceId,
+	})
 	return one, nil
 }
 
