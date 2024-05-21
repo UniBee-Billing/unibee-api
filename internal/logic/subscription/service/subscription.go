@@ -32,6 +32,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/timeline"
+	"unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -133,10 +134,11 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			g.Log().Errorf(ctx, "SubscriptionDetail Unmarshal addon param:%s", err.Error())
 		}
 	}
-	var gatewayId = sub.GatewayId
-	if req.GatewayId != nil {
-		gatewayId = *req.GatewayId
-	}
+	//var gatewayId = sub.GatewayId
+	//if req.GatewayId != nil {
+	//	gatewayId = *req.GatewayId
+	//}
+	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
 
 	var timeNow = gtime.Now().Timestamp()
 	if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
@@ -204,7 +206,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub.GatewayDefaultPaymentMethod, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
+	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
 	if err != nil {
 		g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 		return nil, err
@@ -236,19 +238,20 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 }
 
 type CreatePreviewInternalReq struct {
-	MerchantId     uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	UserId         uint64                 `json:"userId" dc:"UserId" v:"required"`
-	Quantity       int64                  `json:"quantity" dc:"Quantity" `
-	DiscountCode   string                 `json:"discountCode"        dc:"DiscountCode"`
-	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
-	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
-	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
-	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
-	TaxPercentage  *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
-	TrialEnd       int64                  `json:"trialEnd"  description:"trial_end, utc time"` // trial_end, utc time
-	IsSubmit       bool
-	ProductData    *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
+	MerchantId      uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	PlanId          uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	UserId          uint64                 `json:"userId" dc:"UserId" v:"required"`
+	Quantity        int64                  `json:"quantity" dc:"Quantity" `
+	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
+	GatewayId       *uint64                `json:"gatewayId" dc:"Id"`
+	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
+	VatCountryCode  string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
+	VatNumber       string                 `json:"vatNumber" dc:"VatNumber" `
+	TaxPercentage   *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
+	TrialEnd        int64                  `json:"trialEnd"  description:"trial_end, utc time"` // trial_end, utc time
+	IsSubmit        bool
+	ProductData     *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
+	PaymentMethodId string
 }
 
 type CreatePreviewInternalRes struct {
@@ -279,6 +282,7 @@ type CreatePreviewInternalRes struct {
 	VatNumberValidateMessage string                             `json:"vatNumberValidateMessage" `
 	DiscountMessage          string                             `json:"discountMessage" `
 	CancelAtPeriodEnd        int                                `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"` // whether cancel at period end，0-false | 1-true
+	GatewayPaymentMethodId   string
 }
 
 type CreateInternalReq struct {
@@ -288,7 +292,7 @@ type CreateInternalReq struct {
 	DiscountCode       string                      `json:"discountCode"        dc:"DiscountCode"`
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+	GatewayId          *uint64                     `json:"gatewayId" dc:"Id" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -312,14 +316,14 @@ type CreateInternalRes struct {
 func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalReq) (*CreatePreviewInternalRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(req.PlanId > 0, "PlanId invalid")
-	utility.Assert(req.GatewayId > 0, "GatewayId invalid")
 	utility.Assert(req.UserId > 0, "UserId invalid")
 	plan := query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, req.GatewayId)
+	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
+	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
@@ -559,6 +563,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			VatNumberValidateMessage: vatNumberValidateMessage,
 			DiscountMessage:          discountMessage,
 			CancelAtPeriodEnd:        cancelAtPeriodEnd,
+			GatewayPaymentMethodId:   paymentMethodId,
 		}, nil
 	}
 }
@@ -568,7 +573,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call") // todo mark enable for test automatic
 		// create external discount
 		utility.Assert(req.PlanId > 0, "PlanId invalid")
-		utility.Assert(req.GatewayId > 0, "GatewayId invalid")
 		utility.Assert(req.UserId > 0, "UserId invalid")
 		plan := query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
@@ -581,19 +585,20 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	}
 
 	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
-		MerchantId:     req.MerchantId,
-		PlanId:         req.PlanId,
-		UserId:         req.UserId,
-		DiscountCode:   req.DiscountCode,
-		Quantity:       req.Quantity,
-		GatewayId:      req.GatewayId,
-		AddonParams:    req.AddonParams,
-		VatCountryCode: req.VatCountryCode,
-		VatNumber:      req.VatNumber,
-		TaxPercentage:  req.TaxPercentage,
-		IsSubmit:       true,
-		TrialEnd:       req.TrialEnd,
-		ProductData:    req.ProductData,
+		MerchantId:      req.MerchantId,
+		PlanId:          req.PlanId,
+		UserId:          req.UserId,
+		DiscountCode:    req.DiscountCode,
+		Quantity:        req.Quantity,
+		GatewayId:       req.GatewayId,
+		AddonParams:     req.AddonParams,
+		VatCountryCode:  req.VatCountryCode,
+		VatNumber:       req.VatNumber,
+		TaxPercentage:   req.TaxPercentage,
+		IsSubmit:        true,
+		TrialEnd:        req.TrialEnd,
+		ProductData:     req.ProductData,
+		PaymentMethodId: req.PaymentMethodId,
 	})
 	if err != nil {
 		return nil, err
@@ -673,7 +678,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 				MerchantId:     _interface.GetMerchantId(ctx),
 				UserId:         req.UserId,
 				Currency:       prepare.Currency,
-				GatewayId:      req.GatewayId,
+				GatewayId:      prepare.Gateway.Id,
 				SubscriptionId: one.SubscriptionId,
 				RedirectUrl:    req.ReturnUrl,
 				Metadata:       map[string]interface{}{"InvoiceId": invoice.InvoiceId, "Action": "SubscriptionCreate"},
@@ -700,7 +705,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
 		utility.AssertError(err, "System Error")
-		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one.GatewayDefaultPaymentMethod, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
+		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.GatewayPaymentMethodId, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionCreate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -823,6 +828,7 @@ type UpdatePreviewInternalRes struct {
 	TaxPercentage         int64                              `json:"taxPercentage" `
 	RecurringDiscountCode string                             `json:"recurringDiscountCode" `
 	Discount              *bean.MerchantDiscountCodeSimplify `json:"discount" `
+	PaymentMethodId       string
 }
 
 func isUpgradeForSubscription(ctx context.Context, sub *entity.Subscription, plan *entity.Plan, quantity int64, addonParams []*bean.PlanAddonParam) (isUpgrade bool, changed bool) {
@@ -899,12 +905,13 @@ type UpdatePreviewInternalReq struct {
 	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId       uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
+	GatewayId       *uint64                `json:"gatewayId" dc:"Id" `
 	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
 	TaxPercentage   *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	ProductData     *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
+	PaymentMethodId string
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -920,10 +927,11 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	var gatewayId = sub.GatewayId
-	if req.GatewayId > 0 {
-		gatewayId = req.GatewayId
-	}
+	//var gatewayId = sub.GatewayId
+	//if req.GatewayId > 0 {
+	//	gatewayId = req.GatewayId
+	//}
+	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
@@ -1192,6 +1200,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		TaxPercentage:         subscriptionTaxPercentage,
 		RecurringDiscountCode: RecurringDiscountCode,
 		Discount:              bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, plan.MerchantId, currentInvoice.DiscountCode)),
+		PaymentMethodId:       paymentMethodId,
 	}, nil
 }
 
@@ -1207,7 +1216,7 @@ type UpdateInternalReq struct {
 	SubscriptionId     string                      `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId          uint64                      `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                      `json:"gatewayId" dc:"GatewayId" `
+	GatewayId          *uint64                     `json:"gatewayId" dc:"GatewayId" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -1276,14 +1285,9 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		effectTime = gtime.Now().Timestamp()
 	}
 
-	gatewayId := prepare.Subscription.GatewayId
-	if req.GatewayId > 0 {
-		gatewayId = req.GatewayId
-	}
-
 	one := &entity.SubscriptionPendingUpdate{
 		MerchantId:       prepare.MerchantInfo.Id,
-		GatewayId:        gatewayId,
+		GatewayId:        prepare.Gateway.Id,
 		UserId:           prepare.Subscription.UserId,
 		SubscriptionId:   prepare.Subscription.SubscriptionId,
 		PendingUpdateId:  utility.CreatePendingUpdateId(),
@@ -1323,11 +1327,9 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		gateway := query.GetGatewayById(ctx, gatewayId)
-		utility.Assert(gateway != nil, "gateway not found")
 		invoice, err := handler2.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.Subscription.GatewayDefaultPaymentMethod, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.PaymentMethodId, invoice, prepare.Gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -1795,7 +1797,8 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, sub.GatewayDefaultPaymentMethod, one, sub.GatewayId, false, "", "SubscriptionEndTrialManual")
+		gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, one, gatewayId, false, "", "SubscriptionEndTrialManual")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

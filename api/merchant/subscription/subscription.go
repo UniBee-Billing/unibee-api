@@ -139,7 +139,7 @@ type CreatePreviewReq struct {
 	UserId         uint64                 `json:"userId" dc:"UserId"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
-	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
+	GatewayId      *uint64                `json:"gatewayId" dc:"Id" `
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
@@ -179,7 +179,7 @@ type CreateReq struct {
 	Email              string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId             uint64                      `json:"userId" dc:"UserId"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
+	GatewayId          *uint64                     `json:"gatewayId" dc:"Id" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
@@ -230,7 +230,7 @@ type UpdateReq struct {
 	UserId             uint64                      `json:"userId" dc:"UserId, either SubscriptionId or UserId needed, The only one active subscription will update if userId provide instead of subscriptionId"`
 	NewPlanId          uint64                      `json:"newPlanId" dc:"New PlanId" v:"required"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity"  v:"required"`
-	GatewayId          uint64                      `json:"gatewayId" dc:"Id of gateway" `
+	GatewayId          *uint64                     `json:"gatewayId" dc:"Id of gateway" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	EffectImmediate    int                         `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"          `

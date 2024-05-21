@@ -50,7 +50,7 @@ type CreatePreviewReq struct {
 	g.Meta         `path:"/create_preview" tags:"User-Subscription" method:"post" summary:"User Create Subscription Preview"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
-	GatewayId      uint64                 `json:"gatewayId" dc:"Id" v:"required" `
+	GatewayId      *uint64                `json:"gatewayId" dc:"Id" `
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
@@ -84,7 +84,7 @@ type CreateReq struct {
 	g.Meta             `path:"/create_submit" tags:"User-Subscription" method:"post" summary:"User Create Subscription"`
 	PlanId             uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id"   v:"required" `
+	GatewayId          *uint64                `json:"gatewayId" dc:"Id" `
 	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                 `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
@@ -107,7 +107,7 @@ type UpdatePreviewReq struct {
 	SubscriptionId  string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId       uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity        int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId       uint64                 `json:"gatewayId" dc:"Id" `
+	GatewayId       *uint64                `json:"gatewayId" dc:"Id" `
 	EffectImmediate int                    `json:"effectImmediate" dc:"Effect Immediate，1-Immediate，2-Next Period" `
 	AddonParams     []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	DiscountCode    string                 `json:"discountCode"        dc:"DiscountCode"`
@@ -128,7 +128,7 @@ type UpdateReq struct {
 	SubscriptionId     string                 `json:"subscriptionId" dc:"SubscriptionId" v:"required"`
 	NewPlanId          uint64                 `json:"newPlanId" dc:"NewPlanId" v:"required"`
 	Quantity           int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          uint64                 `json:"gatewayId" dc:"Id" `
+	GatewayId          *uint64                `json:"gatewayId" dc:"Id" `
 	AddonParams        []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                  `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                 `json:"confirmCurrency" dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
