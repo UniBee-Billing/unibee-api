@@ -46,7 +46,6 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
 		return errors.New("payment not found")
 	}
-
 	event.SaveEvent(ctx, entity.PaymentEvent{
 		BizType:   0,
 		BizId:     payment.PaymentId,
@@ -56,7 +55,6 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 		OpenApiId: payment.OpenApiId,
 		UniqueNo:  fmt.Sprintf("%s_%s", payment.PaymentId, "Expired"),
 	})
-
 	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
 		fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
