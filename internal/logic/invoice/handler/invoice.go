@@ -211,19 +211,19 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		if one.Status == consts.InvoiceStatusPaid {
+		if status == consts.InvoiceStatusPaid {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoicePaid.Topic,
 				Tag:   redismq2.TopicInvoicePaid.Tag,
 				Body:  one.InvoiceId,
 			})
-		} else if one.Status == consts.InvoiceStatusCancelled {
+		} else if status == consts.InvoiceStatusCancelled {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceCancelled.Topic,
 				Tag:   redismq2.TopicInvoiceCancelled.Tag,
 				Body:  one.InvoiceId,
 			})
-		} else if one.Status == consts.InvoiceStatusFailed {
+		} else if status == consts.InvoiceStatusFailed {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceFailed.Topic,
 				Tag:   redismq2.TopicInvoiceFailed.Tag,
@@ -345,19 +345,19 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 	}
 	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
-		if one.Status == consts.InvoiceStatusPaid {
+		if status == consts.InvoiceStatusPaid {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoicePaid.Topic,
 				Tag:   redismq2.TopicInvoicePaid.Tag,
 				Body:  one.InvoiceId,
 			})
-		} else if one.Status == consts.InvoiceStatusCancelled {
+		} else if status == consts.InvoiceStatusCancelled {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceCancelled.Topic,
 				Tag:   redismq2.TopicInvoiceCancelled.Tag,
 				Body:  one.InvoiceId,
 			})
-		} else if one.Status == consts.InvoiceStatusFailed {
+		} else if status == consts.InvoiceStatusFailed {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceFailed.Topic,
 				Tag:   redismq2.TopicInvoiceFailed.Tag,
