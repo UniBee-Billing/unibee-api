@@ -33,7 +33,6 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		dao.UserAccount.Columns().Facebook:        req.Facebook,
 		dao.UserAccount.Columns().TikTok:          req.TikTok,
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
-		dao.UserAccount.Columns().PaymentMethod:   req.PaymentMethod,
 		dao.UserAccount.Columns().TimeZone:        req.TimeZone,
 		dao.UserAccount.Columns().CountryCode:     req.CountryCode,
 		dao.UserAccount.Columns().CountryName:     req.CountryName,

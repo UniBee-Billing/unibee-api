@@ -95,7 +95,6 @@ type UpdateReq struct {
 	Facebook        string `json:"facebook" dc:"Facebook"`
 	TikTok          string `json:"tiktok" dc:"Tiktok"`
 	OtherSocialInfo string `json:"otherSocialInfo" dc:"Other Social Info"`
-	PaymentMethod   string `json:"paymentMethod" dc:"Payment Method"`
 	CountryCode     string `json:"countryCode" dc:"Country Code" v:"required"`
 	CountryName     string `json:"countryName" dc:"Country Name" v:"required"`
 }

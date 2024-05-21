@@ -23,7 +23,6 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().Facebook:        req.Facebook,
 		dao.UserAccount.Columns().TikTok:          req.TikTok,
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
-		dao.UserAccount.Columns().PaymentMethod:   req.PaymentMethod,
 		dao.UserAccount.Columns().CountryCode:     req.CountryCode,
 		dao.UserAccount.Columns().CountryName:     req.CountryName,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
