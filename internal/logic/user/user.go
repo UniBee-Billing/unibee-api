@@ -4,12 +4,8 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"strconv"
-	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"
-	"unibee/utility"
 )
 
 func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, subscriptionId string) {
@@ -69,30 +65,5 @@ func UpdateUserDefaultVatNumber(ctx context.Context, userId uint64, vatNumber st
 		if err != nil {
 			g.Log().Errorf(ctx, "UpdateUserDefaultVatNumber err:%s", err.Error())
 		}
-	}
-}
-
-func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, gatewayId uint64, paymentMethodId string) {
-	utility.Assert(userId > 0, "userId is nil")
-	utility.Assert(gatewayId > 0, "gatewayId is nil")
-	user := query.GetUserAccountById(ctx, userId)
-	utility.Assert(user != nil, "UpdateUserDefaultGatewayPaymentMethod user not found")
-	gateway := query.GetGatewayById(ctx, gatewayId)
-	utility.Assert(gateway.MerchantId == user.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
-	var newPaymentMethodId = ""
-	if gateway.GatewayType == consts.GatewayTypeCard && len(paymentMethodId) > 0 {
-		paymentMethod := method.QueryPaymentMethod(ctx, user.MerchantId, user.Id, gatewayId, paymentMethodId)
-		utility.Assert(paymentMethod != nil, "card not found")
-		newPaymentMethodId = paymentMethodId
-	}
-	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
-		dao.UserAccount.Columns().GatewayId:     gatewayId,
-		dao.UserAccount.Columns().PaymentMethod: newPaymentMethodId,
-		dao.UserAccount.Columns().GmtModify:     gtime.Now(),
-	}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
-	if err != nil {
-		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s error:%s", userId, gatewayId, paymentMethodId, err.Error())
-	} else {
-		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s success", userId, gatewayId, paymentMethodId)
 	}
 }
