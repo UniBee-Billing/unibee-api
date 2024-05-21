@@ -11,6 +11,8 @@ import (
 // UserAccount is the golang structure for table user_account.
 type UserAccount struct {
 	Id                 uint64      `json:"id"                 description:"userId"`                                                                                                    // userId
+	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                                // gateway_id
+	PaymentMethod      string      `json:"paymentMethod"      description:""`                                                                                                          //
 	MerchantId         uint64      `json:"merchantId"         description:"merchant_id"`                                                                                               // merchant_id
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"create time"`                                                                                               // create time
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`                                                                                               // update time
@@ -29,7 +31,6 @@ type UserAccount struct {
 	Custom             string      `json:"custom"             description:"custom"`                                                                                                    // custom
 	LastLoginAt        int64       `json:"lastLoginAt"        description:"last login time, utc time"`                                                                                 // last login time, utc time
 	IsRisk             int         `json:"isRisk"             description:"is risk account (deperated)"`                                                                               // is risk account (deperated)
-	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                                // gateway_id
 	Version            int         `json:"version"            description:"version"`                                                                                                   // version
 	Phone              string      `json:"phone"              description:"phone"`                                                                                                     // phone
 	Address            string      `json:"address"            description:"address"`                                                                                                   // address
@@ -44,7 +45,6 @@ type UserAccount struct {
 	LinkedIn           string      `json:"linkedIn"           description:"linkedin"`                                                                                                  // linkedin
 	Facebook           string      `json:"facebook"           description:"facebook"`                                                                                                  // facebook
 	OtherSocialInfo    string      `json:"otherSocialInfo"    description:""`                                                                                                          //
-	PaymentMethod      string      `json:"paymentMethod"      description:""`                                                                                                          //
 	CountryCode        string      `json:"countryCode"        description:"country_code"`                                                                                              // country_code
 	CountryName        string      `json:"countryName"        description:"country_name"`                                                                                              // country_name
 	SubscriptionName   string      `json:"subscriptionName"   description:"subscription name"`                                                                                         // subscription name

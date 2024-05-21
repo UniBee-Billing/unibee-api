@@ -26,6 +26,7 @@ import (
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -184,6 +185,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Link = paymentLink
 	gatewayInternalPayResult.Invoice = invoice
 	gatewayInternalPayResult.Payment = createPayContext.Pay
+	user.UpdateUserDefaultGatewayPaymentMethod(ctx, createPayContext.Pay.UserId, createPayContext.Gateway.Id, createPayContext.GatewayPaymentMethod)
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	err = handler2.CreateOrUpdatePaymentTimelineForPayment(ctx, createPayContext.Pay, createPayContext.Pay.PaymentId)
 	if err != nil {

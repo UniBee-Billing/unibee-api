@@ -22,6 +22,7 @@ type PaymentItemDao struct {
 type PaymentItemColumns struct {
 	Id             string //
 	BizType        string // biz_type 1-onetime payment, 3-subscription
+	Status         string // 0-pending, 1-success, 2-failure
 	MerchantId     string // merchant id
 	UserId         string // userId
 	SubscriptionId string // subscription id
@@ -36,7 +37,6 @@ type PaymentItemColumns struct {
 	GmtModify      string // update time
 	IsDeleted      string // 0-UnDeleted，1-Deleted
 	PaymentId      string // PaymentId
-	Status         string // 0-pending, 1-success, 2-failure
 	CreateTime     string // create utc time
 	Description    string // description
 	Name           string // name
@@ -46,6 +46,7 @@ type PaymentItemColumns struct {
 var paymentItemColumns = PaymentItemColumns{
 	Id:             "id",
 	BizType:        "biz_type",
+	Status:         "status",
 	MerchantId:     "merchant_id",
 	UserId:         "user_id",
 	SubscriptionId: "subscription_id",
@@ -60,7 +61,6 @@ var paymentItemColumns = PaymentItemColumns{
 	GmtModify:      "gmt_modify",
 	IsDeleted:      "is_deleted",
 	PaymentId:      "payment_id",
-	Status:         "status",
 	CreateTime:     "create_time",
 	Description:    "description",
 	Name:           "name",

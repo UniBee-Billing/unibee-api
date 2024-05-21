@@ -612,7 +612,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	//}
 
 	if prepare.Invoice.TotalAmount == 0 && strings.Contains(prepare.Plan.TrialDemand, "paymentMethod") && req.PaymentMethodId == "" {
-		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeDefault, "card payment gateway need") // todo mark
+		utility.Assert(prepare.Gateway.GatewayType == consts.GatewayTypeCard, "card payment gateway need") // todo mark
 	}
 
 	var subType = consts.SubTypeDefault

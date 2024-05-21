@@ -58,6 +58,7 @@ type IUserProfile interface {
 	Logout(ctx context.Context, req *profile.LogoutReq) (res *profile.LogoutRes, err error)
 	Update(ctx context.Context, req *profile.UpdateReq) (res *profile.UpdateRes, err error)
 	PasswordReset(ctx context.Context, req *profile.PasswordResetReq) (res *profile.PasswordResetRes, err error)
+	ChangeGateway(ctx context.Context, req *profile.ChangeGatewayReq) (res *profile.ChangeGatewayRes, err error)
 }
 
 type IUserSubscription interface {

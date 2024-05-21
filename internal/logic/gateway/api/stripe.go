@@ -46,7 +46,7 @@ func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (ico
 	params := &stripe.ProductListParams{}
 	params.Limit = stripe.Int64(3)
 	result := product.List(params)
-	return "http://unibee.top/files/invoice/stripe.png", consts.GatewayTypeDefault, result.Err()
+	return "http://unibee.top/files/invoice/stripe.png", consts.GatewayTypeCard, result.Err()
 }
 
 func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {

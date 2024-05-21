@@ -14,6 +14,7 @@ type PaymentItem struct {
 	g.Meta         `orm:"table:payment_item, do:true"`
 	Id             interface{} //
 	BizType        interface{} // biz_type 1-onetime payment, 3-subscription
+	Status         interface{} // 0-pending, 1-success, 2-failure
 	MerchantId     interface{} // merchant id
 	UserId         interface{} // userId
 	SubscriptionId interface{} // subscription id
@@ -28,7 +29,6 @@ type PaymentItem struct {
 	GmtModify      *gtime.Time // update time
 	IsDeleted      interface{} // 0-UnDeleted，1-Deleted
 	PaymentId      interface{} // PaymentId
-	Status         interface{} // 0-pending, 1-success, 2-failure
 	CreateTime     interface{} // create utc time
 	Description    interface{} // description
 	Name           interface{} // name

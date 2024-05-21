@@ -13,6 +13,7 @@ import (
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/timeline"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -26,19 +27,23 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 	utility.Assert(sub != nil, "HandleSubscriptionFirstInvoicePaid sub not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == sub.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
-	if gateway.GatewayType == consts.GatewayTypeDefault {
-		utility.Assert(len(paymentMethodId) > 0, "paymentMethodId invalid")
+	var newPaymentMethodId = ""
+	if gateway.GatewayType == consts.GatewayTypeCard && len(paymentMethodId) > 0 {
 		paymentMethod := method.QueryPaymentMethod(ctx, sub.MerchantId, sub.UserId, gatewayId, paymentMethodId)
-		// todo mark user attach check
-		utility.Assert(paymentMethod != nil, "paymentMethodId not found")
+		utility.Assert(paymentMethod != nil, "card not found")
+		newPaymentMethodId = paymentMethodId
 	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().GatewayId:                   gatewayId,
-		dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
+		dao.Subscription.Columns().GatewayDefaultPaymentMethod: newPaymentMethodId,
 		dao.Subscription.Columns().GmtModify:                   gtime.Now(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
+		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod subscriptionId:%d gatewayId:%d, paymentMethodId:%s error:%s", subscriptionId, gatewayId, paymentMethodId, err.Error())
 		return nil, err
+	} else {
+		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod subscriptionId:%d gatewayId:%d, paymentMethodId:%s success", subscriptionId, gatewayId, paymentMethodId)
+		user.UpdateUserDefaultGatewayPaymentMethod(ctx, sub.UserId, gatewayId, paymentMethodId)
 	}
 	return sub, nil
 }

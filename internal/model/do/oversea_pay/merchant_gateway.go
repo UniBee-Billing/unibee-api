@@ -15,7 +15,7 @@ type MerchantGateway struct {
 	Id                    interface{} // gateway_id
 	MerchantId            interface{} // merchant_id
 	EnumKey               interface{} // enum key , match in gateway implementation
-	GatewayType           interface{} // gateway type，1-Default｜ 2-Crypto
+	GatewayType           interface{} // gateway type，1-Card｜ 2-Crypto | 3-Wire Transfer
 	GatewayName           interface{} // gateway name
 	Name                  interface{} // name
 	SubGateway            interface{} // sub_gateway_enum

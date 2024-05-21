@@ -345,7 +345,7 @@ type OnetimeAddonNewReq struct {
 	DiscountCode       string                 `json:"discountCode" dc:"DiscountCode"`
 	DiscountAmount     *int64                 `json:"discountAmount"     dc:"Amount of discount"`
 	DiscountPercentage *int64                 `json:"discountPercentage" dc:"Percentage of discount, 100=1%, ignore if discountAmount provide"`
-	GatewayId          *uint64                `json:"gatewayId" dc:"GatewayId, use subscription's gateway if not provide"`
+	GatewayId          *uint64                `json:"gatewayId" dc:"GatewayId, use user's gateway if not provide"`
 	TaxPercentage      *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, use subscription's taxPercentage if not provide"`
 }
 

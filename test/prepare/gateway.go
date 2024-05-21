@@ -32,7 +32,7 @@ func CreateTestGateway(ctx context.Context, merchantId uint64) *entity.MerchantG
 		Name:          "autotest",
 		GatewayKey:    "autotest",
 		GatewaySecret: "autotest",
-		GatewayType:   consts.GatewayTypeDefault,
+		GatewayType:   consts.GatewayTypeCard,
 		Logo:          "autotest",
 	}
 	result, err := dao.MerchantGateway.Ctx(ctx).Data(one).OmitNil().Insert(one)

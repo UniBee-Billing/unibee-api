@@ -21,6 +21,8 @@ type UserAccountDao struct {
 // UserAccountColumns defines and stores column names for table user_account.
 type UserAccountColumns struct {
 	Id                 string // userId
+	GatewayId          string // gateway_id
+	PaymentMethod      string //
 	MerchantId         string // merchant_id
 	GmtCreate          string // create time
 	GmtModify          string // update time
@@ -39,7 +41,6 @@ type UserAccountColumns struct {
 	Custom             string // custom
 	LastLoginAt        string // last login time, utc time
 	IsRisk             string // is risk account (deperated)
-	GatewayId          string // gateway_id
 	Version            string // version
 	Phone              string // phone
 	Address            string // address
@@ -54,7 +55,6 @@ type UserAccountColumns struct {
 	LinkedIn           string // linkedin
 	Facebook           string // facebook
 	OtherSocialInfo    string //
-	PaymentMethod      string //
 	CountryCode        string // country_code
 	CountryName        string // country_name
 	SubscriptionName   string // subscription name
@@ -71,6 +71,8 @@ type UserAccountColumns struct {
 // userAccountColumns holds the columns for table user_account.
 var userAccountColumns = UserAccountColumns{
 	Id:                 "id",
+	GatewayId:          "gateway_id",
+	PaymentMethod:      "payment_method",
 	MerchantId:         "merchant_id",
 	GmtCreate:          "gmt_create",
 	GmtModify:          "gmt_modify",
@@ -89,7 +91,6 @@ var userAccountColumns = UserAccountColumns{
 	Custom:             "custom",
 	LastLoginAt:        "last_login_at",
 	IsRisk:             "is_risk",
-	GatewayId:          "gateway_id",
 	Version:            "version",
 	Phone:              "phone",
 	Address:            "address",
@@ -104,7 +105,6 @@ var userAccountColumns = UserAccountColumns{
 	LinkedIn:           "LinkedIn",
 	Facebook:           "Facebook",
 	OtherSocialInfo:    "other_social_info",
-	PaymentMethod:      "payment_method",
 	CountryCode:        "country_code",
 	CountryName:        "country_name",
 	SubscriptionName:   "subscription_name",

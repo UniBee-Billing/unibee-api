@@ -13,6 +13,8 @@ import (
 type UserAccount struct {
 	g.Meta             `orm:"table:user_account, do:true"`
 	Id                 interface{} // userId
+	GatewayId          interface{} // gateway_id
+	PaymentMethod      interface{} //
 	MerchantId         interface{} // merchant_id
 	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // update time
@@ -31,7 +33,6 @@ type UserAccount struct {
 	Custom             interface{} // custom
 	LastLoginAt        interface{} // last login time, utc time
 	IsRisk             interface{} // is risk account (deperated)
-	GatewayId          interface{} // gateway_id
 	Version            interface{} // version
 	Phone              interface{} // phone
 	Address            interface{} // address
@@ -46,7 +47,6 @@ type UserAccount struct {
 	LinkedIn           interface{} // linkedin
 	Facebook           interface{} // facebook
 	OtherSocialInfo    interface{} //
-	PaymentMethod      interface{} //
 	CountryCode        interface{} // country_code
 	CountryName        interface{} // country_name
 	SubscriptionName   interface{} // subscription name

@@ -23,7 +23,7 @@ type MerchantGatewayColumns struct {
 	Id                    string // gateway_id
 	MerchantId            string // merchant_id
 	EnumKey               string // enum key , match in gateway implementation
-	GatewayType           string // gateway type，1-Default｜ 2-Crypto
+	GatewayType           string // gateway type，1-Card｜ 2-Crypto | 3-Wire Transfer
 	GatewayName           string // gateway name
 	Name                  string // name
 	SubGateway            string // sub_gateway_enum

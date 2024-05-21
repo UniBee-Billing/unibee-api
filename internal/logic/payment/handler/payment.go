@@ -19,6 +19,7 @@ import (
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -423,6 +424,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 			//default payment method update
 			if len(req.GatewayPaymentMethod) > 0 {
 				_ = SaveChannelUserDefaultPaymentMethod(ctx, req, err, payment)
+				user.UpdateUserDefaultGatewayPaymentMethod(ctx, payment.UserId, payment.GatewayId, req.GatewayPaymentMethod)
 			}
 			gatewayUser := query.GetGatewayUser(ctx, payment.UserId, payment.GatewayId)
 			gateway := query.GetGatewayById(ctx, payment.GatewayId)

@@ -41,7 +41,7 @@ func (a AutoTest) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gat
 }
 
 func (a AutoTest) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
-	return "http://autotest.unibee.com", consts.GatewayTypeDefault, nil
+	return "http://autotest.unibee.com", consts.GatewayTypeCard, nil
 }
 
 func (a AutoTest) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
