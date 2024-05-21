@@ -187,7 +187,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		return nil, gerror.New("invoice not found, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
 	if one.Status == consts.InvoiceStatusFailed {
-		return nil, gerror.New("invoice has failed, payment:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+		return nil, gerror.New("invoice has failed, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PaymentSuccess {

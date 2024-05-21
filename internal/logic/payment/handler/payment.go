@@ -59,7 +59,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 
 	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
-		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 	}
 
 	err = CreateOrUpdatePaymentTimelineForPayment(ctx, payment, payment.PaymentId)
@@ -83,7 +83,7 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 	}
 	_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 	if err != nil {
-		fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+		fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 	}
 
 	event.SaveEvent(ctx, entity.PaymentEvent{
@@ -132,7 +132,7 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 	if err == nil {
 		_, err = handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -184,12 +184,12 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 		payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 		payment2.SendPaymentWebhookBackground(payment.PaymentId, event2.UNIBEE_WEBHOOK_EVENT_PAYMENT_NEEDAUTHORISED)
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentNeedAuthorisedCallback(ctx, payment, invoice)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 		event.SaveEvent(ctx, entity.PaymentEvent{
 			BizType:   0,
@@ -250,7 +250,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentCancelCallback(ctx, payment, invoice)
@@ -321,7 +321,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentFailureCallback(ctx, payment, invoice)
@@ -402,7 +402,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		payment = query.GetPaymentByPaymentId(ctx, req.PaymentId)
 		invoice, err := handler2.UpdateInvoiceFromPayment(ctx, payment)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPayment error %s`, err.Error())
+			fmt.Printf(`UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 		{
