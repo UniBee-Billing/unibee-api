@@ -9,6 +9,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
+// https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/paypal/
 // link：https://developer.paypal.com/docs/api/payments/v1/#payment_create
 // https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_transactions
 // clientId ATaWQ8G9oJNFyle9YCt59
