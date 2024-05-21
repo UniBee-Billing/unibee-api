@@ -254,6 +254,11 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 	one.Status = invoiceStatus
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismq2.TopicInvoiceCancelled.Topic,
+		Tag:   redismq2.TopicInvoiceCancelled.Tag,
+		Body:  one.InvoiceId,
+	})
 
 	if len(one.RefundId) > 0 {
 		refund := query.GetRefundByRefundId(ctx, one.RefundId)
