@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean/detail"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
@@ -28,9 +29,12 @@ func SendMerchantInvoiceWebhookBackground(one *entity.Invoice, event event.Merch
 				return
 			}
 		}()
-		key := fmt.Sprintf("webhook_lock_%s_%s", one.InvoiceId, event)
-		if !utility.TryLock(ctx, key, 10*60) {
-			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)))
+		g.Log().Infof(ctx, "SendMerchantInvoiceWebhookBackground_invoiceId:%s", one.InvoiceId)
+		if one != nil {
+			key := fmt.Sprintf("webhook_lock_%s_%s", one.InvoiceId, event)
+			if utility.TryLock(ctx, key, 10*60) {
+				message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(detail.ConvertInvoiceToDetail(ctx, one)))
+			}
 		}
 	}()
 }
