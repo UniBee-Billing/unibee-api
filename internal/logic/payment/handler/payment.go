@@ -583,6 +583,7 @@ func CreateOrUpdatePaymentItemForPaymentInvoice(ctx context.Context, payment *en
 		_, _ = dao.PaymentItem.Ctx(ctx).Where(dao.PaymentItem.Columns().PaymentId, payment.PaymentId).Delete()
 		for i, item := range invoiceSimplify.Lines {
 			one := &entity.PaymentItem{
+				BizType:        payment.BizType,
 				MerchantId:     payment.MerchantId,
 				UserId:         payment.UserId,
 				SubscriptionId: payment.SubscriptionId,
