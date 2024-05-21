@@ -65,7 +65,7 @@ type UserAccountColumns struct {
 	TimeZone           string //
 	CreateTime         string // create utc time
 	ExternalUserId     string // external_user_id
-	Status             string // 0-Active, 2-Frozen
+	Status             string // 0-Active, 2-Suspend
 }
 
 // userAccountColumns holds the columns for table user_account.

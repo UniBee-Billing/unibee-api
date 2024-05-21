@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	redismqcmd "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	event2 "unibee/internal/consumer/webhook/event"
@@ -551,5 +552,67 @@ func CreateOrUpdatePaymentTimelineForPayment(ctx context.Context, payment *entit
 			return err
 		}
 	}
+	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
+	if invoice != nil {
+		err := CreateOrUpdatePaymentItemForPaymentInvoice(ctx, payment, invoice)
+		if err != nil {
+			g.Log().Errorf(ctx, "CreateOrUpdatePaymentItemForPaymentInvoice error:%s", err.Error())
+		}
+	}
+	return nil
+}
+
+func CreateOrUpdatePaymentItemForPaymentInvoice(ctx context.Context, payment *entity.Payment, invoice *entity.Invoice) error {
+	if payment == nil || invoice == nil {
+		return gerror.Newf(`payment or invoice is nil`)
+	}
+	payment = query.GetPaymentByPaymentId(ctx, payment.PaymentId)
+	var status = 0
+	if payment.Status == consts.PaymentSuccess {
+		status = 1
+	} else if payment.Status == consts.PaymentFailed || payment.Status == consts.PaymentCancelled {
+		status = 2
+	}
+	var list []*entity.PaymentItem
+	var total = 0
+	_ = dao.PaymentItem.Ctx(ctx).
+		Where(dao.PaymentItem.Columns().PaymentId, payment).
+		OmitEmpty().ScanAndCount(&list, &total, true)
+	invoiceSimplify := bean.SimplifyInvoice(invoice)
+	if total != len(invoiceSimplify.Lines) {
+		_, _ = dao.PaymentItem.Ctx(ctx).Where(dao.PaymentItem.Columns().PaymentId, payment.PaymentId).Delete()
+		for i, item := range invoiceSimplify.Lines {
+			one := &entity.PaymentItem{
+				MerchantId:     payment.MerchantId,
+				UserId:         payment.UserId,
+				SubscriptionId: payment.SubscriptionId,
+				InvoiceId:      payment.InvoiceId,
+				UniqueId:       fmt.Sprintf("%s_%d", payment.PaymentId, i),
+				Currency:       payment.Currency,
+				Name:           item.Name,
+				Description:    item.Description,
+				Amount:         item.Amount,
+				UnitAmount:     item.UnitAmountExcludingTax,
+				Quantity:       item.Quantity,
+				GatewayId:      payment.GatewayId,
+				PaymentId:      payment.PaymentId,
+				Status:         status,
+				CreateTime:     gtime.Now().Timestamp(),
+			}
+			_, err := dao.PaymentItem.Ctx(ctx).Data(one).OmitNil().Insert(one)
+			if err != nil {
+				return gerror.Newf(`record insert failure %s`, err.Error())
+			}
+		}
+	} else {
+		_, err := dao.PaymentItem.Ctx(ctx).Data(g.Map{
+			dao.PaymentItem.Columns().GmtModify: gtime.Now(),
+			dao.PaymentItem.Columns().Status:    status,
+		}).Where(dao.PaymentItem.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
+		if err != nil {
+			return gerror.Newf(`record update failure %s`, err.Error())
+		}
+	}
+
 	return nil
 }

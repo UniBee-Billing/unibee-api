@@ -16,6 +16,7 @@ type SubscriptionTimeline struct {
 	MerchantId      interface{} // merchant id
 	UserId          interface{} // userId
 	SubscriptionId  interface{} // subscription id
+	Status          interface{} // 1-processing,2-finish
 	PeriodStart     interface{} // period_start
 	PeriodEnd       interface{} // period_end
 	PeriodStartTime *gtime.Time // period start (datetime)
@@ -32,5 +33,4 @@ type SubscriptionTimeline struct {
 	IsDeleted       interface{} // 0-UnDeleted，1-Deleted
 	UniqueKey       interface{} // unique key (deperated)
 	CreateTime      interface{} // create utc time
-	Status          interface{} // 1-processing,2-finish
 }

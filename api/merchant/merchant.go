@@ -119,6 +119,7 @@ type IMerchantPayment interface {
 	Cancel(ctx context.Context, req *payment.CancelReq) (res *payment.CancelRes, err error)
 	RefundCancel(ctx context.Context, req *payment.RefundCancelReq) (res *payment.RefundCancelRes, err error)
 	Capture(ctx context.Context, req *payment.CaptureReq) (res *payment.CaptureRes, err error)
+	ItemList(ctx context.Context, req *payment.ItemListReq) (res *payment.ItemListRes, err error)
 	MethodList(ctx context.Context, req *payment.MethodListReq) (res *payment.MethodListRes, err error)
 	MethodGet(ctx context.Context, req *payment.MethodGetReq) (res *payment.MethodGetRes, err error)
 	MethodNew(ctx context.Context, req *payment.MethodNewReq) (res *payment.MethodNewRes, err error)

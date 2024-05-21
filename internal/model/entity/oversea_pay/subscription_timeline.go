@@ -14,6 +14,7 @@ type SubscriptionTimeline struct {
 	MerchantId      uint64      `json:"merchantId"      description:"merchant id"`             // merchant id
 	UserId          uint64      `json:"userId"          description:"userId"`                  // userId
 	SubscriptionId  string      `json:"subscriptionId"  description:"subscription id"`         // subscription id
+	Status          int         `json:"status"          description:"1-processing,2-finish"`   // 1-processing,2-finish
 	PeriodStart     int64       `json:"periodStart"     description:"period_start"`            // period_start
 	PeriodEnd       int64       `json:"periodEnd"       description:"period_end"`              // period_end
 	PeriodStartTime *gtime.Time `json:"periodStartTime" description:"period start (datetime)"` // period start (datetime)
@@ -30,5 +31,4 @@ type SubscriptionTimeline struct {
 	IsDeleted       int         `json:"isDeleted"       description:"0-UnDeleted，1-Deleted"`   // 0-UnDeleted，1-Deleted
 	UniqueKey       string      `json:"uniqueKey"       description:"unique key (deperated)"`  // unique key (deperated)
 	CreateTime      int64       `json:"createTime"      description:"create utc time"`         // create utc time
-	Status          int         `json:"status"          description:"1-processing,2-finish"`   // 1-processing,2-finish
 }
