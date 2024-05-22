@@ -58,7 +58,7 @@ type PasswordResetRes struct {
 }
 
 type ChangeGatewayReq struct {
-	g.Meta          `path:"/change_gateway" tags:"User" method:"post" summary:"ChangeUserDefaultGateway" `
+	g.Meta          `path:"/change_gateway" tags:"User-Profile" method:"post" summary:"ChangeUserDefaultGateway" `
 	GatewayId       uint64 `json:"gatewayId" dc:"GatewayId" v:"required"`
 	PaymentMethodId string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 }
