@@ -70,7 +70,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 	var taxPercentage = sub.TaxPercentage
 	if req.TaxPercentage != nil {
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "External TaxPercentage only available for api call")
-		utility.Assert(*req.TaxPercentage > 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
+		utility.Assert(*req.TaxPercentage >= 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
 		taxPercentage = *req.TaxPercentage
 	}
 
