@@ -34,11 +34,12 @@ import (
 )
 
 func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
-	utility.Assert(createPayContext.Pay.BizType > 0, "pay bizType is nil")
-	utility.Assert(createPayContext.Gateway != nil, "pay gateway is nil")
-	utility.Assert(createPayContext.Pay != nil, "pay is nil")
+	utility.Assert(createPayContext.Pay.BizType > 0, "payment bizType is nil")
+	utility.Assert(createPayContext.Gateway != nil, "payment gateway is nil")
+	utility.Assert(createPayContext.Pay != nil, "payment is nil")
 	utility.Assert(len(createPayContext.Pay.ExternalPaymentId) > 0, "ExternalPaymentId Invalid")
-	utility.Assert(createPayContext.Pay.GatewayId > 0, "pay gatewayId is nil")
+	utility.Assert(createPayContext.Pay.UserId > 0, "payment userId is nil")
+	utility.Assert(createPayContext.Pay.GatewayId > 0, "payment gatewayId is nil")
 	utility.Assert(createPayContext.Pay.TotalAmount > 0, "TotalAmount Invalid")
 	utility.Assert(len(createPayContext.Pay.Currency) > 0, "currency is nil")
 	utility.Assert(createPayContext.Pay.MerchantId > 0, "merchantId Invalid")
@@ -46,6 +47,8 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
 	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
+	user.UpdateUserDefaultGatewayPaymentMethod(ctx, createPayContext.Pay.UserId, createPayContext.Gateway.Id, createPayContext.GatewayPaymentMethod)
+	user.UpdateUserCountryCode(ctx, createPayContext.Pay.UserId, createPayContext.Pay.CountryCode)
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()
@@ -185,7 +188,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Link = paymentLink
 	gatewayInternalPayResult.Invoice = invoice
 	gatewayInternalPayResult.Payment = createPayContext.Pay
-	user.UpdateUserDefaultGatewayPaymentMethod(ctx, createPayContext.Pay.UserId, createPayContext.Gateway.Id, createPayContext.GatewayPaymentMethod)
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	err = handler2.CreateOrUpdatePaymentTimelineForPayment(ctx, createPayContext.Pay, createPayContext.Pay.PaymentId)
 	if err != nil {

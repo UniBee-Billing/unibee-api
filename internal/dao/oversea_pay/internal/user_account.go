@@ -23,6 +23,11 @@ type UserAccountColumns struct {
 	Id                 string // userId
 	GatewayId          string // gateway_id
 	PaymentMethod      string //
+	CountryCode        string // country_code
+	CountryName        string // country_name
+	VATNumber          string // vat number
+	TaxPercentage      string // taxPercentage，1000 = 10%
+	Type               string // User type, 1-Individual|2-organization
 	MerchantId         string // merchant_id
 	GmtCreate          string // create time
 	GmtModify          string // update time
@@ -47,7 +52,6 @@ type UserAccountColumns struct {
 	FirstName          string // first name
 	LastName           string // last name
 	CompanyName        string // company name
-	VATNumber          string // vat number
 	Telegram           string // telegram
 	WhatsAPP           string // whats app
 	WeChat             string // wechat
@@ -55,8 +59,6 @@ type UserAccountColumns struct {
 	LinkedIn           string // linkedin
 	Facebook           string // facebook
 	OtherSocialInfo    string //
-	CountryCode        string // country_code
-	CountryName        string // country_name
 	SubscriptionName   string // subscription name
 	SubscriptionId     string // subscription id
 	SubscriptionStatus string // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
@@ -73,6 +75,11 @@ var userAccountColumns = UserAccountColumns{
 	Id:                 "id",
 	GatewayId:          "gateway_id",
 	PaymentMethod:      "payment_method",
+	CountryCode:        "country_code",
+	CountryName:        "country_name",
+	VATNumber:          "VAT_number",
+	TaxPercentage:      "tax_percentage",
+	Type:               "type",
 	MerchantId:         "merchant_id",
 	GmtCreate:          "gmt_create",
 	GmtModify:          "gmt_modify",
@@ -97,7 +104,6 @@ var userAccountColumns = UserAccountColumns{
 	FirstName:          "first_name",
 	LastName:           "last_name",
 	CompanyName:        "company_name",
-	VATNumber:          "VAT_number",
 	Telegram:           "Telegram",
 	WhatsAPP:           "WhatsAPP",
 	WeChat:             "WeChat",
@@ -105,8 +111,6 @@ var userAccountColumns = UserAccountColumns{
 	LinkedIn:           "LinkedIn",
 	Facebook:           "Facebook",
 	OtherSocialInfo:    "other_social_info",
-	CountryCode:        "country_code",
-	CountryName:        "country_name",
 	SubscriptionName:   "subscription_name",
 	SubscriptionId:     "subscription_id",
 	SubscriptionStatus: "subscription_status",

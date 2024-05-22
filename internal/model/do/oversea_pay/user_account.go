@@ -15,6 +15,11 @@ type UserAccount struct {
 	Id                 interface{} // userId
 	GatewayId          interface{} // gateway_id
 	PaymentMethod      interface{} //
+	CountryCode        interface{} // country_code
+	CountryName        interface{} // country_name
+	VATNumber          interface{} // vat number
+	TaxPercentage      interface{} // taxPercentage，1000 = 10%
+	Type               interface{} // User type, 1-Individual|2-organization
 	MerchantId         interface{} // merchant_id
 	GmtCreate          *gtime.Time // create time
 	GmtModify          *gtime.Time // update time
@@ -39,7 +44,6 @@ type UserAccount struct {
 	FirstName          interface{} // first name
 	LastName           interface{} // last name
 	CompanyName        interface{} // company name
-	VATNumber          interface{} // vat number
 	Telegram           interface{} // telegram
 	WhatsAPP           interface{} // whats app
 	WeChat             interface{} // wechat
@@ -47,8 +51,6 @@ type UserAccount struct {
 	LinkedIn           interface{} // linkedin
 	Facebook           interface{} // facebook
 	OtherSocialInfo    interface{} //
-	CountryCode        interface{} // country_code
-	CountryName        interface{} // country_name
 	SubscriptionName   interface{} // subscription name
 	SubscriptionId     interface{} // subscription id
 	SubscriptionStatus interface{} // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete

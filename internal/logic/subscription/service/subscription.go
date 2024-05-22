@@ -32,7 +32,7 @@ import (
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/timeline"
-	"unibee/internal/logic/user"
+	user2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -138,7 +138,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	//if req.GatewayId != nil {
 	//	gatewayId = *req.GatewayId
 	//}
-	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
+	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
 
 	var timeNow = gtime.Now().Timestamp()
 	if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
@@ -322,7 +322,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
+	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
 	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, req.VatCountryCode), "gateway not support")
@@ -346,6 +346,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidate *bean.ValidResult
 	var vatNumberValidateMessage string
 	var discountMessage string
+	if len(req.VatNumber) == 0 {
+		req.VatNumber = user.VATNumber
+	}
+	if len(req.VatCountryCode) == 0 {
+		req.VatNumber = user.CountryCode
+	}
 
 	if len(req.VatNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
@@ -360,13 +366,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		} else {
 			vatCountryCode = vatNumberValidate.CountryCode
 		}
-		//if err != nil {
-		//	return nil, err
-		//}
 		if req.IsSubmit {
 			utility.Assert(vatNumberValidate.Valid, fmt.Sprintf("VatNumber validate failure, number:"+req.VatNumber))
 		}
-		//vatCountryCode = vatNumberValidate.CountryCode
 	}
 
 	if req.TaxPercentage != nil {
@@ -927,11 +929,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	//var gatewayId = sub.GatewayId
-	//if req.GatewayId > 0 {
-	//	gatewayId = req.GatewayId
-	//}
-	gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
+	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
@@ -1797,7 +1795,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, one, gatewayId, false, "", "SubscriptionEndTrialManual")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())

@@ -13,6 +13,11 @@ type UserAccount struct {
 	Id                 uint64      `json:"id"                 description:"userId"`                                                                                                    // userId
 	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                                // gateway_id
 	PaymentMethod      string      `json:"paymentMethod"      description:""`                                                                                                          //
+	CountryCode        string      `json:"countryCode"        description:"country_code"`                                                                                              // country_code
+	CountryName        string      `json:"countryName"        description:"country_name"`                                                                                              // country_name
+	VATNumber          string      `json:"vATNumber"          description:"vat number"`                                                                                                // vat number
+	TaxPercentage      int64       `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`                                                                                  // taxPercentage，1000 = 10%
+	Type               int64       `json:"type"               description:"User type, 1-Individual|2-organization"`                                                                    // User type, 1-Individual|2-organization
 	MerchantId         uint64      `json:"merchantId"         description:"merchant_id"`                                                                                               // merchant_id
 	GmtCreate          *gtime.Time `json:"gmtCreate"          description:"create time"`                                                                                               // create time
 	GmtModify          *gtime.Time `json:"gmtModify"          description:"update time"`                                                                                               // update time
@@ -37,7 +42,6 @@ type UserAccount struct {
 	FirstName          string      `json:"firstName"          description:"first name"`                                                                                                // first name
 	LastName           string      `json:"lastName"           description:"last name"`                                                                                                 // last name
 	CompanyName        string      `json:"companyName"        description:"company name"`                                                                                              // company name
-	VATNumber          string      `json:"vATNumber"          description:"vat number"`                                                                                                // vat number
 	Telegram           string      `json:"telegram"           description:"telegram"`                                                                                                  // telegram
 	WhatsAPP           string      `json:"whatsAPP"           description:"whats app"`                                                                                                 // whats app
 	WeChat             string      `json:"weChat"             description:"wechat"`                                                                                                    // wechat
@@ -45,8 +49,6 @@ type UserAccount struct {
 	LinkedIn           string      `json:"linkedIn"           description:"linkedin"`                                                                                                  // linkedin
 	Facebook           string      `json:"facebook"           description:"facebook"`                                                                                                  // facebook
 	OtherSocialInfo    string      `json:"otherSocialInfo"    description:""`                                                                                                          //
-	CountryCode        string      `json:"countryCode"        description:"country_code"`                                                                                              // country_code
-	CountryName        string      `json:"countryName"        description:"country_name"`                                                                                              // country_name
 	SubscriptionName   string      `json:"subscriptionName"   description:"subscription name"`                                                                                         // subscription name
 	SubscriptionId     string      `json:"subscriptionId"     description:"subscription id"`                                                                                           // subscription id
 	SubscriptionStatus int         `json:"subscriptionStatus" description:"sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete"` // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete

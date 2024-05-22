@@ -75,23 +75,24 @@ type SearchRes struct {
 
 type UpdateReq struct {
 	g.Meta          `path:"/update" tags:"User" method:"post" summary:"UpdateUserProfile"`
-	UserId          uint64 `json:"userId" dc:"User Id" v:"required"`
-	FirstName       string `json:"firstName" dc:"First name" v:"required"`
-	LastName        string `json:"lastName" dc:"Last Name" v:"required"`
-	Email           string `json:"email" dc:"Email" v:"required"`
-	Address         string `json:"address" dc:"Billing Address" v:"required"`
-	CompanyName     string `json:"companyName" dc:"Company Name"`
-	VATNumber       string `json:"vATNumber" dc:"VAT Number"`
-	Phone           string `json:"phone" dc:"Phone"`
-	Telegram        string `json:"telegram" dc:"Telegram"`
-	WhatsApp        string `json:"whatsApp" dc:"WhatsApp"`
-	WeChat          string `json:"weChat" dc:"WeChat"`
-	LinkedIn        string `json:"LinkedIn" dc:"LinkedIn"`
-	Facebook        string `json:"facebook" dc:"Facebook"`
-	TikTok          string `json:"tiktok" dc:"Tiktok"`
-	OtherSocialInfo string `json:"otherSocialInfo" dc:"Other Social Info"`
-	CountryCode     string `json:"countryCode" dc:"Country Code" v:"required"`
-	CountryName     string `json:"countryName" dc:"Country Name" v:"required"`
+	UserId          uint64  `json:"userId" dc:"User Id" v:"required"`
+	FirstName       string  `json:"firstName" dc:"First name" v:"required"`
+	LastName        string  `json:"lastName" dc:"Last Name" v:"required"`
+	Email           string  `json:"email" dc:"Email" v:"required"`
+	Address         string  `json:"address" dc:"Billing Address" v:"required"`
+	CompanyName     string  `json:"companyName" dc:"Company Name"`
+	VATNumber       *string `json:"vATNumber" dc:"VAT Number"`
+	Phone           string  `json:"phone" dc:"Phone"`
+	Telegram        string  `json:"telegram" dc:"Telegram"`
+	WhatsApp        string  `json:"whatsApp" dc:"WhatsApp"`
+	WeChat          string  `json:"weChat" dc:"WeChat"`
+	LinkedIn        string  `json:"LinkedIn" dc:"LinkedIn"`
+	Facebook        string  `json:"facebook" dc:"Facebook"`
+	TikTok          string  `json:"tiktok" dc:"Tiktok"`
+	OtherSocialInfo string  `json:"otherSocialInfo" dc:"Other Social Info"`
+	CountryCode     *string `json:"countryCode" dc:"Country Code"`
+	CountryName     *string `json:"countryName" dc:"Country Name"`
+	Type            int64   `json:"type" dc:"User type, 1-Individual|2-organization"`
 }
 
 type UpdateRes struct {

@@ -177,6 +177,16 @@ func InitMerchantDefaultVatGateway(ctx context.Context, merchantId uint64) error
 }
 
 func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, userId uint64, vatNumber string, requestVatNumber string) (*bean.ValidResult, error) {
+	if len(vatNumber) == 0 {
+		return &bean.ValidResult{
+			Valid:           false,
+			VatNumber:       "",
+			CountryCode:     "",
+			CompanyName:     "",
+			CompanyAddress:  "",
+			ValidateMessage: "",
+		}, nil
+	}
 	one := query.GetVatNumberValidateHistory(ctx, merchantId, vatNumber)
 	if one != nil {
 		var valid = false
@@ -218,6 +228,9 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 	_, err := dao.MerchantVatNumberVerifyHistory.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
+	}
+	if result.Valid && userId > 0 {
+		UpdateUserVatNumber(ctx, userId, vatNumber)
 	}
 	return result, nil
 }
