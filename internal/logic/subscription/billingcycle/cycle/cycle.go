@@ -123,6 +123,11 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					return &BillingCycleWalkRes{WalkUnfinished: true, Message: "HandleSubscriptionIncomplete As Not Paid After CurrentPeriodEnd Or TrialEnd"}, nil
 				}
 			}
+			var taxPercentage = sub.TaxPercentage
+			percentage, err := user.GetUserTaxPercentage(ctx, sub.UserId)
+			if err == nil {
+				taxPercentage = percentage
+			}
 
 			if needInvoiceGenerate {
 				var invoice *bean.InvoiceSimplify
@@ -152,7 +157,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PlanId:        pendingUpdate.UpdatePlanId,
 						Quantity:      pendingUpdate.UpdateQuantity,
 						AddonJsonData: pendingUpdate.UpdateAddonData,
-						TaxPercentage: sub.TaxPercentage,
+						TaxPercentage: taxPercentage,
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionDowngrade",
@@ -172,7 +177,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PlanId:        sub.PlanId,
 						Quantity:      sub.Quantity,
 						AddonJsonData: sub.AddonData,
-						TaxPercentage: sub.TaxPercentage,
+						TaxPercentage: taxPercentage,
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionCycle",

@@ -124,6 +124,10 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
+	percentage, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	if err == nil {
+		subscriptionTaxPercentage = percentage
+	}
 	if req.TaxPercentage != nil {
 		subscriptionTaxPercentage = *req.TaxPercentage
 	}
@@ -335,10 +339,14 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var err error
 	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another pending or active subscription exist")
 
-	//vat
+	//setup vat from user
 	if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
 		req.VatCountryCode = user.CountryCode
 	}
+	if len(req.VatNumber) == 0 {
+		req.VatNumber = user.VATNumber
+	}
+
 	var vatCountryCode = req.VatCountryCode
 	var subscriptionTaxPercentage int64 = 0
 	var vatCountryName = ""
@@ -346,9 +354,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidate *bean.ValidResult
 	var vatNumberValidateMessage string
 	var discountMessage string
-	if len(req.VatNumber) == 0 {
-		req.VatNumber = user.VATNumber
-	}
+
 	if len(req.VatCountryCode) == 0 {
 		req.VatNumber = user.CountryCode
 	}
@@ -936,11 +942,17 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	merchantInfo := query.GetMerchantById(ctx, plan.MerchantId)
 	utility.Assert(merchantInfo != nil, "merchant not found")
 	utility.Assert(sub.CancelAtPeriodEnd == 0, "subscription will cancel at period end, should resume subscription first")
+	user := query.GetUserAccountById(ctx, sub.UserId)
+	utility.Assert(user != nil, "user not found")
 	if req.Quantity <= 0 {
 		req.Quantity = 1
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 	var subscriptionTaxPercentage = sub.TaxPercentage
+	percentage, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	if err == nil {
+		subscriptionTaxPercentage = percentage
+	}
 	if req.TaxPercentage != nil {
 		subscriptionTaxPercentage = *req.TaxPercentage
 	}
