@@ -1,6 +1,7 @@
 package bean
 
 import (
+	"strconv"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -20,7 +21,7 @@ type UserAccountSimplify struct {
 	Custom             string `json:"custom"             description:"custom"`                                                                                                           // custom
 	LastLoginAt        int64  `json:"lastLoginAt"        description:"last login time, utc time"`                                                                                        // last login time, utc time
 	IsRisk             int    `json:"isRisk"             description:"is risk account (deperated)"`                                                                                      // is risk account (deperated)
-	GatewayId          string `json:"gatewayId"          description:"gateway_id"`                                                                                                       // gateway_id
+	GatewayId          uint64 `json:"gatewayId"          description:"gateway_id"`                                                                                                       // gateway_id
 	Version            int    `json:"version"            description:"version"`                                                                                                          // version
 	Phone              string `json:"phone"              description:"phone"`                                                                                                            // phone
 	Address            string `json:"address"            description:"address"`                                                                                                          // address
@@ -55,6 +56,8 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
 	if one == nil {
 		return nil
 	}
+	gatewayId, _ := strconv.ParseUint(one.GatewayId, 10, 64)
+
 	return &UserAccountSimplify{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
@@ -73,7 +76,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
 		Custom:             one.Custom,
 		LastLoginAt:        one.LastLoginAt,
 		IsRisk:             one.IsRisk,
-		GatewayId:          one.GatewayId,
+		GatewayId:          gatewayId,
 		Version:            one.Version,
 		Phone:              one.Phone,
 		Address:            one.Address,
