@@ -13,6 +13,9 @@ import (
 )
 
 func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
+	if req.GatewayId != nil && *req.GatewayId > 0 {
+		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, *req.PaymentMethodId)
+	}
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
 		gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 		utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")

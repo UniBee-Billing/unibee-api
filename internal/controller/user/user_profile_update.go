@@ -3,9 +3,12 @@ package user
 import (
 	"context"
 	"fmt"
+	"strconv"
+	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
+	"unibee/internal/query"
 	"unibee/time"
 	"unibee/utility"
 
@@ -21,6 +24,27 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if len(req.TimeZone) > 0 {
 		utility.Assert(time.CheckTimeZone(req.TimeZone), fmt.Sprintf("Invalid Timezone:%s", req.TimeZone))
 	}
+
+	if req.GatewayId != nil && *req.GatewayId > 0 {
+		one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+		utility.Assert(one != nil, "user not found")
+		if len(one.GatewayId) > 0 {
+			oldGatewayId, err := strconv.ParseUint(one.GatewayId, 10, 64)
+			if err == nil {
+				gateway := query.GetGatewayById(ctx, oldGatewayId)
+				newGateway := query.GetGatewayById(ctx, *req.GatewayId)
+				if oldGatewayId != *req.GatewayId {
+					utility.Assert(gateway.GatewayType != consts.GatewayTypeWireTransfer, "Can't change gateway from wire transfer to other, Please contact billing admin")
+					utility.Assert(newGateway.GatewayType != consts.GatewayTypeWireTransfer, "Can't change gateway to wire transfer, Please contact billing admin")
+				}
+			}
+		} else {
+			newGateway := query.GetGatewayById(ctx, *req.GatewayId)
+			utility.Assert(newGateway.GatewayType != consts.GatewayTypeWireTransfer, "Can't change gateway to wire transfer, Please contact billing admin")
+		}
+		user.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, *req.PaymentMethodId)
+	}
+
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
