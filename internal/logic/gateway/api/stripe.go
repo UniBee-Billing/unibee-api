@@ -357,17 +357,21 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 					name = line.Name
 					description = line.Description
 				}
-				items = append(items, &stripe.CheckoutSessionLineItemParams{
+				item := &stripe.CheckoutSessionLineItemParams{
 					PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 						Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 						ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-							Name:        stripe.String(fmt.Sprintf("%s", name)),
-							Description: stripe.String(fmt.Sprintf("%s", description)),
+							Name: stripe.String(fmt.Sprintf("%s", name)),
+							//Description: stripe.String(fmt.Sprintf("%s", description)),
 						},
 						UnitAmount: stripe.Int64(line.Amount),
 					},
 					Quantity: stripe.Int64(1),
-				})
+				}
+				if len(description) > 0 {
+					item.PriceData.ProductData.Description = stripe.String(fmt.Sprintf("%s", description))
+				}
+				items = append(items, item)
 			}
 		} else {
 			var productName = createPayContext.Invoice.ProductName
@@ -377,7 +381,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			if len(productName) == 0 {
 				productName = "DefaultProduct"
 			}
-			items = append(items, &stripe.CheckoutSessionLineItemParams{
+			item := &stripe.CheckoutSessionLineItemParams{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(strings.ToLower(createPayContext.Pay.Currency)),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
@@ -386,7 +390,9 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 					UnitAmount: stripe.Int64(createPayContext.Invoice.TotalAmount),
 				},
 				Quantity: stripe.Int64(1),
-			})
+			}
+
+			items = append(items, item)
 		}
 		checkoutParams := &stripe.CheckoutSessionParams{
 			Customer:          stripe.String(gatewayUser.GatewayUserId),
