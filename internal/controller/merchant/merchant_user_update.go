@@ -28,7 +28,11 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		user2.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
 	}
 
-	utility.Assert(req.Type == 1 || req.Type == 2, "invalid Type, 1-Individual|2-organization")
+	if req.Type != nil {
+		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-organization")
+	} else {
+		*req.Type = 1
+	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Type:            req.Type,
 		dao.UserAccount.Columns().LastName:        req.LastName,

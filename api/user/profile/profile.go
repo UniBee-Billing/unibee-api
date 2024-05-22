@@ -39,7 +39,7 @@ type UpdateReq struct {
 	TimeZone        string  `json:"timeZone" dc:"User TimeZone"`
 	CountryCode     *string `json:"countryCode" dc:"Country Code"`
 	CountryName     *string `json:"countryName" dc:"Country Name"`
-	Type            int64   `json:"type" dc:"User type, 1-Individual|2-organization"`
+	Type            *int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
 	GatewayId       *uint64 `json:"gatewayId" dc:"GatewayId"`
 	PaymentMethodId *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
 }
