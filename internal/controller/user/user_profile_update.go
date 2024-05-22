@@ -11,6 +11,7 @@ import (
 	"unibee/internal/query"
 	"unibee/time"
 	"unibee/utility"
+	"unibee/utility/unibee"
 
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -59,7 +60,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if req.Type != nil {
 		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-organization")
 	} else {
-		*req.Type = 1
+		req.Type = unibee.Int64(1)
 	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Type:            req.Type,

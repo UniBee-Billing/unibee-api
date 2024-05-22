@@ -10,6 +10,7 @@ import (
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
@@ -31,7 +32,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 	if req.Type != nil {
 		utility.Assert(*req.Type == 1 || *req.Type == 2, "invalid Type, 1-Individual|2-organization")
 	} else {
-		*req.Type = 1
+		req.Type = unibee.Int64(1)
 	}
 	_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().Type:            req.Type,
