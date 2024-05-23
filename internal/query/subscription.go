@@ -48,6 +48,23 @@ func GetLatestActiveOrIncompleteSubscriptionByUserId(ctx context.Context, userId
 	return
 }
 
+func GetLatestCreateOrProcessingSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
+	if userId <= 0 || merchantId <= 0 {
+		return nil
+	}
+	err := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().UserId, userId).
+		Where(dao.Subscription.Columns().MerchantId, merchantId).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		WhereIn(dao.Subscription.Columns().Status, []int{consts.SubStatusPending, consts.SubStatusProcessing}).
+		OrderDesc(dao.Subscription.Columns().GmtModify).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
+
 func GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
 		return nil

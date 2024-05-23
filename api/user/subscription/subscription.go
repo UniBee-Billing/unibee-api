@@ -244,3 +244,11 @@ type MarkWireTransferPaidReq struct {
 
 type MarkWireTransferPaidRes struct {
 }
+
+type UserPendingCryptoSubscriptionDetailReq struct {
+	g.Meta `path:"/user_pending_crypto_subscription_detail" tags:"User-Subscription" method:"get" summary:"UserPendingCryptoSubscriptionDetail"`
+}
+
+type UserPendingCryptoSubscriptionDetailRes struct {
+	Subscription *detail.SubscriptionDetail `json:"subscription" dc:"Subscription"`
+}

@@ -225,7 +225,8 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 		if lastPayment != nil && lastPayment.Status != consts.PaymentCancelled && lastPayment.Status != consts.PaymentFailed {
 			//Try cancel latest payment
 			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
-				dao.Invoice.Columns().PaymentId: "",
+				dao.Invoice.Columns().PaymentId:   "",
+				dao.Invoice.Columns().PaymentLink: "",
 			}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
 			if err != nil {
 				g.Log().Errorf(ctx, `ClearInvoicePayment update failure %s`, err.Error())

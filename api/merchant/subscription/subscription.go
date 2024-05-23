@@ -42,6 +42,15 @@ type DetailRes struct {
 	UnfinishedSubscriptionPendingUpdate *detail.SubscriptionPendingUpdateDetail `json:"unfinishedSubscriptionPendingUpdate" dc:"processing pending update"`
 }
 
+type UserPendingCryptoSubscriptionDetailReq struct {
+	g.Meta `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get" summary:"UserPendingCryptoSubscriptionDetail"`
+	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
+}
+
+type UserPendingCryptoSubscriptionDetailRes struct {
+	Subscription *detail.SubscriptionDetail `json:"subscription" dc:"Subscription"`
+}
+
 type ListReq struct {
 	g.Meta    `path:"/list" tags:"Subscription" method:"get,post" summary:"SubscriptionList"`
 	UserId    int64  `json:"userId"  dc:"UserId" `
@@ -252,7 +261,7 @@ type UpdateRes struct {
 }
 
 type UserSubscriptionDetailReq struct {
-	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"SubscriptionDetail"`
+	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserSubscriptionDetail"`
 	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
 }
 

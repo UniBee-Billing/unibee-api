@@ -80,6 +80,7 @@ type IUserSubscription interface {
 	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
 	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 	MarkWireTransferPaid(ctx context.Context, req *subscription.MarkWireTransferPaidReq) (res *subscription.MarkWireTransferPaidRes, err error)
+	UserPendingCryptoSubscriptionDetail(ctx context.Context, req *subscription.UserPendingCryptoSubscriptionDetailReq) (res *subscription.UserPendingCryptoSubscriptionDetailRes, err error)
 }
 
 type IUserVat interface {

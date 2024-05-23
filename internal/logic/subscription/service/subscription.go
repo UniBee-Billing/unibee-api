@@ -337,7 +337,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	req.Quantity = utility.MaxInt64(1, req.Quantity)
 
 	var err error
-	utility.Assert(query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another pending or active subscription exist")
+	utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another active or incomplete subscription exist")
 
 	//setup vat from user
 	if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
@@ -590,6 +590,12 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
 		utility.Assert(one.Type == 0, "invalid code, code is from external")
+	}
+
+	existOne := query.GetLatestCreateOrProcessingSubscriptionByUserId(ctx, req.UserId, req.MerchantId)
+	if existOne != nil {
+		err := SubscriptionCancel(ctx, existOne.SubscriptionId, false, false, "CancelledByAnotherCreation")
+		utility.AssertError(err, "Subscription cancel error")
 	}
 
 	prepare, err := SubscriptionCreatePreview(ctx, &CreatePreviewInternalReq{
