@@ -107,7 +107,21 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 	if one == nil {
 		return nil, gerror.New("invoice not found, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
-	if one.Status == consts.InvoiceStatusFailed {
+	if one.Status == consts.InvoiceStatusFailed || one.Status == consts.InvoiceStatusCancelled {
+		if payment.Status == consts.PaymentSuccess {
+			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+				dao.Invoice.Columns().Status:           consts.InvoiceStatusReversed,
+				dao.Invoice.Columns().GmtModify:        gtime.Now(),
+				dao.Invoice.Columns().GatewayPaymentId: payment.GatewayPaymentId,
+				dao.Invoice.Columns().PaymentLink:      payment.Link,
+			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+			if err != nil {
+				g.Log().Errorf(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s error:%s", one.InvoiceId, payment.PaymentId, err.Error())
+				return nil, gerror.New("invoice reverse failed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+			} else {
+				return nil, gerror.New("invoice has reversed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+			}
+		}
 		return nil, gerror.New("invoice has failed, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 	}
 	var status = consts.InvoiceStatusProcessing

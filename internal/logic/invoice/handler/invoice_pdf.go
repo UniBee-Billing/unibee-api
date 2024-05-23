@@ -75,6 +75,8 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 		doc.SetStatus("Cancelled")
 	} else if unibInvoice.Status == consts.InvoiceStatusFailed {
 		doc.SetStatus("Failed")
+	} else if unibInvoice.Status == consts.InvoiceStatusReversed {
+		doc.SetStatus("Reversed")
 	}
 
 	doc.SetPaidDate(unibInvoice.GmtModify.Layout("2006-01-02"))

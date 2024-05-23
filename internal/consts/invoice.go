@@ -10,6 +10,7 @@ const (
 	InvoiceStatusPaid       = 3
 	InvoiceStatusFailed     = 4
 	InvoiceStatusCancelled  = 5
+	InvoiceStatusReversed   = 6
 )
 
 type InvoiceSendStatusEnum int
