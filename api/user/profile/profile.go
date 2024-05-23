@@ -2,7 +2,7 @@ package profile
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type GetReq struct {
@@ -10,7 +10,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	User *bean.UserAccountSimplify `json:"user" dc:"User"`
+	User *detail.UserAccountDetail `json:"user" dc:"User"`
 }
 
 type LogoutReq struct {
@@ -45,7 +45,7 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
-	User *bean.UserAccountSimplify `json:"user" dc:"User"`
+	User *detail.UserAccountDetail `json:"user" dc:"User"`
 }
 
 type PasswordResetReq struct {

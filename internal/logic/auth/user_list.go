@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"strings"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -30,12 +30,12 @@ type UserListInternalReq struct {
 }
 
 type UserListInternalRes struct {
-	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
+	UserAccounts []*detail.UserAccountDetail `json:"userAccounts" description:"UserAccounts" `
 	Total        int                         `json:"total" dc:"Total"`
 }
 
 func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInternalRes, err error) {
-	var mainList []*bean.UserAccountSimplify
+	var mainList []*entity.UserAccount
 	var total = 0
 	if req.Count <= 0 {
 		req.Count = 20
@@ -88,13 +88,17 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if err != nil {
 		return nil, err
 	}
-	return &UserListInternalRes{UserAccounts: mainList, Total: total}, nil
+	var resultList = make([]*detail.UserAccountDetail, 0)
+	for _, one := range mainList {
+		resultList = append(resultList, detail.ConvertUserAccountToDetail(ctx, one))
+	}
+	return &UserListInternalRes{UserAccounts: resultList, Total: total}, nil
 }
 
-func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*bean.UserAccountSimplify, err error) {
+func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list []*detail.UserAccountDetail, err error) {
 	//Will Search UserId|Email|UserName|CompanyName|SubscriptionId|VatNumber|InvoiceId||PaymentId
-	var mainList = make([]*bean.UserAccountSimplify, 0)
-	var mainMap = make(map[uint64]*bean.UserAccountSimplify)
+	var mainList = make([]*entity.UserAccount, 0)
+	var mainMap = make(map[uint64]*entity.UserAccount)
 	var isDeletes = []int{0}
 	var sortKey = "gmt_create desc"
 	m := dao.UserAccount.Ctx(ctx)
@@ -117,16 +121,16 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		if invoice != nil && invoice.UserId > 0 && invoice.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
 			if user != nil && mainMap[user.Id] == nil {
-				mainList = append(mainList, bean.SimplifyUserAccount(user))
-				mainMap[user.Id] = bean.SimplifyUserAccount(user)
+				mainList = append(mainList, user)
+				mainMap[user.Id] = user
 			}
 		}
 		payment := query.GetPaymentByPaymentId(ctx, searchKey)
 		if payment != nil && payment.UserId > 0 && payment.MerchantId == merchantId {
 			user := query.GetUserAccountById(ctx, payment.UserId)
 			if user != nil && mainMap[user.Id] == nil {
-				mainList = append(mainList, bean.SimplifyUserAccount(user))
-				mainMap[user.Id] = bean.SimplifyUserAccount(user)
+				mainList = append(mainList, user)
+				mainMap[user.Id] = user
 			}
 		}
 	}
@@ -147,11 +151,15 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		if len(likeList) > 0 {
 			for _, user := range likeList {
 				if mainMap[user.Id] == nil {
-					mainList = append(mainList, bean.SimplifyUserAccount(user))
-					mainMap[user.Id] = bean.SimplifyUserAccount(user)
+					mainList = append(mainList, user)
+					mainMap[user.Id] = user
 				}
 			}
 		}
 	}
-	return mainList, err
+	var resultList = make([]*detail.UserAccountDetail, 0)
+	for _, one := range mainList {
+		resultList = append(resultList, detail.ConvertUserAccountToDetail(ctx, one))
+	}
+	return resultList, err
 }

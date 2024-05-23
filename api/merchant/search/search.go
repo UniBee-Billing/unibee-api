@@ -3,6 +3,7 @@ package search
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type SearchReq struct {
@@ -18,6 +19,6 @@ type PrecisionMatchObject struct {
 
 type SearchRes struct {
 	PrecisionMatchObject *PrecisionMatchObject       `json:"precisionMatchObject" description:"PrecisionMatchObject" `
-	UserAccounts         []*bean.UserAccountSimplify `json:"matchUserAccounts" description:"MatchUserAccounts" `
+	UserAccounts         []*detail.UserAccountDetail `json:"matchUserAccounts" description:"MatchUserAccounts" `
 	Invoices             []*bean.InvoiceSimplify     `json:"matchInvoice" description:"MatchInvoice" `
 }

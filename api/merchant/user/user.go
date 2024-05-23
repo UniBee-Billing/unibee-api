@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 )
 
 type NewReq struct {
@@ -35,7 +36,7 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"User Account Object List" `
+	UserAccounts []*detail.UserAccountDetail `json:"userAccounts" description:"User Account Object List" `
 	Total        int                         `json:"total" dc:"Total"`
 }
 
@@ -45,7 +46,7 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	User *bean.UserAccountSimplify `json:"user" dc:"User"`
+	User *detail.UserAccountDetail `json:"user" dc:"User"`
 }
 
 type FrozenReq struct {
@@ -70,7 +71,7 @@ type SearchReq struct {
 }
 
 type SearchRes struct {
-	UserAccounts []*bean.UserAccountSimplify `json:"userAccounts" description:"UserAccounts" `
+	UserAccounts []*detail.UserAccountDetail `json:"userAccounts" description:"UserAccounts" `
 }
 
 type UpdateReq struct {

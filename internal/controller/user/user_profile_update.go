@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/user"
@@ -86,6 +87,6 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if err != nil {
 		return nil, err
 	}
-
-	return &profile.UpdateRes{}, nil
+	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+	return &profile.UpdateRes{User: detail.ConvertUserAccountToDetail(ctx, one)}, nil
 }
