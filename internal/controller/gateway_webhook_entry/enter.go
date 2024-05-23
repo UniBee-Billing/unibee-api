@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unibee/internal/logic/gateway/util"
 	"unibee/internal/logic/gateway/webhook"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -43,7 +44,16 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 			r.Response.RedirectTo(fmt.Sprintf("%s&%s", redirect.ReturnUrl, redirect.QueryPath))
 		}
 	} else {
-		r.Response.Writeln(utility.FormatToJsonString(redirect))
+		merchant := query.GetMerchantById(r.Context(), gateway.MerchantId)
+		if merchant != nil && len(merchant.Host) > 0 {
+			if strings.HasPrefix(merchant.Host, "http") {
+				r.Response.RedirectTo(merchant.Host)
+			} else {
+				r.Response.RedirectTo(fmt.Sprintf("http://%s", merchant.Host))
+			}
+		} else {
+			r.Response.Writeln(utility.FormatToJsonString(redirect))
+		}
 	}
 }
 
