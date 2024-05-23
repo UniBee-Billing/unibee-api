@@ -21,6 +21,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, sub.UserId)
+	//Try cancel current sub processing invoice
 	TryCancelSubscriptionLatestInvoice(ctx, sub)
 	var sendEmail = ""
 	if user != nil {
@@ -88,7 +89,6 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
-	//todo mark cancel other sub processing invoice
 	//New Invoice Send Email
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	if err != nil {
