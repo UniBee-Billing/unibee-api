@@ -7,10 +7,12 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	config2 "unibee/internal/cmd/config"
+	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"
+	"unibee/redismq"
 	"unibee/utility"
 )
 
@@ -36,6 +38,17 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s error:%s", userId, gatewayId, paymentMethodId, err.Error())
 	} else {
 		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s success", userId, gatewayId, paymentMethodId)
+	}
+	var oldGatewayId uint64 = 0
+	if len(user.GatewayId) > 0 {
+		oldGatewayId, _ = strconv.ParseUint(user.GatewayId, 10, 64)
+	}
+	if oldGatewayId != gatewayId || user.PaymentMethod != paymentMethodId {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicUserPaymentMethodChanged.Topic,
+			Tag:   redismq2.TopicUserPaymentMethodChanged.Tag,
+			Body:  strconv.FormatUint(user.Id, 10),
+		})
 	}
 }
 

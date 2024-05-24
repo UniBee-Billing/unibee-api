@@ -188,13 +188,15 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
 				}
 				gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-				sub.GatewayId = gatewayId
-				sub.GatewayDefaultPaymentMethod = paymentMethodId
-				_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
-					dao.Subscription.Columns().GmtModify:                   gtime.Now(),
-					dao.Subscription.Columns().GatewayId:                   gatewayId,
-					dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
-				}).Where(dao.Subscription.Columns().PendingUpdateId, pendingUpdate.PendingUpdateId).OmitNil().Update()
+				if sub != nil && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
+					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
+						dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+						dao.Subscription.Columns().GatewayId:                   gatewayId,
+						dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
+					}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+					sub.GatewayId = gatewayId
+					sub.GatewayDefaultPaymentMethod = paymentMethodId
+				}
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())

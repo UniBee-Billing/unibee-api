@@ -10,6 +10,7 @@ var (
 	TopicTest1                            = redismq.MQTopicEnum{"unibee", "test1", "redismq test1"}
 	TopicTest2                            = redismq.MQTopicEnum{"unibee", "test2", "redismq test2"}
 	TopicGatewayPayV2WebHookReceive       = redismq.MQTopicEnum{"unibee", "gatewaypaywebhookreceivev2", "gatewaypaywebhookv2"}
+	TopicUserPaymentMethodChanged         = redismq.MQTopicEnum{"unibee_user", "payment_method_changed", "user change payment method"}
 	TopicPaymentCreated                   = redismq.MQTopicEnum{"unibee_payment", "payment_created", "payment created"}
 	TopicPaymentChecker                   = redismq.MQTopicEnum{"unibee_payment", "payment_checker", "payment status checker"}
 	TopicPaymentCancel                    = redismq.MQTopicEnum{"unibee_payment", "payment_cancelled", "payment cancelled"}

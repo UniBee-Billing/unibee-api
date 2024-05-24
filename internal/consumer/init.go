@@ -6,5 +6,6 @@ import (
 	_ "unibee/internal/consumer/payment"
 	_ "unibee/internal/consumer/refund"
 	_ "unibee/internal/consumer/subscription"
+	_ "unibee/internal/consumer/user"
 	_ "unibee/internal/consumer/webhook"
 )

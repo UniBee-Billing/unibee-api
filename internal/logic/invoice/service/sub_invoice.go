@@ -46,6 +46,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		GatewayId:                      sub.GatewayId,
 		GatewayPaymentMethod:           sub.GatewayDefaultPaymentMethod,
 		Status:                         status,
+		SendNote:                       simplify.SendNote,
 		SendStatus:                     simplify.SendStatus,
 		SendEmail:                      sendEmail,
 		UniqueId:                       invoiceId,
