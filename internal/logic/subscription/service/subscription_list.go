@@ -39,7 +39,9 @@ func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.Sub
 		}
 	}
 	latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, one.LatestInvoiceId))
-	latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, latestInvoiceOne.DiscountCode))
+	if latestInvoiceOne != nil {
+		latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, one.MerchantId, latestInvoiceOne.DiscountCode))
+	}
 	return &detail.SubscriptionDetail{
 		User:                                bean.SimplifyUserAccount(user),
 		Subscription:                        bean.SimplifySubscription(one),
