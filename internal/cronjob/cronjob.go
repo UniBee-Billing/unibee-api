@@ -38,7 +38,7 @@ func StartCronJobs() {
 	}
 	// every 1 min
 	var other1MinTask = "Other1MinTask"
-	_, err = gcron.AddSingleton(ctx, "@every 1m", func(ctx context.Context) {
+	_, err = gcron.Add(ctx, "@every 1m", func(ctx context.Context) {
 		discount.TaskForExpireDiscounts(ctx)
 		invoice.TaskForExpireInvoices(ctx)
 	}, other1MinTask)
@@ -48,8 +48,9 @@ func StartCronJobs() {
 
 	// every 10 min
 	var other10MinTask = "Other10MinTask"
-	_, err = gcron.AddSingleton(ctx, "@every 10m", func(ctx context.Context) {
+	_, err = gcron.Add(ctx, "@every 10m", func(ctx context.Context) {
 		sub.TaskForSubscriptionTrackAfterCancelledOrExpired(ctx, other10MinTask)
+		sub.TaskForSubscriptionInitFailed(ctx, other10MinTask)
 	}, other10MinTask)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other10MinTask, err.Error())
@@ -57,7 +58,7 @@ func StartCronJobs() {
 
 	// every Hour
 	var hourTask = "OtherTask"
-	_, err = gcron.AddSingleton(ctx, "@hourly", func(ctx context.Context) {
+	_, err = gcron.Add(ctx, "@hourly", func(ctx context.Context) {
 		gateway_log.TaskForDeleteChannelLogs(ctx)
 		gateway_log.TaskForDeleteWebhookMessage(ctx)
 	}, hourTask)

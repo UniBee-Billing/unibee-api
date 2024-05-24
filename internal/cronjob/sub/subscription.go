@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/subscription/billingcycle/cycle"
+	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -50,7 +51,7 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 			g.Log().Errorf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk error:%s", err.Error())
 		}
 		g.Log().Infof(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk WalkResult:%s", utility.MarshalToJsonString(walk))
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 
 	g.Log().Debug(ctx, taskName, "End......")
@@ -88,8 +89,39 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 			g.Log().Errorf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired error:%s", err.Error())
 		}
 		g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired WalkResult:%s", utility.MarshalToJsonString(walk))
-		time.Sleep(10 * time.Second)
+		time.Sleep(2 * time.Second)
 	}
 
 	g.Log().Debug(ctx, taskName, "TaskForSubscriptionTrackAfterCancelledOrExpired End......")
+}
+
+func TaskForSubscriptionInitFailed(ctx context.Context, taskName string) {
+	g.Log().Debug(ctx, taskName, "TaskForSubscriptionInitFailed Start......")
+	var timeNow = gtime.Now().Timestamp()
+
+	var subs []*entity.Subscription
+	var status = []int{consts.SubStatusInit}
+	// query sub which dunningTime expired
+	q := dao.Subscription.Ctx(ctx).
+		Where(dao.Subscription.Columns().IsDeleted, 0).
+		WhereLT(dao.Subscription.Columns().CreateTime, timeNow-600). //  10 min
+		Where(dao.Subscription.Columns().Type, consts.SubTypeUniBeeControl).
+		WhereIn(dao.Subscription.Columns().Status, status)
+	err := q.Limit(0, 10).
+		OmitEmpty().Scan(&subs)
+	if err != nil {
+		g.Log().Errorf(ctx, "%s Error:%s", taskName, err.Error())
+		return
+	}
+
+	for _, sub := range subs {
+		err = service.SubscriptionCancel(ctx, sub.SubscriptionId, false, false, "CancelledByInitFailure")
+		if err != nil {
+			g.Log().Errorf(ctx, "TaskForSubscriptionInitFailed subId:%s error:%s", sub.SubscriptionId, err.Error())
+		} else {
+			g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s", sub.SubscriptionId)
+		}
+		time.Sleep(2 * time.Second)
+	}
+
 }
