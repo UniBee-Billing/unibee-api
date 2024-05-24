@@ -26,7 +26,7 @@ func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req
 		user = query.GetUserAccountById(ctx, req.UserId)
 	}
 	utility.Assert(user != nil, "user not found")
-	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
+	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, user.Id, _interface.GetMerchantId(ctx))
 	if one != nil {
 		detail, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		if err == nil {

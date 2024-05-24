@@ -154,6 +154,12 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	if err != nil || affected != 1 {
 		return nil, err
 	}
+	// send the payment status checker mq
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismqcmd.TopicRefundChecker.Topic,
+		Tag:   redismqcmd.TopicRefundChecker.Tag,
+		Body:  one.RefundId,
+	})
 
 	if err != nil {
 		return nil, err

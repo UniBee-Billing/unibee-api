@@ -22,12 +22,16 @@ func (t MerchantWebhookListener) GetTag() string {
 func (t MerchantWebhookListener) Consume(ctx context.Context, message *redismq.Message) redismq.Action {
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
+	if message.ReconsumeTimes > 7 {
+		g.Log().Debugf(ctx, "Webhook_Subscription NewMerchantWebhookListener_Commit By Reach the Webhook limit 8 Message:%s", utility.MarshalToJsonString(message))
+		return redismq.CommitMessage
+	}
 	g.Log().Debugf(ctx, "Webhook_Subscription NewMerchantWebhookListener Receive Message:%s", utility.MarshalToJsonString(message))
 	var webhookMessage *WebhookMessage
 	err := utility.UnmarshalFromJsonString(message.Body, &webhookMessage)
 
 	if err != nil {
-		g.Log().Errorf(ctx, "Webhook_Subscription NewMerchantWebhookListener UnmarshalFromJsonString Error:%s", err.Error())
+		g.Log().Errorf(ctx, "Webhook_Subscription NewMerchantWebhookListener_Resume By UnmarshalFromJsonString Error:%s", err.Error())
 		return redismq.ReconsumeLater
 	}
 

@@ -107,7 +107,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		createPayContext.Pay.InvoiceId = utility.CreateInvoiceId()
 	}
 
-	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPayCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
+	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCreated, createPayContext.Pay.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			//transaction gateway payment
 			if len(createPayContext.Pay.UniqueId) == 0 {
@@ -184,6 +184,13 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	if err != nil || affected != 1 {
 		return nil, err
 	}
+	// send the payment status checker mq
+	_, _ = redismq.Send(&redismq.Message{
+		Topic: redismqcmd.TopicPaymentChecker.Topic,
+		Tag:   redismqcmd.TopicPaymentChecker.Tag,
+		Body:  createPayContext.Pay.PaymentId,
+	})
+
 	gatewayInternalPayResult.Link = paymentLink
 	createPayContext.Pay.Link = paymentLink
 	gatewayInternalPayResult.Invoice = invoice
