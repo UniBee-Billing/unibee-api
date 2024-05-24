@@ -260,10 +260,10 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod 
 			g.Log().Print(ctx, "CreateSubInvoicePaymentDefaultAutomatic CancelLastPayment PaymentGatewayCancel:%s err:", lastPayment.PaymentId, err.Error())
 		}
 	}
-	user := query.GetUserAccountById(ctx, invoice.UserId)
+	subUser := query.GetUserAccountById(ctx, invoice.UserId)
 	var email = ""
-	if user != nil {
-		email = user.Email
+	if subUser != nil {
+		email = subUser.Email
 	}
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	if gateway == nil {

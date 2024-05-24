@@ -187,6 +187,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
 					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
 				}
+				gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+				sub.GatewayId = gatewayId
+				sub.GatewayDefaultPaymentMethod = paymentMethodId
+				_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
+					dao.Subscription.Columns().GmtModify:                   gtime.Now(),
+					dao.Subscription.Columns().GatewayId:                   gatewayId,
+					dao.Subscription.Columns().GatewayDefaultPaymentMethod: paymentMethodId,
+				}).Where(dao.Subscription.Columns().PendingUpdateId, pendingUpdate.PendingUpdateId).OmitNil().Update()
 				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
@@ -217,8 +225,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				if latestInvoice != nil && (timeNow-lastAutomaticTryTime) > 86400 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
 					// finish the payment
-					gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, latestInvoice, gatewayId, false, "", "SubscriptionBillingCycle")
+					//gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice.GatewayPaymentMethod, latestInvoice, latestInvoice.GatewayId, false, "", "SubscriptionBillingCycle")
 					if err != nil {
 						g.Log().Print(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 						return nil, err

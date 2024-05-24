@@ -44,6 +44,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
 		Currency:                       sub.Currency,
 		GatewayId:                      sub.GatewayId,
+		GatewayPaymentMethod:           sub.GatewayDefaultPaymentMethod,
 		Status:                         status,
 		SendStatus:                     simplify.SendStatus,
 		SendEmail:                      sendEmail,
