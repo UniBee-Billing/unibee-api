@@ -44,7 +44,11 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 			newGateway := query.GetGatewayById(ctx, *req.GatewayId)
 			utility.Assert(newGateway.GatewayType != consts.GatewayTypeWireTransfer, "Can't change gateway to wire transfer, Please contact billing admin")
 		}
-		user.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, *req.PaymentMethodId)
+		var paymentMethodId = ""
+		if req.PaymentMethodId != nil {
+			paymentMethodId = *req.PaymentMethodId
+		}
+		user.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId)
 	}
 
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {

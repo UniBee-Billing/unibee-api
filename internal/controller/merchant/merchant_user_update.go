@@ -16,7 +16,11 @@ import (
 
 func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *user.UpdateRes, err error) {
 	if req.GatewayId != nil && *req.GatewayId > 0 {
-		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, *req.PaymentMethodId)
+		var paymentMethodId = ""
+		if req.PaymentMethodId != nil {
+			paymentMethodId = *req.PaymentMethodId
+		}
+		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, paymentMethodId)
 	}
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
 		gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
