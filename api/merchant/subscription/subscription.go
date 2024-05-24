@@ -43,7 +43,7 @@ type DetailRes struct {
 }
 
 type UserPendingCryptoSubscriptionDetailReq struct {
-	g.Meta         `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get.post" summary:"UserPendingCryptoSubscriptionDetail"`
+	g.Meta         `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserPendingCryptoSubscriptionDetail"`
 	UserId         uint64 `json:"userId" dc:"UserId"`
 	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 }
