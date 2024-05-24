@@ -61,7 +61,6 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		return nil
 	}
 	gatewayId, _ := strconv.ParseUint(one.GatewayId, 10, 64)
-
 	return &UserAccountDetail{
 		Id:                 one.Id,
 		MerchantId:         one.MerchantId,
