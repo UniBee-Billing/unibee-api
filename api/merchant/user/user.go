@@ -99,6 +99,7 @@ type UpdateReq struct {
 }
 
 type UpdateRes struct {
+	User *detail.UserAccountDetail `json:"user" dc:"User"`
 }
 
 type ChangeGatewayReq struct {

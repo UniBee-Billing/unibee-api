@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean/detail"
 	"unibee/api/merchant/user"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
@@ -62,5 +63,6 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 	if err != nil {
 		return nil, err
 	}
-	return &user.UpdateRes{}, nil
+	one := query.GetUserAccountById(ctx, req.UserId)
+	return &user.UpdateRes{User: detail.ConvertUserAccountToDetail(ctx, one)}, nil
 }
