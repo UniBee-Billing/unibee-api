@@ -443,11 +443,16 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	utility.Assert(one != nil, "invoice not found, InvoiceId:"+invoiceId)
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not process status, InvoiceId:"+invoiceId)
 	utility.Assert(one.TotalAmount != 0, "invoice totalAmount not zero, InvoiceId:"+invoiceId)
-	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
-	utility.Assert(payment != nil, "invoice payment not found")
 	gateway := query.GetGatewayById(ctx, one.GatewayId)
 	utility.Assert(gateway != nil, "invoice gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
+	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
+	if payment == nil {
+		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", one, one.GatewayId, true, "", "MarkWireTransferInvoiceAsSuccess")
+		utility.AssertError(err, "Mark as success error")
+		payment = res.Payment
+		utility.Assert(payment != nil, "payment not found")
+	}
 	err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 		PaymentId:              payment.PaymentId,
 		GatewayPaymentIntentId: transferNumber,
