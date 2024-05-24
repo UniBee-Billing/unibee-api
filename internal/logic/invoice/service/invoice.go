@@ -27,7 +27,7 @@ import (
 
 func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
-	if one.Status == consts.InvoiceStatusProcessing {
+	if one != nil && one.Status == consts.InvoiceStatusProcessing {
 		err := CancelProcessingInvoice(ctx, one.InvoiceId)
 		if err != nil {
 			g.Log().Errorf(ctx, `TryCancelSubscriptionLatestInvoice failure error:%s`, err.Error())
