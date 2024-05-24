@@ -240,8 +240,9 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		if req.Amount != nil {
 			utility.Assert(*req.Amount > 0, "Amount value should > 0")
 		}
-		if req.Currency != nil {
+		if req.Currency != nil && len(*req.Currency) > 0 {
 			utility.Assert(currency.IsFiatCurrencySupport(*req.Currency), "Currency not support")
+			one.Currency = *req.Currency
 		}
 
 		if req.IntervalCount != nil && *req.IntervalCount < 1 {
