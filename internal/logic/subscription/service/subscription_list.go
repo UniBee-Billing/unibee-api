@@ -104,7 +104,9 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 			user.Password = ""
 		}
 		latestInvoiceOne := bean.SimplifyInvoice(query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId))
-		latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, sub.MerchantId, latestInvoiceOne.DiscountCode))
+		if latestInvoiceOne != nil {
+			latestInvoiceOne.Discount = bean.SimplifyMerchantDiscountCode(query.GetDiscountByCode(ctx, sub.MerchantId, latestInvoiceOne.DiscountCode))
+		}
 		list = append(list, &detail.SubscriptionDetail{
 			User:          bean.SimplifyUserAccount(user),
 			Subscription:  bean.SimplifySubscription(sub),
