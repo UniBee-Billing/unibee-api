@@ -5,6 +5,7 @@ import (
 	"unibee/api/bean"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/subscription/service"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -12,7 +13,18 @@ import (
 )
 
 func (c *ControllerSubscription) UserSubscriptionDetail(ctx context.Context, req *subscription.UserSubscriptionDetailReq) (res *subscription.UserSubscriptionDetailRes, err error) {
-	user := query.GetUserAccountById(ctx, req.UserId)
+	var user *entity.UserAccount
+	if _interface.Context().Get(ctx).IsOpenApiCall {
+		if req.UserId == 0 {
+			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil, one of it is required")
+			user = query.GetUserAccountByExternalUserId(ctx, _interface.GetMerchantId(ctx), req.ExternalUserId)
+			utility.AssertError(err, "Server Error")
+		} else {
+			user = query.GetUserAccountById(ctx, req.UserId)
+		}
+	} else {
+		user = query.GetUserAccountById(ctx, req.UserId)
+	}
 	utility.Assert(user != nil, "user not found")
 	one := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
 	if one != nil {

@@ -327,9 +327,9 @@ func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 // 4000 0000 0000 9995
 func (s Stripe) setUnibeeAppInfo() {
 	stripe.SetAppInfo(&stripe.AppInfo{
-		Name:    "unibee.server",
-		Version: "0.0.1",
-		URL:     "https://unibee.dev",
+		Name:    "UniBee.api",
+		Version: "1.0.0",
+		URL:     "https://merchant.unibee.dev",
 	})
 }
 

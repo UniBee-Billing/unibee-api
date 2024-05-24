@@ -43,8 +43,9 @@ type DetailRes struct {
 }
 
 type UserPendingCryptoSubscriptionDetailReq struct {
-	g.Meta `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get" summary:"UserPendingCryptoSubscriptionDetail"`
-	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
+	g.Meta         `path:"/user_pending_crypto_subscription_detail" tags:"Subscription" method:"get.post" summary:"UserPendingCryptoSubscriptionDetail"`
+	UserId         uint64 `json:"userId" dc:"UserId" v:"required"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 }
 
 type UserPendingCryptoSubscriptionDetailRes struct {
@@ -261,8 +262,9 @@ type UpdateRes struct {
 }
 
 type UserSubscriptionDetailReq struct {
-	g.Meta `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserSubscriptionDetail"`
-	UserId uint64 `json:"userId" dc:"UserId" v:"required"`
+	g.Meta         `path:"/user_subscription_detail" tags:"Subscription" method:"get,post" summary:"UserSubscriptionDetail"`
+	UserId         uint64 `json:"userId" dc:"UserId"`
+	ExternalUserId string `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
 }
 
 type UserSubscriptionDetailRes struct {
