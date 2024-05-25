@@ -114,6 +114,14 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
 			returnUrl = payment.ReturnUrl
+			if params.Contains("PayerID") {
+				customerId := params.Get("PayerID").String()
+				var gatewayPaymentMethodId = ""
+				if params.Contains("token") {
+					gatewayPaymentMethodId = params.Get("token").String()
+				}
+				_, _ = query.CreateOrUpdateGatewayUser(r.Context(), payment.UserId, gateway.Id, customerId, gatewayPaymentMethodId)
+			}
 		}
 		if r.Get("success").Bool() {
 			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
