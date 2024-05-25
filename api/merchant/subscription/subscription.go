@@ -149,7 +149,7 @@ type CreatePreviewReq struct {
 	UserId         uint64                 `json:"userId" dc:"UserId"`
 	PlanId         uint64                 `json:"planId" dc:"PlanId" v:"required"`
 	Quantity       int64                  `json:"quantity" dc:"Quantity" `
-	GatewayId      *uint64                `json:"gatewayId" dc:"Id" `
+	GatewayId      *uint64                `json:"gatewayId" dc:"GatewayId" `
 	AddonParams    []*bean.PlanAddonParam `json:"addonParams" dc:"addonParams" `
 	VatCountryCode string                 `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber      string                 `json:"vatNumber" dc:"VatNumber" `
@@ -189,7 +189,7 @@ type CreateReq struct {
 	Email              string                      `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
 	UserId             uint64                      `json:"userId" dc:"UserId"`
 	Quantity           int64                       `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId          *uint64                     `json:"gatewayId" dc:"Id" `
+	GatewayId          *uint64                     `json:"gatewayId" dc:"GatewayId" `
 	AddonParams        []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
