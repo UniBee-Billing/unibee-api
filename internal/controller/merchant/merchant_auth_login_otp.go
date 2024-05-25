@@ -19,7 +19,7 @@ func (c *ControllerAuth) LoginOtp(ctx context.Context, req *auth.LoginOtpReq) (r
 	}
 
 	verificationCode := utility.GenerateRandomCode(6)
-	fmt.Printf("verification :%s", verificationCode)
+	fmt.Printf("verification :%s\n", verificationCode)
 	_, err = g.Redis().Set(ctx, req.Email+"-MerchantAuth-Verify", verificationCode)
 	utility.AssertError(err, "Server Error")
 	_, err = g.Redis().Expire(ctx, req.Email+"-MerchantAuth-Verify", 3*60)
