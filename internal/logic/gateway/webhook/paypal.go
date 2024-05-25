@@ -3,16 +3,21 @@ package webhook
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"net/http"
 	"strings"
+	"unibee/internal/consts"
 	_gateway "unibee/internal/logic/gateway"
+	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
+	handler2 "unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -110,8 +115,82 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 }
 
 func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	params, err := r.GetJson()
+	if err != nil {
+		g.Log().Printf(r.Context(), "Paypal redirect params:%s err:%s", params, err.Error())
+		r.Response.Writeln(err)
+		return
+	}
+	payIdStr := r.Get("paymentId").String()
+	var response string
+	var status = false
+	var returnUrl = ""
+	if len(payIdStr) > 0 {
+		response = ""
+		//Payment Redirect
+		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
+		if payment != nil {
+			returnUrl = payment.ReturnUrl
+		}
+		if r.Get("success").Bool() {
+			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
+				response = "paymentId invalid"
+			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PaymentSuccess {
+				response = "success"
+				status = true
+			} else {
+				//find
+				_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), payment)
+				if err != nil {
+					g.Log().Errorf(r.Context(), "GatewayRedirect paypal GatewayCapture error:%s", err.Error())
+				}
+				paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, payment.GatewayPaymentId, payment)
+				if err != nil {
+					response = fmt.Sprintf("%v", err)
+				} else {
+					if paymentIntentDetail.Status == consts.PaymentSuccess {
+						err := handler2.HandlePaySuccess(r.Context(), &handler2.HandlePayReq{
+							PaymentId:              payment.PaymentId,
+							GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
+							GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
+							TotalAmount:            paymentIntentDetail.TotalAmount,
+							PayStatusEnum:          consts.PaymentSuccess,
+							PaidTime:               paymentIntentDetail.PaidTime,
+							PaymentAmount:          paymentIntentDetail.PaymentAmount,
+							Reason:                 paymentIntentDetail.Reason,
+							GatewayPaymentMethod:   paymentIntentDetail.GatewayPaymentMethod,
+						})
+						if err != nil {
+							response = fmt.Sprintf("%v", err)
+						} else {
+							response = "payment success"
+							status = true
+						}
+					} else if paymentIntentDetail.Status == consts.PaymentFailed {
+						err := handler2.HandlePayFailure(r.Context(), &handler2.HandlePayReq{
+							PaymentId:              payment.PaymentId,
+							GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
+							GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
+							PayStatusEnum:          consts.PaymentFailed,
+							Reason:                 paymentIntentDetail.Reason,
+						})
+						if err != nil {
+							response = fmt.Sprintf("%v", err)
+						}
+					}
+				}
+			}
+		} else {
+			response = "user cancelled"
+		}
+	}
+	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, "", nil, gateway)
+	return &gateway_bean.GatewayRedirectResp{
+		Status:    status,
+		Message:   response,
+		ReturnUrl: returnUrl,
+		QueryPath: r.URL.RawQuery,
+	}, nil
 }
 
 func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.MerchantGateway) {

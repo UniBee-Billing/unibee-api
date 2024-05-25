@@ -26,3 +26,11 @@ func GetPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) st
 		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v&session_id={CHECKOUT_SESSION_ID}", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
 	}
 }
+
+func GetPaypalPaymentRedirectEntranceUrlCheckout(pay *entity.Payment, success bool) string {
+	if len(pay.SubscriptionId) > 0 {
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&subId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, pay.SubscriptionId, success)
+	} else {
+		return fmt.Sprintf("%s/payment/redirect/%d/forward?paymentId=%s&success=%v", config.GetConfigInstance().Server.GetServerPath(), pay.GatewayId, pay.PaymentId, success)
+	}
+}

@@ -192,6 +192,11 @@ type (
 		Value    string `json:"value"`
 	}
 
+	ExperienceContext struct {
+		ReturnURL string `json:"return_url,omitempty"`
+		CancelURL string `json:"cancel_url,omitempty"`
+	}
+
 	// ApplicationContext struct
 	//Doc: https://developer.paypal.com/docs/api/subscriptions/v1/#definition-application_context
 	ApplicationContext struct {
@@ -1086,15 +1091,16 @@ type (
 
 	// PaymentSourceCard structure
 	PaymentSourceCard struct {
-		ID             string                   `json:"id,omitempty"`
-		Name           string                   `json:"name,omitempty"`
-		Number         string                   `json:"number,omitempty"`
-		Expiry         string                   `json:"expiry,omitempty"`
-		SecurityCode   string                   `json:"security_code,omitempty"`
-		LastDigits     string                   `json:"last_digits,omitempty"`
-		CardType       string                   `json:"card_type,omitempty"`
-		BillingAddress *CardBillingAddress      `json:"billing_address,omitempty"`
-		Attributes     *PaymentSourceAttributes `json:"attributes,omitempty"`
+		ID                string                   `json:"id,omitempty"`
+		Name              string                   `json:"name,omitempty"`
+		Number            string                   `json:"number,omitempty"`
+		Expiry            string                   `json:"expiry,omitempty"`
+		SecurityCode      string                   `json:"security_code,omitempty"`
+		LastDigits        string                   `json:"last_digits,omitempty"`
+		CardType          string                   `json:"card_type,omitempty"`
+		BillingAddress    *CardBillingAddress      `json:"billing_address,omitempty"`
+		Attributes        *PaymentSourceAttributes `json:"attributes,omitempty"`
+		ExperienceContext *ExperienceContext       `json:"experience_context,omitempty"`
 	}
 
 	// CardBillingAddress structure

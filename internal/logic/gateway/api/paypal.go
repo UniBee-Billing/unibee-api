@@ -161,6 +161,18 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 					Amount: &paypal.PurchaseUnitAmount{
 						Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 						Currency: strings.ToUpper(createPayContext.Pay.Currency),
+						Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+							ItemTotal: &paypal.Money{
+								Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+								Currency: strings.ToUpper(createPayContext.Pay.Currency),
+							},
+							Shipping:         nil,
+							Handling:         nil,
+							TaxTotal:         nil,
+							Insurance:        nil,
+							ShippingDiscount: nil,
+							Discount:         nil,
+						},
 					},
 					SoftDescriptor: productName,
 					Items:          items,
@@ -168,12 +180,18 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			},
 			&paypal.CreateOrderPayer{},
 			&paypal.PaymentSource{
-				Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-					Vault: paypal.PaymentSourceAttributesVault{
-						StoreInVault: "ON_SUCCESS",
+				Card: &paypal.PaymentSourceCard{
+					Attributes: &paypal.PaymentSourceAttributes{
+						Vault: paypal.PaymentSourceAttributesVault{
+							StoreInVault: "ON_SUCCESS",
+						},
+						Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
 					},
-					Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-				}},
+					ExperienceContext: &paypal.ExperienceContext{
+						ReturnURL: webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
+						CancelURL: webhook2.GetPaypalPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
+					},
+				},
 			},
 			&paypal.ApplicationContext{
 				BrandName:          "",
@@ -181,10 +199,8 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				ShippingPreference: "",
 				UserAction:         "",
 				PaymentMethod:      paypal.PaymentMethod{},
-				ReturnURL:          webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
-				CancelURL:          webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
 			},
-			utility.CreatePaymentId(),
+			createPayContext.Pay.PaymentId,
 		)
 		if err != nil {
 			return nil, err

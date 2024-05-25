@@ -67,11 +67,15 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
 	var response = string(res)
+	var responseMessage = "not success"
+	if strings.Compare(response, "success") == 0 {
+		responseMessage = response
+	}
 	if err != nil {
 		response = utility.MarshalToJsonString(err)
-		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", webhookMessage.Url, response, err.Error())
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s error\n", "POST", webhookMessage.Url, responseMessage)
 	} else {
-		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, response)
+		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", webhookMessage.Url, responseMessage)
 	}
 	one := &entity.MerchantWebhookLog{
 		MerchantId:     webhookMessage.MerchantId,
