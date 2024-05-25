@@ -153,11 +153,13 @@ func (s SubscriptionPaymentCallback) PaymentCancelCallback(ctx context.Context, 
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
 			sub := query.GetSubscriptionBySubscriptionId(ctx, payment.SubscriptionId)
 			utility.Assert(sub != nil, "payment sub not found")
-			pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
-			if pendingSubUpdate != nil {
-				_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.PendingUpdateId)
-				if err != nil {
-					utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
+			if invoice != nil {
+				pendingSubUpdate := query.GetUnfinishedSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
+				if pendingSubUpdate != nil {
+					_, err := handler.HandlePendingUpdatePaymentFailure(ctx, pendingSubUpdate.PendingUpdateId)
+					if err != nil {
+						utility.AssertError(err, "PaymentFailureCallback_PaymentFailureForPendingUpdate")
+					}
 				}
 			}
 		}
