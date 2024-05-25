@@ -57,7 +57,7 @@ func SetupAllWebhooksBackground() {
 
 		var list []*entity.MerchantGateway
 		err = dao.MerchantGateway.Ctx(ctx).
-			Where(dao.MerchantGateway.Columns().GatewayName, "stripe").
+			WhereIn(dao.MerchantGateway.Columns().GatewayName, []string{"stripe", "paypal"}).
 			Where(dao.MerchantGateway.Columns().IsDeleted, 0).
 			Scan(&list)
 		if err != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/net/ghttp"
 	"net/http"
@@ -54,19 +53,37 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 	if err != nil {
 		return err
 	}
-	if len(result.Webhooks) > 1 {
-		return gerror.New("webhook endpoints count > 1")
+	webhookUrl := _gateway.GetPaymentWebhookEntranceUrl(gateway.Id)
+	var targetEventTypes = []paypal.WebhookEventType{
+		{Name: "PAYMENT.SALE.COMPLETED"},
+		{Name: "PAYMENT.SALE.REFUNDED"},
+		{Name: "PAYMENT.SALE.REVERSED"},
+		{Name: "CHECKOUT.ORDER.COMPLETED"},
+		{Name: "CHECKOUT.ORDER.APPROVED"},
+		{Name: "CHECKOUT.PAYMENT-APPROVAL.REVERSED"},
+		{Name: "VAULT.PAYMENT-TOKEN.CREATED"},
+		{Name: "VAULT.PAYMENT-TOKEN.DELETED"},
+		{Name: "VAULT.PAYMENT-TOKEN.DELETION-INITIATED"},
 	}
-	//过滤不可用
-	if len(result.Webhooks) == 0 {
-		//创建
+	var one *paypal.Webhook
+	for _, endpoint := range result.Webhooks {
+		if strings.Compare(endpoint.URL, webhookUrl) == 0 {
+			if len(endpoint.EventTypes) != len(targetEventTypes) {
+				err = client.DeleteWebhook(ctx, endpoint.ID)
+				if err != nil {
+					g.Log().Errorf(ctx, "Delete Paypal Webhook Endpoint error:%s", err.Error())
+					return err
+				}
+			} else {
+				one = &endpoint
+				break
+			}
+		}
+	}
+	if one == nil {
 		param := &paypal.CreateWebhookRequest{
-			URL: _gateway.GetPaymentWebhookEntranceUrl(gateway.Id),
-			EventTypes: []paypal.WebhookEventType{
-				{Name: "PAYMENT.SALE.COMPLETED"},
-				{Name: "PAYMENT.SALE.REFUNDED"},
-				{Name: "PAYMENT.SALE.REVERSED"},
-			},
+			URL:        webhookUrl,
+			EventTypes: targetEventTypes,
 		}
 		response, err := client.CreateWebhook(ctx, param)
 		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", param, response, err, "", nil, gateway)
@@ -76,41 +93,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 		if err != nil {
 			return nil
 		}
-		//更新 secret
-		//utility.Assert(len(result.Secret) > 0, "secret is nil")
-		//err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, result.Secret)
-		//if err != nil {
-		//	return err
-		//}
-	} else {
-		utility.Assert(len(result.Webhooks) == 1, "internal webhook update, count is not 1")
-		//检查并更新, todo mark 优化检查逻辑，如果 evert 一致不用发起更新
-		webhook := result.Webhooks[0]
-		//utility.Assert(strings.Compare(result.Status, "enabled") == 0, "webhook not status enabled after updated")// todo mark 需要检查里面的每一项
-		param := []paypal.WebhookField{
-			{
-				Operation: "replace",
-				Path:      "/event_types",
-				Value: []paypal.WebhookEventType{
-					{Name: "PAYMENT.SALE.COMPLETED"},
-					{Name: "PAYMENT.SALE.REFUNDED"},
-					{Name: "PAYMENT.SALE.REVERSED"},
-				},
-			},
-			{
-				Operation: "replace",
-				Path:      "/url",
-				Value:     strings.Replace(_gateway.GetPaymentWebhookEntranceUrl(gateway.Id), "http://", "https://", 1), //paypal 只支持 https
-			},
-		}
-		response, err := client.UpdateWebhook(ctx, webhook.ID, param)
-		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", param, response, err, webhook.ID, nil, gateway)
-		if err != nil && strings.Compare(err.(*paypal.ErrorResponse).Name, "WEBHOOK_PATCH_REQUEST_NO_CHANGE") != 0 {
-			//WEBHOOK_PATCH_REQUEST_NO_CHANGE 忽略没有更改的错误
-			return err
-		}
 	}
-
 	return nil
 }
 
@@ -184,7 +167,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 			response = "user cancelled"
 		}
 	}
-	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, "", nil, gateway)
+	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
@@ -217,6 +200,37 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		eventType := jsonData.Get("event_type").String()
 		var responseBack = http.StatusOK
 		switch eventType {
+		case "CHECKOUT.ORDER.COMPLETED", "CHECKOUT.ORDER.APPROVED", "CHECKOUT.PAYMENT-APPROVAL.REVERSED":
+			resource := jsonData.GetJson("resource")
+			if resource == nil || !resource.Contains("id") {
+				g.Log().Errorf(r.Context(), "Webhook Gateway:%s-%d, Error parsing webhook resource is nil\n", gateway.GatewayName, gateway.Id)
+				r.Response.WriteHeader(http.StatusBadRequest)
+				responseBack = http.StatusBadRequest
+			} else {
+				g.Log().Infof(r.Context(), "Webhook Gateway:%s-%d, Subscription updated for %d.", gateway.GatewayName, gateway.Id, resource.Get("id").String())
+				// Then define and call a func to handle the successful attachment of a PaymentMethod.
+				gatewayPaymentId := resource.Get("id").String()
+				payment := query.GetPaymentByGatewayPaymentId(r.Context(), gatewayPaymentId)
+				if payment != nil {
+					if eventType == "CHECKOUT.ORDER.APPROVED" {
+						_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), payment)
+						if err != nil {
+							g.Log().Errorf(r.Context(), "Webhook Gateway paypal GatewayCapture error:%s", err.Error())
+						}
+					}
+					err = ProcessPaymentWebhook(r.Context(), payment.PaymentId, gatewayPaymentId, gateway)
+					if err != nil {
+						g.Log().Errorf(r.Context(), "Webhook Channel:%s-%d, ProcessPaymentWebhook error:%s\n", gateway.GatewayName, gateway.Id, err.Error())
+						r.Response.WriteHeader(http.StatusBadRequest)
+						responseBack = http.StatusBadRequest
+					}
+				} else {
+					g.Log().Errorf(r.Context(), "Webhook Channel:%s-%d, Error Payment not match: %v\n", gateway.GatewayName, gateway.Id, err.Error())
+					r.Response.WriteHeader(http.StatusBadRequest)
+					responseBack = http.StatusBadRequest
+				}
+			}
+		case "VAULT.PAYMENT-TOKEN.CREATED", "VAULT.PAYMENT-TOKEN.DELETED", "VAULT.PAYMENT-TOKEN.DELETION-INITIATED":
 
 		default:
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled event type: %s\n", gateway.GatewayName, eventType)

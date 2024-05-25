@@ -131,7 +131,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 			response = "user cancelled"
 		}
 	}
-	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, "", nil, gateway)
+	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
