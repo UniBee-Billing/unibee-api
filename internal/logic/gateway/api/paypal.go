@@ -10,6 +10,7 @@ import (
 	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	webhook2 "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -41,8 +42,7 @@ func (p Paypal) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.G
 }
 
 func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
@@ -119,8 +119,60 @@ func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 }
 
 func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
+	c, _ := NewClient(createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	if createPayContext.CheckoutMode || !createPayContext.PayImmediate {
+		detail, err := c.CreateOrder(
+			ctx,
+			paypal.OrderIntentCapture,
+			[]paypal.PurchaseUnitRequest{
+				{
+					Amount: &paypal.PurchaseUnitAmount{
+						Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+						Currency: strings.ToUpper(createPayContext.Pay.Currency),
+					},
+				},
+			},
+			&paypal.CreateOrderPayer{},
+			&paypal.PaymentSource{
+				Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
+					Vault: paypal.PaymentSourceAttributesVault{
+						StoreInVault: "ON_SUCCESS",
+					},
+					Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
+				}},
+			},
+			&paypal.ApplicationContext{
+				BrandName:          "",
+				Locale:             "",
+				ShippingPreference: "",
+				UserAction:         "",
+				PaymentMethod:      paypal.PaymentMethod{},
+				ReturnURL:          webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, true),
+				CancelURL:          webhook2.GetPaymentRedirectEntranceUrlCheckout(createPayContext.Pay, false),
+			},
+			utility.CreatePaymentId(),
+		)
+		if err != nil {
+			return nil, err
+		}
+		var approveLink = ""
+		for _, link := range detail.Links {
+			if strings.Compare(link.Rel, "approve") == 0 {
+				approveLink = link.Href
+				break
+			}
+		}
+		return &gateway_bean.GatewayNewPaymentResp{
+			Status:                 consts.PaymentCreated,
+			GatewayPaymentId:       detail.ID,
+			GatewayPaymentIntentId: detail.ID,
+			Link:                   approveLink,
+		}, nil
+	} else {
+		return nil, gerror.New("not support")
+	}
 }
 
 func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
