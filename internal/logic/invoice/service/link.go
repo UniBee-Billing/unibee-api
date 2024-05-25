@@ -63,7 +63,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 				res.Message = "Server Error"
 				return res
 			}
-			createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, "", one, one.GatewayId, true, "", "InvoiceLink")
+			createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "InvoiceLink")
 			if err != nil {
 				g.Log().Infof(ctx, "GatewayPaymentCreate Error:%s", err.Error())
 				res.Message = "Server Error"

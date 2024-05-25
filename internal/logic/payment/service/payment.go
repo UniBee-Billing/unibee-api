@@ -47,7 +47,6 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
 	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
-	user.UpdateUserDefaultGatewayPaymentMethod(ctx, createPayContext.Pay.UserId, createPayContext.Gateway.Id, createPayContext.GatewayPaymentMethod)
 	user.UpdateUserCountryCode(ctx, createPayContext.Pay.UserId, createPayContext.Pay.CountryCode)
 
 	createPayContext.Pay.Status = consts.PaymentCreated
@@ -248,7 +247,7 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 	return nil, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod string, invoice *entity.Invoice, gatewayId uint64, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
 	lastPayment, err := clearInvoicePayment(ctx, invoice)
 	if err != nil {
@@ -265,7 +264,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod 
 	if subUser != nil {
 		email = subUser.Email
 	}
-	gateway := query.GetGatewayById(ctx, gatewayId)
+	gateway := query.GetGatewayById(ctx, invoice.GatewayId)
 	if gateway == nil {
 		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
 	}
@@ -305,7 +304,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, paymentMethod 
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
 		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment},
-		GatewayPaymentMethod: paymentMethod,
+		GatewayPaymentMethod: invoice.GatewayPaymentMethod,
 	})
 
 	if err == nil && res.Payment != nil {
