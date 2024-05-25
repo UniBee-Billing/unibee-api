@@ -35,7 +35,7 @@ type GatewayNewPaymentResp struct {
 
 // GatewayPaymentCaptureResp is the golang structure for table oversea_pay.
 type GatewayPaymentCaptureResp struct {
-	MerchantId       string `json:"merchantId"         `
+	MerchantId       uint64 `json:"merchantId"         `
 	GatewayCaptureId string `json:"gatewayCaptureId"            `
 	Amount           int64  `json:"amount"`
 	Currency         string `json:"currency"`

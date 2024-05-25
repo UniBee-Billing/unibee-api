@@ -8,6 +8,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api"
 	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/payment/service"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
@@ -91,6 +92,12 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 							g.Log().Infof(ctx, "PaymentCheckerListener_Commit by HandlePayCancel paymentId:%s", message.Body)
 							return redismq.CommitMessage
 						}
+					} else if one.AuthorizeStatus == consts.Authorized && gateway.GatewayType == consts.GatewayTypePaypal {
+						err := service.PaymentGatewayCapture(ctx, one)
+						if err != nil {
+							g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback PaymentGatewayCapture paymentId:%s error:%s", message.Body, err.Error())
+						}
+						return redismq.ReconsumeLater
 					}
 				}
 				return redismq.ReconsumeLater

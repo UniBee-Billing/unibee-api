@@ -180,7 +180,8 @@ type (
 
 	// Amount struct
 	Amount struct {
-		Currency string  `json:"currency"`
+		Currency string  `json:"currency_code"`
+		Value    string  `json:"value"`
 		Total    string  `json:"total"`
 		Details  Details `json:"details,omitempty"`
 	}
@@ -966,6 +967,8 @@ type (
 		Amount                    *PurchaseUnitAmount        `json:"amount,omitempty"`
 		SellerProtection          *SellerProtection          `json:"seller_protection,omitempty"`
 		SellerReceivableBreakdown *SellerReceivableBreakdown `json:"seller_receivable_breakdown,omitempty"`
+		CreateTime                *time.Time                 `json:"create_time,omitempty"`
+		UpdateTime                *time.Time                 `json:"update_time,omitempty"`
 	}
 
 	// CapturedPayments has the amounts for a captured order
@@ -1179,6 +1182,7 @@ type (
 		ParentPayment string     `json:"parent_payment,omitempty"`
 		UpdateTime    *time.Time `json:"update_time,omitempty"`
 		SaleID        string     `json:"sale_id,omitempty"`
+		NoteToPayer   string     `json:"note_to_payer,omitempty"`
 	}
 
 	// RefundResponse .

@@ -6,6 +6,7 @@ const (
 	GatewayTypeCard         = 1 //
 	GatewayTypeCrypto       = 2 //
 	GatewayTypeWireTransfer = 3 //
+	GatewayTypePaypal       = 4 //
 )
 
 func (status GatewayTypeEnum) Description() string {
@@ -16,6 +17,8 @@ func (status GatewayTypeEnum) Description() string {
 		return "GatewayTypeCrypto"
 	case GatewayTypeWireTransfer:
 		return "GatewayTypeWireTransfer"
+	case GatewayTypePaypal:
+		return "GatewayTypePaypal"
 	default:
 		return "GatewayTypeCard"
 	}

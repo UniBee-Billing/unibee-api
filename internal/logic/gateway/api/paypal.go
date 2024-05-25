@@ -3,10 +3,18 @@ package api
 import (
 	"context"
 	"errors"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/os/gtime"
 	"net/http"
+	"strings"
+	"time"
+	"unibee/internal/cmd/config"
+	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 // https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/js-sdk/paypal/
@@ -43,8 +51,9 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 }
 
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
-	//TODO implement me
-	panic("implement me")
+	c, _ := NewClient(key, secret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	return "https://www.paypalobjects.com/webstatic/icon/favicon.ico", consts.GatewayTypePaypal, err
 }
 
 func (p Paypal) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
@@ -78,13 +87,25 @@ func (p Paypal) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 }
 
 func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(gateway != nil, "gateway not found")
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	order, err := c.GetOrder(ctx, gatewayPaymentId)
+	if err != nil {
+		return nil, err
+	}
+	return p.parsePaypalPayment(ctx, gateway, order)
 }
 
 func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	utility.Assert(gateway != nil, "gateway not found")
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	gatewayRefund, err := c.GetRefund(ctx, gatewayRefundId)
+	if err != nil {
+		return nil, err
+	}
+	return p.parsePaypalRefund(ctx, gateway, gatewayRefund)
 }
 
 func (p Paypal) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
@@ -97,8 +118,148 @@ func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	panic("implement me")
 }
 
-func init() {
-	// gateway_webhook_entry
+func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
+	utility.Assert(payment != nil, "payment not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	captureRes, err := c.CaptureOrder(ctx, payment.GatewayPaymentId, paypal.CaptureOrderRequest{})
+	if err != nil {
+		return nil, err
+	}
+	return &gateway_bean.GatewayPaymentCaptureResp{
+		MerchantId:       gateway.MerchantId,
+		GatewayCaptureId: captureRes.ID,
+		Amount:           payment.PaymentAmount,
+		Currency:         payment.Currency,
+	}, nil
+}
+
+func (p Paypal) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
+	return &gateway_bean.GatewayPaymentCancelResp{Status: consts.PaymentCancelled}, nil
+}
+
+func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
+	utility.Assert(payment != nil, "payment not found")
+	utility.Assert(len(payment.PaymentData) > 0, "payment capture data not found")
+	var availableCapture *paypal.CaptureAmount
+	utility.AssertError(utility.UnmarshalFromJsonString(payment.PaymentData, &availableCapture), "parse capture data error")
+	utility.Assert(availableCapture != nil, "available capture not found")
+	utility.Assert(refund != nil, "refund not found")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(gateway != nil, "gateway not found")
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	_, err = c.GetAccessToken(context.Background())
+	captureRefundRes, err := c.RefundCapture(ctx, availableCapture.ID, paypal.RefundCaptureRequest{
+		Amount: &paypal.Money{
+			Currency: strings.ToUpper(refund.Currency),
+			Value:    utility.ConvertCentToDollarStr(refund.RefundAmount, refund.Currency),
+		},
+		InvoiceID:   refund.RefundId,
+		NoteToPayer: refund.RefundComment,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return p.GatewayRefundDetail(ctx, gateway, captureRefundRes.ID, refund)
+}
+
+func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Refund) (*gateway_bean.GatewayPaymentRefundResp, error) {
+	var status consts.RefundStatusEnum = consts.RefundCreated
+	if strings.Compare(item.State, "COMPLETED") == 0 {
+		status = consts.RefundSuccess
+	} else if strings.Compare(item.State, "FAILED") == 0 {
+		status = consts.RefundFailed
+	} else if strings.Compare(item.State, "CANCELLED") == 0 {
+		status = consts.RefundCancelled
+	}
+	return &gateway_bean.GatewayPaymentRefundResp{
+		MerchantId:      "",
+		GatewayRefundId: item.ID,
+		Status:          status,
+		Reason:          item.NoteToPayer,
+		RefundAmount:    utility.ConvertDollarStrToCent(item.Amount.Total, item.Amount.Currency),
+		Currency:        strings.ToUpper(item.Amount.Currency),
+		RefundTime:      gtime.New(item.UpdateTime),
+	}, nil
+}
+
+func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Order) (*gateway_bean.GatewayPaymentRo, error) {
+	if len(item.PurchaseUnits) > 0 {
+		return nil, gerror.New("Invalid Order Data")
+	}
+	var amountStr = item.PurchaseUnits[0].Amount.Value
+	var currency = item.PurchaseUnits[0].Amount.Currency
+
+	var availableCapture *paypal.CaptureAmount
+	var paidTime *time.Time
+	if item.PurchaseUnits[0].Payments != nil && len(item.PurchaseUnits[0].Payments.Captures) >= 1 {
+		for _, one := range item.PurchaseUnits[0].Payments.Captures {
+			if strings.Compare(item.Status, "COMPLETED") == 0 ||
+				strings.Compare(item.Status, "REFUNDED") == 0 ||
+				strings.Compare(item.Status, "PARTIALLY_REFUNDED") == 0 {
+				availableCapture = &one
+				break
+			}
+		}
+		if availableCapture != nil {
+			paidTime = availableCapture.UpdateTime
+		}
+	}
+
+	var cancelTime *gtime.Time
+	var status = consts.PaymentCreated
+	if strings.Compare(item.Status, "COMPLETED") == 0 && availableCapture != nil {
+		status = consts.PaymentSuccess
+	} else if strings.Compare(item.Status, "VOIDED") == 0 {
+		status = consts.PaymentFailed
+		cancelTime = gtime.New(item.UpdateTime)
+	}
+	var captureStatus = consts.Authorized
+	var authorizeReason = ""
+	if strings.Compare(item.Status, "CREATED") == 0 ||
+		strings.Compare(item.Status, "SAVED") == 0 ||
+		strings.Compare(item.Status, "PAYER_ACTION_REQUIRED") == 0 {
+		captureStatus = consts.WaitingAuthorized
+	} else if strings.Compare(item.Status, "APPROVED") == 0 {
+		captureStatus = consts.Authorized
+	} else if strings.Compare(item.Status, "COMPLETED") == 0 {
+		captureStatus = consts.CaptureRequest
+	}
+	var gatewayPaymentMethod string
+	var paymentCode string
+	//if item.PaymentMethod != nil {
+	//	gatewayPaymentMethod = item.PaymentMethod.ID
+	//	if len(gatewayPaymentMethod) > 0 {
+	//		query, _ := p.GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{GatewayPaymentMethodId: gatewayPaymentMethod})
+	//		if query != nil {
+	//			paymentCode = utility.MarshalToJsonString(query)
+	//		}
+	//	}
+	//}
+	return &gateway_bean.GatewayPaymentRo{
+		GatewayPaymentId:     item.ID,
+		Status:               status,
+		AuthorizeStatus:      captureStatus,
+		AuthorizeReason:      authorizeReason,
+		CancelReason:         "",
+		PaymentData:          utility.MarshalToJsonString(availableCapture),
+		TotalAmount:          utility.ConvertDollarStrToCent(amountStr, currency),
+		PaymentAmount:        utility.ConvertDollarStrToCent(amountStr, currency),
+		GatewayPaymentMethod: gatewayPaymentMethod,
+		PaymentCode:          paymentCode,
+		Currency:             strings.ToUpper(currency),
+		PaidTime:             gtime.New(paidTime),
+		CreateTime:           gtime.New(item.CreateTime),
+		CancelTime:           cancelTime,
+	}, nil
 }
 
 // todo mark 确认改造成单例是否可行，不用每次都去获取 accessToken
@@ -115,22 +276,14 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 	}, nil
 }
 
-func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
-	//TODO implement me
-	panic("implement me")
+func init() {
+	// gateway_webhook_entry
 }
 
-func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p Paypal) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	//TODO implement me
-	panic("implement me")
+func (p Paypal) GetPaypalHost() string {
+	var apiHost = "https://api-m.paypal.com"
+	if !config.GetConfigInstance().IsProd() {
+		apiHost = "https://api-m.sandbox.paypal.com"
+	}
+	return apiHost
 }
