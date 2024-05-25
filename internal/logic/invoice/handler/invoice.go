@@ -278,7 +278,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 		dao.Invoice.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
-		return nil, err
+		return one, err
 	}
 	if one.Status != status {
 		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
