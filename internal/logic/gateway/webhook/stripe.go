@@ -300,7 +300,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		r.Response.WriteHeader(http.StatusBadRequest)
 		responseBack = http.StatusBadRequest
 	}
-	log.SaveChannelHttpLog("GatewayWebhook", event, responseBack, err, string(event.Type), requestId, gateway)
+	log.SaveChannelHttpLog("GatewayWebhook", event, responseBack, err, fmt.Sprintf("%s-%s-%d", string(event.Type), gateway.GatewayName, gateway.Id), requestId, gateway)
 	r.Response.WriteHeader(responseBack)
 }
 
