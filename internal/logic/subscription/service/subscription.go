@@ -208,7 +208,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// utility.Assert(user != nil, "user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId)
 	utility.AssertError(err, "System Error")
 	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, invoice, gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew")
 	if err != nil {
@@ -681,7 +681,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Id = uint64(uint(id))
 
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId)
 	utility.AssertError(err, "System Error")
 	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {
@@ -718,7 +718,6 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//utility.Assert(user != nil, "user not found")
 		gateway := query.GetGatewayById(ctx, one.GatewayId)
 		utility.Assert(gateway != nil, "gateway not found")
-		utility.AssertError(err, "System Error")
 		var createPaymentResult, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.GatewayPaymentMethodId, invoice, gateway.Id, false, req.ReturnUrl, "SubscriptionCreate")
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionCreate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
@@ -1343,7 +1342,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId)
 		utility.AssertError(err, "System Error")
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, prepare.PaymentMethodId, invoice, prepare.Gateway.Id, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate")
 		if err != nil {
@@ -1360,7 +1359,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else if prepare.EffectImmediate && prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId)
 		utility.AssertError(err, "System Error")
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")
@@ -1808,12 +1807,12 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			InvoiceName:   "SubscriptionCycle",
 			FinishTime:    nextPeriodStart,
 		})
-		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub)
+		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, paymentMethodId, one, gatewayId, false, "", "SubscriptionEndTrialManual")
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())

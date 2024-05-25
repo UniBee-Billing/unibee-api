@@ -19,7 +19,6 @@ require (
 	github.com/leekchan/accounting v1.0.0
 	github.com/minio/minio-go/v7 v7.0.66
 	github.com/nacos-group/nacos-sdk-go v1.1.4
-	github.com/plutov/paypal/v4 v4.7.0
 	github.com/redis/go-redis/v9 v9.3.0
 	github.com/sendgrid/sendgrid-go v3.14.0+incompatible
 	github.com/shopspring/decimal v1.3.1

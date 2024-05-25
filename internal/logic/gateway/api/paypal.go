@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/plutov/paypal/v4"
 	"net/http"
+	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 )

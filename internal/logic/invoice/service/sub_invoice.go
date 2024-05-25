@@ -17,7 +17,7 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription, gatewayId uint64, paymentMethodId string) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, sub.UserId)
@@ -43,8 +43,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		PeriodStartTime:                gtime.NewFromTimeStamp(simplify.PeriodStart),
 		PeriodEndTime:                  gtime.NewFromTimeStamp(simplify.PeriodEnd),
 		Currency:                       sub.Currency,
-		GatewayId:                      sub.GatewayId,
-		GatewayPaymentMethod:           sub.GatewayDefaultPaymentMethod,
+		GatewayId:                      gatewayId,
+		GatewayPaymentMethod:           paymentMethodId,
 		Status:                         status,
 		SendNote:                       simplify.SendNote,
 		SendStatus:                     simplify.SendStatus,
