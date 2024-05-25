@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 	"unibee/internal/cmd/config"
@@ -122,7 +123,36 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	c, _ := NewClient(createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(context.Background())
+	var items = make([]paypal.Item, 0)
+	for _, line := range createPayContext.Invoice.Lines {
+		var name = ""
+		var description = ""
+		if len(line.Name) == 0 {
+			name = line.Description
+		} else {
+			name = line.Name
+			description = line.Description
+		}
+		item := paypal.Item{
+			Name:        name,
+			Description: description,
+			UnitAmount: &paypal.Money{
+				Value:    utility.ConvertCentToDollarStr(line.Amount, createPayContext.Pay.Currency),
+				Currency: strings.ToUpper(createPayContext.Pay.Currency),
+			},
+			Quantity: strconv.FormatInt(line.Quantity, 10),
+		}
+		items = append(items, item)
+	}
+
 	if createPayContext.CheckoutMode || !createPayContext.PayImmediate {
+		var productName = createPayContext.Invoice.ProductName
+		if len(productName) == 0 {
+			productName = createPayContext.Invoice.InvoiceName
+		}
+		if len(productName) == 0 {
+			productName = "DefaultProduct"
+		}
 		detail, err := c.CreateOrder(
 			ctx,
 			paypal.OrderIntentCapture,
@@ -132,6 +162,8 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 						Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 						Currency: strings.ToUpper(createPayContext.Pay.Currency),
 					},
+					SoftDescriptor: productName,
+					Items:          items,
 				},
 			},
 			&paypal.CreateOrderPayer{},
