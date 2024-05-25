@@ -206,9 +206,10 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		r.Response.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	var eventType = ""
 	if strings.Compare(signature.VerificationStatus, "SUCCESS") == 0 {
 		g.Log().Info(r.Context(), "Receive_Webhook_Channel:", gateway.GatewayName, " hook:", jsonData.String())
-		eventType := jsonData.Get("event_type").String()
+		eventType = jsonData.Get("event_type").String()
 		var responseBack = http.StatusOK
 		switch eventType {
 		case "CHECKOUT.ORDER.COMPLETED", "CHECKOUT.ORDER.APPROVED", "CHECKOUT.PAYMENT-APPROVAL.REVERSED":
@@ -251,7 +252,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled event type: %s\n", gateway.GatewayName, eventType)
 		}
 		r.Response.WriteHeader(http.StatusOK)
-		log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+		log.SaveChannelHttpLog("GatewayWebhook", jsonData, responseBack, err, fmt.Sprintf("%s-%s-%d", eventType, gateway.GatewayName, gateway.Id), nil, gateway)
 		return
 	} else {
 		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification failed.\n", gateway.GatewayName)
