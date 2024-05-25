@@ -82,7 +82,7 @@ func HandleRefundCancelled(ctx context.Context, req *HandleRefundReq) (err error
 	} else {
 		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+			g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundCancelCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
@@ -157,7 +157,7 @@ func HandleRefundFailure(ctx context.Context, req *HandleRefundReq) (err error) 
 	} else {
 		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+			g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundFailureCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
@@ -230,7 +230,7 @@ func HandleRefundSuccess(ctx context.Context, req *HandleRefundReq) (err error) 
 	} else {
 		_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
 		if err != nil {
-			fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+			g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 		}
 		callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundSuccessCallback(ctx, payment, one)
 		event.SaveEvent(ctx, entity.PaymentEvent{
@@ -273,7 +273,7 @@ func HandleRefundReversed(ctx context.Context, req *HandleRefundReq) (err error)
 	}
 	_, err = handler2.UpdateInvoiceFromPaymentRefund(ctx, one)
 	if err != nil {
-		fmt.Printf(`UpdateInvoiceFromPaymentRefund error %s`, err.Error())
+		g.Log().Errorf(ctx, `UpdateInvoiceFromPaymentRefund error %s`, err.Error())
 	}
 	callback.GetPaymentCallbackServiceProvider(ctx, one.BizType).PaymentRefundReverseCallback(ctx, payment, one)
 	// todo mark 此异常流有争议暂时什么都不做，只记录明细
