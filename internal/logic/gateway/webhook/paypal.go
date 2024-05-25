@@ -124,7 +124,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 			}
 		}
 		if r.Get("success").Bool() {
-			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {
+			if payment == nil || len(payment.GatewayPaymentId) == 0 {
 				response = "paymentId invalid"
 			} else if len(payment.GatewayPaymentId) > 0 && payment.Status == consts.PaymentSuccess {
 				response = "success"
