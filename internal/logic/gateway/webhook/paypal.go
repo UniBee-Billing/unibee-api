@@ -138,6 +138,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		eventType := jsonData.Get("event_type").String()
 		var responseBack = http.StatusOK
 		switch eventType {
+
 		default:
 			g.Log().Errorf(r.Context(), "Webhook Gateway:%s, Unhandled event type: %s\n", gateway.GatewayName, eventType)
 		}
