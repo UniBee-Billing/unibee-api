@@ -12,6 +12,7 @@ import (
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
+	"unibee/internal/logic/gateway/api/log"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -92,6 +93,7 @@ func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.Mercha
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(context.Background())
 	order, err := c.GetOrder(ctx, gatewayPaymentId)
+	log.SaveChannelHttpLog("GatewayPaymentDetail", gatewayPaymentId, order, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -103,6 +105,7 @@ func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(context.Background())
 	gatewayRefund, err := c.GetRefund(ctx, gatewayRefundId)
+	log.SaveChannelHttpLog("GatewayRefundDetail", gatewayRefund, gatewayRefund, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -202,6 +205,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			},
 			createPayContext.Pay.PaymentId,
 		)
+		log.SaveChannelHttpLog("GatewayNewPayment", createPayContext.Pay.PaymentId, detail, err, "", nil, createPayContext.Gateway)
 		if err != nil {
 			return nil, err
 		}
@@ -230,6 +234,7 @@ func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(context.Background())
 	captureRes, err := c.CaptureOrder(ctx, payment.GatewayPaymentId, paypal.CaptureOrderRequest{})
+	log.SaveChannelHttpLog("GatewayCapture", payment.GatewayPaymentId, captureRes, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -264,6 +269,7 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 		InvoiceID:   refund.RefundId,
 		NoteToPayer: refund.RefundComment,
 	})
+	log.SaveChannelHttpLog("GatewayRefundDetail", availableCapture.ID, captureRefundRes, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
