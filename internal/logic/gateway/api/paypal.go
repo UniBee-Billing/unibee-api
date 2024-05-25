@@ -292,7 +292,7 @@ func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantG
 }
 
 func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Order) (*gateway_bean.GatewayPaymentRo, error) {
-	if len(item.PurchaseUnits) > 0 {
+	if len(item.PurchaseUnits) == 0 {
 		return nil, gerror.New("Invalid Order Data")
 	}
 	var amountStr = item.PurchaseUnits[0].Amount.Value
