@@ -90,8 +90,10 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 		if err != nil {
 			return err
 		}
+		utility.Assert(len(response.ID) > 0, "secret is nil")
+		err = query.UpdateGatewayWebhookSecret(ctx, gateway.Id, response.ID)
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 	return nil
@@ -197,7 +199,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
-	signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
+	signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, gateway.WebhookSecret)
 	if err != nil {
 		log.SaveChannelHttpLog("GatewayWebhook", jsonData, "VerifyError-400", err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification err:%s\n", gateway.GatewayName, err.Error())
