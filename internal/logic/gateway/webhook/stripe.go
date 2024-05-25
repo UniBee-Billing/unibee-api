@@ -303,12 +303,12 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 }
 
 func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	params, err := r.GetJson()
-	if err != nil {
-		g.Log().Printf(r.Context(), "StripeNotify redirect params:%s err:%s", params, err.Error())
-		r.Response.Writeln(err)
-		return
-	}
+	//params, err := r.GetJson()
+	//if err != nil {
+	//	//g.Log().Printf(r.Context(), "StripeNotify redirect params:%s err:%s", params, err.Error())
+	//	r.Response.Writeln(err)
+	//	return
+	//}
 	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false
@@ -392,7 +392,7 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 			response = "user cancelled"
 		}
 	}
-	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+	log.SaveChannelHttpLog("GatewayRedirect", r.URL, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,

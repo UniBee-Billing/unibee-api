@@ -98,12 +98,12 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 }
 
 func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
-	params, err := r.GetJson()
-	if err != nil {
-		g.Log().Printf(r.Context(), "Paypal redirect params:%s err:%s", params, err.Error())
-		r.Response.Writeln(err)
-		return
-	}
+	//params, err := r.GetJson()
+	//if err != nil {
+	//	g.Log().Printf(r.Context(), "Paypal redirect params:%s err:%s", params, err.Error())
+	//	r.Response.Writeln(err)
+	//	return
+	//}
 	payIdStr := r.Get("paymentId").String()
 	var response string
 	var status = false
@@ -114,11 +114,11 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
 			returnUrl = payment.ReturnUrl
-			if params.Contains("PayerID") {
-				customerId := params.Get("PayerID").String()
+			if r.Get("PayerID") != nil {
+				customerId := r.Get("PayerID").String()
 				var gatewayPaymentMethodId = ""
-				if params.Contains("token") {
-					gatewayPaymentMethodId = params.Get("token").String()
+				if r.Get("token") != nil {
+					gatewayPaymentMethodId = r.Get("token").String()
 				}
 				_, _ = query.CreateOrUpdateGatewayUser(r.Context(), payment.UserId, gateway.Id, customerId, gatewayPaymentMethodId)
 			}
@@ -175,7 +175,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 			response = "user cancelled"
 		}
 	}
-	log.SaveChannelHttpLog("GatewayRedirect", params, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+	log.SaveChannelHttpLog("GatewayRedirect", r.URL, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
