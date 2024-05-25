@@ -117,12 +117,14 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 			if err != nil {
 				g.Log().Errorf(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s error:%s", one.InvoiceId, payment.PaymentId, err.Error())
-				return nil, gerror.New("invoice reverse failed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+				return one, gerror.New("invoice reverse failed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 			} else {
-				return nil, gerror.New("invoice has reversed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+				g.Log().Infof(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
+				return one, nil
 			}
 		}
-		return nil, gerror.New("invoice has failed, paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
+		g.Log().Infof(ctx, "UpdateInvoiceFromPayment already failed or cancelled invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
+		return one, nil
 	}
 	var status = consts.InvoiceStatusProcessing
 	if payment.Status == consts.PaymentSuccess {
@@ -139,7 +141,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		dao.Invoice.Columns().PaymentLink:      payment.Link,
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
-		return nil, err
+		return one, err
 	}
 	if one.Status != status {
 		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -261,7 +263,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 		return nil, gerror.New("invoice not found, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
 	}
 	if one.Status == consts.InvoiceStatusFailed {
-		return nil, gerror.New("invoice has failed, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
+		return one, gerror.New("invoice has failed, refundId:" + refund.RefundId + " subId:" + payment.SubscriptionId)
 	}
 	var status = consts.InvoiceStatusProcessing
 	if refund.Status == consts.RefundSuccess {
