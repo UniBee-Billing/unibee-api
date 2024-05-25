@@ -93,7 +93,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 							return redismq.CommitMessage
 						}
 					} else if one.AuthorizeStatus == consts.Authorized && gateway.GatewayType == consts.GatewayTypePaypal {
-						err := service.PaymentGatewayCapture(ctx, one)
+						err = service.PaymentGatewayCapture(ctx, one)
 						if err != nil {
 							g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback PaymentGatewayCapture paymentId:%s error:%s", message.Body, err.Error())
 						}

@@ -15,6 +15,7 @@ import (
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/logic/gateway/gateway_bean"
 	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -133,9 +134,12 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				status = true
 			} else {
 				//find
-				_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), payment)
-				if err != nil {
-					g.Log().Errorf(r.Context(), "GatewayRedirect paypal GatewayCapture error:%s", err.Error())
+				if payment.AuthorizeStatus == consts.Authorized {
+					//_, err = api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayCapture(r.Context(), payment)
+					err = service.PaymentGatewayCapture(r.Context(), payment)
+					if err != nil {
+						g.Log().Errorf(r.Context(), "GatewayRedirect paypal GatewayCapture error:%s", err.Error())
+					}
 				}
 				paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, payment.GatewayPaymentId, payment)
 				if err != nil {
