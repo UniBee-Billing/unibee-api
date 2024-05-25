@@ -199,7 +199,8 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	}
 	signature, err := client.VerifyWebhookSignature(r.Context(), r.Request, jsonData.Get("id").String())
 	if err != nil {
-		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification success\n", gateway.GatewayName)
+		log.SaveChannelHttpLog("GatewayWebhook", jsonData, "VerifyError-400", err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+		g.Log().Errorf(r.Context(), "⚠️  Webhook Gateway:%s, Webhook signature verification err:%s\n", gateway.GatewayName, err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest)
 		return
 	}
