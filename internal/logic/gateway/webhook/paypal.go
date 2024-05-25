@@ -137,7 +137,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 				}
 				paymentIntentDetail, err := api.GetGatewayServiceProvider(r.Context(), gateway.Id).GatewayPaymentDetail(r.Context(), gateway, payment.GatewayPaymentId, payment)
 				if err != nil {
-					response = fmt.Sprintf("%v", err)
+					response = fmt.Sprintf("GatewayPaymentDetail %v", err)
 				} else {
 					if paymentIntentDetail.Status == consts.PaymentSuccess {
 						err := handler2.HandlePaySuccess(r.Context(), &handler2.HandlePayReq{
@@ -152,7 +152,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 							GatewayPaymentMethod:   paymentIntentDetail.GatewayPaymentMethod,
 						})
 						if err != nil {
-							response = fmt.Sprintf("%v", err)
+							response = fmt.Sprintf("HandlePaySuccess %v", err)
 						} else {
 							response = "payment success"
 							status = true
@@ -166,7 +166,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 							Reason:                 paymentIntentDetail.Reason,
 						})
 						if err != nil {
-							response = fmt.Sprintf("%v", err)
+							response = fmt.Sprintf("HandlePayFailure %v", err)
 						}
 					}
 				}
