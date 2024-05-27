@@ -374,9 +374,9 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				vatNumberValidateMessage = "Validate Failure"
 			}
 		} else {
-			if len(req.VatCountryCode) == 0 {
-				utility.Assert(vatCountryCode == vatNumberValidate.CountryCode, "CountryCode error, "+"Your country from vat number is "+vatNumberValidate.CountryCode)
-			}
+			//if len(req.VatCountryCode) == 0 {
+			//	utility.Assert(vatCountryCode == vatNumberValidate.CountryCode, "CountryCode error, "+"Your country from vat number is "+vatNumberValidate.CountryCode)
+			//}
 			vatCountryCode = vatNumberValidate.CountryCode
 		}
 		if req.IsSubmit {
