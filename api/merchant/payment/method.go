@@ -31,7 +31,7 @@ type MethodNewReq struct {
 	g.Meta         `path:"/method_new" tags:"Payment" method:"post" summary:"Create New Payment Method And Attach To User"`
 	UserId         uint64                 `json:"userId" dc:"The customer's unique id"   v:"required" `
 	GatewayId      uint64                 `json:"gatewayId" dc:"The unique id of gateway"   v:"required" `
-	Currency       string                 `json:"currency" dc:"The currency of payment method"  v:"required" `
+	Currency       string                 `json:"currency" dc:"The currency of payment method" `
 	SubscriptionId string                 `json:"subscriptionId" dc:"The id of subscription that want to attach"`
 	RedirectUrl    string                 `json:"redirectUrl" dc:"The redirect url when method created return back"`
 	Type           string                 `json:"type"`

@@ -28,7 +28,7 @@ type MethodGetRes struct {
 type MethodNewReq struct {
 	g.Meta         `path:"/method_new" tags:"User-Payment-Method" method:"post" summary:"User Create New Payment Method"`
 	GatewayId      uint64                 `json:"gatewayId" dc:"GatewayId"   v:"required" `
-	Currency       string                 `json:"currency" dc:""  v:"required" `
+	Currency       string                 `json:"currency" dc:"" `
 	SubscriptionId string                 `json:"subscriptionId" dc:"if provide, bind to it"`
 	RedirectUrl    string                 `json:"redirectUrl" dc:"Redirect Url"`
 	Type           string                 `json:"type" dc:""`
