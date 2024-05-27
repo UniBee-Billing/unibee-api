@@ -59,6 +59,14 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	}
 	if req.CountryCode != nil && len(*req.CountryCode) > 0 {
 		one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+		if one != nil && len(one.VATNumber) > 0 {
+			gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
+			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, one.VATNumber, "")
+			utility.AssertError(err, "Update VAT number error")
+			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CompanyName)
+		}
 		if one.CountryCode != *req.CountryCode {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 			user.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
