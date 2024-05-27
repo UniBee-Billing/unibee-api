@@ -78,9 +78,10 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
 		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing {
-			if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(2*24*60*60) < timeNow {
+			if sub.GmtCreate.Timestamp()+(3*24*60*60) < timeNow {
+				//if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(3*24*60*60) < timeNow {
 				// first time create sub expired
-				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
+				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter36Hours")
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire SubStatus:Created", err.Error())
 					return nil, err

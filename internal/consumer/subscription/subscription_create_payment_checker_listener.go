@@ -31,9 +31,9 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	g.Log().Debugf(ctx, "SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
-	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= 2*24*60*60 {
+	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= 3*24*60*60 {
 		//should expire sub
-		err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter48Hours")
+		err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter36Hours")
 		if err != nil {
 			g.Log().Errorf(ctx, "SubscriptionCreatePaymentCheckListener SubscriptionExpire Error:%s", err.Error())
 		}
