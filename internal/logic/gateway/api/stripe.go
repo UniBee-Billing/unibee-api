@@ -83,13 +83,17 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	utility.Assert(userId > 0, "userId is nil")
 	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, userId)
 	params := &stripe.CheckoutSessionParams{
-		Mode:              stripe.String(string(stripe.CheckoutSessionModeSetup)),
-		Currency:          stripe.String(strings.ToUpper(currency)),
-		Customer:          stripe.String(gatewayUser.GatewayUserId),
-		Metadata:          utility.ConvertToStringMetadata(metadata),
-		PaymentMethodData: &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
-		SuccessURL:        stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
-		CancelURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		Mode: stripe.String(string(stripe.CheckoutSessionModeSetup)),
+		//Currency:           stripe.String(strings.ToUpper(currency)),
+		Customer:           stripe.String(gatewayUser.GatewayUserId),
+		Metadata:           utility.ConvertToStringMetadata(metadata),
+		PaymentMethodTypes: []*string{stripe.String(string(stripe.PaymentMethodTypeCard))},
+		PaymentMethodData:  &stripe.CheckoutSessionPaymentMethodDataParams{AllowRedisplay: stripe.String(string(stripe.PaymentMethodAllowRedisplayAlways))},
+		SuccessURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+		CancelURL:          stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
+	}
+	if len(currency) > 0 {
+		params.Currency = stripe.String(strings.ToUpper(currency))
 	}
 	result, err := session.New(params)
 	log.SaveChannelHttpLog("GatewayUserCreateAndBindPaymentMethod", params, result, err, "", nil, gateway)
