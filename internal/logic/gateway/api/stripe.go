@@ -92,9 +92,9 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 		SuccessURL:         stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, true, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
 		CancelURL:          stripe.String(webhook2.GetPaymentMethodRedirectEntranceUrlCheckout(gateway.Id, false, fmt.Sprintf("%s", metadata["RedirectUrl"]))),
 	}
-	//if len(currency) > 0 {
-	//	params.Currency = stripe.String(strings.ToUpper(currency))
-	//}
+	if len(currency) > 0 {
+		params.Currency = stripe.String(strings.ToUpper(currency))
+	}
 	result, err := session.New(params)
 	log.SaveChannelHttpLog("GatewayUserCreateAndBindPaymentMethod", params, result, err, "", nil, gateway)
 	if err != nil {
