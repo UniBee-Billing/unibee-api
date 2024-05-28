@@ -45,6 +45,9 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 		sub.Status = consts.SubStatusPending
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -100, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
+		if len(sub.VatNumber) > 0 {
+			user.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
+		}
 	}
 	// 3min PaymentChecker
 	return redismq.CommitMessage

@@ -13,6 +13,31 @@ import (
 	"unibee/utility"
 )
 
+func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
+	utility.Assert(userId > 0, "userId is nil")
+	user := query.GetUserAccountById(ctx, userId)
+	utility.Assert(user != nil, "UpdateUserCountryCode user not found")
+	if len(vatNumber) > 0 {
+		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
+			gateway := vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId)
+			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, user.MerchantId, user.Id, vatNumber, "")
+			if err == nil && vatNumberValidate.Valid {
+				_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
+					dao.UserAccount.Columns().VATNumber: vatNumber,
+					dao.UserAccount.Columns().GmtModify: gtime.Now(),
+				}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+				if err != nil {
+					g.Log().Errorf(ctx, "UpdateUserVatNumber userId:%d vatNumber:%s, error:%s", userId, vatNumber, err.Error())
+				} else {
+					g.Log().Errorf(ctx, "UpdateUserVatNumber userId:%d vatNumber:%s, success", userId, vatNumber)
+					UpdateUserVatNumber(ctx, userId, vatNumberValidate.CountryCode)
+				}
+			}
+		}
+	}
+}
+
 func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode string) {
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
@@ -36,9 +61,9 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 					dao.UserAccount.Columns().GmtModify:     gtime.Now(),
 				}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
 				if err != nil {
-					g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%d, error:%s", userId, countryCode, err.Error())
+					g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, error:%s", userId, countryCode, err.Error())
 				} else {
-					g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%d, success", userId, countryCode)
+					g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
 				}
 			}
 		}
