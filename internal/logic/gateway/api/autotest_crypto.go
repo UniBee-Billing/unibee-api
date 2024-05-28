@@ -20,7 +20,7 @@ func (a AutoTestCrypto) GatewayCryptoFiatTrans(ctx context.Context, from *gatewa
 		Currency:       from.Currency,
 		CountryCode:    from.CountryCode,
 		CryptoAmount:   roundUp(float64(from.Amount) / 1),
-		CryptoCurrency: "USDT",
+		CryptoCurrency: "USD",
 		Rate:           1,
 	}, nil
 }
