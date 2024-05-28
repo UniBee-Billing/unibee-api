@@ -15,9 +15,11 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/currency"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -387,23 +389,51 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	utility.Assert(gateway != nil, "gateway not found")
 	user := query.GetUserAccountById(ctx, uint64(one.UserId))
 	utility.Assert(user != nil, "user not found")
-	trans, err := api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
-		Amount:   one.TotalAmount,
-		Currency: one.Currency,
-		Gateway:  gateway,
-	})
-	if err != nil {
-		return err
-	}
 
-	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
-		dao.Invoice.Columns().CryptoCurrency: trans.CryptoCurrency,
-		dao.Invoice.Columns().CryptoAmount:   trans.CryptoAmount,
+	exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, user.MerchantId, config.FiatExchangeApiKey)
+	var cryptoCurrency string
+	var cryptoAmount int64 = -1
+	if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+		if one.Currency == "USD" {
+			_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+				dao.Invoice.Columns().CryptoCurrency: "USD",
+				dao.Invoice.Columns().CryptoAmount:   one.TotalAmount,
+			}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
+			if err != nil {
+				fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
+			}
+			return err
+		} else {
+			rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", one.Currency)
+			if err != nil {
+				return err
+			}
+			if rate != nil {
+				cryptoCurrency = "USD"
+				cryptoAmount = utility.RoundUp(float64(one.TotalAmount) / *rate)
+			}
+		}
+	}
+	if len(cryptoCurrency) == 0 {
+		trans, err := api.GetGatewayServiceProvider(ctx, one.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
+			Amount:   one.TotalAmount,
+			Currency: one.Currency,
+			Gateway:  gateway,
+		})
+		if err != nil {
+			return err
+		}
+		cryptoCurrency = trans.CryptoCurrency
+		cryptoAmount = trans.CryptoAmount
+	}
+	utility.Assert(len(cryptoCurrency) > 0, "transfer to crypto currency error")
+	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().CryptoCurrency: cryptoCurrency,
+		dao.Invoice.Columns().CryptoAmount:   cryptoAmount,
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		fmt.Printf("ReconvertCryptoDataForInvoice update err:%s", err.Error())
 	}
-	//todo mark cancel the currency payment and regeneration
 	return err
 }
 

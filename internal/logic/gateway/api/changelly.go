@@ -15,7 +15,6 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/google/uuid"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -34,21 +33,7 @@ import (
 type Changelly struct {
 }
 
-func roundUp(value float64) int64 {
-	return int64(math.Ceil(value))
-}
-
 func (c Changelly) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	if strings.ToUpper(from.Currency) == "USD" {
-		return &gateway_bean.GatewayCryptoToCurrencyAmountDetailRes{
-			Amount:         from.Amount,
-			Currency:       from.Currency,
-			CountryCode:    from.CountryCode,
-			CryptoAmount:   from.Amount,
-			CryptoCurrency: "USD",
-			Rate:           1,
-		}, nil
-	}
 	//if len(from.CountryCode) == 0 {
 	from.CountryCode = "FR" // not all countryCode contain data
 	//}
@@ -77,7 +62,7 @@ func (c Changelly) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bea
 		Amount:         from.Amount,
 		Currency:       from.Currency,
 		CountryCode:    from.CountryCode,
-		CryptoAmount:   roundUp(float64(from.Amount) / invertedRate),
+		CryptoAmount:   utility.RoundUp(float64(from.Amount) / invertedRate),
 		CryptoCurrency: "USDT",
 		Rate:           invertedRate,
 	}, nil

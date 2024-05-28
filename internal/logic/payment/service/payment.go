@@ -23,9 +23,11 @@ import (
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/merchant_config"
 	"unibee/internal/logic/payment/callback"
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
+	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -83,17 +85,31 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		} else {
 			createPayContext.Pay.GasPayer = "user" // default user pay the gas
 		}
-		trans, err := api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
-			Amount:      createPayContext.Pay.TotalAmount,
-			Currency:    createPayContext.Pay.Currency,
-			CountryCode: createPayContext.Pay.CountryCode,
-			Gateway:     createPayContext.Gateway,
-		})
-		if err != nil {
-			return nil, err
+		exchangeApiKeyConfig := merchant_config.GetMerchantConfig(ctx, createPayContext.Gateway.MerchantId, config.FiatExchangeApiKey)
+		if exchangeApiKeyConfig != nil && len(exchangeApiKeyConfig.ConfigValue) > 0 {
+			if createPayContext.Pay.Currency == "USD" {
+				createPayContext.Pay.CryptoAmount = createPayContext.Pay.TotalAmount
+				createPayContext.Pay.CryptoCurrency = "USD"
+			} else {
+				rate, err := currency.GetExchangeConversionRates(ctx, exchangeApiKeyConfig.ConfigValue, "USD", createPayContext.Pay.Currency)
+				utility.AssertError(err, "transfer crypto currency error")
+				utility.Assert(rate != nil, "transfer crypto currency error, exchange rate nil")
+				createPayContext.Pay.CryptoAmount = utility.RoundUp(float64(createPayContext.Pay.TotalAmount) / *rate)
+				createPayContext.Pay.CryptoCurrency = "USD"
+			}
+		} else {
+			trans, err := api.GetGatewayServiceProvider(ctx, createPayContext.Pay.GatewayId).GatewayCryptoFiatTrans(ctx, &gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq{
+				Amount:      createPayContext.Pay.TotalAmount,
+				Currency:    createPayContext.Pay.Currency,
+				CountryCode: createPayContext.Pay.CountryCode,
+				Gateway:     createPayContext.Gateway,
+			})
+			if err != nil {
+				return nil, err
+			}
+			createPayContext.Pay.CryptoAmount = trans.CryptoAmount
+			createPayContext.Pay.CryptoCurrency = trans.CryptoCurrency
 		}
-		createPayContext.Pay.CryptoAmount = trans.CryptoAmount
-		createPayContext.Pay.CryptoCurrency = trans.CryptoCurrency
 	}
 	if createPayContext.DaysUtilDue == 0 {
 		createPayContext.DaysUtilDue = 3 //default 3 days expire

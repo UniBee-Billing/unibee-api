@@ -13,6 +13,7 @@ const (
 	IncompleteExpireTime               = "IncompleteExpireTime"
 	InvoiceEmail                       = "InvoiceEmail"
 	TryAutomaticPaymentBeforePeriodEnd = "TryAutomaticPaymentBeforePeriodEnd"
+	FiatExchangeApiKey                 = "FiatExchangeApiKey"
 )
 
 func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (config *bean.SubscriptionConfig) {
