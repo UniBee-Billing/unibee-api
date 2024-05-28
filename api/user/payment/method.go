@@ -39,3 +39,12 @@ type MethodNewRes struct {
 	Url    string              `json:"url" dc:"Url" `
 	Method *bean.PaymentMethod `json:"method" dc:"Method" `
 }
+
+type MethodDeleteReq struct {
+	g.Meta          `path:"/method_delete" tags:"Payment" method:"post" summary:"Delete Payment Method From User"`
+	GatewayId       uint64 `json:"gatewayId" dc:"The unique id of gateway"   v:"required" `
+	PaymentMethodId string `json:"paymentMethodId" dc:"The unique id of payment method"  v:"required" `
+}
+
+type MethodDeleteRes struct {
+}

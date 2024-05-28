@@ -48,6 +48,17 @@ func NewPaymentMethod(ctx context.Context, req *NewPaymentMethodInternalReq) (ur
 	return createResult.Url, createResult.PaymentMethod
 }
 
+func DeletePaymentMethod(ctx context.Context, merchantId uint64, userId uint64, gatewayId uint64, paymentMethodId string) error {
+	merchant := query.GetMerchantById(ctx, merchantId)
+	utility.Assert(merchant != nil, "merchant not found")
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
+	gateway := query.GetGatewayById(ctx, gatewayId)
+	utility.Assert(len(paymentMethodId) > 0, "invalid paymentMethodId")
+	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
+	_, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserDeAttachPaymentMethodQuery(ctx, gateway, userId, paymentMethodId)
+	return err
+}
+
 type PaymentMethodListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" `
 	UserId     uint64 `json:"userId" dc:"UserId" `
