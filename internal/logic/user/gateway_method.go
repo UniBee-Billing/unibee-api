@@ -65,8 +65,7 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 		}
 	}
 	if len(reqPaymentMethodId) > 0 {
-		utility.Assert(reqGatewayId != nil, "gateway need specified")
-		// todo mark check reqPaymentMethodId valid
+		utility.Assert(reqGatewayId != nil, "gateway need specified while payment method not empty")
 	}
 	if userDefaultGatewayId > 0 && reqGatewayId == nil {
 		gatewayId = userDefaultGatewayId
