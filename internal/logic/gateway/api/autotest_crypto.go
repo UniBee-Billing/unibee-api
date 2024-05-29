@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/gateway/gateway_bean"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
 )
 
 type AutoTestCrypto struct {
@@ -19,7 +20,7 @@ func (a AutoTestCrypto) GatewayCryptoFiatTrans(ctx context.Context, from *gatewa
 		Amount:         from.Amount,
 		Currency:       from.Currency,
 		CountryCode:    from.CountryCode,
-		CryptoAmount:   roundUp(float64(from.Amount) / 1),
+		CryptoAmount:   utility.RoundUp(float64(from.Amount) / 1),
 		CryptoCurrency: "USD",
 		Rate:           1,
 	}, nil
