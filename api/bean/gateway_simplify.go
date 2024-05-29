@@ -51,6 +51,7 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		MinimumAmount:      one.MinimumAmount,
 		Bank:               bank,
 		WebhookEndpointUrl: webhookEndpointUrl,
+		GatewayKey:         one.GatewayKey,
 		WebhookSecret:      one.WebhookSecret,
 	}
 }
