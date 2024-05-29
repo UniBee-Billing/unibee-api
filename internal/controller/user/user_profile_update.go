@@ -50,19 +50,26 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		}
 		user.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId)
 	}
-
+	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+	var vatNumber = one.VATNumber
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
 		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
 		utility.AssertError(err, "Update VAT number error")
 		utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+		if req.CountryCode != nil && len(*req.CountryCode) > 0 {
+			utility.Assert(*req.CountryCode == vatNumberValidate.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
+		} else {
+			utility.Assert(one.CountryCode == vatNumberValidate.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
+		}
+		vatNumber = *req.VATNumber
 	}
+
 	if req.CountryCode != nil && len(*req.CountryCode) > 0 {
-		one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
-		if one != nil && len(one.VATNumber) > 0 {
+		if len(vatNumber) > 0 {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
-			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, one.VATNumber, "")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
@@ -99,6 +106,6 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if err != nil {
 		return nil, err
 	}
-	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+	one = query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	return &profile.UpdateRes{User: detail.ConvertUserAccountToDetail(ctx, one)}, nil
 }
