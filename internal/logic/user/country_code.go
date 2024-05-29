@@ -31,10 +31,15 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 					g.Log().Errorf(ctx, "UpdateUserVatNumber userId:%d vatNumber:%s, error:%s", userId, vatNumber, err.Error())
 				} else {
 					g.Log().Errorf(ctx, "UpdateUserVatNumber userId:%d vatNumber:%s, success", userId, vatNumber)
-					UpdateUserVatNumber(ctx, userId, vatNumberValidate.CountryCode)
+					UpdateUserCountryCode(ctx, userId, vatNumberValidate.CountryCode)
 				}
 			}
 		}
+	} else {
+		_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
+			dao.UserAccount.Columns().VATNumber: vatNumber,
+			dao.UserAccount.Columns().GmtModify: gtime.Now(),
+		}).Where(dao.UserAccount.Columns().Id, user.Id).Update()
 	}
 }
 
