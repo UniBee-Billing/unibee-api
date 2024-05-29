@@ -189,7 +189,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
 				}
 				gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-				if sub != nil && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
+				if sub != nil && gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
 						dao.Subscription.Columns().GmtModify:                   gtime.Now(),
 						dao.Subscription.Columns().GatewayId:                   gatewayId,
@@ -228,7 +228,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 				if latestInvoice != nil && (timeNow-lastAutomaticTryTime) > 86400 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
 					// finish the payment
-					//gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+					// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "SubscriptionBillingCycle")
 					if err != nil {
 						g.Log().Print(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())

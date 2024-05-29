@@ -143,7 +143,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	//	gatewayId = *req.GatewayId
 	//}
 	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
-
+	utility.Assert(gatewayId > 0, "gateway need specified")
 	var timeNow = gtime.Now().Timestamp()
 	if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
 		timeNow = sub.TestClock
@@ -329,6 +329,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
 	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
+	utility.Assert(gatewayId > 0, "gateway need specified")
 	if !_interface.Context().Get(ctx).IsOpenApiCall {
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
 	}
@@ -913,6 +914,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
 	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
+	utility.Assert(gatewayId > 0, "gateway need specified")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(service2.IsGatewaySupportCountryCode(ctx, gateway, sub.CountryCode), "gateway not support")
@@ -1780,6 +1782,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			FinishTime:    nextPeriodStart,
 		})
 		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		utility.Assert(gatewayId > 0, "gateway need specified")
 		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())

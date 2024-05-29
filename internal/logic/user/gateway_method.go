@@ -79,9 +79,8 @@ func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId
 			paymentMethodId = reqPaymentMethodId
 		}
 	}
-	utility.Assert(gatewayId > 0, "gateway need specified")
 	if !config2.GetConfigInstance().IsProd() {
-		if len(paymentMethodId) == 0 && len(subscriptionId) > 0 {
+		if gatewayId > 0 && len(paymentMethodId) == 0 && len(subscriptionId) > 0 {
 			sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 			if sub != nil && sub.GatewayId == gatewayId {
 				paymentMethodId = sub.GatewayDefaultPaymentMethod

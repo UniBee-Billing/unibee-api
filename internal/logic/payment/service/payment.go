@@ -282,12 +282,13 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 	}
 	gateway := query.GetGatewayById(ctx, invoice.GatewayId)
 	if gateway == nil {
-		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice gateway not found")
+		//SendAuthorizedEmailBackground(invoice)
+		return nil, gerror.New("CreateSubInvoicePaymentDefaultAutomatic gateway not found")
 	}
 
 	merchant := query.GetMerchantById(ctx, invoice.MerchantId)
 	if merchant == nil {
-		return nil, gerror.New("SubscriptionBillingCycleDunningInvoice merchantInfo not found")
+		return nil, gerror.New("CreateSubInvoicePaymentDefaultAutomatic merchantInfo not found")
 	}
 	invoice.Currency = strings.ToUpper(invoice.Currency)
 	var automatic = 1
@@ -326,7 +327,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 	if err == nil && res.Payment != nil {
 		if err == nil && res.Status != consts.PaymentSuccess && !manualPayment {
 			//need send invoice for authorised
-			SendAuthorizedEmailBackground(invoice, res.Payment)
+			SendAuthorizedEmailBackground(invoice)
 		}
 		if len(invoice.DiscountCode) > 0 {
 			_, err = discount.UserDiscountApply(ctx, &discount.UserDiscountApplyReq{
@@ -362,7 +363,7 @@ func HardDeletePayment(ctx context.Context, merchantId uint64, paymentId string)
 	return err
 }
 
-func SendAuthorizedEmailBackground(invoice *entity.Invoice, payment *entity.Payment) {
+func SendAuthorizedEmailBackground(invoice *entity.Invoice) {
 	ctx := context.Background()
 	go func() {
 		var err error
@@ -384,7 +385,7 @@ func SendAuthorizedEmailBackground(invoice *entity.Invoice, payment *entity.Paym
 				UserName:            oneUser.FirstName + " " + oneUser.LastName,
 				MerchantProductName: invoice.ProductName,
 				MerchantCustomEmail: merchant.Email,
-				MerchantName:        query.GetMerchantCountryConfigName(ctx, payment.MerchantId, oneUser.CountryCode),
+				MerchantName:        query.GetMerchantCountryConfigName(ctx, invoice.MerchantId, oneUser.CountryCode),
 				PaymentAmount:       utility.ConvertCentToDollarStr(invoice.TotalAmount, invoice.Currency),
 				Currency:            strings.ToUpper(invoice.Currency),
 				PeriodEnd:           gtime.NewFromTimeStamp(invoice.PeriodEnd),
