@@ -344,12 +344,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, merchantInfo.Id) == nil, "Another active or incomplete subscription exist")
 
 	//setup vat from user
-	if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
-		req.VatCountryCode = user.CountryCode
-	}
-	if len(req.VatNumber) == 0 {
-		req.VatNumber = user.VATNumber
-	}
+	//if len(req.VatCountryCode) == 0 && len(user.CountryCode) > 0 {
+	//	req.VatCountryCode = user.CountryCode
+	//}
+	//if len(req.VatNumber) == 0 {
+	//	req.VatNumber = user.VATNumber
+	//}
 
 	var vatCountryCode = req.VatCountryCode
 	var subscriptionTaxPercentage int64 = 0
@@ -359,12 +359,12 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	var vatNumberValidateMessage string
 	var discountMessage string
 
-	if len(req.VatCountryCode) == 0 {
-		req.VatNumber = user.CountryCode
-	}
+	//if len(req.VatCountryCode) == 0 {
+	//	req.VatNumber = user.CountryCode
+	//}
 
 	if len(req.VatNumber) > 0 {
-		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat VATGateway need setup")
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil, "Vat gateway need setup")
 		vatNumberValidate, err = vat_gateway.ValidateVatNumberByDefaultGateway(ctx, merchantInfo.Id, req.UserId, req.VatNumber, "")
 		if err != nil || !vatNumberValidate.Valid {
 			if err != nil {

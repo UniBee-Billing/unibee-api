@@ -229,9 +229,9 @@ func ValidateVatNumberByDefaultGateway(ctx context.Context, merchantId uint64, u
 	if err != nil {
 		return nil, gerror.Newf(`ValidateVatNumberByDefaultGateway record insert failure %s`, err)
 	}
-	if result.Valid && userId > 0 {
-		UpdateUserVatNumber(ctx, userId, vatNumber)
-	}
+	//if result.Valid && userId > 0 {
+	//	user.UpdateUserVatNumber(ctx, userId, vatNumber)
+	//}
 	return result, nil
 }
 
