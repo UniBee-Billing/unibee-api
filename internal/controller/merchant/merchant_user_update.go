@@ -23,12 +23,12 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		}
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, paymentMethodId)
 	}
-	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+	one := query.GetUserAccountById(ctx, req.UserId)
 	var vatNumber = one.VATNumber
 	if req.VATNumber != nil {
 		if len(*req.VATNumber) > 0 {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), req.UserId, *req.VATNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 			if req.CountryCode != nil {
@@ -44,7 +44,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		if len(vatNumber) > 0 {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx))
 			utility.Assert(gateway != nil, "Default Vat Gateway Need Setup")
-			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, vatNumber, "")
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), req.UserId, vatNumber, "")
 			utility.AssertError(err, "Update VAT number error")
 			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 			utility.Assert(vatNumberValidate.CountryCode == *req.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
