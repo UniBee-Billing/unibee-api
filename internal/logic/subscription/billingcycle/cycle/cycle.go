@@ -166,7 +166,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					discountCode = sub.DiscountCode
 				}
 				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-				if pendingUpdate.EffectImmediate == 1 {
+				if pendingUpdate != nil && pendingUpdate.EffectImmediate == 1 {
 					pendingUpdate = nil
 				}
 				if pendingUpdate != nil {
