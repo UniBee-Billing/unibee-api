@@ -330,7 +330,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 		GatewayPaymentMethod: invoice.GatewayPaymentMethod,
 	})
 
-	if err == nil && res != nil && res.Payment != nil {
+	if err == nil && res.Payment != nil {
 		if err == nil && res.Status != consts.PaymentSuccess && !manualPayment {
 			//need send invoice for authorised
 			SendAuthorizedEmailBackground(invoice)
