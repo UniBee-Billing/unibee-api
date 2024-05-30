@@ -78,6 +78,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	currencyNumberCheck(req.TotalAmount, req.Currency)
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(user != nil, "User Not Found")
+	if len(req.Email) == 0 {
+		req.Email = user.Email
+	}
 
 	var name = req.Name
 	if len(name) == 0 {
