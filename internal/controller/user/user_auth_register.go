@@ -36,7 +36,7 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	var vatNumber = ""
 	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
 		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
+		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, *req.VATNumber, "")
 		utility.AssertError(err, "Update VAT number error")
 		utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
 		if len(req.CountryCode) > 0 {
