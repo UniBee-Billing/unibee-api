@@ -53,13 +53,14 @@ func TaskForExpireInvoices(ctx context.Context) {
 	}
 }
 
-func ExpireUserOneTimeInvoices(ctx context.Context, userId uint64) {
-	if userId <= 0 {
+func ExpireUserOneTimeInvoices(ctx context.Context, sub *entity.Subscription) {
+	if sub == nil {
 		return
 	}
+	var timeNow = gtime.Now().Timestamp()
 	var list []*entity.Invoice
 	err := dao.Invoice.Ctx(ctx).
-		Where(dao.Invoice.Columns().UserId, userId).
+		Where(dao.Invoice.Columns().UserId, sub.UserId).
 		Where(dao.Invoice.Columns().BizType, consts.BizTypeOneTime).
 		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
 		Where(dao.Invoice.Columns().IsDeleted, 0).
@@ -85,7 +86,7 @@ func ExpireUserOneTimeInvoices(ctx context.Context, userId uint64) {
 				if err != nil {
 					g.Log().Errorf(ctx, "ExpireUserOneTimeInvoices Update FinishTime error:", err.Error())
 				}
-			} else if one.FinishTime+(one.DayUtilDue*86400) < gtime.Now().Timestamp() {
+			} else if one.FinishTime+(one.DayUtilDue*86400) < timeNow {
 				//Invoice Expire
 				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId)
 				if err != nil {
