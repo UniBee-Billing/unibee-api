@@ -231,6 +231,19 @@ var (
 				})
 			})
 
+			s.Group("/user/vat", func(group *ghttp.RouterGroup) {
+				group.Middleware(
+					_interface.Middleware().CORS,
+					_interface.Middleware().ResponseHandler,
+					_interface.Middleware().UserPortalPreAuth,
+				)
+				group.Group("/", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewVat(),
+					)
+				})
+			})
+
 			s.Group("/user/auth", func(group *ghttp.RouterGroup) {
 				group.Middleware(
 					_interface.Middleware().CORS,
@@ -240,11 +253,6 @@ var (
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewAuth(),
-					)
-				})
-				group.Group("/vat", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						user.NewVat(),
 					)
 				})
 			})
