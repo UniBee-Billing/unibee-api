@@ -35,9 +35,11 @@ var (
 )
 
 func SaveEvent(ctx context.Context, overseaPayEvent entity.PaymentEvent) {
-	overseaPayEvent.CreateTime = gtime.Now().Timestamp()
-	_, err := dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
-	if err != nil {
-		g.Log().Errorf(ctx, `record insert failure %s`, err)
-	}
+	go func() {
+		overseaPayEvent.CreateTime = gtime.Now().Timestamp()
+		_, err := dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
+		if err != nil {
+			g.Log().Errorf(ctx, `record insert failure %s`, err)
+		}
+	}()
 }

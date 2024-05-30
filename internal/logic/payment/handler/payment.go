@@ -197,7 +197,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 			EventType: event.Authorised.Type,
 			Event:     event.Authorised.Desc,
 			OpenApiId: payment.OpenApiId,
-			UniqueNo:  fmt.Sprintf("%s_%s", payment.GatewayPaymentId, "NeedAuthorised"),
+			UniqueNo:  fmt.Sprintf("%s_%s_%s", payment.PaymentId, "NeedAuthorised", payment.GatewayPaymentId),
 		})
 	}
 	return err
