@@ -107,7 +107,7 @@ func GetSubscriptionPendingUpdateByInvoiceId(ctx context.Context, invoiceId stri
 	return one
 }
 
-func GetSubscriptionUpgradePendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {
+func GetSubscriptionEffectImmediatePendingUpdateByInvoiceId(ctx context.Context, invoiceId string) *entity.SubscriptionPendingUpdate {
 	if len(invoiceId) == 0 {
 		return nil
 	}

@@ -19,6 +19,7 @@ import (
 	"unibee/internal/logic/subscription/billingcycle/expire"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
+	"unibee/internal/logic/subscription/pending_update_cancel"
 	service2 "unibee/internal/logic/subscription/service"
 	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -52,6 +53,17 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if err != nil {
 			g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
 		}
+
+		if len(sub.PendingUpdateId) > 0 {
+			pendingUpdate := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+			if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished {
+				err = pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, pendingUpdate.PendingUpdateId, "EffectTimeout")
+				if err != nil {
+					g.Log().Print(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
+				}
+			}
+		}
+
 		// generate invoice and payment ahead
 		latestInvoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 		// todo mark
@@ -88,8 +100,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled {
 			return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Nothing Todo As Sub Cancelled Or Expired"}, nil
 		} else if sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing {
-			if sub.GmtCreate.Timestamp()+(3*24*60*60) < timeNow {
-				//if utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)+(3*24*60*60) < timeNow {
+			if sub.GmtCreate.Timestamp()+consts.SubPendingTimeout < timeNow {
 				// first time create sub expired
 				err = expire.SubscriptionExpire(ctx, sub, "NotPayAfter36Hours")
 				if err != nil {
@@ -155,6 +166,9 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					discountCode = sub.DiscountCode
 				}
 				pendingUpdate := query.GetUnfinishedSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
+				if pendingUpdate.EffectImmediate == 1 {
+					pendingUpdate = nil
+				}
 				if pendingUpdate != nil {
 					//generate PendingUpdate cycle invoice
 					plan := query.GetPlanById(ctx, pendingUpdate.UpdatePlanId)
@@ -208,7 +222,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					sub.GatewayId = gatewayId
 					sub.GatewayDefaultPaymentMethod = paymentMethodId
 				}
-				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod)
+				one, err := handler2.CreateProcessingInvoiceForSub(ctx, invoice, sub, sub.GatewayId, sub.GatewayDefaultPaymentMethod, true)
 				if err != nil {
 					g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice CreateProcessingInvoiceForSub err:", err.Error())
 					return nil, err

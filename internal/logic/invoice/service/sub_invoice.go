@@ -17,12 +17,14 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription, gatewayId uint64, paymentMethodId string) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	//Try cancel current sub processing invoice
-	TryCancelSubscriptionLatestInvoice(ctx, sub)
+	if isSubLatestInvoice {
+		TryCancelSubscriptionLatestInvoice(ctx, sub)
+	}
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
@@ -75,11 +77,13 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().LatestInvoiceId: invoiceId,
-	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
-	if err != nil {
-		utility.AssertError(err, "CreateProcessingInvoiceForSub")
+	if isSubLatestInvoice {
+		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().LatestInvoiceId: invoiceId,
+		}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+		if err != nil {
+			utility.AssertError(err, "CreateProcessingInvoiceForSub")
+		}
 	}
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicInvoiceCreated.Topic,

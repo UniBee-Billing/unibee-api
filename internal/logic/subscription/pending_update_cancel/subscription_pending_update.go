@@ -1,4 +1,4 @@
-package service
+package pending_update_cancel
 
 import (
 	"context"
@@ -38,7 +38,8 @@ func SubscriptionPendingUpdateCancel(ctx context.Context, pendingUpdateId string
 		_, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusCancelled,
 			dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
+		}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).
+			WhereIn(dao.SubscriptionPendingUpdate.Columns().Status, []int64{consts.PendingSubStatusInit, consts.PendingSubStatusCreate}).OmitNil().Update()
 		if err != nil {
 			return err
 		}

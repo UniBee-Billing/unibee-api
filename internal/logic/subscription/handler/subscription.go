@@ -125,6 +125,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().Amount:                 invoice.TotalAmount,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
 		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
@@ -139,6 +140,8 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		return err
 	}
 	timeline.SubscriptionNewTimeline(ctx, invoice)
+
+	// need cancel payment、 invoice and send invoice email
 	return nil
 }
 

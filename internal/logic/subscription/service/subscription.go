@@ -31,6 +31,7 @@ import (
 	addon2 "unibee/internal/logic/subscription/addon"
 	"unibee/internal/logic/subscription/config"
 	"unibee/internal/logic/subscription/handler"
+	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/subscription/timeline"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
@@ -188,7 +189,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-		InvoiceName:   "SubscriptionCycle",
+		InvoiceName:   "SubscriptionRenew",
 		Currency:      sub.Currency,
 		DiscountCode:  req.DiscountCode,
 		TimeNow:       timeNow,
@@ -208,7 +209,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// utility.Assert(user != nil, "user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId, true)
 	utility.AssertError(err, "System Error")
 	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew", 0)
 	if err != nil {
@@ -217,7 +218,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	}
 
 	// need cancel payment、 invoice and send invoice email
-	CancelOtherUnfinishedPendingUpdatesBackground(sub.SubscriptionId, sub.SubscriptionId, "CancelByRenewSubscription-"+sub.SubscriptionId)
+	pending_update_cancel.CancelOtherUnfinishedPendingUpdatesBackground(sub.SubscriptionId, sub.SubscriptionId, "CancelByRenewSubscription-"+sub.SubscriptionId)
 
 	if createRes.Status == consts.PaymentSuccess && createRes.Payment != nil {
 		err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, createRes.Payment)
@@ -689,7 +690,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Id = uint64(uint(id))
 
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true)
 	utility.AssertError(err, "System Error")
 	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {
@@ -1018,7 +1019,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:   "SubscriptionCycle",
+				InvoiceName:   "SubscriptionUpgrade",
 				Currency:      sub.Currency,
 				DiscountCode:  req.DiscountCode,
 				TimeNow:       prorationDate,
@@ -1054,7 +1055,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:   "SubscriptionCycle",
+				InvoiceName:   "SubscriptionUpgrade",
 				Currency:      sub.Currency,
 				DiscountCode:  req.DiscountCode,
 				TimeNow:       prorationDate,
@@ -1316,7 +1317,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false)
 		utility.AssertError(err, "System Error")
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate", 0)
 		if err != nil {
@@ -1325,7 +1326,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 		// Upgrade
 		subUpdateRes = &UpdateSubscriptionInternalResp{
-			GatewayUpdateId: createRes.Invoice.InvoiceId,
+			GatewayUpdateId: invoice.InvoiceId,
 			Data:            utility.MarshalToJsonString(createRes),
 			Link:            createRes.Link,
 			Paid:            createRes.Status == consts.PaymentSuccess,
@@ -1333,13 +1334,15 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else if prepare.EffectImmediate && prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false)
 		utility.AssertError(err, "System Error")
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")
 		subUpdateRes = &UpdateSubscriptionInternalResp{
-			Paid: true,
-			Link: "",
+			GatewayUpdateId: invoice.InvoiceId,
+			Paid:            true,
+			Link:            "",
+			Invoice:         invoice,
 		}
 	} else {
 		prepare.EffectImmediate = false
@@ -1363,7 +1366,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 	}
 	// only one need, cancel others
 	// need cancel payment、 invoice and send invoice email
-	CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.PendingUpdateId, "CancelByNewUpdate-"+one.PendingUpdateId)
+	pending_update_cancel.CancelOtherUnfinishedPendingUpdatesBackground(prepare.Subscription.SubscriptionId, one.PendingUpdateId, "CancelByNewUpdate-"+one.PendingUpdateId)
 
 	var PaidInt = 0
 	if subUpdateRes.Paid {
@@ -1783,7 +1786,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		})
 		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
-		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId)
+		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId, true)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err

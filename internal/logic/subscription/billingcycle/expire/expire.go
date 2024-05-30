@@ -10,7 +10,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
-	service2 "unibee/internal/logic/subscription/service"
+	service2 "unibee/internal/logic/subscription/pending_update_cancel"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/redismq"
 )

@@ -38,12 +38,16 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		sendEmail = user.Email
 	}
 	st := utility.CreateInvoiceSt()
+	var name = invoice.InvoiceName
+	if len(name) == 0 {
+		name = payment.BillingReason
+	}
 	one := &entity.Invoice{
 		SubscriptionId:                 payment.SubscriptionId,
 		BizType:                        payment.BizType,
 		UserId:                         payment.UserId,
 		MerchantId:                     payment.MerchantId,
-		InvoiceName:                    payment.BillingReason,
+		InvoiceName:                    name,
 		ProductName:                    invoice.ProductName,
 		InvoiceId:                      payment.InvoiceId,
 		UniqueId:                       payment.PaymentId,

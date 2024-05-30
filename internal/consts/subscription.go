@@ -3,6 +3,7 @@ package consts
 const (
 	ProrationUsingUniBeeCompute         = true
 	SubscriptionCycleUnderUniBeeControl = true
+	SubPendingTimeout                   = 3 * 24 * 60 * 60
 )
 
 type SubscriptionStatusEnum int

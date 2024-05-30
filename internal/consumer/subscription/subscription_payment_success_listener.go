@@ -8,6 +8,7 @@ import (
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	user2 "unibee/internal/consumer/webhook/user"
+	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/subscription/user_sub_plan"
 	"unibee/internal/logic/user"
 	"unibee/internal/query"
@@ -39,6 +40,12 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -100, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
+		if len(sub.PendingUpdateId) > 0 {
+			err := pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, sub.PendingUpdateId, "CancelByPaymentSuccess-"+sub.PendingUpdateId)
+			if err != nil {
+				g.Log().Errorf(ctx, "HandleSubscriptionNextBillingCyclePaymentSuccess SubscriptionPendingUpdateCancel pendingUpdateId:%s error:%s", sub.PendingUpdateId, err.Error())
+			}
+		}
 	}
 	return redismq.CommitMessage
 }
