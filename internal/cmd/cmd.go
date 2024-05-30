@@ -216,11 +216,7 @@ var (
 						user.NewMerchantinfo(),
 					)
 				})
-				group.Group("/vat", func(group *ghttp.RouterGroup) {
-					group.Bind(
-						user.NewVat(),
-					)
-				})
+
 			})
 
 			s.Group("/merchant/auth", func(group *ghttp.RouterGroup) {
@@ -244,6 +240,11 @@ var (
 				group.Group("/", func(group *ghttp.RouterGroup) {
 					group.Bind(
 						user.NewAuth(),
+					)
+				})
+				group.Group("/vat", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						user.NewVat(),
 					)
 				})
 			})

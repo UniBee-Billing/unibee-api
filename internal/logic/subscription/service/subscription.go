@@ -75,10 +75,10 @@ func checkAndListAddonsFromParams(ctx context.Context, addonParams []*bean.PlanA
 	return addons
 }
 
-func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq, userId uint64) (*vat.NumberValidateRes, error) {
+func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.NumberValidateRes, error) {
 	utility.Assert(req != nil, "req not found")
 	utility.Assert(len(req.VatNumber) > 0, "vatNumber invalid")
-	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), userId, req.VatNumber, "")
+	vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, req.VatNumber, "")
 	if err != nil {
 		return nil, err
 	}

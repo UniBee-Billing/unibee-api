@@ -12,5 +12,5 @@ import (
 func (c *ControllerVat) NumberValidate(ctx context.Context, req *vat.NumberValidateReq) (res *vat.NumberValidateRes, err error) {
 
 	utility.Assert(_interface.Context().Get(ctx).User != nil, "auth failure,not login")
-	return service.VatNumberValidate(ctx, req, _interface.Context().Get(ctx).User.Id)
+	return service.VatNumberValidate(ctx, req)
 }
