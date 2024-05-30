@@ -76,7 +76,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing) {
 			needInvoiceGenerate = false
 			if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).TryAutomaticPaymentBeforePeriodEnd &&
-				(timeNow-lastAutomaticTryTime) > 86400 &&
+				(timeNow-lastAutomaticTryTime) > 43200 &&
 				latestInvoice.GatewayId > 0 {
 				needTryInvoiceAutomaticPayment = true
 			}
