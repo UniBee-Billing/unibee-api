@@ -54,6 +54,8 @@ type UserAccountDetail struct {
 	TaxPercentage      int64                 `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`               // taxPercentage，1000 = 10%
 	Type               int64                 `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
 	Gateway            *bean.GatewaySimplify `json:"gateway"            description:"Gateway"`
+	City               string                `json:"city" dc:"city"`
+	ZipCode            string                `json:"zipCode" dc:"zip_code"`
 }
 
 func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *UserAccountDetail {
@@ -106,6 +108,8 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		CreateTime:         one.CreateTime,
 		ExternalUserId:     one.ExternalUserId,
 		Status:             one.Status,
+		City:               one.City,
+		ZipCode:            one.ZipCode,
 		Gateway:            bean.SimplifyGateway(query.GetGatewayById(ctx, gatewayId)),
 	}
 }

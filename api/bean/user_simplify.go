@@ -50,6 +50,8 @@ type UserAccountSimplify struct {
 	Status             int    `json:"status"             description:"0-Active, 2-Suspend"`
 	TaxPercentage      int64  `json:"taxPercentage"      description:"taxPercentage，1000 = 10%"`               // taxPercentage，1000 = 10%
 	Type               int64  `json:"type"               description:"User type, 1-Individual|2-organization"` // User type, 1-Individual|2-organization
+	City               string `json:"city" dc:"city"`
+	ZipCode            string `json:"zipCode" dc:"zip_code"`
 }
 
 func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
@@ -103,5 +105,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
 		CreateTime:         one.CreateTime,
 		ExternalUserId:     one.ExternalUserId,
 		Status:             one.Status,
+		City:               one.City,
+		ZipCode:            one.ZipCode,
 	}
 }

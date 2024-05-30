@@ -58,4 +58,6 @@ type UserAccount struct {
 	CreateTime         int64       `json:"createTime"         description:"create utc time"`                                                                                           // create utc time
 	ExternalUserId     string      `json:"externalUserId"     description:"external_user_id"`                                                                                          // external_user_id
 	Status             int         `json:"status"             description:"0-Active, 2-Suspend"`                                                                                       // 0-Active, 2-Suspend
+	City               string      `json:"city"               description:"city"`                                                                                                      // city
+	ZipCode            string      `json:"zipCode"            description:"zip_code"`                                                                                                  // zip_code
 }

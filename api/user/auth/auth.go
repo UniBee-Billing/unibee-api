@@ -66,15 +66,20 @@ type PasswordForgetOtpVerifyRes struct {
 
 type RegisterReq struct {
 	g.Meta      `path:"/sso/register" tags:"User-Auth" method:"post" summary:"User Register"`
-	FirstName   string `json:"firstName" dc:"First Name" v:"required"`
-	LastName    string `json:"lastName" dc:"Last Name" v:"required"`
-	Email       string `json:"email" dc:"Email" v:"required"`
-	Password    string `json:"password" dc:"Password" v:"required"`
-	Phone       string `json:"phone" dc:"Phone" `
-	Address     string `json:"address" dc:"Address"`
-	CountryCode string `json:"countryCode" dc:"CountryCode"`
-	CountryName string `json:"countryName" dc:"CountryName"`
-	UserName    string `json:"userName" dc:"UserName"`
+	FirstName   string  `json:"firstName" dc:"First Name" v:"required"`
+	LastName    string  `json:"lastName" dc:"Last Name" v:"required"`
+	Email       string  `json:"email" dc:"Email" v:"required"`
+	Password    string  `json:"password" dc:"Password" v:"required"`
+	Phone       string  `json:"phone" dc:"Phone" `
+	Address     string  `json:"address" dc:"Address"`
+	CountryCode string  `json:"countryCode" dc:"CountryCode"`
+	CountryName string  `json:"countryName" dc:"CountryName"`
+	UserName    string  `json:"userName" dc:"UserName"`
+	Type        int64   `json:"type" dc:"User type, 1-Individual|2-organization"`
+	CompanyName string  `json:"companyName" dc:"company name"`
+	VATNumber   *string `json:"vATNumber" dc:"vat number"`
+	City        string  `json:"city" dc:"city"`
+	ZipCode     string  `json:"zipCode" dc:"zip_code"`
 }
 type RegisterRes struct {
 }

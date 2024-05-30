@@ -8,6 +8,7 @@ import (
 	_interface "unibee/internal/interface"
 	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/logic/email"
+	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/frame/g"
@@ -32,6 +33,18 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 	newOne = query.GetUserAccountByEmail(ctx, _interface.GetMerchantId(ctx), req.Email) //Id(ctx, user.Id)
 	utility.Assert(newOne == nil, "Email already existed")
 
+	var vatNumber = ""
+	if req.VATNumber != nil && len(*req.VATNumber) > 0 {
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
+		vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), _interface.Context().Get(ctx).User.Id, *req.VATNumber, "")
+		utility.AssertError(err, "Update VAT number error")
+		utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+		if len(req.CountryCode) > 0 {
+			utility.Assert(req.CountryCode == vatNumberValidate.CountryCode, "Your country from vat number is "+vatNumberValidate.CountryCode)
+		}
+		vatNumber = *req.VATNumber
+	}
+
 	userStr, err := json.Marshal(
 		&auth2.NewReq{
 			Email:       req.Email,
@@ -43,6 +56,11 @@ func (c *ControllerAuth) Register(ctx context.Context, req *auth.RegisterReq) (r
 			UserName:    req.UserName,
 			CountryCode: req.CountryCode,
 			CountryName: req.CountryName,
+			Type:        req.Type,
+			CompanyName: req.CompanyName,
+			VATNumber:   vatNumber,
+			City:        req.City,
+			ZipCode:     req.ZipCode,
 		},
 	)
 	utility.AssertError(err, "Server Error")

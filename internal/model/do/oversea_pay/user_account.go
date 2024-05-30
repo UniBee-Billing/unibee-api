@@ -60,4 +60,6 @@ type UserAccount struct {
 	CreateTime         interface{} // create utc time
 	ExternalUserId     interface{} // external_user_id
 	Status             interface{} // 0-Active, 2-Suspend
+	City               interface{} // city
+	ZipCode            interface{} // zip_code
 }

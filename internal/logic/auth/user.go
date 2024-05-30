@@ -73,6 +73,11 @@ type NewReq struct {
 	CountryCode    string `json:"countryCode" dc:"CountryCode"`
 	CountryName    string `json:"countryName" dc:"CountryName"`
 	MerchantId     uint64 `json:"merchantId" dc:"MerchantId"`
+	Type           int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
+	CompanyName    string `json:"companyName" dc:"company name"`
+	VATNumber      string `json:"vATNumber" dc:"vat number"`
+	City           string `json:"city" dc:"city"`
+	ZipCode        string `json:"zipCode" dc:"zip_code"`
 }
 
 func PasswordLogin(ctx context.Context, merchantId uint64, email string, password string) (one *entity.UserAccount, token string) {
@@ -112,6 +117,11 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 		CountryName:    req.CountryName,
 		UserName:       req.UserName,
 		MerchantId:     req.MerchantId,
+		Type:           req.Type,
+		CompanyName:    req.CompanyName,
+		VATNumber:      req.VATNumber,
+		City:           req.City,
+		ZipCode:        req.ZipCode,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
 	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
