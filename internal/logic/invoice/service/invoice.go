@@ -447,6 +447,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	utility.Assert(gateway != nil, "invoice gateway not found")
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
 	utility.Assert(one.TotalAmount >= gateway.MinimumAmount, "Total Amount not reach the gateway's minimum amount")
+	utility.Assert(strings.ToUpper(one.Currency) == strings.ToUpper(gateway.Currency), "Invoice currency not reach the gateway's currency")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
 		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "MarkWireTransferInvoiceAsSuccess", 0)
