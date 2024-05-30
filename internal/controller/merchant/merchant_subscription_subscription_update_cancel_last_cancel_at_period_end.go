@@ -13,8 +13,11 @@ func (c *ControllerSubscription) CancelLastCancelAtPeriodEnd(ctx context.Context
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
 		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
-		utility.Assert(one != nil, "no active or incomplete subscription found")
-		req.SubscriptionId = one.SubscriptionId
+		if one != nil {
+			req.SubscriptionId = one.SubscriptionId
+		} else {
+			return &subscription.CancelLastCancelAtPeriodEndRes{}, nil
+		}
 	}
 
 	err = service.SubscriptionCancelLastCancelAtPeriodEnd(ctx, req.SubscriptionId, false)
