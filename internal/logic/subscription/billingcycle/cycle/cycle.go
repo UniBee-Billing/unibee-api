@@ -63,12 +63,22 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 		trackForSubscription(ctx, sub, timeNow)
 
+		var lastAutomaticTryTime int64 = 0
+		var lastPayment *entity.Payment
+		if latestInvoice != nil && len(latestInvoice.PaymentId) > 0 {
+			lastPayment = query.GetPaymentByPaymentId(ctx, latestInvoice.PaymentId)
+			if lastPayment != nil {
+				lastAutomaticTryTime = lastPayment.CreateTime
+			}
+		}
 		var needInvoiceGenerate = true
-		var needInvoiceFirstTryPayment = false
+		var needTryInvoiceAutomaticPayment = false
 		if latestInvoice != nil && (latestInvoice.Status == consts.InvoiceStatusProcessing) {
 			needInvoiceGenerate = false
-			if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).TryAutomaticPaymentBeforePeriodEnd {
-				needInvoiceFirstTryPayment = true
+			if timeNow > utility.MaxInt64(sub.CurrentPeriodEnd, sub.TrialEnd)-config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).TryAutomaticPaymentBeforePeriodEnd &&
+				(timeNow-lastAutomaticTryTime) > 86400 &&
+				latestInvoice.GatewayId > 0 {
+				needTryInvoiceAutomaticPayment = true
 			}
 		} else if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusPaid && timeNow < latestInvoice.PeriodStart {
 			needInvoiceGenerate = false
@@ -101,7 +111,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			} else {
 				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionCancel At Billing Cycle End By CurrentPeriodEnd Set"}, nil
 			}
-		} else if !needInvoiceGenerate && !needInvoiceFirstTryPayment && isSubscriptionExpireExcludePending(ctx, sub, timeNow) {
+		} else if !needInvoiceGenerate && !needTryInvoiceAutomaticPayment && isSubscriptionExpireExcludePending(ctx, sub, timeNow) {
 			// invoice not generate and sub out of time, need expired by system
 			err = expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
 			if err != nil {
@@ -218,15 +228,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if latestInvoice != nil && latestInvoice.Status == consts.InvoiceStatusProcessing {
 					trackForSubscriptionLatestProcessInvoice(ctx, sub, timeNow)
 				}
-				var lastAutomaticTryTime int64 = 0
-				var lastPayment *entity.Payment
-				if len(latestInvoice.PaymentId) > 0 {
-					lastPayment = query.GetPaymentByPaymentId(ctx, latestInvoice.PaymentId)
-					if lastPayment != nil {
-						lastAutomaticTryTime = lastPayment.CreateTime
-					}
-				}
-				if latestInvoice != nil && latestInvoice.GatewayId > 0 && (timeNow-lastAutomaticTryTime) > 86400 && latestInvoice.Status == consts.InvoiceStatusProcessing && needInvoiceFirstTryPayment {
+
+				if needTryInvoiceAutomaticPayment {
 					// finish the payment
 					// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "SubscriptionBillingCycle")
