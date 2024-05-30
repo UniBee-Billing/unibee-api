@@ -448,7 +448,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	utility.Assert(gateway.GatewayType == consts.GatewayTypeWireTransfer, "invoice not wire transfer type")
 	payment := query.GetPaymentByPaymentId(ctx, one.PaymentId)
 	if payment == nil {
-		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "MarkWireTransferInvoiceAsSuccess")
+		res, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, true, "", "MarkWireTransferInvoiceAsSuccess", 0)
 		utility.AssertError(err, "Mark as success error")
 		payment = res.Payment
 		utility.Assert(payment != nil, "payment not found")

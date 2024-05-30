@@ -128,7 +128,9 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 			if len(createPayContext.Pay.UniqueId) == 0 {
 				createPayContext.Pay.UniqueId = createPayContext.Pay.PaymentId
 			}
-			createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
+			if createPayContext.Pay.CreateTime == 0 {
+				createPayContext.Pay.CreateTime = gtime.Now().Timestamp()
+			}
 			createPayContext.Pay.ExpireTime = createPayContext.Pay.CreateTime + int64(createPayContext.DaysUtilDue*86400)
 			insert, err := dao.Payment.Ctx(ctx).Data(createPayContext.Pay).OmitEmpty().Insert(createPayContext.Pay)
 			if err != nil {
@@ -263,7 +265,7 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 	return nil, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, source string) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, source string, timeNow int64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
 	lastPayment, err := clearInvoicePayment(ctx, invoice)
 	if err != nil {
@@ -316,6 +318,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 			Automatic:         automatic,
 			BillingReason:     invoice.InvoiceName,
 			ReturnUrl:         returnUrl,
+			CreateTime:        timeNow,
 		},
 		ExternalUserId:       strconv.FormatUint(invoice.UserId, 10),
 		Email:                email,

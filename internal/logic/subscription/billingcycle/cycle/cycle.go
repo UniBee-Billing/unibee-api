@@ -232,7 +232,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if needTryInvoiceAutomaticPayment {
 					// finish the payment
 					// gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
-					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "SubscriptionBillingCycle")
+					createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, latestInvoice, false, "", "SubscriptionBillingCycle", timeNow)
 					if err != nil {
 						g.Log().Print(ctx, "AutomaticPaymentByCycle CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 						return nil, err
