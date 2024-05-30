@@ -37,7 +37,7 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	if err != nil {
 		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s error:%s", userId, gatewayId, paymentMethodId, err.Error())
 	} else {
-		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s success", userId, gatewayId, paymentMethodId)
+		g.Log().Infof(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%d gatewayId:%d, paymentMethodId:%s success", userId, gatewayId, paymentMethodId)
 	}
 	var oldGatewayId uint64 = 0
 	if len(user.GatewayId) > 0 {
