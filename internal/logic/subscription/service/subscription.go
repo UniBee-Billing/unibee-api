@@ -146,7 +146,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	var timeNow = gtime.Now().Timestamp()
-	if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
+	if sub.TestClock > timeNow && !config2.GetConfigInstance().IsProd() {
 		timeNow = sub.TestClock
 	}
 
@@ -982,7 +982,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	var RecurringDiscountCode string
 	if prorationDate == 0 {
 		prorationDate = time.Now().Unix()
-		if sub.TestClock > sub.CurrentPeriodStart && !config2.GetConfigInstance().IsProd() {
+		if sub.TestClock > prorationDate && !config2.GetConfigInstance().IsProd() {
 			prorationDate = sub.TestClock
 		}
 	}
