@@ -2,6 +2,8 @@ package event
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
@@ -34,10 +36,31 @@ var (
 	SettledReversed = TradeEventTypeEnum{16, "SettledReversed"}
 )
 
+func printChannelPanic(ctx context.Context, err error) {
+	if err != nil {
+		g.Log().Errorf(ctx, "CallbackException panic error:%s", err.Error())
+	} else {
+		g.Log().Errorf(ctx, "CallbackException panic error:%s", err)
+	}
+}
+
 func SaveEvent(ctx context.Context, overseaPayEvent entity.PaymentEvent) {
 	go func() {
+		backgroundCtx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				printChannelPanic(backgroundCtx, err)
+				return
+			}
+		}()
 		overseaPayEvent.CreateTime = gtime.Now().Timestamp()
-		_, err := dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
+		_, err = dao.PaymentEvent.Ctx(ctx).Data(overseaPayEvent).OmitNil().Insert(overseaPayEvent)
 		if err != nil {
 			g.Log().Errorf(ctx, `SaveEvent record insert failure %s`, err)
 		}
