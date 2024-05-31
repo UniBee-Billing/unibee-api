@@ -210,7 +210,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// utility.Assert(user != nil, "user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId, true)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId, true, timeNow)
 	utility.AssertError(err, "System Error")
 	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew", 0)
 	if err != nil {
@@ -693,7 +693,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 	one.Id = uint64(uint(id))
 
 	var createRes *gateway_bean.GatewayCreateSubscriptionResp
-	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true)
+	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, one, one.GatewayId, prepare.GatewayPaymentMethodId, true, gtime.Now().Timestamp())
 	utility.AssertError(err, "System Error")
 	timeline.SubscriptionNewPendingTimeline(ctx, invoice)
 	if prepare.Invoice.TotalAmount == 0 {
@@ -1323,7 +1323,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		merchantInfo := query.GetMerchantById(ctx, one.MerchantId)
 		utility.Assert(merchantInfo != nil, "merchantInfo not found")
 		// utility.Assert(user != nil, "user not found")
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
 		utility.AssertError(err, "System Error")
 		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate", 0)
 		if err != nil {
@@ -1340,7 +1340,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	} else if prepare.EffectImmediate && prepare.Invoice.TotalAmount == 0 {
 		//totalAmount is 0, no payment need
-		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false)
+		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
 		utility.AssertError(err, "System Error")
 		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
 		utility.AssertError(err, "System Error")
@@ -1743,7 +1743,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		})
 		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
-		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId, true)
+		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId, true, gtime.Now().Timestamp())
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err

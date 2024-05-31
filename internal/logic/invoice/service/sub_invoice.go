@@ -17,7 +17,7 @@ import (
 	"unibee/utility"
 )
 
-func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool) (*entity.Invoice, error) {
+func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSimplify, sub *entity.Subscription, gatewayId uint64, paymentMethodId string, isSubLatestInvoice bool, timeNow int64) (*entity.Invoice, error) {
 	utility.Assert(simplify != nil, "invoice data is nil")
 	utility.Assert(sub != nil, "sub is nil")
 	user := query.GetUserAccountById(ctx, sub.UserId)
@@ -28,6 +28,10 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 	var sendEmail = ""
 	if user != nil {
 		sendEmail = user.Email
+	}
+	var currentTime = gtime.Now().Timestamp()
+	if timeNow > currentTime {
+		currentTime = timeNow
 	}
 	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
@@ -62,7 +66,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Lines:                          utility.MarshalToJsonString(simplify.Lines),
 		Link:                           link.GetInvoiceLink(invoiceId, st),
 		CreateTime:                     gtime.Now().Timestamp(),
-		FinishTime:                     gtime.Now().Timestamp(),
+		FinishTime:                     currentTime,
 		DayUtilDue:                     simplify.DayUtilDue,
 		DiscountAmount:                 simplify.DiscountAmount,
 		DiscountCode:                   simplify.DiscountCode,
