@@ -28,6 +28,7 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 		if !config.GetConfigInstance().IsProd() {
 			periodEnd = utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock)
 		}
+		periodEnd = utility.MinInt64(sub.CurrentPeriodEnd, periodEnd)
 		nextStatus := consts.SubTimeLineStatusFinished
 		if oldOne.Status == consts.SubTimeLineStatusPending {
 			if endSubStatus == consts.SubStatusExpired {
