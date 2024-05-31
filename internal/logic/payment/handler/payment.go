@@ -365,7 +365,7 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentSuccess, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-			result, err := transaction.Update(dao.Payment.Table(), g.Map{
+			_, err = transaction.Update(dao.Payment.Table(), g.Map{
 				dao.Payment.Columns().Status:                 consts.PaymentSuccess,
 				dao.Payment.Columns().PaidTime:               paidAt,
 				dao.Payment.Columns().GatewayPaymentIntentId: req.GatewayPaymentIntentId,
@@ -374,12 +374,8 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 				dao.Payment.Columns().PaymentAmount:          req.PaymentAmount,
 				dao.Payment.Columns().Code:                   req.PaymentCode,
 			},
-				g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
-			if err != nil || result == nil {
-				return err
-			}
-			affected, err := result.RowsAffected()
-			if err != nil || affected != 1 {
+				g.Map{dao.Payment.Columns().Id: payment.Id})
+			if err != nil {
 				return err
 			}
 			payment.Status = consts.PaymentSuccess
