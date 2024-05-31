@@ -60,7 +60,7 @@ func (s StripeWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 	var one *stripe.WebhookEndpoint
 	for _, endpoint := range result.WebhookEndpointList().Data {
 		if strings.Compare(endpoint.URL, webhookUrl) == 0 {
-			if endpoint.APIVersion != stripe.APIVersion {
+			if endpoint.APIVersion != stripe.APIVersion || len(gateway.WebhookSecret) == 0 {
 				params := &stripe.WebhookEndpointParams{}
 				_, _ = webhookendpoint.Del(endpoint.ID, params)
 			} else {
