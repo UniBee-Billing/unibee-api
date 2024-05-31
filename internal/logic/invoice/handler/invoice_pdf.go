@@ -70,7 +70,11 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 	if unibInvoice.Status == consts.InvoiceStatusProcessing {
 		doc.SetStatus("Process")
 	} else if unibInvoice.Status == consts.InvoiceStatusPaid {
-		doc.SetStatus("Paid")
+		if len(unibInvoice.RefundId) > 0 {
+			doc.SetStatus("Refunded")
+		} else {
+			doc.SetStatus("Paid")
+		}
 	} else if unibInvoice.Status == consts.InvoiceStatusCancelled {
 		doc.SetStatus("Cancelled")
 	} else if unibInvoice.Status == consts.InvoiceStatusFailed {
