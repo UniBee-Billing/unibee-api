@@ -198,10 +198,12 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 		dao.Payment.Columns().GatewayPaymentIntentId: gatewayInternalPayResult.GatewayPaymentIntentId}).
 		Where(dao.Payment.Columns().Id, createPayContext.Pay.Id).Where(dao.Payment.Columns().Status, consts.PaymentCreated).Update()
 	if err != nil || result == nil {
+		g.Log().Errorf(ctx, `GatewayPaymentCreate error:%s, result:%s`, err, result)
 		return nil, err
 	}
 	affected, err := result.RowsAffected()
 	if err != nil || affected != 1 {
+		g.Log().Errorf(ctx, `GatewayPaymentCreate error:%s, affected:%s`, err, affected)
 		return nil, err
 	}
 	// send the payment status checker mq
@@ -218,7 +220,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	callback.GetPaymentCallbackServiceProvider(ctx, createPayContext.Pay.BizType).PaymentCreateCallback(ctx, createPayContext.Pay, gatewayInternalPayResult.Invoice)
 	err = handler2.CreateOrUpdatePaymentTimelineForPayment(ctx, createPayContext.Pay, createPayContext.Pay.PaymentId)
 	if err != nil {
-		fmt.Printf(`CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
+		g.Log().Errorf(ctx, `CreateOrUpdatePaymentTimelineForPayment error %s`, err.Error())
 	}
 	if createPayContext.Pay.Status == consts.PaymentSuccess {
 		req := &handler2.HandlePayReq{
