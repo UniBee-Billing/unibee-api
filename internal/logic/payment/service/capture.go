@@ -23,13 +23,9 @@ func PaymentGatewayCapture(ctx context.Context, payment *entity.Payment) (err er
 		return err
 	}
 	return dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
-		result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CaptureRequest},
+		_, err = transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().AuthorizeStatus: consts.CaptureRequest},
 			g.Map{dao.Payment.Columns().Id: payment.Id, dao.Payment.Columns().Status: consts.PaymentCreated})
-		if err != nil || result == nil {
-			return err
-		}
-		affected, err := result.RowsAffected()
-		if err != nil || affected != 1 {
+		if err != nil {
 			return err
 		}
 		return nil

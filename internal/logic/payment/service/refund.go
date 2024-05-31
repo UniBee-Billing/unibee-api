@@ -143,15 +143,11 @@ func GatewayPaymentRefundCreate(ctx context.Context, req *NewPaymentRefundIntern
 	one.GatewayRefundId = gatewayResult.GatewayRefundId
 	one.Status = int(gatewayResult.Status)
 	one.Type = gatewayResult.Type
-	result, err := dao.Refund.Ctx(ctx).Data(g.Map{
+	_, err = dao.Refund.Ctx(ctx).Data(g.Map{
 		dao.Refund.Columns().GatewayRefundId: gatewayResult.GatewayRefundId,
 		dao.Refund.Columns().Type:            gatewayResult.Type,
 	}).Where(dao.Refund.Columns().Id, one.Id).Where(dao.Refund.Columns().Status, consts.RefundCreated).Update()
-	if err != nil || result == nil {
-		return nil, err
-	}
-	affected, err := result.RowsAffected()
-	if err != nil || affected != 1 {
+	if err != nil {
 		return nil, err
 	}
 	// send the payment status checker mq
