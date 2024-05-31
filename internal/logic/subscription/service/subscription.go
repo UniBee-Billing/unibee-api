@@ -1228,7 +1228,7 @@ type UpdateInternalReq struct {
 }
 
 func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMemberId int64) (*subscription.UpdateRes, error) {
-	prorationDate := gtime.Now().Timestamp()
+	var prorationDate int64 = 0
 	if req.ProrationDate != nil {
 		prorationDate = *req.ProrationDate
 	}
