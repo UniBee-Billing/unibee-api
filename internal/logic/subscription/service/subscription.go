@@ -1711,11 +1711,16 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	utility.Assert(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing, "subscription not in pending or processing status")
 	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
 	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
-	err := handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
+	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		dao.Subscription.Columns().CurrentPeriodPaid: expireTime,
+		dao.Subscription.Columns().GmtModify:         gtime.Now(),
+	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	utility.AssertError(err, "Subscription Active Temporarily")
+
+	err = handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
 	if err != nil {
 		return err
 	}
-
 	if sub.TrialEnd > 0 && sub.TrialEnd > sub.CurrentPeriodStart {
 		// trial start
 		oneUser := query.GetUserAccountById(ctx, sub.UserId)
