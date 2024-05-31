@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
@@ -103,7 +104,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 
 func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
 	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
-	utility.Assert(payment.Status == consts.PaymentSuccess, "payment not success")
+	utility.Assert(payment.Status == consts.PaymentSuccess, fmt.Sprintf("payment not success:%v", payment.Status))
 	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
 
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
