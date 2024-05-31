@@ -572,52 +572,53 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			return nil, err
 		}
 
-		var containNegative = false
+		//var containNegative = false
+		//for _, line := range createPayContext.Invoice.Lines {
+		//	if line.Amount <= 0 {
+		//		containNegative = true
+		//	}
+		//}
+		//if !containNegative {
 		for _, line := range createPayContext.Invoice.Lines {
-			if line.Amount <= 0 {
-				containNegative = true
-			}
-		}
-		if !containNegative {
-			for _, line := range createPayContext.Invoice.Lines {
-				var description = line.Description
-				if len(description) == 0 {
-					if line.Plan != nil {
-						description = line.Plan.PlanName
-					} else {
-						description = "Default Product"
-					}
+			var description = line.Description
+			if len(description) == 0 {
+				if line.Plan != nil {
+					description = line.Plan.PlanName
+				} else {
+					description = "Default Product"
 				}
-				ItemParams := &stripe.InvoiceItemParams{
-					Invoice:     stripe.String(result.ID),
-					Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-					Amount:      stripe.Int64(line.Amount),
-					Description: stripe.String(description),
-					Customer:    stripe.String(gatewayUser.GatewayUserId)}
-				_, err = invoiceitem.New(ItemParams)
-				if err != nil {
-					return nil, err
-				}
-			}
-		} else {
-			var productName = createPayContext.Invoice.ProductName
-			if len(productName) == 0 {
-				productName = createPayContext.Invoice.InvoiceName
-			}
-			if len(productName) == 0 {
-				productName = "DefaultProduct"
 			}
 			ItemParams := &stripe.InvoiceItemParams{
 				Invoice:     stripe.String(result.ID),
 				Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
-				Amount:      stripe.Int64(createPayContext.Invoice.TotalAmount),
-				Description: stripe.String(fmt.Sprintf("%s", productName)),
+				Amount:      stripe.Int64(line.Amount),
+				Description: stripe.String(description),
 				Customer:    stripe.String(gatewayUser.GatewayUserId)}
-			_, err = invoiceitem.New(ItemParams)
+			itemResult, err := invoiceitem.New(ItemParams)
+			log.SaveChannelHttpLog("GatewayNewPayment", ItemParams, itemResult, err, "NewInvoiceItem", nil, createPayContext.Gateway)
 			if err != nil {
 				return nil, err
 			}
 		}
+		//} else {
+		//	var productName = createPayContext.Invoice.ProductName
+		//	if len(productName) == 0 {
+		//		productName = createPayContext.Invoice.InvoiceName
+		//	}
+		//	if len(productName) == 0 {
+		//		productName = "DefaultProduct"
+		//	}
+		//	ItemParams := &stripe.InvoiceItemParams{
+		//		Invoice:     stripe.String(result.ID),
+		//		Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
+		//		Amount:      stripe.Int64(createPayContext.Invoice.TotalAmount),
+		//		Description: stripe.String(fmt.Sprintf("%s", productName)),
+		//		Customer:    stripe.String(gatewayUser.GatewayUserId)}
+		//	_, err = invoiceitem.New(ItemParams)
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//}
 		finalizeInvoiceParam := &stripe.InvoiceFinalizeInvoiceParams{}
 		if createPayContext.PayImmediate {
 			finalizeInvoiceParam.AutoAdvance = stripe.Bool(true)
