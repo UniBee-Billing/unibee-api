@@ -28,7 +28,7 @@ import (
 func TryCancelSubscriptionLatestInvoice(ctx context.Context, subscription *entity.Subscription) {
 	one := query.GetInvoiceByInvoiceId(ctx, subscription.LatestInvoiceId)
 	if one != nil && one.Status == consts.InvoiceStatusProcessing {
-		err := CancelProcessingInvoice(ctx, one.InvoiceId)
+		err := CancelProcessingInvoice(ctx, one.InvoiceId, "TryCancelSubscriptionLatestInvoice")
 		if err != nil {
 			g.Log().Errorf(ctx, `TryCancelSubscriptionLatestInvoice failure error:%s`, err.Error())
 		}
@@ -236,7 +236,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 	}
 }
 
-func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
+func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
 	if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
@@ -244,6 +244,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string) error {
 	}
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
+	g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", invoiceId, reason)
 	invoiceStatus := consts.InvoiceStatusCancelled
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:    invoiceStatus,

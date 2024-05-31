@@ -162,6 +162,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				Body:  one.InvoiceId,
 			})
 		} else if status == consts.InvoiceStatusCancelled {
+			g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceCancelled.Topic,
 				Tag:   redismq2.TopicInvoiceCancelled.Tag,
@@ -296,6 +297,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 				Body:  one.InvoiceId,
 			})
 		} else if status == consts.InvoiceStatusCancelled {
+			g.Log().Infof(ctx, "CancelProcessingInvoice invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPaymentRefund")
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceCancelled.Topic,
 				Tag:   redismq2.TopicInvoiceCancelled.Tag,

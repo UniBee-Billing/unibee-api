@@ -124,7 +124,7 @@ func TestInvoice(t *testing.T) {
 		require.NotNil(t, checkRes)
 		require.Equal(t, true, len(checkRes.Link) == 0)
 		require.Equal(t, true, len(checkRes.Message) > 0)
-		err = CancelProcessingInvoice(ctx, one.InvoiceId)
+		err = CancelProcessingInvoice(ctx, one.InvoiceId, "AutoTestCancel")
 		require.Nil(t, err)
 		checkRes = LinkCheck(ctx, one.InvoiceId, gtime.Now().Timestamp())
 		require.NotNil(t, checkRes)
