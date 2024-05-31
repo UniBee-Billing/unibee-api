@@ -23,6 +23,8 @@ func TestPeriod(t *testing.T) {
 		//fmt.Println(time.Timestamp() - time.StartOfMonth().Timestamp())
 		//today := time.Date
 		{
+			fmt.Println(gtime.Timestamp())
+			fmt.Println(gtime.NewFromTimeStamp(gtime.Timestamp()))
 			today := gtime.NewFromTimeStamp(time.Date(2024, 1, 31, 12, 0, 0, 0, time.Local).Unix())
 			d := today.Day()
 			fmt.Println(d)

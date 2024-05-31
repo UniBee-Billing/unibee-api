@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/nacos-group/nacos-sdk-go/util"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -23,7 +24,10 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 		Where(dao.SubscriptionTimeline.Columns().SubscriptionId, sub.SubscriptionId).
 		OmitEmpty().Scan(&oldOne)
 	if oldOne != nil {
-		periodEnd := utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock)
+		periodEnd := gtime.Now().Timestamp()
+		if !config.GetConfigInstance().IsProd() {
+			periodEnd = utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock)
+		}
 		nextStatus := consts.SubTimeLineStatusFinished
 		if oldOne.Status == consts.SubTimeLineStatusPending {
 			if endSubStatus == consts.SubStatusExpired {
