@@ -41,7 +41,7 @@ func TaskForExpireInvoices(ctx context.Context) {
 				}
 			} else if one.FinishTime+(one.DayUtilDue*86400) < gtime.Now().Timestamp() {
 				//Invoice Expire
-				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId)
+				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId, "TaskForExpireInvoices")
 				if err != nil {
 					g.Log().Errorf(ctx, "TaskForExpireInvoices Failure invoice error:", err.Error())
 				}
@@ -88,7 +88,7 @@ func ExpireUserSubInvoices(ctx context.Context, sub *entity.Subscription, timeNo
 				}
 			} else if one.FinishTime+(one.DayUtilDue*86400) < timeNow {
 				//Invoice Expire
-				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId)
+				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId, "ExpireUserSubInvoices")
 				if err != nil {
 					g.Log().Errorf(ctx, "ExpireUserSubInvoices Failure invoice error:", err.Error())
 				}
