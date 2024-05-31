@@ -283,7 +283,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 	return nil
 }
 
-func ProcessingInvoiceFailure(ctx context.Context, invoiceId string) error {
+func ProcessingInvoiceFailure(ctx context.Context, invoiceId string, reason string) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, fmt.Sprintf("invoice not found:%s", invoiceId))
 	if one.Status == consts.InvoiceStatusCancelled || one.Status == consts.InvoiceStatusFailed {
@@ -291,6 +291,7 @@ func ProcessingInvoiceFailure(ctx context.Context, invoiceId string) error {
 	}
 	utility.Assert(one.Status == consts.InvoiceStatusProcessing, "invoice not in processing status")
 	utility.Assert(one.IsDeleted == 0, "invoice is deleted")
+	g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", invoiceId, reason)
 	_, err := dao.Invoice.Ctx(ctx).Data(g.Map{
 		dao.Invoice.Columns().Status:     consts.InvoiceStatusFailed,
 		dao.Invoice.Columns().SendStatus: consts.InvoiceSendStatusUnnecessary,

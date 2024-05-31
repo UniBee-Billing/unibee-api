@@ -169,6 +169,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				Body:  one.InvoiceId,
 			})
 		} else if status == consts.InvoiceStatusFailed {
+			g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceFailed.Topic,
 				Tag:   redismq2.TopicInvoiceFailed.Tag,
@@ -304,6 +305,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 				Body:  one.InvoiceId,
 			})
 		} else if status == consts.InvoiceStatusFailed {
+			g.Log().Infof(ctx, "ProcessingInvoiceFailure invoiceId:%s reason:%s", one.InvoiceId, "UpdateInvoiceFromPayment")
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoiceFailed.Topic,
 				Tag:   redismq2.TopicInvoiceFailed.Tag,
