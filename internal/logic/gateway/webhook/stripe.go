@@ -148,7 +148,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 	if !config.GetConfigInstance().IsServerDev() {
 		event, err = webhook.ConstructEvent(r.GetBody(), signatureHeader, endpointSecret)
 		if err != nil {
-			log.SaveChannelHttpLog("GatewayWebhook", string(r.GetBody()), "VerifyError-400", nil, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+			log.SaveChannelHttpLog("GatewayWebhook", string(r.GetBody()), "SignatureVerifyError-400", nil, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 			g.Log().Errorf(r.Context(), "⚠️  Webhook GatewayId:%d, GatewayName:%s, Webhook signature verification failed. %s\n", gateway.Id, gateway.GatewayName, err.Error())
 			r.Response.WriteHeader(http.StatusOK)
 			return
