@@ -10,6 +10,9 @@ import (
 )
 
 func GetPeriodEndFromStart(ctx context.Context, start int64, billingCycleAnchor int64, planId uint64) int64 {
+	if billingCycleAnchor == 0 {
+		billingCycleAnchor = start
+	}
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
 	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
