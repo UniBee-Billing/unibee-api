@@ -573,11 +573,19 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		}
 
 		for _, line := range createPayContext.Invoice.Lines {
+			var description = line.Description
+			if len(description) == 0 {
+				if line.Plan != nil {
+					description = line.Plan.PlanName
+				} else {
+					description = "Default Product"
+				}
+			}
 			ItemParams := &stripe.InvoiceItemParams{
 				Invoice:     stripe.String(result.ID),
 				Currency:    stripe.String(strings.ToLower(createPayContext.Invoice.Currency)),
 				Amount:      stripe.Int64(line.Amount),
-				Description: stripe.String(line.Description),
+				Description: stripe.String(description),
 				Customer:    stripe.String(gatewayUser.GatewayUserId)}
 			_, err = invoiceitem.New(ItemParams)
 			if err != nil {

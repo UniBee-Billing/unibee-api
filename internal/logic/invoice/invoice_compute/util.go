@@ -222,7 +222,9 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 	var description = fmt.Sprintf("%d * %s %s", req.Quantity, plan.PlanName, period)
 	if req.ProductData != nil && len(req.ProductData.Name) > 0 {
 		name = req.ProductData.Name
-		description = req.ProductData.Description
+		if len(req.ProductData.Description) > 0 {
+			description = req.ProductData.Description
+		}
 	}
 	invoiceItems = append(invoiceItems, &bean.InvoiceItemSimplify{
 		Currency:               req.Currency,
