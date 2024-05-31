@@ -153,7 +153,7 @@ type MarkWireTransferSuccessRes struct {
 }
 
 type MarkRefundInvoiceSuccessReq struct {
-	g.Meta    `path:"/mark_refund" tags:"Invoice" method:"post" summary:"MarkInvoiceRefundSuccess" dc:"Mark refund invoice success, only support Changelly and Wire Transfer"`
+	g.Meta    `path:"/mark_refund_success" tags:"Invoice" method:"post" summary:"MarkInvoiceRefundSuccess" dc:"Mark refund invoice success, only support Changelly and Wire Transfer"`
 	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 	Reason    string `json:"reason" dc:"The reason of mark action"`
 }
