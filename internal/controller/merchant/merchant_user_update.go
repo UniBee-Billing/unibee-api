@@ -75,6 +75,8 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().Facebook:        req.Facebook,
 		dao.UserAccount.Columns().TikTok:          req.TikTok,
 		dao.UserAccount.Columns().OtherSocialInfo: req.OtherSocialInfo,
+		dao.UserAccount.Columns().City:            req.City,
+		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
 	if err != nil {

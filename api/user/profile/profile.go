@@ -42,6 +42,8 @@ type UpdateReq struct {
 	Type            *int64  `json:"type" dc:"User type, 1-Individual|2-organization"`
 	GatewayId       *uint64 `json:"gatewayId" dc:"GatewayId"`
 	PaymentMethodId *string `json:"paymentMethodId" dc:"PaymentMethodId of gateway, available for card type gateway, payment automatic will enable if set" `
+	City            string  `json:"city" dc:"city"`
+	ZipCode         string  `json:"zipCode" dc:"zip_code"`
 }
 
 type UpdateRes struct {
