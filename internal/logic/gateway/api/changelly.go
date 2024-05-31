@@ -264,13 +264,22 @@ func (c Changelly) GatewayRefundDetail(ctx context.Context, gateway *entity.Merc
 func (c Changelly) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
-		Status:          consts.RefundSuccess,
+		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil
 }
 
 func (c Changelly) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
-	return nil, gerror.New("Not Support")
+	return &gateway_bean.GatewayPaymentRefundResp{
+		MerchantId:       strconv.FormatUint(payment.MerchantId, 10),
+		GatewayRefundId:  refund.GatewayRefundId,
+		GatewayPaymentId: payment.GatewayPaymentId,
+		Status:           consts.RefundCancelled,
+		Reason:           refund.RefundComment,
+		RefundAmount:     refund.RefundAmount,
+		Currency:         refund.Currency,
+		RefundTime:       gtime.Now(),
+	}, nil
 }
 
 func parseChangellyPayment(item *gjson.Json) *gateway_bean.GatewayPaymentRo {

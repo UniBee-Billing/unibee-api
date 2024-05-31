@@ -86,6 +86,7 @@ type IMerchantInvoice interface {
 	Refund(ctx context.Context, req *invoice.RefundReq) (res *invoice.RefundRes, err error)
 	MarkRefund(ctx context.Context, req *invoice.MarkRefundReq) (res *invoice.MarkRefundRes, err error)
 	MarkWireTransferSuccess(ctx context.Context, req *invoice.MarkWireTransferSuccessReq) (res *invoice.MarkWireTransferSuccessRes, err error)
+	MarkRefundInvoiceSuccess(ctx context.Context, req *invoice.MarkRefundInvoiceSuccessReq) (res *invoice.MarkRefundInvoiceSuccessRes, err error)
 }
 
 type IMerchantMember interface {

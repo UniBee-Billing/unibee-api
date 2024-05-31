@@ -117,7 +117,7 @@ func (w Wire) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantG
 func (w Wire) GatewayRefund(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	return &gateway_bean.GatewayPaymentRefundResp{
 		GatewayRefundId: refund.RefundId,
-		Status:          consts.RefundSuccess,
+		Status:          consts.RefundCreated,
 		Type:            consts.RefundTypeMarked,
 	}, nil
 }

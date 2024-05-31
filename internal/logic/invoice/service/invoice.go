@@ -399,6 +399,32 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	return refund, nil
 }
 
+func MarkInvoiceRefundSuccess(ctx context.Context, merchantId uint64, invoiceId string, reason string) {
+	utility.Assert(len(invoiceId) > 0, "invoiceId invalid")
+	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	utility.Assert(one != nil, "invoice not found")
+	utility.Assert(one.MerchantId == merchantId, "wrong merchant")
+	gateway := query.GetGatewayById(ctx, one.GatewayId)
+	utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
+	utility.Assert(len(one.RefundId) > 0, "invoiceId not refund invoice")
+	refund := query.GetRefundByRefundId(ctx, one.RefundId)
+	utility.Assert(refund != nil, "refund not found")
+	gateway = query.GetGatewayById(ctx, refund.GatewayId)
+	utility.Assert(gateway != nil && (gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto), "gateway not wire transfer or changelly type")
+
+	err := handler2.HandleRefundSuccess(ctx, &handler2.HandleRefundReq{
+		RefundId:         one.RefundId,
+		GatewayRefundId:  refund.GatewayRefundId,
+		RefundAmount:     refund.RefundAmount,
+		RefundStatusEnum: consts.RefundSuccess,
+		RefundTime:       gtime.Now(),
+		Reason:           reason,
+	})
+	if err != nil {
+		g.Log().Errorf(ctx, "MarkInvoiceRefundSuccess invoiceId:%s error:%s", invoiceId, err.Error())
+	}
+}
+
 func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity.Refund, error) {
 	utility.Assert(req.RefundAmount > 0, "refundFee should > 0")
 	utility.Assert(len(req.InvoiceId) > 0, "invoiceId invalid")
