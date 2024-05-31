@@ -15,11 +15,11 @@ func (c *ControllerWebhook) EndpointLogList(ctx context.Context, req *webhook.En
 	if one == nil {
 		return nil, gerror.New("Merchant Check Error")
 	}
-	list := webhook2.MerchantWebhookEndpointLogList(ctx, &webhook2.EndpointLogListInternalReq{
+	list, total := webhook2.MerchantWebhookEndpointLogList(ctx, &webhook2.EndpointLogListInternalReq{
 		MerchantId: _interface.GetMerchantId(ctx),
 		EndpointId: req.EndpointId,
 		Page:       req.Page,
 		Count:      req.Count,
 	})
-	return &webhook.EndpointLogListRes{EndpointLogList: list}, nil
+	return &webhook.EndpointLogListRes{EndpointLogList: list, Total: total}, nil
 }

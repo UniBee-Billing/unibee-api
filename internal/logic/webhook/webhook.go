@@ -54,7 +54,7 @@ type EndpointLogListInternalReq struct {
 	Count      int    `json:"count" dc:"Count Of Page" `
 }
 
-func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) []*bean.MerchantWebhookLogSimplify {
+func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInternalReq) ([]*bean.MerchantWebhookLogSimplify, int) {
 	var mainList = make([]*bean.MerchantWebhookLogSimplify, 0)
 	if req.Count <= 0 {
 		req.Count = 20
@@ -65,13 +65,14 @@ func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInt
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	utility.Assert(req.EndpointId > 0, "endpointId not found")
 	var sortKey = "create_time desc"
+	var total = 0
 	_ = dao.MerchantWebhookLog.Ctx(ctx).
 		Where(dao.MerchantWebhookLog.Columns().MerchantId, req.MerchantId).
 		Where(dao.MerchantWebhookLog.Columns().EndpointId, req.EndpointId).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().Scan(&mainList)
-	return mainList
+		OmitEmpty().ScanAndCount(&mainList, &total, true)
+	return mainList, total
 }
 
 func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url string, events []string) (*entity.MerchantWebhook, error) {

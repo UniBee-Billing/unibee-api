@@ -30,6 +30,7 @@ type EndpointLogListReq struct {
 
 type EndpointLogListRes struct {
 	EndpointLogList []*bean.MerchantWebhookLogSimplify `json:"endpointLogList" dc:"EndpointLogList"`
+	Total           int                                `json:"total" dc:"Total"`
 }
 
 type ResendWebhookReq struct {
