@@ -555,7 +555,6 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 			} else if len(gatewayUser.GatewayDefaultPaymentMethod) > 0 && ContainString(paymentMethodIds, gatewayUser.GatewayDefaultPaymentMethod) {
 				params.DefaultPaymentMethod = stripe.String(gatewayUser.GatewayDefaultPaymentMethod)
 			} else if len(listQuery.PaymentMethods) > 0 {
-				// todo mark use detail query
 				params.DefaultPaymentMethod = stripe.String(listQuery.PaymentMethods[0].Id)
 			}
 		} else {
