@@ -1721,6 +1721,12 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	utility.AssertError(err, "Subscription Active Temporarily")
 
+	_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
+		dao.Invoice.Columns().DayUtilDue: (expireTime - invoice.FinishTime) / 86400,
+		dao.Invoice.Columns().GmtModify:  gtime.Now(),
+	}).Where(dao.Invoice.Columns().InvoiceId, invoice.InvoiceId).OmitNil().Update()
+	utility.AssertError(err, "Subscription Active Temporarily")
+
 	err = handler.MakeSubscriptionIncomplete(ctx, subscriptionId)
 	if err != nil {
 		return err
