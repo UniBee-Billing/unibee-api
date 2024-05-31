@@ -1711,6 +1711,10 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 	utility.Assert(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing, "subscription not in pending or processing status")
 	utility.Assert(sub.CurrentPeriodStart < expireTime, "expireTime should greater then subscription's period start time")
 	utility.Assert(sub.CurrentPeriodEnd >= expireTime, "expireTime should lower then subscription's period end time")
+	utility.Assert(len(sub.LatestInvoiceId) > 0, "sub latest invoice not found")
+	invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
+	utility.Assert(invoice != nil, "sub latest invoice not found")
+	utility.Assert(invoice.Status == consts.InvoiceStatusProcessing, "sub latest invoice not in processing")
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().CurrentPeriodPaid: expireTime,
 		dao.Subscription.Columns().GmtModify:         gtime.Now(),
