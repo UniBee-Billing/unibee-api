@@ -53,30 +53,30 @@ func TaskForExpireInvoices(ctx context.Context) {
 	}
 }
 
-func ExpireUserOneTimeInvoices(ctx context.Context, sub *entity.Subscription) {
+func ExpireUserSubInvoices(ctx context.Context, sub *entity.Subscription, timeNow int64) {
 	if sub == nil {
 		return
 	}
-	var timeNow = gtime.Now().Timestamp()
 	var list []*entity.Invoice
 	err := dao.Invoice.Ctx(ctx).
 		Where(dao.Invoice.Columns().UserId, sub.UserId).
-		Where(dao.Invoice.Columns().BizType, consts.BizTypeOneTime).
+		Where(dao.Invoice.Columns().SubscriptionId, sub.SubscriptionId).
+		Where(dao.Invoice.Columns().BizType, consts.BizTypeSubscription).
 		Where(dao.Invoice.Columns().Status, consts.InvoiceStatusProcessing).
 		Where(dao.Invoice.Columns().IsDeleted, 0).
 		OrderAsc(dao.Invoice.Columns().FinishTime).
 		Scan(&list)
 	if err != nil {
-		g.Log().Errorf(ctx, "ExpireUserOneTimeInvoices error:%s", err.Error())
+		g.Log().Errorf(ctx, "ExpireUserSubInvoices error:%s", err.Error())
 		return
 	}
 	for _, one := range list {
 		key := fmt.Sprintf("TaskForExpireInvoices-%v", one.Id)
 		if utility.TryLock(ctx, key, 60) {
-			g.Log().Debugf(ctx, "ExpireUserOneTimeInvoices GetLock 60s", key)
+			g.Log().Debugf(ctx, "ExpireUserSubInvoices GetLock 60s", key)
 			defer func() {
 				utility.ReleaseLock(ctx, key)
-				g.Log().Debugf(ctx, "ExpireUserOneTimeInvoices ReleaseLock", key)
+				g.Log().Debugf(ctx, "ExpireUserSubInvoices ReleaseLock", key)
 			}()
 			if one.FinishTime == 0 {
 				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -84,17 +84,17 @@ func ExpireUserOneTimeInvoices(ctx context.Context, sub *entity.Subscription) {
 					dao.Invoice.Columns().GmtModify:  gtime.Now(),
 				}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 				if err != nil {
-					g.Log().Errorf(ctx, "ExpireUserOneTimeInvoices Update FinishTime error:", err.Error())
+					g.Log().Errorf(ctx, "ExpireUserSubInvoices Update FinishTime error:", err.Error())
 				}
 			} else if one.FinishTime+(one.DayUtilDue*86400) < timeNow {
 				//Invoice Expire
 				err = service.ProcessingInvoiceFailure(ctx, one.InvoiceId)
 				if err != nil {
-					g.Log().Errorf(ctx, "ExpireUserOneTimeInvoices Failure invoice error:", err.Error())
+					g.Log().Errorf(ctx, "ExpireUserSubInvoices Failure invoice error:", err.Error())
 				}
 			}
 		} else {
-			g.Log().Errorf(ctx, "ExpireUserOneTimeInvoices GetLock Failure", key)
+			g.Log().Errorf(ctx, "ExpireUserSubInvoices GetLock Failure", key)
 			return
 		}
 	}

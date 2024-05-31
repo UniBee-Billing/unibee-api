@@ -52,7 +52,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:      test.TestPlan.Id,
 			UserId:      test.TestUser.Id,
 			Quantity:    testQuantity,
-			GatewayId:   test.TestGateway.Id,
+			GatewayId:   &test.TestGateway.Id,
 			AddonParams: []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 		})
 		require.Nil(t, err)
@@ -71,7 +71,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:         test.TestPlan.Id,
 			UserId:         test.TestUser.Id,
 			Quantity:       testQuantity,
-			GatewayId:      test.TestGateway.Id,
+			GatewayId:      &test.TestGateway.Id,
 			AddonParams:    []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 			VatCountryCode: "AT",
 		})
@@ -88,7 +88,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:         test.TestPlan.Id,
 			UserId:         test.TestUser.Id,
 			Quantity:       testQuantity,
-			GatewayId:      test.TestGateway.Id,
+			GatewayId:      &test.TestGateway.Id,
 			AddonParams:    []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 			VatCountryCode: "AT",
 			VatNumber:      "IE6388047V",
@@ -109,7 +109,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        testQuantity,
-			GatewayId:       test.TestGateway.Id,
+			GatewayId:       &test.TestGateway.Id,
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 			Discount: &bean.ExternalDiscountParam{
@@ -183,7 +183,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        testQuantity,
-			GatewayId:       test.TestGateway.Id,
+			GatewayId:       &test.TestGateway.Id,
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 			TrialEnd:        gtime.Now().Timestamp() + 86400,
@@ -210,7 +210,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        testQuantity,
-			GatewayId:       test.TestGateway.Id,
+			GatewayId:       &test.TestGateway.Id,
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 		})
@@ -229,7 +229,7 @@ func TestSubscription(t *testing.T) {
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       2,
-			GatewayId:      one.GatewayId,
+			GatewayId:      &one.GatewayId,
 		}, 0, 0)
 		require.Nil(t, err)
 		invoice_compute.VerifyInvoiceSimplify(preview.Invoice)
@@ -238,7 +238,7 @@ func TestSubscription(t *testing.T) {
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       3, //todo mark if set to 2 will cause a bug
-			GatewayId:      one.GatewayId,
+			GatewayId:      &one.GatewayId,
 		}, 0)
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
@@ -255,7 +255,7 @@ func TestSubscription(t *testing.T) {
 			SubscriptionId: testSubscriptionId,
 			NewPlanId:      test.TestPlan.Id,
 			Quantity:       1,
-			GatewayId:      one.GatewayId,
+			GatewayId:      &one.GatewayId,
 		}, 0)
 		require.Nil(t, err)
 		one = query.GetSubscriptionBySubscriptionId(ctx, testSubscriptionId)
@@ -283,7 +283,7 @@ func TestSubscription(t *testing.T) {
 			PlanId:          test.TestPlan.Id,
 			UserId:          test.TestUser.Id,
 			Quantity:        testQuantity,
-			GatewayId:       test.TestWireTransferGateway.Id,
+			GatewayId:       &test.TestWireTransferGateway.Id,
 			PaymentMethodId: "testPaymentMethodId",
 			AddonParams:     []*bean.PlanAddonParam{{Quantity: testQuantity, AddonPlanId: test.TestRecurringAddon.Id}},
 		})

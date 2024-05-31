@@ -29,7 +29,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	utility.Assert(sub != nil, "Subscription Not Found")
 	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
 	utility.Assert(sub.TestClock < newTestClock, "The Subscription Has Walk To The TestClock Exceed The New One")
-	invoice.ExpireUserOneTimeInvoices(ctx, sub)
+	invoice.ExpireUserSubInvoices(ctx, sub, newTestClock)
 	//firstEnd := subscription.GetPeriodEndFromStart(ctx,utility.MaxInt64(sub.CurrentPeriodEnd,sub.TrialEnd), uint64(sub.PlanId))
 	// Verify Farthest Time Which Test Clock Can Set, The Max Number Of Subscription Billing Cycle Which TestClock Can Cover is 2
 	var maxTimeCap int64 = 24 * 60 * 60 * 60 // Max 7days TestClock Cap
