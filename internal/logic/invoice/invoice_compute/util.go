@@ -16,18 +16,19 @@ import (
 )
 
 type CalculateInvoiceReq struct {
-	Currency      string                 `json:"currency"`
-	DiscountCode  string                 `json:"discountCode"`
-	TimeNow       int64                  `json:"TimeNow"`
-	PlanId        uint64                 `json:"planId"`
-	Quantity      int64                  `json:"quantity"`
-	AddonJsonData string                 `json:"addonJsonData"`
-	TaxPercentage int64                  `json:"taxPercentage"`
-	PeriodStart   int64                  `json:"periodStart"`
-	PeriodEnd     int64                  `json:"periodEnd"`
-	FinishTime    int64                  `json:"finishTime"`
-	InvoiceName   string                 `json:"invoiceName"`
-	ProductData   *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
+	Currency           string                 `json:"currency"`
+	DiscountCode       string                 `json:"discountCode"`
+	TimeNow            int64                  `json:"TimeNow"`
+	PlanId             uint64                 `json:"planId"`
+	Quantity           int64                  `json:"quantity"`
+	AddonJsonData      string                 `json:"addonJsonData"`
+	TaxPercentage      int64                  `json:"taxPercentage"`
+	PeriodStart        int64                  `json:"periodStart"`
+	PeriodEnd          int64                  `json:"periodEnd"`
+	FinishTime         int64                  `json:"finishTime"`
+	InvoiceName        string                 `json:"invoiceName"`
+	ProductData        *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
+	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 }
 
 func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
@@ -279,6 +280,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
+		BillingCycleAnchor:             req.BillingCycleAnchor,
 	}
 }
 
@@ -288,18 +290,19 @@ type ProrationPlanParam struct {
 }
 
 type CalculateProrationInvoiceReq struct {
-	Currency          string                `json:"currency"`
-	DiscountCode      string                `json:"discountCode"`
-	TimeNow           int64                 `json:"TimeNow"`
-	TaxPercentage     int64                 `json:"taxPercentage"`
-	ProrationDate     int64                 `json:"prorationStart"`
-	PeriodStart       int64                 `json:"periodStart"`
-	PeriodEnd         int64                 `json:"periodEnd"`
-	FinishTime        int64                 `json:"finishTime"`
-	OldProrationPlans []*ProrationPlanParam `json:"oldPlans"`
-	NewProrationPlans []*ProrationPlanParam `json:"newPlans"`
-	InvoiceName       string                `json:"invoiceName"`
-	ProductName       string                `json:"productName"`
+	Currency           string                `json:"currency"`
+	DiscountCode       string                `json:"discountCode"`
+	TimeNow            int64                 `json:"TimeNow"`
+	TaxPercentage      int64                 `json:"taxPercentage"`
+	ProrationDate      int64                 `json:"prorationStart"`
+	PeriodStart        int64                 `json:"periodStart"`
+	PeriodEnd          int64                 `json:"periodEnd"`
+	FinishTime         int64                 `json:"finishTime"`
+	OldProrationPlans  []*ProrationPlanParam `json:"oldPlans"`
+	NewProrationPlans  []*ProrationPlanParam `json:"newPlans"`
+	InvoiceName        string                `json:"invoiceName"`
+	ProductName        string                `json:"productName"`
+	BillingCycleAnchor int64                 `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 }
 
 func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
@@ -440,6 +443,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
+		BillingCycleAnchor:             req.BillingCycleAnchor,
 	}
 }
 
@@ -492,7 +496,7 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		plan := query.GetPlanById(ctx, newPlanSub.PlanId)
 		utility.Assert(plan != nil, "plan not found:"+strconv.FormatUint(newPlanSub.PlanId, 10))
 		if plan.Type == consts.PlanTypeMain {
-			newPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, req.ProrationDate, plan.Id)
+			newPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, req.ProrationDate, req.ProrationDate, plan.Id)
 		}
 	}
 	utility.Assert(newPeriodEnd > 0, "no main plan for upgrade")
@@ -548,5 +552,6 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		FinishTime:                     req.FinishTime,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
+		BillingCycleAnchor:             req.BillingCycleAnchor,
 	}
 }

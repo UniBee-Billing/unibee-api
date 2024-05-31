@@ -27,3 +27,10 @@ func MinInt64(a int64, b int64) int64 {
 	}
 	return a
 }
+
+func MinInt(a int, b int) int {
+	if a > b {
+		return b
+	}
+	return a
+}

@@ -80,6 +80,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
 		CountryCode:                    payment.CountryCode,
+		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

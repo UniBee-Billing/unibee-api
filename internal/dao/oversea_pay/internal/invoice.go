@@ -72,6 +72,7 @@ type InvoiceColumns struct {
 	ProductName                    string // product name
 	GasPayer                       string // gas_payer
 	GatewayPaymentMethod           string // gateway_payment_method
+	BillingCycleAnchor             string // billing_cycle_anchor
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -128,6 +129,7 @@ var invoiceColumns = InvoiceColumns{
 	ProductName:                    "product_name",
 	GasPayer:                       "gas_payer",
 	GatewayPaymentMethod:           "gateway_payment_method",
+	BillingCycleAnchor:             "billing_cycle_anchor",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

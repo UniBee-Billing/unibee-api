@@ -59,6 +59,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
+		dao.Subscription.Columns().BillingCycleAnchor:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
@@ -121,8 +122,13 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 			recurringDiscountCode = &invoice.DiscountCode
 		}
 	}
+	var billingCycleAnchor = invoice.BillingCycleAnchor
+	if billingCycleAnchor <= 0 {
+		billingCycleAnchor = sub.BillingCycleAnchor
+	}
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
+		dao.Subscription.Columns().BillingCycleAnchor:     billingCycleAnchor,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
 		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
 		dao.Subscription.Columns().Amount:                 invoice.TotalAmount,

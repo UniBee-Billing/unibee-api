@@ -9,7 +9,7 @@ import (
 	"unibee/utility"
 )
 
-func GetPeriodEndFromStart(ctx context.Context, start int64, planId uint64) int64 {
+func GetPeriodEndFromStart(ctx context.Context, start int64, billingCycleAnchor int64, planId uint64) int64 {
 	plan := query.GetPlanById(ctx, planId)
 	utility.Assert(plan != nil, "GetPeriod Plan Not Found")
 	utility.Assert(plan.Status == consts.PlanStatusActive, "Plan Not Active")
@@ -19,9 +19,13 @@ func GetPeriodEndFromStart(ctx context.Context, start int64, planId uint64) int6
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "week") == 0 {
 		periodEnd = periodEnd.AddDate(0, 0, 7*plan.IntervalCount)
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "month") == 0 {
-		periodEnd = periodEnd.AddDate(0, plan.IntervalCount, 0)
+		//periodEnd = periodEnd.AddDate(0, plan.IntervalCount, 0)
+		periodEnd = periodEnd.AddDate(0, plan.IntervalCount, -periodEnd.Day()+1)
+		periodEnd = periodEnd.AddDate(0, 0, utility.MinInt(gtime.NewFromTimeStamp(billingCycleAnchor).Day(), periodEnd.EndOfMonth().Day())-1)
 	} else if strings.Compare(strings.ToLower(plan.IntervalUnit), "year") == 0 {
-		periodEnd = periodEnd.AddDate(plan.IntervalCount, 0, 0)
+		//periodEnd = periodEnd.AddDate(plan.IntervalCount, 0, 0)
+		periodEnd = periodEnd.AddDate(plan.IntervalCount, 0, -periodEnd.Day()+1)
+		periodEnd = periodEnd.AddDate(0, 0, utility.MinInt(gtime.NewFromTimeStamp(billingCycleAnchor).Day(), periodEnd.EndOfMonth().Day())-1)
 	}
 	return periodEnd.Timestamp()
 }

@@ -189,18 +189,19 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	}
 
 	currentInvoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-		InvoiceName:   "SubscriptionRenew",
-		Currency:      sub.Currency,
-		DiscountCode:  req.DiscountCode,
-		TimeNow:       timeNow,
-		PlanId:        sub.PlanId,
-		Quantity:      sub.Quantity,
-		AddonJsonData: utility.MarshalToJsonString(addonParams),
-		TaxPercentage: subscriptionTaxPercentage,
-		PeriodStart:   timeNow,
-		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, timeNow, sub.PlanId),
-		FinishTime:    timeNow,
-		ProductData:   req.ProductData,
+		InvoiceName:        "SubscriptionRenew",
+		Currency:           sub.Currency,
+		DiscountCode:       req.DiscountCode,
+		TimeNow:            timeNow,
+		PlanId:             sub.PlanId,
+		Quantity:           sub.Quantity,
+		AddonJsonData:      utility.MarshalToJsonString(addonParams),
+		TaxPercentage:      subscriptionTaxPercentage,
+		PeriodStart:        timeNow,
+		PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, timeNow, timeNow, sub.PlanId),
+		FinishTime:         timeNow,
+		ProductData:        req.ProductData,
+		BillingCycleAnchor: timeNow,
 	})
 
 	// createAndPayNewProrationInvoice
@@ -503,9 +504,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 				PeriodStart:            currentTimeStart.Timestamp(),
 				Plan:                   bean.SimplifyPlan(plan),
 			}},
-			PeriodStart: currentTimeStart.Timestamp(),
-			PeriodEnd:   currentTimeEnd,
-			FinishTime:  currentTimeStart.Timestamp(),
+			PeriodStart:        currentTimeStart.Timestamp(),
+			PeriodEnd:          currentTimeEnd,
+			BillingCycleAnchor: currentTimeStart.Timestamp(),
+			FinishTime:         currentTimeStart.Timestamp(),
 		}
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
@@ -536,20 +538,21 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountMessage:          discountMessage,
 		}, nil
 	} else {
-		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), req.PlanId)
+		var currentTimeEnd = subscription2.GetPeriodEndFromStart(ctx, currentTimeStart.Timestamp(), currentTimeStart.Timestamp(), req.PlanId)
 		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			InvoiceName:   "SubscriptionCreate",
-			DiscountCode:  req.DiscountCode,
-			TimeNow:       gtime.Now().Timestamp(),
-			Currency:      currency,
-			PlanId:        req.PlanId,
-			Quantity:      req.Quantity,
-			AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-			TaxPercentage: subscriptionTaxPercentage,
-			PeriodStart:   currentTimeStart.Timestamp(),
-			PeriodEnd:     currentTimeEnd,
-			FinishTime:    currentTimeStart.Timestamp(),
-			ProductData:   req.ProductData,
+			InvoiceName:        "SubscriptionCreate",
+			DiscountCode:       req.DiscountCode,
+			TimeNow:            gtime.Now().Timestamp(),
+			Currency:           currency,
+			PlanId:             req.PlanId,
+			Quantity:           req.Quantity,
+			AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+			TaxPercentage:      subscriptionTaxPercentage,
+			PeriodStart:        currentTimeStart.Timestamp(),
+			PeriodEnd:          currentTimeEnd,
+			FinishTime:         currentTimeStart.Timestamp(),
+			ProductData:        req.ProductData,
+			BillingCycleAnchor: currentTimeStart.Timestamp(),
 		})
 
 		return &CreatePreviewInternalRes{
@@ -672,7 +675,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		CurrentPeriodStart:          prepare.Invoice.PeriodStart,
 		CurrentPeriodEnd:            prepare.Invoice.PeriodEnd,
 		DunningTime:                 dunningTime,
-		BillingCycleAnchor:          prepare.Invoice.PeriodStart,
+		BillingCycleAnchor:          prepare.Invoice.BillingCycleAnchor,
 		GatewayDefaultPaymentMethod: req.PaymentMethodId,
 		DiscountCode:                prepare.RecurringDiscountCode,
 		CreateTime:                  gtime.Now().Timestamp(),
@@ -1019,18 +1022,19 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		if !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).UpgradeProration {
 			// without proration, just generate next cycle
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:   "SubscriptionUpgrade",
-				Currency:      sub.Currency,
-				DiscountCode:  req.DiscountCode,
-				TimeNow:       prorationDate,
-				PlanId:        req.NewPlanId,
-				Quantity:      req.Quantity,
-				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxPercentage: subscriptionTaxPercentage,
-				PeriodStart:   prorationDate,
-				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
-				FinishTime:    prorationDate,
-				ProductData:   req.ProductData,
+				InvoiceName:        "SubscriptionUpgrade",
+				Currency:           sub.Currency,
+				DiscountCode:       req.DiscountCode,
+				TimeNow:            prorationDate,
+				PlanId:             req.NewPlanId,
+				Quantity:           req.Quantity,
+				AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+				TaxPercentage:      subscriptionTaxPercentage,
+				PeriodStart:        prorationDate,
+				PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, prorationDate, prorationDate, req.NewPlanId),
+				FinishTime:         prorationDate,
+				ProductData:        req.ProductData,
+				BillingCycleAnchor: prorationDate,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -1050,23 +1054,23 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProrationDate:                  prorationDate,
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
-				FinishTime:                     prorationDate,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
 			currentInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-				InvoiceName:   "SubscriptionUpgrade",
-				Currency:      sub.Currency,
-				DiscountCode:  req.DiscountCode,
-				TimeNow:       prorationDate,
-				PlanId:        req.NewPlanId,
-				Quantity:      req.Quantity,
-				AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-				TaxPercentage: subscriptionTaxPercentage,
-				PeriodStart:   prorationDate,
-				PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, prorationDate, req.NewPlanId),
-				FinishTime:    prorationDate,
-				ProductData:   req.ProductData,
+				InvoiceName:        "SubscriptionUpgrade",
+				Currency:           sub.Currency,
+				DiscountCode:       req.DiscountCode,
+				TimeNow:            prorationDate,
+				PlanId:             req.NewPlanId,
+				Quantity:           req.Quantity,
+				AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+				TaxPercentage:      subscriptionTaxPercentage,
+				PeriodStart:        prorationDate,
+				PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, prorationDate, prorationDate, req.NewPlanId),
+				FinishTime:         prorationDate,
+				ProductData:        req.ProductData,
+				BillingCycleAnchor: prorationDate,
 			})
 		} else {
 			// currentInvoice
@@ -1111,17 +1115,18 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
-					InvoiceName:       "SubscriptionUpgrade",
-					ProductName:       plan.PlanName,
-					Currency:          sub.Currency,
-					DiscountCode:      req.DiscountCode,
-					TimeNow:           prorationDate,
-					TaxPercentage:     subscriptionTaxPercentage,
-					ProrationDate:     prorationDate,
-					OldProrationPlans: oldProrationPlanParams,
-					NewProrationPlans: newProrationPlanParams,
-					PeriodStart:       sub.CurrentPeriodStart,
-					PeriodEnd:         sub.CurrentPeriodEnd,
+					InvoiceName:        "SubscriptionUpgrade",
+					ProductName:        plan.PlanName,
+					Currency:           sub.Currency,
+					DiscountCode:       req.DiscountCode,
+					TimeNow:            prorationDate,
+					TaxPercentage:      subscriptionTaxPercentage,
+					ProrationDate:      prorationDate,
+					OldProrationPlans:  oldProrationPlanParams,
+					NewProrationPlans:  newProrationPlanParams,
+					PeriodStart:        sub.CurrentPeriodStart,
+					PeriodEnd:          sub.CurrentPeriodEnd,
+					BillingCycleAnchor: prorationDate,
 				})
 			}
 		}
@@ -1148,18 +1153,19 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 
 	nextPeriodInvoice = invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-		InvoiceName:   "SubscriptionCycle",
-		Currency:      sub.Currency,
-		DiscountCode:  req.DiscountCode,
-		TimeNow:       prorationDate,
-		PlanId:        req.NewPlanId,
-		Quantity:      req.Quantity,
-		AddonJsonData: utility.MarshalToJsonString(req.AddonParams),
-		TaxPercentage: subscriptionTaxPercentage,
-		PeriodStart:   utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
-		PeriodEnd:     subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), req.NewPlanId),
-		FinishTime:    utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
-		ProductData:   req.ProductData,
+		InvoiceName:        "SubscriptionCycle",
+		Currency:           sub.Currency,
+		DiscountCode:       req.DiscountCode,
+		TimeNow:            prorationDate,
+		PlanId:             req.NewPlanId,
+		Quantity:           req.Quantity,
+		AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+		TaxPercentage:      subscriptionTaxPercentage,
+		PeriodStart:        utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+		PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), prorationDate, req.NewPlanId),
+		FinishTime:         utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
+		ProductData:        req.ProductData,
+		BillingCycleAnchor: prorationDate,
 	})
 
 	if currentInvoice.TotalAmount <= 0 {
@@ -1596,69 +1602,6 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	return nil
 }
 
-//
-//type AdminAttachSubscriptionToUserEmailReq struct {
-//	ExternalUserId string                      `json:"externalUserId" dc:"ExternalUserId"`
-//	Email          string                      `json:"email" dc:"Email" v:"required"`
-//	MerchantId     uint64                      `json:"merchantId" dc:"MerchantId" v:"required"`
-//	PlanId         uint64                      `json:"planId" dc:"PlanId" v:"required"`
-//	UserId         uint64                      `json:"userId" dc:"UserId" v:"required"`
-//	Quantity       int64                       `json:"quantity" dc:"Quantity，Default 1" `
-//	GatewayId      uint64                      `json:"gatewayId" dc:"Id"   v:"required" `
-//	AddonParams    []*bean.PlanAddonParam      `json:"addonParams" dc:"addonParams" `
-//}
-//
-//func AdminAttachSubscriptionToUserEmail(ctx context.Context, req *AdminAttachSubscriptionToUserEmailReq) (*entity.Subscription, error) {
-//	user, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
-//		ExternalUserId: req.ExternalUserId,
-//		Email:          req.Email,
-//		MerchantId:     req.MerchantId,
-//	})
-//	utility.AssertError(err, "QueryOrCreateUser error")
-//	var subType = consts.SubTypeDefault
-//	if consts.SubscriptionCycleUnderUniBeeControl {
-//		subType = consts.SubTypeUniBeeControl
-//	}
-//	one := &entity.Subscription{
-//		MerchantId:                  req.MerchantId,
-//		Type:                        subType,
-//		PlanId:                      prepare.Plan.Id,
-//		TrialEnd:                    prepare.TrialEnd,
-//		GatewayId:                   prepare.Gateway.Id,
-//		UserId:                      prepare.UserId,
-//		Quantity:                    prepare.Quantity,
-//		Amount:                      prepare.TotalAmount,
-//		Currency:                    prepare.Currency,
-//		AddonData:                   utility.MarshalToJsonString(prepare.AddonParams),
-//		SubscriptionId:              utility.CreateSubscriptionId(),
-//		Status:                      consts.SubStatusPending,
-//		CustomerEmail:               prepare.Email,
-//		ReturnUrl:                   req.ReturnUrl,
-//		VatNumber:                   prepare.VatNumber,
-//		VatVerifyData:               prepare.VatVerifyData,
-//		CountryCode:                 prepare.VatCountryCode,
-//		TaxPercentage:               prepare.TaxPercentage,
-//		CurrentPeriodStart:          prepare.Invoice.PeriodStart,
-//		CurrentPeriodEnd:            prepare.Invoice.PeriodEnd,
-//		DunningTime:                 dunningTime,
-//		BillingCycleAnchor:          prepare.Invoice.PeriodStart,
-//		GatewayDefaultPaymentMethod: req.PaymentMethodId,
-//		DiscountCode:                prepare.RecurringDiscountCode,
-//		CreateTime:                  gtime.Now().Timestamp(),
-//		MetaData:                    utility.MarshalToJsonString(req.Metadata),
-//		GasPayer:                    prepare.Plan.GasPayer,
-//	}
-//
-//	result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
-//	if err != nil {
-//		err = gerror.Newf(`SubscriptionCreate record insert failure %s`, err)
-//		return nil, err
-//	}
-//	id, _ := result.LastInsertId()
-//	one.Id = uint64(uint(id))
-//	return nil, gerror.New("not support")
-//}
-
 func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, AppendNewTrialEndByHour int64) error {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId not found")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
@@ -1674,8 +1617,7 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	utility.Assert(AppendNewTrialEndByHour > 0, "invalid AppendNewTrialEndByHour , should > 0")
 	newTrialEnd := sub.CurrentPeriodEnd + AppendNewTrialEndByHour*3600
 
-	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, sub.PlanId)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
 	newStatus := sub.Status
 	if newTrialEnd > gtime.Now().Timestamp() {
 		//automatic change sub status to active
@@ -1687,8 +1629,8 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:             newStatus,
 		dao.Subscription.Columns().TrialEnd:           newTrialEnd,
+		dao.Subscription.Columns().BillingCycleAnchor: newTrialEnd,
 		dao.Subscription.Columns().DunningTime:        dunningTime,
-		dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
 		dao.Subscription.Columns().GmtModify:          gtime.Now(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 	if err != nil {
@@ -1777,8 +1719,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 	utility.Assert(sub != nil, "subscription not found")
 	utility.Assert(sub.TrialEnd > gtime.Now().Timestamp(), "subscription not in trial period")
 	newTrialEnd := sub.CurrentPeriodStart - 1
-	var newBillingCycleAnchor = utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd)
-	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, newBillingCycleAnchor, sub.PlanId)
+	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(newTrialEnd, sub.CurrentPeriodEnd), sub.PlanId)
 	newStatus := sub.Status
 	if gtime.Now().Timestamp() > sub.CurrentPeriodEnd {
 		// todo mark has unfinished pending update
@@ -1787,17 +1728,18 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		plan := query.GetPlanById(ctx, sub.PlanId)
 
 		var nextPeriodStart = gtime.Now().Timestamp()
-		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, plan.Id)
+		var nextPeriodEnd = subscription2.GetPeriodEndFromStart(ctx, nextPeriodStart, nextPeriodStart, plan.Id)
 		invoice := invoice_compute.ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx, &invoice_compute.CalculateInvoiceReq{
-			Currency:      sub.Currency,
-			PlanId:        sub.PlanId,
-			Quantity:      sub.Quantity,
-			AddonJsonData: sub.AddonData,
-			TaxPercentage: sub.TaxPercentage,
-			PeriodStart:   nextPeriodStart,
-			PeriodEnd:     nextPeriodEnd,
-			InvoiceName:   "SubscriptionCycle",
-			FinishTime:    nextPeriodStart,
+			Currency:           sub.Currency,
+			PlanId:             sub.PlanId,
+			Quantity:           sub.Quantity,
+			AddonJsonData:      sub.AddonData,
+			TaxPercentage:      sub.TaxPercentage,
+			PeriodStart:        nextPeriodStart,
+			PeriodEnd:          nextPeriodEnd,
+			InvoiceName:        "SubscriptionCycle",
+			FinishTime:         nextPeriodStart,
+			BillingCycleAnchor: nextPeriodStart,
 		})
 		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
@@ -1815,7 +1757,6 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			dao.Subscription.Columns().CurrentPeriodStart: invoice.PeriodStart,
 			dao.Subscription.Columns().CurrentPeriodEnd:   invoice.PeriodEnd,
 			dao.Subscription.Columns().DunningTime:        dunningTime,
-			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
 			dao.Subscription.Columns().GmtModify:          gtime.Now(),
 		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 		if err != nil {
@@ -1829,12 +1770,11 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		}
 	} else {
 		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
-			dao.Subscription.Columns().Status:             newStatus,
-			dao.Subscription.Columns().TrialEnd:           newTrialEnd,
-			dao.Subscription.Columns().DunningTime:        dunningTime,
-			dao.Subscription.Columns().BillingCycleAnchor: newBillingCycleAnchor,
-			dao.Subscription.Columns().GmtModify:          gtime.Now(),
-			dao.Subscription.Columns().LastUpdateTime:     gtime.Now().Timestamp(),
+			dao.Subscription.Columns().Status:         newStatus,
+			dao.Subscription.Columns().TrialEnd:       newTrialEnd,
+			dao.Subscription.Columns().DunningTime:    dunningTime,
+			dao.Subscription.Columns().GmtModify:      gtime.Now(),
+			dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
 		if err != nil {
 			return err

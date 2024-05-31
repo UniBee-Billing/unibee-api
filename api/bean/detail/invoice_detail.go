@@ -57,6 +57,7 @@ type InvoiceDetail struct {
 	CryptoAmount                   int64                              `json:"cryptoAmount"                   description:"crypto_amount, cent"` // crypto_amount, cent
 	CryptoCurrency                 string                             `json:"cryptoCurrency"                 description:"crypto_currency"`
 	DayUtilDue                     int64                              `json:"dayUtilDue"                     description:"day util due after finish"` // day util due after finish
+	BillingCycleAnchor             int64                              `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`      // billing_cycle_anchor
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -111,5 +112,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		CryptoCurrency:                 invoice.CryptoCurrency,
 		CryptoAmount:                   invoice.CryptoAmount,
 		DayUtilDue:                     invoice.DayUtilDue,
+		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 	}
 }
