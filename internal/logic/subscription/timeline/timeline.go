@@ -23,7 +23,7 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 		Where(dao.SubscriptionTimeline.Columns().SubscriptionId, sub.SubscriptionId).
 		OmitEmpty().Scan(&oldOne)
 	if oldOne != nil {
-		periodEnd := gtime.Now().Timestamp()
+		periodEnd := utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock)
 		nextStatus := consts.SubTimeLineStatusFinished
 		if oldOne.Status == consts.SubTimeLineStatusPending {
 			if endSubStatus == consts.SubStatusExpired {
