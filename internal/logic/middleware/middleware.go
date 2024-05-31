@@ -233,7 +233,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		}
 
 		token := jwt.ParsePortalToken(tokenString)
-		g.Log().Infof(r.Context(), "TokenAuth Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
+		g.Log().Debugf(r.Context(), "TokenAuth Parsed Token: %s, URL: %s", utility.MarshalToJsonString(token), r.GetUrl())
 
 		if token.TokenType == jwt.TOKENTYPEUSER {
 			userAccount := query.GetUserAccountById(r.Context(), token.Id)
