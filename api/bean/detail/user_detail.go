@@ -101,7 +101,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		CountryName:        one.CountryName,
 		SubscriptionName:   one.SubscriptionId,
 		SubscriptionId:     one.SubscriptionId,
-		SubscriptionStatus: one.Status,
+		SubscriptionStatus: one.SubscriptionStatus,
 		RecurringAmount:    one.RecurringAmount,
 		BillingType:        one.BillingType,
 		TimeZone:           one.TimeZone,

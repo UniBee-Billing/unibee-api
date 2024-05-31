@@ -98,7 +98,7 @@ func SimplifyUserAccount(one *entity.UserAccount) *UserAccountSimplify {
 		CountryName:        one.CountryName,
 		SubscriptionName:   one.SubscriptionId,
 		SubscriptionId:     one.SubscriptionId,
-		SubscriptionStatus: one.Status,
+		SubscriptionStatus: one.SubscriptionStatus,
 		RecurringAmount:    one.RecurringAmount,
 		BillingType:        one.BillingType,
 		TimeZone:           one.TimeZone,
