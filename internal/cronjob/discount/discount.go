@@ -25,12 +25,12 @@ func TaskForExpireDiscounts(ctx context.Context) {
 	for _, one := range list {
 		key := fmt.Sprintf("TaskForExpireDiscounts-%s", one.Id)
 		if utility.TryLock(ctx, key, 60) {
-			g.Log().Print(ctx, "TaskForExpireDiscounts GetLock 60s", key)
+			g.Log().Debugf(ctx, "TaskForExpireDiscounts GetLock 60s", key)
 			defer func() {
 				utility.ReleaseLock(ctx, key)
-				g.Log().Print(ctx, "TaskForExpireDiscounts ReleaseLock", key)
+				g.Log().Debugf(ctx, "TaskForExpireDiscounts ReleaseLock", key)
 			}()
-			_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
+			_, err = dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
 				dao.MerchantDiscountCode.Columns().Status:    discount.DiscountStatusExpired,
 				dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
@@ -38,7 +38,7 @@ func TaskForExpireDiscounts(ctx context.Context) {
 				g.Log().Errorf(ctx, "TaskForExpireDiscounts Expire id:%d error:%s", one.Id, err.Error())
 			}
 		} else {
-			g.Log().Print(ctx, "TaskForExpireDiscounts GetLock Failure", key)
+			g.Log().Errorf(ctx, "TaskForExpireDiscounts GetLock Failure", key)
 			return
 		}
 	}

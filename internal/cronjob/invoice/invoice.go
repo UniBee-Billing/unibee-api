@@ -26,10 +26,10 @@ func TaskForExpireInvoices(ctx context.Context) {
 	for _, one := range list {
 		key := fmt.Sprintf("TaskForExpireInvoices-%v", one.Id)
 		if utility.TryLock(ctx, key, 60) {
-			g.Log().Print(ctx, "TaskForExpireInvoices GetLock 60s", key)
+			g.Log().Debugf(ctx, "TaskForExpireInvoices GetLock 60s", key)
 			defer func() {
 				utility.ReleaseLock(ctx, key)
-				g.Log().Print(ctx, "TaskForExpireInvoices ReleaseLock", key)
+				g.Log().Debugf(ctx, "TaskForExpireInvoices ReleaseLock", key)
 			}()
 			if one.FinishTime == 0 {
 				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{
@@ -73,10 +73,10 @@ func ExpireUserOneTimeInvoices(ctx context.Context, sub *entity.Subscription) {
 	for _, one := range list {
 		key := fmt.Sprintf("TaskForExpireInvoices-%v", one.Id)
 		if utility.TryLock(ctx, key, 60) {
-			g.Log().Print(ctx, "ExpireUserOneTimeInvoices GetLock 60s", key)
+			g.Log().Debugf(ctx, "ExpireUserOneTimeInvoices GetLock 60s", key)
 			defer func() {
 				utility.ReleaseLock(ctx, key)
-				g.Log().Print(ctx, "ExpireUserOneTimeInvoices ReleaseLock", key)
+				g.Log().Debugf(ctx, "ExpireUserOneTimeInvoices ReleaseLock", key)
 			}()
 			if one.FinishTime == 0 {
 				_, err = dao.Invoice.Ctx(ctx).Data(g.Map{

@@ -42,16 +42,16 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	}
 	key := fmt.Sprintf("SubscriptionCycleWalk-%s", sub.SubscriptionId)
 	if utility.TryLock(ctx, key, 60) {
-		g.Log().Print(ctx, source, "GetLock 60s", key)
+		g.Log().Debugf(ctx, source, "GetLock 60s", key)
 		defer func() {
 			utility.ReleaseLock(ctx, key)
-			g.Log().Print(ctx, source, "ReleaseLock", key)
+			g.Log().Debugf(ctx, source, "ReleaseLock", key)
 		}()
 		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().TaskTime: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 		if err != nil {
-			g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
+			g.Log().Errorf(ctx, source, "SubscriptionBillingCycleDunningInvoice Update TaskTime err:", err.Error())
 		}
 
 		if len(sub.PendingUpdateId) > 0 {
@@ -264,7 +264,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 		}
 	} else {
-		g.Log().Print(ctx, source, "GetLock Failure", key)
+		g.Log().Errorf(ctx, source, "GetLock Failure", key)
 		return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Sub Get Lock Failure"}, nil
 	}
 }
@@ -311,11 +311,11 @@ func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow
 				key := fmt.Sprintf("UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%d-%d", one.MerchantId, one.UserId)
 				if config2.GetConfigInstance().IsProd() {
 					if utility.TryLock(ctx, key, 1800) {
-						g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
+						g.Log().Debugf(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
 						subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
 					}
 				} else {
-					g.Log().Print(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
+					g.Log().Debugf(ctx, "UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE-%s-%s", "GetLock 1800s", key)
 					subscription3.SendMerchantSubscriptionWebhookBackground(one, dayLeft, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE)
 				}
 			}
