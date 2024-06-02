@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/frame/g"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"time"
+	"unibee/utility"
 )
 
 // NewClient returns new Client struct
@@ -98,7 +101,12 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		req.Header.Set("Prefer", "return=representation")
 	}
 
+	body, _ := req.GetBody()
+	bodyByte, _ := io.ReadAll(body)
+	c.RequestBodyStr = string(bodyByte)
+
 	resp, err = c.Client.Do(req)
+	c.ResponseStatus = resp.StatusCode
 	c.log(req, resp)
 
 	if err != nil {
@@ -113,12 +121,13 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		data, err = io.ReadAll(resp.Body)
 
 		if err == nil && len(data) > 0 {
-			err := json.Unmarshal(data, errResp)
+			err = json.Unmarshal(data, errResp)
 			if err != nil {
+				g.Log().Errorf(req.Context(), "Paypal_Send \nRequest:%v Error \nStatusCode:%d \nerr:%s", c.FormatRequest(req), resp.StatusCode, err.Error())
 				return err
 			}
 		}
-
+		g.Log().Errorf(req.Context(), "Paypal_Send \nRequest:%v Error \nStatusCode:%d \nresponse:%s", c.FormatRequest(req), resp.StatusCode, utility.MarshalToJsonString(errResp))
 		return errResp
 	}
 	if v == nil {
@@ -126,11 +135,28 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 	}
 
 	if w, ok := v.(io.Writer); ok {
-		_, err := io.Copy(w, resp.Body)
+		_, err = io.Copy(w, resp.Body)
 		return err
 	}
 
-	return json.NewDecoder(resp.Body).Decode(v)
+	respByte, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	response := string(respByte)
+	c.ResponseStr = response
+	g.Log().Debugf(req.Context(), "Paypal_Send \nRequest:%v Debug \n StatusCode:%d \nresponse:%s", c.FormatRequest(req), resp.StatusCode, c.ResponseStr)
+	return json.Unmarshal(respByte, v)
+
+	//return json.NewDecoder(resp.Body).Decode(v)
+}
+
+func (c *Client) FormatRequest(req *http.Request) *gjson.Json {
+	var reqJson = gjson.New("")
+	_ = reqJson.Set("Url", req.URL.String())
+	_ = reqJson.Set("Method", req.Method)
+	_ = reqJson.Set("Body", c.RequestBodyStr)
+	return reqJson
 }
 
 // SendWithAuth makes a request to the API and apply OAuth2 header automatically.
@@ -178,7 +204,6 @@ func (c *Client) NewRequest(ctx context.Context, method, url string, payload int
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("send paypal post data:%s\n", string(b))
 		buf = bytes.NewBuffer(b)
 	}
 	return http.NewRequestWithContext(ctx, method, url, buf)

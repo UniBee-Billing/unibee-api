@@ -679,6 +679,9 @@ type (
 		Token                *TokenResponse
 		tokenExpiresAt       time.Time
 		returnRepresentation bool
+		RequestBodyStr       string
+		ResponseStr          string
+		ResponseStatus       int
 	}
 
 	// CreditCard struct
