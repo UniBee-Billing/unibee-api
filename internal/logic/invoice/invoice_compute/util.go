@@ -29,6 +29,7 @@ type CalculateInvoiceReq struct {
 	InvoiceName        string                 `json:"invoiceName"`
 	ProductData        *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
+	CreateFrom         string                 `json:"createFrom"                     description:"create from"`          // create from
 }
 
 func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {

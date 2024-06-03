@@ -26,6 +26,8 @@ var (
 	TopicSubscriptionCreatePaymentCheck   = redismq.MQTopicEnum{"unibee_subscription", "subscription_create_payment_check", "subscription create payment check"}
 	TopicSubscriptionIncomplete           = redismq.MQTopicEnum{"unibee_subscription", "subscription_incomplete", "subscription incomplete"}
 	TopicSubscriptionPaymentSuccess       = redismq.MQTopicEnum{"unibee_subscription", "subscription_payment_success", "subscription payment success"}
+	TopicSubscriptionAutoRenewSuccess     = redismq.MQTopicEnum{"unibee_subscription", "subscription_auto_renew_success", "subscription auto renew success"}
+	TopicSubscriptionAutoRenewFailure     = redismq.MQTopicEnum{"unibee_subscription", "subscription_auto_renew_failure", "subscription auto renew failure"}
 	TopicSubscriptionActiveWithoutPayment = redismq.MQTopicEnum{"unibee_subscription", "subscription_active_without_payment", "subscription become active without payment"}
 	TopicMerchantWebhook                  = redismq.MQTopicEnum{"unibee_merchant_webhook", "webhook", "merchant webhook"}
 	TopicInvoiceCreated                   = redismq.MQTopicEnum{"unibee_invoice", "invoice_created", "invoice created"}

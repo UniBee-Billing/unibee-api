@@ -43,6 +43,7 @@ type InvoiceSimplify struct {
 	Discount                       *MerchantDiscountCodeSimplify `json:"discount" dc:"Discount"`
 	TrialEnd                       int64                         `json:"trialEnd"                       description:"trial_end, utc time"`  // trial_end, utc time
 	BillingCycleAnchor             int64                         `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
+	CreateFrom                     string                        `json:"createFrom"                     description:"create from"`          // create from
 }
 
 type InvoiceItemSimplify struct {
@@ -113,5 +114,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		TaxPercentage:                  one.TaxPercentage,
 		TrialEnd:                       one.TrialEnd,
 		BillingCycleAnchor:             one.BillingCycleAnchor,
+		CreateFrom:                     one.CreateFrom,
 	}
 }

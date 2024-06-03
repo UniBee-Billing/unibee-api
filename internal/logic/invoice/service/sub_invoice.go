@@ -73,6 +73,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		TrialEnd:                       simplify.TrialEnd,
 		CountryCode:                    sub.CountryCode,
 		BillingCycleAnchor:             simplify.BillingCycleAnchor,
+		CreateFrom:                     simplify.CreateFrom,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

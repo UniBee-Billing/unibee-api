@@ -107,9 +107,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCreate error:%s", err.Error())
 				}
-			} else if
-			//strings.Compare(payment.BillingReason, "SubscriptionCycle") == 0 && sub.Amount == payment.TotalAmount &&
-			strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
+			} else if strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
 				// SubscriptionCycle
 				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
 				if err != nil {
@@ -124,6 +122,13 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
 				Body:  payment.SubscriptionId,
 			})
+			if invoice != nil && len(invoice.CreateFrom) > 0 && invoice.CreateFrom == "AutoRenew" {
+				_, _ = redismq.Send(&redismq.Message{
+					Topic: redismq2.TopicSubscriptionAutoRenewSuccess.Topic,
+					Tag:   redismq2.TopicSubscriptionAutoRenewSuccess.Tag,
+					Body:  payment.SubscriptionId,
+				})
+			}
 		}
 	}
 }

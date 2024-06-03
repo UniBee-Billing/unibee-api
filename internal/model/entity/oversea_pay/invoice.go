@@ -63,4 +63,5 @@ type Invoice struct {
 	GasPayer                       string      `json:"gasPayer"                       description:"gas_payer"`                                                              // gas_payer
 	GatewayPaymentMethod           string      `json:"gatewayPaymentMethod"           description:"gateway_payment_method"`                                                 // gateway_payment_method
 	BillingCycleAnchor             int64       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`                                                   // billing_cycle_anchor
+	CreateFrom                     string      `json:"createFrom"                     description:"create from"`                                                            // create from
 }

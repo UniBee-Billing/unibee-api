@@ -65,4 +65,5 @@ type Invoice struct {
 	GasPayer                       interface{} // gas_payer
 	GatewayPaymentMethod           interface{} // gateway_payment_method
 	BillingCycleAnchor             interface{} // billing_cycle_anchor
+	CreateFrom                     interface{} // create from
 }

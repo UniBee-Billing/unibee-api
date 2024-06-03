@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	config2 "unibee/internal/cmd/config"
+	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
 	subscription3 "unibee/internal/consumer/webhook/subscription"
@@ -24,6 +25,7 @@ import (
 	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/redismq"
 	"unibee/utility"
 )
 
@@ -124,12 +126,17 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 		} else if !needInvoiceGenerate && !needTryInvoiceAutomaticPayment && isSubscriptionExpireExcludePending(ctx, sub, timeNow) {
 			// invoice not generate and sub out of time, need expired by system
-			err = expire.SubscriptionExpire(ctx, sub, "CycleExpireWithoutPay")
+			err = expire.SubscriptionExpire(ctx, sub, "AutoRenewFailure")
 			if err != nil {
 				g.Log().Print(ctx, source, "SubscriptionBillingCycleDunningInvoice SubscriptionExpire", err.Error())
 				return nil, err
 			} else {
-				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionExpire From Billing Cycle As Payment Out Of Permission Days"}, nil
+				_, _ = redismq.Send(&redismq.Message{
+					Topic: redismq2.TopicSubscriptionAutoRenewFailure.Topic,
+					Tag:   redismq2.TopicSubscriptionAutoRenewFailure.Tag,
+					Body:  sub.SubscriptionId,
+				})
+				return &BillingCycleWalkRes{WalkUnfinished: true, Message: "SubscriptionExpire For AutoRenew Failed"}, nil
 			}
 		} else {
 			if sub.CancelAtPeriodEnd == 1 {
@@ -187,6 +194,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionDowngrade",
 						FinishTime:    timeNow,
+						CreateFrom:    "AutoRenew",
 					})
 				} else {
 					//generate cycle invoice from sub
@@ -207,6 +215,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionCycle",
 						FinishTime:    timeNow,
+						CreateFrom:    "AutoRenew",
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
