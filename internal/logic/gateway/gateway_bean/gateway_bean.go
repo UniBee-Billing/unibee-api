@@ -97,6 +97,7 @@ type GatewayPaymentRo struct {
 	BalanceStart         int64       `json:"balanceStart"              `
 	BalanceEnd           int64       `json:"balanceEnd"              `
 	Reason               string      `json:"reason"              `
+	Link                 string      `json:"Link"              `
 	PaidTime             *gtime.Time `json:"paidTime" `
 	CreateTime           *gtime.Time `json:"createTime" `
 	CancelTime           *gtime.Time `json:"cancelTime" `

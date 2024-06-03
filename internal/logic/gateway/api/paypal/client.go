@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"io"
 	"net/http"
@@ -101,9 +102,13 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		req.Header.Set("Prefer", "return=representation")
 	}
 
-	body, _ := req.GetBody()
-	bodyByte, _ := io.ReadAll(body)
-	c.RequestBodyStr = string(bodyByte)
+	if req.Body != nil {
+		body, _ := req.GetBody()
+		bodyByte, _ := io.ReadAll(body)
+		c.RequestBodyStr = string(bodyByte)
+	} else {
+		c.RequestBodyStr = ""
+	}
 
 	resp, err = c.Client.Do(req)
 	c.ResponseStatus = resp.StatusCode
@@ -128,7 +133,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 			}
 		}
 		g.Log().Errorf(req.Context(), "Paypal_Send \nRequest:%v Error \nStatusCode:%d \nresponse:%s", c.FormatRequest(req), resp.StatusCode, utility.MarshalToJsonString(errResp))
-		return errResp
+		return gerror.New(fmt.Sprintf("%v %v: %d %s, %+v", errResp.Response.Request.Method, errResp.Response.Request.URL, errResp.Response.StatusCode, errResp.Message, errResp.Details))
 	}
 	if v == nil {
 		return nil

@@ -941,6 +941,7 @@ type (
 		Status        string                 `json:"status,omitempty"`
 		Intent        string                 `json:"intent,omitempty"`
 		Payer         *PayerWithNameAndPhone `json:"payer,omitempty"`
+		PaymentSource *PaymentSource         `json:"payment_source,omitempty"`
 		PurchaseUnits []PurchaseUnit         `json:"purchase_units,omitempty"`
 		Links         []Link                 `json:"links,omitempty"`
 		CreateTime    *time.Time             `json:"create_time,omitempty"`
@@ -1022,6 +1023,7 @@ type (
 		Payer         *PayerWithNameAndPhone `json:"payer,omitempty"`
 		Address       *Address               `json:"address,omitempty"`
 		PurchaseUnits []CapturedPurchaseUnit `json:"purchase_units,omitempty"`
+		PaymentSource *PaymentSource         `json:"payment_source,omitempty"`
 	}
 
 	// Payer struct
@@ -1088,8 +1090,9 @@ type (
 
 	// PaymentSource structure
 	PaymentSource struct {
-		Card  *PaymentSourceCard  `json:"card,omitempty"`
-		Token *PaymentSourceToken `json:"token,omitempty"`
+		Card   *PaymentSourceCard   `json:"card,omitempty"`
+		Paypal *PaymentSourcePaypal `json:"paypal,omitempty"`
+		Token  *PaymentSourceToken  `json:"token,omitempty"`
 	}
 
 	// PaymentSourceCard structure
@@ -1106,6 +1109,12 @@ type (
 		ExperienceContext *ExperienceContext       `json:"experience_context,omitempty"`
 	}
 
+	PaymentSourcePaypal struct {
+		//ExperienceContext *ExperienceContext       `json:"experience_context,omitempty"`
+		Attributes *PaymentSourceAttributes `json:"attributes,omitempty"`
+		VaultId    string                   `json:"vault_id,omitempty"`
+	}
+
 	// CardBillingAddress structure
 	CardBillingAddress struct {
 		AddressLine1 string `json:"address_line_1"`
@@ -1117,13 +1126,22 @@ type (
 	}
 
 	PaymentSourceAttributes struct {
-		Vault        PaymentSourceAttributesVault        `json:"vault,omitempty"`
-		Verification PaymentSourceAttributesVerification `json:"verification,omitempty"`
+		Vault        *PaymentSourceAttributesVault        `json:"vault,omitempty"`
+		Verification *PaymentSourceAttributesVerification `json:"verification,omitempty"`
 	}
 
 	PaymentSourceAttributesVault struct {
-		StoreInVault string `json:"store_in_vault,omitempty"`
+		StoreInVault string         `json:"store_in_vault,omitempty"`
+		UsageType    string         `json:"usage_type,omitempty"`
+		Id           string         `json:"id,omitempty"`
+		Status       string         `json:"status,omitempty"`
+		Customer     PaypalCustomer `json:"customer,omitempty"`
 	}
+
+	PaypalCustomer struct {
+		Id string `json:"id,omitempty"`
+	}
+
 	PaymentSourceAttributesVerification struct {
 		Method string `json:"method,omitempty"`
 	}
@@ -1132,11 +1150,6 @@ type (
 	PaymentSourceToken struct {
 		ID   string `json:"id"`
 		Type string `json:"type"`
-	}
-
-	// PaymentSourcePaypal structure
-	PaymentSourcePaypal struct {
-		VaultId string `json:"vault_id"`
 	}
 
 	// Payout struct
@@ -1649,7 +1662,7 @@ type (
 )
 
 // Error method implementation for ErrorResponse struct
-func (r *ErrorResponse) Error() string {
+func (r ErrorResponse) Error() string {
 	return fmt.Sprintf("%v %v: %d %s, %+v", r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message, r.Details)
 }
 
