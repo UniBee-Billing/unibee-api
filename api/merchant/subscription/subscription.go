@@ -1,9 +1,11 @@
 package subscription
 
 import (
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
+	"unibee/api/merchant/payment"
 )
 
 type ConfigReq struct {
@@ -376,4 +378,31 @@ type OnetimeAddonListReq struct {
 
 type OnetimeAddonListRes struct {
 	SubscriptionOnetimeAddons []*detail.SubscriptionOnetimeAddonDetail `json:"subscriptionOnetimeAddons" description:"SubscriptionOnetimeAddons" `
+}
+
+type NewPaymentReq struct {
+	g.Meta            `path:"/payment/new" tags:"Subscription" method:"post" summary:"NewSubscriptionPayment"`
+	ExternalPaymentId string                 `json:"externalPaymentId" dc:"ExternalPaymentId should unique for payment"`
+	ExternalUserId    string                 `json:"externalUserId" dc:"ExternalUserId, unique, either ExternalUserId&Email or UserId needed"`
+	Email             string                 `json:"email" dc:"Email, either ExternalUserId&Email or UserId needed"`
+	UserId            uint64                 `json:"userId" dc:"UserId, either ExternalUserId&Email or UserId needed"`
+	Currency          string                 `json:"currency" dc:"Currency, either Currency&TotalAmount or PlanId needed" `
+	TotalAmount       int64                  `json:"totalAmount" dc:"Total PaymentAmount, Cent, either TotalAmount&Currency or PlanId needed"`
+	PlanId            uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
+	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
+	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
+	Name              string                 `json:"name" dc:"Name"`
+	Description       string                 `json:"description" dc:"Description"`
+	Items             []*payment.Item        `json:"items" dc:"Items"`
+	Metadata          map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	GasPayer          string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+}
+
+type NewPaymentRes struct {
+	Status            int         `json:"status" dc:"Status, 10-Created|20-Success|30-Failed|40-Cancelled"`
+	PaymentId         string      `json:"paymentId" dc:"The unique id of payment"`
+	ExternalPaymentId string      `json:"externalPaymentId" dc:"The external unique id of payment"`
+	Link              string      `json:"link"`
+	Action            *gjson.Json `json:"action" dc:"action"`
 }

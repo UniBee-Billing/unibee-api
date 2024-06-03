@@ -197,6 +197,7 @@ type IMerchantSubscription interface {
 	AdminNoteList(ctx context.Context, req *subscription.AdminNoteListReq) (res *subscription.AdminNoteListRes, err error)
 	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
 	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
+	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
 }
 
 type IMerchantUser interface {
