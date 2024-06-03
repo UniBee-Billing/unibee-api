@@ -90,7 +90,7 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		GasPayer:          req.GasPayer,
 	})
 
-	if paymentErr == nil {
+	if paymentErr != nil {
 		return nil, paymentErr
 	}
 	return &subscription.NewPaymentRes{
