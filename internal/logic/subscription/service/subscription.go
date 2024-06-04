@@ -118,6 +118,17 @@ type RenewInternalReq struct {
 	ProductData   *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
+func GetSubscriptionZeroPaymentLink(returnUrl string, subId string) string {
+	if returnUrl == "" {
+		return returnUrl
+	}
+	if returnUrl != "" && strings.Contains(returnUrl, "?") {
+		return fmt.Sprintf("%s&subId=%s&success=true", returnUrl, subId)
+	} else {
+		return fmt.Sprintf("%s?subId=%s&success=true", returnUrl, subId)
+	}
+}
+
 func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInternalRes, error) {
 	sub := query.GetSubscriptionBySubscriptionId(ctx, req.SubscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -228,7 +239,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			GatewayPaymentId:       "",
 			GatewayPaymentIntentId: "",
 			GatewayPaymentMethod:   "",
-			Link:                   "",
+			Link:                   GetSubscriptionZeroPaymentLink(req.ReturnUrl, sub.SubscriptionId),
 			Action:                 nil,
 			Invoice:                nil,
 			PaymentCode:            "",
@@ -736,6 +747,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 			utility.AssertError(err, "System Error")
 			createRes = &gateway_bean.GatewayCreateSubscriptionResp{
 				GatewaySubscriptionId: one.SubscriptionId,
+				Link:                  GetSubscriptionZeroPaymentLink(req.ReturnUrl, one.SubscriptionId),
 				Paid:                  true,
 			}
 		}
@@ -1364,7 +1376,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		subUpdateRes = &UpdateSubscriptionInternalResp{
 			GatewayUpdateId: invoice.InvoiceId,
 			Paid:            true,
-			Link:            "",
+			Link:            GetSubscriptionZeroPaymentLink(req.ReturnUrl, sub.SubscriptionId),
 			Invoice:         invoice,
 		}
 	} else {

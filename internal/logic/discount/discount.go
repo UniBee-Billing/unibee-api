@@ -58,7 +58,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
-		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
+		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
 		req.Currency = ""
@@ -113,7 +113,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
 	if req.DiscountType == DiscountTypePercentage {
-		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage < 10000, "invalid DiscountPercentage")
+		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
 		req.Currency = ""
