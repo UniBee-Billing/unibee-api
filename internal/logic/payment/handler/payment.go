@@ -30,6 +30,7 @@ type HandlePayReq struct {
 	PaymentId              string
 	GatewayPaymentIntentId string
 	GatewayPaymentId       string
+	GatewayUserId          string
 	TotalAmount            int64
 	PayStatusEnum          consts.PaymentStatusEnum
 	PaidTime               *gtime.Time
@@ -399,6 +400,9 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 		if err != nil {
 			g.Log().Errorf(ctx, `UpdateInvoiceFromPayment error %s\n`, err.Error())
 		}
+		if len(req.GatewayUserId) > 0 {
+			_, _ = query.CreateOrUpdateGatewayUser(ctx, payment.UserId, payment.GatewayId, req.GatewayUserId, req.GatewayPaymentMethod)
+		}
 		callback.GetPaymentCallbackServiceProvider(ctx, payment.BizType).PaymentSuccessCallback(ctx, payment, invoice)
 		{
 			event.SaveEvent(ctx, entity.PaymentEvent{
@@ -457,6 +461,7 @@ func HandlePaymentWebhookEvent(ctx context.Context, paymentId string, gatewayPay
 				PaymentId:              one.PaymentId,
 				GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 				GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
+				GatewayUserId:          gatewayPaymentRo.GatewayUserId,
 				TotalAmount:            gatewayPaymentRo.TotalAmount,
 				PayStatusEnum:          consts.PaymentSuccess,
 				PaidTime:               gatewayPaymentRo.PaidTime,

@@ -30,6 +30,10 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 		utility.Assert(paymentMethod != nil, "card not found")
 		newPaymentMethodId = paymentMethodId
 	}
+	gatewayUser := query.GetGatewayUser(ctx, userId, gatewayId)
+	if len(newPaymentMethodId) == 0 && gatewayUser != nil && len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
+		newPaymentMethodId = gatewayUser.GatewayDefaultPaymentMethod
+	}
 	_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 		dao.UserAccount.Columns().GatewayId:     gatewayId,
 		dao.UserAccount.Columns().PaymentMethod: newPaymentMethodId,

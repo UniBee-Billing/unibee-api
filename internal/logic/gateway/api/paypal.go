@@ -350,6 +350,7 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 		captureStatus = consts.CaptureRequest
 	}
 	var gatewayPaymentMethod string
+	var gatewayUserId string
 	var paymentCode string
 	if item.PaymentSource != nil &&
 		item.PaymentSource.Paypal != nil &&
@@ -357,6 +358,9 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 		item.PaymentSource.Paypal.Attributes.Vault != nil &&
 		len(item.PaymentSource.Paypal.Attributes.Vault.Id) > 0 && strings.Compare(item.PaymentSource.Paypal.Attributes.Vault.Status, "VAULTED") == 0 {
 		gatewayPaymentMethod = item.PaymentSource.Paypal.Attributes.Vault.Id
+		if item.PaymentSource.Paypal.Attributes.Vault.Customer != nil {
+			gatewayUserId = item.PaymentSource.Paypal.Attributes.Vault.Customer.Id
+		}
 		if len(gatewayPaymentMethod) > 0 {
 			paymentCode = utility.MarshalToJsonString(item.PaymentSource)
 		}
@@ -385,6 +389,7 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 		PaymentData:          utility.MarshalToJsonString(availableCapture),
 		TotalAmount:          payment.TotalAmount,
 		PaymentAmount:        payment.TotalAmount,
+		GatewayUserId:        gatewayUserId,
 		GatewayPaymentMethod: gatewayPaymentMethod,
 		PaymentCode:          paymentCode,
 		Currency:             payment.Currency,

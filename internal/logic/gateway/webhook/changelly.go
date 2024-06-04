@@ -100,6 +100,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 							PaymentId:              payment.PaymentId,
 							GatewayPaymentIntentId: payment.GatewayPaymentIntentId,
 							GatewayPaymentId:       paymentIntentDetail.GatewayPaymentId,
+							GatewayUserId:          paymentIntentDetail.GatewayUserId,
 							TotalAmount:            paymentIntentDetail.TotalAmount,
 							PayStatusEnum:          consts.PaymentSuccess,
 							PaidTime:               paymentIntentDetail.PaidTime,

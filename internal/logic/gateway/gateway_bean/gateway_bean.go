@@ -105,6 +105,7 @@ type GatewayPaymentRo struct {
 	PaymentData          string      `json:"paymentData" `
 	PaymentCode          string      `json:"paymentCode" `
 	GatewayId            uint64      `json:"gatewayId"         `
+	GatewayUserId        string      `json:"gatewayUserId"         `
 	GatewayPaymentId     string      `json:"gatewayPaymentId"              `
 	GatewayPaymentMethod string      `json:"gatewayPaymentMethod"              `
 }

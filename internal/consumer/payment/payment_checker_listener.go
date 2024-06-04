@@ -47,6 +47,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 							PaymentId:              one.PaymentId,
 							GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 							GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
+							GatewayUserId:          gatewayPaymentRo.GatewayUserId,
 							TotalAmount:            gatewayPaymentRo.TotalAmount,
 							PayStatusEnum:          consts.PaymentSuccess,
 							PaidTime:               gatewayPaymentRo.PaidTime,

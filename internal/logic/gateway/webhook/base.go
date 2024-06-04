@@ -38,6 +38,7 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 				CancelTime:           paymentIntentDetail.CancelTime,
 				GatewayPaymentId:     paymentIntentDetail.GatewayPaymentId,
 				GatewayPaymentMethod: paymentIntentDetail.GatewayPaymentMethod,
+				GatewayUserId:        paymentIntentDetail.GatewayUserId,
 			})
 			if err != nil {
 				return err

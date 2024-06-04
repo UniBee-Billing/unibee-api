@@ -1131,11 +1131,11 @@ type (
 	}
 
 	PaymentSourceAttributesVault struct {
-		StoreInVault string         `json:"store_in_vault,omitempty"`
-		UsageType    string         `json:"usage_type,omitempty"`
-		Id           string         `json:"id,omitempty"`
-		Status       string         `json:"status,omitempty"`
-		Customer     PaypalCustomer `json:"customer,omitempty"`
+		StoreInVault string          `json:"store_in_vault,omitempty"`
+		UsageType    string          `json:"usage_type,omitempty"`
+		Id           string          `json:"id,omitempty"`
+		Status       string          `json:"status,omitempty"`
+		Customer     *PaypalCustomer `json:"customer,omitempty"`
 	}
 
 	PaypalCustomer struct {
