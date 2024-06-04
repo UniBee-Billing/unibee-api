@@ -52,7 +52,7 @@ func (s Stripe) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, userId)
+	gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, userId)
 	params := &stripe.PaymentMethodAttachParams{
 		Customer: stripe.String(gatewayUser.GatewayUserId),
 	}
@@ -80,7 +80,7 @@ func (s Stripe) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
 	utility.Assert(userId > 0, "userId is nil")
-	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, userId)
+	gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, userId)
 	params := &stripe.CheckoutSessionParams{
 		Mode: stripe.String(string(stripe.CheckoutSessionModeSetup)),
 		//Currency:           stripe.String(strings.ToUpper(currency)),
@@ -133,7 +133,7 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 		}
 	} else {
 		utility.Assert(req.UserId > 0, "userId is nil")
-		gatewayUser := QueryAndCreateChannelUser(ctx, gateway, req.UserId)
+		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, req.UserId)
 
 		params := &stripe.CustomerListPaymentMethodsParams{
 			Customer: stripe.String(gatewayUser.GatewayUserId),
@@ -190,7 +190,7 @@ func (s Stripe) GatewayPaymentList(ctx context.Context, gateway *entity.Merchant
 	utility.Assert(gateway != nil, "gateway not found")
 	stripe.Key = gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	gatewayUser := QueryAndCreateChannelUser(ctx, gateway, listReq.UserId)
+	gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, listReq.UserId)
 
 	params := &stripe.PaymentIntentListParams{}
 	params.Customer = stripe.String(gatewayUser.GatewayUserId)
@@ -282,7 +282,7 @@ func (s Stripe) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 	s.setUnibeeAppInfo()
 
 	params := &stripe.CustomerParams{}
-	response, err := customer.Get(QueryAndCreateChannelUserWithOutPaymentMethod(ctx, gateway, userId).GatewayUserId, params)
+	response, err := customer.Get(QueryAndCreateGatewayUserWithOutPaymentMethod(ctx, gateway, userId).GatewayUserId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -340,7 +340,7 @@ func (s Stripe) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	stripe.Key = createPayContext.Gateway.GatewaySecret
 	s.setUnibeeAppInfo()
-	gatewayUser := QueryAndCreateChannelUser(ctx, createPayContext.Gateway, createPayContext.Pay.UserId)
+	gatewayUser := QueryAndCreateGatewayUser(ctx, createPayContext.Gateway, createPayContext.Pay.UserId)
 
 	if createPayContext.CheckoutMode {
 		var items []*stripe.CheckoutSessionLineItemParams

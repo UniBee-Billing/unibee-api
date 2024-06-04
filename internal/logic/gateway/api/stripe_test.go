@@ -122,7 +122,7 @@ func TestStrip(t *testing.T) {
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUnibeeAppInfo()
-		gatewayUser := QueryAndCreateChannelUser(ctx, gateway, 2235427988)
+		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, 2235427988)
 
 		{
 			params := &stripe.CustomerListPaymentMethodsParams{
@@ -151,7 +151,7 @@ func TestStrip(t *testing.T) {
 		_test.AssertNotNil(gateway)
 		stripe.Key = gateway.GatewaySecret
 		setUnibeeAppInfo()
-		gatewayUser := QueryAndCreateChannelUser(ctx, gateway, 2235427988)
+		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, 2235427988)
 		{
 			params := &stripe.PaymentMethodListParams{
 				Type:     stripe.String(string(stripe.PaymentMethodTypeCard)),
