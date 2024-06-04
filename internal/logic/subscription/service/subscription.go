@@ -1320,7 +1320,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 
 	var effectImmediate = 0
 	var effectTime = prepare.Subscription.CurrentPeriodEnd
-	if prepare.EffectImmediate && prepare.Invoice.TotalAmount > 0 {
+	if prepare.EffectImmediate {
 		effectImmediate = 1
 		effectTime = gtime.Now().Timestamp()
 	}

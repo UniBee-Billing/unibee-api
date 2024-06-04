@@ -335,11 +335,15 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	}
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	one.Status = consts.InvoiceStatusPaid
-	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicInvoicePaid.Topic,
-		Tag:   redismq2.TopicInvoicePaid.Tag,
-		Body:  one.InvoiceId,
-	})
+	go func() {
+
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicInvoicePaid.Topic,
+			Tag:   redismq2.TopicInvoicePaid.Tag,
+			Body:  one.InvoiceId,
+		})
+	}()
+
 	return one, nil
 }
 
