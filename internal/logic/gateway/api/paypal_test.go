@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"strings"
 	"testing"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/query"
@@ -75,33 +76,34 @@ func TestPaypal_Gateway(t *testing.T) {
 	})
 
 	t.Run("Test Paypal Checkout payment", func(t *testing.T) {
+		amountValue := "1.10"
 		orderResponse, err := c.CreateOrder(
 			ctx,
 			paypal.OrderIntentCapture,
 			[]paypal.PurchaseUnitRequest{
 				{
 					Amount: &paypal.PurchaseUnitAmount{
-						Value:    "1.00",
+						Value:    amountValue,
 						Currency: "USD",
 					},
 				},
 			},
 			&paypal.CreateOrderPayer{},
 			&paypal.PaymentSource{
-				//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-				//	Vault: paypal.PaymentSourceAttributesVault{
-				//		StoreInVault: "ON_SUCCESS",
-				//	},
-				//	Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-				//}},
-				Paypal: &paypal.PaymentSourcePaypal{
-					Attributes: &paypal.PaymentSourceAttributes{
-						Vault: &paypal.PaymentSourceAttributesVault{
-							StoreInVault: "ON_SUCCESS",
-							UsageType:    "MERCHANT",
-						},
+				Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
+					Vault: &paypal.PaymentSourceAttributesVault{
+						StoreInVault: "ON_SUCCESS",
 					},
-				},
+					Verification: &paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
+				}},
+				//Paypal: &paypal.PaymentSourcePaypal{
+				//	Attributes: &paypal.PaymentSourceAttributes{
+				//		Vault: &paypal.PaymentSourceAttributesVault{
+				//			StoreInVault: "ON_SUCCESS",
+				//			UsageType:    "MERCHANT",
+				//		},
+				//	},
+				//},
 			},
 			&paypal.ApplicationContext{
 				BrandName:          "",
@@ -121,7 +123,7 @@ func TestPaypal_Gateway(t *testing.T) {
 		if err != nil {
 			t.Errorf("Not expected error for GetOrder(), got %s", err.Error())
 		}
-		if order.PurchaseUnits[0].Amount.Value != "1.00" {
+		if order.PurchaseUnits[0].Amount.Value != amountValue {
 			t.Errorf("CreateOrder amount incorrect")
 		}
 
@@ -135,9 +137,69 @@ func TestPaypal_Gateway(t *testing.T) {
 		if err != nil {
 			t.Errorf("Not expected error for GetOrder(), got %s", err.Error())
 		}
-		if order.PurchaseUnits[0].Amount.Value != "1.00" {
+		if order.PurchaseUnits[0].Amount.Value != amountValue {
 			t.Errorf("CreateOrder amount incorrect")
 		}
 
+		var gatewayPaymentMethod string
+		if order.PaymentSource != nil &&
+			order.PaymentSource.Paypal != nil &&
+			order.PaymentSource.Paypal.Attributes != nil &&
+			order.PaymentSource.Paypal.Attributes.Vault != nil &&
+			len(order.PaymentSource.Paypal.Attributes.Vault.Id) > 0 && strings.Compare(order.PaymentSource.Paypal.Attributes.Vault.Status, "VAULTED") == 0 {
+			gatewayPaymentMethod = order.PaymentSource.Paypal.Attributes.Vault.Id
+		}
+		if gatewayPaymentMethod != "" {
+			orderResponse, err = c.CreateOrder(
+				ctx,
+				paypal.OrderIntentCapture,
+				[]paypal.PurchaseUnitRequest{
+					{
+						Amount: &paypal.PurchaseUnitAmount{
+							Value:    amountValue,
+							Currency: "USD",
+						},
+					},
+				},
+				&paypal.CreateOrderPayer{},
+				&paypal.PaymentSource{
+					//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
+					//	Vault: paypal.PaymentSourceAttributesVault{
+					//		StoreInVault: "ON_SUCCESS",
+					//	},
+					//	Verification: paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
+					//}},
+					Paypal: &paypal.PaymentSourcePaypal{
+						VaultId: gatewayPaymentMethod,
+						//Attributes: &paypal.PaymentSourceAttributes{
+						//	Vault: &paypal.PaymentSourceAttributesVault{
+						//		StoreInVault: "ON_SUCCESS",
+						//		UsageType:    "MERCHANT",
+						//	},
+						//},
+					},
+				},
+				&paypal.ApplicationContext{
+					BrandName:          "",
+					Locale:             "",
+					ShippingPreference: "",
+					UserAction:         "",
+					PaymentMethod:      paypal.PaymentMethod{},
+					ReturnURL:          "https://merchant.unibee.top",
+					CancelURL:          "https://user.unibee.top",
+				},
+				utility.CreatePaymentId(),
+			)
+			if err != nil {
+				t.Errorf("Not expected error for CreateOrder(), got %s", err.Error())
+			}
+			order, err = c.GetOrder(ctx, orderResponse.ID)
+			if err != nil {
+				t.Errorf("Not expected error for GetOrder(), got %s", err.Error())
+			}
+			if order.PurchaseUnits[0].Amount.Value != amountValue {
+				t.Errorf("CreateOrder amount incorrect")
+			}
+		}
 	})
 }

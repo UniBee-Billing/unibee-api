@@ -76,6 +76,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 			Addons:          addon2.GetSubscriptionAddonsByAddonJson(ctx, one.AddonData),
 			GatewayId:       one.GatewayId,
 			CreateTime:      one.CreateTime,
+			Status:          one.Status,
 		})
 	}
 

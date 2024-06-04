@@ -33,8 +33,9 @@ type SubscriptionTimeLineDetail struct {
 	Plan            *bean.PlanSimplify      `json:"plan" description:"Plan"`
 	Quantity        int64                   `json:"quantity"        description:"quantity"` // quantity
 	Addons          []*bean.PlanAddonDetail `json:"addons" description:"Addon"`
-	GatewayId       uint64                  `json:"gatewayId"       description:"gateway_id"`      // gateway_id
-	CreateTime      int64                   `json:"createTime"      description:"create utc time"` // create utc time
+	GatewayId       uint64                  `json:"gatewayId"       description:"gateway_id"`            // gateway_id
+	CreateTime      int64                   `json:"createTime"      description:"create utc time"`       // create utc time
+	Status          int                     `json:"status"          description:"1-processing,2-finish"` // 1-processing,2-finish
 }
 
 type SubscriptionPendingUpdateDetail struct {
