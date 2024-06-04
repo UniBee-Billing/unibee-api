@@ -183,6 +183,7 @@ func MakeSubscriptionIncomplete(ctx context.Context, subscriptionId string) erro
 }
 
 func UpdateSubscriptionDefaultPaymentMethod(ctx context.Context, subscriptionId string, paymentMethod string) error {
+	g.Log().Infof(ctx, "UpdateSubscriptionDefaultPaymentMethod subscriptionId:%s paymentMethod:%s", subscriptionId, paymentMethod)
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
