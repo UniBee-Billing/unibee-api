@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
+	"strings"
 	config2 "unibee/internal/cmd/config"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
@@ -47,6 +48,9 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	var oldGatewayId uint64 = 0
 	if len(user.GatewayId) > 0 {
 		oldGatewayId, _ = strconv.ParseUint(user.GatewayId, 10, 64)
+	}
+	if len(newPaymentMethodId) > 0 && gatewayUser != nil && strings.Compare(gatewayUser.GatewayDefaultPaymentMethod, newPaymentMethodId) != 0 {
+		_, _ = query.CreateOrUpdateGatewayUser(ctx, userId, gatewayId, gatewayUser.GatewayUserId, newPaymentMethodId)
 	}
 	if oldGatewayId != gatewayId || user.PaymentMethod != paymentMethodId {
 		_, _ = redismq.Send(&redismq.Message{
