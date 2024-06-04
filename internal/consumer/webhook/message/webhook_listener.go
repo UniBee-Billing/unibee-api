@@ -36,6 +36,7 @@ func (t MerchantWebhookListener) Consume(ctx context.Context, message *redismq.M
 	}
 
 	if SendWebhookRequest(ctx, webhookMessage, message.ReconsumeTimes) {
+		// todo mark limit the dependencyKey
 		if webhookMessage.SequenceKey != "" {
 			_, _ = g.Redis().Set(ctx, webhookMessage.SequenceKey, "Sent")
 			_, _ = g.Redis().Expire(ctx, webhookMessage.SequenceKey, 24*60*60)
