@@ -12,6 +12,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"strings"
 	"time"
 	"unibee/utility"
 )
@@ -106,6 +107,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		body, _ := req.GetBody()
 		bodyByte, _ := io.ReadAll(body)
 		c.RequestBodyStr = string(bodyByte)
+		c.RequestBodyStr = strings.ReplaceAll(c.RequestBodyStr, "\\", "")
 	} else {
 		c.RequestBodyStr = ""
 	}
@@ -150,6 +152,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 	}
 	response := string(respByte)
 	c.ResponseStr = response
+	c.ResponseStr = strings.ReplaceAll(c.ResponseStr, "\\", "")
 	g.Log().Debugf(req.Context(), "Paypal_Send \nRequest:%v Debug \n StatusCode:%d \nresponse:%s", c.FormatRequest(req), resp.StatusCode, c.ResponseStr)
 	return json.Unmarshal(respByte, v)
 

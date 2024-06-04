@@ -43,7 +43,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 					g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback paymentId:%s error:%s", message.Body, err.Error())
 				} else {
 					if gatewayPaymentRo.Status == consts.PaymentSuccess {
-						err := handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
+						err = handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 							PaymentId:              one.PaymentId,
 							GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 							GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
@@ -63,7 +63,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 							return redismq.CommitMessage
 						}
 					} else if gatewayPaymentRo.Status == consts.PaymentFailed {
-						err := handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
+						err = handler2.HandlePayFailure(ctx, &handler2.HandlePayReq{
 							PaymentId:              one.PaymentId,
 							GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 							GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,
@@ -78,7 +78,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 							return redismq.CommitMessage
 						}
 					} else if gatewayPaymentRo.Status == consts.PaymentCancelled {
-						err := handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
+						err = handler2.HandlePayCancel(ctx, &handler2.HandlePayReq{
 							PaymentId:              one.PaymentId,
 							GatewayPaymentIntentId: gatewayPaymentRo.GatewayPaymentId,
 							GatewayPaymentId:       gatewayPaymentRo.GatewayPaymentId,

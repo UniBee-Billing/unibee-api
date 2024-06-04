@@ -22,16 +22,19 @@ func GetPaypalHost() string {
 
 func TestPaypal_Gateway(t *testing.T) {
 	ctx := context.Background()
-	gateway := query.GetGatewayById(ctx, 47)
+	gateway := query.GetGatewayById(ctx, 45)
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, GetPaypalHost())
 	_, err := c.GetAccessToken(context.Background())
 	utility.AssertError(err, "Test Paypal Error")
 
 	t.Run("Test Paypal Automatic payment", func(t *testing.T) {
-		order, err := c.GetOrder(ctx, "9CH16636GU041544S")
+		order, err := c.GetOrder(ctx, "2F888037H01542134")
 		if err != nil {
 			t.Errorf("Not expected error for GetOrder(), got %s", err.Error())
 		}
+		payment := query.GetPaymentByGatewayPaymentId(ctx, "2F888037H01542134")
+		detail, _ := Paypal{}.parsePaypalPayment(ctx, gateway, order, payment)
+		fmt.Println(detail)
 		orderResponse, err := c.CreateOrder(
 			ctx,
 			paypal.OrderIntentCapture,
