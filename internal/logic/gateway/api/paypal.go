@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"net/http"
@@ -217,7 +218,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		},
 		createPayContext.Pay.PaymentId,
 	)
-	log.SaveChannelHttpLog("GatewayNewPayment", c.RequestBodyStr, c.ResponseStr, err, "", nil, createPayContext.Gateway)
+	log.SaveChannelHttpLog("GatewayNewPayment", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", createPayContext.Gateway.GatewayName, createPayContext.Gateway.Id), nil, createPayContext.Gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -245,7 +246,7 @@ func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
 	captureRes, err := c.CaptureOrder(ctx, payment.GatewayPaymentId, paypal.CaptureOrderRequest{})
-	log.SaveChannelHttpLog("GatewayCapture", c.RequestBodyStr, c.ResponseStr, err, "", nil, gateway)
+	log.SaveChannelHttpLog("GatewayCapture", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +281,7 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 		InvoiceID:   refund.RefundId,
 		NoteToPayer: refund.RefundComment,
 	})
-	log.SaveChannelHttpLog("GatewayRefundDetail", c.RequestBodyStr, c.ResponseStr, err, "", nil, gateway)
+	log.SaveChannelHttpLog("GatewayRefundDetail", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	if err != nil {
 		return nil, err
 	}

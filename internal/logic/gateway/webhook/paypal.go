@@ -99,7 +99,7 @@ func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway 
 			EventTypes: targetEventTypes,
 		}
 		response, err := client.CreateWebhook(ctx, param)
-		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", param, response, err, "", nil, gateway)
+		log.SaveChannelHttpLog("GatewayCheckAndSetupWebhook", param, response, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 		if err != nil {
 			return err
 		}
