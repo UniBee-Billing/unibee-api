@@ -5,16 +5,25 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"unibee/internal/cmd/config"
 	"unibee/internal/logic/gateway/api/paypal"
 	"unibee/internal/query"
 	_ "unibee/test"
 	"unibee/utility"
 )
 
+func GetPaypalHost() string {
+	var apiHost = "https://api-m.paypal.com"
+	if !config.GetConfigInstance().IsProd() {
+		apiHost = "https://api-m.sandbox.paypal.com"
+	}
+	return apiHost
+}
+
 func TestPaypal_Gateway(t *testing.T) {
 	ctx := context.Background()
 	gateway := query.GetGatewayById(ctx, 45)
-	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
+	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, GetPaypalHost())
 	_, err := c.GetAccessToken(context.Background())
 	utility.AssertError(err, "Test Paypal Error")
 

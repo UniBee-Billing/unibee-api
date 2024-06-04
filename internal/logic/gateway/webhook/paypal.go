@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/net/ghttp"
 	"net/http"
 	"strings"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	_gateway "unibee/internal/logic/gateway"
 	"unibee/internal/logic/gateway/api"
@@ -42,11 +43,22 @@ func NewClient(clientID string, secret string, APIBase string) (*paypal.Client, 
 	}, nil
 }
 
+func (p PaypalWebhook) GetPaypalHost() string {
+	var apiHost = "https://api-m.paypal.com"
+	if !config.GetConfigInstance().IsProd() {
+		apiHost = "https://api-m.sandbox.paypal.com"
+	}
+	return apiHost
+}
+
 // GatewayCheckAndSetupWebhook https://developer.paypal.com/docs/subscriptions/webhooks/
 func (p PaypalWebhook) GatewayCheckAndSetupWebhook(ctx context.Context, gateway *entity.MerchantGateway) (err error) {
 	utility.Assert(gateway != nil, "gateway is nil")
-	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
-	_, err = client.GetAccessToken(context.Background())
+	client, err := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
+	if err != nil {
+		return err
+	}
+	_, err = client.GetAccessToken(ctx)
 	if err != nil {
 		return err
 	}
@@ -197,7 +209,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return
 	}
-	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, gateway.Host)
+	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = client.GetAccessToken(context.Background())
 	if err != nil {
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
