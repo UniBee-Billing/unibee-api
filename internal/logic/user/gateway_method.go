@@ -17,7 +17,7 @@ import (
 )
 
 func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, gatewayId uint64, paymentMethodId string) {
-	g.Log().Infof(ctx, "UpdateSubscriptionDefaultPaymentMethod subscriptionId:%s gatewayId:%s paymentMethod:%s", userId, gatewayId, paymentMethodId)
+	g.Log().Infof(ctx, "UpdateUserDefaultGatewayPaymentMethod userId:%v gatewayId:%s paymentMethod:%s", userId, gatewayId, paymentMethodId)
 	utility.Assert(userId > 0, "userId is nil")
 	utility.Assert(gatewayId > 0, "gatewayId is nil")
 	user := query.GetUserAccountById(ctx, userId)
