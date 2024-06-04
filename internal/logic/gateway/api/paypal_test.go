@@ -22,7 +22,7 @@ func GetPaypalHost() string {
 
 func TestPaypal_Gateway(t *testing.T) {
 	ctx := context.Background()
-	gateway := query.GetGatewayById(ctx, 45)
+	gateway := query.GetGatewayById(ctx, 47)
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, GetPaypalHost())
 	_, err := c.GetAccessToken(context.Background())
 	utility.AssertError(err, "Test Paypal Error")
@@ -86,6 +86,17 @@ func TestPaypal_Gateway(t *testing.T) {
 
 	t.Run("Test Paypal Checkout payment", func(t *testing.T) {
 		amountValue := "1.10"
+		var items = make([]paypal.Item, 0)
+		items = append(items, paypal.Item{
+			Name:        "default product",
+			Description: "default product",
+			UnitAmount: &paypal.Money{
+				Value:    amountValue,
+				Currency: "EUR",
+			},
+			Quantity: "1",
+		})
+
 		orderResponse, err := c.CreateOrder(
 			ctx,
 			paypal.OrderIntentCapture,
@@ -93,26 +104,40 @@ func TestPaypal_Gateway(t *testing.T) {
 				{
 					Amount: &paypal.PurchaseUnitAmount{
 						Value:    amountValue,
-						Currency: "USD",
+						Currency: "EUR",
+						//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+						//	ItemTotal: &paypal.Money{
+						//		Value:    amountValue,
+						//		Currency: "EUR",
+						//	},
+						//	Shipping:         nil,
+						//	Handling:         nil,
+						//	TaxTotal:         nil,
+						//	Insurance:        nil,
+						//	ShippingDiscount: nil,
+						//	Discount:         nil,
+						//},
 					},
+					SoftDescriptor: "Default Product",
+					//Items:          items,
 				},
 			},
 			&paypal.CreateOrderPayer{},
 			&paypal.PaymentSource{
-				Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
-					Vault: &paypal.PaymentSourceAttributesVault{
-						StoreInVault: "ON_SUCCESS",
-					},
-					Verification: &paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
-				}},
-				//Paypal: &paypal.PaymentSourcePaypal{
-				//	Attributes: &paypal.PaymentSourceAttributes{
-				//		Vault: &paypal.PaymentSourceAttributesVault{
-				//			StoreInVault: "ON_SUCCESS",
-				//			UsageType:    "MERCHANT",
-				//		},
+				//Card: &paypal.PaymentSourceCard{Attributes: &paypal.PaymentSourceAttributes{
+				//	Vault: &paypal.PaymentSourceAttributesVault{
+				//		StoreInVault: "ON_SUCCESS",
 				//	},
-				//},
+				//	Verification: &paypal.PaymentSourceAttributesVerification{Method: "SCA_WHEN_REQUIRED"},
+				//}},
+				Paypal: &paypal.PaymentSourcePaypal{
+					Attributes: &paypal.PaymentSourceAttributes{
+						Vault: &paypal.PaymentSourceAttributesVault{
+							StoreInVault: "ON_SUCCESS",
+							UsageType:    "MERCHANT",
+						},
+					},
+				},
 			},
 			&paypal.ApplicationContext{
 				BrandName:          "",

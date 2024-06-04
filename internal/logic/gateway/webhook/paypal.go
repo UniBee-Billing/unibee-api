@@ -210,7 +210,7 @@ func (p PaypalWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 		return
 	}
 	client, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = client.GetAccessToken(context.Background())
+	_, err = client.GetAccessToken(r.Context())
 	if err != nil {
 		r.Response.WriteHeader(http.StatusBadRequest) // Return a 400 error on a bad signature
 		return

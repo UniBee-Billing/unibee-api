@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
 	webhook2 "unibee/internal/logic/gateway"
@@ -54,7 +53,7 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	c, _ := NewClient(key, secret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	return "https://www.paypalobjects.com/webstatic/icon/favicon.ico", consts.GatewayTypePaypal, err
 }
 
@@ -91,19 +90,19 @@ func (p Paypal) GatewayRefundList(ctx context.Context, gateway *entity.MerchantG
 func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	order, err := c.GetOrder(ctx, gatewayPaymentId)
 	log.SaveChannelHttpLog("GatewayPaymentDetail", c.RequestBodyStr, c.ResponseStr, err, "", nil, gateway)
 	if err != nil {
 		return nil, err
 	}
-	return p.parsePaypalPayment(ctx, gateway, order)
+	return p.parsePaypalPayment(ctx, gateway, order, payment)
 }
 
 func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayRefundId string, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
 	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	gatewayRefund, err := c.GetRefund(ctx, gatewayRefundId)
 	log.SaveChannelHttpLog("GatewayRefundDetail", c.RequestBodyStr, c.ResponseStr, err, "", nil, gateway)
 	if err != nil {
@@ -125,7 +124,7 @@ func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.Merc
 func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
 	utility.Assert(createPayContext.Gateway != nil, "gateway not found")
 	c, _ := NewClient(createPayContext.Gateway.GatewayKey, createPayContext.Gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	var items = make([]paypal.Item, 0)
 	for _, line := range createPayContext.Invoice.Lines {
 		var name = ""
@@ -188,21 +187,21 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				Amount: &paypal.PurchaseUnitAmount{
 					Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 					Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-						ItemTotal: &paypal.Money{
-							Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
-							Currency: strings.ToUpper(createPayContext.Pay.Currency),
-						},
-						Shipping:         nil,
-						Handling:         nil,
-						TaxTotal:         nil,
-						Insurance:        nil,
-						ShippingDiscount: nil,
-						Discount:         nil,
-					},
+					//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+					//	ItemTotal: &paypal.Money{
+					//		Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+					//		Currency: strings.ToUpper(createPayContext.Pay.Currency),
+					//	},
+					//	Shipping:         nil,
+					//	Handling:         nil,
+					//	TaxTotal:         nil,
+					//	Insurance:        nil,
+					//	ShippingDiscount: nil,
+					//	Discount:         nil,
+					//},
 				},
 				SoftDescriptor: productName,
-				Items:          items,
+				//Items:          items,
 			},
 		},
 		&paypal.CreateOrderPayer{},
@@ -223,7 +222,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 		return nil, err
 	}
 
-	payment, err := p.parsePaypalPayment(ctx, createPayContext.Gateway, detail)
+	payment, err := p.parsePaypalPayment(ctx, createPayContext.Gateway, detail, createPayContext.Pay)
 	if err != nil {
 		return nil, err
 	}
@@ -244,7 +243,7 @@ func (p Paypal) GatewayCapture(ctx context.Context, payment *entity.Payment) (re
 	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	captureRes, err := c.CaptureOrder(ctx, payment.GatewayPaymentId, paypal.CaptureOrderRequest{})
 	log.SaveChannelHttpLog("GatewayCapture", c.RequestBodyStr, c.ResponseStr, err, "", nil, gateway)
 	if err != nil {
@@ -272,7 +271,7 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 	gateway := query.GetGatewayById(ctx, payment.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
-	_, err = c.GetAccessToken(context.Background())
+	_, err = c.GetAccessToken(ctx)
 	captureRefundRes, err := c.RefundCapture(ctx, availableCapture.ID, paypal.RefundCaptureRequest{
 		Amount: &paypal.Money{
 			Currency: strings.ToUpper(refund.Currency),
@@ -309,16 +308,14 @@ func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantG
 	}, nil
 }
 
-func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Order) (*gateway_bean.GatewayPaymentRo, error) {
-	if len(item.PurchaseUnits) == 0 {
-		return nil, gerror.New("Invalid Order Data")
-	}
-	var amountStr = item.PurchaseUnits[0].Amount.Value
-	var currency = item.PurchaseUnits[0].Amount.Currency
+func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Order, payment *entity.Payment) (*gateway_bean.GatewayPaymentRo, error) {
+	//if len(item.PurchaseUnits) == 0 {
+	//	return nil, gerror.New("Invalid Order Data")
+	//}
 
 	var availableCapture *paypal.CaptureAmount
-	var paidTime *time.Time
-	if item.PurchaseUnits[0].Payments != nil && len(item.PurchaseUnits[0].Payments.Captures) >= 1 {
+	var paidTime *gtime.Time
+	if item.PurchaseUnits != nil && len(item.PurchaseUnits) > 0 && item.PurchaseUnits[0].Payments != nil && len(item.PurchaseUnits[0].Payments.Captures) >= 1 {
 		for _, one := range item.PurchaseUnits[0].Payments.Captures {
 			if strings.Compare(item.Status, "COMPLETED") == 0 ||
 				strings.Compare(item.Status, "REFUNDED") == 0 ||
@@ -327,8 +324,8 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 				break
 			}
 		}
-		if availableCapture != nil {
-			paidTime = availableCapture.UpdateTime
+		if availableCapture != nil && availableCapture.UpdateTime != nil {
+			paidTime = gtime.New(availableCapture.UpdateTime)
 		}
 	}
 
@@ -369,6 +366,14 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 			approveLink = link.Href
 			break
 		}
+		if strings.Compare(link.Rel, "payer-action") == 0 {
+			approveLink = link.Href
+			break
+		}
+	}
+	var createTime *gtime.Time
+	if item.CreateTime != nil {
+		createTime = gtime.New(item.CreateTime)
 	}
 	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.ID,
@@ -377,13 +382,13 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 		AuthorizeReason:      authorizeReason,
 		CancelReason:         "",
 		PaymentData:          utility.MarshalToJsonString(availableCapture),
-		TotalAmount:          utility.ConvertDollarStrToCent(amountStr, currency),
-		PaymentAmount:        utility.ConvertDollarStrToCent(amountStr, currency),
+		TotalAmount:          payment.TotalAmount,
+		PaymentAmount:        payment.TotalAmount,
 		GatewayPaymentMethod: gatewayPaymentMethod,
 		PaymentCode:          paymentCode,
-		Currency:             strings.ToUpper(currency),
-		PaidTime:             gtime.New(paidTime),
-		CreateTime:           gtime.New(item.CreateTime),
+		Currency:             payment.Currency,
+		PaidTime:             paidTime,
+		CreateTime:           createTime,
 		CancelTime:           cancelTime,
 		Link:                 approveLink,
 	}, nil
