@@ -100,7 +100,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		discountAmount = utility.MinInt64(*req.DiscountAmount, totalAmountExcludingTax)
 	} else if req.DiscountPercentage != nil && *req.DiscountPercentage > 0 {
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "Discount only available for api call")
-		utility.Assert(*req.DiscountPercentage > 0 && *req.DiscountPercentage < 10000, "invalid discountPercentage")
+		utility.Assert(*req.DiscountPercentage > 0 && *req.DiscountPercentage <= 10000, "invalid discountPercentage")
 		discountAmount = int64(float64(totalAmountExcludingTax) * utility.ConvertTaxPercentageToInternalFloat(*req.DiscountPercentage))
 	} else if len(req.DiscountCode) > 0 {
 		discountCode := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)

@@ -212,17 +212,34 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.Assert(gateway != nil, "gateway not found")
 	invoice, err := service3.CreateProcessingInvoiceForSub(ctx, currentInvoice, sub, gateway.Id, paymentMethodId, true, timeNow)
 	utility.AssertError(err, "System Error")
-	createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew", 0)
-	if err != nil {
-		g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
-		return nil, err
+	var createRes *gateway_bean.GatewayNewPaymentResp
+	if invoice.TotalAmount > 0 {
+		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew", 0)
+		if err != nil {
+			g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
+			return nil, err
+		}
+	} else {
+		invoice, err = handler2.MarkInvoiceAsPaidForZeroPayment(ctx, invoice.InvoiceId)
+		utility.AssertError(err, "System Error")
+		createRes = &gateway_bean.GatewayNewPaymentResp{
+			Payment:                nil,
+			Status:                 consts.PaymentSuccess,
+			GatewayPaymentId:       "",
+			GatewayPaymentIntentId: "",
+			GatewayPaymentMethod:   "",
+			Link:                   "",
+			Action:                 nil,
+			Invoice:                nil,
+			PaymentCode:            "",
+		}
 	}
 
 	// need cancel payment、 invoice and send invoice email
 	pending_update_cancel.CancelOtherUnfinishedPendingUpdatesBackground(sub.SubscriptionId, sub.SubscriptionId, "CancelByRenewSubscription-"+sub.SubscriptionId)
 
-	if createRes.Status == consts.PaymentSuccess && createRes.Payment != nil {
-		err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, createRes.Payment)
+	if createRes.Status == consts.PaymentSuccess {
+		err = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, invoice)
 		if err != nil {
 			return nil, err
 		}
@@ -238,7 +255,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 
 	return &CreateInternalRes{
 		Subscription: bean.SimplifySubscription(sub),
-		Paid:         createRes.Status == consts.PaymentSuccess && createRes.Payment != nil,
+		Paid:         createRes.Status == consts.PaymentSuccess,
 		Link:         createRes.Link,
 	}, nil
 }

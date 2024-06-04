@@ -102,15 +102,16 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 	return nil
 }
 
-func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, payment *entity.Payment) error {
-	utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
-	utility.Assert(payment.Status == consts.PaymentSuccess, fmt.Sprintf("payment not success:%v", payment.Status))
-	utility.Assert(len(payment.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
+func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *entity.Subscription, paymentInvoice *entity.Invoice) error {
+	//utility.Assert(payment != nil, "UpdateSubscriptionBillingCycleWithPayment payment is nil")
+	//utility.Assert(payment.Status == consts.PaymentSuccess, fmt.Sprintf("payment not success:%v", payment.Status))
+	utility.Assert(len(paymentInvoice.SubscriptionId) > 0, "UpdateSubscriptionBillingCycleWithPayment payment subId is nil")
 
 	sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
 	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
-	invoice := query.GetInvoiceByInvoiceId(ctx, payment.InvoiceId)
-	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+payment.PaymentId)
+	invoice := query.GetInvoiceByInvoiceId(ctx, paymentInvoice.InvoiceId)
+	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+paymentInvoice.PaymentId)
+	utility.Assert(invoice.Status == consts.InvoiceStatusPaid, fmt.Sprintf("invoice not success:%v", invoice.Status))
 	if sub.CurrentPeriodEnd > invoice.PeriodEnd && sub.Status == consts.SubStatusActive {
 		// sub cycle never go back time
 		return nil

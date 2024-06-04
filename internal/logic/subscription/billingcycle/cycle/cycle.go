@@ -262,7 +262,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 					}
 
 					if createRes.Payment != nil && createRes.Status == consts.PaymentSuccess {
-						_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, createRes.Payment)
+						_ = handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, latestInvoice)
 					}
 					return &BillingCycleWalkRes{WalkUnfinished: true, Message: fmt.Sprintf("Subscription Finish Invoice Payment Result:%s", utility.MarshalToJsonString(createRes))}, nil
 				} else if latestInvoice != nil && latestInvoice.GatewayId <= 0 {

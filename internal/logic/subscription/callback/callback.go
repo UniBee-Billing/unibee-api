@@ -109,7 +109,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 				}
 			} else if strings.Compare(sub.LatestInvoiceId, invoice.InvoiceId) == 0 {
 				// SubscriptionCycle
-				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, payment)
+				err := handler.HandleSubscriptionNextBillingCyclePaymentSuccess(ctx, sub, invoice)
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentSuccessCallback_Finish_SubscriptionCycle error:%s", err.Error())
 				}
