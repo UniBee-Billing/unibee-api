@@ -32,7 +32,7 @@ func SendRefundWebhookBackground(refundId string, event event.MerchantWebhookEve
 			refundDetail := detail.GetRefundDetail(ctx, one.MerchantId, one.RefundId)
 			utility.Assert(refundDetail != nil, "SendRefundWebhookBackground Error")
 
-			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(refundDetail))
+			message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(refundDetail), "", "")
 		}
 	}()
 }

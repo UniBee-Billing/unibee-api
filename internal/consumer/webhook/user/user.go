@@ -32,7 +32,7 @@ func SendMerchantUserMetricWebhookBackground(userId uint64, event event.Merchant
 			userMetric := metric_event.GetUserMetricStat(ctx, user.MerchantId, user)
 			utility.AssertError(err, "SendMerchantUserMetricWebhookBackground Error")
 
-			message.SendWebhookMessage(ctx, event, user.MerchantId, utility.FormatToGJson(userMetric))
+			message.SendWebhookMessage(ctx, event, user.MerchantId, utility.FormatToGJson(userMetric), "", "")
 		}
 	}()
 }

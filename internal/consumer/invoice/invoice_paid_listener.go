@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
+	"time"
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	"unibee/internal/consumer/webhook/event"
@@ -31,7 +32,10 @@ func (t InvoicePaidListener) Consume(ctx context.Context, message *redismq.Messa
 	one := query.GetInvoiceByInvoiceId(ctx, message.Body)
 	if one != nil {
 		one.Status = consts.InvoiceStatusPaid
-		invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID)
+		go func() {
+			time.Sleep(1 * time.Second)
+			invoice.SendMerchantInvoiceWebhookBackground(one, event.UNIBEE_WEBHOOK_EVENT_INVOICE_PAID)
+		}()
 	}
 	return redismq.CommitMessage
 }

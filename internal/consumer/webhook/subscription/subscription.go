@@ -36,6 +36,6 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft
 		} else {
 			subDetailRes.DayLeft = dayLeft
 		}
-		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes))
+		message.SendWebhookMessage(ctx, event, one.MerchantId, utility.FormatToGJson(subDetailRes), "", "")
 	}()
 }

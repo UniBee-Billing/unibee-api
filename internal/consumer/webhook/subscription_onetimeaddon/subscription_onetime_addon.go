@@ -26,6 +26,6 @@ func SendMerchantSubscriptionOnetimeAddonWebhookBackground(merchantId uint64, on
 				return
 			}
 		}()
-		message.SendWebhookMessage(ctx, event, merchantId, utility.FormatToGJson(one))
+		message.SendWebhookMessage(ctx, event, merchantId, utility.FormatToGJson(one), "", "")
 	}()
 }

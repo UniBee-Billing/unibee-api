@@ -17,15 +17,18 @@ import (
 )
 
 type WebhookMessage struct {
-	Id         uint64
-	Event      event2.MerchantWebhookEvent
-	EndpointId uint64
-	Url        string
-	MerchantId uint64
-	Data       *gjson.Json
+	Id                uint64
+	Event             event2.MerchantWebhookEvent
+	EndpointId        uint64
+	Url               string
+	MerchantId        uint64
+	Data              *gjson.Json
+	SequenceKey       string
+	DependencyKey     string
+	EndpointEventList string
 }
 
-func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, merchantId uint64, data *gjson.Json) {
+func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, merchantId uint64, data *gjson.Json, sequenceKey string, dependencyKey string) {
 	webhookMessage := &entity.MerchantWebhookMessage{
 		MerchantId:      merchantId,
 		WebhookEvent:    string(event),
@@ -48,12 +51,14 @@ func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, 
 					Topic: redismq2.TopicMerchantWebhook.Topic,
 					Tag:   redismq2.TopicMerchantWebhook.Tag,
 					Body: utility.MarshalToJsonString(&WebhookMessage{
-						Id:         webhookMessage.Id,
-						Event:      event,
-						EndpointId: merchantWebhook.Id,
-						Url:        merchantWebhook.WebhookUrl,
-						MerchantId: merchantId,
-						Data:       data,
+						Id:            webhookMessage.Id,
+						Event:         event,
+						EndpointId:    merchantWebhook.Id,
+						Url:           merchantWebhook.WebhookUrl,
+						MerchantId:    merchantId,
+						Data:          data,
+						SequenceKey:   sequenceKey,
+						DependencyKey: dependencyKey,
 					}),
 				})
 				g.Log().Infof(ctx, "SendWebhookMessage event:%s, merchantWebhookUrl:%s send:%v err:%v", event, merchantWebhook.WebhookUrl, send, err)

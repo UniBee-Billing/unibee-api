@@ -336,7 +336,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
 	one.Status = consts.InvoiceStatusPaid
 	go func() {
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Second)
 		_, _ = redismq.Send(&redismq.Message{
 			Topic: redismq2.TopicInvoicePaid.Topic,
 			Tag:   redismq2.TopicInvoicePaid.Tag,
