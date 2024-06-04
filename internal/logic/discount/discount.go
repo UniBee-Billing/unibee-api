@@ -234,7 +234,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 	} else if param.DiscountPercentage != nil && *param.DiscountPercentage > 0 {
 		discountType = DiscountTypePercentage
 		discountPercentage = *param.DiscountPercentage
-		utility.Assert(discountPercentage > 0 && discountPercentage < 10000, "invalid discountPercentage")
+		utility.Assert(discountPercentage > 0 && discountPercentage <= 10000, "invalid discountPercentage")
 	} else {
 		utility.Assert(true, "one of discountAmount or discountPercentage should specified")
 	}
