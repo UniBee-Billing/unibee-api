@@ -1211,7 +1211,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		Metadata:           req.Metadata,
 	})
 
-	if currentInvoice.TotalAmount <= 0 {
+	if currentInvoice.TotalAmount <= 0 && !config.GetMerchantSubscriptionConfig(ctx, sub.MerchantId).DowngradeEffectImmediately {
 		effectImmediate = false
 	}
 
