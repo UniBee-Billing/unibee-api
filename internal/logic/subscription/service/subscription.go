@@ -116,6 +116,7 @@ type RenewInternalReq struct {
 	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl     string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 	ProductData   *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	Metadata      map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 }
 
 func GetSubscriptionZeroPaymentLink(returnUrl string, subId string) string {
@@ -213,6 +214,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		FinishTime:         timeNow,
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: timeNow,
+		Metadata:           req.Metadata,
 	})
 
 	// createAndPayNewProrationInvoice
@@ -286,6 +288,7 @@ type CreatePreviewInternalReq struct {
 	IsSubmit        bool
 	ProductData     *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	PaymentMethodId string
+	Metadata        map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 type CreatePreviewInternalRes struct {
@@ -536,6 +539,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			PeriodEnd:          currentTimeEnd,
 			BillingCycleAnchor: currentTimeStart.Timestamp(),
 			FinishTime:         currentTimeStart.Timestamp(),
+			Metadata:           req.Metadata,
 		}
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
@@ -581,6 +585,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			FinishTime:         currentTimeStart.Timestamp(),
 			ProductData:        req.ProductData,
 			BillingCycleAnchor: currentTimeStart.Timestamp(),
+			Metadata:           req.Metadata,
 		})
 
 		return &CreatePreviewInternalRes{
@@ -653,6 +658,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		TrialEnd:        req.TrialEnd,
 		ProductData:     req.ProductData,
 		PaymentMethodId: req.PaymentMethodId,
+		Metadata:        req.Metadata,
 	})
 	if err != nil {
 		return nil, err
@@ -931,6 +937,7 @@ type UpdatePreviewInternalReq struct {
 	TaxPercentage   *int64                 `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
 	ProductData     *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	PaymentMethodId string
+	Metadata        map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalReq, prorationDate int64, merchantMemberId int64) (res *UpdatePreviewInternalRes, err error) {
@@ -1064,6 +1071,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				FinishTime:         prorationDate,
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
+				Metadata:           req.Metadata,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -1083,6 +1091,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProrationDate:                  prorationDate,
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
+				Metadata:                       req.Metadata,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
@@ -1100,6 +1109,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				FinishTime:         prorationDate,
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
+				Metadata:           req.Metadata,
 			})
 		} else {
 			// currentInvoice
@@ -1141,6 +1151,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					NewProrationPlans: newProrationPlanParams,
 					PeriodStart:       sub.CurrentPeriodStart,
 					PeriodEnd:         sub.CurrentPeriodEnd,
+					Metadata:          req.Metadata,
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
@@ -1156,6 +1167,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodStart:        sub.CurrentPeriodStart,
 					PeriodEnd:          sub.CurrentPeriodEnd,
 					BillingCycleAnchor: prorationDate,
+					Metadata:           req.Metadata,
 				})
 			}
 		}
@@ -1178,6 +1190,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			ProrationDate:                  prorationDate,
 			PeriodStart:                    sub.CurrentPeriodStart,
 			PeriodEnd:                      sub.CurrentPeriodEnd,
+			Metadata:                       req.Metadata,
 		}
 	}
 
@@ -1195,6 +1208,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		FinishTime:         utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: prorationDate,
+		Metadata:           req.Metadata,
 	})
 
 	if currentInvoice.TotalAmount <= 0 {
@@ -1287,6 +1301,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		DiscountCode:    req.DiscountCode,
 		TaxPercentage:   req.TaxPercentage,
 		ProductData:     req.ProductData,
+		Metadata:        req.Metadata,
 	}, prorationDate, merchantMemberId)
 	if err != nil {
 		return nil, err

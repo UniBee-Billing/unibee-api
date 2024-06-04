@@ -30,6 +30,7 @@ type CalculateInvoiceReq struct {
 	ProductData        *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom         string                 `json:"createFrom"                     description:"create from"`          // create from
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func VerifyInvoiceSimplify(one *bean.InvoiceSimplify) {
@@ -284,6 +285,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
+		Metadata:                       req.Metadata,
 	}
 }
 
@@ -293,19 +295,20 @@ type ProrationPlanParam struct {
 }
 
 type CalculateProrationInvoiceReq struct {
-	Currency           string                `json:"currency"`
-	DiscountCode       string                `json:"discountCode"`
-	TimeNow            int64                 `json:"TimeNow"`
-	TaxPercentage      int64                 `json:"taxPercentage"`
-	ProrationDate      int64                 `json:"prorationStart"`
-	PeriodStart        int64                 `json:"periodStart"`
-	PeriodEnd          int64                 `json:"periodEnd"`
-	FinishTime         int64                 `json:"finishTime"`
-	OldProrationPlans  []*ProrationPlanParam `json:"oldPlans"`
-	NewProrationPlans  []*ProrationPlanParam `json:"newPlans"`
-	InvoiceName        string                `json:"invoiceName"`
-	ProductName        string                `json:"productName"`
-	BillingCycleAnchor int64                 `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
+	Currency           string                 `json:"currency"`
+	DiscountCode       string                 `json:"discountCode"`
+	TimeNow            int64                  `json:"TimeNow"`
+	TaxPercentage      int64                  `json:"taxPercentage"`
+	ProrationDate      int64                  `json:"prorationStart"`
+	PeriodStart        int64                  `json:"periodStart"`
+	PeriodEnd          int64                  `json:"periodEnd"`
+	FinishTime         int64                  `json:"finishTime"`
+	OldProrationPlans  []*ProrationPlanParam  `json:"oldPlans"`
+	NewProrationPlans  []*ProrationPlanParam  `json:"newPlans"`
+	InvoiceName        string                 `json:"invoiceName"`
+	ProductName        string                 `json:"productName"`
+	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
+	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Context, req *CalculateProrationInvoiceReq) *bean.InvoiceSimplify {
@@ -447,6 +450,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
+		Metadata:                       req.Metadata,
 	}
 }
 
@@ -556,5 +560,6 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
+		Metadata:                       req.Metadata,
 	}
 }

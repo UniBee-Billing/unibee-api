@@ -66,4 +66,5 @@ type Invoice struct {
 	GatewayPaymentMethod           interface{} // gateway_payment_method
 	BillingCycleAnchor             interface{} // billing_cycle_anchor
 	CreateFrom                     interface{} // create from
+	MetaData                       interface{} // meta_data(json)
 }

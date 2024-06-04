@@ -3,6 +3,7 @@ package detail
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/controller/link"
@@ -59,6 +60,7 @@ type InvoiceDetail struct {
 	DayUtilDue                     int64                              `json:"dayUtilDue"                     description:"day util due after finish"` // day util due after finish
 	BillingCycleAnchor             int64                              `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`      // billing_cycle_anchor
 	CreateFrom                     string                             `json:"createFrom"                     description:"create from"`               // create from
+	Metadata                       map[string]interface{}             `json:"metadata" dc:"Metadata，Map"`
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -70,6 +72,13 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 	}
 	if err != nil {
 		fmt.Printf("ConvertInvoiceLines err:%s", err)
+	}
+	var metadata = make(map[string]interface{})
+	if len(invoice.MetaData) > 0 {
+		err = gjson.Unmarshal([]byte(invoice.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
 	}
 	return &InvoiceDetail{
 		Id:                             invoice.Id,
@@ -115,5 +124,6 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		DayUtilDue:                     invoice.DayUtilDue,
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 		CreateFrom:                     invoice.CreateFrom,
+		Metadata:                       metadata,
 	}
 }

@@ -131,6 +131,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			SendStatus:              consts.InvoiceSendStatusUnnecessary,
 			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines:                   invoiceItems,
+			Metadata:                req.Metadata,
 		}
 	} else {
 		invoice = &bean.InvoiceSimplify{
@@ -157,6 +158,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 				Description:            req.Description,
 				Quantity:               1,
 			}},
+			Metadata: req.Metadata,
 		}
 	}
 	var uniqueId = fmt.Sprintf("%d_%s", merchantInfo.Id, req.ExternalPaymentId)

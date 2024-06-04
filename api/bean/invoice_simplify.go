@@ -1,6 +1,7 @@
 package bean
 
 import (
+	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"unibee/internal/controller/link"
@@ -44,6 +45,7 @@ type InvoiceSimplify struct {
 	TrialEnd                       int64                         `json:"trialEnd"                       description:"trial_end, utc time"`  // trial_end, utc time
 	BillingCycleAnchor             int64                         `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom                     string                        `json:"createFrom"                     description:"create from"`          // create from
+	Metadata                       map[string]interface{}        `json:"metadata" dc:"Metadata，Map"`
 }
 
 type InvoiceItemSimplify struct {
@@ -81,6 +83,13 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 	if err != nil {
 		return nil
 	}
+	var metadata = make(map[string]interface{})
+	if len(one.MetaData) > 0 {
+		err = gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
+	}
 	return &InvoiceSimplify{
 		Id:                             one.Id,
 		InvoiceName:                    one.InvoiceName,
@@ -115,5 +124,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		TrialEnd:                       one.TrialEnd,
 		BillingCycleAnchor:             one.BillingCycleAnchor,
 		CreateFrom:                     one.CreateFrom,
+		Metadata:                       metadata,
 	}
 }

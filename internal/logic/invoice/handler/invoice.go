@@ -81,6 +81,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		DiscountCode:                   invoice.DiscountCode,
 		CountryCode:                    payment.CountryCode,
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
+		MetaData:                       utility.MarshalToJsonString(invoice.Metadata),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

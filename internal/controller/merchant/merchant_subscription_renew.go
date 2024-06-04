@@ -32,6 +32,7 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 		ManualPayment:  req.ManualPayment,
 		ReturnUrl:      req.ReturnUrl,
 		ProductData:    req.ProductData,
+		Metadata:       req.Metadata,
 	})
 	if err != nil {
 		return nil, err

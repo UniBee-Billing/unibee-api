@@ -64,4 +64,5 @@ type Invoice struct {
 	GatewayPaymentMethod           string      `json:"gatewayPaymentMethod"           description:"gateway_payment_method"`                                                 // gateway_payment_method
 	BillingCycleAnchor             int64       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`                                                   // billing_cycle_anchor
 	CreateFrom                     string      `json:"createFrom"                     description:"create from"`                                                            // create from
+	MetaData                       string      `json:"metaData"                       description:"meta_data(json)"`                                                        // meta_data(json)
 }

@@ -74,6 +74,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		CountryCode:                    sub.CountryCode,
 		BillingCycleAnchor:             simplify.BillingCycleAnchor,
 		CreateFrom:                     simplify.CreateFrom,
+		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

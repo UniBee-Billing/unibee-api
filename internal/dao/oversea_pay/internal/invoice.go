@@ -74,6 +74,7 @@ type InvoiceColumns struct {
 	GatewayPaymentMethod           string // gateway_payment_method
 	BillingCycleAnchor             string // billing_cycle_anchor
 	CreateFrom                     string // create from
+	MetaData                       string // meta_data(json)
 }
 
 // invoiceColumns holds the columns for table invoice.
@@ -132,6 +133,7 @@ var invoiceColumns = InvoiceColumns{
 	GatewayPaymentMethod:           "gateway_payment_method",
 	BillingCycleAnchor:             "billing_cycle_anchor",
 	CreateFrom:                     "create_from",
+	MetaData:                       "meta_data",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

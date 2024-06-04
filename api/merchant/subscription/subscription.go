@@ -136,6 +136,7 @@ type RenewReq struct {
 	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl      string                      `json:"returnUrl"  dc:"ReturnUrl"  `
 	ProductData    *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
+	Metadata       map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 }
 
 type RenewRes struct {
