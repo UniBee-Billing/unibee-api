@@ -30,7 +30,7 @@ func (t SubscriptionAutoRenewSuccessListener) Consume(ctx context.Context, messa
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
 		sub = query.GetSubscriptionBySubscriptionId(ctx, sub.SubscriptionId)
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, 0, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_AUTORENEW_SUCCESS)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_AUTORENEW_SUCCESS)
 	}
 	return redismq.CommitMessage
 }

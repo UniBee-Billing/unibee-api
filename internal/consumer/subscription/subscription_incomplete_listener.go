@@ -33,7 +33,7 @@ func (t SubscriptionIncompleteListener) Consume(ctx context.Context, message *re
 	if sub != nil {
 		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
-		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -100, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
+		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)
 	}
 	return redismq.CommitMessage
 }
