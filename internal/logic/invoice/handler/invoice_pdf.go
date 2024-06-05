@@ -23,7 +23,6 @@ import (
 )
 
 func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
-
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
 	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
