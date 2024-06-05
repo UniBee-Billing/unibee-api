@@ -1199,7 +1199,7 @@ type (
 		ID            string     `json:"id,omitempty"`
 		Amount        *Amount    `json:"amount,omitempty"`
 		CreateTime    *time.Time `json:"create_time,omitempty"`
-		State         string     `json:"state,omitempty"`
+		Status        string     `json:"status,omitempty"`
 		CaptureID     string     `json:"capture_id,omitempty"`
 		ParentPayment string     `json:"parent_payment,omitempty"`
 		UpdateTime    *time.Time `json:"update_time,omitempty"`

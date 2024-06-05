@@ -28,6 +28,11 @@ func TestPaypal_Gateway(t *testing.T) {
 	utility.AssertError(err, "Test Paypal Error")
 
 	t.Run("Test Paypal Automatic payment", func(t *testing.T) {
+		refund, err := c.GetRefund(ctx, "36J9867447391970W")
+		if err != nil {
+			t.Errorf("Not expected error for GetRefund(), got %s", err.Error())
+		}
+		fmt.Println(utility.MarshalToJsonString(refund))
 		order, err := c.GetOrder(ctx, "2F888037H01542134")
 		if err != nil {
 			t.Errorf("Not expected error for GetOrder(), got %s", err.Error())

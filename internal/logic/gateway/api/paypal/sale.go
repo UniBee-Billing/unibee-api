@@ -52,7 +52,7 @@ func (c *Client) RefundSale(ctx context.Context, saleID string, a *Amount) (*Ref
 func (c *Client) GetRefund(ctx context.Context, refundID string) (*Refund, error) {
 	refund := &Refund{}
 
-	req, err := c.NewRequest(ctx, "GET", fmt.Sprintf("%s%s", c.APIBase, "/v2/payments/refund/"+refundID), nil)
+	req, err := c.NewRequest(ctx, "GET", fmt.Sprintf("%s%s", c.APIBase, "/v2/payments/refunds/"+refundID), nil)
 	if err != nil {
 		return refund, err
 	}

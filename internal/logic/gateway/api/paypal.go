@@ -293,11 +293,11 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 
 func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantGateway, item *paypal.Refund) (*gateway_bean.GatewayPaymentRefundResp, error) {
 	var status consts.RefundStatusEnum = consts.RefundCreated
-	if strings.Compare(item.State, "COMPLETED") == 0 {
+	if strings.Compare(item.Status, "COMPLETED") == 0 {
 		status = consts.RefundSuccess
-	} else if strings.Compare(item.State, "FAILED") == 0 {
+	} else if strings.Compare(item.Status, "FAILED") == 0 {
 		status = consts.RefundFailed
-	} else if strings.Compare(item.State, "CANCELLED") == 0 {
+	} else if strings.Compare(item.Status, "CANCELLED") == 0 {
 		status = consts.RefundCancelled
 	}
 	return &gateway_bean.GatewayPaymentRefundResp{
@@ -305,7 +305,7 @@ func (p Paypal) parsePaypalRefund(ctx context.Context, gateway *entity.MerchantG
 		GatewayRefundId: item.ID,
 		Status:          status,
 		Reason:          item.NoteToPayer,
-		RefundAmount:    utility.ConvertDollarStrToCent(item.Amount.Total, item.Amount.Currency),
+		RefundAmount:    utility.ConvertDollarStrToCent(item.Amount.Value, item.Amount.Currency),
 		Currency:        strings.ToUpper(item.Amount.Currency),
 		RefundTime:      gtime.New(item.UpdateTime),
 	}, nil
