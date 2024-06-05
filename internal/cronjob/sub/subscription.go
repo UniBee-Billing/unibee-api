@@ -67,8 +67,8 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 	// query sub which dunningTime expired
 	q := dao.Subscription.Ctx(ctx).
 		Where(dao.Subscription.Columns().IsDeleted, 0).
-		WhereLT(dao.Subscription.Columns().DunningTime, timeNow).              //  dunning < now
-		WhereGT(dao.Subscription.Columns().LastUpdateTime, timeNow-(5*86400)). //  in 5 days
+		WhereLT(dao.Subscription.Columns().DunningTime, timeNow).                //  dunning < now
+		WhereGT(dao.Subscription.Columns().CurrentPeriodEnd, timeNow-(5*86400)). //  in 5 days
 		Where(dao.Subscription.Columns().Type, consts.SubTypeUniBeeControl).
 		WhereIn(dao.Subscription.Columns().Status, status)
 	if !config.GetConfigInstance().IsProd() {
