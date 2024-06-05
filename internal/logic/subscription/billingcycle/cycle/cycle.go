@@ -300,7 +300,7 @@ func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.S
 
 func trackForSubscription(ctx context.Context, one *entity.Subscription, timeNow int64) {
 	g.Log().Infof(ctx, "trackForSubscription sub:%s", one.SubscriptionId)
-	if one.LastTrackTime+86400 < timeNow && (timeNow-one.CurrentPeriodEnd) >= -15*86400 && (timeNow-one.CurrentPeriodEnd) <= 15*86400 {
+	if one.LastTrackTime+86400 <= timeNow && (timeNow-one.CurrentPeriodEnd) >= -15*86400 && (timeNow-one.CurrentPeriodEnd) <= 15*86400 {
 		// dunning: daily resend invoice, update track time
 		g.Log().Infof(ctx, "trackForSubscription start track SubscriptionId:%s", one.SubscriptionId)
 		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
