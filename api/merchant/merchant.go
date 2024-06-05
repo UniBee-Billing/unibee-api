@@ -74,6 +74,7 @@ type IMerchantGateway interface {
 
 type IMerchantInvoice interface {
 	PdfGenerate(ctx context.Context, req *invoice.PdfGenerateReq) (res *invoice.PdfGenerateRes, err error)
+	PdfUpdate(ctx context.Context, req *invoice.PdfUpdateReq) (res *invoice.PdfUpdateRes, err error)
 	SendEmail(ctx context.Context, req *invoice.SendEmailReq) (res *invoice.SendEmailRes, err error)
 	ReconvertCryptoAndSend(ctx context.Context, req *invoice.ReconvertCryptoAndSendReq) (res *invoice.ReconvertCryptoAndSendRes, err error)
 	Detail(ctx context.Context, req *invoice.DetailReq) (res *invoice.DetailRes, err error)

@@ -14,6 +14,14 @@ type PdfGenerateReq struct {
 type PdfGenerateRes struct {
 }
 
+type PdfUpdateReq struct {
+	g.Meta    `path:"/pdf_generate" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
+	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+	SendPdf   *string `json:"sendPdf" dc:"SendPdf"`
+}
+type PdfUpdateRes struct {
+}
+
 type SendEmailReq struct {
 	g.Meta    `path:"/send_email" tags:"Invoice" method:"post" summary:"SendInvoiceEmail"`
 	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
