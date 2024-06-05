@@ -207,6 +207,7 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 						Discount:         nil,
 					},
 				},
+
 				//SoftDescriptor: productName,
 				Items: items,
 			},
