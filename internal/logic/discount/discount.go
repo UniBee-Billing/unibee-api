@@ -204,7 +204,7 @@ func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id u
 	return err
 }
 
-func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint64, source string, param *bean.ExternalDiscountParam, currency string) *entity.MerchantDiscountCode {
+func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint64, source string, param *bean.ExternalDiscountParam, currency string, timeNow int64) *entity.MerchantDiscountCode {
 	var cycleLimit = 0
 	var endTime int64 = 0
 	var BillingType = DiscountBillingTypeOnetime
@@ -217,11 +217,11 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		if param.EndTime != nil {
 			endTime = *param.EndTime
 		}
-		utility.Assert(endTime >= gtime.Now().Timestamp(), "invalid endTime")
+		utility.Assert(endTime >= timeNow, "invalid endTime")
 	} else {
 		utility.Assert(param.CycleLimit == nil, "cycleLimit not available as recurring not enable")
 		utility.Assert(param.EndTime == nil, "endTime not available as recurring not enable")
-		endTime = gtime.Now().Timestamp() + 10
+		endTime = timeNow + 600
 	}
 	var discountType = DiscountTypePercentage
 	var discountAmount int64 = 0
@@ -249,7 +249,7 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		DiscountPercentage: discountPercentage,
 		Currency:           currency,
 		CycleLimit:         cycleLimit,
-		StartTime:          gtime.Now().Timestamp() - 10,
+		StartTime:          timeNow - 10,
 		EndTime:            endTime,
 		Metadata:           param.Metadata,
 	})

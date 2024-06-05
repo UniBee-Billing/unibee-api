@@ -24,6 +24,7 @@ type UserDiscountApplyReq struct {
 	InvoiceId      string `json:"invoiceId"        description:"InvoiceId"`
 	ApplyAmount    int64  `json:"applyAmount"        description:"ApplyAmount"`
 	Currency       string `json:"currency"        description:"Currency"`
+	TimeNow        int64  `json:"timeNow"        description:"TimeNow"`
 }
 
 func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (canApply bool, isRecurring bool, message string) {
@@ -43,10 +44,10 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if discountCode.Status != DiscountStatusActive {
 		return false, false, "Code not active"
 	}
-	if discountCode.StartTime > gtime.Now().Timestamp() {
+	if discountCode.StartTime > req.TimeNow {
 		return false, false, "Code not ready"
 	}
-	if discountCode.EndTime != 0 && discountCode.EndTime < gtime.Now().Timestamp() {
+	if discountCode.EndTime != 0 && discountCode.EndTime < req.TimeNow {
 		return false, false, "Code expired"
 	}
 	if discountCode.DiscountType == DiscountTypeFixedAmount && len(discountCode.Currency) == 0 {

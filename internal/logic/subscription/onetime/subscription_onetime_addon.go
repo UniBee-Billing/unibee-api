@@ -111,6 +111,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 			DiscountCode: req.DiscountCode,
 			Currency:     plan.Currency,
 			PLanId:       plan.Id,
+			TimeNow:      utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		utility.Assert(canApply, message)
 		utility.Assert(!isRecurring, "recurring discount code not available for one-time addon")

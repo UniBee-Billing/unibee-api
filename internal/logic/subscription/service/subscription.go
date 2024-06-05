@@ -169,7 +169,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		plan := query.GetPlanById(ctx, sub.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency)
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, sub.UserId, strconv.FormatUint(sub.PlanId, 10), req.Discount, plan.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -184,6 +184,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
 			PLanId:         sub.PlanId,
+			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		utility.Assert(canApply, message)
 	} else if len(req.DiscountCode) == 0 && len(sub.DiscountCode) > 0 {
@@ -194,6 +195,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
 			PLanId:         sub.PlanId,
+			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode
@@ -459,6 +461,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			DiscountCode: req.DiscountCode,
 			Currency:     plan.Currency,
 			PLanId:       plan.Id,
+			TimeNow:      gtime.Now().Timestamp(),
 		})
 		if canApply {
 			if isRecurring {
@@ -630,7 +633,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		plan := query.GetPlanById(ctx, req.PlanId)
 		utility.Assert(plan.MerchantId == req.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(req.PlanId, 10), req.Discount, plan.Currency)
+		one := discount.CreateExternalDiscount(ctx, req.MerchantId, req.UserId, strconv.FormatUint(req.PlanId, 10), req.Discount, plan.Currency, gtime.Now().Timestamp())
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, req.MerchantId, req.DiscountCode)
@@ -1034,6 +1037,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
 			PLanId:         req.NewPlanId,
+			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		utility.Assert(canApply, message)
 		if isRecurring {
@@ -1047,6 +1051,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			Currency:       sub.Currency,
 			SubscriptionId: sub.SubscriptionId,
 			PLanId:         req.NewPlanId,
+			TimeNow:        utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock),
 		})
 		if canApply && isRecurring {
 			req.DiscountCode = sub.DiscountCode
@@ -1285,7 +1290,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		plan := query.GetPlanById(ctx, req.NewPlanId)
 		utility.Assert(plan.MerchantId == sub.MerchantId, "merchant not match")
 		utility.Assert(plan != nil, "invalid planId")
-		one := discount.CreateExternalDiscount(ctx, sub.MerchantId, sub.UserId, strconv.FormatUint(req.NewPlanId, 10), req.Discount, plan.Currency)
+		one := discount.CreateExternalDiscount(ctx, sub.MerchantId, sub.UserId, strconv.FormatUint(req.NewPlanId, 10), req.Discount, plan.Currency, utility.MaxInt64(gtime.Now().Timestamp(), sub.TestClock))
 		req.DiscountCode = one.Code
 	} else if len(req.DiscountCode) > 0 {
 		one := query.GetDiscountByCode(ctx, sub.MerchantId, req.DiscountCode)
