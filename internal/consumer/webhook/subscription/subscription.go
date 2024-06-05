@@ -30,9 +30,8 @@ func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft
 		}()
 		subDetailRes, err := service.SubscriptionDetail(ctx, one.SubscriptionId)
 		utility.AssertError(err, "SendMerchantSubscriptionWebhookBackground SubscriptionDetail Error")
-
 		if dayLeft == -100 {
-			subDetailRes.DayLeft = int((subDetailRes.Subscription.CurrentPeriodEnd - gtime.Now().Timestamp() + 7200) / 86400)
+			subDetailRes.DayLeft = int((subDetailRes.Subscription.CurrentPeriodEnd - utility.MaxInt64(gtime.Now().Timestamp(), subDetailRes.Subscription.TestClock) + 7200) / 86400)
 		} else {
 			subDetailRes.DayLeft = dayLeft
 		}

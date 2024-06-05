@@ -46,7 +46,8 @@ func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, 
 	list := query.GetMerchantWebhooksByMerchantId(ctx, merchantId)
 	if list != nil {
 		for _, merchantWebhook := range list {
-			if strings.Contains(merchantWebhook.WebhookEvents, string(event)) {
+			eventList := strings.Split(merchantWebhook.WebhookEvents, ",")
+			if in(eventList, string(event)) {
 				send, err := redismq.Send(&redismq.Message{
 					Topic: redismq2.TopicMerchantWebhook.Topic,
 					Tag:   redismq2.TopicMerchantWebhook.Tag,
@@ -65,4 +66,13 @@ func SendWebhookMessage(ctx context.Context, event event2.MerchantWebhookEvent, 
 			}
 		}
 	}
+}
+
+func in(strArray []string, target string) bool {
+	for _, element := range strArray {
+		if target == element {
+			return true
+		}
+	}
+	return false
 }
