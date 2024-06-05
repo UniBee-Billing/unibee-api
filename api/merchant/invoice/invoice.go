@@ -16,7 +16,8 @@ type PdfGenerateRes struct {
 
 type SendEmailReq struct {
 	g.Meta    `path:"/send_email" tags:"Invoice" method:"post" summary:"SendInvoiceEmail"`
-	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+	SendPdf   *string `json:"sendPdf" dc:"SendPdf"`
 }
 type SendEmailRes struct {
 }

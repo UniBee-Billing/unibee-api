@@ -6,7 +6,6 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/controller/link"
-	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -74,11 +73,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 			res.Link = one.PaymentLink
 		}
 	} else if one.Status == consts.InvoiceStatusPaid {
-		if len(one.SendPdf) > 0 {
-			res.Link = link.GetInvoicePdfLink(one.InvoiceId, one.SendTerms)
-		} else {
-			res.FileName = handler.GenerateInvoicePdf(ctx, one)
-		}
+		res.Link = link.GetInvoicePdfLink(one.InvoiceId, one.SendTerms)
 	}
 	return res
 }

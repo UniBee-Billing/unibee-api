@@ -13,6 +13,7 @@ type SubscriptionConfig struct {
 	UpgradeProration                   bool  `json:"upgradeProration" dc:"UpgradeProration, whether subscription update generation proration invoice or not, default yes"`
 	IncompleteExpireTime               int64 `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
 	InvoiceEmail                       bool  `json:"invoiceEmail" dc:"InvoiceEmail, whether to send invoice email to user, default yes"`
+	InvoicePdfGenerate                 bool  `json:"invoicePdfGenerate" dc:"InvoicePdfGenerate, whether to generate invoice pdf to user, default yes"`
 	TryAutomaticPaymentBeforePeriodEnd int64 `json:"tryAutomaticPaymentBeforePeriodEnd" dc:"TryAutomaticPaymentBeforePeriodEnd, default 30 min"`
 }
 

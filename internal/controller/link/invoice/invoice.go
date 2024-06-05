@@ -69,6 +69,12 @@ func LinkPdfEntry(r *ghttp.Request) {
 	} else {
 		pdfFileName = handler.GenerateInvoicePdf(r.Context(), one)
 	}
+	if len(pdfFileName) == 0 {
+		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
+		r.Response.WriteHeader(http.StatusBadRequest)
+		r.Response.Writeln("Bad request")
+		return
+	}
 	//r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 	//r.Response.Header().Add("Content-Security-Policy", "block-all-mixed-content")
 	//r.Response.Header().Add("Strict-Transport-Security", "includeSubDomains")

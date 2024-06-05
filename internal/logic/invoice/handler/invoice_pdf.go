@@ -16,15 +16,20 @@ import (
 	"unibee/internal/consts"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
 	"unibee/internal/logic/oss"
+	config2 "unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
 func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string {
+
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
 	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
+	if !config2.GetMerchantSubscriptionConfig(ctx, merchantInfo.Id).InvoicePdfGenerate {
+		return ""
+	}
 	//utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
