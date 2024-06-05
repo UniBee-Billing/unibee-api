@@ -194,22 +194,22 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				Amount: &paypal.PurchaseUnitAmount{
 					Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 					Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-						ItemTotal: &paypal.Money{
-							Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
-							Currency: strings.ToUpper(createPayContext.Pay.Currency),
-						},
-						Shipping:         nil,
-						Handling:         nil,
-						TaxTotal:         nil,
-						Insurance:        nil,
-						ShippingDiscount: nil,
-						Discount:         nil,
-					},
+					//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+					//	ItemTotal: &paypal.Money{
+					//		Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+					//		Currency: strings.ToUpper(createPayContext.Pay.Currency),
+					//	},
+					//	Shipping:         nil,
+					//	Handling:         nil,
+					//	TaxTotal:         nil,
+					//	Insurance:        nil,
+					//	ShippingDiscount: nil,
+					//	Discount:         nil,
+					//},
 				},
 
 				//SoftDescriptor: productName,
-				Items: items,
+				//Items: items,
 			},
 		},
 		&paypal.CreateOrderPayer{},

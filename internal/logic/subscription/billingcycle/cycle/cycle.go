@@ -273,7 +273,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			}
 		}
 	} else {
-		g.Log().Errorf(ctx, source, "GetLock Failure", key)
+		g.Log().Infof(ctx, source, "GetLock Failure", key)
 		return &BillingCycleWalkRes{WalkUnfinished: false, Message: "Sub Get Lock Failure"}, nil
 	}
 }
