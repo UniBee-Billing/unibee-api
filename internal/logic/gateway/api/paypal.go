@@ -283,7 +283,7 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 		InvoiceID:   refund.RefundId,
 		NoteToPayer: refund.RefundComment,
 	})
-	log.SaveChannelHttpLog("GatewayRefundDetail", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
+	log.SaveChannelHttpLog("GatewayRefund", c.RequestBodyStr, c.ResponseStr, err, fmt.Sprintf("%s-%d", gateway.GatewayName, gateway.Id), nil, gateway)
 	if err != nil {
 		return nil, err
 	}
