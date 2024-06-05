@@ -266,11 +266,13 @@ func (p Paypal) GatewayRefund(ctx context.Context, payment *entity.Payment, refu
 	utility.Assert(payment != nil, "payment not found")
 	utility.Assert(len(payment.PaymentData) > 0, "payment capture data not found")
 	var availableCapture *paypal.CaptureAmount
-	utility.AssertError(utility.UnmarshalFromJsonString(payment.PaymentData, &availableCapture), "parse capture data error")
+	gateway := query.GetGatewayById(ctx, payment.GatewayId)
+	utility.Assert(payment != nil, "gateway not found")
+	gatewayPaymentRo, err := p.GatewayPaymentDetail(ctx, gateway, payment.GatewayPaymentId, payment)
+	utility.Assert(len(gatewayPaymentRo.PaymentData) > 0, "available capture not found")
+	utility.AssertError(utility.UnmarshalFromJsonString(gatewayPaymentRo.PaymentData, &availableCapture), "parse capture data error")
 	utility.Assert(availableCapture != nil, "available capture not found")
 	utility.Assert(refund != nil, "refund not found")
-	gateway := query.GetGatewayById(ctx, payment.GatewayId)
-	utility.Assert(gateway != nil, "gateway not found")
 	c, _ := NewClient(gateway.GatewayKey, gateway.GatewaySecret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
 	captureRefundRes, err := c.RefundCapture(ctx, availableCapture.ID, paypal.RefundCaptureRequest{
