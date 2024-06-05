@@ -15,7 +15,7 @@ type PdfGenerateRes struct {
 }
 
 type PdfUpdateReq struct {
-	g.Meta    `path:"/pdf_generate" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
+	g.Meta    `path:"/pdf_update" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
 	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 	SendPdf   *string `json:"sendPdf" dc:"SendPdf"`
 }
