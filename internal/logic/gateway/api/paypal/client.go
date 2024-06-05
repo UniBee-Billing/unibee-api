@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
-	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"io"
 	"net/http"
@@ -81,6 +80,13 @@ func (c *Client) SetReturnRepresentation() {
 	c.returnRepresentation = true
 }
 
+// localCode is an implementer for interface Code for internal usage only.
+type localCode struct {
+	code    int         // Error code, usually an integer.
+	message string      // Brief message for this error code.
+	detail  interface{} // As type of interface, it is mainly designed as an extension field for error code.
+}
+
 // Send makes a request to the API, the response body will be
 // unmarshalled into v, or if v is an io.Writer, the response will
 // be written to it without decoding
@@ -135,7 +141,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 			}
 		}
 		g.Log().Errorf(req.Context(), "Paypal_Send \nRequest:%v Error \nStatusCode:%d \nresponse:%s", c.FormatRequest(req), resp.StatusCode, utility.MarshalToJsonString(errResp))
-		return gerror.New(fmt.Sprintf("%v %v: %d %s, %+v", errResp.Response.Request.Method, errResp.Response.Request.URL, errResp.Response.StatusCode, errResp.Message, errResp.Details))
+		return errResp
 	}
 	if v == nil {
 		return nil

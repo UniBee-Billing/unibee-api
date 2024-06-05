@@ -684,6 +684,9 @@ type (
 		ResponseStatus       int
 	}
 
+	PaymentMethodToken struct {
+	}
+
 	// CreditCard struct
 	CreditCard struct {
 		ID                 string   `json:"id,omitempty"`

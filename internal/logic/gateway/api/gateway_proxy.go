@@ -81,24 +81,24 @@ func (p GatewayProxy) GatewayUserCreateAndBindPaymentMethod(ctx context.Context,
 }
 
 func (p GatewayProxy) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
-	defer func() {
-		if exception := recover(); exception != nil {
-			if v, ok := exception.(error); ok && gerror.HasStack(v) {
-				err = v
-			} else {
-				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
-			}
-			printChannelPanic(ctx, err)
-			return
-		}
-	}()
-	startTime := time.Now()
+	//defer func() {
+	//	if exception := recover(); exception != nil {
+	//		if v, ok := exception.(error); ok && gerror.HasStack(v) {
+	//			err = v
+	//		} else {
+	//			err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+	//		}
+	//		printChannelPanic(ctx, err)
+	//		return
+	//	}
+	//}()
+	//startTime := time.Now()
 	icon, gatewayType, err = p.getRemoteGateway().GatewayTest(ctx, key, secret)
 
-	glog.Infof(ctx, "MeasureChannelFunction:GatewayTest cost：%s \n", time.Now().Sub(startTime))
-	if err != nil {
-		err = gerror.NewCode(utility.GatewayError, err.Error())
-	}
+	//glog.Infof(ctx, "MeasureChannelFunction:GatewayTest cost：%s \n", time.Now().Sub(startTime))
+	//if err != nil {
+	//	err = gerror.NewCode(utility.GatewayError, err.Error())
+	//}
 	return icon, gatewayType, err
 }
 

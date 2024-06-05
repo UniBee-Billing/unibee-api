@@ -55,6 +55,12 @@ func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gatew
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
 	c, _ := NewClient(key, secret, p.GetPaypalHost())
 	_, err = c.GetAccessToken(ctx)
+	if err == nil {
+		_, vaultErr := c.GetPaymentMethodTokens(ctx, "BEEB8ANDETATE")
+		if re, ok := vaultErr.(*paypal.ErrorResponse); ok {
+			utility.Assert(re.Response != nil && re.Response.StatusCode != 403, "Insufficient permissions to start automatic payment,see https://developer.paypal.com/docs/checkout/save-payment-methods/during-purchase/orders-api/paypal/")
+		}
+	}
 	return "https://www.paypalobjects.com/webstatic/icon/favicon.ico", consts.GatewayTypePaypal, err
 }
 
@@ -188,21 +194,21 @@ func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway
 				Amount: &paypal.PurchaseUnitAmount{
 					Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
 					Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					//Breakdown: &paypal.PurchaseUnitAmountBreakdown{
-					//	ItemTotal: &paypal.Money{
-					//		Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
-					//		Currency: strings.ToUpper(createPayContext.Pay.Currency),
-					//	},
-					//	Shipping:         nil,
-					//	Handling:         nil,
-					//	TaxTotal:         nil,
-					//	Insurance:        nil,
-					//	ShippingDiscount: nil,
-					//	Discount:         nil,
-					//},
+					Breakdown: &paypal.PurchaseUnitAmountBreakdown{
+						ItemTotal: &paypal.Money{
+							Value:    utility.ConvertCentToDollarStr(createPayContext.Pay.TotalAmount, createPayContext.Pay.Currency),
+							Currency: strings.ToUpper(createPayContext.Pay.Currency),
+						},
+						Shipping:         nil,
+						Handling:         nil,
+						TaxTotal:         nil,
+						Insurance:        nil,
+						ShippingDiscount: nil,
+						Discount:         nil,
+					},
 				},
-				SoftDescriptor: productName,
-				//Items:          items,
+				//SoftDescriptor: productName,
+				Items: items,
 			},
 		},
 		&paypal.CreateOrderPayer{},
