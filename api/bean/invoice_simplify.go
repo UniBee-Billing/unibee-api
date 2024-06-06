@@ -46,6 +46,7 @@ type InvoiceSimplify struct {
 	BillingCycleAnchor             int64                         `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom                     string                        `json:"createFrom"                     description:"create from"`          // create from
 	Metadata                       map[string]interface{}        `json:"metadata" dc:"Metadata，Map"`
+	CountryCode                    string                        `json:"countryCode"                    description:""` //
 }
 
 type InvoiceItemSimplify struct {
@@ -124,6 +125,7 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		TrialEnd:                       one.TrialEnd,
 		BillingCycleAnchor:             one.BillingCycleAnchor,
 		CreateFrom:                     one.CreateFrom,
+		CountryCode:                    one.CountryCode,
 		Metadata:                       metadata,
 	}
 }

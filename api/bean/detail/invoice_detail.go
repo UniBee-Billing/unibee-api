@@ -62,6 +62,7 @@ type InvoiceDetail struct {
 	BillingCycleAnchor             int64                              `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`      // billing_cycle_anchor
 	CreateFrom                     string                             `json:"createFrom"                     description:"create from"`               // create from
 	Metadata                       map[string]interface{}             `json:"metadata" dc:"Metadata，Map"`
+	CountryCode                    string                             `json:"countryCode"                    description:""` //
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -126,6 +127,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		DayUtilDue:                     invoice.DayUtilDue,
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 		CreateFrom:                     invoice.CreateFrom,
+		CountryCode:                    invoice.CountryCode,
 		Metadata:                       metadata,
 	}
 }
