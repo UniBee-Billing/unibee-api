@@ -36,8 +36,8 @@ func StandaloneInit(ctx context.Context) {
 				}
 			}()
 			time.Sleep(10 * time.Second)
-			merchant.StandAloneInit(ctx)
-			email.StandAloneInit(ctx)
+			merchant.StandAloneInit(backgroundCtx)
+			email.StandAloneInit(backgroundCtx)
 		}()
 	}
 }

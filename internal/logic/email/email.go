@@ -161,8 +161,8 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 			return gerror.New("Default Email Gateway Need Setup")
 		}
 	}
-	ctx := context.Background()
 	go func() {
+		backgroundCtx := context.Background()
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -171,11 +171,11 @@ func SendTemplateEmail(superCtx context.Context, merchantId uint64, mailTo strin
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				log2.PrintPanic(ctx, err)
+				log2.PrintPanic(backgroundCtx, err)
 				return
 			}
 		}()
-		err = sendTemplateEmailInternal(ctx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables, emailGatewayKey)
+		err = sendTemplateEmailInternal(backgroundCtx, merchantId, mailTo, timezone, templateName, pdfFilePath, templateVariables, emailGatewayKey)
 		utility.AssertError(err, "sendTemplateEmailInternal")
 	}()
 	return nil

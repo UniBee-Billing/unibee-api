@@ -367,8 +367,8 @@ func HardDeletePayment(ctx context.Context, merchantId uint64, paymentId string)
 }
 
 func SendAuthorizedEmailBackground(invoice *entity.Invoice) {
-	ctx := context.Background()
 	go func() {
+		ctx := context.Background()
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {

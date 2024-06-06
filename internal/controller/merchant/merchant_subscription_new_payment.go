@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/google/uuid"
 	"strings"
@@ -63,10 +64,17 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		Where(dao.Payment.Columns().BizType, consts.BizTypeOneTime).
 		OmitEmpty().Scan(&oldList)
 	go func() {
+		defer func() {
+			if exception := recover(); exception != nil {
+				fmt.Printf("SubscriptionNewPayment PaymentGatewayCancel panic error:%s\n", exception)
+				return
+			}
+		}()
+		backgroundCtx := context.Background()
 		for _, oldOne := range oldList {
-			err = service.PaymentGatewayCancel(ctx, oldOne)
+			err = service.PaymentGatewayCancel(backgroundCtx, oldOne)
 			if err != nil {
-				g.Log().Errorf(ctx, "SubscriptionNewPayment NewPayment error:%s", err.Error())
+				g.Log().Errorf(backgroundCtx, "SubscriptionNewPayment NewPayment error:%s", err.Error())
 			}
 		}
 	}()

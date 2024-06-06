@@ -109,7 +109,7 @@ const (
 
 func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64, userId uint64, metricId uint64) {
 	go func() {
-		ctx := context.Background()
+		backgroundCtx := context.Background()
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -118,15 +118,15 @@ func ReloadUserMetricLimitCacheBackground(ctx context.Context, merchantId uint64
 				} else {
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				g.Log().Errorf(ctx, "ReloadUserSubPlanCacheListBackground panic error:%s", err.Error())
+				g.Log().Errorf(backgroundCtx, "ReloadUserSubPlanCacheListBackground panic error:%s", err.Error())
 				return
 			}
 		}()
-		met := query.GetMerchantMetric(ctx, metricId)
+		met := query.GetMerchantMetric(backgroundCtx, metricId)
 		if met != nil {
-			sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, userId, merchantId)
+			sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(backgroundCtx, userId, merchantId)
 			if sub != nil {
-				GetUserMetricLimitCachedUseValue(ctx, merchantId, uint64(userId), met, sub, true)
+				GetUserMetricLimitCachedUseValue(backgroundCtx, merchantId, uint64(userId), met, sub, true)
 			}
 		}
 	}()

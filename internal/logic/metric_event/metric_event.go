@@ -125,15 +125,15 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 	go func() {
 		// update background
 		backgroundCtx := context.Background()
-		var err error
+		var backgroundError error
 		defer func() {
 			if exception := recover(); exception != nil {
 				if v, ok := exception.(error); ok && gerror.HasStack(v) {
-					err = v
+					backgroundError = v
 				} else {
-					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+					backgroundError = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
-				if err != nil {
+				if backgroundError != nil {
 					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err.Error())
 				} else {
 					g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue panic error:%s", err)
@@ -141,11 +141,11 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 				return
 			}
 		}()
-		_, err = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
+		_, backgroundError = dao.MerchantMetricEvent.Ctx(backgroundCtx).Data(g.Map{
 			dao.MerchantMetricEvent.Columns().Used:      usedValue,
 			dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.MerchantMetricEvent.Columns().Id, one.Id).OmitNil().Update()
-		if err != nil {
+		if backgroundError != nil {
 			g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())
 		}
 	}()
