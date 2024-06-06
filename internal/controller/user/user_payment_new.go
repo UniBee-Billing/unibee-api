@@ -17,6 +17,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(plan != nil, "plan not found")
 	req.Quantity = utility.MaxInt64(1, req.Quantity)
 	controllerPayment := merchant.ControllerPayment{}
+	if req.Metadata == nil {
+		req.Metadata = make(map[string]interface{})
+	}
 	req.Metadata["PlanId"] = req.PlanId
 	req.Metadata["Quantity"] = req.Quantity
 	paymentRes, paymentErr := controllerPayment.New(ctx, &merchantPaymentApi.NewReq{
