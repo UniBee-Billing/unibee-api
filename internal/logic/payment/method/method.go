@@ -69,7 +69,9 @@ type PaymentMethodListInternalReq struct {
 func QueryPaymentMethodList(ctx context.Context, req *PaymentMethodListInternalReq) []*bean.PaymentMethod {
 	merchant := query.GetMerchantById(ctx, req.MerchantId)
 	utility.Assert(merchant != nil, "merchant not found")
-	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
+	if req.GatewayId <= 0 {
+		return make([]*bean.PaymentMethod, 0)
+	}
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(merchant.Id == gateway.MerchantId, "wrong gateway")
 	var gatewayPaymentId string
