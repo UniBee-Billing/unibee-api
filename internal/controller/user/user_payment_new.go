@@ -6,20 +6,26 @@ import (
 	"unibee/api/user/payment"
 	merchant "unibee/internal/controller/merchant"
 	_interface "unibee/internal/interface"
+	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error) {
+	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
+	utility.Assert(one != nil, "user not found")
+	plan := query.GetPlanById(ctx, req.PlanId)
+	utility.Assert(plan != nil, "plan not found")
+	req.Quantity = utility.MaxInt64(1, req.Quantity)
 	controllerPayment := merchant.ControllerPayment{}
 	paymentRes, paymentErr := controllerPayment.New(ctx, &merchantPaymentApi.NewReq{
-		UserId:      _interface.Context().Get(ctx).User.Id,
-		Currency:    req.Currency,
-		TotalAmount: req.TotalAmount,
+		UserId:      one.Id,
+		Currency:    plan.Currency,
+		TotalAmount: plan.Amount * req.Quantity,
 		GatewayId:   req.GatewayId,
 		RedirectUrl: req.RedirectUrl,
-		CountryCode: req.CountryCode,
-		Name:        req.Name,
-		Description: req.Description,
-		Items:       req.Items,
+		CountryCode: one.CountryCode,
+		Name:        plan.PlanName,
+		Description: plan.Description,
 		Metadata:    req.Metadata,
 	})
 
