@@ -49,6 +49,7 @@ type IUserPayment interface {
 	MethodNew(ctx context.Context, req *payment.MethodNewReq) (res *payment.MethodNewRes, err error)
 	MethodDelete(ctx context.Context, req *payment.MethodDeleteReq) (res *payment.MethodDeleteRes, err error)
 	New(ctx context.Context, req *payment.NewReq) (res *payment.NewRes, err error)
+	Detail(ctx context.Context, req *payment.DetailReq) (res *payment.DetailRes, err error)
 	TimeLineList(ctx context.Context, req *payment.TimeLineListReq) (res *payment.TimeLineListRes, err error)
 }
 

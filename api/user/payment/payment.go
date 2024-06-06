@@ -3,6 +3,7 @@ package payment
 import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
+	"unibee/api/bean/detail"
 )
 
 type NewReq struct {
@@ -20,4 +21,12 @@ type NewRes struct {
 	ExternalPaymentId string      `json:"externalPaymentId" dc:"The external unique id of payment"`
 	Link              string      `json:"link"`
 	Action            *gjson.Json `json:"action" dc:"action"`
+}
+
+type DetailReq struct {
+	g.Meta    `path:"/detail" tags:"Payment" method:"get" summary:"PaymentDetail"`
+	PaymentId string `json:"paymentId" dc:"The unique id of payment" v:"required"`
+}
+type DetailRes struct {
+	PaymentDetail *detail.PaymentDetail `json:"paymentDetail" dc:"Payment Detail Object"`
 }
