@@ -18,6 +18,7 @@ func (c *ControllerPlan) List(ctx context.Context, req *plan.ListReq) (res *plan
 
 	publishPlans, total := service.PlanList(ctx, &service.SubscriptionPlanListInternalReq{
 		MerchantId:    _interface.GetMerchantId(ctx),
+		Type:          req.Type,
 		Status:        []int{consts.PlanStatusActive},
 		PublishStatus: consts.PlanPublishStatusPublished,
 		Currency:      req.Currency,

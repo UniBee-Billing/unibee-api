@@ -7,7 +7,7 @@ import (
 
 type ListReq struct {
 	g.Meta   `path:"/list" tags:"User-Plan" method:"get,post" summary:"Plan List"`
-	Type     int    `json:"type"  dc:"Default All，,1-main plan，2-addon plan" `
+	Type     []int  `json:"type" dc:"Default All，,1-main plan，2-addon plan" `
 	Currency string `json:"currency" dc:"Currency"  `
 	Page     int    `json:"page"  dc:"Page, Start 0" `
 	Count    int    `json:"count"  dc:"Count Of Per Page" `
