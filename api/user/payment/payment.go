@@ -24,7 +24,7 @@ type NewRes struct {
 }
 
 type DetailReq struct {
-	g.Meta    `path:"/detail" tags:"Payment" method:"get" summary:"PaymentDetail"`
+	g.Meta    `path:"/detail" tags:"User-Payment" method:"get" summary:"PaymentDetail"`
 	PaymentId string `json:"paymentId" dc:"The unique id of payment" v:"required"`
 }
 type DetailRes struct {
