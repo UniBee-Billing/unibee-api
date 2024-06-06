@@ -279,7 +279,6 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 	}
 }
 
-// trackForSubscriptionLatestProcessInvoice dunning system for subscription invoice
 func trackForSubscriptionLatestProcessInvoice(ctx context.Context, sub *entity.Subscription, timeNow int64) {
 	//g.Log().Infof(ctx, "trackForSubscriptionLatestProcessInvoice sub:%s", sub.SubscriptionId)
 	//one := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)

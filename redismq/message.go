@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/redis/go-redis/v9"
-	"unibee/utility"
 	"strings"
+	"unibee/utility"
 )
 
 type Message struct {
@@ -16,6 +16,7 @@ type Message struct {
 	Key              string                 `json:"key" dc:"Key"`
 	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Second"`
 	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
+	ReconsumeMax     int                    `json:"reconsumeMax" dc:"Reconsume Max Count"`
 	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
 	SendTime         int64                  `json:"sendTime" dc:"Sent Time"`
 }
@@ -23,6 +24,7 @@ type Message struct {
 type MessageMetaData struct {
 	StartDeliverTime int64                  `json:"startDeliverTime" dc:"Send Time,0-No Delay，Second"`
 	ReconsumeTimes   int                    `json:"reconsumeTimes" dc:"Reconsume Count"`
+	ReconsumeMax     int                    `json:"reconsumeMax" dc:"Reconsume Max Count"`
 	CustomData       map[string]interface{} `json:"customData" dc:"CustomData"`
 	Key              string                 `json:"key" dc:"Key"`
 	SendTime         int64                  `json:"sendTime" dc:"SendTime"`
@@ -110,6 +112,7 @@ func (message *Message) paseStreamMessage(value map[string]interface{}) {
 				}
 			}()
 			message.ReconsumeTimes = json.Get("reconsumeTimes").Int()
+			message.ReconsumeMax = json.Get("reconsumeMax").Int()
 			message.StartDeliverTime = json.Get("startDeliverTime").Int64()
 			message.SendTime = json.Get("sendTime").Int64()
 			message.CustomData = json.Get("sendTime").Map()

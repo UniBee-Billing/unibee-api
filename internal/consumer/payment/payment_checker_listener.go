@@ -29,6 +29,7 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 	utility.Assert(len(message.Body) > 0, "body is nil")
 	utility.Assert(len(message.Body) != 0, "body length is 0")
 	g.Log().Infof(ctx, "PaymentCheckerListener Receive Message:%s", utility.MarshalToJsonString(message))
+	message.ReconsumeMax = 100
 	if message.ReconsumeTimes > 50 {
 		g.Log().Infof(ctx, "PaymentCheckerListener_Commit by Reach Limit 50 paymentId:%s", message.Body)
 		return redismq.CommitMessage
