@@ -21,7 +21,7 @@ func (c *ControllerInvoice) ReconvertCryptoAndSend(ctx context.Context, req *inv
 	if err != nil {
 		return nil, err
 	}
-	err = handler.SendInvoiceEmailToUser(ctx, req.InvoiceId)
+	err = handler.SendInvoiceEmailToUser(ctx, req.InvoiceId, true)
 	if err != nil {
 		return nil, err
 	}

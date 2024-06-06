@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"golang.org/x/text/currency"
@@ -16,7 +17,6 @@ import (
 	"unibee/internal/consts"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
 	"unibee/internal/logic/oss"
-	config2 "unibee/internal/logic/subscription/config"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -26,9 +26,6 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	utility.Assert(unibInvoice.MerchantId > 0, "invalid merchantId")
 	utility.Assert(unibInvoice.UserId > 0, "invalid UserId")
 	merchantInfo := query.GetMerchantById(ctx, unibInvoice.MerchantId)
-	if !config2.GetMerchantSubscriptionConfig(ctx, merchantInfo.Id).InvoicePdfGenerate {
-		return ""
-	}
 	//utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
@@ -53,8 +50,16 @@ func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (s
 	return upload.Url, nil
 }
 
-func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, savePath string) error {
-	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(unibInvoice.Currency))))
+func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, savePath string) error {
+	var metadata = make(map[string]interface{})
+	if len(one.MetaData) > 0 {
+		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		if err != nil {
+			fmt.Printf("createInvoicePdf Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+
+	var symbol = fmt.Sprintf("%v ", currency.NarrowSymbol(currency.MustParseISO(strings.ToUpper(one.Currency))))
 	doc, _ := generator2.New(generator2.Invoice, &generator2.Options{
 		AutoPrint:      true,
 		CurrencySymbol: symbol,
@@ -65,29 +70,30 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 		Pagination: true,
 	})
 
-	doc.SetInvoiceNumber(unibInvoice.InvoiceId)
-	doc.SetInvoiceDate(unibInvoice.GmtCreate.Layout("2006-01-02"))
-	if len(unibInvoice.RefundId) > 0 {
-		doc.SetOriginInvoiceNumber(unibInvoice.SendNote)
+	doc.SetInvoiceNumber(one.InvoiceId)
+	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
+	//doc.Description = "Test Description"
+	if len(one.RefundId) > 0 {
+		doc.SetOriginInvoiceNumber(one.SendNote)
 	}
 
-	if unibInvoice.Status == consts.InvoiceStatusProcessing {
+	if one.Status == consts.InvoiceStatusProcessing {
 		doc.SetStatus("Process")
-	} else if unibInvoice.Status == consts.InvoiceStatusPaid {
-		if len(unibInvoice.RefundId) > 0 {
+	} else if one.Status == consts.InvoiceStatusPaid {
+		if len(one.RefundId) > 0 {
 			doc.SetStatus("Refunded")
 		} else {
 			doc.SetStatus("Paid")
 		}
-	} else if unibInvoice.Status == consts.InvoiceStatusCancelled {
+	} else if one.Status == consts.InvoiceStatusCancelled {
 		doc.SetStatus("Cancelled")
-	} else if unibInvoice.Status == consts.InvoiceStatusFailed {
+	} else if one.Status == consts.InvoiceStatusFailed {
 		doc.SetStatus("Failed")
-	} else if unibInvoice.Status == consts.InvoiceStatusReversed {
+	} else if one.Status == consts.InvoiceStatusReversed {
 		doc.SetStatus("Reversed")
 	}
 
-	doc.SetPaidDate(unibInvoice.GmtModify.Layout("2006-01-02"))
+	doc.SetPaidDate(one.GmtModify.Layout("2006-01-02"))
 
 	if len(merchantInfo.CompanyLogo) > 0 {
 		tempLogoPath := utility.DownloadFile(merchantInfo.CompanyLogo)
@@ -99,10 +105,28 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 		doc.SetLogo(logoBytes)
 	}
 
+	var vatNumber = metadata["IssueVatNumber"]
+	var regNumber = metadata["IssueRegNumber"]
+	var companyName = metadata["IssueCompanyName"]
+	var address = metadata["IssueAddress"]
+	if vatNumber == nil {
+		vatNumber = ""
+	}
+	if regNumber == nil {
+		regNumber = ""
+	}
+	if companyName == nil {
+		companyName = merchantInfo.CompanyName
+	}
+	if address == nil {
+		address = merchantInfo.Address
+	}
 	doc.SetCompany(&generator2.Contact{
-		Name: merchantInfo.CompanyName,
+		Name: fmt.Sprintf("%s", companyName),
 		Address: &generator2.Address{
-			Address: merchantInfo.Location + " " + merchantInfo.Address,
+			Address:   fmt.Sprintf("%s", address),
+			VatNumber: fmt.Sprintf("%s", vatNumber),
+			RegNumber: fmt.Sprintf("%s", regNumber),
 		},
 	})
 	var userName = ""
@@ -120,16 +144,16 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 	})
 
 	var lines []*bean.InvoiceItemSimplify
-	err := utility.UnmarshalFromJsonString(unibInvoice.Lines, &lines)
+	err := utility.UnmarshalFromJsonString(one.Lines, &lines)
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
-	if len(unibInvoice.RefundId) > 0 {
+	if len(one.RefundId) > 0 {
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
-				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, unibInvoice.Currency)),
+				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency)),
 			})
 		}
 	} else {
@@ -138,23 +162,23 @@ func createInvoicePdf(unibInvoice *entity.Invoice, merchantInfo *entity.Merchant
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
-				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, unibInvoice.Currency)),
+				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)),
 			})
 		}
 	}
 	doc.SetDefaultTax(&generator2.Tax{
-		Percent: utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage),
+		Percent: utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
 	})
-	doc.SubTotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.SubscriptionAmountExcludingTax, unibInvoice.Currency))
-	if unibInvoice.DiscountAmount > 0 {
-		if len(unibInvoice.DiscountCode) > 0 {
-			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(%s)", unibInvoice.DiscountCode)
+	doc.SubTotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.SubscriptionAmountExcludingTax, one.Currency))
+	if one.DiscountAmount > 0 {
+		if len(one.DiscountCode) > 0 {
+			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(%s)", one.DiscountCode)
 		}
-		doc.DiscountTotalString = fmt.Sprintf("%s -%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.DiscountAmount, unibInvoice.Currency))
+		doc.DiscountTotalString = fmt.Sprintf("%s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency))
 	}
-	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TotalAmount, unibInvoice.Currency))
-	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(unibInvoice.TaxAmount, unibInvoice.Currency))
-	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(unibInvoice.TaxPercentage), "%")
+	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency))
+	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TaxAmount, one.Currency))
+	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
 
 	pdf, err := doc.Build()
 	if err != nil {

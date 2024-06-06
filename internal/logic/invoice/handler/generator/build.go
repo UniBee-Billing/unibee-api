@@ -141,7 +141,6 @@ func (doc *Document) appendLogo() float64 {
 	return y
 }
 
-// appendMetas to document
 func (doc *Document) appendMetas() {
 	// Append ref
 	x, _, _, _ := doc.pdf.GetMargins()
@@ -216,16 +215,14 @@ func (doc *Document) appendMetas() {
 	doc.pdf.SetXY(x, returnY)
 }
 
-// appendDescription to document
 func (doc *Document) appendDescription() {
 	if len(doc.Description) > 0 {
 		doc.pdf.SetY(doc.pdf.GetY() + 10)
 		doc.pdf.SetFont(doc.Options.Font, "", 12)
-		doc.pdf.MultiCell(190, 5, doc.encodeString(doc.Description), "B", "L", false)
+		doc.pdf.CellFormat(190, 5, doc.encodeString(doc.Description), "B", 0, "L", false, 0, "")
 	}
 }
 
-// drawsTableTitles in document
 func (doc *Document) drawsTableTitles(fontSize float64) {
 	// Draw table titles
 	doc.pdf.SetX(10)

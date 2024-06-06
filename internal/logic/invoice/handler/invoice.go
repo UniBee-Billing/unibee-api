@@ -387,7 +387,7 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
-			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId)
+			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, false)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()
@@ -451,7 +451,7 @@ func ReconvertCryptoDataForInvoice(ctx context.Context, invoiceId string) error 
 	return err
 }
 
-func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
+func SendInvoiceEmailToUser(ctx context.Context, invoiceId string, manualSend bool) error {
 	one := query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	utility.Assert(one != nil, "invoice not found")
 	if one.TotalAmount <= 0 {
@@ -474,7 +474,7 @@ func SendInvoiceEmailToUser(ctx context.Context, invoiceId string) error {
 	if len(pdfFileName) == 0 {
 		return gerror.New("pdfFile download or generate error")
 	}
-	if !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
+	if !manualSend && !config.GetMerchantSubscriptionConfig(ctx, one.MerchantId).InvoiceEmail {
 		fmt.Printf("SendInvoiceEmailToUser merchant configed to stop sending invoice email, email not send")
 		return nil
 	}

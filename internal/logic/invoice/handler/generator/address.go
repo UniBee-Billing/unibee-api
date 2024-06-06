@@ -1,5 +1,7 @@
 package generator
 
+import "fmt"
+
 // Address represent an address
 type Address struct {
 	//Address    string `json:"address,omitempty" validate:"required"`
@@ -8,6 +10,8 @@ type Address struct {
 	PostalCode string `json:"postal_code,omitempty"`
 	City       string `json:"city,omitempty"`
 	Country    string `json:"country,omitempty"`
+	RegNumber  string `json:"regNumber,omitempty"`
+	VatNumber  string `json:"vatNumber,omitempty"`
 }
 
 // ToString output address as string
@@ -23,9 +27,10 @@ func (a *Address) ToString() string {
 	if len(a.PostalCode) > 0 {
 		addrString += "\n"
 		addrString += a.PostalCode
-	} else {
-		addrString += "\n"
 	}
+	//else {
+	//	addrString += "\n"
+	//}
 
 	if len(a.City) > 0 {
 		addrString += " "
@@ -35,6 +40,16 @@ func (a *Address) ToString() string {
 	if len(a.Country) > 0 {
 		addrString += "\n"
 		addrString += a.Country
+	}
+
+	if len(a.RegNumber) > 0 {
+		addrString += "\n"
+		addrString += fmt.Sprintf("Reg.number: %s", a.RegNumber)
+	}
+
+	if len(a.VatNumber) > 0 {
+		addrString += "\n"
+		addrString += fmt.Sprintf("VAT Number:%s", a.VatNumber)
 	}
 
 	return addrString

@@ -33,7 +33,7 @@ func TestGenerateInvoicePdf(t *testing.T) {
 }
 
 func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
-	_ = SendInvoiceEmailToUser(context.Background(), "iv20240316QYuw5DQGcABgHDn")
+	_ = SendInvoiceEmailToUser(context.Background(), "iv20240316QYuw5DQGcABgHDn", true)
 }
 
 func TestGenerate(t *testing.T) {
@@ -51,13 +51,14 @@ func TestGenerate(t *testing.T) {
 		GmtModify:                      gtime.Now(),
 		Link:                           "http://unibee.top",
 		TaxPercentage:                  2000,
+		MetaData:                       utility.MarshalToJsonString(map[string]string{"IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
 	}, &entity.Merchant{
-		CompanyName: "UniBee.inc",
+		CompanyName: "Multilogin OÜ",
 		BusinessNum: "EE101775690",
 		Name:        "UniBee",
 		Idcard:      "12660871",
 		Location:    "Supluse",
-		Address:     "pst 1-201A, Tallinn Harju maakond, 11911",
+		Address:     "Supluse ",
 		IsDeleted:   0,
 		CompanyLogo: "https://imagesize.hknet-inc.com/sp/files/f18f4fce-802b-471c-9418-9640384594f6.jpg",
 	}, &entity.UserAccount{
@@ -73,10 +74,10 @@ func TestGenerate(t *testing.T) {
 	if err != nil {
 		return
 	}
-	err = os.Remove("pdf_test.pdf")
-	if err != nil {
-		return
-	}
+	//err = os.Remove("pdf_test.pdf")
+	//if err != nil {
+	//	return
+	//}
 }
 
 func TestTimeFormat(t *testing.T) {

@@ -15,17 +15,20 @@ type PdfGenerateRes struct {
 }
 
 type PdfUpdateReq struct {
-	g.Meta    `path:"/pdf_update" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
-	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
-	SendPdf   *string `json:"sendPdf" dc:"SendPdf"`
+	g.Meta           `path:"/pdf_update" tags:"Invoice" method:"post" summary:"UpdateInvoicePDF"`
+	InvoiceId        string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
+	IssueCompanyName *string `json:"issueCompanyName" dc:"IssueCompanyName"`
+	IssueAddress     *string `json:"issueAddress" dc:"IssueAddress"`
+	IssueVatNumber   *string `json:"issueVatNumber" dc:"IssueVatNumber"`
+	IssueRegNumber   *string `json:"issueRegNumber" dc:"IssueRegNumber"`
+	SendUserEmail    bool    `json:"sendUserEmail" d:"false" dc:"Whether sen invoice email to user or not，default false"`
 }
 type PdfUpdateRes struct {
 }
 
 type SendEmailReq struct {
 	g.Meta    `path:"/send_email" tags:"Invoice" method:"post" summary:"SendInvoiceEmail"`
-	InvoiceId string  `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
-	SendPdf   *string `json:"sendPdf" dc:"SendPdf"`
+	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 }
 type SendEmailRes struct {
 }
