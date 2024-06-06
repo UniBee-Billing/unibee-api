@@ -399,7 +399,7 @@ func MaxInt(a int, b int) int {
 
 func pushTaskToResumeLater(consumer IMessageListener, message *Message) bool {
 	ResumeTimesMax := MaxInt(40, message.ReconsumeMax)
-	fmt.Printf("RedisMq_pushTaskToResumeLater messageId:%s, ResumeTimesMax:%v", message.MessageId, ResumeTimesMax)
+	fmt.Printf("RedisMq_pushTaskToResumeLater messageId:%s, topic:%s tag:%s ResumeTimesMax:%v", message.MessageId, message.Topic, message.Tag, ResumeTimesMax)
 	if message.ReconsumeTimes >= ResumeTimesMax {
 		return putMessageToDeathQueue(message.Topic, message.MessageId, message)
 	} else {
