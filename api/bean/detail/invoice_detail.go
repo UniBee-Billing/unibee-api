@@ -23,6 +23,7 @@ type InvoiceDetail struct {
 	GmtCreate                      *gtime.Time                        `json:"gmtCreate"                      description:"GmtCreate"`
 	OriginAmount                   int64                              `json:"originAmount"                    description:"OriginAmount,Cents"`
 	TotalAmount                    int64                              `json:"totalAmount"                    description:"TotalAmount,Cents"`
+	DiscountCode                   string                             `json:"discountCode"`
 	DiscountAmount                 int64                              `json:"discountAmount"                 description:"DiscountAmount,Cents"`
 	TaxAmount                      int64                              `json:"taxAmount"                      description:"TaxAmount,Cents"`
 	SubscriptionAmount             int64                              `json:"subscriptionAmount"             description:"SubscriptionAmount,Cents"`
@@ -107,6 +108,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		GatewayInvoicePdf:              invoice.GatewayInvoicePdf,
 		TaxPercentage:                  invoice.TaxPercentage,
 		SendNote:                       invoice.SendNote,
+		DiscountCode:                   invoice.DiscountCode,
 		DiscountAmount:                 invoice.DiscountAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
