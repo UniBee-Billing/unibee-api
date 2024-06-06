@@ -21,6 +21,11 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		return false
 	}
 	utility.Assert(one != nil, "webhook log not found")
+	merchant := query.GetMerchantById(ctx, one.MerchantId)
+	if merchant == nil {
+		g.Log().Errorf(ctx, "Webhook_Resend %s %s merchant not found\n", "POST", one.WebhookUrl)
+		return false
+	}
 	datetime := getCurrentDateTime()
 	msgId := generateMsgId()
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", one.WebhookUrl, one.Body)
@@ -28,6 +33,7 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		"Content-Gateway": "application/json",
 		"Msg-id":          msgId,
 		"Datetime":        datetime,
+		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	body := []byte(one.Body)
 	res, err := utility.SendRequest(one.WebhookUrl, "POST", body, headers)
