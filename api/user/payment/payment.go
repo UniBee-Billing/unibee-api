@@ -7,12 +7,12 @@ import (
 )
 
 type NewReq struct {
-	g.Meta      `path:"/new" tags:"User-Payment" method:"post" summary:"NewPayment"`
-	PlanId      uint64                 `json:"planId" dc:"PlanId" v:"required"`
-	Quantity    int64                  `json:"quantity" dc:"Quantity，Default 1" `
-	GatewayId   uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
-	RedirectUrl string                 `json:"redirectUrl" dc:"Redirect Url"`
-	Metadata    map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
+	g.Meta    `path:"/new" tags:"User-Payment" method:"post" summary:"NewPayment"`
+	PlanId    uint64                 `json:"planId" dc:"PlanId" v:"required"`
+	Quantity  int64                  `json:"quantity" dc:"Quantity，Default 1" `
+	GatewayId uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
+	ReturnUrl string                 `json:"returnUrl"  dc:"RedirectUrl"  `
+	Metadata  map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
 
 type NewRes struct {

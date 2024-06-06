@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	merchantPaymentApi "unibee/api/merchant/payment"
 	"unibee/api/user/payment"
 	merchant "unibee/internal/controller/merchant"
@@ -27,9 +28,9 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		Currency:    plan.Currency,
 		TotalAmount: plan.Amount * req.Quantity,
 		GatewayId:   req.GatewayId,
-		RedirectUrl: req.RedirectUrl,
+		RedirectUrl: req.ReturnUrl,
 		CountryCode: one.CountryCode,
-		Name:        plan.PlanName,
+		Name:        fmt.Sprintf("%s * %d", plan.PlanName, req.Quantity),
 		Description: plan.Description,
 		Metadata:    req.Metadata,
 	})
