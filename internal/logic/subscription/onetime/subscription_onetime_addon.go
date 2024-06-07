@@ -151,6 +151,7 @@ func CreateSubOneTimeAddon(ctx context.Context, req *SubscriptionCreateOnetimeAd
 		Pay: &entity.Payment{
 			ExternalPaymentId: strconv.FormatUint(one.Id, 10),
 			BizType:           consts.BizTypeOneTime,
+			SubscriptionId:    sub.SubscriptionId,
 			UserId:            sub.UserId,
 			GatewayId:         gateway.Id,
 			TotalAmount:       invoice.TotalAmount,
