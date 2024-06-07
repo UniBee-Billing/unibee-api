@@ -99,7 +99,7 @@ func ConvertUserAccountToDetail(ctx context.Context, one *entity.UserAccount) *U
 		PaymentMethod:      one.PaymentMethod,
 		CountryCode:        one.CountryCode,
 		CountryName:        one.CountryName,
-		SubscriptionName:   one.SubscriptionId,
+		SubscriptionName:   one.SubscriptionName,
 		SubscriptionId:     one.SubscriptionId,
 		SubscriptionStatus: one.SubscriptionStatus,
 		RecurringAmount:    one.RecurringAmount,
