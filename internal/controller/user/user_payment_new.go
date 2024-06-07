@@ -32,7 +32,15 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		CountryCode: one.CountryCode,
 		Name:        fmt.Sprintf("%s * %d", plan.PlanName, req.Quantity),
 		Description: plan.Description,
-		Metadata:    req.Metadata,
+		Items: []*merchantPaymentApi.Item{{
+			Quantity:               req.Quantity,
+			UnitAmountExcludingTax: plan.Amount,
+			Amount:                 plan.Amount * req.Quantity,
+			Name:                   fmt.Sprintf("%s * %d", plan.PlanName, req.Quantity),
+			Description:            plan.Description,
+			AmountExcludingTax:     plan.Amount * req.Quantity,
+		}},
+		Metadata: req.Metadata,
 	})
 
 	if paymentErr != nil {
