@@ -103,7 +103,7 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Body:  one.InvoiceId,
 	})
 	//New Invoice Send Email
-	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
 		return nil, err
 	}

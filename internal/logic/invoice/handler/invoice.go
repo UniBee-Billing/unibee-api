@@ -101,7 +101,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
-	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 		_, _ = dao.Invoice.Ctx(ctx).Data(g.Map{
 			dao.Invoice.Columns().SendPdf: "",
 		}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
-		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 		if status == consts.InvoiceStatusPaid {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoicePaid.Topic,
@@ -255,7 +255,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
-	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func UpdateInvoiceFromPaymentRefund(ctx context.Context, refund *entity.Refund) 
 		return one, err
 	}
 	if one.Status != status {
-		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+		_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 		if status == consts.InvoiceStatusPaid {
 			_, _ = redismq.Send(&redismq.Message{
 				Topic: redismq2.TopicInvoicePaid.Topic,
@@ -333,7 +333,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	if err != nil {
 		return nil, err
 	}
-	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	one.Status = consts.InvoiceStatusPaid
 	go func() {
 		time.Sleep(1 * time.Second)
@@ -347,7 +347,7 @@ func MarkInvoiceAsPaidForZeroPayment(ctx context.Context, invoiceId string) (*en
 	return one, nil
 }
 
-func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool) (err error) {
+func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bool, manualSend bool) (err error) {
 	go func() {
 		defer func() {
 			if exception := recover(); exception != nil {
@@ -387,7 +387,7 @@ func InvoicePdfGenerateAndEmailSendBackground(invoiceId string, sendUserEmail bo
 			}
 		}
 		if sendUserEmail && one.SendStatus != consts.InvoiceSendStatusUnnecessary {
-			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, false)
+			err := SendInvoiceEmailToUser(backgroundCtx, one.InvoiceId, manualSend)
 			utility.Assert(err == nil, "SendInvoiceEmail error")
 		}
 	}()

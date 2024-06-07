@@ -13,6 +13,6 @@ func (c *ControllerInvoice) PdfGenerate(ctx context.Context, req *invoice.PdfGen
 	if !utility.TryLock(ctx, redisKey, 10) {
 		utility.Assert(false, "click too fast, please wait for second")
 	}
-	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail)
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
 	return &invoice.PdfGenerateRes{}, nil
 }

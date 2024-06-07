@@ -254,7 +254,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 		return err
 	}
 	one.Status = invoiceStatus
-	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicInvoiceCancelled.Topic,
 		Tag:   redismq2.TopicInvoiceCancelled.Tag,
@@ -352,7 +352,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 	}
 	one.Status = invoiceStatus
 	one.Link = invoiceLink
-	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true)
+	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	_, _ = redismq.Send(&redismq.Message{
 		Topic: redismq2.TopicInvoiceProcessed.Topic,
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
