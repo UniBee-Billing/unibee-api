@@ -268,12 +268,12 @@ var (
 						system.NewInformation(),
 					)
 				})
+				group.Group("/subscription", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewSubscription(),
+					)
+				})
 				if !config.GetConfigInstance().IsProd() {
-					group.Group("/subscription", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							system.NewSubscription(),
-						)
-					})
 					group.Group("/invoice", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewInvoice(),
