@@ -16,7 +16,7 @@ type ConfigRes struct {
 }
 
 type ConfigUpdateReq struct {
-	g.Meta                             `path:"/config/update" tags:"Subscription" method:"get" summary:"Update Merchant Subscription Config"`
+	g.Meta                             `path:"/config/update" tags:"Subscription" method:"post" summary:"Update Merchant Subscription Config"`
 	DowngradeEffectImmediately         *bool  `json:"downgradeEffectImmediately" dc:"DowngradeEffectImmediately, whether subscription downgrade should effect immediately or at period end, default at period end"`
 	UpgradeProration                   *bool  `json:"upgradeProration" dc:"UpgradeProration, whether subscription update generation proration invoice or not, default yes"`
 	IncompleteExpireTime               *int64 `json:"incompleteExpireTime" dc:"IncompleteExpireTime, em.. default 1day for plan of month type"`
