@@ -32,6 +32,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		CountryCode: one.CountryCode,
 		Name:        fmt.Sprintf("%s * %d", plan.PlanName, req.Quantity),
 		Description: plan.Description,
+		SendInvoice: true,
 		Items: []*merchantPaymentApi.Item{{
 			Quantity:               req.Quantity,
 			UnitAmountExcludingTax: plan.Amount,

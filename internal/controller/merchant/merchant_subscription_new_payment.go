@@ -96,6 +96,7 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		Items:             req.Items,
 		Metadata:          req.Metadata,
 		GasPayer:          req.GasPayer,
+		SendInvoice:       true,
 	})
 
 	if paymentErr != nil {

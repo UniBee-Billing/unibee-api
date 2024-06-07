@@ -23,6 +23,7 @@ type NewReq struct {
 	Items             []*Item                `json:"items" dc:"Items"`
 	Metadata          map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 	GasPayer          string                 `json:"gasPayer" dc:"who pay the gas, merchant|user"`
+	SendInvoice       bool                   `json:"sendInvoice" d:"false" dc:"Whether sen invoice email to customer or not，default false"`
 }
 
 type NewRes struct {

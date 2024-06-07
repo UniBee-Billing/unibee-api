@@ -92,6 +92,10 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	if len(name) == 0 {
 		name = "Default Product"
 	}
+	var sendStatus = consts.InvoiceSendStatusUnnecessary
+	if req.SendInvoice {
+		sendStatus = consts.InvoiceSendStatusUnSend
+	}
 	var invoice *bean.InvoiceSimplify
 	if req.Items != nil && len(req.Items) > 0 {
 		var invoiceItems []*bean.InvoiceItemSimplify
@@ -128,7 +132,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			TotalAmountExcludingTax: totalAmountExcludingTax,
 			TaxAmount:               totalTax,
 			DiscountAmount:          0,
-			SendStatus:              consts.InvoiceSendStatusUnnecessary,
+			SendStatus:              sendStatus,
 			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines:                   invoiceItems,
 			Metadata:                req.Metadata,
@@ -143,7 +147,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 			Currency:                req.Currency,
 			TaxAmount:               0,
 			DiscountAmount:          0,
-			SendStatus:              consts.InvoiceSendStatusUnnecessary,
+			SendStatus:              sendStatus,
 			DayUtilDue:              consts.DEFAULT_DAY_UTIL_DUE,
 			Lines: []*bean.InvoiceItemSimplify{{
 				Currency:               req.Currency,
