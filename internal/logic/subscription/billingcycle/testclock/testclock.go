@@ -21,14 +21,14 @@ type TestClockWalkRes struct {
 }
 
 func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock int64) (*TestClockWalkRes, error) {
-	if config.GetConfigInstance().IsProd() {
-		return nil, gerror.New("Test Does Not Work For Prod Env")
-	}
 	//TestClock Verify
 	utility.Assert(len(subId) > 0, "Invalid SubscriptionId")
 	utility.Assert(newTestClock > 0, "Invalid TestClock")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
 	utility.Assert(sub != nil, "Subscription Not Found")
+	if config.GetConfigInstance().IsProd() && sub.TestClock == 0 {
+		return nil, gerror.New("Test Does Not Work For Prod Env")
+	}
 	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
 	utility.Assert(sub.TestClock < newTestClock, "The Subscription Has Walk To The TestClock Exceed The New One")
 	//firstEnd := subscription.GetPeriodEndFromStart(ctx,utility.MaxInt64(sub.CurrentPeriodEnd,sub.TrialEnd), uint64(sub.PlanId))
