@@ -286,6 +286,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
+		CreateFrom:                     req.CreateFrom,
 	}
 }
 

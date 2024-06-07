@@ -93,8 +93,8 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		Body:           jsonString,
 		ReconsumeCount: reconsumeTimes,
 		Response:       response,
-		Mamo:           utility.MarshalToJsonString(err),
-		CreateTime:     gtime.Now().Timestamp(),
+		//Mamo:           utility.MarshalToJsonString(err),
+		CreateTime: gtime.Now().Timestamp(),
 	}
 	_, saveErr := dao.MerchantWebhookLog.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if saveErr != nil {
