@@ -18,10 +18,13 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
 	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
-		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
+		err = gjson.Unmarshal([]byte(one.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("createInvoicePdf Unmarshal Metadata error:%s", err.Error())
 		}
+	}
+	if metadata == nil {
+		metadata = make(map[string]interface{})
 	}
 	if req.IssueAddress != nil {
 		metadata["IssueAddress"] = *req.IssueAddress
