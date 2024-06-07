@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consumer/webhook/event"
 	"unibee/internal/consumer/webhook/log"
@@ -16,6 +17,7 @@ import (
 func SendMerchantSubscriptionWebhookBackground(one *entity.Subscription, dayLeft int, event event.MerchantWebhookEvent) {
 	go func() {
 		ctx := context.Background()
+		g.Log().Infof(ctx, "SendMerchantSubscriptionWebhookBackground event:%v", event)
 		var err error
 		defer func() {
 			if exception := recover(); exception != nil {

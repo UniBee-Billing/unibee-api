@@ -72,7 +72,7 @@ func SendWebhookRequest(ctx context.Context, webhookMessage *WebhookMessage, rec
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
 	res, err := utility.SendRequest(webhookMessage.Url, "POST", body, headers)
-	g.Log().Infof(ctx, "SendWebhookRequest event:%s", webhookMessage.Event)
+	g.Log().Infof(ctx, "SendWebhookRequest event:%v", webhookMessage.Event)
 	var response = string(res)
 	var responseMessage = "not success"
 	if strings.Compare(response, "success") == 0 {
