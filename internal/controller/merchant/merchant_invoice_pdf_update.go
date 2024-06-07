@@ -8,14 +8,16 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/merchant/invoice"
 	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
 	"unibee/internal/query"
 	"unibee/utility"
 )
 
 func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdateReq) (res *invoice.PdfUpdateRes, err error) {
-	utility.Assert(len(req.InvoiceId) > 0, "invalid invoiceId")
+	utility.Assert(len(req.InvoiceId) > 0, "invalid InvoiceId")
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "invalid MerchantId")
 	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
 		err = gjson.Unmarshal([]byte(one.MetaData), &metadata)
