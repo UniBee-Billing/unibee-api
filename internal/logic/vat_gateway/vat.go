@@ -268,6 +268,7 @@ func MerchantCountryRateList(ctx context.Context, merchantId uint64) ([]*bean.Va
 			CountryCode:           countryRate.CountryCode,
 			CountryName:           countryRate.CountryName,
 			VatSupport:            vatSupport,
+			IsEU:                  countryRate.Eu == 1,
 			StandardTaxPercentage: standardTaxPercentage,
 		})
 	}

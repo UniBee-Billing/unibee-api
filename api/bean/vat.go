@@ -6,6 +6,7 @@ type VatCountryRate struct {
 	CountryCode           string `json:"countryCode"           `                                      // country_code
 	CountryName           string `json:"countryName"           `                                      // country_name
 	VatSupport            bool   `json:"vatSupport"          dc:"vat support,true or false"         ` // vat support true or false
+	IsEU                  bool   `json:"isEU"          dc:""         `
 	StandardTaxPercentage int64  `json:"standardTaxPercentage"  dc:"Tax税率，万分位，1000 表示 10%"`
 }
 
