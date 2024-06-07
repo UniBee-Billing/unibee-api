@@ -26,7 +26,7 @@ func WalkSubscriptionToTestClock(ctx context.Context, subId string, newTestClock
 	utility.Assert(newTestClock > 0, "Invalid TestClock")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subId)
 	utility.Assert(sub != nil, "Subscription Not Found")
-	if config.GetConfigInstance().IsProd() && sub.TestClock == 0 {
+	if config.GetConfigInstance().IsProd() && sub.TestClock <= 0 {
 		return nil, gerror.New("Test Does Not Work For Prod Env")
 	}
 	//utility.Assert(sub.Status != consts.SubStatusExpired && sub.Status != consts.SubStatusCancelled, "Subscription Has Cancel or Expire")
