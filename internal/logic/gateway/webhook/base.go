@@ -2,6 +2,8 @@ package webhook
 
 import (
 	"context"
+	"fmt"
+	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"unibee/internal/logic/gateway/api"
@@ -65,4 +67,24 @@ func ProcessRefundWebhook(ctx context.Context, eventType string, gatewayRefundId
 	}
 
 	return nil
+}
+
+func GetPaymentRedirectUrl(ctx context.Context, payment *entity.Payment, success string) string {
+	if success == "false" {
+		var metadata = make(map[string]string)
+		if len(payment.MetaData) > 0 {
+			err := gjson.Unmarshal([]byte(payment.MetaData), &metadata)
+			if err != nil {
+				fmt.Printf("SimplifyPayment Unmarshal Metadata error:%s", err.Error())
+			}
+		}
+		cancelUrl := metadata["CancelUrl"]
+		if cancelUrl != "" && len(cancelUrl) > 0 {
+			return cancelUrl
+		} else {
+			return payment.ReturnUrl
+		}
+	} else {
+		return payment.ReturnUrl
+	}
 }

@@ -17,6 +17,7 @@ type NewReq struct {
 	PlanId            uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
 	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
+	CancelUrl         string                 `json:"cancelUrl" dc:"CancelUrl"`
 	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
 	Name              string                 `json:"name" dc:"Name"`
 	Description       string                 `json:"description" dc:"Description"`

@@ -81,7 +81,12 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 		//Payment Redirect
 		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
-			returnUrl = payment.ReturnUrl
+			success := r.Get("success")
+			if success != nil {
+				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
+			} else {
+				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
+			}
 		}
 		if r.Get("success").Bool() {
 			if payment == nil || len(payment.GatewayPaymentIntentId) == 0 {

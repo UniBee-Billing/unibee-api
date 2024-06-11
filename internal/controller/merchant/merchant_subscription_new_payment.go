@@ -90,6 +90,7 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		PlanId:            req.PlanId,
 		GatewayId:         req.GatewayId,
 		RedirectUrl:       req.RedirectUrl,
+		CancelUrl:         req.CancelUrl,
 		CountryCode:       req.CountryCode,
 		Name:              req.Name,
 		Description:       req.Description,

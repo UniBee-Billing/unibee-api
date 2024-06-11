@@ -32,6 +32,7 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		ConfirmTotalAmount: req.ConfirmTotalAmount,
 		ConfirmCurrency:    req.ConfirmCurrency,
 		ReturnUrl:          req.ReturnUrl,
+		CancelUrl:          req.CancelUrl,
 		VatCountryCode:     req.VatCountryCode,
 		VatNumber:          req.VatNumber,
 		TaxPercentage:      req.TaxPercentage,

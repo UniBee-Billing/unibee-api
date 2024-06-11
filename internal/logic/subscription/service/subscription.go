@@ -115,6 +115,7 @@ type RenewInternalReq struct {
 	Discount      *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl     string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl     string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData   *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	Metadata      map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 }
@@ -229,7 +230,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	utility.AssertError(err, "System Error")
 	var createRes *gateway_bean.GatewayNewPaymentResp
 	if invoice.TotalAmount > 0 {
-		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionRenew", 0)
+		createRes, err = service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, req.CancelUrl, "SubscriptionRenew", 0)
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionRenew CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -336,6 +337,7 @@ type CreateInternalReq struct {
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount To Be Confirmed，Get From Preview"  v:"required"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency To Be Confirmed，Get From Preview" v:"required"  `
 	ReturnUrl          string                      `json:"returnUrl"  dc:"RedirectUrl"  `
+	CancelUrl          string                      `json:"cancelUrl" dc:"CancelUrl"`
 	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%"`
@@ -775,7 +777,7 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		//		Paid:                  createPaymentResult.Status == consts.PaymentSuccess,
 		//	}
 	} else {
-		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, len(req.PaymentMethodId) == 0, req.ReturnUrl, "SubscriptionCreate", 0)
+		createPaymentResult, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, len(req.PaymentMethodId) == 0, req.ReturnUrl, req.CancelUrl, "SubscriptionCreate", 0)
 		if err != nil {
 			// todo mark use method
 			_, updateErr := dao.Subscription.Ctx(ctx).Data(g.Map{
@@ -1272,6 +1274,7 @@ type UpdateInternalReq struct {
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl          string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
@@ -1374,7 +1377,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		// utility.Assert(user != nil, "user not found")
 		invoice, err := service3.CreateProcessingInvoiceForSub(ctx, prepare.Invoice, prepare.Subscription, prepare.Gateway.Id, prepare.PaymentMethodId, false, prepare.ProrationDate)
 		utility.AssertError(err, "System Error")
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, "SubscriptionUpdate", 0)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, invoice, req.ManualPayment, req.ReturnUrl, req.CancelUrl, "SubscriptionUpdate", 0)
 		if err != nil {
 			g.Log().Print(ctx, "SubscriptionUpdate CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return nil, err
@@ -1797,7 +1800,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			g.Log().Print(ctx, "EndTrialManual CreateProcessingInvoiceForSub err:", err.Error())
 			return err
 		}
-		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, false, "", "SubscriptionEndTrialManual", 0)
+		createRes, err := service.CreateSubInvoicePaymentDefaultAutomatic(ctx, one, false, "", "", "SubscriptionEndTrialManual", 0)
 		if err != nil {
 			g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic err:", err.Error())
 			return err

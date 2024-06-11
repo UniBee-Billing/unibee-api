@@ -265,7 +265,7 @@ func clearInvoicePayment(ctx context.Context, invoice *entity.Invoice) (*entity.
 	return nil, nil
 }
 
-func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, source string, timeNow int64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
+func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entity.Invoice, manualPayment bool, returnUrl string, cancelUrl string, source string, timeNow int64) (gatewayInternalPayResult *gateway_bean.GatewayNewPaymentResp, err error) {
 	g.Log().Infof(ctx, "CreateSubInvoicePaymentDefaultAutomatic invoiceId:%s", invoice.InvoiceId)
 	lastPayment, err := clearInvoicePayment(ctx, invoice)
 	if err != nil {
@@ -323,7 +323,7 @@ func CreateSubInvoicePaymentDefaultAutomatic(ctx context.Context, invoice *entit
 		ExternalUserId:       strconv.FormatUint(invoice.UserId, 10),
 		Email:                email,
 		Invoice:              bean.SimplifyInvoice(invoice),
-		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment},
+		Metadata:             map[string]interface{}{"BillingReason": invoice.InvoiceName, "Source": source, "manualPayment": manualPayment, "CancelUrl": cancelUrl},
 		GatewayPaymentMethod: invoice.GatewayPaymentMethod,
 	})
 

@@ -322,7 +322,12 @@ func (s StripeWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		//Payment Redirect
 		payment := query.GetPaymentByPaymentId(r.Context(), payIdStr)
 		if payment != nil {
-			returnUrl = payment.ReturnUrl
+			success := r.Get("success")
+			if success != nil {
+				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
+			} else {
+				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
+			}
 		}
 		if r.Get("success").Bool() {
 			stripe.Key = gateway.GatewaySecret

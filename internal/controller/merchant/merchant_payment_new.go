@@ -28,6 +28,13 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	utility.Assert(gateway != nil, "gateway not found")
 	utility.Assert(gateway.MerchantId == merchantInfo.Id, "merchant gateway not match")
 
+	if len(req.CancelUrl) > 0 {
+		if req.Metadata == nil {
+			req.Metadata = make(map[string]interface{})
+		}
+		req.Metadata["CancelUrl"] = req.CancelUrl
+	}
+
 	var user *entity.UserAccount
 	if _interface.Context().Get(ctx).IsOpenApiCall {
 		if req.UserId == 0 {
@@ -78,6 +85,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 	currencyNumberCheck(req.TotalAmount, req.Currency)
 	utility.Assert(len(req.ExternalPaymentId) > 0, "ExternalPaymentId is nil")
 	utility.Assert(user != nil, "User Not Found")
+
 	if len(req.Email) == 0 {
 		req.Email = user.Email
 	}

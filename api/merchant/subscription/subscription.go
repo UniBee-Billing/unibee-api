@@ -135,6 +135,7 @@ type RenewReq struct {
 	Discount       *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment  bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl      string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl      string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData    *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 	Metadata       map[string]interface{}      `json:"metadata" dc:"Metadata，Map"`
 }
@@ -197,6 +198,7 @@ type CreateReq struct {
 	ConfirmTotalAmount int64                       `json:"confirmTotalAmount"  dc:"TotalAmount to verify if provide"            `
 	ConfirmCurrency    string                      `json:"confirmCurrency"  dc:"Currency to verify if provide" `
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl          string                      `json:"cancelUrl" dc:"CancelUrl"`
 	VatCountryCode     string                      `json:"vatCountryCode" dc:"VatCountryCode, CountryName"`
 	VatNumber          string                      `json:"vatNumber" dc:"VatNumber" `
 	TaxPercentage      *int64                      `json:"taxPercentage" dc:"TaxPercentage，1000 = 10%, override subscription taxPercentage if provide"`
@@ -255,6 +257,7 @@ type UpdateReq struct {
 	Discount           *bean.ExternalDiscountParam `json:"discount" dc:"Discount, override subscription discount"`
 	ManualPayment      bool                        `json:"manualPayment" dc:"ManualPayment"`
 	ReturnUrl          string                      `json:"returnUrl"  dc:"ReturnUrl"  `
+	CancelUrl          string                      `json:"cancelUrl" dc:"CancelUrl"`
 	ProductData        *bean.PlanProductParam      `json:"productData"  dc:"ProductData"  `
 }
 
@@ -392,6 +395,7 @@ type NewPaymentReq struct {
 	PlanId            uint64                 `json:"planId" dc:"PlanId, either TotalAmount&Currency or PlanId needed"`
 	GatewayId         uint64                 `json:"gatewayId"   dc:"GatewayId" v:"required"`
 	RedirectUrl       string                 `json:"redirectUrl" dc:"Redirect Url"`
+	CancelUrl         string                 `json:"cancelUrl" dc:"CancelUrl"`
 	CountryCode       string                 `json:"countryCode" dc:"CountryCode"`
 	Name              string                 `json:"name" dc:"Name"`
 	Description       string                 `json:"description" dc:"Description"`
