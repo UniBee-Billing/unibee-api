@@ -76,6 +76,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 	var response string
 	var status = false
 	var returnUrl = ""
+	var isSuccess = false
 	if len(payIdStr) > 0 {
 		response = ""
 		//Payment Redirect
@@ -83,6 +84,9 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 		if payment != nil {
 			success := r.Get("success")
 			if success != nil {
+				if success.String() == "true" {
+					isSuccess = true
+				}
 				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
 			} else {
 				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
@@ -141,6 +145,7 @@ func (c ChangellyWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merc
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
+		Success:   isSuccess,
 		ReturnUrl: returnUrl,
 		QueryPath: r.URL.RawQuery,
 	}, nil

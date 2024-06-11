@@ -169,5 +169,6 @@ type GatewayRedirectResp struct {
 	Status    bool   `json:"status"`
 	Message   string `json:"message"`
 	ReturnUrl string `json:"returnUrl"`
+	Success   bool   `json:"success"`
 	QueryPath string `json:"queryPath"`
 }

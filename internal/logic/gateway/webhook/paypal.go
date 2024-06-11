@@ -123,6 +123,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	var response string
 	var status = false
 	var returnUrl = ""
+	var isSuccess = true
 	if len(payIdStr) > 0 {
 		response = ""
 		//Payment Redirect
@@ -130,6 +131,9 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 		if payment != nil {
 			success := r.Get("success")
 			if success != nil {
+				if success.String() == "true" {
+					isSuccess = true
+				}
 				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, success.String())
 			} else {
 				returnUrl = GetPaymentRedirectUrl(r.Context(), payment, "")
@@ -203,6 +207,7 @@ func (p PaypalWebhook) GatewayRedirect(r *ghttp.Request, gateway *entity.Merchan
 	return &gateway_bean.GatewayRedirectResp{
 		Status:    status,
 		Message:   response,
+		Success:   isSuccess,
 		ReturnUrl: returnUrl,
 		QueryPath: r.URL.RawQuery,
 	}, nil

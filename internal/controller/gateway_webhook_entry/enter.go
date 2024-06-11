@@ -38,7 +38,9 @@ func GatewayRedirectEntrance(r *ghttp.Request) {
 		return
 	}
 	if len(redirect.ReturnUrl) > 0 {
-		if !strings.Contains(redirect.ReturnUrl, "?") {
+		if !redirect.Success {
+			r.Response.RedirectTo(fmt.Sprintf("%s", redirect.ReturnUrl))
+		} else if !strings.Contains(redirect.ReturnUrl, "?") {
 			r.Response.RedirectTo(fmt.Sprintf("%s?%s", redirect.ReturnUrl, redirect.QueryPath))
 		} else {
 			r.Response.RedirectTo(fmt.Sprintf("%s&%s", redirect.ReturnUrl, redirect.QueryPath))
