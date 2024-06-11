@@ -75,7 +75,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		query = query.WhereLTE(dao.Invoice.Columns().TotalAmount, req.AmountEnd)
 	}
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
-		var userIdList []uint64
+		var userIdList = make([]uint64, 0)
 		var list []*entity.UserAccount
 		userQuery := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().MerchantId, req.MerchantId)
 		if len(req.FirstName) > 0 {
@@ -88,9 +88,8 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		for _, user := range list {
 			userIdList = append(userIdList, user.Id)
 		}
-		if len(userIdList) > 0 {
-			query = query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
-		}
+		query = query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
+
 	}
 	err = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 		Order(sortKey).
