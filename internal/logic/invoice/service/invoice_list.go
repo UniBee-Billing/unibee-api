@@ -88,6 +88,9 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 		for _, user := range list {
 			userIdList = append(userIdList, user.Id)
 		}
+		if len(userIdList) == 0 {
+			return &InvoiceListInternalRes{Invoices: make([]*detail.InvoiceDetail, 0), Total: 0}, nil
+		}
 		query = query.WhereIn(dao.Invoice.Columns().UserId, userIdList)
 
 	}
