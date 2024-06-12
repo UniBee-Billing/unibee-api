@@ -124,16 +124,19 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 	if payment.TotalAmount == refund.RefundAmount {
 		refundType = "Full Refund"
 	}
-	return &bean.InvoiceSimplify{
-		BizType: originalInvoice.BizType,
 
+	return &bean.InvoiceSimplify{
+		InvoiceName:                    "Credit Note",
+		ProductName:                    originalInvoice.ProductName,
+		BizType:                        originalInvoice.BizType,
 		Currency:                       originalInvoice.Currency,
 		OriginAmount:                   -refund.RefundAmount,
 		TotalAmount:                    -refund.RefundAmount,
 		TotalAmountExcludingTax:        -refund.RefundAmount,
 		SubscriptionAmount:             -refund.RefundAmount,
 		SubscriptionAmountExcludingTax: -refund.RefundAmount,
-		TaxAmount:                      0,
+		TaxAmount:                      -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)),
+		TaxPercentage:                  originalInvoice.TaxPercentage,
 		DiscountAmount:                 0,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
 		DayUtilDue:                     consts.DEFAULT_DAY_UTIL_DUE,

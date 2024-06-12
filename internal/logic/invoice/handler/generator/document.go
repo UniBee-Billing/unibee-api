@@ -3,6 +3,7 @@ package generator
 import (
 	"github.com/go-pdf/fpdf"
 	"github.com/leekchan/accounting"
+	"strings"
 )
 
 // Document define base document
@@ -20,6 +21,7 @@ type Document struct {
 	InvoiceOriginNumber string        `json:"invoiceOriginNumber,omitempty"`
 	InvoiceType         string        `json:"invoiceType,omitempty"`
 	Status              string        `json:"status,omitempty" validate:"max=32"`
+	IsRefund            bool          `json:"isRefund,omitempty"`
 	ClientRef           string        `json:"client_ref,omitempty" validate:"max=64"`
 	Description         string        `json:"description,omitempty" validate:"max=1024"`
 	Notes               string        `json:"notes,omitempty"`
@@ -53,6 +55,21 @@ func (doc *Document) SetUnicodeTranslator(fn UnicodeTranslateFunc) {
 // encodeString encodes the string using doc.Options.UnicodeTranslateFunc
 func (doc *Document) encodeString(str string) string {
 	return doc.Options.UnicodeTranslateFunc(str)
+}
+
+// encodeString encodes the string using doc.Options.UnicodeTranslateFunc
+func (doc *Document) encodeFitRefundString(str string) string {
+	if doc.IsRefund {
+		str = strings.ReplaceAll(str, "Invoice", "Credit Note")
+	}
+	return doc.Options.UnicodeTranslateFunc(str)
+}
+
+func (doc *Document) FitRefundString(str string) string {
+	if doc.IsRefund {
+		str = strings.ReplaceAll(str, "Invoice", "Credit Note")
+	}
+	return str
 }
 
 // typeAsString return the document type as string

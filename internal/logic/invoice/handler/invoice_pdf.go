@@ -74,6 +74,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
 	//doc.Description = "Test Description"
 	if len(one.RefundId) > 0 {
+		doc.IsRefund = true
 		doc.SetOriginInvoiceNumber(one.SendNote)
 	}
 
@@ -148,6 +149,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
 	if len(one.RefundId) > 0 {
+		doc.SetIsRefund(true)
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),

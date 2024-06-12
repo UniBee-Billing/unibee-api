@@ -204,7 +204,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		BizType:                        payment.BizType,
 		UserId:                         refund.UserId,
 		MerchantId:                     refund.MerchantId,
-		InvoiceName:                    payment.BillingReason,
+		InvoiceName:                    invoice.InvoiceName,
 		ProductName:                    invoice.ProductName,
 		InvoiceId:                      refund.InvoiceId,
 		UniqueId:                       refund.RefundId,

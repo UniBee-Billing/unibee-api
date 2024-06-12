@@ -53,6 +53,12 @@ func (d *Document) SetStatus(status string) *Document {
 	return d
 }
 
+// SetIsRefund of document
+func (d *Document) SetIsRefund(isRefund bool) *Document {
+	d.IsRefund = isRefund
+	return d
+}
+
 // SetDescription of document
 func (d *Document) SetDescription(desc string) *Document {
 	d.Description = desc

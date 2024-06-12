@@ -109,8 +109,8 @@ func (c *Contact) appendContactTODoc(
 
 func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
 	x, _, _, _ := doc.pdf.GetMargins()
-	if len(doc.InvoiceOriginNumber) > 0 {
-		return c.appendContactTODoc(x, y, true, doc, "Refund From:")
+	if doc.IsRefund {
+		return c.appendContactTODoc(x, y, true, doc, "Credit Note From:")
 	} else {
 		return c.appendContactTODoc(x, y, true, doc, "Issued By:")
 	}
@@ -118,5 +118,9 @@ func (c *Contact) appendCompanyContactToDoc(doc *Document, y float64) float64 {
 }
 
 func (c *Contact) appendCustomerContactToDoc(doc *Document, y float64) float64 {
-	return c.appendContactTODoc(130, y, true, doc, "Invoice To:")
+	if doc.IsRefund {
+		return c.appendContactTODoc(130, y, true, doc, "Credit Note To:")
+	} else {
+		return c.appendContactTODoc(130, y, true, doc, "Invoice To:")
+	}
 }

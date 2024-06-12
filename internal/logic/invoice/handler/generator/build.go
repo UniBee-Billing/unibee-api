@@ -144,7 +144,7 @@ func (doc *Document) appendLogo() float64 {
 func (doc *Document) appendMetas() {
 	// Append ref
 	x, _, _, _ := doc.pdf.GetMargins()
-	refString := fmt.Sprintf("%s: %s", doc.Options.TextInvoiceNumberTitle, doc.InvoiceNumber)
+	refString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceNumberTitle), doc.InvoiceNumber)
 	//y := doc.pdf.GetY()
 	startY := doc.pdf.GetY() + 8
 	doc.pdf.SetXY(x, startY)
@@ -169,7 +169,7 @@ func (doc *Document) appendMetas() {
 
 	// Append InvoiceDate
 	if len(doc.InvoiceDate) > 0 {
-		dataString := fmt.Sprintf("%s: %s", doc.Options.TextInvoiceDateTitle, doc.InvoiceDate)
+		dataString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceDateTitle), doc.InvoiceDate)
 		doc.pdf.SetXY(x, doc.pdf.GetY()+8)
 		doc.pdf.SetFont(doc.Options.Font, "", 10)
 		doc.pdf.CellFormat(80, 12, doc.encodeString(dataString), "0", 0, "L", false, 0, "")
@@ -180,7 +180,7 @@ func (doc *Document) appendMetas() {
 	if len(doc.PaidDate) > 0 {
 		paidDate = doc.PaidDate
 	}
-	dateString := fmt.Sprintf("%s: %s", doc.Options.TextInvoicePaidDateTitle, paidDate)
+	dateString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoicePaidDateTitle), paidDate)
 	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
 	doc.pdf.SetFont(doc.Options.Font, "", 10)
 	doc.pdf.CellFormat(80, 12, doc.encodeString(dateString), "0", 0, "L", false, 0, "")
@@ -189,7 +189,7 @@ func (doc *Document) appendMetas() {
 
 	doc.pdf.SetXY(130, startY)
 	doc.pdf.SetFont(doc.Options.BoldFont, "", 10)
-	doc.pdf.CellFormat(80, 12, doc.encodeString("Invoice Status:"), "0", 0, "L", false, 0, "")
+	doc.pdf.CellFormat(80, 12, doc.encodeFitRefundString("Invoice Status:"), "0", 0, "L", false, 0, "")
 
 	doc.pdf.SetXY(130, startY+10)
 	doc.pdf.SetFont(doc.Options.BoldFont, "B", 18)
