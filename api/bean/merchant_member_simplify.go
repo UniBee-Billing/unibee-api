@@ -5,14 +5,14 @@ import (
 )
 
 type MerchantMemberSimplify struct {
-	Id         uint64 `json:"id"         description:"userId"`          // userId
-	MerchantId uint64 `json:"merchantId" description:"merchant id"`     // merchant id
-	Email      string `json:"email"      description:"email"`           // email
-	FirstName  string `json:"firstName"  description:"first name"`      // first name
-	LastName   string `json:"lastName"   description:"last name"`       // last name
-	CreateTime int64  `json:"createTime" description:"create utc time"` // create utc time
-	Mobile     string `json:"mobile"     description:"mobile"`          // mobile
-	Role       string `json:"role"       description:"role"`            // role
+	Id         uint64 `json:"id"         description:"userId"`                                         // userId
+	MerchantId uint64 `json:"merchantId" description:"merchant id"`                                    // merchant id
+	Email      string `json:"email"      description:"email"`                                          // email
+	FirstName  string `json:"firstName"  description:"first name"`                                     // first name
+	LastName   string `json:"lastName"   description:"last name"`                                      // last name
+	CreateTime int64  `json:"createTime" description:"create utc time"`                                // create utc time
+	Mobile     string `json:"mobile"     description:"mobile"`                                         // mobile
+	Role       string `json:"role"       description:"role，Separate multiple numbers with commas (,)"` // role
 }
 
 func SimplifyMerchantMember(one *entity.MerchantMember) *MerchantMemberSimplify {
