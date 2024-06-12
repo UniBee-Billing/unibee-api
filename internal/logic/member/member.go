@@ -48,14 +48,17 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 	utility.AssertError(err, "server error")
 }
 
-func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roleName string) error {
+func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roles string) error {
 	member := query.GetMerchantMemberById(ctx, memberId)
 	utility.Assert(member != nil, "member not found")
-	utility.Assert(strings.Compare(member.Role, "Owner") == 0, "Cannot Update Owner Role")
-	role := query.GetRoleByName(ctx, merchantId, roleName)
-	utility.Assert(role != nil, "role not found")
+	utility.Assert(strings.Compare(member.Role, "Owner") == 0, "Cannot Update Owner's Role")
+	roleList := strings.Split(roles, ",")
+	for _, roleName := range roleList {
+		role := query.GetRoleByName(ctx, merchantId, roleName)
+		utility.Assert(role != nil, "role "+roleName+" not found")
+	}
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
-		dao.MerchantMember.Columns().Role:      role,
+		dao.MerchantMember.Columns().Role:      roles,
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, memberId).Where(dao.MerchantMember.Columns().MerchantId, merchantId).OmitNil().Update()
 	return err
@@ -86,12 +89,15 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, role string) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, roles string) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
-	utility.Assert(strings.Compare(role, "Owner") != 0, "can not add owner member")
-	merchantRole := query.GetRoleByName(ctx, merchantId, role)
-	utility.Assert(merchantRole != nil, "role not found")
+	utility.Assert(strings.Compare(roles, "Owner") != 0, "can not add owner as a member")
+	roleList := strings.Split(roles, ",")
+	for _, roleName := range roleList {
+		role := query.GetRoleByName(ctx, merchantId, roleName)
+		utility.Assert(role != nil, "role "+roleName+" not found")
+	}
 
 	merchantMasterMember := &entity.MerchantMember{
 		MerchantId: merchantId,
@@ -99,8 +105,9 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		CreateTime: gtime.Now().Timestamp(),
 		FirstName:  firstName,
 		LastName:   lastName,
-		Role:       role,
+		Role:       roles,
 	}
+
 	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
 	if err != nil {
 		return err

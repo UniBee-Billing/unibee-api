@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/profile"
@@ -18,8 +19,21 @@ import (
 
 func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *profile.GetRes, err error) {
 	var member *entity.MerchantMember
+	var isOwner = false
+	var memberRoles = make([]*bean.MerchantRoleSimplify, 0)
 	if _interface.Context().Get(ctx).MerchantMember != nil {
 		member = query.GetMerchantMemberById(ctx, _interface.Context().Get(ctx).MerchantMember.Id)
+		if member != nil {
+			if strings.Contains(member.Role, "Owner") {
+				isOwner = true
+			} else {
+				roleNameList := strings.Split(member.Role, ",")
+				for _, roleName := range roleNameList {
+					role := query.GetRoleByName(ctx, member.MerchantId, roleName)
+					memberRoles = append(memberRoles, bean.SimplifyMerchantRole(role))
+				}
+			}
+		}
 	}
 	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))
 	utility.Assert(merchant != nil, "merchant not found")
@@ -36,5 +50,7 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 		OpenApiKey:     utility.HideStar(merchant.ApiKey),
 		SendGridKey:    utility.HideStar(emailData),
 		VatSenseKey:    utility.HideStar(vatData),
+		IsOwner:        isOwner,
+		MemberRoles:    memberRoles,
 	}, nil
 }

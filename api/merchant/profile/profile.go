@@ -21,6 +21,8 @@ type GetRes struct {
 	OpenApiKey     string                       `json:"openApiKey" description:"OpenApiKey" `
 	SendGridKey    string                       `json:"sendGridKey" description:"SendGridKey" `
 	VatSenseKey    string                       `json:"vatSenseKey" description:"VatSenseKey" `
+	IsOwner        bool                         `json:"isOwner" description:"Check Member is Owner" `
+	MemberRoles    []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
 }
 
 type UpdateReq struct {
