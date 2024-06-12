@@ -9,7 +9,7 @@ import (
 )
 
 func (c *ControllerMember) UpdateMemberRole(ctx context.Context, req *member.UpdateMemberRoleReq) (res *member.UpdateMemberRoleRes, err error) {
-	err = member2.UpdateMemberRole(ctx, _interface.GetMerchantId(ctx), req.MemberId, req.Role)
+	err = member2.UpdateMemberRole(ctx, _interface.GetMerchantId(ctx), req.MemberId, req.Roles)
 	if err != nil {
 		return nil, err
 	}
