@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/google/uuid"
+	"strconv"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -58,6 +59,13 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, fmt.Sprintf("send user not found:%d", req.UserId))
 	utility.Assert(len(user.Email) > 0, fmt.Sprintf("send user email not found:%d", req.UserId))
+	if req.GatewayId <= 0 {
+		gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
+		if gatewayId > 0 {
+			req.GatewayId = gatewayId
+		}
+	}
+	utility.Assert(req.GatewayId > 0, "invalid gatewayId")
 	gateway := query.GetGatewayById(ctx, req.GatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
 

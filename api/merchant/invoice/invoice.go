@@ -74,7 +74,7 @@ type NewReq struct {
 	g.Meta        `path:"/new" tags:"Invoice" method:"post" summary:"NewInvoice"`
 	UserId        uint64                 `json:"userId" dc:"The userId of invoice" v:"required"`
 	TaxPercentage int64                  `json:"taxPercentage"  dc:"The tax percentage of invoice，1000=10%" v:"required" `
-	GatewayId     uint64                 `json:"gatewayId" dc:"The gateway id of invoice"   v:"required" `
+	GatewayId     uint64                 `json:"gatewayId" dc:"The gateway id of invoice" `
 	Currency      string                 `json:"currency"   dc:"The currency of invoice" v:"required" `
 	Name          string                 `json:"name"   dc:"The name of invoice" `
 	Lines         []*NewInvoiceItemParam `json:"lines"              `
