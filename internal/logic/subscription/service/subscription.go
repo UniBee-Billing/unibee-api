@@ -83,11 +83,11 @@ func VatNumberValidate(ctx context.Context, req *vat.NumberValidateReq) (*vat.Nu
 	if err != nil {
 		return nil, err
 	}
-	if vatNumberValidate.Valid {
-		vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, _interface.GetMerchantId(ctx), vatNumberValidate.CountryCode)
-		utility.Assert(err == nil, fmt.Sprintf("verify error:%s", err))
-		utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
-	}
+	//if vatNumberValidate.Valid {
+	//	vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, _interface.GetMerchantId(ctx), vatNumberValidate.CountryCode)
+	//	utility.Assert(err == nil, fmt.Sprintf("verify error:%s", err))
+	//	utility.Assert(vatCountryRate != nil, fmt.Sprintf("vatNumber not found for countryCode:%v", vatNumberValidate.CountryCode))
+	//}
 	return &vat.NumberValidateRes{VatNumberValidate: vatNumberValidate}, nil
 }
 
@@ -427,17 +427,23 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		utility.Assert(*req.TaxPercentage >= 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
 		subscriptionTaxPercentage = *req.TaxPercentage
 	} else if len(vatCountryCode) > 0 {
-		if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
-			vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-			if err == nil && vatCountryRate != nil {
-				vatCountryName = vatCountryRate.CountryName
-				if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
-					subscriptionTaxPercentage = 0
-				} else if vatCountryRate.StandardTaxPercentage > 0 {
-					subscriptionTaxPercentage = vatCountryRate.StandardTaxPercentage
-				}
-			}
+		var validVatNumber = ""
+		if vatNumberValidate != nil && vatNumberValidate.Valid {
+			validVatNumber = vatNumberValidate.VatNumber
 		}
+		taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, vatCountryCode, gatewayId, validVatNumber)
+		subscriptionTaxPercentage = taxPercentage
+		//if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
+		//	vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
+		//	if err == nil && vatCountryRate != nil {
+		//		vatCountryName = vatCountryRate.CountryName
+		//		if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
+		//			subscriptionTaxPercentage = 0
+		//		} else if vatCountryRate.StandardTaxPercentage > 0 {
+		//			subscriptionTaxPercentage = vatCountryRate.StandardTaxPercentage
+		//		}
+		//	}
+		//}
 	}
 
 	var currency = plan.Currency

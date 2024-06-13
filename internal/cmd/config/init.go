@@ -40,7 +40,6 @@ var (
 	nacosNamespaceArg                string
 	nacosGroupArg                    string
 	nacosDataIdArg                   string
-	VatNonEuEnable                   string
 	VatNumberUnExemptionCountryCodes string
 )
 
@@ -68,7 +67,6 @@ func Init() {
 	flag.StringVar(&nacosNamespaceArg, "nacos-namespace", utility.GetEnvParam("nacos.namespace"), "nacos namespace, default")
 	flag.StringVar(&nacosGroupArg, "nacos-group", utility.GetEnvParam("nacos.group"), "nacos group")
 	flag.StringVar(&nacosDataIdArg, "nacos-data-id", utility.GetEnvParam("nacos.data.id"), "nacos dataid like unibee-settings.yaml")
-	flag.StringVar(&VatNonEuEnable, "vat-non-eu-enable", utility.GetEnvParam("vat.non.eu.enable"), "vat config, non eu country enable vat rate")
 	flag.StringVar(&VatNumberUnExemptionCountryCodes, "vat-number-un-exemption-country-codes", utility.GetEnvParam("vat.number.un.exemption.country.codes"), "vat config, vat number not exemption countryCodes")
 
 	var ctx = gctx.New()
@@ -181,9 +179,6 @@ func SetupDefaultConfigs(ctx context.Context) {
 	//}
 	g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetContent(utility.MarshalToJsonString(config), DefaultConfigFileName)
 	SetConfig(utility.MarshalToJsonString(config))
-	if VatNonEuEnable != "" {
-		GetConfigInstance().VatConfig.NonEuEnable = VatNonEuEnable
-	}
 	if VatNumberUnExemptionCountryCodes != "" {
 		GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes = VatNumberUnExemptionCountryCodes
 	}
