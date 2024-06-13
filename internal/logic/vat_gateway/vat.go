@@ -5,12 +5,14 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"strings"
 	"unibee/api/bean"
-	"unibee/internal/cmd/config"
+	config2 "unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/subscription/config"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
 	"unibee/internal/logic/vat_gateway/vatstack"
@@ -301,11 +303,6 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 	}
 	// disable tax for non-eu country
 	var standardTaxPercentage = one.StandardTaxPercentage
-	if config.GetConfigInstance().VatConfig.NonEuEnable != "true" {
-		if one.Eu != 1 {
-			standardTaxPercentage = 0
-		}
-	}
 
 	return &bean.VatCountryRate{
 		Id:                    one.Id,
@@ -313,6 +310,53 @@ func QueryVatCountryRateByMerchant(ctx context.Context, merchantId uint64, count
 		CountryCode:           one.CountryCode,
 		CountryName:           one.CountryName,
 		VatSupport:            vatSupport,
+		IsEU:                  one.Eu == 1,
 		StandardTaxPercentage: standardTaxPercentage,
 	}, nil
+}
+
+type GatewayVATRule struct {
+	GatewayNames      string `json:"gatewayNames" dc:""`
+	ValidCountryCodes string `json:"validCountryCodes" dc:""`
+}
+
+func ComputeMerchantVatPercentage(ctx context.Context, merchantId uint64, countryCode string, gatewayId uint64, validVatNumber string) (taxPercentage int64, countryName string) {
+	if GetDefaultVatGateway(ctx, merchantId) != nil {
+		vatCountryRate, err := QueryVatCountryRateByMerchant(ctx, merchantId, countryCode)
+		if err == nil && vatCountryRate != nil {
+			countryName = vatCountryRate.CountryName
+			if len(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule) > 0 {
+				var gatewayName string
+				gateway := query.GetGatewayById(ctx, gatewayId)
+				if gateway != nil {
+					gatewayName = gateway.GatewayName
+				}
+				var gatewayVATRules = make([]*GatewayVATRule, 0)
+				_ = utility.UnmarshalFromJsonString(config.GetMerchantSubscriptionConfig(ctx, merchantId).GatewayVATRule, &gatewayVATRules)
+				for _, gatewayVatRule := range gatewayVATRules {
+					if gatewayVatRule.GatewayNames == "" {
+						continue
+					}
+					if gatewayVatRule.GatewayNames == "*" {
+						if strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
+							taxPercentage = vatCountryRate.StandardTaxPercentage
+							break
+						}
+					}
+					if strings.Contains(gatewayVatRule.GatewayNames, gatewayName) && strings.Contains(gatewayVatRule.ValidCountryCodes, countryCode) {
+						taxPercentage = vatCountryRate.StandardTaxPercentage
+						break
+					}
+				}
+			} else {
+				taxPercentage = vatCountryRate.StandardTaxPercentage
+			}
+			if len(validVatNumber) > 0 && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, countryCode) {
+				taxPercentage = 0
+			}
+		}
+	} else {
+		g.Log().Infof(ctx, "Default Vat Gateway Need Setup:"+strconv.FormatUint(merchantId, 10))
+	}
+	return taxPercentage, countryName
 }

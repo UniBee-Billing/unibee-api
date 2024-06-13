@@ -65,7 +65,6 @@ type MinioConfig struct {
 }
 
 type VatConfig struct {
-	NonEuEnable                   string `json:"nonEuEnable" yaml:"nonEuEnable"`
 	NumberUnExemptionCountryCodes string `json:"numberUnExemptionCountryCodes" yaml:"numberUnExemptionCountryCodes"`
 }
 

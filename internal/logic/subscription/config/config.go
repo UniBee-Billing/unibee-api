@@ -14,6 +14,7 @@ const (
 	InvoiceEmail                       = "InvoiceEmail"
 	TryAutomaticPaymentBeforePeriodEnd = "TryAutomaticPaymentBeforePeriodEnd"
 	FiatExchangeApiKey                 = "FiatExchangeApiKey"
+	GatewayVATRule                     = "GatewayVATRule"
 )
 
 func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (config *bean.SubscriptionConfig) {
@@ -24,6 +25,7 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 		IncompleteExpireTime:               24 * 60 * 60, // 24h expire after
 		InvoiceEmail:                       true,
 		TryAutomaticPaymentBeforePeriodEnd: 30 * 60, // 30 min before period
+		GatewayVATRule:                     "",
 	}
 	downgradeEffectImmediatelyConfig := merchant_config.GetMerchantConfig(ctx, merchantId, DowngradeEffectImmediately)
 	if downgradeEffectImmediatelyConfig != nil && downgradeEffectImmediatelyConfig.ConfigValue == "true" {
@@ -50,6 +52,10 @@ func GetMerchantSubscriptionConfig(ctx context.Context, merchantId uint64) (conf
 		if err == nil {
 			config.TryAutomaticPaymentBeforePeriodEnd = value
 		}
+	}
+	vatREPLACERuleConfig := merchant_config.GetMerchantConfig(ctx, merchantId, GatewayVATRule)
+	if vatREPLACERuleConfig != nil && len(vatREPLACERuleConfig.ConfigValue) > 0 {
+		config.GatewayVATRule = vatREPLACERuleConfig.ConfigValue
 	}
 	return config
 }
