@@ -2,7 +2,6 @@ package merchant
 
 import (
 	"context"
-	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/profile"
@@ -24,15 +23,7 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 	if _interface.Context().Get(ctx).MerchantMember != nil {
 		member = query.GetMerchantMemberById(ctx, _interface.Context().Get(ctx).MerchantMember.Id)
 		if member != nil {
-			if strings.Contains(member.Role, "Owner") {
-				isOwner = true
-			} else {
-				roleNameList := strings.Split(member.Role, ",")
-				for _, roleName := range roleNameList {
-					role := query.GetRoleByName(ctx, member.MerchantId, roleName)
-					memberRoles = append(memberRoles, bean.SimplifyMerchantRole(role))
-				}
-			}
+			isOwner, memberRoles = detail.ConvertMemberRole(ctx, member)
 		}
 	}
 	merchant := query.GetMerchantById(ctx, _interface.GetMerchantId(ctx))

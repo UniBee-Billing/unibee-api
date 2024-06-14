@@ -13,6 +13,7 @@ func (c *ControllerRole) Edit(ctx context.Context, req *role.EditReq) (res *role
 	utility.Assert(_interface.Context().Get(ctx).MerchantMember.IsOwner, "only owner can edit permission")
 	utility.Assert(len(req.Role) > 0, "invalid role")
 	err = role2.EditMerchantRole(ctx, &role2.CreateRoleInternalReq{
+		Id:             req.Id,
 		MerchantId:     _interface.GetMerchantId(ctx),
 		Role:           req.Role,
 		PermissionData: req.Permissions,
