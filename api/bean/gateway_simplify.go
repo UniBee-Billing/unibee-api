@@ -47,7 +47,7 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 		Id:                 one.Id,
 		GatewayLogo:        one.Logo,
 		GatewayName:        one.GatewayName,
-		DisplayName:        toUpperFirst(one.GatewayName),
+		DisplayName:        toUpperFirst(one.GatewayName, one.Name),
 		GatewayType:        one.GatewayType,
 		CountryConfig:      countryConfig,
 		CreateTime:         one.CreateTime,
@@ -60,7 +60,10 @@ func SimplifyGateway(one *entity.MerchantGateway) *GatewaySimplify {
 	}
 }
 
-func toUpperFirst(s string) string {
+func toUpperFirst(s string, target string) string {
+	if len(target) > 0 {
+		return target
+	}
 	if s == "" {
 		return s
 	}
