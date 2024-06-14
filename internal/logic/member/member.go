@@ -70,8 +70,6 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	if strings.Compare(member.Role, "Owner") == 0 {
 		return nil
 	}
-	role := query.GetRoleByName(ctx, merchantId, "Owner")
-	utility.Assert(role != nil, "owner role not found")
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
 		dao.MerchantMember.Columns().Role:      "",
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
