@@ -9,8 +9,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
 	"unibee/internal/logic/metric"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -181,7 +181,7 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		dao.MerchantMetricEvent.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricEvent.Columns().Id, list[0].Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Metric(%v)", met.Id),
 		Content:        "DeleteEvent",
 		UserId:         0,

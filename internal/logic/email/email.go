@@ -13,8 +13,8 @@ import (
 	"unibee/api/bean"
 	log2 "unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -79,7 +79,7 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 	if isDefault {
 		err = merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantEmailName, name)
 	}
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("EmailGateway(%s)-SetDefault(%v)", name, isDefault),
 		Content:        "SetupEmailGateway",
 		UserId:         0,

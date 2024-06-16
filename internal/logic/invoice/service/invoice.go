@@ -18,7 +18,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -133,7 +133,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		Tag:   redismq2.TopicInvoiceCreated.Tag,
 		Body:  one.InvoiceId,
 	})
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "New",
 		UserId:         one.UserId,
@@ -220,7 +220,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	one.TaxPercentage = req.TaxPercentage
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Edit",
 		UserId:         one.UserId,
@@ -258,7 +258,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 
-		member.AppendOptLog(ctx, &member.OptLogRequest{
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 			Content:        "Delete",
 			UserId:         one.UserId,
@@ -300,7 +300,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 		Body:  one.InvoiceId,
 	})
 
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Cancel",
 		UserId:         one.UserId,
@@ -407,7 +407,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Finish",
 		UserId:         one.UserId,
@@ -449,7 +449,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
 	})
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "NewRefund",
 		UserId:         one.UserId,
@@ -489,7 +489,7 @@ func MarkInvoiceRefundSuccess(ctx context.Context, merchantId uint64, invoiceId 
 	if err != nil {
 		g.Log().Errorf(ctx, "MarkInvoiceRefundSuccess invoiceId:%s error:%s", invoiceId, err.Error())
 	}
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkRefundSuccess",
 		UserId:         one.UserId,
@@ -525,7 +525,7 @@ func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
 	})
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkRefund",
 		UserId:         one.UserId,
@@ -579,7 +579,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	})
 	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
 	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkInvoiceAsSuccess(WireTransfer)",
 		UserId:         one.UserId,

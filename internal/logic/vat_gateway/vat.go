@@ -12,8 +12,8 @@ import (
 	config2 "unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
-	"unibee/internal/logic/member"
 	"unibee/internal/logic/merchant_config"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/config"
 	vat "unibee/internal/logic/vat_gateway/github"
 	"unibee/internal/logic/vat_gateway/vatsense"
@@ -70,7 +70,7 @@ func GetDefaultMerchantVatConfig(ctx context.Context, merchantId uint64) (vatNam
 func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName string, data string, isDefault bool) error {
 	utility.Assert(strings.Contains(VAT_IMPLEMENT_NAMES, vatName), "gateway not support, should be "+VAT_IMPLEMENT_NAMES)
 	err := merchant_config.SetMerchantConfig(ctx, merchantId, vatName, data)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Vat(%s)", vatName),
 		Content:        "SetupVatGateway",
 		UserId:         0,

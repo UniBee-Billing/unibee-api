@@ -24,6 +24,7 @@ type MerchantOperationLogColumns struct {
 	CompanyId          string // company id
 	MerchantId         string // merchant Id
 	MemberId           string // member_id
+	UserId             string // user_id
 	OptAccount         string // admin account
 	ClientType         string // client type
 	BizType            string // biz_type
@@ -37,7 +38,6 @@ type MerchantOperationLogColumns struct {
 	ServerType         string // server type
 	ServerTypeDesc     string // server type description
 	SubscriptionId     string // subscription_id
-	UserId             string // user_id
 	InvoiceId          string // invoice id
 	PlanId             string // plan id
 	DiscountCode       string // discount_code
@@ -49,6 +49,7 @@ var merchantOperationLogColumns = MerchantOperationLogColumns{
 	CompanyId:          "company_id",
 	MerchantId:         "merchant_id",
 	MemberId:           "member_id",
+	UserId:             "user_id",
 	OptAccount:         "opt_account",
 	ClientType:         "client_type",
 	BizType:            "biz_type",
@@ -62,7 +63,6 @@ var merchantOperationLogColumns = MerchantOperationLogColumns{
 	ServerType:         "server_type",
 	ServerTypeDesc:     "server_type_desc",
 	SubscriptionId:     "subscription_id",
-	UserId:             "user_id",
 	InvoiceId:          "invoice_id",
 	PlanId:             "plan_id",
 	DiscountCode:       "discount_code",

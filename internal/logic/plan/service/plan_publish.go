@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -37,7 +37,7 @@ func PlanActivate(ctx context.Context, planId uint64) error {
 	if affected != 1 {
 		return gerror.New("internal err, publish count != 1")
 	}
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "Activate",
 		UserId:         0,

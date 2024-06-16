@@ -12,7 +12,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/gateway/api"
 	gatewayWebhook "unibee/internal/logic/gateway/webhook"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -50,7 +50,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Setup",
 		UserId:         0,
@@ -80,7 +80,7 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 	one = query.GetGatewayById(ctx, gatewayId)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Edit",
 		UserId:         0,
@@ -102,7 +102,7 @@ func EditGatewayCountryConfig(ctx context.Context, merchantId uint64, gatewayId 
 		dao.MerchantGateway.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
 	utility.AssertError(err, "system error")
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "EditCountryConfig",
 		UserId:         0,
@@ -173,7 +173,7 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *e
 	utility.AssertError(err, "system error")
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Setup-WireTransfer",
 		UserId:         0,
@@ -199,7 +199,7 @@ func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *en
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
 	utility.AssertError(err, "system error")
 	one = query.GetGatewayById(ctx, req.GatewayId)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Edit-WireTransfer",
 		UserId:         0,

@@ -11,7 +11,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -99,7 +99,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
-		member.AppendOptLog(ctx, &member.OptLogRequest{
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 			Content:        "New",
 			UserId:         0,
@@ -123,7 +123,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 		}
 		one = query.GetMerchantWebhook(ctx, one.Id)
-		member.AppendOptLog(ctx, &member.OptLogRequest{
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 			Content:        "Update",
 			UserId:         0,
@@ -152,7 +152,7 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().WebhookEvents: strings.Join(events, SplitSep),
 		dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 		Content:        "Update",
 		UserId:         0,
@@ -182,7 +182,7 @@ func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().IsDeleted: 1,
 		dao.MerchantWebhook.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,

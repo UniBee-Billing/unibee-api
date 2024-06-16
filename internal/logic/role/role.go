@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -34,7 +34,7 @@ func NewMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 	result, err := dao.MerchantRole.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,
@@ -58,7 +58,7 @@ func EditMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		dao.MerchantRole.Columns().PermissionData: utility.MarshalToJsonString(req.PermissionData),
 		dao.MerchantRole.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "Edit",
 		UserId:         0,
@@ -78,7 +78,7 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,

@@ -8,7 +8,7 @@ import (
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/jwt"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -44,7 +44,7 @@ func FrozenUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().Status:    2,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Suspend",
 		UserId:         one.Id,
@@ -68,7 +68,7 @@ func ReleaseUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().Status:    0,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Resume",
 		UserId:         one.Id,
@@ -163,7 +163,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 	if one == nil {
 		// check email not exist
 		one, err = CreateUser(ctx, req)
-		member.AppendOptLog(ctx, &member.OptLogRequest{
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 			Target:         fmt.Sprintf("User(%v)", one.Id),
 			Content:        "New",
 			UserId:         one.Id,
@@ -182,7 +182,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().Email:     req.Email,
 				dao.UserAccount.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
-			member.AppendOptLog(ctx, &member.OptLogRequest{
+			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				Target:         fmt.Sprintf("User(%v)", one.Id),
 				Content:        "Update(Email)",
 				UserId:         one.Id,
@@ -201,7 +201,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
 				dao.UserAccount.Columns().GmtModify:      gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
-			member.AppendOptLog(ctx, &member.OptLogRequest{
+			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				Target:         fmt.Sprintf("User(%v)", one.Id),
 				Content:        "Update(ExternalUserId)",
 				UserId:         one.Id,

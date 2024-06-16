@@ -9,7 +9,7 @@ import (
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/time"
 	"unibee/utility"
@@ -41,7 +41,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if err != nil {
 		return nil, err
 	}
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Profile"),
 		Content:        "Update",
 		UserId:         0,

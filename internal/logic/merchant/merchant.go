@@ -10,7 +10,7 @@ import (
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/email"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -53,7 +53,7 @@ func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 		dao.Merchant.Columns().ApiKey:    apiKey,
 		dao.Merchant.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Merchant.Columns().Id, merchantId).Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("ApiKey(%v)", one.ApiKey),
 		Content:        fmt.Sprintf("NewApiKey(%v)", apiKey),
 		UserId:         0,

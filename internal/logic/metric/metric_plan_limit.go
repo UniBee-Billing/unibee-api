@@ -9,7 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -68,7 +68,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	one.Id = uint64(id)
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "NewPlanLimit",
 		UserId:         0,
@@ -111,7 +111,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	one.MetricLimit = req.MetricLimit
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "EditPlanLimit",
 		UserId:         0,
@@ -143,7 +143,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.PlanId, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "DeletePlanLimit",
 		UserId:         0,

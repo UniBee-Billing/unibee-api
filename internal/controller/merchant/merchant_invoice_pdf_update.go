@@ -10,7 +10,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -48,7 +48,7 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "update Invoice error")
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "PdfUpdate",
 		UserId:         one.UserId,

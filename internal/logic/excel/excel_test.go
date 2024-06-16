@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/xuri/excelize/v2"
-	"os"
 	"testing"
 )
 
@@ -50,7 +49,7 @@ func TestExcelStreamWrite(t *testing.T) {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
-		_ = os.Remove("test01.xlsx")
+		//_ = os.Remove("test01.xlsx")
 	})
 	t.Run("Test Non Stream Write 490000", func(t *testing.T) {
 		file := excelize.NewFile()

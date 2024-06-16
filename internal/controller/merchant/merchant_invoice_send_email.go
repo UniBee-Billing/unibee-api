@@ -6,7 +6,7 @@ import (
 	"unibee/api/merchant/invoice"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -20,7 +20,7 @@ func (c *ControllerInvoice) SendEmail(ctx context.Context, req *invoice.SendEmai
 	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "invalid MerchantId")
 	err = handler.SendInvoiceEmailToUser(ctx, req.InvoiceId, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Send",
 		UserId:         one.UserId,

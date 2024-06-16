@@ -11,7 +11,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -60,7 +60,7 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 			Body:  strconv.FormatUint(user.Id, 10),
 		})
 	}
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("User(%v)", user.Id),
 		Content:        "ChangeUserGateway",
 		UserId:         user.Id,

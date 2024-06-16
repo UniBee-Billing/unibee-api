@@ -9,7 +9,7 @@ import (
 	"unibee/api/merchant/user"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
@@ -81,7 +81,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Update",
 		UserId:         one.Id,

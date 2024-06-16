@@ -6,7 +6,7 @@ import (
 	"unibee/api/merchant/invoice"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
-	"unibee/internal/logic/member"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -21,7 +21,7 @@ func (c *ControllerInvoice) PdfGenerate(ctx context.Context, req *invoice.PdfGen
 		utility.Assert(false, "click too fast, please wait for second")
 	}
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
-	member.AppendOptLog(ctx, &member.OptLogRequest{
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "PdfGenerateAndSend",
 		UserId:         one.UserId,
