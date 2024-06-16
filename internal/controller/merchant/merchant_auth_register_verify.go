@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	"unibee/internal/logic/merchant"
 	"unibee/utility"
 
@@ -24,5 +24,5 @@ func (c *ControllerAuth) RegisterVerify(ctx context.Context, req *auth.RegisterV
 
 	_, member, err := merchant.CreateMerchant(ctx, createMerchantReq)
 
-	return &auth.RegisterVerifyRes{MerchantMember: bean.SimplifyMerchantMember(member)}, nil
+	return &auth.RegisterVerifyRes{MerchantMember: detail.ConvertMemberToDetail(ctx, member)}, nil
 }

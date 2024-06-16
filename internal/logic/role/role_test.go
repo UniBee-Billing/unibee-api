@@ -25,6 +25,7 @@ func TestMerchantRole(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, query.GetRoleByName(ctx, test.TestMerchant.Id, testRole))
 		err = EditMerchantRole(ctx, &CreateRoleInternalReq{
+			Id:         query.GetRoleByName(ctx, test.TestMerchant.Id, testRole).Id,
 			MerchantId: test.TestMerchant.Id,
 			Role:       testRole,
 			PermissionData: []*bean.MerchantRolePermission{{

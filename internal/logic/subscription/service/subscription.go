@@ -1490,7 +1490,7 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 			GmtModify:       one.GmtModify,
 			Paid:            one.Paid,
 			Link:            one.Link,
-			MerchantMember:  bean.SimplifyMerchantMember(query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
+			MerchantMember:  detail.ConvertMemberToDetail(ctx, query.GetMerchantMemberById(ctx, uint64(one.MerchantMemberId))),
 			EffectImmediate: one.EffectImmediate,
 			EffectTime:      one.EffectTime,
 			Note:            one.Note,

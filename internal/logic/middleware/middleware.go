@@ -267,6 +267,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				MerchantId: merchantAccount.MerchantId,
 				Token:      tokenString,
 				Email:      token.Email,
+				IsOwner:    strings.Compare(strings.Trim(merchantAccount.Role, " "), "Owner") == 0,
 			}
 			customCtx.MerchantId = merchantAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.MerchantMember.Id, 10), r)
