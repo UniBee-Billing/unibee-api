@@ -18,6 +18,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/member"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -132,6 +133,15 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		Tag:   redismq2.TopicInvoiceCreated.Tag,
 		Body:  one.InvoiceId,
 	})
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "New",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
 			InvoiceId: one.InvoiceId,
@@ -210,6 +220,15 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	one.TaxPercentage = req.TaxPercentage
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "Edit",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if req.Finish {
 		finishRes, err := FinishInvoice(ctx, &invoice.FinishReq{
 			InvoiceId: one.InvoiceId,
@@ -238,6 +257,17 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 			dao.Invoice.Columns().IsDeleted: 1,
 			dao.Invoice.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+
+		member.AppendOptLog(ctx, &member.OptLogRequest{
+			Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+			Content:        "Delete",
+			UserId:         one.UserId,
+			SubscriptionId: one.SubscriptionId,
+			InvoiceId:      one.InvoiceId,
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+
 		if err != nil {
 			return err
 		}
@@ -269,6 +299,16 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 		Tag:   redismq2.TopicInvoiceCancelled.Tag,
 		Body:  one.InvoiceId,
 	})
+
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "Cancel",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 
 	if len(one.RefundId) > 0 {
 		refund := query.GetRefundByRefundId(ctx, one.RefundId)
@@ -367,7 +407,15 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
-
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "Finish",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &invoice.FinishRes{Invoice: bean.SimplifyInvoice(one)}, nil
 }
 
@@ -401,6 +449,15 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
 	})
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "NewRefund",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		return nil, err
 	}
@@ -432,6 +489,15 @@ func MarkInvoiceRefundSuccess(ctx context.Context, merchantId uint64, invoiceId 
 	if err != nil {
 		g.Log().Errorf(ctx, "MarkInvoiceRefundSuccess invoiceId:%s error:%s", invoiceId, err.Error())
 	}
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "MarkRefundSuccess",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 }
 
 func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity.Refund, error) {
@@ -459,6 +525,15 @@ func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
 	})
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "MarkRefund",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		return nil, err
 	}
@@ -504,5 +579,14 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	})
 	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
 	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "MarkInvoiceAsSuccess(WireTransfer)",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return one, nil
 }

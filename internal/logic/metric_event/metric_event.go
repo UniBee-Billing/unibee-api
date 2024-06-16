@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	"unibee/internal/logic/metric"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -149,7 +150,6 @@ func NewMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 			g.Log().Errorf(backgroundCtx, "NewMerchantMetricEvent Update UsedValue err:%s", err.Error())
 		}
 	}()
-
 	return one, nil
 }
 
@@ -181,6 +181,15 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		dao.MerchantMetricEvent.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricEvent.Columns().Id, list[0].Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", met.Id),
+		Content:        "DeleteEvent",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		return err
 	}

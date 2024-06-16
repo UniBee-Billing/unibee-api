@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -95,6 +96,15 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+		Content:        "New",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   one.Code,
+	}, err)
 	return one, err
 }
 
@@ -144,6 +154,15 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 		return nil, err
 	}
 	one = query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+		Content:        "Edit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   one.Code,
+	}, err)
 	return one, err
 }
 
@@ -161,6 +180,15 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uin
 		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusActive,
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+		Content:        "Activate",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   one.Code,
+	}, err)
 	return err
 }
 
@@ -178,6 +206,15 @@ func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id u
 		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusDeActive,
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+		Content:        "Deactivate",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   one.Code,
+	}, err)
 	return err
 }
 
@@ -191,6 +228,15 @@ func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint6
 		dao.MerchantDiscountCode.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
+		Content:        "Delete",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   one.Code,
+	}, err)
 	return err
 }
 

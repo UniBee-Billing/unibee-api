@@ -9,6 +9,7 @@ import (
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/member"
 	"unibee/internal/query"
 	"unibee/time"
 	"unibee/utility"
@@ -40,6 +41,15 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 	if err != nil {
 		return nil, err
 	}
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Profile"),
+		Content:        "Update",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 
 	return &profile.UpdateRes{Merchant: bean.SimplifyMerchant(query.GetMerchantById(ctx, _interface.Context().Get(ctx).MerchantMember.MerchantId))}, nil
 }

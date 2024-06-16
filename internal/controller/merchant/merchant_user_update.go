@@ -2,12 +2,14 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean/detail"
 	"unibee/api/merchant/user"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/member"
 	user2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
@@ -79,6 +81,15 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().ZipCode:         req.ZipCode,
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("User(%v)", one.Id),
+		Content:        "Update",
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		return nil, err
 	}

@@ -38,6 +38,7 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 	var mainList = make([]*entity.MerchantOperationLog, 0)
 	query := dao.MerchantOperationLog.Ctx(ctx).
 		Where(dao.MerchantOperationLog.Columns().MerchantId, req.MerchantId).
+		WhereGT(dao.MerchantOperationLog.Columns().MemberId, 0).
 		Where(dao.MerchantOperationLog.Columns().IsDelete, 0).
 		Limit(req.Page*req.Count, req.Count)
 	if len(req.SubscriptionId) > 0 {

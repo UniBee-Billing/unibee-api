@@ -2,11 +2,13 @@ package role
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -29,7 +31,18 @@ func NewMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		PermissionData: utility.MarshalToJsonString(req.PermissionData),
 		CreateTime:     gtime.Now().Timestamp(),
 	}
-	_, err := dao.MerchantRole.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	result, err := dao.MerchantRole.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	id, _ := result.LastInsertId()
+	one.Id = uint64(uint(id))
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Role(%v)", one.Id),
+		Content:        "New",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 
@@ -45,6 +58,15 @@ func EditMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		dao.MerchantRole.Columns().PermissionData: utility.MarshalToJsonString(req.PermissionData),
 		dao.MerchantRole.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Role(%v)", one.Id),
+		Content:        "Edit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 
@@ -56,6 +78,15 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Role(%v)", one.Id),
+		Content:        "Delete",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 

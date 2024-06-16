@@ -10,6 +10,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/member"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -17,6 +18,7 @@ import (
 func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdateReq) (res *invoice.PdfUpdateRes, err error) {
 	utility.Assert(len(req.InvoiceId) > 0, "invalid InvoiceId")
 	one := query.GetInvoiceByInvoiceId(ctx, req.InvoiceId)
+	utility.Assert(one != nil, "invoice not found")
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "invalid MerchantId")
 	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
@@ -46,5 +48,14 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	}).Where(dao.Invoice.Columns().Id, one.Id).OmitNil().Update()
 	utility.AssertError(err, "update Invoice error")
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "PdfUpdate",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &invoice.PdfUpdateRes{}, nil
 }

@@ -15,6 +15,7 @@ type Context struct {
 	RequestId      string
 	Data           g.Map
 	OpenApiConfig  *entity.OpenApiConfig
+	OpenApiKey     string
 	IsOpenApiCall  bool
 }
 

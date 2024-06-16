@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/interface"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -37,6 +38,15 @@ func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
 		g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
 	}
 	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Gateway(%v-%s)", gateway.Id, gateway.GatewayName),
+		Content:        "CheckAndSetupWebhook",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 }
 
 func SetupAllWebhooksBackground() {

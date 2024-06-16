@@ -8,6 +8,7 @@ import (
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/jwt"
+	"unibee/internal/logic/member"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -43,6 +44,15 @@ func FrozenUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().Status:    2,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("User(%v)", one.Id),
+		Content:        "Suspend",
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	utility.AssertError(err, "server error")
 	sub := query.GetLatestActiveOrIncompleteOrCreateSubscriptionByUserId(ctx, one.Id, one.MerchantId)
 	if sub != nil {
@@ -58,6 +68,15 @@ func ReleaseUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().Status:    0,
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("User(%v)", one.Id),
+		Content:        "Resume",
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	utility.AssertError(err, "server error")
 }
 
@@ -144,6 +163,15 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 	if one == nil {
 		// check email not exist
 		one, err = CreateUser(ctx, req)
+		member.AppendOptLog(ctx, &member.OptLogRequest{
+			Target:         fmt.Sprintf("User(%v)", one.Id),
+			Content:        "New",
+			UserId:         one.Id,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		utility.AssertError(err, "Server Error")
 	} else {
 		if strings.Compare(one.Email, req.Email) != 0 {
@@ -154,6 +182,15 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().Email:     req.Email,
 				dao.UserAccount.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+			member.AppendOptLog(ctx, &member.OptLogRequest{
+				Target:         fmt.Sprintf("User(%v)", one.Id),
+				Content:        "Update(Email)",
+				UserId:         one.Id,
+				SubscriptionId: "",
+				InvoiceId:      "",
+				PlanId:         0,
+				DiscountCode:   "",
+			}, err)
 			utility.AssertError(err, "Server Error")
 		}
 		if strings.Compare(one.ExternalUserId, req.ExternalUserId) != 0 {
@@ -164,6 +201,15 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().ExternalUserId: req.ExternalUserId,
 				dao.UserAccount.Columns().GmtModify:      gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+			member.AppendOptLog(ctx, &member.OptLogRequest{
+				Target:         fmt.Sprintf("User(%v)", one.Id),
+				Content:        "Update(ExternalUserId)",
+				UserId:         one.Id,
+				SubscriptionId: "",
+				InvoiceId:      "",
+				PlanId:         0,
+				DiscountCode:   "",
+			}, err)
 			utility.AssertError(err, "Server Error")
 		}
 		utility.Assert(one.Status == 0, "account status abnormal")

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -37,6 +38,15 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 	}
 	body := []byte(one.Body)
 	res, err := utility.SendRequest(one.WebhookUrl, "POST", body, headers)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("WebhookEndpointLog(%v)", one.Id),
+		Content:        "Resent",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, nil)
 	var response = string(res)
 	if err != nil {
 		response = utility.MarshalToJsonString(err)

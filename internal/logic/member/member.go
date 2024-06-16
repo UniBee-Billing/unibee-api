@@ -35,6 +35,15 @@ func ChangeMerchantMemberPasswordWithOutOldVerify(ctx context.Context, email str
 		dao.MerchantMember.Columns().Password:  utility.PasswordEncrypt(newPassword),
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+	AppendOptLog(ctx, &OptLogRequest{
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "ChangePasswordByVerifyCode",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	utility.AssertError(err, "server error")
 }
 
@@ -46,6 +55,15 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 		dao.MerchantMember.Columns().Password:  utility.PasswordEncrypt(newPassword),
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+	AppendOptLog(ctx, &OptLogRequest{
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "ChangePassword",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	utility.AssertError(err, "server error")
 }
 
@@ -61,6 +79,15 @@ func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, r
 		dao.MerchantMember.Columns().Role:      utility.MarshalToJsonString(roleIds),
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, memberId).Where(dao.MerchantMember.Columns().MerchantId, merchantId).OmitNil().Update()
+	AppendOptLog(ctx, &OptLogRequest{
+		Target:         fmt.Sprintf("Member(%v)", member.Id),
+		Content:        "UpdateRole",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 
@@ -112,6 +139,15 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		UserName: merchantMasterMember.FirstName + " " + merchantMasterMember.LastName,
 		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
 	})
+	AppendOptLog(ctx, &OptLogRequest{
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "New",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	utility.AssertError(err, "AddMerchantMember")
 	return nil
 }

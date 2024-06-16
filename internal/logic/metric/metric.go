@@ -2,12 +2,14 @@ package metric
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -84,7 +86,15 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
-
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "New",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
@@ -104,7 +114,15 @@ func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64,
 	}
 	one.MetricName = name
 	one.MetricDescription = description
-
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "Edit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return bean.SimplifyMerchantMetric(one), nil
 }
 
@@ -117,6 +135,15 @@ func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId uint6
 		dao.MerchantMetric.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantMetric.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "Delete",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 

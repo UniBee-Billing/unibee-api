@@ -290,6 +290,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			_interface.OpenApiJsonExit(r, 61, "invalid token")
 		} else {
 			customCtx.MerchantId = merchantInfo.Id
+			customCtx.OpenApiKey = tokenString
 		}
 	}
 

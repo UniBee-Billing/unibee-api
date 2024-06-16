@@ -11,6 +11,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consumer/webhook/event"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -98,7 +99,15 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 		}
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
-
+		member.AppendOptLog(ctx, &member.OptLogRequest{
+			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
+			Content:        "New",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		return one, nil
 	} else {
 		utility.Assert(one.IsDeleted != 0, "endpoint already exist")
@@ -114,6 +123,15 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 			return nil, gerror.NewCode(gcode.New(500, "server error", nil))
 		}
 		one = query.GetMerchantWebhook(ctx, one.Id)
+		member.AppendOptLog(ctx, &member.OptLogRequest{
+			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
+			Content:        "Update",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 		return one, nil
 	}
 }
@@ -134,6 +152,15 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().WebhookEvents: strings.Join(events, SplitSep),
 		dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
+		Content:        "Update",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		g.Log().Errorf(ctx, "UpdateMerchantWebhookEndpoint Update err:%s", err.Error())
 		return gerror.NewCode(gcode.New(500, "server error", nil))
@@ -155,6 +182,15 @@ func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().IsDeleted: 1,
 		dao.MerchantWebhook.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitNil().Update()
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
+		Content:        "Delete",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 

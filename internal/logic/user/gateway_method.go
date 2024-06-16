@@ -11,6 +11,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -59,6 +60,15 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 			Body:  strconv.FormatUint(user.Id, 10),
 		})
 	}
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("User(%v)", user.Id),
+		Content:        "ChangeUserGateway",
+		UserId:         user.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 }
 
 func VerifyPaymentGatewayMethod(ctx context.Context, userId uint64, reqGatewayId *uint64, reqPaymentMethodId string, subscriptionId string) (gatewayId uint64, paymentMethodId string) {

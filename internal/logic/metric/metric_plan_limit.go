@@ -2,12 +2,14 @@ package metric
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gcode"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -66,6 +68,15 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	one.Id = uint64(id)
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "NewPlanLimit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &bean.MerchantMetricPlanLimit{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
@@ -100,6 +111,15 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	one.MetricLimit = req.MetricLimit
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "EditPlanLimit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return &bean.MerchantMetricPlanLimit{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
@@ -123,6 +143,15 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	}).Where(dao.MerchantMetricPlanLimit.Columns().Id, one.Id).OmitNil().Update()
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.PlanId, true)
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Metric(%v)", one.Id),
+		Content:        "DeletePlanLimit",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return err
 }
 

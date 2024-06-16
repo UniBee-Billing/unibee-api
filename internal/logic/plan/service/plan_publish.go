@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	"unibee/internal/query"
 	"unibee/utility"
 )
@@ -35,6 +37,15 @@ func PlanActivate(ctx context.Context, planId uint64) error {
 	if affected != 1 {
 		return gerror.New("internal err, publish count != 1")
 	}
+	member.AppendOptLog(ctx, &member.OptLogRequest{
+		Target:         fmt.Sprintf("Plan(%v)", one.Id),
+		Content:        "Activate",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         one.Id,
+		DiscountCode:   "",
+	}, err)
 	return nil
 }
 
