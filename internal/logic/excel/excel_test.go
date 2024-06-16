@@ -8,36 +8,37 @@ import (
 	"testing"
 )
 
+// Document Link: https://blog.csdn.net/qq_23118345/article/details/126706626
 func TestExcelStreamWrite(t *testing.T) {
 	t.Run("Test Stream Write 490000", func(t *testing.T) {
 		file := excelize.NewFile()
-		//设置表名
-		err := file.SetSheetName("Sheet1", "表1")
+		//Set Header
+		err := file.SetSheetName("Sheet1", "Table1")
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
-		//创建流式写入
-		writer, err := file.NewStreamWriter("表1")
-		//修改列宽
+		//Create Stream Writer
+		writer, err := file.NewStreamWriter("Table1")
+		//Update Width Height
 		err = writer.SetColWidth(1, 15, 12)
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
-		//设置表头
-		err = writer.SetRow("A1", []interface{}{"测试列名1", "测试列名2", "测试列名3", "测试列名4", "测试列名5", "测试列名6", "测试列名7", "测试列名8", "测试列名9", "测试列名10", "测试列名11", "测试列名12", "测试列名13", "测试列名14", "测试列名15"})
+		//Set Header
+		err = writer.SetRow("A1", []interface{}{"TestRow1", "TestRow2", "TestRow3", "TestRow4", "TestRow5", "TestRow6", "TestRow7", "TestRow8", "TestRow9", "TestRow10", "TestRow11", "TestRow12", "TestRow13", "TestRow14", "TestRow15"})
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
 		for i := 1; i <= 490000; i++ {
-			//索引转单元格坐标
+			//Index to Table column
 			cell, _ := excelize.CoordinatesToCellName(1, i+1)
-			//添加的数据
-			_ = writer.SetRow(cell, []interface{}{"测试数据1", "测试数据2", "测试数据3", "测试数据4", "测试数据5", "测试数据6", "测试数据7", "测试数据8", "测试数据9", "测试数据10", "测试数据11", "测试数据12", "测试数据13", "测试数据14", "测试数据15"})
+			//Append Data
+			_ = writer.SetRow(cell, []interface{}{"TestData1", "TestData2", "TestData3", "TestData4", "TestData5", "TestData6", "TestData7", "TestData8", "TestData9", "TestData10", "TestData11", "TestData12", "TestData13", "TestData14", "TestData15"})
 		}
-		//结束流式写入
+		//End Stream Writer
 		err = writer.Flush()
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())
@@ -49,5 +50,22 @@ func TestExcelStreamWrite(t *testing.T) {
 			return
 		}
 		_ = os.Remove("test01.xlsx")
+	})
+	t.Run("Test Non Stream Write 490000", func(t *testing.T) {
+		file := excelize.NewFile()
+		//Set Table Name
+		_ = file.SetSheetName("Sheet1", "Table1")
+		//Update Width Height
+		_ = file.SetColWidth("Table1", "A", "O", 12)
+		//Set Header
+		_ = file.SetSheetRow("Table1", "A1", &[]interface{}{"TestRow1", "TestRow2", "TestRow3", "TestRow4", "TestRow5", "TestRow6", "TestRow7", "TestRow8", "TestRow9", "TestRow10", "TestRow11", "TestRow12", "TestRow13", "TestRow14", "TestRow15"})
+		for i := 1; i <= 1000000; i++ {
+			//Index to Table column
+			cell, _ := excelize.CoordinatesToCellName(1, i+1)
+			//Append Data
+			_ = file.SetSheetRow("Table1", cell, &[]interface{}{"TestData1", "TestData2", "TestData3", "TestData4", "TestData5", "TestData6", "TestData7", "TestData8", "TestData9", "TestData10", "TestData11", "TestData12", "TestData13", "TestData14", "TestData15"})
+		}
+		//Save File
+		_ = file.SaveAs("test01.xlsx")
 	})
 }
