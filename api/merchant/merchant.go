@@ -97,6 +97,7 @@ type IMerchantMember interface {
 	List(ctx context.Context, req *member.ListReq) (res *member.ListRes, err error)
 	UpdateMemberRole(ctx context.Context, req *member.UpdateMemberRoleReq) (res *member.UpdateMemberRoleRes, err error)
 	NewMember(ctx context.Context, req *member.NewMemberReq) (res *member.NewMemberRes, err error)
+	OperationLogList(ctx context.Context, req *member.OperationLogListReq) (res *member.OperationLogListRes, err error)
 }
 
 type IMerchantMetric interface {

@@ -13,7 +13,7 @@ type MerchantOperationLog struct {
 	Id                 uint64      `json:"id"                 description:"id"`                        // id
 	CompanyId          int64       `json:"companyId"          description:"company id"`                // company id
 	MerchantId         uint64      `json:"merchantId"         description:"merchant Id"`               // merchant Id
-	UserId             int64       `json:"userId"             description:"user_id"`                   // user_id
+	MemberId           uint64      `json:"memberId"           description:"member_id"`                 // member_id
 	OptAccount         string      `json:"optAccount"         description:"admin account"`             // admin account
 	ClientType         int         `json:"clientType"         description:"client type"`               // client type
 	BizType            int         `json:"bizType"            description:"biz_type"`                  // biz_type
@@ -26,4 +26,9 @@ type MerchantOperationLog struct {
 	QueryportRequestId string      `json:"queryportRequestId" description:"queryport id"`              // queryport id
 	ServerType         int         `json:"serverType"         description:"server type"`               // server type
 	ServerTypeDesc     string      `json:"serverTypeDesc"     description:"server type description"`   // server type description
+	SubscriptionId     string      `json:"subscriptionId"     description:"subscription_id"`           // subscription_id
+	UserId             uint64      `json:"userId"             description:"user_id"`                   // user_id
+	InvoiceId          string      `json:"invoiceId"          description:"invoice id"`                // invoice id
+	PlanId             uint64      `json:"planId"             description:"plan id"`                   // plan id
+	DiscountCode       string      `json:"discountCode"       description:"discount_code"`             // discount_code
 }

@@ -15,7 +15,7 @@ type MerchantOperationLog struct {
 	Id                 interface{} // id
 	CompanyId          interface{} // company id
 	MerchantId         interface{} // merchant Id
-	UserId             interface{} // user_id
+	MemberId           interface{} // member_id
 	OptAccount         interface{} // admin account
 	ClientType         interface{} // client type
 	BizType            interface{} // biz_type
@@ -28,4 +28,9 @@ type MerchantOperationLog struct {
 	QueryportRequestId interface{} // queryport id
 	ServerType         interface{} // server type
 	ServerTypeDesc     interface{} // server type description
+	SubscriptionId     interface{} // subscription_id
+	UserId             interface{} // user_id
+	InvoiceId          interface{} // invoice id
+	PlanId             interface{} // plan id
+	DiscountCode       interface{} // discount_code
 }

@@ -57,3 +57,22 @@ type NewMemberReq struct {
 
 type NewMemberRes struct {
 }
+
+type OperationLogListReq struct {
+	g.Meta          `path:"/operation_log_list" tags:"Member" method:"get" summary:"GetMemberOperationLogList"`
+	MemberFirstName string `json:"memberFirstName" description:"Filter Member's FirstName Default All" `
+	MemberLastName  string `json:"memberLastName" description:"Filter Member's LastName, Default All" `
+	FirstName       string `json:"firstName" description:"FirstName" `
+	LastName        string `json:"lastName" description:"LastName" `
+	SubscriptionId  string `json:"subscriptionId"     description:"subscription_id"` // subscription_id
+	InvoiceId       string `json:"invoiceId"          description:"invoice id"`      // invoice id
+	PlanId          uint64 `json:"planId"             description:"plan id"`         // plan id
+	DiscountCode    string `json:"discountCode"       description:"discount_code"`   // discount_code
+	Page            int    `json:"page"  description:"Page, Start With 0" `
+	Count           int    `json:"count"  description:"Count Of Page"`
+}
+
+type OperationLogListRes struct {
+	MerchantOperationLogs []*detail.MerchantOperationLogDetail `json:"merchantOperationLogs" dc:"Merchant Member Operation Log List"`
+	Total                 int                                  `json:"total" dc:"Total"`
+}
