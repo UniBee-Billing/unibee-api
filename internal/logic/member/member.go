@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"strconv"
 	"strings"
 	"unibee/internal/cmd/config"
 	dao "unibee/internal/dao/oversea_pay"
@@ -48,17 +49,16 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 	utility.AssertError(err, "server error")
 }
 
-func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roles string) error {
+func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roleIds []uint64) error {
 	member := query.GetMerchantMemberById(ctx, memberId)
 	utility.Assert(member != nil, "member not found")
-	utility.Assert(strings.Compare(member.Role, "Owner") == 0, "Cannot Update Owner's Role")
-	roleList := strings.Split(roles, ",")
-	for _, roleName := range roleList {
-		role := query.GetRoleByName(ctx, merchantId, roleName)
-		utility.Assert(role != nil, "role "+roleName+" not found")
+	utility.Assert(strings.Compare(member.Role, "Owner") == 0, "Can't Update Owner's Role")
+	for _, roleId := range roleIds {
+		role := query.GetRoleById(ctx, roleId)
+		utility.Assert(role != nil, "roleId "+strconv.FormatUint(roleId, 10)+" not found")
 	}
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
-		dao.MerchantMember.Columns().Role:      roles,
+		dao.MerchantMember.Columns().Role:      utility.MarshalToJsonString(roleIds),
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, memberId).Where(dao.MerchantMember.Columns().MerchantId, merchantId).OmitNil().Update()
 	return err
@@ -70,8 +70,6 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	if strings.Compare(member.Role, "Owner") == 0 {
 		return nil
 	}
-	role := query.GetRoleByName(ctx, merchantId, "Owner")
-	utility.Assert(role != nil, "owner role not found")
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
 		dao.MerchantMember.Columns().Role:      "",
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
@@ -89,14 +87,12 @@ func TransferOwnerMember(ctx context.Context, merchantId uint64, memberId uint64
 	return err
 }
 
-func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, roles string) error {
+func AddMerchantMember(ctx context.Context, merchantId uint64, email string, firstName string, lastName string, roleIds []uint64) error {
 	one := query.GetMerchantMemberByEmail(ctx, email)
 	utility.Assert(one == nil, "email exist")
-	utility.Assert(strings.Compare(roles, "Owner") != 0, "can not add owner as a member")
-	roleList := strings.Split(roles, ",")
-	for _, roleName := range roleList {
-		role := query.GetRoleByName(ctx, merchantId, roleName)
-		utility.Assert(role != nil, "role "+roleName+" not found")
+	for _, roleId := range roleIds {
+		role := query.GetRoleById(ctx, roleId)
+		utility.Assert(role != nil, "roleId "+strconv.FormatUint(roleId, 10)+" not found")
 	}
 
 	merchantMasterMember := &entity.MerchantMember{
@@ -105,7 +101,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		CreateTime: gtime.Now().Timestamp(),
 		FirstName:  firstName,
 		LastName:   lastName,
-		Role:       roles,
+		Role:       utility.MarshalToJsonString(roleIds),
 	}
 
 	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)

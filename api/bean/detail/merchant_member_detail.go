@@ -2,7 +2,8 @@ package detail
 
 import (
 	"context"
-	"fmt"
+	"strconv"
+	"strings"
 	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -10,26 +11,19 @@ import (
 )
 
 type MerchantMemberDetail struct {
-	Id          uint64                         `json:"id"         description:"userId"`          // userId
-	MerchantId  uint64                         `json:"merchantId" description:"merchant id"`     // merchant id
-	Email       string                         `json:"email"      description:"email"`           // email
-	FirstName   string                         `json:"firstName"  description:"first name"`      // first name
-	LastName    string                         `json:"lastName"   description:"last name"`       // last name
-	CreateTime  int64                          `json:"createTime" description:"create utc time"` // create utc time
-	Mobile      string                         `json:"mobile"     description:"mobile"`          // mobile
-	Role        string                         `json:"role"       description:"role"`            // role
-	Permissions []*bean.MerchantRolePermission `json:"permissions" description:"permissions"`
+	Id          uint64                       `json:"id"         description:"userId"`          // userId
+	MerchantId  uint64                       `json:"merchantId" description:"merchant id"`     // merchant id
+	Email       string                       `json:"email"      description:"email"`           // email
+	FirstName   string                       `json:"firstName"  description:"first name"`      // first name
+	LastName    string                       `json:"lastName"   description:"last name"`       // last name
+	CreateTime  int64                        `json:"createTime" description:"create utc time"` // create utc time
+	Mobile      string                       `json:"mobile"     description:"mobile"`          // mobile
+	IsOwner     bool                         `json:"isOwner" description:"Check Member is Owner" `
+	MemberRoles []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
 }
 
 func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *MerchantMemberDetail {
-	role := query.GetRoleByName(ctx, one.MerchantId, one.Role)
-	var permissionData = make([]*bean.MerchantRolePermission, 0)
-	if role != nil {
-		err := utility.UnmarshalFromJsonString(role.PermissionData, &permissionData)
-		if err != nil {
-			fmt.Printf("ConvertRolePermissions err:%s", err)
-		}
-	}
+	isOwner, memberRoles := ConvertMemberRole(ctx, one)
 	return &MerchantMemberDetail{
 		Id:          one.Id,
 		MerchantId:  one.MerchantId,
@@ -38,7 +32,29 @@ func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *Mer
 		LastName:    one.LastName,
 		CreateTime:  one.CreateTime,
 		Mobile:      one.Mobile,
-		Role:        one.Role,
-		Permissions: permissionData,
+		IsOwner:     isOwner,
+		MemberRoles: memberRoles,
 	}
+}
+
+func ConvertMemberRole(ctx context.Context, member *entity.MerchantMember) (isOwner bool, memberRoles []*bean.MerchantRoleSimplify) {
+	memberRoles = make([]*bean.MerchantRoleSimplify, 0)
+	if member != nil {
+		if strings.Contains(member.Role, "Owner") {
+			isOwner = true
+		} else {
+			var roleIdList = make([]string, 0)
+			_ = utility.UnmarshalFromJsonString(member.Role, &roleIdList)
+			for _, roleIdStr := range roleIdList {
+				roleId, _ := strconv.ParseUint(roleIdStr, 10, 64)
+				if roleId > 0 {
+					role := query.GetRoleById(ctx, roleId)
+					if role != nil {
+						memberRoles = append(memberRoles, bean.SimplifyMerchantRole(role))
+					}
+				}
+			}
+		}
+	}
+	return isOwner, memberRoles
 }

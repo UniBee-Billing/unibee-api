@@ -39,6 +39,7 @@ func TestContext(t *testing.T) {
 			Id:         test.TestMerchantMember.Id,
 			MerchantId: test.TestMerchant.Id,
 			Email:      test.TestMerchantMember.Email,
+			IsOwner:    true,
 		})
 		_interface.Context().SetData(r.Context(), g.Map{})
 		_interface.Context().Get(r.Context()).MerchantId = test.TestMerchant.Id

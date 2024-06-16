@@ -7,7 +7,7 @@ import (
 )
 
 type MerchantRoleSimplify struct {
-	Id          uint64                    `json:"id"             description:"userId"`      // userId
+	Id          uint64                    `json:"id"             description:"id"`          // id
 	MerchantId  uint64                    `json:"merchantId"     description:"merchant id"` // merchant id
 	Role        string                    `json:"role"           description:"role"`        // role
 	Permissions []*MerchantRolePermission `json:"permissions" description:"permissions"`

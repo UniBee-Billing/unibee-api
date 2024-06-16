@@ -25,6 +25,7 @@ type NewRes struct {
 
 type EditReq struct {
 	g.Meta      `path:"/edit" tags:"Role" method:"post" summary:"EditRole"`
+	Id          uint64                         `json:"id" dc:"id" v:"required"`
 	Role        string                         `json:"role" dc:"Role" v:"required"`
 	Permissions []*bean.MerchantRolePermission `json:"permissions" dc:"Permissions" v:"required"`
 }
@@ -34,7 +35,7 @@ type EditRes struct {
 
 type DeleteReq struct {
 	g.Meta `path:"/delete" tags:"Role" method:"post" summary:"DeleteRole"`
-	Role   string `json:"role" dc:"Role" v:"required"`
+	Id     uint64 `json:"id" dc:"id" v:"required"`
 }
 
 type DeleteRes struct {

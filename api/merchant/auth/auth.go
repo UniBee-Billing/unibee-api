@@ -2,7 +2,6 @@ package auth
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
-	"unibee/api/bean"
 	"unibee/api/bean/detail"
 )
 
@@ -73,5 +72,5 @@ type RegisterVerifyReq struct {
 }
 
 type RegisterVerifyRes struct {
-	MerchantMember *bean.MerchantMemberSimplify `json:"merchantMember" dc:"Merchant Member Object"`
+	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"Merchant Member Object"`
 }

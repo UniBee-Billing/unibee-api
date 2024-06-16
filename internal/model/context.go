@@ -30,4 +30,5 @@ type ContextMerchantMember struct {
 	MerchantId uint64
 	Token      string
 	Email      string
+	IsOwner    bool
 }
