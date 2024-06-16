@@ -13,7 +13,7 @@ func TestUserCreateAndDelete(t *testing.T) {
 	ctx := context.Background()
 	var one *entity.UserAccount
 	var err error
-	t.Run("Test for User Create|Login|ChangePassword|Frozen|Relase", func(t *testing.T) {
+	t.Run("Test for User Create|Login|ChangePassword|Frozen|Release", func(t *testing.T) {
 		one, err = CreateUser(ctx, &NewReq{
 			ExternalUserId: "auto_x_2",
 			Email:          "autotestuser@wowow.io",
