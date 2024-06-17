@@ -69,7 +69,7 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 			if err != nil {
 				g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, error:%s", userId, countryCode, err.Error())
 			} else {
-				g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
+				g.Log().Infof(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
 			}
 			//}
 		}
