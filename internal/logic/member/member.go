@@ -73,7 +73,7 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, roleIds []uint64) error {
 	member := query.GetMerchantMemberById(ctx, memberId)
 	utility.Assert(member != nil, "member not found")
-	utility.Assert(strings.Compare(member.Role, "Owner") == 0, "Can't Update Owner's Role")
+	utility.Assert(strings.Compare(member.Role, "Owner") != 0, "Can't Update Owner's Role")
 	for _, roleId := range roleIds {
 		role := query.GetRoleById(ctx, roleId)
 		utility.Assert(role != nil, "roleId "+strconv.FormatUint(roleId, 10)+" not found")
