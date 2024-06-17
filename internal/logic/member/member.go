@@ -126,7 +126,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		utility.Assert(role != nil, "roleId "+strconv.FormatUint(roleId, 10)+" not found")
 	}
 
-	merchantMasterMember := &entity.MerchantMember{
+	one = &entity.MerchantMember{
 		MerchantId: merchantId,
 		Email:      email,
 		CreateTime: gtime.Now().Timestamp(),
@@ -135,17 +135,19 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		Role:       utility.MarshalToJsonString(roleIds),
 	}
 
-	_, err := dao.MerchantMember.Ctx(ctx).Data(merchantMasterMember).OmitNil().Insert(merchantMasterMember)
+	result, err := dao.MerchantMember.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	if err != nil {
 		return err
 	}
+	id, _ := result.LastInsertId()
+	one.Id = uint64(id)
 	err = email2.SendTemplateEmail(ctx, merchantId, email, "", email2.TemplateMerchantMemberInvite, "", &email2.TemplateVariable{
-		UserName: merchantMasterMember.FirstName + " " + merchantMasterMember.LastName,
+		UserName: one.FirstName + " " + one.LastName,
 		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-		MerchantId:     merchantMasterMember.MerchantId,
-		Target:         fmt.Sprintf("Member(%v)", merchantMasterMember.Id),
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,
 		SubscriptionId: "",
