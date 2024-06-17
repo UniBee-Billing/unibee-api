@@ -45,7 +45,7 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 		optAccount = fmt.Sprintf("OpenApi(%v)", _interface.Context().Get(superCtx).OpenApiKey)
 	} else {
 		memberId = 0
-		optAccount = fmt.Sprintf("Unknown")
+		optAccount = fmt.Sprintf("System")
 	}
 	operationLog := &entity.MerchantOperationLog{
 		CompanyId:      0,
@@ -68,8 +68,8 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 		DiscountCode:   req.DiscountCode,
 	}
 	if memberId <= 0 {
-		if optAccount == "Unknown" {
-			g.Log().Errorf(superCtx, "Receive UnknownOperationLog:%s", utility.MarshalToJsonString(operationLog))
+		if optAccount == "System" {
+			g.Log().Debugf(superCtx, "Receive SystemOperationLog:%s", utility.MarshalToJsonString(operationLog))
 		} else {
 			g.Log().Debugf(superCtx, "Receive OpenApiOperationLog:%s", utility.MarshalToJsonString(operationLog))
 		}
