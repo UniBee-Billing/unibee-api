@@ -62,6 +62,17 @@ func (p GatewayWebhookProxy) GatewayWebhook(r *ghttp.Request, gateway *entity.Me
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayWebhook cost：%s \n", time.Now().Sub(startTime))
 }
 func (p GatewayWebhookProxy) GatewayRedirect(r *ghttp.Request, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayRedirectResp, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			printChannelPanic(r.Context(), err)
+			return
+		}
+	}()
 	startTime := time.Now()
 	res, err = p.getRemoteGateway().GatewayRedirect(r, gateway)
 	glog.Infof(r.Context(), "MeasureChannelFunction:GatewayRedirect cost：%s \n", time.Now().Sub(startTime))
