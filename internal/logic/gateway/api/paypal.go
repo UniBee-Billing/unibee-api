@@ -39,8 +39,7 @@ type Paypal struct {
 }
 
 func (p Paypal) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
@@ -48,8 +47,7 @@ func (p Paypal) GatewayRefundCancel(ctx context.Context, payment *entity.Payment
 }
 
 func (p Paypal) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {
@@ -65,33 +63,27 @@ func (p Paypal) GatewayTest(ctx context.Context, key string, secret string) (ico
 }
 
 func (p Paypal) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayRefundList(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string) (res []*gateway_bean.GatewayPaymentRefundResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayPaymentDetail(ctx context.Context, gateway *entity.MerchantGateway, gatewayPaymentId string, payment *entity.Payment) (res *gateway_bean.GatewayPaymentRo, err error) {
@@ -119,13 +111,11 @@ func (p Paypal) GatewayRefundDetail(ctx context.Context, gateway *entity.Merchan
 }
 
 func (p Paypal) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (p Paypal) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
