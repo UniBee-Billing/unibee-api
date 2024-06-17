@@ -2,7 +2,6 @@ package detail
 
 import (
 	"context"
-	"strconv"
 	"strings"
 	"unibee/api/bean"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -43,10 +42,9 @@ func ConvertMemberRole(ctx context.Context, member *entity.MerchantMember) (isOw
 		if strings.Contains(member.Role, "Owner") {
 			isOwner = true
 		} else {
-			var roleIdList = make([]string, 0)
+			var roleIdList = make([]uint64, 0)
 			_ = utility.UnmarshalFromJsonString(member.Role, &roleIdList)
-			for _, roleIdStr := range roleIdList {
-				roleId, _ := strconv.ParseUint(roleIdStr, 10, 64)
+			for _, roleId := range roleIdList {
 				if roleId > 0 {
 					role := query.GetRoleById(ctx, roleId)
 					if role != nil {

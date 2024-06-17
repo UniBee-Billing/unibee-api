@@ -144,8 +144,8 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-		MerchantId:     one.MerchantId,
-		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		MerchantId:     merchantMasterMember.MerchantId,
+		Target:         fmt.Sprintf("Member(%v)", merchantMasterMember.Id),
 		Content:        "New",
 		UserId:         0,
 		SubscriptionId: "",
