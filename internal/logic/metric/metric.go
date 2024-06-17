@@ -87,6 +87,7 @@ func NewMerchantMetric(ctx context.Context, req *NewMerchantMetricInternalReq) (
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,
@@ -115,6 +116,7 @@ func EditMerchantMetric(ctx context.Context, merchantId uint64, metricId uint64,
 	one.MetricName = name
 	one.MetricDescription = description
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "Edit",
 		UserId:         0,
@@ -136,6 +138,7 @@ func DeleteMerchantMetric(ctx context.Context, merchantId uint64, metricId uint6
 		dao.MerchantMetric.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetric.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,

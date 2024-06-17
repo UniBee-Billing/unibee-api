@@ -100,6 +100,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 		id, _ := result.LastInsertId()
 		one.Id = uint64(id)
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 			Content:        "New",
 			UserId:         0,
@@ -124,6 +125,7 @@ func NewMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, url stri
 		}
 		one = query.GetMerchantWebhook(ctx, one.Id)
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 			Content:        "Update",
 			UserId:         0,
@@ -153,6 +155,7 @@ func UpdateMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 		Content:        "Update",
 		UserId:         0,
@@ -183,6 +186,7 @@ func DeleteMerchantWebhookEndpoint(ctx context.Context, merchantId uint64, endpo
 		dao.MerchantWebhook.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantWebhook.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().MerchantId, merchantId).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("WebhookEndpoint(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,

@@ -15,6 +15,7 @@ import (
 )
 
 type OptLogRequest struct {
+	MerchantId     uint64
 	Target         string
 	Content        string
 	UserId         uint64
@@ -25,7 +26,7 @@ type OptLogRequest struct {
 }
 
 func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) {
-	var merchantId = _interface.GetMerchantId(superCtx)
+	var merchantId = req.MerchantId
 	if merchantId <= 0 {
 		g.Log().Errorf(superCtx, "AppendOptLog error invalid merchantId:%v", merchantId)
 		return
@@ -36,10 +37,10 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	}
 	var memberId uint64 = 0
 	var optAccount = ""
-	if _interface.Context().Get(superCtx).MerchantMember != nil {
+	if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).MerchantMember != nil {
 		memberId = _interface.Context().Get(superCtx).MerchantMember.Id
 		optAccount = fmt.Sprintf("Member(%v)", memberId)
-	} else if _interface.Context().Get(superCtx).IsOpenApiCall {
+	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).IsOpenApiCall {
 		memberId = 0
 		optAccount = fmt.Sprintf("OpenApi(%v)", _interface.Context().Get(superCtx).OpenApiKey)
 	} else {

@@ -39,6 +39,7 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 	body := []byte(one.Body)
 	res, err := utility.SendRequest(one.WebhookUrl, "POST", body, headers)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchant.Id,
 		Target:         fmt.Sprintf("WebhookEndpointLog(%v)", one.Id),
 		Content:        "Resent",
 		UserId:         0,

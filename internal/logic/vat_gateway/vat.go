@@ -71,6 +71,7 @@ func SetupMerchantVatConfig(ctx context.Context, merchantId uint64, vatName stri
 	utility.Assert(strings.Contains(VAT_IMPLEMENT_NAMES, vatName), "gateway not support, should be "+VAT_IMPLEMENT_NAMES)
 	err := merchant_config.SetMerchantConfig(ctx, merchantId, vatName, data)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchantId,
 		Target:         fmt.Sprintf("Vat(%s)", vatName),
 		Content:        "SetupVatGateway",
 		UserId:         0,

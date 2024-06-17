@@ -45,6 +45,7 @@ func FrozenUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Suspend",
 		UserId:         one.Id,
@@ -69,6 +70,7 @@ func ReleaseUser(ctx context.Context, userId int64) {
 		dao.UserAccount.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Resume",
 		UserId:         one.Id,
@@ -164,6 +166,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 		// check email not exist
 		one, err = CreateUser(ctx, req)
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("User(%v)", one.Id),
 			Content:        "New",
 			UserId:         one.Id,
@@ -183,6 +186,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().GmtModify: gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+				MerchantId:     one.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", one.Id),
 				Content:        "Update(Email)",
 				UserId:         one.Id,
@@ -202,6 +206,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 				dao.UserAccount.Columns().GmtModify:      gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+				MerchantId:     one.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", one.Id),
 				Content:        "Update(ExternalUserId)",
 				UserId:         one.Id,

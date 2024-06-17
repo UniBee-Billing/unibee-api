@@ -38,6 +38,7 @@ func PlanActivate(ctx context.Context, planId uint64) error {
 		return gerror.New("internal err, publish count != 1")
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "Activate",
 		UserId:         0,

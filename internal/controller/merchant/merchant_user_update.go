@@ -82,6 +82,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		dao.UserAccount.Columns().GmtModify:       gtime.Now(),
 	}).Where(dao.UserAccount.Columns().Id, req.UserId).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("User(%v)", one.Id),
 		Content:        "Update",
 		UserId:         one.Id,

@@ -134,6 +134,7 @@ func CreateInvoice(ctx context.Context, merchantId uint64, req *invoice.NewReq) 
 		Body:  one.InvoiceId,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "New",
 		UserId:         one.UserId,
@@ -221,6 +222,7 @@ func EditInvoice(ctx context.Context, req *invoice.EditReq) (res *invoice.EditRe
 	one.GatewayId = req.GatewayId
 	one.Lines = utility.MarshalToJsonString(invoiceItems)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Edit",
 		UserId:         one.UserId,
@@ -259,6 +261,7 @@ func DeletePendingInvoice(ctx context.Context, invoiceId string) error {
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 
 		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
 			Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 			Content:        "Delete",
 			UserId:         one.UserId,
@@ -301,6 +304,7 @@ func CancelProcessingInvoice(ctx context.Context, invoiceId string, reason strin
 	})
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Cancel",
 		UserId:         one.UserId,
@@ -408,6 +412,7 @@ func FinishInvoice(ctx context.Context, req *invoice.FinishReq) (*invoice.Finish
 		Body:  one.InvoiceId,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Finish",
 		UserId:         one.UserId,
@@ -450,6 +455,7 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 		Currency:         one.Currency,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "NewRefund",
 		UserId:         one.UserId,
@@ -490,6 +496,7 @@ func MarkInvoiceRefundSuccess(ctx context.Context, merchantId uint64, invoiceId 
 		g.Log().Errorf(ctx, "MarkInvoiceRefundSuccess invoiceId:%s error:%s", invoiceId, err.Error())
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkRefundSuccess",
 		UserId:         one.UserId,
@@ -526,6 +533,7 @@ func MarkInvoiceRefund(ctx context.Context, req *invoice.MarkRefundReq) (*entity
 		Currency:         one.Currency,
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkRefund",
 		UserId:         one.UserId,
@@ -580,6 +588,7 @@ func MarkWireTransferInvoiceAsSuccess(ctx context.Context, invoiceId string, tra
 	utility.AssertError(err, "MarkWireTransferInvoiceAsSuccess")
 	one = query.GetInvoiceByInvoiceId(ctx, invoiceId)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "MarkInvoiceAsSuccess(WireTransfer)",
 		UserId:         one.UserId,

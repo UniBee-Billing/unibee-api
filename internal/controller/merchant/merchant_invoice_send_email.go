@@ -21,6 +21,7 @@ func (c *ControllerInvoice) SendEmail(ctx context.Context, req *invoice.SendEmai
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "invalid MerchantId")
 	err = handler.SendInvoiceEmailToUser(ctx, req.InvoiceId, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "Send",
 		UserId:         one.UserId,

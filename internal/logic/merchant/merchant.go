@@ -46,6 +46,7 @@ func PutOpenApiKeyToCache(ctx context.Context, openApiKey string, merchantId uin
 
 func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 	one := query.GetMerchantById(ctx, merchantId)
+	utility.Assert(one != nil, "Merchant Not Found")
 	oldApikey := one.ApiKey
 	utility.Assert(PutOpenApiKeyToCache(ctx, oldApikey, merchantId), "Server Error")
 	apiKey := utility.GenerateRandomAlphanumeric(32)
@@ -54,6 +55,7 @@ func NewOpenApiKey(ctx context.Context, merchantId uint64) string {
 		dao.Merchant.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.Merchant.Columns().Id, merchantId).Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchantId,
 		Target:         fmt.Sprintf("ApiKey(%v)", one.ApiKey),
 		Content:        fmt.Sprintf("NewApiKey(%v)", apiKey),
 		UserId:         0,

@@ -182,6 +182,7 @@ func DelMerchantMetricEvent(ctx context.Context, req *MerchantMetricEventInterna
 		dao.MerchantMetricEvent.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMetricEvent.Columns().Id, list[0].Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     req.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", met.Id),
 		Content:        "DeleteEvent",
 		UserId:         0,

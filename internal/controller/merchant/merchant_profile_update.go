@@ -42,6 +42,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		return nil, err
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchant.Id,
 		Target:         fmt.Sprintf("Profile"),
 		Content:        "Update",
 		UserId:         0,

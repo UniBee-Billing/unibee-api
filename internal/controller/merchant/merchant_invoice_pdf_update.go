@@ -49,6 +49,7 @@ func (c *ControllerInvoice) PdfUpdate(ctx context.Context, req *invoice.PdfUpdat
 	utility.AssertError(err, "update Invoice error")
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "PdfUpdate",
 		UserId:         one.UserId,

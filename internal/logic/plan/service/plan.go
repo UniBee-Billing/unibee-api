@@ -31,6 +31,7 @@ func PlanPublish(ctx context.Context, planId uint64) (err error) {
 		dao.Plan.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.Plan.Columns().Id, planId).Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "Publish",
 		UserId:         0,
@@ -54,6 +55,7 @@ func PlanUnPublish(ctx context.Context, planId uint64) (err error) {
 		dao.Plan.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.Plan.Columns().Id, planId).Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "UnPublish",
 		UserId:         0,
@@ -215,6 +217,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 		}
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,
@@ -402,6 +405,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 		}
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "Edit",
 		UserId:         0,
@@ -449,6 +453,7 @@ func PlanCopy(ctx context.Context, planId uint64) (one *entity.Plan, err error) 
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", planId),
 		Content:        fmt.Sprintf("CopyTo(%v)", one.Id),
 		UserId:         0,
@@ -474,6 +479,7 @@ func PlanDelete(ctx context.Context, planId uint64) (one *entity.Plan, err error
 	}
 	one.IsDeleted = int(gtime.Now().Timestamp())
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,
@@ -582,6 +588,7 @@ func PlanAddonsBinding(ctx context.Context, req *plan.AddonsBindingReq) (one *en
 	}).Where(dao.Plan.Columns().Id, one.Id).Update()
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Plan(%v)", one.Id),
 		Content:        fmt.Sprintf("BindingAddon-(%s)-(%s)", utility.MarshalToJsonString(req.AddonIds), utility.MarshalToJsonString(req.OnetimeAddonIds)),
 		UserId:         0,

@@ -35,6 +35,7 @@ func NewMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 	id, _ := result.LastInsertId()
 	one.Id = uint64(uint(id))
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,
@@ -59,6 +60,7 @@ func EditMerchantRole(ctx context.Context, req *CreateRoleInternalReq) error {
 		dao.MerchantRole.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "Edit",
 		UserId:         0,
@@ -79,6 +81,7 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantRole.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Role(%v)", one.Id),
 		Content:        "Delete",
 		UserId:         0,

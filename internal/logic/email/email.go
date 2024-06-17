@@ -80,6 +80,7 @@ func SetupMerchantEmailConfig(ctx context.Context, merchantId uint64, name strin
 		err = merchant_config.SetMerchantConfig(ctx, merchantId, KeyMerchantEmailName, name)
 	}
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchantId,
 		Target:         fmt.Sprintf("EmailGateway(%s)-SetDefault(%v)", name, isDefault),
 		Content:        "SetupEmailGateway",
 		UserId:         0,

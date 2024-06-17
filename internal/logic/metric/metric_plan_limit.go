@@ -69,6 +69,7 @@ func NewMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLimi
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, req.MerchantId, req.PlanId, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "NewPlanLimit",
 		UserId:         0,
@@ -112,6 +113,7 @@ func EditMerchantMetricPlanLimit(ctx context.Context, req *MerchantMetricPlanLim
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, req.PlanId, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "EditPlanLimit",
 		UserId:         0,
@@ -144,6 +146,7 @@ func DeleteMerchantMetricPlanLimit(ctx context.Context, merchantId uint64, metri
 	// reload Cache
 	MerchantMetricPlanLimitCachedList(ctx, one.MerchantId, one.PlanId, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Metric(%v)", one.Id),
 		Content:        "DeletePlanLimit",
 		UserId:         0,

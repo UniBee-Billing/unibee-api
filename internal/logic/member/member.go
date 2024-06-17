@@ -37,6 +37,7 @@ func ChangeMerchantMemberPasswordWithOutOldVerify(ctx context.Context, email str
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Member(%v)", one.Id),
 		Content:        "ChangePasswordByVerifyCode",
 		UserId:         0,
@@ -57,6 +58,7 @@ func ChangeMerchantMemberPassword(ctx context.Context, email string, oldPassword
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Member(%v)", one.Id),
 		Content:        "ChangePassword",
 		UserId:         0,
@@ -81,6 +83,7 @@ func UpdateMemberRole(ctx context.Context, merchantId uint64, memberId uint64, r
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantMember.Columns().Id, memberId).Where(dao.MerchantMember.Columns().MerchantId, merchantId).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     merchantId,
 		Target:         fmt.Sprintf("Member(%v)", member.Id),
 		Content:        "UpdateRole",
 		UserId:         0,
@@ -141,6 +144,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Member(%v)", one.Id),
 		Content:        "New",
 		UserId:         0,

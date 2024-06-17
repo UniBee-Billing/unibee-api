@@ -39,6 +39,7 @@ func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
 	}
 	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     gateway.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", gateway.Id, gateway.GatewayName),
 		Content:        "CheckAndSetupWebhook",
 		UserId:         0,

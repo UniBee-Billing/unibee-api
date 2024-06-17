@@ -51,6 +51,7 @@ func SetupGateway(ctx context.Context, merchantId uint64, gatewayName string, ga
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Setup",
 		UserId:         0,
@@ -81,6 +82,7 @@ func EditGateway(ctx context.Context, merchantId uint64, gatewayId uint64, gatew
 	gatewayWebhook.CheckAndSetupGatewayWebhooks(ctx, one.Id)
 	one = query.GetGatewayById(ctx, gatewayId)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Edit",
 		UserId:         0,
@@ -103,6 +105,7 @@ func EditGatewayCountryConfig(ctx context.Context, merchantId uint64, gatewayId 
 	}).Where(dao.MerchantGateway.Columns().Id, one.Id).Update()
 	utility.AssertError(err, "system error")
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "EditCountryConfig",
 		UserId:         0,
@@ -174,6 +177,7 @@ func SetupWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *e
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Setup-WireTransfer",
 		UserId:         0,
@@ -200,6 +204,7 @@ func EditWireTransferGateway(ctx context.Context, req *WireTransferSetupReq) *en
 	utility.AssertError(err, "system error")
 	one = query.GetGatewayById(ctx, req.GatewayId)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Gateway(%v-%s)", one.Id, one.GatewayName),
 		Content:        "Edit-WireTransfer",
 		UserId:         0,

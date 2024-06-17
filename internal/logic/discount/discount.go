@@ -97,6 +97,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
 		Content:        "New",
 		UserId:         0,
@@ -155,6 +156,7 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	}
 	one = query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
 		Content:        "Edit",
 		UserId:         0,
@@ -181,6 +183,7 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uin
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
 		Content:        "Activate",
 		UserId:         0,
@@ -207,6 +210,7 @@ func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id u
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
 		Content:        "Deactivate",
 		UserId:         0,
@@ -229,6 +233,7 @@ func DeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id uint6
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("DiscountCode(%s)", one.Code),
 		Content:        "Delete",
 		UserId:         0,

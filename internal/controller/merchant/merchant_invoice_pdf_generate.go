@@ -22,6 +22,7 @@ func (c *ControllerInvoice) PdfGenerate(ctx context.Context, req *invoice.PdfGen
 	}
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(req.InvoiceId, req.SendUserEmail, true)
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
 		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
 		Content:        "PdfGenerateAndSend",
 		UserId:         one.UserId,
