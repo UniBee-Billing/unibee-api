@@ -2,7 +2,9 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -37,6 +39,18 @@ func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.Re
 	})
 	if err != nil {
 		return nil, err
+	}
+	if err == nil {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     renewRes.Subscription.MerchantId,
+			Target:         fmt.Sprintf("Subscription(%v)", renewRes.Subscription.SubscriptionId),
+			Content:        "RenewUserSubscription",
+			UserId:         renewRes.Subscription.UserId,
+			SubscriptionId: renewRes.Subscription.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 	}
 	return &subscription.RenewRes{
 		Subscription: renewRes.Subscription,

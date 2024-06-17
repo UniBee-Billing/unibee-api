@@ -2,8 +2,10 @@ package merchant
 
 import (
 	"context"
+	"fmt"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
 	"unibee/utility"
 
@@ -44,6 +46,19 @@ func (c *ControllerSubscription) Create(ctx context.Context, req *subscription.C
 		StartIncomplete:    req.StartIncomplete,
 		ProductData:        req.ProductData,
 	})
+	if err == nil {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     createRes.Subscription.MerchantId,
+			Target:         fmt.Sprintf("Subscription(%v)", createRes.Subscription.SubscriptionId),
+			Content:        "AssignSubscriptionToUser",
+			UserId:         createRes.Subscription.UserId,
+			SubscriptionId: createRes.Subscription.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
+
 	return &subscription.CreateRes{
 		Subscription: createRes.Subscription,
 		Paid:         createRes.Paid,

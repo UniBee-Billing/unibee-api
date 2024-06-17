@@ -11,6 +11,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	discount2 "unibee/internal/logic/discount"
 	email2 "unibee/internal/logic/email"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	subscription2 "unibee/internal/logic/subscription"
 	"unibee/internal/logic/subscription/timeline"
@@ -46,6 +47,16 @@ func ChangeSubscriptionGateway(ctx context.Context, subscriptionId string, gatew
 		g.Log().Errorf(ctx, "UpdateUserDefaultGatewayPaymentMethod subscriptionId:%d gatewayId:%d, paymentMethodId:%s success", subscriptionId, gatewayId, paymentMethodId)
 		user.UpdateUserDefaultGatewayPaymentMethod(ctx, sub.UserId, gatewayId, paymentMethodId)
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "ChangeGateway",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return sub, nil
 }
 

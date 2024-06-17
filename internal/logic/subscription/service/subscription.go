@@ -25,6 +25,7 @@ import (
 	handler2 "unibee/internal/logic/invoice/handler"
 	"unibee/internal/logic/invoice/invoice_compute"
 	service3 "unibee/internal/logic/invoice/service"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
 	"unibee/internal/logic/payment/service"
 	subscription2 "unibee/internal/logic/subscription"
@@ -1566,6 +1567,16 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 		Tag:   redismq2.TopicSubscriptionCancel.Tag,
 		Body:  sub.SubscriptionId,
 	})
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "Cancel",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return nil
 }
 
@@ -1619,6 +1630,16 @@ func SubscriptionCancelAtPeriodEnd(ctx context.Context, subscriptionId string, p
 			g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelAtPeriodEnd:%s", err.Error())
 		}
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "EnableCancelAtPeriodEnd",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return nil
 }
 
@@ -1657,6 +1678,16 @@ func SubscriptionCancelLastCancelAtPeriodEnd(ctx context.Context, subscriptionId
 	if err != nil {
 		g.Log().Errorf(ctx, "SendTemplateEmail SubscriptionCancelLastCancelAtPeriodEnd:%s", err.Error())
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "DisableCancelAtPeriodEnd",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return nil
 }
 
@@ -1701,6 +1732,16 @@ func SubscriptionAddNewTrialEnd(ctx context.Context, subscriptionId string, Appe
 			Body:  sub.SubscriptionId,
 		})
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "AddNewTrialEnd",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return nil
 }
 
@@ -1748,6 +1789,16 @@ func SubscriptionActiveTemporarily(ctx context.Context, subscriptionId string, e
 			}
 		}
 	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%v)", sub.SubscriptionId),
+		Content:        "ActiveTemporarily",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 
 	return nil
 }
