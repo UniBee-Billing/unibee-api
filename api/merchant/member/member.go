@@ -62,8 +62,10 @@ type OperationLogListReq struct {
 	g.Meta          `path:"/operation_log_list" tags:"Member" method:"get" summary:"GetMemberOperationLogList"`
 	MemberFirstName string `json:"memberFirstName" description:"Filter Member's FirstName Default All" `
 	MemberLastName  string `json:"memberLastName" description:"Filter Member's LastName, Default All" `
+	MemberEmail     string `json:"memberEmail" description:"Filter Member's Email, Default All" `
 	FirstName       string `json:"firstName" description:"FirstName" `
 	LastName        string `json:"lastName" description:"LastName" `
+	Email           string `json:"email" description:"Email" `
 	SubscriptionId  string `json:"subscriptionId"     description:"subscription_id"` // subscription_id
 	InvoiceId       string `json:"invoiceId"          description:"invoice id"`      // invoice id
 	PlanId          uint64 `json:"planId"             description:"plan id"`         // plan id

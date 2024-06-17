@@ -13,10 +13,12 @@ type OperationLogListInternalReq struct {
 	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	MemberFirstName string `json:"memberFirstName" dc:"Filter Member's FirstName Default All" `
 	MemberLastName  string `json:"memberLastName" dc:"Filter Member's LastName, Default All" `
+	MemberEmail     string `json:"memberEmail" dc:"Filter Member's Email, Default All" `
 	//MemberId        uint64 `json:"memberId" dc:"Filter MemberId Default All" `
 	//UserId          uint64 `json:"userId" dc:"Filter UserId Default All" `
 	FirstName      string `json:"firstName" dc:"FirstName" `
 	LastName       string `json:"lastName" dc:"LastName" `
+	Email          string `json:"email" dc:"Email" `
 	SubscriptionId string `json:"subscriptionId"     dc:"subscription_id"` // subscription_id
 	InvoiceId      string `json:"invoiceId"          dc:"invoice id"`      // invoice id
 	PlanId         uint64 `json:"planId"             dc:"plan id"`         // plan id
@@ -53,7 +55,7 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 	if len(req.DiscountCode) > 0 {
 		query = query.Where(dao.MerchantOperationLog.Columns().DiscountCode, req.DiscountCode)
 	}
-	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
+	if len(req.FirstName) > 0 || len(req.LastName) > 0 || len(req.Email) > 0 {
 		var userIdList = make([]uint64, 0)
 		var list []*entity.UserAccount
 		userQuery := dao.UserAccount.Ctx(ctx).Where(dao.UserAccount.Columns().MerchantId, req.MerchantId)
@@ -62,6 +64,9 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		}
 		if len(req.LastName) > 0 {
 			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+		}
+		if len(req.Email) > 0 {
+			userQuery = userQuery.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
 		}
 		_ = userQuery.Where(dao.UserAccount.Columns().IsDeleted, 0).Scan(&list)
 		for _, user := range list {
@@ -73,7 +78,7 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		query = query.WhereIn(dao.MerchantOperationLog.Columns().UserId, userIdList)
 	}
 
-	if len(req.MemberLastName) > 0 || len(req.MemberFirstName) > 0 {
+	if len(req.MemberLastName) > 0 || len(req.MemberFirstName) > 0 || len(req.MemberEmail) > 0 {
 		var memberIdList = make([]uint64, 0)
 		var list []*entity.MerchantMember
 		memberQuery := dao.MerchantMember.Ctx(ctx).Where(dao.MerchantMember.Columns().MerchantId, req.MerchantId)
@@ -82,6 +87,9 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		}
 		if len(req.MemberLastName) > 0 {
 			memberQuery = memberQuery.WhereLike(dao.MerchantMember.Columns().LastName, "%"+req.MemberLastName+"%")
+		}
+		if len(req.MemberEmail) > 0 {
+			memberQuery = memberQuery.WhereLike(dao.MerchantMember.Columns().Email, "%"+req.MemberEmail+"%")
 		}
 		_ = memberQuery.Where(dao.MerchantMember.Columns().IsDeleted, 0).Scan(&list)
 		for _, one := range list {
