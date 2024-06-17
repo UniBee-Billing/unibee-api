@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/stripe/stripe-go/v78"
@@ -32,8 +33,7 @@ type Stripe struct {
 }
 
 func (s Stripe) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (s Stripe) GatewayTest(ctx context.Context, key string, secret string) (icon string, gatewayType int64, err error) {

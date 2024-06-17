@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"github.com/gogf/gf/v2/encoding/gjson"
+	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
@@ -15,8 +16,7 @@ type AutoTest struct {
 }
 
 func (a AutoTest) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (a AutoTest) GatewayRefundCancel(ctx context.Context, payment *entity.Payment, refund *entity.Refund) (res *gateway_bean.GatewayPaymentRefundResp, err error) {
@@ -138,8 +138,7 @@ func (a AutoTest) GatewayNewPayment(ctx context.Context, createPayContext *gatew
 }
 
 func (a AutoTest) GatewayCapture(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (a AutoTest) GatewayCancel(ctx context.Context, pay *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {

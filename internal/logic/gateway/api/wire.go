@@ -18,38 +18,31 @@ func (w Wire) GatewayTest(ctx context.Context, key string, secret string) (icon 
 }
 
 func (w Wire) GatewayUserCreate(ctx context.Context, gateway *entity.MerchantGateway, user *entity.UserAccount) (res *gateway_bean.GatewayUserCreateResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayUserDetailQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64) (res *gateway_bean.GatewayUserDetailQueryResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayMerchantBalancesQuery(ctx context.Context, gateway *entity.MerchantGateway) (res *gateway_bean.GatewayMerchantBalanceQueryResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayUserAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserAttachPaymentMethodResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayUserDeAttachPaymentMethodQuery(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, gatewayPaymentMethod string) (res *gateway_bean.GatewayUserDeAttachPaymentMethodResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *entity.MerchantGateway, req *gateway_bean.GatewayUserPaymentMethodReq) (res *gateway_bean.GatewayUserPaymentMethodListResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayUserCreateAndBindPaymentMethod(ctx context.Context, gateway *entity.MerchantGateway, userId uint64, currency string, metadata map[string]interface{}) (res *gateway_bean.GatewayUserPaymentMethodCreateAndBindResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayNewPayment(ctx context.Context, createPayContext *gateway_bean.GatewayNewPaymentReq) (res *gateway_bean.GatewayNewPaymentResp, err error) {
@@ -62,8 +55,7 @@ func (w Wire) GatewayNewPayment(ctx context.Context, createPayContext *gateway_b
 }
 
 func (w Wire) GatewayCapture(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCaptureResp, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *gateway_bean.GatewayPaymentCancelResp, err error) {
@@ -71,8 +63,7 @@ func (w Wire) GatewayCancel(ctx context.Context, payment *entity.Payment) (res *
 }
 
 func (w Wire) GatewayCryptoFiatTrans(ctx context.Context, from *gateway_bean.GatewayCryptoFromCurrencyAmountDetailReq) (to *gateway_bean.GatewayCryptoToCurrencyAmountDetailRes, err error) {
-	//TODO implement me
-	panic("implement me")
+	return nil, gerror.New("not support")
 }
 
 func (w Wire) GatewayPaymentList(ctx context.Context, gateway *entity.MerchantGateway, listReq *gateway_bean.GatewayPaymentListReq) (res []*gateway_bean.GatewayPaymentRo, err error) {
