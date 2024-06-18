@@ -7,7 +7,9 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"unibee/api/bean"
+	"unibee/api/bean/detail"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/member"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -76,6 +78,8 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 	one := query.GetRoleById(ctx, id)
 	utility.Assert(one != nil, "role not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Permission Deny")
+	memberList := GetMemberListByRole(ctx, merchantId, id)
+	utility.Assert(len(memberList) == 0, "Role has member binding can not delete")
 	_, err := dao.MerchantRole.Ctx(ctx).Data(g.Map{
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
@@ -98,4 +102,21 @@ func HardDeleteMerchantRole(ctx context.Context, merchantId uint64, role string)
 	utility.Assert(len(role) > 0, "invalid role")
 	_, err := dao.MerchantRole.Ctx(ctx).Where(dao.MerchantRole.Columns().Role, role).Where(dao.MerchantRole.Columns().MerchantId, merchantId).Delete()
 	return err
+}
+
+func GetMemberListByRole(ctx context.Context, merchantId uint64, roleId uint64) []*detail.MerchantMemberDetail {
+	resultList := make([]*detail.MerchantMemberDetail, 0)
+	totalList, _ := member.MerchantMemberList(ctx, merchantId)
+	for _, one := range totalList {
+		var found = false
+		for _, role := range one.MemberRoles {
+			if role.Id == roleId {
+				found = true
+			}
+		}
+		if found {
+			resultList = append(resultList, one)
+		}
+	}
+	return resultList
 }
