@@ -24,7 +24,8 @@ func GetRoleByName(ctx context.Context, merchantId uint64, role string) (one *en
 	err := dao.MerchantRole.Ctx(ctx).
 		Where(dao.MerchantRole.Columns().MerchantId, merchantId).
 		Where(dao.MerchantRole.Columns().Role, role).
-		OmitEmpty().Scan(&one)
+		Where(dao.MerchantRole.Columns().IsDeleted, 0).
+		OmitNil().Scan(&one)
 	if err != nil {
 		one = nil
 	}
