@@ -22,7 +22,7 @@ func PasswordLogin(ctx context.Context, email string, password string) (one *ent
 	utility.Assert(one != nil, "Email Not Found")
 	utility.Assert(utility.ComparePasswords(one.Password, password), "Login Failed, Password Not Match")
 
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTMember, one.MerchantId, one.Id, one.Email)
+	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, one.MerchantId, one.Id, one.Email)
 	fmt.Println("logged-in, save email/id in token: ", one.Email, "/", one.Id)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", one.Id)), "Cache Error")

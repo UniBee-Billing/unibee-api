@@ -7,7 +7,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"strings"
 	"time"
+	"unibee/api/bean/detail"
 	"unibee/internal/cmd/config"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -20,10 +23,11 @@ const (
 )
 
 type TokenClaims struct {
-	TokenType  TokenType `json:"tokenType"`
-	Id         uint64    `json:"id"`
-	Email      string    `json:"email"`
-	MerchantId uint64    `json:"merchantId"`
+	TokenType     TokenType `json:"tokenType"`
+	Id            uint64    `json:"id"`
+	Email         string    `json:"email"`
+	MerchantId    uint64    `json:"merchantId"`
+	PermissionKey string    `json:"permissionKey"`
 	jwt.RegisteredClaims
 }
 
@@ -57,6 +61,36 @@ func CreatePortalToken(tokenType TokenType, merchantId uint64, id uint64, email 
 	}
 
 	return fmt.Sprintf("%s%s", TOKEN_PREFIX, tokenString), nil
+}
+
+func CreateMemberPortalToken(ctx context.Context, tokenType TokenType, merchantId uint64, memberId uint64, email string) (string, error) {
+	utility.Assert(len(config.GetConfigInstance().Server.JwtKey) > 0, "server error: tokenKey is nil")
+	one := query.GetMerchantMemberById(ctx, memberId)
+	utility.Assert(one != nil, "member not found")
+	permissionKey := GetMemberPermissionKey(ctx, one)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		jwt.MapClaims{
+			"tokenType":     tokenType,
+			"merchantId":    merchantId,
+			"id":            memberId,
+			"email":         email,
+			"exp":           time.Now().Add(time.Hour * 1).Unix(),
+			"permissionKey": permissionKey,
+		})
+
+	tokenString, err := token.SignedString([]byte(config.GetConfigInstance().Server.JwtKey))
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s%s", TOKEN_PREFIX, tokenString), nil
+}
+
+func GetMemberPermissionKey(ctx context.Context, one *entity.MerchantMember) string {
+	isOwner, permission := detail.ConvertMemberPermissions(ctx, one)
+	permissionKey := fmt.Sprintf("%v_%s", isOwner, utility.MD5(utility.MarshalToJsonString(permission)))
+	return permissionKey
 }
 
 func getAuthTokenRedisKey(token string) string {

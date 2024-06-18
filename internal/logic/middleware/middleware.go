@@ -256,6 +256,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
+			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
 			if merchantAccount == nil {
 				g.Log().Infof(r.Context(), "TokenAuth merchant member not found token:%s", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
@@ -263,6 +264,10 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			} else if merchantAccount.Status == 2 {
 				g.Log().Infof(r.Context(), "TokenAuth merchant member has suspend :%v", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
+				r.Exit()
+			} else if strings.Compare(permissionKey, token.PermissionKey) != 0 {
+				g.Log().Infof(r.Context(), "TokenAuth merchant member permission has change, need reLogin")
+				_interface.JsonRedirectExit(r, 62, "Your permission has changed. Please reLogin.", s.LoginUrl)
 				r.Exit()
 			}
 

@@ -28,7 +28,7 @@ func (c *ControllerAuth) LoginOtpVerify(ctx context.Context, req *auth.LoginOtpV
 	newOne = query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(newOne != nil, "Login Failed")
 
-	token, err := jwt.CreatePortalToken(jwt.TOKENTYPEMERCHANTMember, newOne.MerchantId, newOne.Id, req.Email)
+	token, err := jwt.CreateMemberPortalToken(ctx, jwt.TOKENTYPEMERCHANTMember, newOne.MerchantId, newOne.Id, req.Email)
 	utility.AssertError(err, "Server Error")
 	utility.Assert(jwt.PutAuthTokenToCache(ctx, token, fmt.Sprintf("MerchantMember#%d", newOne.Id)), "Cache Error")
 	jwt.AppendRequestCookieWithToken(ctx, token)

@@ -13,5 +13,6 @@ func (c *ControllerMember) UpdateMemberRole(ctx context.Context, req *member.Upd
 	if err != nil {
 		return nil, err
 	}
+
 	return &member.UpdateMemberRoleRes{}, nil
 }

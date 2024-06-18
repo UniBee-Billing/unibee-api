@@ -58,3 +58,29 @@ func ConvertMemberRole(ctx context.Context, member *entity.MerchantMember) (isOw
 	}
 	return isOwner, memberRoles
 }
+
+func ConvertMemberPermissions(ctx context.Context, member *entity.MerchantMember) (isOwner bool, permissions []*bean.MerchantRolePermission) {
+	permissions = make([]*bean.MerchantRolePermission, 0)
+	if member != nil {
+		if strings.Contains(member.Role, "Owner") {
+			isOwner = true
+		} else {
+			var roleIdList = make([]uint64, 0)
+			_ = utility.UnmarshalFromJsonString(member.Role, &roleIdList)
+			for _, roleId := range roleIdList {
+				if roleId > 0 {
+					role := query.GetRoleById(ctx, roleId)
+					if role != nil {
+						roleDetail := bean.SimplifyMerchantRole(role)
+						if roleDetail != nil {
+							for _, permission := range roleDetail.Permissions {
+								permissions = append(permissions, permission)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return isOwner, permissions
+}
