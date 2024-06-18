@@ -79,7 +79,7 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 	utility.Assert(one != nil, "role not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Permission Deny")
 	memberList, _ := GetMemberListByRole(ctx, merchantId, id)
-	utility.Assert(len(memberList) == 0, "Role has member binding can not delete")
+	utility.Assert(len(memberList) == 0, fmt.Sprintf("Role has %v members binding can not delete", len(memberList)))
 	_, err := dao.MerchantRole.Ctx(ctx).Data(g.Map{
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
 		dao.MerchantRole.Columns().GmtModify: gtime.Now(),
