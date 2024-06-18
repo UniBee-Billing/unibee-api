@@ -67,7 +67,7 @@ type FrozenRes struct {
 }
 
 type ReleaseReq struct {
-	g.Meta   `path:"/resume_member" tags:"User" method:"post" summary:"ResumeMember"`
+	g.Meta   `path:"/resume_member" tags:"Member" method:"post" summary:"ResumeMember"`
 	MemberId uint64 `json:"memberId"         description:"The unique id of member"`
 }
 
