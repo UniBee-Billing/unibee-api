@@ -265,7 +265,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 				g.Log().Infof(r.Context(), "TokenAuth merchant member has suspend :%v", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
-			} else if strings.Compare(permissionKey, token.PermissionKey) != 0 {
+			} else if strings.Compare(permissionKey, token.PermissionKey) != 0 && !strings.Contains(r.GetUrl(), "logout") {
 				g.Log().Infof(r.Context(), "TokenAuth merchant member permission has change, need reLogin")
 				_interface.JsonRedirectExit(r, 62, "Your permission has changed. Please reLogin.", s.LoginUrl)
 				r.Exit()
