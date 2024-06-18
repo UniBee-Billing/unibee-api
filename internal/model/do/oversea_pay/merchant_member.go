@@ -25,4 +25,5 @@ type MerchantMember struct {
 	LastName   interface{} // last name
 	CreateTime interface{} // create utc time
 	Role       interface{} // role
+	Status     interface{} // 0-Active, 2-Suspend
 }

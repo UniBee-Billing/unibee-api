@@ -158,3 +158,44 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	utility.AssertError(err, "AddMerchantMember")
 	return nil
 }
+
+func FrozenMember(ctx context.Context, memberId uint64) {
+	one := query.GetMerchantMemberById(ctx, memberId)
+	utility.Assert(one != nil, "member not found")
+	utility.Assert(one.Status != 2, "member already suspend")
+	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
+		dao.MerchantMember.Columns().Status:    2,
+		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "Suspend",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+	utility.AssertError(err, "server error")
+}
+
+func ReleaseMember(ctx context.Context, memberId uint64) {
+	one := query.GetMerchantMemberById(ctx, memberId)
+	utility.Assert(one != nil, "member not found")
+	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
+		dao.MerchantMember.Columns().Status:    0,
+		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
+	}).Where(dao.MerchantMember.Columns().Id, one.Id).OmitNil().Update()
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Member(%v)", one.Id),
+		Content:        "Resume",
+		UserId:         0,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+	utility.AssertError(err, "server error")
+}

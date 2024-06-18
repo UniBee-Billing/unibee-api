@@ -257,8 +257,12 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			if merchantAccount == nil {
-				g.Log().Infof(r.Context(), "TokenAuth merchant user not found token:%s", utility.MarshalToJsonString(token))
+				g.Log().Infof(r.Context(), "TokenAuth merchant member not found token:%s", utility.MarshalToJsonString(token))
 				_interface.JsonRedirectExit(r, 61, "merchant user not found", s.LoginUrl)
+				r.Exit()
+			} else if merchantAccount.Status == 2 {
+				g.Log().Infof(r.Context(), "TokenAuth merchant member has suspend :%v", utility.MarshalToJsonString(token))
+				_interface.JsonRedirectExit(r, 61, "Your account has been suspended. Please contact billing admin for further assistance.", s.LoginUrl)
 				r.Exit()
 			}
 

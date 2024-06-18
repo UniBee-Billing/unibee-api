@@ -23,4 +23,5 @@ type MerchantMember struct {
 	LastName   string      `json:"lastName"   description:"last name"`             // last name
 	CreateTime int64       `json:"createTime" description:"create utc time"`       // create utc time
 	Role       string      `json:"role"       description:"role"`                  // role
+	Status     int         `json:"status"     description:"0-Active, 2-Suspend"`   // 0-Active, 2-Suspend
 }

@@ -33,6 +33,7 @@ type MerchantMemberColumns struct {
 	LastName   string // last name
 	CreateTime string // create utc time
 	Role       string // role
+	Status     string // 0-Active, 2-Suspend
 }
 
 // merchantMemberColumns holds the columns for table merchant_member.
@@ -50,6 +51,7 @@ var merchantMemberColumns = MerchantMemberColumns{
 	LastName:   "last_name",
 	CreateTime: "create_time",
 	Role:       "role",
+	Status:     "status",
 }
 
 // NewMerchantMemberDao creates and returns a new DAO object for table data access.

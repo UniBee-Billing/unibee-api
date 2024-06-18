@@ -26,6 +26,7 @@ func (c *ControllerAuth) PasswordForgetOtp(ctx context.Context, req *auth.Passwo
 
 	merchantMember := query.GetMerchantMemberByEmail(ctx, req.Email)
 	utility.Assert(merchantMember != nil, "merchant member not found")
+	utility.Assert(merchantMember.Status != 2, "Your account has been suspended. Please contact billing admin for further assistance.")
 	err = email.SendTemplateEmail(ctx, merchantMember.MerchantId, req.Email, "", email.TemplateUserOTPLogin, "", &email.TemplateVariable{
 		UserName:         merchantMember.FirstName + " " + merchantMember.LastName,
 		CodeExpireMinute: "3",

@@ -18,6 +18,7 @@ type MerchantMemberDetail struct {
 	CreateTime  int64                        `json:"createTime" description:"create utc time"` // create utc time
 	Mobile      string                       `json:"mobile"     description:"mobile"`          // mobile
 	IsOwner     bool                         `json:"isOwner" description:"Check Member is Owner" `
+	Status      int                          `json:"status"             description:"0-Active, 2-Suspend"`
 	MemberRoles []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
 }
 
@@ -33,6 +34,7 @@ func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *Mer
 		Mobile:      one.Mobile,
 		IsOwner:     isOwner,
 		MemberRoles: memberRoles,
+		Status:      one.Status,
 	}
 }
 

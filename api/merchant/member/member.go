@@ -58,6 +58,22 @@ type NewMemberReq struct {
 type NewMemberRes struct {
 }
 
+type FrozenReq struct {
+	g.Meta   `path:"/suspend_member" tags:"Member" method:"post" summary:"SuspendMember"`
+	MemberId uint64 `json:"memberId"         description:"The unique id of member"`
+}
+
+type FrozenRes struct {
+}
+
+type ReleaseReq struct {
+	g.Meta   `path:"/resume_member" tags:"User" method:"post" summary:"ResumeMember"`
+	MemberId uint64 `json:"memberId"         description:"The unique id of member"`
+}
+
+type ReleaseRes struct {
+}
+
 type OperationLogListReq struct {
 	g.Meta          `path:"/operation_log_list" tags:"Member" method:"get" summary:"GetMemberOperationLogList"`
 	MemberFirstName string `json:"memberFirstName" description:"Filter Member's FirstName Default All" `
