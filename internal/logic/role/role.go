@@ -78,7 +78,7 @@ func DeleteMerchantRole(ctx context.Context, merchantId uint64, id uint64) error
 	one := query.GetRoleById(ctx, id)
 	utility.Assert(one != nil, "role not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Permission Deny")
-	memberList := GetMemberListByRole(ctx, merchantId, id)
+	memberList, _ := GetMemberListByRole(ctx, merchantId, id)
 	utility.Assert(len(memberList) == 0, "Role has member binding can not delete")
 	_, err := dao.MerchantRole.Ctx(ctx).Data(g.Map{
 		dao.MerchantRole.Columns().IsDeleted: gtime.Now().Timestamp(),
@@ -104,7 +104,7 @@ func HardDeleteMerchantRole(ctx context.Context, merchantId uint64, role string)
 	return err
 }
 
-func GetMemberListByRole(ctx context.Context, merchantId uint64, roleId uint64) []*detail.MerchantMemberDetail {
+func GetMemberListByRole(ctx context.Context, merchantId uint64, roleId uint64) ([]*detail.MerchantMemberDetail, int) {
 	resultList := make([]*detail.MerchantMemberDetail, 0)
 	totalList, _ := member.MerchantMemberList(ctx, merchantId)
 	for _, one := range totalList {
@@ -118,5 +118,5 @@ func GetMemberListByRole(ctx context.Context, merchantId uint64, roleId uint64) 
 			resultList = append(resultList, one)
 		}
 	}
-	return resultList
+	return resultList, len(resultList)
 }
