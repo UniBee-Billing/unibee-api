@@ -160,6 +160,7 @@ type TemplateVariable struct {
 	BIC                 string      `json:"BIC"`
 	IBAN                string      `json:"IBAN"`
 	Address             string      `json:"Address"`
+	Email               string      `json:"Email"`
 }
 
 // SendTemplateEmail template should convert by html tools like https://www.iamwawa.cn/text2html.html

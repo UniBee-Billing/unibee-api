@@ -141,9 +141,19 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	}
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
+	var link = config.GetConfigInstance().Server.GetServerPath()
+	if !strings.Contains(link, "/api") {
+		link = "https://merchant.unibee.top"
+	} else {
+		link = strings.Replace(link, "/api", "", 1)
+	}
+	merchant := query.GetMerchantById(ctx, one.MerchantId)
+	utility.Assert(merchant != nil, "Invalid Merchant")
 	err = email2.SendTemplateEmail(ctx, merchantId, email, "", email2.TemplateMerchantMemberInvite, "", &email2.TemplateVariable{
-		UserName: one.FirstName + " " + one.LastName,
-		Link:     "<a href=\"" + config.GetConfigInstance().Server.GetServerPath() + "\">Link</a>",
+		UserName:     one.FirstName + " " + one.LastName,
+		MerchantName: merchant.Name,
+		Email:        email,
+		Link:         "<a href=\"" + link + "\">Link</a>",
 	})
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     one.MerchantId,
