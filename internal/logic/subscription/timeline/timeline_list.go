@@ -59,6 +59,11 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 	}
 	var timelines []*detail.SubscriptionTimeLineDetail
 	for _, one := range mainList {
+		invoice := query.GetInvoiceByInvoiceId(ctx, one.InvoiceId)
+		var paymentId = ""
+		if invoice != nil {
+			paymentId = invoice.PaymentId
+		}
 		timelines = append(timelines, &detail.SubscriptionTimeLineDetail{
 			MerchantId:      one.MerchantId,
 			UserId:          one.UserId,
@@ -68,6 +73,7 @@ func SubscriptionTimeLineList(ctx context.Context, req *SubscriptionTimeLineList
 			PeriodStartTime: one.PeriodStartTime,
 			PeriodEndTime:   one.PeriodEndTime,
 			InvoiceId:       one.InvoiceId,
+			PaymentId:       paymentId,
 			UniqueId:        one.UniqueId,
 			Currency:        one.Currency,
 			PlanId:          one.PlanId,

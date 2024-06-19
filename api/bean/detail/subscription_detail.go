@@ -27,6 +27,7 @@ type SubscriptionTimeLineDetail struct {
 	PeriodStartTime *gtime.Time             `json:"periodStartTime" description:"period start (datetime)"` // period start (datetime)
 	PeriodEndTime   *gtime.Time             `json:"periodEndTime"   description:"period end (datatime)"`   // period end (datatime)
 	InvoiceId       string                  `json:"invoiceId"       description:"invoice id"`              // invoice id
+	PaymentId       string                  `json:"paymentId"       description:"payment id"`              // invoice id
 	UniqueId        string                  `json:"uniqueId"        description:"unique id"`               // unique id
 	Currency        string                  `json:"currency"        description:"currency"`                // currency
 	PlanId          uint64                  `json:"planId"          description:"PlanId"`                  // PlanId
