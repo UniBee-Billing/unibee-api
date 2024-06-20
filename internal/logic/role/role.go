@@ -123,6 +123,12 @@ func GetMemberListByRoleId(ctx context.Context, merchantId uint64, roleId uint64
 }
 
 func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []uint64, page int, count int) ([]*detail.MerchantMemberDetail, int) {
+	if count <= 0 {
+		count = 20
+	}
+	if page < 0 {
+		page = 0
+	}
 	resultList := make([]*detail.MerchantMemberDetail, 0)
 	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId)
 	for _, one := range totalList {
