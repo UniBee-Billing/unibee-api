@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"math"
 	"strconv"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -106,7 +107,7 @@ func HardDeleteMerchantRole(ctx context.Context, merchantId uint64, role string)
 
 func GetMemberListByRoleId(ctx context.Context, merchantId uint64, roleId uint64) ([]*detail.MerchantMemberDetail, int) {
 	resultList := make([]*detail.MerchantMemberDetail, 0)
-	totalList, _ := member.MerchantMemberList(ctx, merchantId)
+	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId)
 	for _, one := range totalList {
 		var found = false
 		for _, role := range one.MemberRoles {
@@ -121,9 +122,9 @@ func GetMemberListByRoleId(ctx context.Context, merchantId uint64, roleId uint64
 	return resultList, len(resultList)
 }
 
-func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []uint64) ([]*detail.MerchantMemberDetail, int) {
+func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []uint64, page int, count int) ([]*detail.MerchantMemberDetail, int) {
 	resultList := make([]*detail.MerchantMemberDetail, 0)
-	totalList, _ := member.MerchantMemberList(ctx, merchantId)
+	totalList, _ := member.MerchantMemberTotalList(ctx, merchantId)
 	for _, one := range totalList {
 		var found = false
 		for _, role := range one.MemberRoles {
@@ -137,5 +138,32 @@ func GetMemberListByRoleIds(ctx context.Context, merchantId uint64, roleIds []ui
 			resultList = append(resultList, one)
 		}
 	}
-	return resultList, len(resultList)
+	sliceStart, sliceEnd := SlicePage(page+1, count, len(resultList))
+	return resultList[sliceStart:sliceEnd], len(resultList)
+}
+
+func SlicePage(page, pageSize, nums int) (sliceStart, sliceEnd int) {
+	if page < 0 {
+		page = 1
+	}
+
+	if pageSize < 0 {
+		pageSize = 20
+	}
+
+	if pageSize > nums {
+		return 0, nums
+	}
+
+	pageCount := int(math.Ceil(float64(nums) / float64(pageSize)))
+	if page > pageCount {
+		return 0, 0
+	}
+	sliceStart = (page - 1) * pageSize
+	sliceEnd = sliceStart + pageSize
+
+	if sliceEnd > nums {
+		sliceEnd = nums
+	}
+	return sliceStart, sliceEnd
 }
