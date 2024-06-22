@@ -173,6 +173,11 @@ var (
 						merchant.NewDiscount(),
 					)
 				})
+				group.Group("/download", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewDownload(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {

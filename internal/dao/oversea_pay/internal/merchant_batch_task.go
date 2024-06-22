@@ -20,46 +20,50 @@ type MerchantBatchTaskDao struct {
 
 // MerchantBatchTaskColumns defines and stores column names for table merchant_batch_task.
 type MerchantBatchTaskColumns struct {
-	Id            string // id
-	MerchantId    string // merchant_id
-	MemberId      string // member_id
-	ModuleName    string // module_name
-	TaskName      string // task_name
-	SourceFrom    string // source_from
-	Payload       string // payload(json)
-	DownloadUrl   string // download_file_url
-	Status        string // Status。0-Pending，1-Processing，2-Success，3-Failure
-	StartTime     string // task_start_time
-	FinishTime    string // task_finish_time
-	TaskCost      string // task cost time(second)
-	FailReason    string // reason of failure
-	GmtCreate     string // gmt_create
-	TaskType      string // type，0-download，1-upload
-	SuccessCount  string // success_count
-	UploadFileUrl string // the file url of upload type task
-	GmtModify     string // update time
+	Id             string // id
+	MerchantId     string // merchant_id
+	MemberId       string // member_id
+	ModuleName     string // module_name
+	TaskName       string // task_name
+	SourceFrom     string // source_from
+	Payload        string // payload(json)
+	DownloadUrl    string // download_file_url
+	Status         string // Status。0-Pending，1-Processing，2-Success，3-Failure
+	StartTime      string // task_start_time
+	FinishTime     string // task_finish_time
+	TaskCost       string // task cost time(second)
+	FailReason     string // reason of failure
+	GmtCreate      string // gmt_create
+	TaskType       string // type，0-download，1-upload
+	SuccessCount   string // success_count
+	UploadFileUrl  string // the file url of upload type task
+	GmtModify      string // update time
+	CreateTime     string // create utc time
+	LastUpdateTime string // last update utc time
 }
 
 // merchantBatchTaskColumns holds the columns for table merchant_batch_task.
 var merchantBatchTaskColumns = MerchantBatchTaskColumns{
-	Id:            "id",
-	MerchantId:    "merchant_id",
-	MemberId:      "member_id",
-	ModuleName:    "module_name",
-	TaskName:      "task_name",
-	SourceFrom:    "source_from",
-	Payload:       "payload",
-	DownloadUrl:   "download_url",
-	Status:        "status",
-	StartTime:     "start_time",
-	FinishTime:    "finish_time",
-	TaskCost:      "task_cost",
-	FailReason:    "fail_reason",
-	GmtCreate:     "gmt_create",
-	TaskType:      "task_type",
-	SuccessCount:  "success_count",
-	UploadFileUrl: "upload_file_url",
-	GmtModify:     "gmt_modify",
+	Id:             "id",
+	MerchantId:     "merchant_id",
+	MemberId:       "member_id",
+	ModuleName:     "module_name",
+	TaskName:       "task_name",
+	SourceFrom:     "source_from",
+	Payload:        "payload",
+	DownloadUrl:    "download_url",
+	Status:         "status",
+	StartTime:      "start_time",
+	FinishTime:     "finish_time",
+	TaskCost:       "task_cost",
+	FailReason:     "fail_reason",
+	GmtCreate:      "gmt_create",
+	TaskType:       "task_type",
+	SuccessCount:   "success_count",
+	UploadFileUrl:  "upload_file_url",
+	GmtModify:      "gmt_modify",
+	CreateTime:     "create_time",
+	LastUpdateTime: "last_update_time",
 }
 
 // NewMerchantBatchTaskDao creates and returns a new DAO object for table data access.

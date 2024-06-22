@@ -40,7 +40,7 @@ func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (s
 		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
 		g.Log().Errorf(ctx, "UploadInvoicePdf error:Oss service not setup")
-		return "", gerror.New("Oss service not setup")
+		return "", gerror.New("File service need setup")
 	}
 	upload, err := oss.UploadLocalFile(ctx, filePath, invoiceId, filePath, "0")
 	if err != nil {

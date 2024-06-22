@@ -1,4 +1,4 @@
-package excel
+package batch
 
 import (
 	"context"
@@ -9,10 +9,13 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
+	"strconv"
+	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/excel/task/invoice"
+	"unibee/internal/logic/batch/task/invoice"
+	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
@@ -34,7 +37,14 @@ type MerchantBatchTaskInternalRequest struct {
 	Payload    map[string]string `json:"payload" dc:"Payload"`
 }
 
-func BatchDownloadTask(superCtx context.Context, req MerchantBatchTaskInternalRequest) error {
+func NewBatchDownloadTask(superCtx context.Context, req MerchantBatchTaskInternalRequest) error {
+	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
+		g.Log().Errorf(superCtx, "UploadInvoicePdf error:Oss service not setup")
+		utility.Assert(true, "File service need setup")
+	}
 	utility.Assert(req.MerchantId > 0, "Invalid Merchant")
 	utility.Assert(req.MemberId > 0, "Invalid Member")
 	utility.Assert(len(req.TaskName) > 0, "Invalid TaskName")
@@ -55,6 +65,7 @@ func BatchDownloadTask(superCtx context.Context, req MerchantBatchTaskInternalRe
 		GmtCreate:    nil,
 		TaskType:     0,
 		SuccessCount: 0,
+		CreateTime:   gtime.Now().Timestamp(),
 	}
 	result, err := dao.MerchantBatchTask.Ctx(superCtx).Data(one).OmitNil().Insert(one)
 	if err != nil {
@@ -144,8 +155,9 @@ func StartRunTaskBackground(one *entity.MerchantBatchTask, task _interface.Batch
 				return
 			}
 			_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
-				dao.MerchantBatchTask.Columns().SuccessCount: gdb.Raw(fmt.Sprintf("success_count + %v", len(data))),
-				dao.MerchantBatchTask.Columns().GmtModify:    gtime.Now(),
+				dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(data))),
+				dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+				dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 			}).Where(dao.MerchantBatchTask.Columns().Id, one.Id).OmitNil().Update()
 			if len(data) < count {
 				break
@@ -159,20 +171,27 @@ func StartRunTaskBackground(one *entity.MerchantBatchTask, task _interface.Batch
 			FailureTask(ctx, one.Id, err)
 			return
 		}
-		// todo mark upload File to Url
+		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_download", fmt.Sprintf("%v_%v_%v", one.MerchantId, one.MemberId, one.Id), strconv.FormatUint(one.MemberId, 10))
+		if err != nil {
+			g.Log().Errorf(ctx, fmt.Sprintf("StartRunTaskBackground UploadLocalFile error:%v", err))
+			return
+		}
 		_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
-			dao.MerchantBatchTask.Columns().Status:     2,
-			dao.MerchantBatchTask.Columns().FinishTime: gtime.Now().Timestamp(),
-			dao.MerchantBatchTask.Columns().TaskCost:   gtime.Now().Timestamp() - startTime,
-			dao.MerchantBatchTask.Columns().GmtModify:  gtime.Now(),
+			dao.MerchantBatchTask.Columns().Status:         2,
+			dao.MerchantBatchTask.Columns().UploadFileUrl:  upload.Url,
+			dao.MerchantBatchTask.Columns().FinishTime:     gtime.Now().Timestamp(),
+			dao.MerchantBatchTask.Columns().TaskCost:       gtime.Now().Timestamp() - startTime,
+			dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+			dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 		}).Where(dao.MerchantBatchTask.Columns().Id, one.Id).OmitNil().Update()
 	}()
 }
 
 func FailureTask(ctx context.Context, taskId int64, err error) {
 	_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
-		dao.MerchantBatchTask.Columns().Status:     3,
-		dao.MerchantBatchTask.Columns().FailReason: fmt.Sprintf("%s", err.Error()),
-		dao.MerchantBatchTask.Columns().GmtModify:  gtime.Now(),
+		dao.MerchantBatchTask.Columns().Status:         3,
+		dao.MerchantBatchTask.Columns().FailReason:     fmt.Sprintf("%s", err.Error()),
+		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantBatchTask.Columns().Id, taskId).OmitNil().Update()
 }

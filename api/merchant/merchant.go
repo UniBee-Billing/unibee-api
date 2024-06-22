@@ -10,6 +10,7 @@ import (
 	"unibee/api/merchant/auth"
 	"unibee/api/merchant/balance"
 	"unibee/api/merchant/discount"
+	"unibee/api/merchant/download"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
 	"unibee/api/merchant/invoice"
@@ -51,6 +52,10 @@ type IMerchantDiscount interface {
 	Delete(ctx context.Context, req *discount.DeleteReq) (res *discount.DeleteRes, err error)
 	Activate(ctx context.Context, req *discount.ActivateReq) (res *discount.ActivateRes, err error)
 	Deactivate(ctx context.Context, req *discount.DeactivateReq) (res *discount.DeactivateRes, err error)
+}
+
+type IMerchantDownload interface {
+	List(ctx context.Context, req *download.ListReq) (res *download.ListRes, err error)
 }
 
 type IMerchantEmail interface {
