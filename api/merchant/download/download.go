@@ -15,3 +15,12 @@ type ListRes struct {
 	Downloads []*bean.MerchantBatchTaskSimplify `json:"downloads" dc:"Merchant Member Download List"`
 	Total     int                               `json:"total" dc:"Total"`
 }
+
+type NewReq struct {
+	g.Meta  `path:"/new" tags:"Download" method:"post" summary:"NewDownload" description:""`
+	Task    string            `json:"task" dc:"Task,InvoiceExport"`
+	Payload map[string]string `json:"payload" dc:"Payload"`
+}
+
+type NewRes struct {
+}

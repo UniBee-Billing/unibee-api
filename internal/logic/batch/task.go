@@ -24,20 +24,18 @@ var taskMap = map[string]_interface.BatchTask{
 	"InvoiceExport": &invoice.TaskInvoice{},
 }
 
-func GetTaskForName(taskName string) _interface.BatchTask {
-	return taskMap[taskName]
+func GetTask(task string) _interface.BatchTask {
+	return taskMap[task]
 }
 
 type MerchantBatchTaskInternalRequest struct {
 	MerchantId uint64            `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	MemberId   uint64            `json:"memberId" dc:"MemberId" `
-	TaskName   string            `json:"taskName" dc:"TaskName"`
-	ModuleName string            `json:"moduleName" dc:"ModuleName"`
-	SourceFrom string            `json:"sourceFrom" dc:"SourceFrom"`
+	Task       string            `json:"task" dc:"Task"`
 	Payload    map[string]string `json:"payload" dc:"Payload"`
 }
 
-func NewBatchDownloadTask(superCtx context.Context, req MerchantBatchTaskInternalRequest) error {
+func NewBatchDownloadTask(superCtx context.Context, req *MerchantBatchTaskInternalRequest) error {
 	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
@@ -47,15 +45,15 @@ func NewBatchDownloadTask(superCtx context.Context, req MerchantBatchTaskInterna
 	}
 	utility.Assert(req.MerchantId > 0, "Invalid Merchant")
 	utility.Assert(req.MemberId > 0, "Invalid Member")
-	utility.Assert(len(req.TaskName) > 0, "Invalid TaskName")
-	task := GetTaskForName(req.TaskName)
-	utility.Assert(task != nil, "Invalid TaskName")
+	utility.Assert(len(req.Task) > 0, "Invalid Task")
+	task := GetTask(req.Task)
+	utility.Assert(task != nil, "Task not found")
 	one := &entity.MerchantBatchTask{
 		MerchantId:   req.MerchantId,
 		MemberId:     req.MemberId,
-		ModuleName:   req.ModuleName,
-		TaskName:     req.TaskName,
-		SourceFrom:   req.SourceFrom,
+		ModuleName:   "",
+		TaskName:     task.TableName(),
+		SourceFrom:   "",
 		Payload:      utility.MarshalToJsonString(req.Payload),
 		Status:       0,
 		StartTime:    0,
@@ -111,14 +109,14 @@ func StartRunTaskBackground(one *entity.MerchantBatchTask, task _interface.Batch
 		}
 
 		//Set Header
-		err = file.SetSheetName("Sheet1", task.TableName(one))
+		err = file.SetSheetName("Sheet1", task.TableName())
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			FailureTask(ctx, one.Id, err)
 			return
 		}
 		//Create Stream Writer
-		writer, err := file.NewStreamWriter(task.TableName(one))
+		writer, err := file.NewStreamWriter(task.TableName())
 		//Update Width Height
 		err = writer.SetColWidth(1, 15, 12)
 		if err != nil {

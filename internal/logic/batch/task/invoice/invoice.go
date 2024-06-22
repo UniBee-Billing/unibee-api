@@ -9,8 +9,8 @@ import (
 type TaskInvoice struct {
 }
 
-func (t TaskInvoice) TableName(task *entity.MerchantBatchTask) string {
-	return fmt.Sprintf("Invoice_%v_%v_%v", task.Id, task.MerchantId, task.MemberId)
+func (t TaskInvoice) TableName() string {
+	return fmt.Sprintf("InvoiceExport")
 }
 
 func (t TaskInvoice) Header() []interface{} {

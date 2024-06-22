@@ -8,9 +8,7 @@ type MerchantBatchTaskSimplify struct {
 	Id             int64  `json:"id"            description:"id"`                                                // id
 	MerchantId     uint64 `json:"merchantId"    description:"merchant_id"`                                       // merchant_id
 	MemberId       uint64 `json:"memberId"      description:"member_id"`                                         // member_id
-	ModuleName     string `json:"moduleName"    description:"module_name"`                                       // module_name
 	TaskName       string `json:"taskName"      description:"task_name"`                                         // task_name
-	SourceFrom     string `json:"sourceFrom"    description:"source_from"`                                       // source_from
 	Payload        string `json:"payload"       description:"payload(json)"`                                     // payload(json)
 	DownloadUrl    string `json:"downloadUrl"   description:"download_file_url"`                                 // download_file_url
 	Status         int    `json:"status"        description:"Status。0-Pending，1-Processing，2-Success，3-Failure"` // Status。0-Pending，1-Processing，2-Success，3-Failure
@@ -33,9 +31,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		Id:             one.Id,
 		MerchantId:     one.MerchantId,
 		MemberId:       one.MemberId,
-		ModuleName:     one.ModuleName,
 		TaskName:       one.TaskName,
-		SourceFrom:     one.SourceFrom,
 		Payload:        one.Payload,
 		DownloadUrl:    one.DownloadUrl,
 		Status:         one.Status,

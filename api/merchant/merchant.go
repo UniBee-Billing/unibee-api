@@ -56,6 +56,7 @@ type IMerchantDiscount interface {
 
 type IMerchantDownload interface {
 	List(ctx context.Context, req *download.ListReq) (res *download.ListRes, err error)
+	New(ctx context.Context, req *download.NewReq) (res *download.NewRes, err error)
 }
 
 type IMerchantEmail interface {
