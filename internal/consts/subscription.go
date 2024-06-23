@@ -29,15 +29,46 @@ const (
 func (status SubscriptionStatusEnum) Description() string {
 	switch status {
 	case SubStatusInit:
-		return "SubStatusInit"
+		return "Init"
 	case SubStatusPending:
-		return "SubStatusPending"
+		return "Pending"
 	case SubStatusActive:
-		return "SubStatusActive"
+		return "Active"
+	case SubStatusCancelled:
+		return "Cancelled"
+	case SubStatusExpired:
+		return "Expired"
 	case SubStatusSuspended:
-		return "SubStatusSuspended"
+		return "Suspended"
+	case SubStatusIncomplete:
+		return "Incomplete"
+	case SubStatusProcessing:
+		return "Processing"
 	default:
-		return "SubStatusInit"
+		return "Init"
+	}
+}
+
+func SubStatusToEnum(status int) SubscriptionStatusEnum {
+	switch status {
+	case SubStatusInit:
+		return SubStatusInit
+	case SubStatusPending:
+		return SubStatusPending
+	case SubStatusActive:
+		return SubStatusActive
+	case SubStatusCancelled:
+		return SubStatusCancelled
+	case SubStatusExpired:
+		return SubStatusExpired
+	case SubStatusSuspended:
+		return SubStatusSuspended
+	case SubStatusIncomplete:
+		return SubStatusIncomplete
+	case SubStatusProcessing:
+		return SubStatusProcessing
+	default:
+		return SubStatusInit
 	}
 }
 

@@ -9,16 +9,16 @@ import (
 type TaskInvoice struct {
 }
 
-func (t TaskInvoice) TableName() string {
+func (t TaskInvoice) TaskName() string {
 	return fmt.Sprintf("InvoiceExport")
 }
 
-func (t TaskInvoice) Header() []interface{} {
+func (t TaskInvoice) Header() interface{} {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([][]interface{}, error) {
+func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	//TODO implement me
 	panic("implement me")
 }

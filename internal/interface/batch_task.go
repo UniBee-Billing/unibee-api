@@ -6,7 +6,7 @@ import (
 )
 
 type BatchTask interface {
-	TableName() string
-	Header() []interface{}
-	PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([][]interface{}, error)
+	TaskName() string
+	Header() interface{}
+	PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error)
 }

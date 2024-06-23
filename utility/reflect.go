@@ -15,7 +15,7 @@ func ReflectTemplateStructToMap(in interface{}, timeZone string) (map[string]int
 		v = v.Elem()
 	}
 
-	if v.Kind() != reflect.Struct { //
+	if v.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v)
 	}
 
