@@ -17,6 +17,7 @@ type InvoiceDetail struct {
 	UserId                         uint64                             `json:"userId"                         description:"UserId"`
 	SubscriptionId                 string                             `json:"subscriptionId"                 description:"SubscriptionId"`
 	InvoiceName                    string                             `json:"invoiceName"                    description:"InvoiceName"`
+	ProductName                    string                             `json:"productName"`
 	InvoiceId                      string                             `json:"invoiceId"                      description:"InvoiceId"`
 	GatewayInvoiceId               string                             `json:"gatewayInvoiceId"               description:"GatewayInvoiceId"`
 	UniqueId                       string                             `json:"uniqueId"                       description:"UniqueId"`
@@ -63,6 +64,9 @@ type InvoiceDetail struct {
 	CreateFrom                     string                             `json:"createFrom"                     description:"create from"`               // create from
 	Metadata                       map[string]interface{}             `json:"metadata" dc:"Metadata，Map"`
 	CountryCode                    string                             `json:"countryCode"                    description:""` //
+	FinishTime                     int64                              `json:"finishTime"`
+	ProrationDate                  int64                              `json:"prorationDate"`
+	TrialEnd                       int64                              `json:"trialEnd"                       description:"trial_end, utc time"` // trial_end, utc time
 }
 
 func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *InvoiceDetail {
@@ -88,6 +92,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		SubscriptionId:                 invoice.SubscriptionId,
 		InvoiceId:                      invoice.InvoiceId,
 		InvoiceName:                    invoice.InvoiceName,
+		ProductName:                    invoice.ProductName,
 		GmtCreate:                      invoice.GmtCreate,
 		OriginAmount:                   invoice.TotalAmount + invoice.DiscountAmount,
 		TotalAmount:                    invoice.TotalAmount,
@@ -129,5 +134,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		CreateFrom:                     invoice.CreateFrom,
 		CountryCode:                    invoice.CountryCode,
 		Metadata:                       metadata,
+		FinishTime:                     invoice.FinishTime,
+		TrialEnd:                       invoice.TrialEnd,
 	}
 }

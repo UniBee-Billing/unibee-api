@@ -252,6 +252,9 @@ func refactorData(obj interface{}, timeZone string) []interface{} {
 						}
 					}
 					value = targetTime.Layout(layout)
+					if value == "0001-01-01 00:00:00" {
+						value = ""
+					}
 				}
 			}
 			out = append(out, value)

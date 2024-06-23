@@ -3,10 +3,12 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	"unibee/internal/logic/auth"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type TaskUser struct {
@@ -60,10 +62,10 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 				SubscriptionName:   one.SubscriptionName,
 				SubscriptionId:     one.SubscriptionId,
 				SubscriptionStatus: consts.SubStatusToEnum(one.SubscriptionStatus).Description(),
-				CreateTime:         "",
+				CreateTime:         gtime.NewFromTimeStamp(one.CreateTime),
 				ExternalUserId:     one.ExternalUserId,
 				Status:             consts.UserStatusToEnum(one.Status).Description(),
-				TaxPercentage:      "",
+				TaxPercentage:      utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage),
 				Type:               consts.UserTypeToEnum(one.Type).Description(),
 				Gateway:            userGateway,
 				City:               one.City,
@@ -75,26 +77,26 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 }
 
 type ExportUserEntity struct {
-	Id                 string `json:"Id"                 `
-	FirstName          string `json:"FirstName"          `
-	LastName           string `json:"LastName"           `
-	Email              string `json:"Email"              `
-	MerchantName       string `json:"MerchantName"       `
-	AvatarUrl          string `json:"AvatarUrl"          `
-	Phone              string `json:"Phone"              `
-	Address            string `json:"Address"            `
-	VATNumber          string `json:"VATNumber"          `
-	CountryCode        string `json:"CountryCode"        `
-	CountryName        string `json:"CountryName"        `
-	SubscriptionName   string `json:"SubscriptionName"   `
-	SubscriptionId     string `json:"SubscriptionId"     `
-	SubscriptionStatus string `json:"SubscriptionStatus" `
-	CreateTime         string `json:"CreateTime"         `
-	ExternalUserId     string `json:"ExternalUserId"     `
-	Status             string `json:"Status"             `
-	TaxPercentage      string `json:"TaxPercentage"      `
-	Type               string `json:"Type"               `
-	Gateway            string `json:"Gateway"            `
-	City               string `json:"City"               `
-	ZipCode            string `json:"ZipCode"            `
+	Id                 string      `json:"Id"                 `
+	FirstName          string      `json:"FirstName"          `
+	LastName           string      `json:"LastName"           `
+	Email              string      `json:"Email"              `
+	MerchantName       string      `json:"MerchantName"       `
+	AvatarUrl          string      `json:"AvatarUrl"          `
+	Phone              string      `json:"Phone"              `
+	Address            string      `json:"Address"            `
+	VATNumber          string      `json:"VATNumber"          `
+	CountryCode        string      `json:"CountryCode"        `
+	CountryName        string      `json:"CountryName"        `
+	SubscriptionName   string      `json:"SubscriptionName"   `
+	SubscriptionId     string      `json:"SubscriptionId"     `
+	SubscriptionStatus string      `json:"SubscriptionStatus" `
+	CreateTime         *gtime.Time `json:"CreateTime"       layout:"2006-01-02 15:04:05"  `
+	ExternalUserId     string      `json:"ExternalUserId"     `
+	Status             string      `json:"Status"             `
+	TaxPercentage      string      `json:"TaxPercentage"      `
+	Type               string      `json:"Type"               `
+	Gateway            string      `json:"Gateway"            `
+	City               string      `json:"City"               `
+	ZipCode            string      `json:"ZipCode"            `
 }
