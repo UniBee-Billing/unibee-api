@@ -17,6 +17,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/batch/task/invoice"
+	"unibee/internal/logic/batch/task/subscription"
 	"unibee/internal/logic/batch/task/user"
 	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -24,8 +25,9 @@ import (
 )
 
 var taskMap = map[string]_interface.BatchTask{
-	"InvoiceExport": &invoice.TaskInvoice{},
-	"UserExport":    &user.TaskUser{},
+	"InvoiceExport":      &invoice.TaskInvoice{},
+	"UserExport":         &user.TaskUser{},
+	"SubscriptionExport": &subscription.TaskSubscription{},
 }
 
 func getTask(task string) _interface.BatchTask {

@@ -54,7 +54,7 @@ type SubscriptionSimplify struct {
 	TestClock              int64                  `json:"testClock"                   description:"test_clock, simulator clock for subscription, if set , sub will out of cronjob controll"`                                                                        // test_clock, simulator clock for subscription, if set , sub will out of cronjob controll
 	Metadata               map[string]interface{} `json:"metadata" description:""`
 	GasPayer               string                 `json:"gasPayer"                  description:"who pay the gas, merchant|user"` // who pay the gas, merchant|user
-	DefaultPaymentMethodId string                 `json:"defaultPaymentMethodId"    description:""`                               //
+	DefaultPaymentMethodId string                 `json:"defaultPaymentMethodId"    description:""`
 }
 
 func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
