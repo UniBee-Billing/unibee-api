@@ -9,17 +9,19 @@ import (
 
 func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error) {
 	result, err := auth.UserList(ctx, &auth.UserListInternalReq{
-		MerchantId:    _interface.GetMerchantId(ctx),
-		UserId:        req.UserId,
-		Email:         req.Email,
-		FirstName:     req.FirstName,
-		LastName:      req.LastName,
-		Status:        req.Status,
-		DeleteInclude: req.DeleteInclude,
-		SortField:     req.SortField,
-		SortType:      req.SortType,
-		Page:          req.Page,
-		Count:         req.Count,
+		MerchantId:      _interface.GetMerchantId(ctx),
+		UserId:          req.UserId,
+		Email:           req.Email,
+		FirstName:       req.FirstName,
+		LastName:        req.LastName,
+		Status:          req.Status,
+		DeleteInclude:   req.DeleteInclude,
+		SortField:       req.SortField,
+		SortType:        req.SortType,
+		Page:            req.Page,
+		Count:           req.Count,
+		CreateTimeStart: req.CreateTimeStart,
+		CreateTimeEnd:   req.CreateTimeEnd,
 	})
 	if err != nil {
 		return nil, err

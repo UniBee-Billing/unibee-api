@@ -49,20 +49,22 @@ type DetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta        `path:"/list" tags:"Invoice" method:"get,post" summary:"InvoiceList" dc:"Get invoice list"`
-	FirstName     string `json:"firstName" dc:"The firstName of invoice" `
-	LastName      string `json:"lastName" dc:"The lastName of invoice" `
-	Currency      string `json:"currency" dc:"The currency of invoice" `
-	Status        []int  `json:"status" dc:"The status of invoice, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
-	AmountStart   int64  `json:"amountStart" dc:"The filter start amount of invoice" `
-	AmountEnd     int64  `json:"amountEnd" dc:"The filter end amount of invoice" `
-	UserId        uint64 `json:"userId" dc:"The filter userid of invoice" `
-	SendEmail     string `json:"sendEmail" dc:"The filter email of invoice" `
-	SortField     string `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
-	SortType      string `json:"sortType" dc:"Sort，asc|desc，Default desc" `
-	DeleteInclude bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin Permission" `
-	Page          int    `json:"page"  dc:"Page, Start 0" `
-	Count         int    `json:"count"  dc:"Count" dc:"Count By Page" `
+	g.Meta          `path:"/list" tags:"Invoice" method:"get,post" summary:"InvoiceList" dc:"Get invoice list"`
+	FirstName       string `json:"firstName" dc:"The firstName of invoice" `
+	LastName        string `json:"lastName" dc:"The lastName of invoice" `
+	Currency        string `json:"currency" dc:"The currency of invoice" `
+	Status          []int  `json:"status" dc:"The status of invoice, 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled" `
+	AmountStart     int64  `json:"amountStart" dc:"The filter start amount of invoice" `
+	AmountEnd       int64  `json:"amountEnd" dc:"The filter end amount of invoice" `
+	UserId          uint64 `json:"userId" dc:"The filter userid of invoice" `
+	SendEmail       string `json:"sendEmail" dc:"The filter email of invoice" `
+	SortField       string `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
+	SortType        string `json:"sortType" dc:"Sort，asc|desc，Default desc" `
+	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin Permission" `
+	Page            int    `json:"page"  dc:"Page, Start 0" `
+	Count           int    `json:"count"  dc:"Count" dc:"Count By Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type ListRes struct {

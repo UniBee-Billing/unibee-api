@@ -14,13 +14,15 @@ import (
 )
 
 type SubscriptionListInternalReq struct {
-	MerchantId uint64 `json:"merchantId" dc:"MerchantId"`
-	UserId     int64  `json:"userId"  dc:"UserId" `
-	Status     []int  `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
-	SortField  string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType   string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page       int    `json:"page" dc:"Page, Start With 0" `
-	Count      int    `json:"count" dc:"Count Of Page" `
+	MerchantId      uint64 `json:"merchantId" dc:"MerchantId"`
+	UserId          int64  `json:"userId"  dc:"UserId" `
+	Status          []int  `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page" dc:"Page, Start With 0" `
+	Count           int    `json:"count" dc:"Count Of Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.SubscriptionDetail, error) {
@@ -78,6 +80,12 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 		Where(dao.Subscription.Columns().UserId, req.UserId)
 	if req.Status != nil && len(req.Status) > 0 {
 		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().Status, req.Status)
+	}
+	if req.CreateTimeStart > 0 {
+		baseQuery = baseQuery.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+	}
+	if req.CreateTimeEnd > 0 {
+		baseQuery = baseQuery.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
 	}
 	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		Order(sortKey).

@@ -10,13 +10,15 @@ import (
 
 func (c *ControllerSubscription) List(ctx context.Context, req *subscription.ListReq) (res *subscription.ListRes, err error) {
 	list, total := service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
-		MerchantId: _interface.GetMerchantId(ctx),
-		UserId:     req.UserId,
-		Status:     req.Status,
-		SortField:  req.SortField,
-		SortType:   req.SortType,
-		Page:       req.Page,
-		Count:      req.Count,
+		MerchantId:      _interface.GetMerchantId(ctx),
+		UserId:          req.UserId,
+		Status:          req.Status,
+		SortField:       req.SortField,
+		SortType:        req.SortType,
+		Page:            req.Page,
+		Count:           req.Count,
+		CreateTimeStart: req.CreateTimeStart,
+		CreateTimeEnd:   req.CreateTimeEnd,
 	})
 	return &subscription.ListRes{Subscriptions: list, Total: total}, nil
 }

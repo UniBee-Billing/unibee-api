@@ -55,13 +55,15 @@ type UserPendingCryptoSubscriptionDetailRes struct {
 }
 
 type ListReq struct {
-	g.Meta    `path:"/list" tags:"Subscription" method:"get,post" summary:"SubscriptionList"`
-	UserId    int64  `json:"userId"  dc:"UserId" `
-	Status    []int  `json:"status" dc:"Filter, Default All，Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
-	SortField string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType  string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page      int    `json:"page" dc:"Page, Start With 0" `
-	Count     int    `json:"count"  dc:"Count" dc:"Count Of Page" `
+	g.Meta          `path:"/list" tags:"Subscription" method:"get,post" summary:"SubscriptionList"`
+	UserId          int64  `json:"userId"  dc:"UserId" `
+	Status          []int  `json:"status" dc:"Filter, Default All，Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
+	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page" dc:"Page, Start With 0" `
+	Count           int    `json:"count"  dc:"Count" dc:"Count Of Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 type ListRes struct {
 	Subscriptions []*detail.SubscriptionDetail `json:"subscriptions" dc:"Subscriptions"`

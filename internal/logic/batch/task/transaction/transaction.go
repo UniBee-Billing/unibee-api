@@ -28,8 +28,11 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
 	result, _ := service.PaymentTimeLineList(ctx, &service.PaymentTimelineListInternalReq{
 		MerchantId: task.MerchantId,
-		Page:       page,
-		Count:      count,
+		//UserId:     0,
+		//CreateTimeStart: 0,
+		//CreateTimeEnd:   0,
+		Page:  page,
+		Count: count,
 	})
 	if result != nil && result.PaymentTimelines != nil {
 		for _, one := range result.PaymentTimelines {

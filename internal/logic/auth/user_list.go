@@ -22,11 +22,13 @@ type UserListInternalReq struct {
 	//SubscriptionStatus int    `json:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
 	//PaymentMethod      int    `json:"paymentMethod" dc:"Filter GatewayDefaultPaymentMethod, Default All" `
 	//BillingType        int    `json:"billingType" dc:"Filter BillingType, Default All" `
-	DeleteInclude bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
-	SortField     string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
-	SortType      string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page          int    `json:"page"  dc:"Page,Start 0" `
-	Count         int    `json:"count" dc:"Count Of Page" `
+	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
+	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page"  dc:"Page,Start 0" `
+	Count           int    `json:"count" dc:"Count Of Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type UserListInternalRes struct {
@@ -81,6 +83,12 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	}
 	if len(req.Status) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)
+	}
+	if req.CreateTimeStart > 0 {
+		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+	}
+	if req.CreateTimeEnd > 0 {
+		q = q.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
 	}
 	err = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).

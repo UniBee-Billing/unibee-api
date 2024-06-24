@@ -30,8 +30,10 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
 	result, _ := service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
 		MerchantId: task.MerchantId,
-		Page:       page,
-		Count:      count,
+		//CreateTimeStart: 0,
+		//CreateTimeEnd:   0,
+		Page:  page,
+		Count: count,
 	})
 	if result != nil {
 		for _, one := range result {
