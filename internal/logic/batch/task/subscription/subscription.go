@@ -3,6 +3,7 @@ package subscription
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	"unibee/internal/logic/subscription/service"
@@ -28,13 +29,40 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
-	result, _ := service.SubscriptionList(ctx, &service.SubscriptionListInternalReq{
+	var payload map[string]interface{}
+	err := utility.UnmarshalFromJsonString(task.Payload, &payload)
+	if err != nil {
+		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
+		return mainList, nil
+	}
+	req := &service.SubscriptionListInternalReq{
 		MerchantId: task.MerchantId,
 		//CreateTimeStart: 0,
 		//CreateTimeEnd:   0,
 		Page:  page,
 		Count: count,
-	})
+	}
+	if payload != nil {
+		if value, ok := payload["userId"].(int64); ok {
+			req.UserId = value
+		}
+		if value, ok := payload["sortField"].(string); ok {
+			req.SortField = value
+		}
+		if value, ok := payload["sortType"].(string); ok {
+			req.SortType = value
+		}
+		if value, ok := payload["status"].([]int); ok {
+			req.Status = value
+		}
+		if value, ok := payload["createTimeStart"].(int64); ok {
+			req.CreateTimeStart = value
+		}
+		if value, ok := payload["createTimeEnd"].(int64); ok {
+			req.CreateTimeEnd = value
+		}
+	}
+	result, _ := service.SubscriptionList(ctx, req)
 	if result != nil {
 		for _, one := range result {
 			var subGateway = ""

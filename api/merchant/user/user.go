@@ -23,7 +23,7 @@ type NewRes struct {
 
 type ListReq struct {
 	g.Meta          `path:"/list" tags:"User" method:"get,post" summary:"UserList"`
-	UserId          int    `json:"userId" dc:"Filter UserId" `
+	UserId          int64  `json:"userId" dc:"Filter UserId" `
 	FirstName       string `json:"firstName" dc:"Search FirstName" `
 	LastName        string `json:"lastName" dc:"Search LastName" `
 	Email           string `json:"email" dc:"Search Filter Email" `

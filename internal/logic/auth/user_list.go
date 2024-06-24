@@ -12,7 +12,7 @@ import (
 
 type UserListInternalReq struct {
 	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int    `json:"userId" dc:"Filter UserId, Default All" `
+	UserId     int64  `json:"userId" dc:"Filter UserId, Default All" `
 	Email      string `json:"email" dc:"Search Email" `
 	FirstName  string `json:"firstName" dc:"Search FirstName" `
 	LastName   string `json:"lastName" dc:"Search LastName" `

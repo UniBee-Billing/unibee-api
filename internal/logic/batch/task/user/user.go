@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	"unibee/internal/logic/auth"
@@ -28,7 +29,13 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
-	result, _ := auth.UserList(ctx, &auth.UserListInternalReq{
+	var payload map[string]interface{}
+	err := utility.UnmarshalFromJsonString(task.Payload, &payload)
+	if err != nil {
+		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
+		return mainList, nil
+	}
+	req := &auth.UserListInternalReq{
 		MerchantId: task.MerchantId,
 		//UserId:        0,
 		//Email:         "",
@@ -42,7 +49,40 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 		//CreateTimeEnd:   0,
 		Page:  page,
 		Count: count,
-	})
+	}
+	if payload != nil {
+		if value, ok := payload["userId"].(int64); ok {
+			req.UserId = value
+		}
+		if value, ok := payload["email"].(string); ok {
+			req.Email = value
+		}
+		if value, ok := payload["firstName"].(string); ok {
+			req.FirstName = value
+		}
+		if value, ok := payload["lastName"].(string); ok {
+			req.LastName = value
+		}
+		if value, ok := payload["status"].([]int); ok {
+			req.Status = value
+		}
+		if value, ok := payload["deleteInclude"].(bool); ok {
+			req.DeleteInclude = value
+		}
+		if value, ok := payload["sortField"].(string); ok {
+			req.SortField = value
+		}
+		if value, ok := payload["sortType"].(string); ok {
+			req.SortType = value
+		}
+		if value, ok := payload["createTimeStart"].(int64); ok {
+			req.CreateTimeStart = value
+		}
+		if value, ok := payload["createTimeEnd"].(int64); ok {
+			req.CreateTimeEnd = value
+		}
+	}
+	result, _ := auth.UserList(ctx, req)
 	if result != nil && result.UserAccounts != nil {
 		for _, one := range result.UserAccounts {
 			var userGateway = ""

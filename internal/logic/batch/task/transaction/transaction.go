@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -26,14 +27,40 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
-	result, _ := service.PaymentTimeLineList(ctx, &service.PaymentTimelineListInternalReq{
+	var payload map[string]interface{}
+	err := utility.UnmarshalFromJsonString(task.Payload, &payload)
+	if err != nil {
+		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
+		return mainList, nil
+	}
+	req := &service.PaymentTimelineListInternalReq{
 		MerchantId: task.MerchantId,
 		//UserId:     0,
 		//CreateTimeStart: 0,
 		//CreateTimeEnd:   0,
+		//SortField: "",
+		//SortType: "",
 		Page:  page,
 		Count: count,
-	})
+	}
+	if payload != nil {
+		if value, ok := payload["userId"].(uint64); ok {
+			req.UserId = value
+		}
+		if value, ok := payload["sortField"].(string); ok {
+			req.SortField = value
+		}
+		if value, ok := payload["sortType"].(string); ok {
+			req.SortType = value
+		}
+		if value, ok := payload["createTimeStart"].(int64); ok {
+			req.CreateTimeStart = value
+		}
+		if value, ok := payload["createTimeEnd"].(int64); ok {
+			req.CreateTimeEnd = value
+		}
+	}
+	result, _ := service.PaymentTimeLineList(ctx, req)
 	if result != nil && result.PaymentTimelines != nil {
 		for _, one := range result.PaymentTimelines {
 			var gateway = ""

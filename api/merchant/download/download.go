@@ -18,8 +18,8 @@ type ListRes struct {
 
 type NewReq struct {
 	g.Meta  `path:"/new" tags:"Download" method:"post" summary:"NewDownload" description:""`
-	Task    string            `json:"task" dc:"Task,InvoiceExport"`
-	Payload map[string]string `json:"payload" dc:"Payload"`
+	Task    string                 `json:"task" dc:"Task,InvoiceExport"`
+	Payload map[string]interface{} `json:"payload" dc:"Payload"`
 }
 
 type NewRes struct {

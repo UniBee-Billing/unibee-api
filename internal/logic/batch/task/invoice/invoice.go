@@ -3,6 +3,7 @@ package invoice
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	"unibee/internal/logic/invoice/service"
@@ -28,7 +29,13 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		return mainList, nil
 	}
 	merchant := query.GetMerchantById(ctx, task.MerchantId)
-	result, _ := service.InvoiceList(ctx, &service.InvoiceListInternalReq{
+	var payload map[string]interface{}
+	err := utility.UnmarshalFromJsonString(task.Payload, &payload)
+	if err != nil {
+		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
+		return mainList, nil
+	}
+	req := &service.InvoiceListInternalReq{
 		MerchantId: task.MerchantId,
 		//FirstName:     "",
 		//LastName:      "",
@@ -43,7 +50,49 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		//DeleteInclude: false,
 		Page:  0,
 		Count: 0,
-	})
+	}
+	if payload != nil {
+		if value, ok := payload["userId"].(uint64); ok {
+			req.UserId = value
+		}
+		if value, ok := payload["firstName"].(string); ok {
+			req.FirstName = value
+		}
+		if value, ok := payload["lastName"].(string); ok {
+			req.LastName = value
+		}
+		if value, ok := payload["currency"].(string); ok {
+			req.Currency = value
+		}
+		if value, ok := payload["status"].([]int); ok {
+			req.Status = value
+		}
+		if value, ok := payload["deleteInclude"].(bool); ok {
+			req.DeleteInclude = value
+		}
+		if value, ok := payload["sendEmail"].(string); ok {
+			req.SendEmail = value
+		}
+		if value, ok := payload["sortField"].(string); ok {
+			req.SortField = value
+		}
+		if value, ok := payload["sortType"].(string); ok {
+			req.SortType = value
+		}
+		if value, ok := payload["amountStart"].(int64); ok {
+			req.AmountStart = value
+		}
+		if value, ok := payload["AmountEnd"].(int64); ok {
+			req.AmountEnd = value
+		}
+		if value, ok := payload["createTimeStart"].(int64); ok {
+			req.CreateTimeStart = value
+		}
+		if value, ok := payload["createTimeEnd"].(int64); ok {
+			req.CreateTimeEnd = value
+		}
+	}
+	result, _ := service.InvoiceList(ctx, req)
 	if result != nil && result.Invoices != nil {
 		for _, one := range result.Invoices {
 			var invoiceGateway = ""

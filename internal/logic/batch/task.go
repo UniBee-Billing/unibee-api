@@ -37,10 +37,10 @@ func getTask(task string) _interface.BatchTask {
 }
 
 type MerchantBatchTaskInternalRequest struct {
-	MerchantId uint64            `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	MemberId   uint64            `json:"memberId" dc:"MemberId" `
-	Task       string            `json:"task" dc:"Task"`
-	Payload    map[string]string `json:"payload" dc:"Payload"`
+	MerchantId uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	MemberId   uint64                 `json:"memberId" dc:"MemberId" `
+	Task       string                 `json:"task" dc:"Task"`
+	Payload    map[string]interface{} `json:"payload" dc:"Payload"`
 }
 
 func NewBatchDownloadTask(superCtx context.Context, req *MerchantBatchTaskInternalRequest) error {

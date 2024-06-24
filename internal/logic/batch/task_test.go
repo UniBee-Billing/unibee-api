@@ -2,6 +2,7 @@ package batch
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/xuri/excelize/v2"
 	"testing"
@@ -67,5 +68,19 @@ func TestExcelStreamWrite(t *testing.T) {
 		}
 		//Save File
 		_ = file.SaveAs("test01.xlsx")
+	})
+	t.Run("Test interface convert", func(t *testing.T) {
+		var data = make(map[string]interface{})
+		data["1"] = []int{1, 2}
+		data["2"] = "2"
+		if value, ok := data["1"].([]int); ok {
+			fmt.Println(value)
+		}
+		if value, ok := data["2"].(string); ok {
+			fmt.Println(value)
+		}
+		if value, ok := data["3"].(string); ok {
+			fmt.Println(value)
+		}
 	})
 }

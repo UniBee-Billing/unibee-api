@@ -68,7 +68,7 @@ func TestUserCreateAndDelete(t *testing.T) {
 		require.NotNil(t, one.Status == 0)
 		list, err := UserList(ctx, &UserListInternalReq{
 			MerchantId: test.TestMerchant.Id,
-			UserId:     int(one.Id),
+			UserId:     int64(one.Id),
 			Email:      "autotestuser@wowow.io",
 			SortType:   "desc",
 			SortField:  "gmt_create",
