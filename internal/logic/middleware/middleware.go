@@ -256,7 +256,7 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			customCtx.MerchantId = userAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
 			//UserPortalTrack
-			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.GetUrl(), nil)
+			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.URL.Path, nil)
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)
