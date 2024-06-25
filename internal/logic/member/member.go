@@ -142,7 +142,7 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 	id, _ := result.LastInsertId()
 	one.Id = uint64(id)
 	var link = config.GetConfigInstance().Server.GetServerPath()
-	if !strings.Contains(link, "/api") {
+	if strings.Compare(link, "https://api.unibee.top") == 0 {
 		link = "https://merchant.unibee.top"
 	} else {
 		link = strings.Replace(link, "/api", "", 1)
