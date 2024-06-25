@@ -98,7 +98,7 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		if len(memberIdList) == 0 {
 			return make([]*detail.MerchantOperationLogDetail, 0), 0
 		}
-		query = query.WhereIn(dao.MerchantOperationLog.Columns().MerchantId, memberIdList)
+		query = query.WhereIn(dao.MerchantOperationLog.Columns().MemberId, memberIdList)
 	}
 
 	err := query.ScanAndCount(&mainList, &total, true)
