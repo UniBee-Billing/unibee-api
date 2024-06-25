@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	_ "unibee/internal/consts"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/merchant"
 	"unibee/internal/model"
@@ -254,6 +255,8 @@ func (s *SMiddleware) TokenAuth(r *ghttp.Request) {
 			}
 			customCtx.MerchantId = userAccount.MerchantId
 			doubleRequestLimit(strconv.FormatUint(customCtx.User.Id, 10), r)
+			//UserPortalTrack
+			segment.TrackSegmentEventBackground(r.Context(), userAccount.MerchantId, userAccount, r.GetUrl(), nil)
 		} else if token.TokenType == jwt.TOKENTYPEMERCHANTMember {
 			merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
 			permissionKey := jwt.GetMemberPermissionKey(r.Context(), merchantAccount)

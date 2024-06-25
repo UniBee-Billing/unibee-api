@@ -10,7 +10,9 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/analysis/segment"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -43,6 +45,30 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).IsOpenApiCall {
 		memberId = 0
 		optAccount = fmt.Sprintf("OpenApi(%v)", _interface.Context().Get(superCtx).OpenApiKey)
+		var targetUserId uint64 = 0
+		if req.UserId > 0 {
+			targetUserId = req.UserId
+		} else if len(req.SubscriptionId) > 0 {
+			sub := query.GetSubscriptionBySubscriptionId(superCtx, req.SubscriptionId)
+			if sub != nil {
+				targetUserId = sub.UserId
+			}
+		} else if len(req.InvoiceId) > 0 {
+			in := query.GetInvoiceByInvoiceId(superCtx, req.InvoiceId)
+			if in != nil {
+				targetUserId = in.UserId
+			}
+		}
+		if targetUserId > 0 {
+			userAccount := query.GetUserAccountById(superCtx, targetUserId)
+			if userAccount != nil {
+				segment.TrackSegmentEventBackground(superCtx, userAccount.MerchantId, userAccount, req.Target, map[string]interface{}{
+					"OptAccount": optAccount,
+					"OptTarget":  req.Target,
+					"OptContent": req.Content,
+				})
+			}
+		}
 	} else {
 		memberId = 0
 		optAccount = fmt.Sprintf("System")

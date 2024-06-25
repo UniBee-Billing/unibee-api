@@ -7,6 +7,7 @@ import (
 	"unibee/api/merchant/profile"
 	"unibee/internal/cmd/config"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/currency"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/vat_gateway"
@@ -31,17 +32,19 @@ func (c *ControllerProfile) Get(ctx context.Context, req *profile.GetReq) (res *
 	_, vatData := vat_gateway.GetDefaultMerchantVatConfig(ctx, merchant.Id)
 	_, emailData := email.GetDefaultMerchantEmailConfig(ctx, merchant.Id)
 	return &profile.GetRes{
-		Merchant:       bean.SimplifyMerchant(merchant),
-		MerchantMember: detail.ConvertMemberToDetail(ctx, member),
-		Currency:       currency.GetMerchantCurrencies(),
-		Env:            config.GetConfigInstance().Env,
-		IsProd:         config.GetConfigInstance().IsProd(),
-		TimeZone:       time.GetTimeZoneList(),
-		Gateways:       bean.SimplifyGatewayList(query.GetMerchantGatewayList(ctx, merchant.Id)),
-		OpenApiKey:     utility.HideStar(merchant.ApiKey),
-		SendGridKey:    utility.HideStar(emailData),
-		VatSenseKey:    utility.HideStar(vatData),
-		IsOwner:        isOwner,
-		MemberRoles:    memberRoles,
+		Merchant:             bean.SimplifyMerchant(merchant),
+		MerchantMember:       detail.ConvertMemberToDetail(ctx, member),
+		Currency:             currency.GetMerchantCurrencies(),
+		Env:                  config.GetConfigInstance().Env,
+		IsProd:               config.GetConfigInstance().IsProd(),
+		TimeZone:             time.GetTimeZoneList(),
+		Gateways:             bean.SimplifyGatewayList(query.GetMerchantGatewayList(ctx, merchant.Id)),
+		OpenApiKey:           utility.HideStar(merchant.ApiKey),
+		SendGridKey:          utility.HideStar(emailData),
+		VatSenseKey:          utility.HideStar(vatData),
+		SegmentServerSideKey: segment.GetMerchantSegmentServerSideConfig(ctx, merchant.Id),
+		SegmentUserPortalKey: segment.GetMerchantSegmentUserPortalConfig(ctx, merchant.Id),
+		IsOwner:              isOwner,
+		MemberRoles:          memberRoles,
 	}, nil
 }

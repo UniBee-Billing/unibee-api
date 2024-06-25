@@ -11,18 +11,20 @@ type GetReq struct {
 }
 
 type GetRes struct {
-	Merchant       *bean.MerchantSimplify       `json:"merchant" dc:"Merchant"`
-	MerchantMember *detail.MerchantMemberDetail `json:"merchantMember" dc:"MerchantMember"`
-	Env            string                       `json:"env" description:"System Env, em: daily|stage|local|prod" `
-	IsProd         bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
-	TimeZone       []string                     `json:"TimeZone" description:"TimeZone List" `
-	Currency       []*bean.Currency             `json:"Currency" description:"Currency List" `
-	Gateways       []*bean.GatewaySimplify      `json:"gateways" description:"Gateway List" `
-	OpenApiKey     string                       `json:"openApiKey" description:"OpenApiKey" `
-	SendGridKey    string                       `json:"sendGridKey" description:"SendGridKey" `
-	VatSenseKey    string                       `json:"vatSenseKey" description:"VatSenseKey" `
-	IsOwner        bool                         `json:"isOwner" description:"Check Member is Owner" `
-	MemberRoles    []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
+	Merchant             *bean.MerchantSimplify       `json:"merchant" dc:"Merchant"`
+	MerchantMember       *detail.MerchantMemberDetail `json:"merchantMember" dc:"MerchantMember"`
+	Env                  string                       `json:"env" description:"System Env, em: daily|stage|local|prod" `
+	IsProd               bool                         `json:"isProd" description:"Check System Env Is Prod, true|false" `
+	TimeZone             []string                     `json:"TimeZone" description:"TimeZone List" `
+	Currency             []*bean.Currency             `json:"Currency" description:"Currency List" `
+	Gateways             []*bean.GatewaySimplify      `json:"gateways" description:"Gateway List" `
+	OpenApiKey           string                       `json:"openApiKey" description:"OpenApiKey" `
+	SendGridKey          string                       `json:"sendGridKey" description:"SendGridKey" `
+	VatSenseKey          string                       `json:"vatSenseKey" description:"VatSenseKey" `
+	SegmentServerSideKey string                       `json:"segmentServerSideKey" description:"SegmentServerSideKey" `
+	SegmentUserPortalKey string                       `json:"segmentUserPortalKey" description:"SegmentUserPortalKey" `
+	IsOwner              bool                         `json:"isOwner" description:"Check Member is Owner" `
+	MemberRoles          []*bean.MerchantRoleSimplify `json:"MemberRoles" description:"The member's role list'" `
 }
 
 type UpdateReq struct {

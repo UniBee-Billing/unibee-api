@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
@@ -150,6 +151,7 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 	id, err := result.LastInsertId()
 	utility.AssertError(err, "Server Error")
 	one.Id = uint64(id)
+	segment.RegisterSegmentUserBackground(ctx, one.MerchantId, one)
 	return one, nil
 }
 
