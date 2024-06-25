@@ -109,16 +109,16 @@ func TrackSegmentEventBackground(superCtx context.Context, merchantId uint64, us
 			}
 		}(client)
 
-		err = client.Enqueue(analytics.Identify{
-			UserId: strconv.FormatUint(user.Id, 10),
-			Traits: analytics.NewTraits().
-				SetName(fmt.Sprintf("%s %s", user.FirstName, user.LastName)).
-				SetEmail(user.Email).
-				Set("externalUserId", user.ExternalUserId),
-		})
-		if err != nil {
-			g.Log().Errorf(ctx, "TrackSegmentEvent Register error:%s", err.Error())
-		}
+		//err = client.Enqueue(analytics.Identify{
+		//	UserId: strconv.FormatUint(user.Id, 10),
+		//	Traits: analytics.NewTraits().
+		//		SetName(fmt.Sprintf("%s %s", user.FirstName, user.LastName)).
+		//		SetEmail(user.Email).
+		//		Set("externalUserId", user.ExternalUserId),
+		//})
+		//if err != nil {
+		//	g.Log().Errorf(ctx, "TrackSegmentEvent Register error:%s", err.Error())
+		//}
 
 		properties := analytics.NewProperties()
 		for key, value := range data {
