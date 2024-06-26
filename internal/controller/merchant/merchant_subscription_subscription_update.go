@@ -18,6 +18,10 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		utility.Assert(one != nil, "no active or incomplete subscription found")
 		req.SubscriptionId = one.SubscriptionId
 	}
+	var memberMemberId int64 = 0
+	if _interface.Context().Get(ctx).MerchantMember != nil {
+		memberMemberId = int64(_interface.Context().Get(ctx).MerchantMember.Id)
+	}
 	update, err := service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{
 		SubscriptionId:     req.SubscriptionId,
 		NewPlanId:          req.NewPlanId,
@@ -36,7 +40,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		ReturnUrl:          req.ReturnUrl,
 		CancelUrl:          req.CancelUrl,
 		ProductData:        req.ProductData,
-	}, -1)
+	}, memberMemberId)
 	if err != nil {
 		return nil, err
 	}
