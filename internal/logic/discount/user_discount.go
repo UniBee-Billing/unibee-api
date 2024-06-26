@@ -8,6 +8,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -41,7 +42,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if discountCode == nil {
 		return false, false, "Code not found"
 	}
-	if discountCode.Status != DiscountStatusActive {
+	if discountCode.Status != consts.DiscountStatusActive {
 		return false, false, "Code not active"
 	}
 	if discountCode.StartTime > req.TimeNow {
@@ -50,10 +51,10 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 	if discountCode.EndTime != 0 && discountCode.EndTime < req.TimeNow {
 		return false, false, "Code expired"
 	}
-	if discountCode.DiscountType == DiscountTypeFixedAmount && len(discountCode.Currency) == 0 {
+	if discountCode.DiscountType == consts.DiscountTypeFixedAmount && len(discountCode.Currency) == 0 {
 		return false, false, "Code is fixed amount,but currency not set"
 	}
-	if discountCode.DiscountType == DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
+	if discountCode.DiscountType == consts.DiscountTypeFixedAmount && strings.Compare(strings.ToUpper(req.Currency), strings.ToUpper(discountCode.Currency)) != 0 {
 		return false, false, "Code currency not match plan"
 	}
 	if len(discountCode.PlanIds) > 0 {
@@ -108,7 +109,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 			return false, false, "Code reach out the limit"
 		}
 	}
-	if discountCode.BillingType == DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && len(req.SubscriptionId) > 0 {
+	if discountCode.BillingType == consts.DiscountBillingTypeRecurring && discountCode.CycleLimit > 0 && len(req.SubscriptionId) > 0 {
 		//check user subscription limit
 		count, err := dao.MerchantUserDiscountCode.Ctx(ctx).
 			Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
@@ -127,7 +128,7 @@ func UserDiscountApplyPreview(ctx context.Context, req *UserDiscountApplyReq) (c
 		}
 	}
 
-	return true, discountCode.BillingType == DiscountBillingTypeRecurring, ""
+	return true, discountCode.BillingType == consts.DiscountBillingTypeRecurring, ""
 }
 
 func UserDiscountApply(ctx context.Context, req *UserDiscountApplyReq) (discountCode *entity.MerchantUserDiscountCode, err error) {
@@ -203,16 +204,16 @@ func ComputeDiscountAmount(ctx context.Context, merchantId uint64, totalAmountEx
 	if merchantDiscountCode == nil {
 		return 0
 	}
-	if merchantDiscountCode.Status != DiscountStatusActive {
+	if merchantDiscountCode.Status != consts.DiscountStatusActive {
 		return 0
 	}
 	if (merchantDiscountCode.EndTime != 0 && merchantDiscountCode.EndTime < timeNow) || merchantDiscountCode.StartTime > timeNow {
 		return 0
 	}
 
-	if merchantDiscountCode.DiscountType == DiscountTypePercentage {
+	if merchantDiscountCode.DiscountType == consts.DiscountTypePercentage {
 		return int64(float64(totalAmountExcludeTax) * utility.ConvertTaxPercentageToInternalFloat(merchantDiscountCode.DiscountPercentage))
-	} else if merchantDiscountCode.DiscountType == DiscountTypeFixedAmount &&
+	} else if merchantDiscountCode.DiscountType == consts.DiscountTypeFixedAmount &&
 		strings.Compare(strings.ToUpper(currency), strings.ToUpper(merchantDiscountCode.Currency)) == 0 {
 		return merchantDiscountCode.DiscountAmount
 	}

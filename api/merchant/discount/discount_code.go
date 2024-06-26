@@ -7,16 +7,18 @@ import (
 )
 
 type ListReq struct {
-	g.Meta       `path:"/list" tags:"Discount" method:"get" summary:"DiscountCodeList" dc:"Get discountCode list"`
-	DiscountType []int  `json:"discountType"  dc:"discount_type, 1-percentage, 2-fixed_amount" `
-	BillingType  []int  `json:"billingType"  dc:"billing_type, 1-one-time, 2-recurring" `
-	Status       []int  `json:"status" dc:"status, 1-editable, 2-active, 3-deactive, 4-expire" `
-	Code         string `json:"code" dc:"Filter Code"  `
-	Currency     string `json:"currency" dc:"Filter Currency"  `
-	SortField    string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
-	SortType     string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
-	Page         int    `json:"page"  dc:"Page, Start 0" `
-	Count        int    `json:"count"  dc:"Count Of Per Page" `
+	g.Meta          `path:"/list" tags:"Discount" method:"get" summary:"DiscountCodeList" dc:"Get discountCode list"`
+	DiscountType    []int  `json:"discountType"  dc:"discount_type, 1-percentage, 2-fixed_amount" `
+	BillingType     []int  `json:"billingType"  dc:"billing_type, 1-one-time, 2-recurring" `
+	Status          []int  `json:"status" dc:"status, 1-editable, 2-active, 3-deactive, 4-expire" `
+	Code            string `json:"code" dc:"Filter Code"  `
+	Currency        string `json:"currency" dc:"Filter Currency"  `
+	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page"  dc:"Page, Start 0" `
+	Count           int    `json:"count"  dc:"Count Of Per Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
 }
 
 type ListRes struct {

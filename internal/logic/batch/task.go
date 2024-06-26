@@ -16,6 +16,7 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/batch/task/discount"
 	"unibee/internal/logic/batch/task/invoice"
 	"unibee/internal/logic/batch/task/subscription"
 	"unibee/internal/logic/batch/task/transaction"
@@ -30,6 +31,7 @@ var taskMap = map[string]_interface.BatchTask{
 	"UserExport":         &user.TaskUser{},
 	"SubscriptionExport": &subscription.TaskSubscription{},
 	"TransactionExport":  &transaction.TaskTransaction{},
+	"DiscountExport":     &discount.TaskDiscount{},
 }
 
 func getTask(task string) _interface.BatchTask {

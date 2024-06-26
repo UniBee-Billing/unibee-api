@@ -24,6 +24,7 @@ import (
 	"unibee/api/merchant/search"
 	"unibee/api/merchant/session"
 	"unibee/api/merchant/subscription"
+	"unibee/api/merchant/track"
 	"unibee/api/merchant/user"
 	"unibee/api/merchant/vat"
 	"unibee/api/merchant/webhook"
@@ -208,6 +209,10 @@ type IMerchantSubscription interface {
 	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
 	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
+}
+
+type IMerchantTrack interface {
+	SetupSegment(ctx context.Context, req *track.SetupSegmentReq) (res *track.SetupSegmentRes, err error)
 }
 
 type IMerchantUser interface {

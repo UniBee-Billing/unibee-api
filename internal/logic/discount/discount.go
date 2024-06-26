@@ -9,22 +9,12 @@ import (
 	"strconv"
 	"strings"
 	"unibee/api/bean"
+	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
-)
-
-const (
-	DiscountStatusEditable       = 1
-	DiscountStatusActive         = 2
-	DiscountStatusDeActive       = 3
-	DiscountStatusExpired        = 4
-	DiscountBillingTypeOnetime   = 1
-	DiscountBillingTypeRecurring = 2
-	DiscountTypePercentage       = 1
-	DiscountTypeFixedAmount      = 2
 )
 
 type CreateDiscountCodeInternalReq struct {
@@ -51,19 +41,19 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 	utility.Assert(req.Code != "", "invalid Code")
 	one := query.GetDiscountByCode(ctx, req.MerchantId, req.Code)
 	utility.Assert(one == nil, "exist Code:"+req.Code)
-	utility.Assert(req.BillingType == DiscountBillingTypeOnetime || req.BillingType == DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
-	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
+	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
+	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
 	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
-	if req.DiscountType == DiscountTypePercentage {
+	if req.DiscountType == consts.DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
 		req.Currency = ""
-	} else if req.DiscountType == DiscountTypeFixedAmount {
+	} else if req.DiscountType == consts.DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
@@ -73,7 +63,7 @@ func NewMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeInterna
 		MerchantId:         req.MerchantId,
 		Code:               req.Code,
 		Name:               req.Name,
-		Status:             DiscountStatusEditable,
+		Status:             consts.DiscountStatusEditable,
 		BillingType:        req.BillingType,
 		DiscountType:       req.DiscountType,
 		DiscountAmount:     req.DiscountAmount,
@@ -115,20 +105,20 @@ func EditMerchantDiscountCode(ctx context.Context, req *CreateDiscountCodeIntern
 	utility.Assert(one != nil, "Discount not found :"+strconv.FormatUint(req.Id, 10))
 	utility.Assert(one.MerchantId == req.MerchantId, "Discount merchant not match :"+req.Code)
 	utility.Assert(one.Type == 0, "Edit not available for external code :"+req.Code)
-	utility.Assert(one.Status == DiscountStatusEditable, "Code not editable :"+req.Code)
-	utility.Assert(req.BillingType == DiscountBillingTypeOnetime || req.BillingType == DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
-	utility.Assert(req.DiscountType == DiscountTypePercentage || req.DiscountType == DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
+	utility.Assert(one.Status == consts.DiscountStatusEditable, "Code not editable :"+req.Code)
+	utility.Assert(req.BillingType == consts.DiscountBillingTypeOnetime || req.BillingType == consts.DiscountBillingTypeRecurring, "invalid billingType, 1-one-time, 2-recurring")
+	utility.Assert(req.DiscountType == consts.DiscountTypePercentage || req.DiscountType == consts.DiscountTypeFixedAmount, "invalid billingType, 1-percentage, 2-fixed_amount")
 	utility.Assert(req.UserLimit >= 0, "invalid UserLimit")
 	utility.Assert(req.SubscriptionLimit >= 0, "invalid SubscriptionLimit")
 	//utility.Assert(req.StartTime >= gtime.Now().Timestamp(), "startTime should greater then time now")
 	utility.Assert(req.EndTime >= req.StartTime, "startTime should lower then endTime")
 	req.Currency = strings.ToUpper(req.Currency)
-	if req.DiscountType == DiscountTypePercentage {
+	if req.DiscountType == consts.DiscountTypePercentage {
 		utility.Assert(req.DiscountPercentage >= 0 && req.DiscountPercentage <= 10000, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount == 0, "invalid discountAmount")
 		//utility.Assert(len(req.Currency) == 0, "invalid Currency")
 		req.Currency = ""
-	} else if req.DiscountType == DiscountTypeFixedAmount {
+	} else if req.DiscountType == consts.DiscountTypeFixedAmount {
 		utility.Assert(req.DiscountPercentage == 0, "invalid DiscountPercentage")
 		utility.Assert(req.DiscountAmount >= 0, "invalid discountAmount")
 		utility.Assert(len(req.Currency) >= 0, "invalid Currency")
@@ -173,13 +163,13 @@ func ActivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id uin
 	one := query.GetDiscountById(ctx, id)
 	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
-	if one.Status == DiscountStatusActive {
+	if one.Status == consts.DiscountStatusActive {
 		return nil
-	} else if one.Status == DiscountStatusExpired {
+	} else if one.Status == consts.DiscountStatusExpired {
 		return gerror.New("Code is expired")
 	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
-		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusActive,
+		dao.MerchantDiscountCode.Columns().Status:    consts.DiscountStatusActive,
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
@@ -200,13 +190,13 @@ func DeactivateMerchantDiscountCode(ctx context.Context, merchantId uint64, id u
 	one := query.GetDiscountById(ctx, id)
 	utility.Assert(one != nil, "discount not found :"+strconv.FormatUint(id, 10))
 	utility.Assert(one.MerchantId == merchantId, "Discount merchant not match :"+strconv.FormatUint(id, 10))
-	if one.Status == DiscountStatusDeActive {
+	if one.Status == consts.DiscountStatusDeactivate {
 		return nil
-	} else if one.Status != DiscountStatusActive {
+	} else if one.Status != consts.DiscountStatusActive {
 		return gerror.New("Code is not active status")
 	}
 	_, err := dao.MerchantDiscountCode.Ctx(ctx).Data(g.Map{
-		dao.MerchantDiscountCode.Columns().Status:    DiscountStatusDeActive,
+		dao.MerchantDiscountCode.Columns().Status:    consts.DiscountStatusDeactivate,
 		dao.MerchantDiscountCode.Columns().GmtModify: gtime.Now(),
 	}).Where(dao.MerchantDiscountCode.Columns().Id, one.Id).OmitNil().Update()
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
@@ -258,9 +248,9 @@ func HardDeleteMerchantDiscountCode(ctx context.Context, merchantId uint64, id u
 func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint64, source string, param *bean.ExternalDiscountParam, currency string, timeNow int64) *entity.MerchantDiscountCode {
 	var cycleLimit = 0
 	var endTime int64 = 0
-	var BillingType = DiscountBillingTypeOnetime
+	var BillingType = consts.DiscountBillingTypeOnetime
 	if param.Recurring != nil && *param.Recurring {
-		BillingType = DiscountBillingTypeRecurring
+		BillingType = consts.DiscountBillingTypeRecurring
 		if param.CycleLimit != nil {
 			cycleLimit = *param.CycleLimit
 		}
@@ -274,16 +264,16 @@ func CreateExternalDiscount(ctx context.Context, merchantId uint64, userId uint6
 		utility.Assert(param.EndTime == nil, "endTime not available as recurring not enable")
 		endTime = timeNow + 600
 	}
-	var discountType = DiscountTypePercentage
+	var discountType = consts.DiscountTypePercentage
 	var discountAmount int64 = 0
 	var discountPercentage int64 = 0
 
 	if param.DiscountAmount != nil && *param.DiscountAmount > 0 {
-		discountType = DiscountTypeFixedAmount
+		discountType = consts.DiscountTypeFixedAmount
 		discountAmount = *param.DiscountAmount
 
 	} else if param.DiscountPercentage != nil && *param.DiscountPercentage > 0 {
-		discountType = DiscountTypePercentage
+		discountType = consts.DiscountTypePercentage
 		discountPercentage = *param.DiscountPercentage
 		utility.Assert(discountPercentage > 0 && discountPercentage <= 10000, "invalid discountPercentage")
 	} else {

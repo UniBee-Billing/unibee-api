@@ -9,7 +9,6 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
-	discount2 "unibee/internal/logic/discount"
 	email2 "unibee/internal/logic/email"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/payment/method"
@@ -131,7 +130,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	var recurringDiscountCode *string
 	if len(invoice.DiscountCode) > 0 {
 		discount := query.GetDiscountByCode(ctx, invoice.MerchantId, invoice.DiscountCode)
-		if discount.BillingType == discount2.DiscountBillingTypeRecurring {
+		if discount.BillingType == consts.DiscountBillingTypeRecurring {
 			recurringDiscountCode = &invoice.DiscountCode
 		}
 	}

@@ -128,3 +128,9 @@ func NewDownload() merchant.IMerchantDownload {
 	return &ControllerDownload{}
 }
 
+type ControllerTrack struct{}
+
+func NewTrack() merchant.IMerchantTrack {
+	return &ControllerTrack{}
+}
+

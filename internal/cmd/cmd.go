@@ -178,6 +178,11 @@ var (
 						merchant.NewDownload(),
 					)
 				})
+				group.Group("/track", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						merchant.NewTrack(),
+					)
+				})
 			})
 
 			s.Group("/user", func(group *ghttp.RouterGroup) {
