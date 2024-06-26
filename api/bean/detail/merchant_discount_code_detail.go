@@ -76,3 +76,41 @@ func ConvertMerchantDiscountCodeDetail(ctx context.Context, one *entity.Merchant
 		Metadata:           metadata,
 	}
 }
+
+type MerchantUserDiscountCodeDetail struct {
+	Id             int64                     `json:"id"             description:"ID"`         // ID
+	MerchantId     uint64                    `json:"merchantId"     description:"merchantId"` // merchantId
+	User           *bean.UserAccountSimplify `json:"user"     description:"User"`
+	Code           string                    `json:"code"           description:"code"` // code
+	Plan           *bean.PlanSimplify        `json:"plan"     description:"Plan"`
+	SubscriptionId string                    `json:"subscriptionId" description:"subscription_id"` // subscription_id
+	PaymentId      string                    `json:"paymentId"      description:"payment_id"`      // payment_id
+	InvoiceId      string                    `json:"invoiceId"      description:"invoice_id"`      // invoice_id
+	CreateTime     int64                     `json:"createTime"     description:"create utc time"` // create utc time
+	ApplyAmount    int64                     `json:"applyAmount"    description:"apply_amount"`    // apply_amount
+	Currency       string                    `json:"currency"       description:"currency"`        // currency
+}
+
+func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.MerchantUserDiscountCode) *MerchantUserDiscountCodeDetail {
+	if one == nil {
+		return nil
+	}
+	planId, err := strconv.ParseInt(one.PlanId, 10, 64)
+	var plan *bean.PlanSimplify
+	if err == nil {
+		plan = bean.SimplifyPlan(query.GetPlanById(ctx, uint64(planId)))
+	}
+	return &MerchantUserDiscountCodeDetail{
+		Id:             one.Id,
+		MerchantId:     one.MerchantId,
+		User:           bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
+		Code:           one.Code,
+		Plan:           plan,
+		SubscriptionId: one.SubscriptionId,
+		PaymentId:      one.PaymentId,
+		InvoiceId:      one.InvoiceId,
+		CreateTime:     one.CreateTime,
+		ApplyAmount:    one.ApplyAmount,
+		Currency:       one.Currency,
+	}
+}
