@@ -100,3 +100,19 @@ type DeactivateReq struct {
 
 type DeactivateRes struct {
 }
+
+type UserDiscountListReq struct {
+	g.Meta          `path:"/user_discount_list" tags:"Discount" method:"get" summary:"UserDiscountCodeList" dc:"Get user discountCode list"`
+	Id              uint64 `json:"id"                 description:"The discount's Id" v:"required"`
+	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
+	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
+	Page            int    `json:"page"  dc:"Page, Start 0" `
+	Count           int    `json:"count"  dc:"Count Of Per Page" `
+	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
+	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+}
+
+type UserDiscountListRes struct {
+	UserDiscounts []*detail.MerchantUserDiscountCodeDetail `json:"userDiscounts" dc:"User Discount Object List"`
+	Total         int                                      `json:"total" dc:"Total"`
+}
