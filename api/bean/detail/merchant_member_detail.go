@@ -23,6 +23,9 @@ type MerchantMemberDetail struct {
 }
 
 func ConvertMemberToDetail(ctx context.Context, one *entity.MerchantMember) *MerchantMemberDetail {
+	if ctx == nil || one == nil {
+		return nil
+	}
 	isOwner, memberRoles := ConvertMemberRole(ctx, one)
 	return &MerchantMemberDetail{
 		Id:          one.Id,
