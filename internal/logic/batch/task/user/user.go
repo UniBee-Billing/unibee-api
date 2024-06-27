@@ -16,7 +16,7 @@ type TaskUser struct {
 }
 
 func (t TaskUser) TaskName() string {
-	return "CustomerExport"
+	return "UserExport"
 }
 
 func (t TaskUser) Header() interface{} {
