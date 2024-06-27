@@ -81,6 +81,7 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 				MerchantName:       merchant.Name,
 				Amount:             utility.ConvertCentToDollarStr(one.Subscription.Amount, one.Subscription.Currency),
 				Currency:           one.Subscription.Currency,
+				PlanId:             fmt.Sprintf("%v", one.Plan.Id),
 				PlanName:           one.Plan.PlanName,
 				Quantity:           fmt.Sprintf("%v", one.Subscription.Quantity),
 				Gateway:            subGateway,
@@ -110,6 +111,7 @@ type ExportSubscriptionEntity struct {
 	MerchantName       string      `json:"MerchantName"       `
 	Amount             string      `json:"Amount"             `
 	Currency           string      `json:"Currency"           `
+	PlanId             string      `json:"PlanId"           `
 	PlanName           string      `json:"PlanName"           `
 	Quantity           string      `json:"Quantity"           `
 	Gateway            string      `json:"Gateway"            `

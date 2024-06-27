@@ -32,6 +32,7 @@ var taskMap = map[string]_interface.BatchTask{
 	"SubscriptionExport": &subscription.TaskSubscription{},
 	"TransactionExport":  &transaction.TaskTransaction{},
 	"DiscountExport":     &discount.TaskDiscount{},
+	"UserDiscountExport": &discount.TaskUserDiscount{},
 }
 
 func getTask(task string) _interface.BatchTask {
