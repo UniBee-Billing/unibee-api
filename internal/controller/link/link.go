@@ -26,3 +26,10 @@ func GetPaymentLink(paymentId string) string {
 	}
 	return fmt.Sprintf("%s/pay/%s", config.GetConfigInstance().Server.GetServerPath(), paymentId)
 }
+
+func GetExportLink(taskId int64) string {
+	if taskId <= 0 {
+		return ""
+	}
+	return fmt.Sprintf("%s/export/%v", config.GetConfigInstance().Server.GetServerPath(), taskId)
+}

@@ -1,6 +1,7 @@
 package bean
 
 import (
+	"unibee/internal/controller/link/export"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
@@ -33,7 +34,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		MemberId:       one.MemberId,
 		TaskName:       one.TaskName,
 		Payload:        one.Payload,
-		DownloadUrl:    one.DownloadUrl,
+		DownloadUrl:    export.GetTaskDownloadUrl(one),
 		Status:         one.Status,
 		StartTime:      one.StartTime,
 		FinishTime:     one.FinishTime,
@@ -41,7 +42,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		FailReason:     one.FailReason,
 		TaskType:       one.TaskType,
 		SuccessCount:   one.SuccessCount,
-		UploadFileUrl:  one.UploadFileUrl,
+		UploadFileUrl:  export.GetTaskDownloadUrl(one),
 		CreateTime:     one.CreateTime,
 		LastUpdateTime: one.LastUpdateTime,
 	}

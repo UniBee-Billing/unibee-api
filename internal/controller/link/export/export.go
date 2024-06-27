@@ -6,9 +6,15 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"unibee/internal/query"
+	"unibee/internal/controller/link"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 )
+
+func GetTaskDownloadUrl(task *entity.MerchantBatchTask) string {
+	return link.GetExportLink(task.Id)
+}
 
 func LinkExportEntry(r *ghttp.Request) {
 	taskId := r.Get("taskId").Int64()
@@ -17,19 +23,29 @@ func LinkExportEntry(r *ghttp.Request) {
 		return
 	}
 
-	one := query.GetMerchantBatchTask(r.Context(), uint64(taskId))
+	if taskId <= 0 {
+		r.Response.Writeln("TaskId invalid")
+		return
+	}
+	var one *entity.MerchantBatchTask
+	err := dao.MerchantBatchTask.Ctx(r.Context()).
+		Where(dao.MerchantBatchTask.Columns().Id, taskId).
+		Scan(&one)
+	if err != nil {
+		one = nil
+	}
 	if one == nil {
 		r.Response.Writeln("Task not found")
 		return
 	}
-	if len(one.DownloadUrl) == 0 || one.Status != 2 {
+	if len(one.UploadFileUrl) == 0 || one.Status != 2 {
 		g.Log().Errorf(r.Context(), "LinkEntry task not success")
 		r.Response.WriteHeader(http.StatusBadRequest)
 		r.Response.Writeln("Bad request")
 		return
 	}
 
-	fileName := utility.DownloadFile(one.DownloadUrl)
+	fileName := utility.DownloadFile(one.UploadFileUrl)
 	if len(fileName) == 0 {
 		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
 		r.Response.WriteHeader(http.StatusBadRequest)
