@@ -73,11 +73,19 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 			if one.Subscription.CancelAtPeriodEnd == 1 {
 				canAtPeriodEnd = "Yes"
 			}
+			var firstName = ""
+			var lastName = ""
+			var email = ""
+			if one.User != nil {
+				firstName = one.User.FirstName
+				lastName = one.User.LastName
+				email = one.User.Email
+			}
 			mainList = append(mainList, &ExportSubscriptionEntity{
 				SubscriptionId:     one.Subscription.SubscriptionId,
-				FirstName:          one.User.FirstName,
-				LastName:           one.User.LastName,
-				Email:              one.User.Email,
+				FirstName:          firstName,
+				LastName:           lastName,
+				Email:              email,
 				MerchantName:       merchant.Name,
 				Amount:             utility.ConvertCentToDollarStr(one.Subscription.Amount, one.Subscription.Currency),
 				Currency:           one.Subscription.Currency,

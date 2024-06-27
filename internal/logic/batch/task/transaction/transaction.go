@@ -72,9 +72,6 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 				gateway = gatewayEntity.GatewayName
 			}
 			user := query.GetUserAccountById(ctx, one.UserId)
-			if user == nil {
-				continue
-			}
 			var transactionType = "payment"
 			var fullRefund = "No"
 			if one.TimelineType == 1 {
@@ -89,12 +86,20 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 			} else if one.Status == 2 {
 				status = "Failure"
 			}
+			var firstName = ""
+			var lastName = ""
+			var email = ""
+			if user != nil {
+				firstName = user.FirstName
+				lastName = user.LastName
+				email = user.Email
+			}
 
 			mainList = append(mainList, &ExportTransactionEntity{
 				TransactionId:         one.TransactionId,
-				FirstName:             user.FirstName,
-				LastName:              user.LastName,
-				Email:                 user.Email,
+				FirstName:             firstName,
+				LastName:              lastName,
+				Email:                 email,
 				MerchantName:          merchant.Name,
 				SubscriptionId:        one.SubscriptionId,
 				InvoiceId:             one.InvoiceId,

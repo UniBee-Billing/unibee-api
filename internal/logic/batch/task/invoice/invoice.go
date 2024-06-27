@@ -88,15 +88,20 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 			if one.Gateway != nil {
 				invoiceGateway = one.Gateway.GatewayName
 			}
-			if one.UserAccount == nil {
-				continue
+			var firstName = ""
+			var lastName = ""
+			var email = ""
+			if one.UserAccount != nil {
+				firstName = one.UserAccount.FirstName
+				lastName = one.UserAccount.LastName
+				email = one.UserAccount.Email
 			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
-				FirstName:                      fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.FirstName, "")),
-				LastName:                       fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.LastName, "")),
-				Email:                          fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.Email, "")),
+				FirstName:                      firstName,
+				LastName:                       lastName,
+				Email:                          email,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
 				Gateway:                        invoiceGateway,
