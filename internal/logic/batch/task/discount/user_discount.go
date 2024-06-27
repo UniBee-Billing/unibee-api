@@ -64,12 +64,20 @@ func (t TaskUserDiscount) PageData(ctx context.Context, page int, count int, tas
 	result, _ := discount.MerchantUserDiscountCodeList(ctx, req)
 	if result != nil {
 		for _, one := range result {
+			var firstName = ""
+			var lastName = ""
+			var email = ""
+			if one.User != nil {
+				firstName = one.User.FirstName
+				lastName = one.User.LastName
+				email = one.User.Email
+			}
 			mainList = append(mainList, &ExportUserDiscountEntity{
 				Id:             fmt.Sprintf("%v", one.Id),
 				MerchantName:   merchant.Name,
-				FirstName:      one.User.FirstName,
-				LastName:       one.User.LastName,
-				Email:          one.User.Email,
+				FirstName:      firstName,
+				LastName:       lastName,
+				Email:          email,
 				PlanId:         fmt.Sprintf("%v", one.Plan.Id),
 				PlanName:       one.Plan.PlanName,
 				Code:           one.Code,
