@@ -143,7 +143,7 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 			return
 		}
 		var page = 0
-		var count = 100
+		var count = 10
 		for {
 			list, pageDataErr := taskImpl.PageData(ctx, page, count, task)
 			if pageDataErr != nil {
@@ -157,12 +157,6 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 				cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
 				_ = writer.SetRow(cell, refactorData(one, ""))
 			}
-			err = writer.Flush()
-			if err != nil {
-				g.Log().Errorf(ctx, err.Error())
-				failureTask(ctx, task.Id, err)
-				return
-			}
 			_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 				dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(list))),
 				dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
@@ -172,6 +166,12 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 				break
 			}
 			page = page + 1
+		}
+		err = writer.Flush()
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
 		}
 		fileName := fmt.Sprintf("Batch_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
 		err = file.SaveAs(fileName)
