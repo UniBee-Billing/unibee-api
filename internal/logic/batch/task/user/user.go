@@ -90,12 +90,12 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 				userGateway = one.Gateway.GatewayName
 			}
 			mainList = append(mainList, &ExportUserEntity{
-				Id:                 fmt.Sprintf("%v", one.Id),
-				FirstName:          one.FirstName,
-				LastName:           one.LastName,
-				Email:              one.Email,
-				MerchantName:       merchant.Name,
-				AvatarUrl:          one.AvatarUrl,
+				Id:           fmt.Sprintf("%v", one.Id),
+				FirstName:    one.FirstName,
+				LastName:     one.LastName,
+				Email:        one.Email,
+				MerchantName: merchant.Name,
+				//AvatarUrl:          one.AvatarUrl,
 				Phone:              one.Phone,
 				Address:            one.Address,
 				VATNumber:          one.VATNumber,
@@ -119,12 +119,12 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 }
 
 type ExportUserEntity struct {
-	Id                 string      `json:"Id"                 `
-	FirstName          string      `json:"FirstName"          `
-	LastName           string      `json:"LastName"           `
-	Email              string      `json:"Email"              `
-	MerchantName       string      `json:"MerchantName"       `
-	AvatarUrl          string      `json:"AvatarUrl"          `
+	Id           string `json:"Id"                 `
+	FirstName    string `json:"FirstName"          `
+	LastName     string `json:"LastName"           `
+	Email        string `json:"Email"              `
+	MerchantName string `json:"MerchantName"       `
+	//AvatarUrl          string      `json:"AvatarUrl"          `
 	Phone              string      `json:"Phone"              `
 	Address            string      `json:"Address"            `
 	VATNumber          string      `json:"VATNumber"          `
