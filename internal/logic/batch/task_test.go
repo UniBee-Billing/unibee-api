@@ -91,7 +91,7 @@ func TestExcelStreamWrite(t *testing.T) {
 		}
 		defer func() {
 			// Close the spreadsheet.
-			if err := f.Close(); err != nil {
+			if err = f.Close(); err != nil {
 				fmt.Println(err)
 			}
 		}()
