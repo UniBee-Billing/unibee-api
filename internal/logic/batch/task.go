@@ -155,6 +155,9 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 				break
 			}
 			for i, one := range list {
+				if one == nil {
+					continue
+				}
 				cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
 				_ = writer.SetRow(cell, refactorData(one, ""))
 			}

@@ -6,17 +6,12 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 )
-
-func GetTaskDownloadUrl(task *entity.MerchantBatchTask) string {
-	return link.GetExportLink(task.Id)
-}
 
 func LinkExportEntry(r *ghttp.Request) {
 	g.Log().Infof(r.Context(), "LinkExportEntry:%v", r.Method)
