@@ -44,6 +44,7 @@ func LinkExportEntry(r *ghttp.Request) {
 		r.Response.Writeln("Bad request")
 		return
 	}
+	r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 
 	fileName := utility.DownloadFile(one.UploadFileUrl)
 	if len(fileName) == 0 {
