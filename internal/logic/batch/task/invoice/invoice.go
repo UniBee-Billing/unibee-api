@@ -88,6 +88,9 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 			if one.Gateway != nil {
 				invoiceGateway = one.Gateway.GatewayName
 			}
+			if one.UserAccount == nil {
+				continue
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
