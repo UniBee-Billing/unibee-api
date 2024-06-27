@@ -53,7 +53,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		}
 		if one.CountryCode != *req.CountryCode {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			user2.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
+			user2.UpdateUserCountryCode(ctx, req.UserId, *req.CountryCode)
 		}
 	}
 
