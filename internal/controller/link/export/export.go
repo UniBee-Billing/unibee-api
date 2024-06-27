@@ -19,6 +19,8 @@ func GetTaskDownloadUrl(task *entity.MerchantBatchTask) string {
 func LinkExportEntry(r *ghttp.Request) {
 	g.Log().Infof(r.Context(), "LinkExportEntry:%v", r.Method)
 	if r.Method == "OPTIONS" {
+		r.Response.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
+		r.Response.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT,DELETE,OPTIONS,PATCH")
 		r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 		return
 	}
