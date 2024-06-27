@@ -8,7 +8,9 @@ import (
 	"os"
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/jwt"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -24,6 +26,18 @@ func LinkExportEntry(r *ghttp.Request) {
 		r.Response.Header().Add("Access-Control-Allow-Origin", "*")
 		return
 	}
+	tokenString := r.Header.Get("Authorization")
+	if len(tokenString) == 0 || !jwt.IsPortalToken(tokenString) || !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
+		r.Response.Writeln("Permission Deny")
+		return
+	}
+	token := jwt.ParsePortalToken(tokenString)
+	if token.TokenType != jwt.TOKENTYPEMERCHANTMember {
+		r.Response.Writeln("Permission Deny")
+		return
+	}
+	merchantAccount := query.GetMerchantMemberById(r.Context(), token.Id)
+
 	taskId := r.Get("taskId").Int64()
 	if taskId <= 0 {
 		r.Response.Writeln("TaskId not found")
@@ -43,6 +57,10 @@ func LinkExportEntry(r *ghttp.Request) {
 	}
 	if one == nil {
 		r.Response.Writeln("Task not found")
+		return
+	}
+	if merchantAccount == nil || one.MemberId != merchantAccount.Id {
+		r.Response.Writeln("Not Your Task")
 		return
 	}
 	if len(one.UploadFileUrl) == 0 || one.Status != 2 {
