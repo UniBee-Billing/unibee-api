@@ -18,6 +18,10 @@ func GetTaskDownloadUrl(task *entity.MerchantBatchTask) string {
 
 func LinkExportEntry(r *ghttp.Request) {
 	g.Log().Infof(r.Context(), "LinkExportEntry:%v", r.Method)
+	if r.Method == "OPTIONS" {
+		r.Response.Header().Add("Access-Control-Allow-Origin", "*")
+		return
+	}
 	taskId := r.Get("taskId").Int64()
 	if taskId <= 0 {
 		r.Response.Writeln("TaskId not found")

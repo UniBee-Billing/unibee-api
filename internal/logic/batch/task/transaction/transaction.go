@@ -63,6 +63,9 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 	result, _ := service.PaymentTimeLineList(ctx, req)
 	if result != nil && result.PaymentTimelines != nil {
 		for _, one := range result.PaymentTimelines {
+			if one == nil {
+				continue
+			}
 			var gateway = ""
 			gatewayEntity := query.GetGatewayById(ctx, one.GatewayId)
 			if gatewayEntity != nil {
