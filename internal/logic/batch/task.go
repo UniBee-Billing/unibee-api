@@ -100,6 +100,7 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
 				}
 				log.PrintPanic(ctx, err)
+				failureTask(ctx, task.Id, err)
 				return
 			}
 		}()
@@ -143,7 +144,7 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 			return
 		}
 		var page = 0
-		var count = 10
+		var count = 100
 		for {
 			list, pageDataErr := taskImpl.PageData(ctx, page, count, task)
 			if pageDataErr != nil {
@@ -183,9 +184,10 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_download", fileName, strconv.FormatUint(task.MemberId, 10))
 		if err != nil {
 			g.Log().Errorf(ctx, fmt.Sprintf("StartRunTaskBackground UploadLocalFile error:%v", err))
+			failureTask(ctx, task.Id, err)
 			return
 		}
-		_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+		_, err = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 			dao.MerchantBatchTask.Columns().Status:         2,
 			dao.MerchantBatchTask.Columns().UploadFileUrl:  upload.Url,
 			dao.MerchantBatchTask.Columns().FinishTime:     gtime.Now().Timestamp(),
@@ -193,13 +195,18 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 			dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 			dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 		}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(ctx, fmt.Sprintf("StartRunTaskBackground Update MerchantBatchTask error:%v", err))
+			failureTask(ctx, task.Id, err)
+			return
+		}
 	}()
 }
 
 func failureTask(ctx context.Context, taskId int64, err error) {
 	_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 		dao.MerchantBatchTask.Columns().Status:         3,
-		dao.MerchantBatchTask.Columns().FailReason:     fmt.Sprintf("%s", err.Error()),
+		dao.MerchantBatchTask.Columns().FailReason:     fmt.Sprintf("%s \n \t %s", err.Error(), g.Log().GetStack()),
 		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantBatchTask.Columns().Id, taskId).OmitNil().Update()

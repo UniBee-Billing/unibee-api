@@ -6,7 +6,6 @@ import (
 	"unibee/internal/consts"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
-	"unibee/utility"
 )
 
 type PaymentTimelineDetail struct {
@@ -35,7 +34,9 @@ func ConvertPaymentTimeline(ctx context.Context, one *entity.PaymentTimeline) *P
 		return nil
 	}
 	var payment = bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, one.PaymentId))
-	utility.Assert(payment != nil, "payment not found:"+one.PaymentId)
+	if payment == nil {
+		return nil
+	}
 	var refund = bean.SimplifyRefund(query.GetRefundByRefundId(ctx, one.RefundId))
 	var transactionId = one.PaymentId
 	var externalTransactionId = payment.GatewayPaymentId

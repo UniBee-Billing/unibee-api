@@ -91,9 +91,9 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
-				FirstName:                      one.UserAccount.FirstName,
-				LastName:                       one.UserAccount.LastName,
-				Email:                          one.UserAccount.Email,
+				FirstName:                      fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.FirstName, "")),
+				LastName:                       fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.LastName, "")),
+				Email:                          fmt.Sprintf("%v", utility.CheckReturn(one.UserAccount != nil, one.UserAccount.Email, "")),
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
 				Gateway:                        invoiceGateway,
