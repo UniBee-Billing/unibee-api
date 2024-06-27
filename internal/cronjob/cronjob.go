@@ -5,6 +5,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gcron"
 	"github.com/gogf/gf/v2/os/gctx"
+	"unibee/internal/cronjob/batch"
 	"unibee/internal/cronjob/discount"
 	"unibee/internal/cronjob/gateway_log"
 	"unibee/internal/cronjob/invoice"
@@ -41,6 +42,7 @@ func StartCronJobs() {
 	_, err = gcron.Add(ctx, "@every 1m", func(ctx context.Context) {
 		discount.TaskForExpireDiscounts(ctx)
 		invoice.TaskForExpireInvoices(ctx)
+		batch.TaskForExpireBatchTasks(ctx)
 	}, other1MinTask)
 	if err != nil {
 		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
