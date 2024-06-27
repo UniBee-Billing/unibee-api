@@ -49,7 +49,7 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 	if len(countryCode) > 0 && strings.Compare(user.CountryCode, countryCode) != 0 {
 		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
 			gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
-			taxPercentage, countryName := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, user.CountryCode, gatewayId, user.VATNumber)
+			taxPercentage, countryName := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, countryCode, gatewayId, user.VATNumber)
 			//vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, user.MerchantId, countryCode)
 			//var taxPercentage int64 = 0
 			//if err == nil && vatCountryRate != nil {
