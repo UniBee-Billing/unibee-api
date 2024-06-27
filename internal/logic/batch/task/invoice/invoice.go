@@ -37,19 +37,8 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 	}
 	req := &service.InvoiceListInternalReq{
 		MerchantId: task.MerchantId,
-		//FirstName:     "",
-		//LastName:      "",
-		//Currency:      "",
-		//Status:        nil,
-		//AmountStart:   0,
-		//AmountEnd:     0,
-		//UserId:        0,
-		//SendEmail:     "",
-		//SortField:     "",
-		//SortType:      "",
-		//DeleteInclude: false,
-		Page:  0,
-		Count: 0,
+		Page:       page,
+		Count:      count,
 	}
 	if payload != nil {
 		if value, ok := payload["userId"].(uint64); ok {
