@@ -18,7 +18,7 @@ type ListRes struct {
 
 type NewReq struct {
 	g.Meta  `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
-	Task    string                 `json:"task" dc:"Task,InvoiceExport"`
+	Task    string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
 	Payload map[string]interface{} `json:"payload" dc:"Payload"`
 }
 
