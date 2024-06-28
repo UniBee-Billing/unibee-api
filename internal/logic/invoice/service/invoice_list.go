@@ -16,8 +16,8 @@ type InvoiceListInternalReq struct {
 	LastName        string `json:"lastName" dc:"LastName" `
 	Currency        string `json:"Currency" dc:"Currency" `
 	Status          []int  `json:"status" dc:"Status" `
-	AmountStart     int64  `json:"amountStart" dc:"AmountStart" `
-	AmountEnd       int64  `json:"amountEnd" dc:"AmountEnd" `
+	AmountStart     *int64 `json:"amountStart" dc:"AmountStart" `
+	AmountEnd       *int64 `json:"amountEnd" dc:"AmountEnd" `
 	UserId          uint64 `json:"userId" dc:"Filter UserId Default All" `
 	SendEmail       string `json:"sendEmail" dc:"Filter SendEmail Default All" `
 	SortField       string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
@@ -72,9 +72,11 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	if req.Status != nil && len(req.Status) > 0 {
 		query = query.WhereIn(dao.Invoice.Columns().Status, req.Status)
 	}
-	if req.AmountStart < req.AmountEnd {
-		query = query.WhereGTE(dao.Invoice.Columns().TotalAmount, req.AmountStart)
-		query = query.WhereLTE(dao.Invoice.Columns().TotalAmount, req.AmountEnd)
+	if req.AmountStart != nil {
+		query = query.WhereGTE(dao.Invoice.Columns().TotalAmount, &req.AmountStart)
+	}
+	if req.AmountEnd != nil {
+		query = query.WhereLTE(dao.Invoice.Columns().TotalAmount, &req.AmountEnd)
 	}
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
 		var userIdList = make([]uint64, 0)

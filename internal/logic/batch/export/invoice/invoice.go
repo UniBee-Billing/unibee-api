@@ -11,6 +11,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 type TaskInvoice struct {
@@ -70,10 +71,10 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 			req.SortType = value
 		}
 		if value, ok := payload["amountStart"].(float64); ok {
-			req.AmountStart = int64(value)
+			req.AmountStart = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["AmountEnd"].(float64); ok {
-			req.AmountEnd = int64(value)
+			req.AmountEnd = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
 			req.CreateTimeStart = int64(value)
