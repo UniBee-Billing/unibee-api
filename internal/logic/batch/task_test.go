@@ -84,7 +84,7 @@ func TestExcelStreamWrite(t *testing.T) {
 		}
 	})
 	t.Run("Test For Import", func(t *testing.T) {
-		f, err := excelize.OpenFile("Book1.xlsx")
+		f, err := excelize.OpenFile("test/test.xlsx")
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -96,7 +96,7 @@ func TestExcelStreamWrite(t *testing.T) {
 			}
 		}()
 		// Get value from cell by given worksheet name and cell reference.
-		cell, err := f.GetCellValue("Sheet1", "B2")
+		cell, err := f.GetCellValue("Sheet1", "A1")
 		if err != nil {
 			fmt.Println(err)
 			return

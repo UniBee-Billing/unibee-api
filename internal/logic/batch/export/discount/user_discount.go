@@ -35,8 +35,8 @@ func (t TaskUserDiscount) PageData(ctx context.Context, page int, count int, tas
 		return mainList, nil
 	}
 	var id int64
-	if value, ok := payload["id"].(int64); ok {
-		id = value
+	if value, ok := payload["id"].(float64); ok {
+		id = int64(value)
 	}
 	if id <= 0 {
 		return mainList, nil
