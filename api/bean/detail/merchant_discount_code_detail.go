@@ -95,9 +95,15 @@ func ConvertMerchantUserDiscountCodeDetail(ctx context.Context, one *entity.Merc
 	if one == nil {
 		return nil
 	}
-	planId, err := strconv.ParseInt(one.PlanId, 10, 64)
+	planId, _ := strconv.ParseInt(one.PlanId, 10, 64)
+	if planId <= 0 {
+		sub := query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
+		if sub != nil {
+			planId = int64(sub.PlanId)
+		}
+	}
 	var plan *bean.PlanSimplify
-	if err == nil {
+	if planId > 0 {
 		plan = bean.SimplifyPlan(query.GetPlanById(ctx, uint64(planId)))
 	}
 	return &MerchantUserDiscountCodeDetail{

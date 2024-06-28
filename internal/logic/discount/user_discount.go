@@ -140,6 +140,7 @@ func UserDiscountApply(ctx context.Context, req *UserDiscountApplyReq) (discount
 		UserId:         req.UserId,
 		Code:           req.DiscountCode,
 		Status:         1,
+		PlanId:         strconv.FormatUint(req.PLanId, 10),
 		SubscriptionId: req.SubscriptionId,
 		PaymentId:      req.PaymentId,
 		InvoiceId:      req.InvoiceId,
