@@ -42,7 +42,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		FailReason:     one.FailReason,
 		TaskType:       one.TaskType,
 		SuccessCount:   one.SuccessCount,
-		UploadFileUrl:  link.GetTaskDownloadUrl(one),
+		UploadFileUrl:  one.UploadFileUrl,
 		CreateTime:     one.CreateTime,
 		LastUpdateTime: one.LastUpdateTime,
 	}

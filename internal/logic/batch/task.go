@@ -26,7 +26,7 @@ import (
 	"unibee/utility"
 )
 
-var taskMap = map[string]_interface.BatchTask{
+var taskMap = map[string]_interface.BatchExportTask{
 	"InvoiceExport":      &invoice.TaskInvoice{},
 	"UserExport":         &user.TaskUser{},
 	"SubscriptionExport": &subscription.TaskSubscription{},
@@ -35,7 +35,7 @@ var taskMap = map[string]_interface.BatchTask{
 	"UserDiscountExport": &discount.TaskUserDiscount{},
 }
 
-func getTask(task string) _interface.BatchTask {
+func getTask(task string) _interface.BatchExportTask {
 	return taskMap[task]
 }
 
@@ -88,7 +88,7 @@ func NewBatchDownloadTask(superCtx context.Context, req *MerchantBatchTaskIntern
 	return nil
 }
 
-func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchTask) {
+func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask) {
 	go func() {
 		ctx := context.Background()
 		var err error
