@@ -61,6 +61,7 @@ type ListReq struct {
 	SortField       string `json:"sortField" dc:"Filter，em. invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType        string `json:"sortType" dc:"Sort，asc|desc，Default desc" `
 	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin Permission" `
+	Type            *int   `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
 	Page            int    `json:"page"  dc:"Page, Start 0" `
 	Count           int    `json:"count"  dc:"Count" dc:"Count By Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `

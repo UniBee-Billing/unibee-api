@@ -23,6 +23,7 @@ type InvoiceListInternalReq struct {
 	SortField       string `json:"sortField" dc:"Sort Field，invoice_id|gmt_create|period_end|total_amount" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc" `
 	DeleteInclude   bool   `json:"deleteInclude" dc:"Is Delete Include" `
+	Type            *int   `json:"type"  dc:"invoice Type, 0-payment, 1-refund" `
 	Page            int    `json:"page"  dc:"Page, Start With 0" `
 	Count           int    `json:"count"  dc:"Count Of Page"`
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
@@ -80,6 +81,14 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	}
 	if req.AmountEnd != nil {
 		query = query.WhereLTE(dao.Invoice.Columns().TotalAmount, &req.AmountEnd)
+	}
+	if req.Type != nil {
+		utility.Assert(*req.Type == 0 || *req.Type == 1, "type should be 0 or 1")
+		if *req.Type == 0 {
+			query = query.WhereNull(dao.Invoice.Columns().RefundId)
+		} else if *req.Type == 1 {
+			query = query.WhereNotNull(dao.Invoice.Columns().RefundId)
+		}
 	}
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 {
 		var userIdList = make([]uint64, 0)
