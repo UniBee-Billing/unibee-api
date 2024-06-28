@@ -61,6 +61,9 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		//if value, ok := payload["deleteInclude"].(bool); ok {
 		//	req.DeleteInclude = value
 		//}
+		if value, ok := payload["type"].(float64); ok {
+			req.Type = unibee.Int(int(value))
+		}
 		if value, ok := payload["sendEmail"].(string); ok {
 			req.SendEmail = value
 		}
