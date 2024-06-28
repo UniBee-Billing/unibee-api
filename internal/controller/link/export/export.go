@@ -22,8 +22,12 @@ func LinkExportEntry(r *ghttp.Request) {
 		return
 	}
 	tokenString := r.Header.Get("Authorization")
-	if len(tokenString) == 0 || !jwt.IsPortalToken(tokenString) || !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
-		r.Response.Writeln("Permission Deny")
+	if len(tokenString) == 0 || !jwt.IsPortalToken(tokenString) {
+		r.Response.Writeln("Permission Deny, Invalid Token")
+		return
+	}
+	if !jwt.IsAuthTokenAvailable(r.Context(), tokenString) {
+		r.Response.Writeln("Permission Deny, Token Expired")
 		return
 	}
 	token := jwt.ParsePortalToken(tokenString)
