@@ -21,6 +21,7 @@ func (c *ControllerInvoice) List(ctx context.Context, req *merchantInvoice.ListR
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		DeleteInclude:   req.DeleteInclude,
+		Type:            req.Type,
 		Page:            req.Page,
 		Count:           req.Count,
 		CreateTimeStart: req.CreateTimeStart,
