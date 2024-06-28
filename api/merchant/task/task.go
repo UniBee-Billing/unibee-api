@@ -1,4 +1,4 @@
-package download
+package task
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
@@ -6,7 +6,7 @@ import (
 )
 
 type ListReq struct {
-	g.Meta `path:"/list" tags:"Download" method:"get,post" summary:"GetDownloadList"`
+	g.Meta `path:"/list" tags:"Task" method:"get,post" summary:"GetTaskList"`
 	Page   int `json:"page"  description:"Page, Start With 0" `
 	Count  int `json:"count"  description:"Count Of Page"`
 }
@@ -17,7 +17,7 @@ type ListRes struct {
 }
 
 type NewReq struct {
-	g.Meta  `path:"/new" tags:"Download" method:"post" summary:"NewDownload" description:""`
+	g.Meta  `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
 	Task    string                 `json:"task" dc:"Task,InvoiceExport"`
 	Payload map[string]interface{} `json:"payload" dc:"Payload"`
 }

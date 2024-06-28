@@ -10,7 +10,6 @@ import (
 	"unibee/api/merchant/auth"
 	"unibee/api/merchant/balance"
 	"unibee/api/merchant/discount"
-	"unibee/api/merchant/download"
 	"unibee/api/merchant/email"
 	"unibee/api/merchant/gateway"
 	"unibee/api/merchant/invoice"
@@ -24,6 +23,7 @@ import (
 	"unibee/api/merchant/search"
 	"unibee/api/merchant/session"
 	"unibee/api/merchant/subscription"
+	"unibee/api/merchant/task"
 	"unibee/api/merchant/track"
 	"unibee/api/merchant/user"
 	"unibee/api/merchant/vat"
@@ -54,11 +54,6 @@ type IMerchantDiscount interface {
 	Activate(ctx context.Context, req *discount.ActivateReq) (res *discount.ActivateRes, err error)
 	Deactivate(ctx context.Context, req *discount.DeactivateReq) (res *discount.DeactivateRes, err error)
 	UserDiscountList(ctx context.Context, req *discount.UserDiscountListReq) (res *discount.UserDiscountListRes, err error)
-}
-
-type IMerchantDownload interface {
-	List(ctx context.Context, req *download.ListReq) (res *download.ListRes, err error)
-	New(ctx context.Context, req *download.NewReq) (res *download.NewRes, err error)
 }
 
 type IMerchantEmail interface {
@@ -210,6 +205,11 @@ type IMerchantSubscription interface {
 	OnetimeAddonNew(ctx context.Context, req *subscription.OnetimeAddonNewReq) (res *subscription.OnetimeAddonNewRes, err error)
 	OnetimeAddonList(ctx context.Context, req *subscription.OnetimeAddonListReq) (res *subscription.OnetimeAddonListRes, err error)
 	NewPayment(ctx context.Context, req *subscription.NewPaymentReq) (res *subscription.NewPaymentRes, err error)
+}
+
+type IMerchantTask interface {
+	List(ctx context.Context, req *task.ListReq) (res *task.ListRes, err error)
+	New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error)
 }
 
 type IMerchantTrack interface {

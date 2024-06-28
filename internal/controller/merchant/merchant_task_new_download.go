@@ -6,10 +6,10 @@ import (
 	"unibee/internal/logic/batch"
 	"unibee/utility"
 
-	"unibee/api/merchant/download"
+	"unibee/api/merchant/task"
 )
 
-func (c *ControllerDownload) New(ctx context.Context, req *download.NewReq) (res *download.NewRes, err error) {
+func (c *ControllerTask) New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error) {
 	utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "no permission")
 	err = batch.NewBatchDownloadTask(ctx, &batch.MerchantBatchTaskInternalRequest{
 		MerchantId: _interface.GetMerchantId(ctx),
@@ -20,5 +20,5 @@ func (c *ControllerDownload) New(ctx context.Context, req *download.NewReq) (res
 	if err != nil {
 		return nil, err
 	}
-	return &download.NewRes{}, nil
+	return &task.NewRes{}, nil
 }

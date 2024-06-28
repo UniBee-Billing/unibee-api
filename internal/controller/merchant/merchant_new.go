@@ -122,10 +122,10 @@ func NewDiscount() merchant.IMerchantDiscount {
 	return &ControllerDiscount{}
 }
 
-type ControllerDownload struct{}
+type ControllerTask struct{}
 
-func NewDownload() merchant.IMerchantDownload {
-	return &ControllerDownload{}
+func NewTask() merchant.IMerchantTask {
+	return &ControllerTask{}
 }
 
 type ControllerTrack struct{}
