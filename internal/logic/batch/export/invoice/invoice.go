@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
+	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/invoice/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -41,8 +42,8 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		Count:      count,
 	}
 	if payload != nil {
-		if value, ok := payload["userId"].(uint64); ok {
-			req.UserId = value
+		if value, ok := payload["userId"].(float64); ok {
+			req.UserId = uint64(value)
 		}
 		if value, ok := payload["firstName"].(string); ok {
 			req.FirstName = value
@@ -53,12 +54,12 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		if value, ok := payload["currency"].(string); ok {
 			req.Currency = value
 		}
-		if value, ok := payload["status"].([]int); ok {
-			req.Status = value
+		if value, ok := payload["status"].([]interface{}); ok {
+			req.Status = export.JsonArrayTypeConvert(ctx, value)
 		}
-		if value, ok := payload["deleteInclude"].(bool); ok {
-			req.DeleteInclude = value
-		}
+		//if value, ok := payload["deleteInclude"].(bool); ok {
+		//	req.DeleteInclude = value
+		//}
 		if value, ok := payload["sendEmail"].(string); ok {
 			req.SendEmail = value
 		}
@@ -68,17 +69,17 @@ func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *en
 		if value, ok := payload["sortType"].(string); ok {
 			req.SortType = value
 		}
-		if value, ok := payload["amountStart"].(int64); ok {
-			req.AmountStart = value
+		if value, ok := payload["amountStart"].(float64); ok {
+			req.AmountStart = int64(value)
 		}
-		if value, ok := payload["AmountEnd"].(int64); ok {
-			req.AmountEnd = value
+		if value, ok := payload["AmountEnd"].(float64); ok {
+			req.AmountEnd = int64(value)
 		}
-		if value, ok := payload["createTimeStart"].(int64); ok {
-			req.CreateTimeStart = value
+		if value, ok := payload["createTimeStart"].(float64); ok {
+			req.CreateTimeStart = int64(value)
 		}
-		if value, ok := payload["createTimeEnd"].(int64); ok {
-			req.CreateTimeEnd = value
+		if value, ok := payload["createTimeEnd"].(float64); ok {
+			req.CreateTimeEnd = int64(value)
 		}
 	}
 	result, _ := service.InvoiceList(ctx, req)

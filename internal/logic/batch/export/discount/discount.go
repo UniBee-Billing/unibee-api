@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/discount"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -42,14 +43,14 @@ func (t TaskDiscount) PageData(ctx context.Context, page int, count int, task *e
 		Count:      count,
 	}
 	if payload != nil {
-		if value, ok := payload["discountType"].([]int); ok {
-			req.DiscountType = value
+		if value, ok := payload["discountType"].([]interface{}); ok {
+			req.DiscountType = export.JsonArrayTypeConvert(ctx, value)
 		}
-		if value, ok := payload["billingType"].([]int); ok {
-			req.BillingType = value
+		if value, ok := payload["billingType"].([]interface{}); ok {
+			req.BillingType = export.JsonArrayTypeConvert(ctx, value)
 		}
-		if value, ok := payload["status"].([]int); ok {
-			req.Status = value
+		if value, ok := payload["status"].([]interface{}); ok {
+			req.Status = export.JsonArrayTypeConvert(ctx, value)
 		}
 		if value, ok := payload["code"].(string); ok {
 			req.Code = value
@@ -63,11 +64,11 @@ func (t TaskDiscount) PageData(ctx context.Context, page int, count int, task *e
 		if value, ok := payload["sortType"].(string); ok {
 			req.SortType = value
 		}
-		if value, ok := payload["createTimeStart"].(int64); ok {
-			req.CreateTimeStart = value
+		if value, ok := payload["createTimeStart"].(float64); ok {
+			req.CreateTimeStart = int64(value)
 		}
-		if value, ok := payload["createTimeEnd"].(int64); ok {
-			req.CreateTimeEnd = value
+		if value, ok := payload["createTimeEnd"].(float64); ok {
+			req.CreateTimeEnd = int64(value)
 		}
 	}
 	result, _ := discount.MerchantDiscountCodeList(ctx, req)

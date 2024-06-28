@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
+	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -43,8 +44,8 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 		Count: count,
 	}
 	if payload != nil {
-		if value, ok := payload["userId"].(int64); ok {
-			req.UserId = value
+		if value, ok := payload["userId"].(float64); ok {
+			req.UserId = int64(value)
 		}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value
@@ -52,14 +53,14 @@ func (t TaskSubscription) PageData(ctx context.Context, page int, count int, tas
 		if value, ok := payload["sortType"].(string); ok {
 			req.SortType = value
 		}
-		if value, ok := payload["status"].([]int); ok {
-			req.Status = value
+		if value, ok := payload["status"].([]interface{}); ok {
+			req.Status = export.JsonArrayTypeConvert(ctx, value)
 		}
-		if value, ok := payload["createTimeStart"].(int64); ok {
-			req.CreateTimeStart = value
+		if value, ok := payload["createTimeStart"].(float64); ok {
+			req.CreateTimeStart = int64(value)
 		}
-		if value, ok := payload["createTimeEnd"].(int64); ok {
-			req.CreateTimeEnd = value
+		if value, ok := payload["createTimeEnd"].(float64); ok {
+			req.CreateTimeEnd = int64(value)
 		}
 	}
 	result, _ := service.SubscriptionList(ctx, req)

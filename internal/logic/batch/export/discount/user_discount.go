@@ -54,11 +54,11 @@ func (t TaskUserDiscount) PageData(ctx context.Context, page int, count int, tas
 		if value, ok := payload["sortType"].(string); ok {
 			req.SortType = value
 		}
-		if value, ok := payload["createTimeStart"].(int64); ok {
-			req.CreateTimeStart = value
+		if value, ok := payload["createTimeStart"].(float64); ok {
+			req.CreateTimeStart = int64(value)
 		}
-		if value, ok := payload["createTimeEnd"].(int64); ok {
-			req.CreateTimeEnd = value
+		if value, ok := payload["createTimeEnd"].(float64); ok {
+			req.CreateTimeEnd = int64(value)
 		}
 	}
 	result, _ := discount.MerchantUserDiscountCodeList(ctx, req)

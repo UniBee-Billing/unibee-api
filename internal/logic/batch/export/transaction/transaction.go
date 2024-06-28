@@ -44,8 +44,8 @@ func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task
 		Count: count,
 	}
 	if payload != nil {
-		if value, ok := payload["userId"].(uint64); ok {
-			req.UserId = value
+		if value, ok := payload["userId"].(float64); ok {
+			req.UserId = uint64(value)
 		}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value

@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
 	"unibee/internal/logic/auth"
+	"unibee/internal/logic/batch/export"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -51,8 +52,8 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 		Count: count,
 	}
 	if payload != nil {
-		if value, ok := payload["userId"].(int64); ok {
-			req.UserId = value
+		if value, ok := payload["userId"].(float64); ok {
+			req.UserId = int64(value)
 		}
 		if value, ok := payload["email"].(string); ok {
 			req.Email = value
@@ -63,23 +64,23 @@ func (t TaskUser) PageData(ctx context.Context, page int, count int, task *entit
 		if value, ok := payload["lastName"].(string); ok {
 			req.LastName = value
 		}
-		if value, ok := payload["status"].([]int); ok {
-			req.Status = value
+		if value, ok := payload["status"].([]interface{}); ok {
+			req.Status = export.JsonArrayTypeConvert(ctx, value)
 		}
-		if value, ok := payload["deleteInclude"].(bool); ok {
-			req.DeleteInclude = value
-		}
+		//if value, ok := payload["deleteInclude"].(bool); ok {
+		//	req.DeleteInclude = value
+		//}
 		if value, ok := payload["sortField"].(string); ok {
 			req.SortField = value
 		}
 		if value, ok := payload["sortType"].(string); ok {
 			req.SortType = value
 		}
-		if value, ok := payload["createTimeStart"].(int64); ok {
-			req.CreateTimeStart = value
+		if value, ok := payload["createTimeStart"].(float64); ok {
+			req.CreateTimeStart = int64(value)
 		}
-		if value, ok := payload["createTimeEnd"].(int64); ok {
-			req.CreateTimeEnd = value
+		if value, ok := payload["createTimeEnd"].(float64); ok {
+			req.CreateTimeEnd = int64(value)
 		}
 	}
 	result, _ := auth.UserList(ctx, req)
