@@ -14,18 +14,18 @@ import (
 	"unibee/utility/unibee"
 )
 
-type TaskInvoice struct {
+type TaskInvoiceExport struct {
 }
 
-func (t TaskInvoice) TaskName() string {
+func (t TaskInvoiceExport) TaskName() string {
 	return fmt.Sprintf("InvoiceExport")
 }
 
-func (t TaskInvoice) Header() interface{} {
+func (t TaskInvoiceExport) Header() interface{} {
 	return ExportInvoiceEntity{}
 }
 
-func (t TaskInvoice) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
+func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
 	if task == nil && task.MerchantId <= 0 {
 		return mainList, nil

@@ -10,18 +10,18 @@ import (
 	"unibee/utility"
 )
 
-type TaskTransaction struct {
+type TaskTransactionExport struct {
 }
 
-func (t TaskTransaction) TaskName() string {
+func (t TaskTransactionExport) TaskName() string {
 	return "TransactionExport"
 }
 
-func (t TaskTransaction) Header() interface{} {
+func (t TaskTransactionExport) Header() interface{} {
 	return ExportTransactionEntity{}
 }
 
-func (t TaskTransaction) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
+func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
 	if task == nil && task.MerchantId <= 0 {
 		return mainList, nil

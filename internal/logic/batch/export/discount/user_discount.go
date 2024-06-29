@@ -11,18 +11,18 @@ import (
 	"unibee/utility"
 )
 
-type TaskUserDiscount struct {
+type TaskUserDiscountExport struct {
 }
 
-func (t TaskUserDiscount) TaskName() string {
+func (t TaskUserDiscountExport) TaskName() string {
 	return "UserDiscountExport"
 }
 
-func (t TaskUserDiscount) Header() interface{} {
+func (t TaskUserDiscountExport) Header() interface{} {
 	return ExportUserDiscountEntity{}
 }
 
-func (t TaskUserDiscount) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
+func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
 	if task == nil && task.MerchantId <= 0 {
 		return mainList, nil

@@ -11,7 +11,7 @@ import (
 
 func (c *ControllerTask) New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error) {
 	utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "no permission")
-	err = batch.NewBatchDownloadTask(ctx, &batch.MerchantBatchTaskInternalRequest{
+	err = batch.NewBatchExportTask(ctx, &batch.MerchantBatchExportTaskInternalRequest{
 		MerchantId: _interface.GetMerchantId(ctx),
 		MemberId:   _interface.Context().Get(ctx).MerchantMember.Id,
 		Task:       req.Task,

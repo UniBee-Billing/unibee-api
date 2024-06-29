@@ -9,9 +9,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
-	"reflect"
 	"strconv"
-	"time"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
@@ -26,38 +24,38 @@ import (
 	"unibee/utility"
 )
 
-var taskMap = map[string]_interface.BatchExportTask{
-	"InvoiceExport":      &invoice.TaskInvoice{},
-	"UserExport":         &user.TaskUser{},
-	"SubscriptionExport": &subscription.TaskSubscription{},
-	"TransactionExport":  &transaction.TaskTransaction{},
-	"DiscountExport":     &discount.TaskDiscount{},
-	"UserDiscountExport": &discount.TaskUserDiscount{},
+var exportTaskMap = map[string]_interface.BatchExportTask{
+	"InvoiceExport":      &invoice.TaskInvoiceExport{},
+	"UserExport":         &user.TaskUserExport{},
+	"SubscriptionExport": &subscription.TaskSubscriptionExport{},
+	"TransactionExport":  &transaction.TaskTransactionExport{},
+	"DiscountExport":     &discount.TaskDiscountExport{},
+	"UserDiscountExport": &discount.TaskUserDiscountExport{},
 }
 
-func getTask(task string) _interface.BatchExportTask {
-	return taskMap[task]
+func GetExportTaskImpl(task string) _interface.BatchExportTask {
+	return exportTaskMap[task]
 }
 
-type MerchantBatchTaskInternalRequest struct {
+type MerchantBatchExportTaskInternalRequest struct {
 	MerchantId uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
 	MemberId   uint64                 `json:"memberId" dc:"MemberId" `
 	Task       string                 `json:"task" dc:"Task"`
 	Payload    map[string]interface{} `json:"payload" dc:"Payload"`
 }
 
-func NewBatchDownloadTask(superCtx context.Context, req *MerchantBatchTaskInternalRequest) error {
+func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskInternalRequest) error {
 	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
-		g.Log().Errorf(superCtx, "NewBatchDownloadTask error:file service not setup")
+		g.Log().Errorf(superCtx, "NewBatchExportTask error:file service not setup")
 		utility.Assert(true, "File service need setup")
 	}
 	utility.Assert(req.MerchantId > 0, "Invalid Merchant")
 	utility.Assert(req.MemberId > 0, "Invalid Member")
 	utility.Assert(len(req.Task) > 0, "Invalid Task")
-	task := getTask(req.Task)
+	task := GetExportTaskImpl(req.Task)
 	utility.Assert(task != nil, "Task not found")
 	one := &entity.MerchantBatchTask{
 		MerchantId:   req.MerchantId,
@@ -78,17 +76,17 @@ func NewBatchDownloadTask(superCtx context.Context, req *MerchantBatchTaskIntern
 	}
 	result, err := dao.MerchantBatchTask.Ctx(superCtx).Data(one).OmitNil().Insert(one)
 	if err != nil {
-		err = gerror.Newf(`BatchDownloadTask record insert failure %s`, err.Error())
+		err = gerror.Newf(`BatchExportTask record insert failure %s`, err.Error())
 		return err
 	}
 	id, _ := result.LastInsertId()
 	one.Id = int64(uint(id))
-	utility.Assert(one.Id > 0, "BatchDownloadTask record insert failure")
-	StartRunTaskBackground(one, task)
+	utility.Assert(one.Id > 0, "BatchExportTask record insert failure")
+	startRunExportTaskBackground(one, task)
 	return nil
 }
 
-func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask) {
+func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -137,7 +135,7 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 			return
 		}
 		//Set Header
-		err = writer.SetRow("A1", refactorHeaders(taskImpl.Header()))
+		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header()))
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)
@@ -159,7 +157,7 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 					continue
 				}
 				cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
-				_ = writer.SetRow(cell, refactorData(one, ""))
+				_ = writer.SetRow(cell, RefactorData(one, ""))
 			}
 			_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 				dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(list))),
@@ -177,105 +175,31 @@ func StartRunTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.
 			failureTask(ctx, task.Id, err)
 			return
 		}
-		fileName := fmt.Sprintf("Batch_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
+		fileName := fmt.Sprintf("Batch_export_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
 		err = file.SaveAs(fileName)
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)
 			return
 		}
-		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_download", fileName, strconv.FormatUint(task.MemberId, 10))
+		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_export", fileName, strconv.FormatUint(task.MemberId, 10))
 		if err != nil {
-			g.Log().Errorf(ctx, fmt.Sprintf("StartRunTaskBackground UploadLocalFile error:%v", err))
+			g.Log().Errorf(ctx, fmt.Sprintf("startRunExportTaskBackground UploadLocalFile error:%v", err))
 			failureTask(ctx, task.Id, err)
 			return
 		}
 		_, err = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 			dao.MerchantBatchTask.Columns().Status:         2,
-			dao.MerchantBatchTask.Columns().UploadFileUrl:  upload.Url,
+			dao.MerchantBatchTask.Columns().DownloadUrl:    upload.Url,
 			dao.MerchantBatchTask.Columns().FinishTime:     gtime.Now().Timestamp(),
 			dao.MerchantBatchTask.Columns().TaskCost:       gtime.Now().Timestamp() - startTime,
 			dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 			dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 		}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
 		if err != nil {
-			g.Log().Errorf(ctx, fmt.Sprintf("StartRunTaskBackground Update MerchantBatchTask error:%v", err))
+			g.Log().Errorf(ctx, fmt.Sprintf("startRunExportTaskBackground Update MerchantBatchTask error:%v", err))
 			failureTask(ctx, task.Id, err)
 			return
 		}
 	}()
-}
-
-func failureTask(ctx context.Context, taskId int64, err error) {
-	_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
-		dao.MerchantBatchTask.Columns().Status:         3,
-		dao.MerchantBatchTask.Columns().FailReason:     fmt.Sprintf("%s \n \t %s", err.Error(), g.Log().GetStack()),
-		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
-		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
-	}).Where(dao.MerchantBatchTask.Columns().Id, taskId).OmitNil().Update()
-}
-
-func refactorHeaders(obj interface{}) []interface{} {
-	out := make([]interface{}, 0)
-	if obj == nil {
-		return out
-	}
-
-	v := reflect.ValueOf(obj)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
-
-	t := v.Type()
-	// range properties
-	// get Tag named "json" as key
-	for i := 0; i < v.NumField(); i++ {
-		fi := t.Field(i)
-		if key := fi.Tag.Get("json"); key != "" {
-			out = append(out, key)
-		}
-	}
-	return out
-}
-
-func refactorData(obj interface{}, timeZone string) []interface{} {
-	out := make([]interface{}, 0)
-	if obj == nil {
-		return out
-	}
-
-	v := reflect.ValueOf(obj)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-
-	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
-
-	t := v.Type()
-	// range properties
-	// get Tag named "json" as key
-	for i := 0; i < v.NumField(); i++ {
-		fi := t.Field(i)
-		if key := fi.Tag.Get("json"); key != "" {
-			value := v.Field(i).Interface()
-			if layout := fi.Tag.Get("layout"); layout != "" {
-				if targetTime, ok := value.(*gtime.Time); ok {
-					if len(timeZone) > 0 {
-						loc, err := time.LoadLocation(timeZone)
-						if err == nil {
-							targetTime = targetTime.ToLocation(loc)
-						}
-					}
-					value = targetTime.Layout(layout)
-					if value == "0001-01-01 00:00:00" {
-						value = ""
-					}
-				}
-			}
-			out = append(out, value)
-		}
-	}
-	return out
 }

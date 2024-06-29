@@ -6,6 +6,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/xuri/excelize/v2"
 	"testing"
+	"unibee/internal/query"
 )
 
 // Document Link: https://blog.csdn.net/qq_23118345/article/details/126706626
@@ -84,6 +85,7 @@ func TestExcelStreamWrite(t *testing.T) {
 		}
 	})
 	t.Run("Test For Import", func(t *testing.T) {
+		fmt.Println(query.Case2Camel("user_import"))
 		f, err := excelize.OpenFile("test/test.xlsx")
 		if err != nil {
 			fmt.Println(err)

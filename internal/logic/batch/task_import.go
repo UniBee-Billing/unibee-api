@@ -1,0 +1,198 @@
+package batch
+
+import (
+	"context"
+	"fmt"
+	"github.com/gogf/gf/v2/errors/gcode"
+	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/xuri/excelize/v2"
+	"strconv"
+	"unibee/internal/cmd/config"
+	"unibee/internal/consumer/webhook/log"
+	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
+	user2 "unibee/internal/logic/batch/_import/user"
+	"unibee/internal/logic/oss"
+	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/utility"
+)
+
+var importTaskMap = map[string]_interface.BatchImportTask{
+	"UserImport": user2.TaskUserImport{},
+}
+
+func GetImportTaskImpl(task string) _interface.BatchImportTask {
+	return importTaskMap[task]
+}
+
+type MerchantBatchImportTaskInternalRequest struct {
+	MerchantId    uint64 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	MemberId      uint64 `json:"memberId" dc:"MemberId" `
+	Task          string `json:"task" dc:"Task"`
+	UploadFileUrl string `json:"uploadFileUrl" dc:"UploadFileUrl"`
+}
+
+func NewBatchImportTask(superCtx context.Context, req *MerchantBatchImportTaskInternalRequest) error {
+	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.AccessKey) == 0 ||
+		len(config.GetConfigInstance().MinioConfig.SecretKey) == 0 {
+		g.Log().Errorf(superCtx, "NewBatchImportTask error:file service not setup")
+		utility.Assert(true, "File service need setup")
+	}
+	utility.Assert(req.MerchantId > 0, "Invalid Merchant")
+	utility.Assert(req.MemberId > 0, "Invalid Member")
+	utility.Assert(len(req.Task) > 0, "Invalid Task")
+	task := GetImportTaskImpl(req.Task)
+	utility.Assert(task != nil, "Task not found")
+	one := &entity.MerchantBatchTask{
+		MerchantId:    req.MerchantId,
+		MemberId:      req.MemberId,
+		ModuleName:    "",
+		TaskName:      task.TaskName(),
+		SourceFrom:    "",
+		UploadFileUrl: req.UploadFileUrl,
+		Payload:       "",
+		Status:        0,
+		StartTime:     0,
+		FinishTime:    0,
+		TaskCost:      0,
+		FailReason:    "",
+		GmtCreate:     nil,
+		TaskType:      1,
+		SuccessCount:  0,
+		CreateTime:    gtime.Now().Timestamp(),
+	}
+	result, err := dao.MerchantBatchTask.Ctx(superCtx).Data(one).OmitNil().Insert(one)
+	if err != nil {
+		err = gerror.Newf(`BatchImportTask record insert failure %s`, err.Error())
+		return err
+	}
+	id, _ := result.LastInsertId()
+	one.Id = int64(uint(id))
+	utility.Assert(one.Id > 0, "BatchImportTask record insert failure")
+	startRunImportTaskBackground(one, task)
+	return nil
+}
+
+func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchImportTask) {
+	go func() {
+		ctx := context.Background()
+		var err error
+		defer func() {
+			if exception := recover(); exception != nil {
+				if v, ok := exception.(error); ok && gerror.HasStack(v) {
+					err = v
+				} else {
+					err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+				}
+				log.PrintPanic(ctx, err)
+				failureTask(ctx, task.Id, err)
+				return
+			}
+		}()
+		file := excelize.NewFile()
+		var startTime = gtime.Now().Timestamp()
+		_, err = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+			dao.MerchantBatchTask.Columns().Status:       1,
+			dao.MerchantBatchTask.Columns().StartTime:    startTime,
+			dao.MerchantBatchTask.Columns().FinishTime:   0,
+			dao.MerchantBatchTask.Columns().TaskCost:     0,
+			dao.MerchantBatchTask.Columns().SuccessCount: 0,
+			dao.MerchantBatchTask.Columns().FailReason:   "",
+			dao.MerchantBatchTask.Columns().GmtModify:    gtime.Now(),
+		}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+		if err != nil {
+			failureTask(ctx, task.Id, err)
+			return
+		}
+
+		//Set Header
+		err = file.SetSheetName("Sheet1", taskImpl.TaskName())
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		//Create Stream Writer
+		writer, err := file.NewStreamWriter(taskImpl.TaskName())
+		//Update Width Height
+		err = writer.SetColWidth(1, 15, 12)
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		//Set Header
+		resultHeader := RefactorHeaders(taskImpl.TemplateHeader())
+		resultHeader = append(resultHeader, "Result")
+		err = writer.SetRow("A1", resultHeader)
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		//var page = 0
+		//var count = 100
+		//for {
+		//	list, pageDataErr := taskImpl.PageData(ctx, page, count, task)
+		//	if pageDataErr != nil {
+		//		failureTask(ctx, task.Id, pageDataErr)
+		//		return
+		//	}
+		//	if list == nil {
+		//		break
+		//	}
+		//	for i, one := range list {
+		//		if one == nil {
+		//			continue
+		//		}
+		//		cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
+		//		_ = writer.SetRow(cell, RefactorData(one, ""))
+		//	}
+		//	_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+		//		dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(list))),
+		//		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+		//		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
+		//	}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+		//	if len(list) < count {
+		//		break
+		//	}
+		//	page = page + 1
+		//}
+		err = writer.Flush()
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		fileName := fmt.Sprintf("Batch_import_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
+		err = file.SaveAs(fileName)
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_import", fileName, strconv.FormatUint(task.MemberId, 10))
+		if err != nil {
+			g.Log().Errorf(ctx, fmt.Sprintf("startRunImportTaskBackground UploadLocalFile error:%v", err))
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		_, err = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+			dao.MerchantBatchTask.Columns().Status:         2,
+			dao.MerchantBatchTask.Columns().DownloadUrl:    upload.Url,
+			dao.MerchantBatchTask.Columns().FinishTime:     gtime.Now().Timestamp(),
+			dao.MerchantBatchTask.Columns().TaskCost:       gtime.Now().Timestamp() - startTime,
+			dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+			dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
+		}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+		if err != nil {
+			g.Log().Errorf(ctx, fmt.Sprintf("startRunImportTaskBackground Update MerchantBatchTask error:%v", err))
+			failureTask(ctx, task.Id, err)
+			return
+		}
+	}()
+}

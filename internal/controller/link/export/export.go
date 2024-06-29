@@ -62,14 +62,14 @@ func LinkExportEntry(r *ghttp.Request) {
 		r.Response.Writeln("Not Your Task")
 		return
 	}
-	if len(one.UploadFileUrl) == 0 || one.Status != 2 {
+	if len(one.DownloadUrl) == 0 || one.Status != 2 {
 		g.Log().Errorf(r.Context(), "LinkEntry task not success")
 		r.Response.WriteHeader(http.StatusBadRequest)
 		r.Response.Writeln("Bad request")
 		return
 	}
 
-	fileName := utility.DownloadFile(one.UploadFileUrl)
+	fileName := utility.DownloadFile(one.DownloadUrl)
 	if len(fileName) == 0 {
 		g.Log().Errorf(r.Context(), "LinkEntry pdfFile download or generate error")
 		r.Response.WriteHeader(http.StatusBadRequest)

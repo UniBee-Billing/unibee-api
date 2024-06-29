@@ -13,18 +13,18 @@ import (
 	"unibee/utility"
 )
 
-type TaskSubscription struct {
+type TaskSubscriptionExport struct {
 }
 
-func (t TaskSubscription) TaskName() string {
+func (t TaskSubscriptionExport) TaskName() string {
 	return "SubscriptionExport"
 }
 
-func (t TaskSubscription) Header() interface{} {
+func (t TaskSubscriptionExport) Header() interface{} {
 	return ExportSubscriptionEntity{}
 }
 
-func (t TaskSubscription) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
+func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count int, task *entity.MerchantBatchTask) ([]interface{}, error) {
 	var mainList = make([]interface{}, 0)
 	if task == nil && task.MerchantId <= 0 {
 		return mainList, nil
