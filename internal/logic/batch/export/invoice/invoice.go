@@ -76,7 +76,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 		if value, ok := payload["amountStart"].(float64); ok {
 			req.AmountStart = unibee.Int64(int64(value))
 		}
-		if value, ok := payload["AmountEnd"].(float64); ok {
+		if value, ok := payload["amountEnd"].(float64); ok {
 			req.AmountEnd = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
