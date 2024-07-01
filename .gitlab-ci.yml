@@ -54,8 +54,9 @@ hub_push:
   image: docker
   stage: hub_push
   script:
-#    - docker login -u ${CI_REGISTRY_USER} -p '${CI_REGISTRY_PASSWORD}'
-#    - docker login -u accounts.unibee@unibee.dev -p "[TWF2aR^cCDVvu#2du"
+    - echo ${CI_REGISTRY_USER}
+    - echo ${CI_REGISTRY_PASSWORD}
+    - docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD}
     - docker tag easzlab.io.local:5000/unibee/unibee-api:daily unibee/api:stage
     - docker push unibee/api:stage
 
