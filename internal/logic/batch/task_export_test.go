@@ -97,24 +97,33 @@ func TestExcelStreamWrite(t *testing.T) {
 				fmt.Println(err)
 			}
 		}()
-		// Get value from cell by given worksheet name and cell reference.
-		cell, err := f.GetCellValue("Sheet1", "A1")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		fmt.Println(cell)
+		//// Get value from cell by given worksheet name and cell reference.
+		//cell, err := f.GetCellValue("Sheet1", "A1")
+		//if err != nil {
+		//	fmt.Println(err)
+		//	return
+		//}
+		//fmt.Println(cell)
 		// Get all the rows in the Sheet1.
 		rows, err := f.GetRows("Sheet1")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		for _, row := range rows {
-			for _, colCell := range row {
-				fmt.Print(colCell, "\t")
+		var headers = make(map[int]string)
+		var list = make([]map[string]string, 0)
+		for i, row := range rows {
+			if i == 0 {
+				for j, colCell := range row {
+					headers[j] = colCell
+				}
+			} else {
+				target := make(map[string]string)
+				for j, colCell := range row {
+					target[headers[j]] = colCell
+				}
+				list = append(list, target)
 			}
-			fmt.Println()
 		}
 	})
 }

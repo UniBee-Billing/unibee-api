@@ -9,6 +9,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
 	"strconv"
+	"strings"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
@@ -127,41 +128,72 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 		}
 		//Set Header
 		resultHeader := RefactorHeaders(taskImpl.TemplateHeader())
-		resultHeader = append(resultHeader, "Result")
+		resultHeader = append(resultHeader, "ImportResult")
 		err = writer.SetRow("A1", resultHeader)
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)
 			return
 		}
-		//var page = 0
-		//var count = 100
-		//for {
-		//	list, pageDataErr := taskImpl.PageData(ctx, page, count, task)
-		//	if pageDataErr != nil {
-		//		failureTask(ctx, task.Id, pageDataErr)
-		//		return
-		//	}
-		//	if list == nil {
-		//		break
-		//	}
-		//	for i, one := range list {
-		//		if one == nil {
-		//			continue
-		//		}
-		//		cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
-		//		_ = writer.SetRow(cell, RefactorData(one, ""))
-		//	}
-		//	_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
-		//		dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(list))),
-		//		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
-		//		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
-		//	}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
-		//	if len(list) < count {
-		//		break
-		//	}
-		//	page = page + 1
-		//}
+		// Start Read Import File
+		importFile := utility.DownloadFile(task.UploadFileUrl)
+		if len(importFile) == 0 {
+			err = gerror.Newf("download url failed:%s", task.UploadFileUrl)
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		reader, err := excelize.OpenFile(importFile)
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		readerRows, err := reader.GetRows(taskImpl.TaskName())
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+		var headers = make(map[int]string)
+		var count = 0
+		for i, row := range readerRows {
+			count = i
+			if i == 0 {
+				for j, colCell := range row {
+					headers[j] = strings.TrimSpace(colCell)
+				}
+			} else {
+				target := make(map[string]string)
+				for j, colCell := range row {
+					target[headers[j]] = strings.TrimSpace(colCell)
+				}
+				if target == nil {
+					continue
+				}
+				cell, _ := excelize.CoordinatesToCellName(1, i+1)
+				result, importResult := taskImpl.ImportRow(ctx, task, target)
+				var resultMessage = "success"
+				if importResult != nil {
+					resultMessage = fmt.Sprintf("%s", importResult.Error())
+				}
+				_ = writer.SetRow(cell, append(RefactorData(result, ""), resultMessage))
+				if count%10 == 0 {
+					_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+						dao.MerchantBatchTask.Columns().SuccessCount:   fmt.Sprintf("%v", count),
+						dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+						dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
+					}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+				}
+			}
+		}
+
+		_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
+			dao.MerchantBatchTask.Columns().SuccessCount:   fmt.Sprintf("%v", count),
+			dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
+			dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
+		}).Where(dao.MerchantBatchTask.Columns().Id, task.Id).OmitNil().Update()
+
 		err = writer.Flush()
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())

@@ -210,6 +210,7 @@ type IMerchantSubscription interface {
 type IMerchantTask interface {
 	List(ctx context.Context, req *task.ListReq) (res *task.ListRes, err error)
 	New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error)
+	NewImport(ctx context.Context, req *task.NewImportReq) (res *task.NewImportRes, err error)
 }
 
 type IMerchantTrack interface {

@@ -59,7 +59,10 @@ var (
 			openapi.Info.Version = readBuildVersionInfo(ctx)
 			openapi.Config.CommonResponse = _interface.JsonRes{}
 			openapi.Config.CommonResponseDataField = `Data`
-			openapi.Servers = &goai.Servers{{URL: config.GetConfigInstance().Server.DomainPath}}
+			openapi.Servers = &goai.Servers{
+				{URL: config.GetConfigInstance().Server.DomainPath},
+				{URL: fmt.Sprintf("http://127.0.0.1%s", config.GetConfigInstance().Server.Address)},
+			}
 			s.Group("/", func(group *ghttp.RouterGroup) {
 				group.GET("/swagger-ui.html", func(r *ghttp.Request) {
 					r.Response.Write(swagger.LatestSwaggerUIPageContent)

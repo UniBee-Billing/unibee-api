@@ -2,6 +2,7 @@ package task
 
 import (
 	"github.com/gogf/gf/v2/frame/g"
+	"github.com/gogf/gf/v2/net/ghttp"
 	"unibee/api/bean"
 )
 
@@ -23,4 +24,12 @@ type NewReq struct {
 }
 
 type NewRes struct {
+}
+
+type NewImportReq struct {
+	g.Meta `path:"/new_import" method:"post" mime:"multipart/form-data" tags:"Task" summary:"NewImport"`
+	File   *ghttp.UploadFile `json:"file" type:"file" dc:"File To Upload"`
+	Task   string            `json:"task" dc:"Task,UserImport"`
+}
+type NewImportRes struct {
 }

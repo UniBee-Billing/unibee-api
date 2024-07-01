@@ -100,6 +100,7 @@ type NewReq struct {
 	VATNumber      string `json:"vATNumber" dc:"vat number"`
 	City           string `json:"city" dc:"city"`
 	ZipCode        string `json:"zipCode" dc:"zip_code"`
+	Custom         string `json:"custom" dc:"Custom"`
 }
 
 func PasswordLogin(ctx context.Context, merchantId uint64, email string, password string) (one *entity.UserAccount, token string) {
@@ -144,13 +145,16 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 		VATNumber:      req.VATNumber,
 		City:           req.City,
 		ZipCode:        req.ZipCode,
+		Custom:         req.Custom,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
+	// todo mark vat check, countryCode check
 	result, err := dao.UserAccount.Ctx(ctx).Data(one).OmitNil().Insert(one)
 	utility.AssertError(err, "Server Error")
 	id, err := result.LastInsertId()
 	utility.AssertError(err, "Server Error")
 	one.Id = uint64(id)
+	// move to redis mq
 	segment.RegisterSegmentUserBackground(ctx, one.MerchantId, one)
 	return one, nil
 }
