@@ -50,16 +50,6 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
 			gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
 			taxPercentage, countryName := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, countryCode, gatewayId, user.VATNumber)
-			//vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, user.MerchantId, countryCode)
-			//var taxPercentage int64 = 0
-			//if err == nil && vatCountryRate != nil {
-			//	if len(user.VATNumber) > 0 && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, countryCode) {
-			//		taxPercentage = 0
-			//	} else if vatCountryRate.StandardTaxPercentage > 0 {
-			//		taxPercentage = vatCountryRate.StandardTaxPercentage
-			//	}
-			//}
-			//if err == nil && vatCountryRate != nil {
 			_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 				dao.UserAccount.Columns().CountryCode:   countryCode,
 				dao.UserAccount.Columns().CountryName:   countryName,
@@ -71,7 +61,6 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 			} else {
 				g.Log().Infof(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, success", userId, countryCode)
 			}
-			//}
 		}
 	}
 }

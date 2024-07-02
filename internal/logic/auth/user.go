@@ -7,10 +7,12 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	_interface "unibee/internal/interface"
 	"unibee/internal/logic/analysis/segment"
 	"unibee/internal/logic/jwt"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
+	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -128,6 +130,21 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 	utility.Assert(one == nil, "email or externalUserId exist")
 	emailOne := query.GetUserAccountByEmail(ctx, req.MerchantId, req.Email)
 	utility.Assert(emailOne == nil, "email exist")
+
+	var taxPercentage int64 = 0
+	var countryName = ""
+	if len(req.CountryCode) > 0 {
+		utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, req.MerchantId) != nil, "vat gateway need setup while countryCode is not blank")
+		if len(req.VATNumber) > 0 {
+			vatNumberValidate, err := vat_gateway.ValidateVatNumberByDefaultGateway(ctx, _interface.GetMerchantId(ctx), 0, req.VATNumber, "")
+			utility.AssertError(err, "Validate vatNumber error")
+			utility.Assert(vatNumberValidate.Valid, "VAT number invalid")
+		}
+		taxPercentage, countryName = vat_gateway.ComputeMerchantVatPercentage(ctx, req.MerchantId, req.CountryCode, 0, req.VATNumber)
+	} else if len(req.VATNumber) > 0 {
+		utility.Assert(false, "countryCode is blank while vatNumber provided")
+	}
+
 	one = &entity.UserAccount{
 		FirstName:      req.FirstName,
 		LastName:       req.LastName,
@@ -137,7 +154,7 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 		Address:        req.Address,
 		ExternalUserId: req.ExternalUserId,
 		CountryCode:    req.CountryCode,
-		CountryName:    req.CountryName,
+		CountryName:    countryName,
 		UserName:       req.UserName,
 		MerchantId:     req.MerchantId,
 		Type:           req.Type,
@@ -146,6 +163,7 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 		City:           req.City,
 		ZipCode:        req.ZipCode,
 		Custom:         req.Custom,
+		TaxPercentage:  taxPercentage,
 		CreateTime:     gtime.Now().Timestamp(),
 	}
 	// todo mark vat check, countryCode check
@@ -154,6 +172,7 @@ func CreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccount, err 
 	id, err := result.LastInsertId()
 	utility.AssertError(err, "Server Error")
 	one.Id = uint64(id)
+
 	// move to redis mq
 	segment.RegisterSegmentUserBackground(ctx, one.MerchantId, one)
 	return one, nil

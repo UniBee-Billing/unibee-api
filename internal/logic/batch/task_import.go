@@ -172,7 +172,8 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 					continue
 				}
 				cell, _ := excelize.CoordinatesToCellName(1, i+1)
-				result, importResult := taskImpl.ImportRow(ctx, task, target)
+				//result, importResult := taskImpl.ImportRow(ctx, task, target)
+				result, importResult := ProxyImportRow(ctx, taskImpl, task, target)
 				var resultMessage = "success"
 				if importResult != nil {
 					resultMessage = fmt.Sprintf("%s", importResult.Error())
@@ -227,4 +228,19 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 	}()
+}
+
+func ProxyImportRow(ctx context.Context, taskImpl _interface.BatchImportTask, task *entity.MerchantBatchTask, target map[string]string) (data interface{}, err error) {
+	defer func() {
+		if exception := recover(); exception != nil {
+			if v, ok := exception.(error); ok && gerror.HasStack(v) {
+				err = v
+			} else {
+				err = gerror.NewCodef(gcode.CodeInternalPanic, "%+v", exception)
+			}
+			log.PrintPanic(ctx, err)
+			return
+		}
+	}()
+	return taskImpl.ImportRow(ctx, task, target)
 }
