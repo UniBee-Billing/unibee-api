@@ -7,7 +7,6 @@ import (
 	"unibee/internal/logic/auth"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
-	"unibee/test"
 )
 
 type TaskUserImport struct {
@@ -21,18 +20,18 @@ func (t TaskUserImport) TemplateHeader() interface{} {
 	return ImportUserEntity{}
 }
 
-func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatchTask, data map[string]string) (interface{}, error) {
+func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatchTask, row map[string]string) (interface{}, error) {
 	var err error
 	target := &ImportUserEntity{
-		FirstName:      fmt.Sprintf("%s", data["FirstName"]),
-		LastName:       fmt.Sprintf("%s", data["LastName"]),
-		Email:          fmt.Sprintf("%s", data["Email"]),
-		Address:        fmt.Sprintf("%s", data["Address"]),
-		VATNumber:      fmt.Sprintf("%s", data["VATNumber"]),
-		CountryCode:    fmt.Sprintf("%s", data["CountryCode"]),
-		ExternalUserId: fmt.Sprintf("%s", data["ExternalUserId"]),
-		TaxPercentage:  fmt.Sprintf("%s", data["TaxPercentage"]),
-		Type:           fmt.Sprintf("%s", data["Type"]),
+		FirstName:      fmt.Sprintf("%s", row["FirstName"]),
+		LastName:       fmt.Sprintf("%s", row["LastName"]),
+		Email:          fmt.Sprintf("%s", row["Email"]),
+		Address:        fmt.Sprintf("%s", row["Address"]),
+		VATNumber:      fmt.Sprintf("%s", row["VATNumber"]),
+		CountryCode:    fmt.Sprintf("%s", row["CountryCode"]),
+		ExternalUserId: fmt.Sprintf("%s", row["ExternalUserId"]),
+		TaxPercentage:  fmt.Sprintf("%s", row["TaxPercentage"]),
+		Type:           fmt.Sprintf("%s", row["Type"]),
 	}
 	one := query.GetUserAccountByEmail(ctx, task.MerchantId, target.Email)
 	if one != nil {
@@ -53,7 +52,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		Address:        target.Address,
 		CountryCode:    target.CountryCode,
 		Custom:         "Import",
-		MerchantId:     test.TestMerchant.Id,
+		MerchantId:     task.MerchantId,
 	})
 	return target, err
 }
