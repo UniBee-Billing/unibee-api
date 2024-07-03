@@ -3,6 +3,7 @@ package merchant
 import (
 	"context"
 	"fmt"
+	"github.com/gogf/gf/v2/frame/g"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/subscription/service"
@@ -13,6 +14,7 @@ import (
 )
 
 func (c *ControllerSubscription) Renew(ctx context.Context, req *subscription.RenewReq) (res *subscription.RenewRes, err error) {
+	g.Log().Infof(ctx, "Renew called by payload:%s", utility.MarshalToJsonString(req))
 	if len(req.SubscriptionId) == 0 {
 		utility.Assert(req.UserId > 0, "one of SubscriptionId and UserId should provide")
 		one := query.GetLatestActiveOrIncompleteSubscriptionByUserId(ctx, req.UserId, _interface.GetMerchantId(ctx))
