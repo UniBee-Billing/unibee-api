@@ -16,7 +16,7 @@ func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeL
 		AmountEnd:       req.AmountEnd,
 		Status:          req.Status,
 		TimelineTypes:   req.TimelineTypes,
-		GatewayId:       req.GatewayId,
+		GatewayIds:      req.GatewayIds,
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		Page:            req.Page,
