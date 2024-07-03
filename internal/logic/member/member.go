@@ -171,8 +171,8 @@ func AddMerchantMember(ctx context.Context, merchantId uint64, email string, fir
 
 func FrozenMember(ctx context.Context, memberId uint64) {
 	one := query.GetMerchantMemberById(ctx, memberId)
-	utility.Assert(one != nil, "member not found")
-	utility.Assert(one.Status != 2, "member already suspend")
+	utility.Assert(one != nil, "Member Not Found")
+	utility.Assert(one.Status != 2, "Member Already Suspended")
 	_, err := dao.MerchantMember.Ctx(ctx).Data(g.Map{
 		dao.MerchantMember.Columns().Status:    2,
 		dao.MerchantMember.Columns().GmtModify: gtime.Now(),
