@@ -23,6 +23,7 @@ import (
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic"
+	"unibee/internal/logic/dbupgrade"
 	"unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -356,6 +357,7 @@ var (
 			{
 				//logic init
 				logic.StandaloneInit(ctx)
+				dbupgrade.StandAloneInit(ctx)
 				//SetupAllWebhooks
 				webhook.SetupAllWebhooksBackground()
 			}
