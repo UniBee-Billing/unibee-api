@@ -86,10 +86,10 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if len(req.LastName) > 0 {
 		q = q.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
 	}
-	if len(req.SubStatus) > 0 {
+	if req.SubStatus != nil && len(req.SubStatus) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().SubscriptionStatus, req.SubStatus)
 	}
-	if len(req.Status) > 0 {
+	if req.Status != nil && len(req.Status) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)
 	}
 	if req.CreateTimeStart > 0 {
