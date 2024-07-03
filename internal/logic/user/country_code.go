@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
@@ -75,7 +76,7 @@ func GetUserCountryCode(ctx context.Context, userId uint64) (countryCode string,
 func GetUserTaxPercentage(ctx context.Context, userId uint64) (int64, error) {
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
-	utility.Assert(user != nil, "GetUserCountryCode user not found")
+	utility.Assert(user != nil, fmt.Sprintf("GetUserCountryCode user not found:%v", userId))
 	gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
 	taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, user.CountryCode, gatewayId, user.VATNumber)
 	return taxPercentage, nil
