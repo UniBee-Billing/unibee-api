@@ -14,6 +14,8 @@ func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user
 		Email:           req.Email,
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
+		SubscriptionId:  req.SubscriptionId,
+		SubStatus:       req.SubStatus,
 		Status:          req.Status,
 		DeleteInclude:   req.DeleteInclude,
 		SortField:       req.SortField,

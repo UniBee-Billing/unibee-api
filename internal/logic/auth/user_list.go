@@ -11,12 +11,14 @@ import (
 )
 
 type UserListInternalReq struct {
-	MerchantId uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
-	UserId     int64  `json:"userId" dc:"Filter UserId, Default All" `
-	Email      string `json:"email" dc:"Search Email" `
-	FirstName  string `json:"firstName" dc:"Search FirstName" `
-	LastName   string `json:"lastName" dc:"Search LastName" `
-	Status     []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	MerchantId     uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
+	UserId         int64  `json:"userId" dc:"Filter UserId, Default All" `
+	Email          string `json:"email" dc:"Search Email" `
+	FirstName      string `json:"firstName" dc:"Search FirstName" `
+	LastName       string `json:"lastName" dc:"Search LastName" `
+	SubscriptionId string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
+	SubStatus      []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
+	Status         []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
 	//UserName   int    `json:"userName" dc:"Filter UserName, Default All" `
 	//SubscriptionName   int    `json:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
 	//SubscriptionStatus int    `json:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
@@ -72,6 +74,9 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if req.UserId > 0 {
 		q = q.Where(dao.UserAccount.Columns().Id, req.UserId)
 	}
+	if len(req.SubscriptionId) > 0 {
+		q = q.Where(dao.UserAccount.Columns().SubscriptionId, req.SubscriptionId)
+	}
 	if len(req.Email) > 0 {
 		q = q.WhereLike(dao.UserAccount.Columns().Email, "%"+req.Email+"%")
 	}
@@ -80,6 +85,9 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	}
 	if len(req.LastName) > 0 {
 		q = q.WhereLike(dao.UserAccount.Columns().LastName, "%"+req.LastName+"%")
+	}
+	if len(req.SubStatus) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().SubscriptionStatus, req.SubStatus)
 	}
 	if len(req.Status) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)

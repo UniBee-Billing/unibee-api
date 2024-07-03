@@ -12,6 +12,11 @@ func (c *ControllerPayment) TimeLineList(ctx context.Context, req *payment.TimeL
 	result, err := service.PaymentTimeLineList(ctx, &service.PaymentTimelineListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
 		UserId:          req.UserId,
+		AmountStart:     req.AmountStart,
+		AmountEnd:       req.AmountEnd,
+		Status:          req.Status,
+		TimelineTypes:   req.TimelineTypes,
+		GatewayId:       req.GatewayId,
 		SortField:       req.SortField,
 		SortType:        req.SortType,
 		Page:            req.Page,

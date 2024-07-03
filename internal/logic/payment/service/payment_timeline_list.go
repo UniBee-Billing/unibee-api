@@ -12,6 +12,11 @@ import (
 type PaymentTimelineListInternalReq struct {
 	MerchantId      uint64 `json:"merchantId" dc:"MerchantId" v:"required"`
 	UserId          uint64 `json:"userId" dc:"Filter UserId, Default All " `
+	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of timeline" `
+	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of timeline" `
+	Status          []int  `json:"status" dc:"The filter status, 0-pending, 1-success, 2-failure" `
+	TimelineTypes   []int  `json:"timelineTypes"   dc:"The filter timelineType, 0-pay, 1-refund"`
+	GatewayId       uint64 `json:"gatewayId"      dc:"The filter id of gateway "`
 	SortField       string `json:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc" `
 	Page            int    `json:"page"  dc:"Page, Start With 0" `
@@ -50,10 +55,28 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 		Where(dao.PaymentTimeline.Columns().MerchantId, req.MerchantId).
 		Where(dao.PaymentTimeline.Columns().UserId, req.UserId)
 	if req.CreateTimeStart > 0 {
-		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+		q = q.WhereGTE(dao.PaymentTimeline.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
-		q = q.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
+		q = q.WhereLTE(dao.PaymentTimeline.Columns().CreateTime, req.CreateTimeEnd)
+	}
+	if req.AmountStart != nil && req.AmountEnd != nil {
+		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower then amountEnd")
+	}
+	if req.AmountStart != nil {
+		q = q.WhereGTE(dao.PaymentTimeline.Columns().TotalAmount, &req.AmountStart)
+	}
+	if req.AmountEnd != nil {
+		q = q.WhereLTE(dao.PaymentTimeline.Columns().TotalAmount, &req.AmountEnd)
+	}
+	if len(req.Status) > 0 {
+		q = q.WhereIn(dao.PaymentTimeline.Columns().Status, req.Status)
+	}
+	if len(req.TimelineTypes) > 0 {
+		q = q.WhereIn(dao.PaymentTimeline.Columns().TimelineType, req.TimelineTypes)
+	}
+	if req.GatewayId > 0 {
+		q = q.Where(dao.PaymentTimeline.Columns().GatewayId, req.GatewayId)
 	}
 	err = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
