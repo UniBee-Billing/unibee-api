@@ -7,9 +7,12 @@ import (
 	"github.com/gogf/gf/v2/encoding/gjson"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/glog"
+	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	_ "unibee/internal/dao/oversea_pay"
+	dao "unibee/internal/dao/oversea_pay"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/utility"
 	"unibee/utility/liberr"
 )
@@ -18,22 +21,31 @@ func StandAloneInit(ctx context.Context) {
 	list := fetchColumnAppendListFromCloudApi()
 	if len(list) > 0 {
 		glog.Infof(ctx, "StandAloneInit DBUpgrade start")
-		database := g.DB("default")
-		db, err := gdb.Instance()
+		historyList := GetUpgradeList(ctx)
+		historyIds := make([]uint64, 0)
+		for _, history := range historyList {
+			historyIds = append(historyIds, history.Id)
+		}
+		database, err := gdb.Instance()
 		tables, err := database.Tables(ctx, database.GetSchema())
 		liberr.ErrIsNil(ctx, err, "DB Not Ready For Upgrade")
 		utility.AssertError(err, "StandAloneInit DBUpgrade Get Database Instance failure,%v")
 		for _, one := range list {
-			if db != nil && len(one.UpgradeSql) > 0 {
+			if utility.IsUint64InArray(historyIds, one.Id) {
+				continue
+			}
+			if database != nil && len(one.UpgradeSql) > 0 {
 				if len(one.Action) == 0 || len(one.TableName) == 0 {
 					glog.Infof(ctx, "StandAloneInit DBUpgrade upgradeId:%v skip by empty action or tableName", one.Id)
 					continue
 				}
 				if one.Action == "table_creation" {
 					if !utility.IsStringInArray(tables, one.TableName) {
-						_, err = db.Exec(ctx, one.UpgradeSql)
+						_, err = database.Exec(ctx, one.UpgradeSql)
 						if err != nil {
 							glog.Errorf(ctx, "StandAloneInit DBUpgrade Create Table for upgradeId:%v error:%v", one.Id, err.Error())
+						} else {
+							SaveUpgradeHistory(ctx, one)
 						}
 					}
 				} else if one.Action == "column_add" {
@@ -48,9 +60,11 @@ func StandAloneInit(ctx context.Context) {
 							continue
 						}
 						if _, ok := fields[one.ColumnName]; !ok {
-							_, err = db.Exec(ctx, one.UpgradeSql)
+							_, err = database.Exec(ctx, one.UpgradeSql)
 							if err != nil {
 								glog.Errorf(ctx, "StandAloneInit DBUpgrade Append Table Column %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
+							} else {
+								SaveUpgradeHistory(ctx, one)
 							}
 						}
 					}
@@ -66,9 +80,11 @@ func StandAloneInit(ctx context.Context) {
 							continue
 						}
 						if _, ok := fields[one.ColumnName]; ok {
-							_, err = db.Exec(ctx, one.UpgradeSql)
+							_, err = database.Exec(ctx, one.UpgradeSql)
 							if err != nil {
 								glog.Errorf(ctx, "StandAloneInit DBUpgrade Edit Table Column %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
+							} else {
+								SaveUpgradeHistory(ctx, one)
 							}
 						}
 					}
@@ -80,9 +96,11 @@ func StandAloneInit(ctx context.Context) {
 							continue
 						}
 						if _, ok := fields[one.ColumnName]; ok {
-							_, err = db.Exec(ctx, one.UpgradeSql)
+							_, err = database.Exec(ctx, one.UpgradeSql)
 							if err != nil {
 								glog.Errorf(ctx, "StandAloneInit DBUpgrade Add Table Key %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
+							} else {
+								SaveUpgradeHistory(ctx, one)
 							}
 						}
 					}
@@ -108,4 +126,30 @@ func fetchColumnAppendListFromCloudApi() []*bean.TableUpgradeSimplify {
 		_ = gjson.Unmarshal([]byte(data.GetJson("data").Get("tableUpgrades").String()), &list)
 	}
 	return list
+}
+
+func GetUpgradeList(ctx context.Context) (list []*entity.TableUpgradeHistory) {
+	var data = make([]*entity.TableUpgradeHistory, 0)
+	err := dao.TableUpgradeHistory.Ctx(ctx).Scan(&data)
+	if err != nil {
+		g.Log().Errorf(ctx, "GetUpgradeList error:%s", err)
+		return nil
+	}
+	return data
+}
+
+func SaveUpgradeHistory(ctx context.Context, one *bean.TableUpgradeSimplify) {
+	_, _ = dao.FileUpload.Ctx(ctx).Data(&entity.TableUpgradeHistory{
+		Id:            one.Id,
+		DatabaseType:  one.DatabaseType,
+		Env:           one.Env,
+		Action:        one.Action,
+		TableName:     one.TableName,
+		ColumnName:    one.ColumnName,
+		ServerVersion: g.Server().GetOpenApi().Info.Version,
+		UpgradeSql:    one.UpgradeSql,
+		GmtCreate:     gtime.Now(),
+		GmtModify:     gtime.Now(),
+		CreateTime:    gtime.Now().Timestamp(),
+	}).Insert()
 }
