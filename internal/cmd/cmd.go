@@ -331,6 +331,7 @@ var (
 				_, err = query.GetMerchantList(ctx)
 				liberr.ErrIsNil(ctx, err, "DB Not Ready")
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
+				g.Log().Infof(ctx, "Server build version: %s ", g.Server().GetOpenApi().Info.Version)
 				g.Log().Infof(ctx, "Server port: %s ", config.GetConfigInstance().Server.Address)
 				g.Log().Infof(ctx, "Server domainPath: %s ", config.GetConfigInstance().Server.DomainPath)
 				g.Log().Infof(ctx, "Server TimeStamp: %d ", gtime.Now().Timestamp())
