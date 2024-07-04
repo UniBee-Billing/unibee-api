@@ -177,7 +177,7 @@ func GetUpgradeList(ctx context.Context) (list []*entity.TableUpgradeHistory) {
 
 func SaveUpgradeHistory(ctx context.Context, one *bean.TableUpgradeSimplify) {
 	g.Log().Info(ctx, "StandAloneInit DBUpgrade success and save upgradeId:%v", one.Id)
-	_, _ = dao.FileUpload.Ctx(ctx).Data(&entity.TableUpgradeHistory{
+	_, err := dao.TableUpgradeHistory.Ctx(ctx).Data(&entity.TableUpgradeHistory{
 		Id:            one.Id,
 		DatabaseType:  one.DatabaseType,
 		Env:           one.Env,
@@ -190,4 +190,7 @@ func SaveUpgradeHistory(ctx context.Context, one *bean.TableUpgradeSimplify) {
 		GmtModify:     gtime.Now(),
 		CreateTime:    gtime.Now().Timestamp(),
 	}).Insert()
+	if err != nil {
+		g.Log().Info(ctx, "StandAloneInit DBUpgrade save upgradeId:%v error:%v", one.Id, err.Error())
+	}
 }
