@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/invoice/service"
@@ -100,10 +101,16 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				firstName = one.UserAccount.FirstName
 				lastName = one.UserAccount.LastName
 				email = one.UserAccount.Email
+			} else {
+				one.UserAccount = &bean.UserAccountSimplify{}
+			}
+			if one.Subscription == nil {
+				one.Subscription = &bean.SubscriptionSimplify{}
 			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
+				ExternalUserId:                 fmt.Sprintf("%v", one.UserAccount.ExternalUserId),
 				FirstName:                      firstName,
 				LastName:                       lastName,
 				Email:                          email,
@@ -128,6 +135,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				PaymentId:                      one.PaymentId,
 				RefundId:                       one.RefundId,
 				SubscriptionId:                 one.SubscriptionId,
+				PlanId:                         fmt.Sprintf("%v", one.Subscription.PlanId),
 				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd),
 				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor),
 				CreateFrom:                     one.CreateFrom,
@@ -140,7 +148,8 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 
 type ExportInvoiceEntity struct {
 	InvoiceId                      string      `json:"InvoiceId"`
-	UserId                         string      `json:"UserId"                 `
+	UserId                         string      `json:"UserId"             `
+	ExternalUserId                 string      `json:"ExternalUserId"     `
 	FirstName                      string      `json:"FirstName"          `
 	LastName                       string      `json:"LastName"           `
 	Email                          string      `json:"Email"              `
@@ -165,8 +174,9 @@ type ExportInvoiceEntity struct {
 	PaymentId                      string      `json:"PaymentId"                      description:"paymentId"`                                                     // paymentId
 	RefundId                       string      `json:"RefundId"                       description:"refundId"`                                                      // refundId
 	SubscriptionId                 string      `json:"SubscriptionId"                 description:"subscription_id"`                                               // subscription_id
-	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"  `                                              // trial_end, utc time
-	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  `                                              // billing_cycle_anchor
-	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`                                                   // create from
-	CountryCode                    string      `json:"CountryCode"                    description:""`                                                              //
+	PlanId                         string      `json:"PlanId"             `
+	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"  ` // trial_end, utc time
+	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  ` // billing_cycle_anchor
+	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`      // create from
+	CountryCode                    string      `json:"CountryCode"                    description:""`                 //
 }

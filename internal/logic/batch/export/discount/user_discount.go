@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/logic/discount"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -71,14 +72,22 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 				firstName = one.User.FirstName
 				lastName = one.User.LastName
 				email = one.User.Email
+			} else {
+				one.User = &bean.UserAccountSimplify{}
+			}
+			if one.Plan == nil {
+				one.Plan = &bean.PlanSimplify{}
 			}
 			mainList = append(mainList, &ExportUserDiscountEntity{
 				Id:             fmt.Sprintf("%v", one.Id),
+				UserId:         fmt.Sprintf("%v", one.User.Id),
+				ExternalUserId: fmt.Sprintf("%v", one.User.ExternalUserId),
 				MerchantName:   merchant.Name,
 				FirstName:      firstName,
 				LastName:       lastName,
 				Email:          email,
 				PlanId:         fmt.Sprintf("%v", one.Plan.Id),
+				ExternalPlanId: fmt.Sprintf("%v", one.Plan.ExternalPlanId),
 				PlanName:       one.Plan.PlanName,
 				Code:           one.Code,
 				SubscriptionId: one.SubscriptionId,
@@ -95,11 +104,14 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 
 type ExportUserDiscountEntity struct {
 	Id             string      `json:"Id"                 `
+	UserId         string      `json:"UserId"             `
+	ExternalUserId string      `json:"ExternalUserId"     `
 	FirstName      string      `json:"FirstName"          `
 	LastName       string      `json:"LastName"           `
 	Email          string      `json:"Email"              `
 	MerchantName   string      `json:"MerchantName"       `
 	PlanId         string      `json:"PlanId"             `
+	ExternalPlanId string      `json:"ExternalPlanId"     `
 	PlanName       string      `json:"PlanName"           `
 	Code           string      `json:"Code"           `
 	SubscriptionId string      `json:"SubscriptionId" `

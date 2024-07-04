@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/subscription/service"
@@ -94,9 +95,16 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				firstName = one.User.FirstName
 				lastName = one.User.LastName
 				email = one.User.Email
+			} else {
+				one.User = &bean.UserAccountSimplify{}
+			}
+			if one.Plan == nil {
+				one.Plan = &bean.PlanSimplify{}
 			}
 			mainList = append(mainList, &ExportSubscriptionEntity{
 				SubscriptionId:     one.Subscription.SubscriptionId,
+				UserId:             fmt.Sprintf("%v", one.User.Id),
+				ExternalUserId:     fmt.Sprintf("%v", one.User.ExternalUserId),
 				FirstName:          firstName,
 				LastName:           lastName,
 				Email:              email,
@@ -104,6 +112,7 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				Amount:             utility.ConvertCentToDollarStr(one.Subscription.Amount, one.Subscription.Currency),
 				Currency:           one.Subscription.Currency,
 				PlanId:             fmt.Sprintf("%v", one.Plan.Id),
+				ExternalPlanId:     fmt.Sprintf("%v", one.Plan.ExternalPlanId),
 				PlanName:           one.Plan.PlanName,
 				Quantity:           fmt.Sprintf("%v", one.Subscription.Quantity),
 				Gateway:            subGateway,
@@ -127,13 +136,16 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 
 type ExportSubscriptionEntity struct {
 	SubscriptionId     string      `json:"SubscriptionId"     `
+	UserId             string      `json:"UserId"             `
+	ExternalUserId     string      `json:"ExternalUserId"     `
 	FirstName          string      `json:"FirstName"          `
 	LastName           string      `json:"LastName"           `
 	Email              string      `json:"Email"              `
 	MerchantName       string      `json:"MerchantName"       `
 	Amount             string      `json:"Amount"             `
 	Currency           string      `json:"Currency"           `
-	PlanId             string      `json:"PlanId"           `
+	PlanId             string      `json:"PlanId"             `
+	ExternalPlanId     string      `json:"ExternalPlanId"     `
 	PlanName           string      `json:"PlanName"           `
 	Quantity           string      `json:"Quantity"           `
 	Gateway            string      `json:"Gateway"            `

@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/logic/batch/export"
@@ -113,10 +114,14 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 				firstName = user.FirstName
 				lastName = user.LastName
 				email = user.Email
+			} else {
+				user = &entity.UserAccount{}
 			}
 
 			mainList = append(mainList, &ExportTransactionEntity{
 				TransactionId:         one.TransactionId,
+				UserId:                fmt.Sprintf("%v", user.Id),
+				ExternalUserId:        fmt.Sprintf("%v", user.ExternalUserId),
 				FirstName:             firstName,
 				LastName:              lastName,
 				Email:                 email,
@@ -141,6 +146,8 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 
 type ExportTransactionEntity struct {
 	TransactionId         string      `json:"TransactionId"      `
+	UserId                string      `json:"UserId"             `
+	ExternalUserId        string      `json:"ExternalUserId"     `
 	FirstName             string      `json:"FirstName"          `
 	LastName              string      `json:"LastName"           `
 	Email                 string      `json:"Email"              `
