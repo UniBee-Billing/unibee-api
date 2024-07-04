@@ -24,7 +24,7 @@ func StandAloneInit(ctx context.Context) {
 				// todo mark check or upgrade
 				_, err = db.Exec(ctx, one.UpgradeSql)
 				if err != nil {
-					glog.Errorf(ctx, "StandAloneInit DBUpgrade error:%v", err.Error())
+					glog.Errorf(ctx, "StandAloneInit DBUpgrade for upgradeId:%v error:%v", one.Id, err.Error())
 				}
 			}
 		}
