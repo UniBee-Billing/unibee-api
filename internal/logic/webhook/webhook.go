@@ -65,7 +65,7 @@ func MerchantWebhookEndpointLogList(ctx context.Context, req *EndpointLogListInt
 	}
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	utility.Assert(req.EndpointId > 0, "endpointId not found")
-	var sortKey = "create_time desc"
+	var sortKey = "id desc"
 	var total = 0
 	_ = dao.MerchantWebhookLog.Ctx(ctx).
 		Where(dao.MerchantWebhookLog.Columns().MerchantId, req.MerchantId).
