@@ -23,6 +23,7 @@ import (
 	"unibee/internal/cronjob"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic"
+	"unibee/internal/logic/dbupgrade"
 	"unibee/internal/logic/gateway/webhook"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -326,6 +327,7 @@ var (
 
 			{
 				//db check
+				dbupgrade.StandAloneInit(ctx)
 				_, err = query.GetMerchantList(ctx)
 				liberr.ErrIsNil(ctx, err, "DB Not Ready")
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))

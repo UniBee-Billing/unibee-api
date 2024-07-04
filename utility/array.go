@@ -46,3 +46,15 @@ func IntListToString(arr []int64) string {
 	}
 	return strings.Join(strArr, ",")
 }
+
+func IsStringInArray(arr []string, target string) bool {
+	if arr == nil || len(arr) == 0 || len(target) == 0 {
+		return false
+	}
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
+}
