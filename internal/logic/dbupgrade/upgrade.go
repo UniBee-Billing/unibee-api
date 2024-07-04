@@ -11,6 +11,7 @@ import (
 	"unibee/internal/cmd/config"
 	_ "unibee/internal/dao/oversea_pay"
 	"unibee/utility"
+	"unibee/utility/liberr"
 )
 
 func StandAloneInit(ctx context.Context) {
@@ -20,10 +21,7 @@ func StandAloneInit(ctx context.Context) {
 		database := g.DB("default")
 		db, err := gdb.Instance()
 		tables, err := database.Tables(ctx, database.GetSchema())
-		if err != nil {
-			glog.Errorf(ctx, "StandAloneInit DBUpgrade Get Tables error:%v", err.Error())
-			return
-		}
+		liberr.ErrIsNil(ctx, err, "DB Not Ready For Upgrade")
 		utility.AssertError(err, "StandAloneInit DBUpgrade Get Database Instance failure,%v")
 		for _, one := range list {
 			if db != nil && len(one.UpgradeSql) > 0 {
