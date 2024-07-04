@@ -11,6 +11,7 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 )
 
 type TaskSubscriptionExport struct {
@@ -55,6 +56,18 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 		}
 		if value, ok := payload["status"].([]interface{}); ok {
 			req.Status = export.JsonArrayTypeConvert(ctx, value)
+		}
+		if value, ok := payload["planIds"].([]interface{}); ok {
+			req.PlanIds = export.JsonArrayTypeConvert(ctx, value)
+		}
+		if value, ok := payload["currency"].(string); ok {
+			req.Currency = value
+		}
+		if value, ok := payload["amountStart"].(float64); ok {
+			req.AmountStart = unibee.Int64(int64(value))
+		}
+		if value, ok := payload["amountEnd"].(float64); ok {
+			req.AmountEnd = unibee.Int64(int64(value))
 		}
 		if value, ok := payload["createTimeStart"].(float64); ok {
 			req.CreateTimeStart = int64(value)

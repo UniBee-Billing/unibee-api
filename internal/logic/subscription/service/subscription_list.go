@@ -17,6 +17,10 @@ type SubscriptionListInternalReq struct {
 	MerchantId      uint64 `json:"merchantId" dc:"MerchantId"`
 	UserId          int64  `json:"userId"  dc:"UserId" `
 	Status          []int  `json:"status" dc:"Default All，,Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire" `
+	Currency        string `json:"currency" dc:"The currency of subscription" `
+	PlanIds         []int  `json:"planIds" dc:"The filter ids of plan" `
+	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of subscription" `
+	AmountEnd       *int64 `json:"amountEnd" dc:"The filter end amount of subscription" `
 	SortField       string `json:"sortField" dc:"Sort Field，gmt_create|gmt_modify，Default gmt_modify" `
 	SortType        string `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int    `json:"page" dc:"Page, Start With 0" `
@@ -81,11 +85,26 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if req.Status != nil && len(req.Status) > 0 {
 		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().Status, req.Status)
 	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		baseQuery = baseQuery.WhereIn(dao.Subscription.Columns().PlanId, req.PlanIds)
+	}
 	if req.CreateTimeStart > 0 {
-		baseQuery = baseQuery.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
-		baseQuery = baseQuery.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
+		baseQuery = baseQuery.WhereLTE(dao.Subscription.Columns().CreateTime, req.CreateTimeEnd)
+	}
+	if req.AmountStart != nil && req.AmountEnd != nil {
+		utility.Assert(*req.AmountStart <= *req.AmountEnd, "amountStart should lower then amountEnd")
+	}
+	if req.AmountStart != nil {
+		baseQuery = baseQuery.WhereGTE(dao.Subscription.Columns().Amount, &req.AmountStart)
+	}
+	if req.AmountEnd != nil {
+		baseQuery = baseQuery.WhereLTE(dao.Subscription.Columns().Amount, &req.AmountEnd)
+	}
+	if len(req.Currency) > 0 {
+		baseQuery = baseQuery.Where(dao.Subscription.Columns().Currency, strings.ToUpper(req.Currency))
 	}
 	err := baseQuery.Limit(req.Page*req.Count, req.Count).
 		Order(sortKey).
