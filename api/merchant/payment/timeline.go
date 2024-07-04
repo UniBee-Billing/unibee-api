@@ -13,6 +13,7 @@ type TimeLineListReq struct {
 	Status          []int    `json:"status" dc:"The filter status, 0-pending, 1-success, 2-failure" `
 	TimelineTypes   []int    `json:"timelineTypes"   dc:"The filter timelineType, 0-pay, 1-refund"`
 	GatewayIds      []uint64 `json:"gatewayIds"      dc:"The filter ids of gateway"`
+	Currency        string   `json:"currency" dc:"Currency" `
 	SortField       string   `json:"sortField" dc:"Sort，invoice_id|gmt_create|gmt_modify|period_end|total_amount，Default gmt_modify" `
 	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc，Default desc" `
 	Page            int      `json:"page"  dc:"Page,Start 0" `

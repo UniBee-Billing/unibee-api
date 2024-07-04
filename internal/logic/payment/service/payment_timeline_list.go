@@ -17,6 +17,7 @@ type PaymentTimelineListInternalReq struct {
 	Status          []int    `json:"status" dc:"The filter status, 0-pending, 1-success, 2-failure" `
 	TimelineTypes   []int    `json:"timelineTypes"   dc:"The filter timelineType, 0-pay, 1-refund"`
 	GatewayIds      []uint64 `json:"gatewayIds"      dc:"The filter ids of gateway "`
+	Currency        string   `json:"currency" dc:"Currency" `
 	SortField       string   `json:"sortField" dc:"Sort Field，merchant_id|gmt_create|gmt_modify|user_id" `
 	SortType        string   `json:"sortType" dc:"Sort Type，asc|desc" `
 	Page            int      `json:"page"  dc:"Page, Start With 0" `
@@ -77,6 +78,9 @@ func PaymentTimeLineList(ctx context.Context, req *PaymentTimelineListInternalRe
 	}
 	if len(req.GatewayIds) > 0 {
 		q = q.WhereIn(dao.PaymentTimeline.Columns().GatewayId, req.GatewayIds)
+	}
+	if len(req.Currency) > 0 {
+		q = q.Where(dao.PaymentTimeline.Columns().Currency, strings.ToUpper(req.Currency))
 	}
 	err = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
