@@ -72,6 +72,20 @@ func StandAloneInit(ctx context.Context) {
 							}
 						}
 					}
+				} else if one.Action == "index_add" {
+					if utility.IsStringInArray(tables, one.TableName) {
+						fields, err := database.TableFields(ctx, one.TableName, database.GetSchema())
+						if err != nil {
+							glog.Errorf(ctx, "StandAloneInit DBUpgrade Get Table: %s Fields error:%v", one.TableName, err.Error())
+							continue
+						}
+						if _, ok := fields[one.ColumnName]; ok {
+							_, err = db.Exec(ctx, one.UpgradeSql)
+							if err != nil {
+								glog.Errorf(ctx, "StandAloneInit DBUpgrade Add Table Key %s for upgradeId:%v error:%v", one.ColumnName, one.Id, err.Error())
+							}
+						}
+					}
 				}
 			}
 		}
