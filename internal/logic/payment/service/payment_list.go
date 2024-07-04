@@ -41,7 +41,7 @@ func PaymentList(ctx context.Context, req *PaymentListInternalReq) (PaymentDetai
 	}
 
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
-	var sortKey = "create_time desc"
+	var sortKey = "id desc"
 	if len(req.SortField) > 0 {
 		utility.Assert(strings.Contains("user_id|create_time|status", req.SortField), "sortField should one of user_id|create_time|status")
 		if len(req.SortType) > 0 {

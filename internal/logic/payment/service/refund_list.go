@@ -26,7 +26,7 @@ func RefundList(ctx context.Context, req *RefundListInternalReq) (RefundDetails 
 	var mainList []*detail.RefundDetail
 	utility.Assert(req.MerchantId > 0, "merchantId not found")
 	utility.Assert(len(req.PaymentId) > 0, "PaymentId not found")
-	var sortKey = "create_time desc"
+	var sortKey = "id desc"
 	query := dao.Refund.Ctx(ctx).
 		Where(dao.Refund.Columns().MerchantId, req.MerchantId)
 	if req.GatewayId > 0 {
