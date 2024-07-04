@@ -64,8 +64,14 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		if value, ok := payload["lastName"].(string); ok {
 			req.LastName = value
 		}
+		if value, ok := payload["subscriptionId"].(string); ok {
+			req.SubscriptionId = value
+		}
 		if value, ok := payload["status"].([]interface{}); ok {
 			req.Status = export.JsonArrayTypeConvert(ctx, value)
+		}
+		if value, ok := payload["subStatus"].([]interface{}); ok {
+			req.SubStatus = export.JsonArrayTypeConvert(ctx, value)
 		}
 		//if value, ok := payload["deleteInclude"].(bool); ok {
 		//	req.DeleteInclude = value

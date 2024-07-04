@@ -17,3 +17,15 @@ func JsonArrayTypeConvert(ctx context.Context, source []interface{}) []int {
 	}
 	return intSlice
 }
+
+func JsonArrayTypeConvertUint64(ctx context.Context, source []interface{}) []uint64 {
+	intSlice := make([]uint64, len(source))
+	for i, v := range source {
+		if val, ok := v.(float64); ok {
+			intSlice[i] = uint64(val)
+		} else {
+			utility.Assert(false, fmt.Sprintf("ArrayTypeConvertError from:%v to []int", source))
+		}
+	}
+	return intSlice
+}
