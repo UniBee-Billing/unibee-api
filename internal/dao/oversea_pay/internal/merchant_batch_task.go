@@ -25,6 +25,8 @@ type MerchantBatchTaskColumns struct {
 	MemberId       string // member_id
 	ModuleName     string // module_name
 	TaskName       string // task_name
+	SuccessCount   string // success_count
+	LastUpdateTime string // last update utc time
 	SourceFrom     string // source_from
 	Payload        string // payload(json)
 	DownloadUrl    string // download_file_url
@@ -35,11 +37,9 @@ type MerchantBatchTaskColumns struct {
 	FailReason     string // reason of failure
 	GmtCreate      string // gmt_create
 	TaskType       string // type，0-download，1-upload
-	SuccessCount   string // success_count
 	UploadFileUrl  string // the file url of upload type task
 	GmtModify      string // update time
 	CreateTime     string // create utc time
-	LastUpdateTime string // last update utc time
 }
 
 // merchantBatchTaskColumns holds the columns for table merchant_batch_task.
@@ -49,6 +49,8 @@ var merchantBatchTaskColumns = MerchantBatchTaskColumns{
 	MemberId:       "member_id",
 	ModuleName:     "module_name",
 	TaskName:       "task_name",
+	SuccessCount:   "success_count",
+	LastUpdateTime: "last_update_time",
 	SourceFrom:     "source_from",
 	Payload:        "payload",
 	DownloadUrl:    "download_url",
@@ -59,11 +61,9 @@ var merchantBatchTaskColumns = MerchantBatchTaskColumns{
 	FailReason:     "fail_reason",
 	GmtCreate:      "gmt_create",
 	TaskType:       "task_type",
-	SuccessCount:   "success_count",
 	UploadFileUrl:  "upload_file_url",
 	GmtModify:      "gmt_modify",
 	CreateTime:     "create_time",
-	LastUpdateTime: "last_update_time",
 }
 
 // NewMerchantBatchTaskDao creates and returns a new DAO object for table data access.

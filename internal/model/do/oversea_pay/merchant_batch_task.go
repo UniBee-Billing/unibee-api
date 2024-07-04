@@ -17,6 +17,8 @@ type MerchantBatchTask struct {
 	MemberId       interface{} // member_id
 	ModuleName     interface{} // module_name
 	TaskName       interface{} // task_name
+	SuccessCount   interface{} // success_count
+	LastUpdateTime interface{} // last update utc time
 	SourceFrom     interface{} // source_from
 	Payload        interface{} // payload(json)
 	DownloadUrl    interface{} // download_file_url
@@ -27,9 +29,7 @@ type MerchantBatchTask struct {
 	FailReason     interface{} // reason of failure
 	GmtCreate      *gtime.Time // gmt_create
 	TaskType       interface{} // type，0-download，1-upload
-	SuccessCount   interface{} // success_count
 	UploadFileUrl  interface{} // the file url of upload type task
 	GmtModify      *gtime.Time // update time
 	CreateTime     interface{} // create utc time
-	LastUpdateTime interface{} // last update utc time
 }

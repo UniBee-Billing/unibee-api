@@ -13,6 +13,7 @@ import (
 type UserAccount struct {
 	g.Meta             `orm:"table:user_account, do:true"`
 	Id                 interface{} // userId
+	Email              interface{} // email
 	GatewayId          interface{} // gateway_id
 	PaymentMethod      interface{} //
 	CountryCode        interface{} // country_code
@@ -27,7 +28,6 @@ type UserAccount struct {
 	Password           interface{} // password , encrypt
 	UserName           interface{} // user name
 	Mobile             interface{} // mobile
-	Email              interface{} // email
 	Gender             interface{} // gender
 	AvatarUrl          interface{} // avator url
 	ReMark             interface{} // note

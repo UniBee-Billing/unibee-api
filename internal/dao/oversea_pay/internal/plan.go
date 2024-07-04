@@ -51,6 +51,7 @@ type PlanColumns struct {
 	TrialDurationTime         string // duration of trial
 	TrialDemand               string //
 	CancelAtTrialEnd          string // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ExternalPlanId            string // external_user_id
 }
 
 // planColumns holds the columns for table plan.
@@ -86,6 +87,7 @@ var planColumns = PlanColumns{
 	TrialDurationTime:         "trial_duration_time",
 	TrialDemand:               "trial_demand",
 	CancelAtTrialEnd:          "cancel_at_trial_end",
+	ExternalPlanId:            "external_plan_id",
 }
 
 // NewPlanDao creates and returns a new DAO object for table data access.

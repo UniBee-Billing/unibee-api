@@ -11,6 +11,7 @@ import (
 func (c *ControllerPlan) New(ctx context.Context, req *plan.NewReq) (res *plan.NewRes, err error) {
 
 	one, err := service.PlanCreate(ctx, &service.PlanInternalReq{
+		ExternalPlanId:     req.ExternalPlanId,
 		Type:               req.Type,
 		PlanName:           req.PlanName,
 		Amount:             req.Amount,

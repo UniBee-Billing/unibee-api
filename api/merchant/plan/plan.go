@@ -8,6 +8,7 @@ import (
 
 type NewReq struct {
 	g.Meta             `path:"/new" tags:"Plan" method:"post" summary:"CreatePlan"`
+	ExternalPlanId     string                                  `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName           string                                  `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             int64                                   `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           string                                  `json:"currency"   dc:"Plan Currency" v:"required" `
@@ -36,6 +37,7 @@ type NewRes struct {
 type EditReq struct {
 	g.Meta             `path:"/edit" tags:"Plan" method:"post" summary:"EditPlan" dc:"Edit exist plan, amount|currency|intervalUnit|intervalCount is not editable when plan is active "`
 	PlanId             uint64                                  `json:"planId" dc:"Id of plan" v:"required"`
+	ExternalPlanId     *string                                 `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName           *string                                 `json:"planName" dc:"Name of plan" `
 	Amount             *int64                                  `json:"amount"   dc:"CaptureAmount of plan, not editable when plan is active" `
 	Currency           *string                                 `json:"currency"   dc:"Currency of plan, not editable when plan is active"`

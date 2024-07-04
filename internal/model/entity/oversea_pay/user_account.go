@@ -11,6 +11,7 @@ import (
 // UserAccount is the golang structure for table user_account.
 type UserAccount struct {
 	Id                 uint64      `json:"id"                 description:"userId"`                                                                                                    // userId
+	Email              string      `json:"email"              description:"email"`                                                                                                     // email
 	GatewayId          string      `json:"gatewayId"          description:"gateway_id"`                                                                                                // gateway_id
 	PaymentMethod      string      `json:"paymentMethod"      description:""`                                                                                                          //
 	CountryCode        string      `json:"countryCode"        description:"country_code"`                                                                                              // country_code
@@ -25,7 +26,6 @@ type UserAccount struct {
 	Password           string      `json:"password"           description:"password , encrypt"`                                                                                        // password , encrypt
 	UserName           string      `json:"userName"           description:"user name"`                                                                                                 // user name
 	Mobile             string      `json:"mobile"             description:"mobile"`                                                                                                    // mobile
-	Email              string      `json:"email"              description:"email"`                                                                                                     // email
 	Gender             string      `json:"gender"             description:"gender"`                                                                                                    // gender
 	AvatarUrl          string      `json:"avatarUrl"          description:"avator url"`                                                                                                // avator url
 	ReMark             string      `json:"reMark"             description:"note"`                                                                                                      // note

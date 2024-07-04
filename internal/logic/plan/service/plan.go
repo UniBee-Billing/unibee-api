@@ -71,6 +71,7 @@ func PlanUnPublish(ctx context.Context, planId uint64) (err error) {
 }
 
 type PlanInternalReq struct {
+	ExternalPlanId     string                                  `json:"externalPlanId" dc:"ExternalPlanId"`
 	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" `
 	PlanName           string                                  `json:"planName" dc:"Plan Name"    `
@@ -102,6 +103,11 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.Amount > 0, "amount value should > 0")
 	utility.Assert(len(req.PlanName) > 0, "plan name should not blank")
 	utility.Assert(currency.IsFiatCurrencySupport(req.Currency), "currency not support")
+
+	if len(req.ExternalPlanId) > 0 {
+		utility.Assert(query.GetPlanByExternalPlanId(ctx, req.MerchantId, req.ExternalPlanId) == nil, "Same ExternalPlanId Exist")
+	}
+
 	if len(req.GasPayer) > 0 {
 		utility.Assert(strings.Contains("merchant|user", req.GasPayer), "gasPayer should one of merchant|user")
 	}
@@ -178,6 +184,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 	utility.Assert(req.TrialDemand == "" || req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	one = &entity.Plan{
+		ExternalPlanId:            req.ExternalPlanId,
 		CompanyId:                 merchantInfo.CompanyId,
 		MerchantId:                req.MerchantId,
 		PlanName:                  req.PlanName,
@@ -232,6 +239,7 @@ func PlanCreate(ctx context.Context, req *PlanInternalReq) (one *entity.Plan, er
 type EditInternalReq struct {
 	MerchantId         uint64                                  `json:"merchantId" dc:"MerchantId" `
 	PlanId             uint64                                  `json:"planId" dc:"PlanId" v:"required"`
+	ExternalPlanId     *string                                 `json:"externalPlanId" dc:"ExternalPlanId"`
 	PlanName           *string                                 `json:"planName" dc:"Plan Name"   v:"required" `
 	Amount             *int64                                  `json:"amount"   dc:"Plan CaptureAmount"   v:"required" `
 	Currency           *string                                 `json:"currency"   dc:"Plan Currency" v:"required" `
@@ -259,6 +267,10 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	one = query.GetPlanById(ctx, req.PlanId)
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
+
+	if req.ExternalPlanId != nil && len(*req.ExternalPlanId) > 0 {
+		utility.Assert(query.GetPlanByExternalPlanId(ctx, req.MerchantId, *req.ExternalPlanId) == nil, "Same ExternalPlanId Exist")
+	}
 
 	//utility.Assert(one.Status == consts.PlanStatusEditable, fmt.Sprintf("plan is not in edit status, id:%d", req.PlanId))
 	if one.Status == consts.PlanStatusActive {
@@ -368,6 +380,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	utility.Assert(req.TrialDemand == nil || *req.TrialDemand == "" || *req.TrialDemand == "paymentMethod", "Demand of trial should be paymentMethod or not")
 
 	_, err = dao.Plan.Ctx(ctx).Data(g.Map{
+		dao.Plan.Columns().ExternalPlanId:            req.ExternalPlanId,
 		dao.Plan.Columns().PlanName:                  req.PlanName,
 		dao.Plan.Columns().Amount:                    req.Amount,
 		dao.Plan.Columns().Currency:                  editCurrency,

@@ -21,6 +21,7 @@ type UserAccountDao struct {
 // UserAccountColumns defines and stores column names for table user_account.
 type UserAccountColumns struct {
 	Id                 string // userId
+	Email              string // email
 	GatewayId          string // gateway_id
 	PaymentMethod      string //
 	CountryCode        string // country_code
@@ -35,7 +36,6 @@ type UserAccountColumns struct {
 	Password           string // password , encrypt
 	UserName           string // user name
 	Mobile             string // mobile
-	Email              string // email
 	Gender             string // gender
 	AvatarUrl          string // avator url
 	ReMark             string // note
@@ -75,6 +75,7 @@ type UserAccountColumns struct {
 // userAccountColumns holds the columns for table user_account.
 var userAccountColumns = UserAccountColumns{
 	Id:                 "id",
+	Email:              "email",
 	GatewayId:          "gateway_id",
 	PaymentMethod:      "payment_method",
 	CountryCode:        "country_code",
@@ -89,7 +90,6 @@ var userAccountColumns = UserAccountColumns{
 	Password:           "password",
 	UserName:           "user_name",
 	Mobile:             "mobile",
-	Email:              "email",
 	Gender:             "gender",
 	AvatarUrl:          "avatar_url",
 	ReMark:             "re_mark",

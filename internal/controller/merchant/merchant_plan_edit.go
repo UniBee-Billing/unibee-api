@@ -13,6 +13,7 @@ func (c *ControllerPlan) Edit(ctx context.Context, req *plan.EditReq) (res *plan
 	one, err := service.PlanEdit(ctx, &service.EditInternalReq{
 		MerchantId:         _interface.GetMerchantId(ctx),
 		PlanId:             req.PlanId,
+		ExternalPlanId:     req.ExternalPlanId,
 		PlanName:           req.PlanName,
 		Amount:             req.Amount,
 		Currency:           req.Currency,

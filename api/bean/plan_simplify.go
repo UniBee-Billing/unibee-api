@@ -33,6 +33,7 @@ type PlanSimplify struct {
 	TrialDurationTime      int64                  `json:"trialDurationTime"         description:"duration of trial"`              // duration of trial
 	TrialDemand            string                 `json:"trialDemand"               description:""`
 	CancelAtTrialEnd       int                    `json:"cancelAtTrialEnd"          description:"whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription"` // whether cancel at subscripiton first trial end，0-false | 1-true, will pass to cancelAtPeriodEnd of subscription
+	ExternalPlanId         string                 `json:"externalPlanId"            description:"external_user_id"`                                                                                                // external_user_id
 }
 
 func SimplifyPlan(one *entity.Plan) *PlanSimplify {
@@ -73,6 +74,7 @@ func SimplifyPlan(one *entity.Plan) *PlanSimplify {
 		TrialDurationTime:      one.TrialDurationTime,
 		TrialAmount:            one.TrialAmount,
 		CancelAtTrialEnd:       one.CancelAtTrialEnd,
+		ExternalPlanId:         one.ExternalPlanId,
 	}
 }
 

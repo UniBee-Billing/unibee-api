@@ -15,6 +15,8 @@ type MerchantBatchTask struct {
 	MemberId       uint64      `json:"memberId"       description:"member_id"`                                         // member_id
 	ModuleName     string      `json:"moduleName"     description:"module_name"`                                       // module_name
 	TaskName       string      `json:"taskName"       description:"task_name"`                                         // task_name
+	SuccessCount   int64       `json:"successCount"   description:"success_count"`                                     // success_count
+	LastUpdateTime int64       `json:"lastUpdateTime" description:"last update utc time"`                              // last update utc time
 	SourceFrom     string      `json:"sourceFrom"     description:"source_from"`                                       // source_from
 	Payload        string      `json:"payload"        description:"payload(json)"`                                     // payload(json)
 	DownloadUrl    string      `json:"downloadUrl"    description:"download_file_url"`                                 // download_file_url
@@ -25,9 +27,7 @@ type MerchantBatchTask struct {
 	FailReason     string      `json:"failReason"     description:"reason of failure"`                                 // reason of failure
 	GmtCreate      *gtime.Time `json:"gmtCreate"      description:"gmt_create"`                                        // gmt_create
 	TaskType       int         `json:"taskType"       description:"type，0-download，1-upload"`                          // type，0-download，1-upload
-	SuccessCount   int64       `json:"successCount"   description:"success_count"`                                     // success_count
 	UploadFileUrl  string      `json:"uploadFileUrl"  description:"the file url of upload type task"`                  // the file url of upload type task
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                                       // update time
 	CreateTime     int64       `json:"createTime"     description:"create utc time"`                                   // create utc time
-	LastUpdateTime int64       `json:"lastUpdateTime" description:"last update utc time"`                              // last update utc time
 }
