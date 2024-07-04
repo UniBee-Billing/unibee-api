@@ -327,6 +327,7 @@ var (
 
 			{
 				//db check
+				dbupgrade.StandAloneInit(ctx)
 				_, err = query.GetMerchantList(ctx)
 				liberr.ErrIsNil(ctx, err, "DB Not Ready")
 				g.Log().Infof(ctx, "TimeZone:%s", utility.MarshalToJsonString(time.Local))
@@ -357,7 +358,6 @@ var (
 			{
 				//logic init
 				logic.StandaloneInit(ctx)
-				dbupgrade.StandAloneInit(ctx)
 				//SetupAllWebhooks
 				webhook.SetupAllWebhooksBackground()
 			}
