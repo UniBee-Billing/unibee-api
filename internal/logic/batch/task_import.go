@@ -14,6 +14,7 @@ import (
 	"unibee/internal/consumer/webhook/log"
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	"unibee/internal/logic/batch/_import/subscription"
 	user2 "unibee/internal/logic/batch/_import/user"
 	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -21,7 +22,8 @@ import (
 )
 
 var importTaskMap = map[string]_interface.BatchImportTask{
-	"UserImport": user2.TaskUserImport{},
+	"UserImport":               user2.TaskUserImport{},
+	"ActiveSubscriptionImport": subscription.TaskActiveSubscriptionImport{},
 }
 
 func GetImportTaskImpl(task string) _interface.BatchImportTask {
