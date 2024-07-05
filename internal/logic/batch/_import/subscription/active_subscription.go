@@ -69,6 +69,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
 		Features:               fmt.Sprintf("%s", row["Features(Json)"]),
 	}
+	// todo mark ExternalSubscriptionId verify
 	// data prepare
 	if len(target.ExternalUserId) == 0 {
 		return target, gerror.New("Error, ExternalUserId is blank")
