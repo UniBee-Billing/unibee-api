@@ -58,6 +58,8 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		r.Response.Writeln("Bad request")
 		return
 	}
+	cell, _ := excelize.CoordinatesToCellName(1, 2)
+	_ = writer.SetRow(cell, batch.RefactorData(taskImpl.TemplateHeader(), ""))
 
 	err = writer.Flush()
 	if err != nil {

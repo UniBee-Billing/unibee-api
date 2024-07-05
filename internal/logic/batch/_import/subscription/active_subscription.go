@@ -16,7 +16,24 @@ func (t TaskActiveSubscriptionImport) TaskName() string {
 }
 
 func (t TaskActiveSubscriptionImport) TemplateHeader() interface{} {
-	return ImportActiveSubscriptionEntity{}
+	return &ImportActiveSubscriptionEntity{
+		ExternalSubscriptionId: "",
+		ExternalUserId:         "",
+		ExternalPlanId:         "",
+		Amount:                 "",
+		Currency:               "",
+		Quantity:               "",
+		Gateway:                "",
+		CurrentPeriodStart:     "",
+		CurrentPeriodEnd:       "",
+		BillingCycleAnchor:     "",
+		FirstPaidTime:          "",
+		CreateTime:             "",
+		StripeUserId:           "",
+		StripePaymentMethod:    "",
+		PaypalVaultId:          "",
+		Features:               "",
+	}
 }
 
 func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entity.MerchantBatchTask, row map[string]string) (interface{}, error) {

@@ -20,7 +20,14 @@ func (t TaskUserImport) TaskName() string {
 }
 
 func (t TaskUserImport) TemplateHeader() interface{} {
-	return ImportUserEntity{}
+	return &ImportUserEntity{
+		Email:          "example@unibee.top",
+		ExternalUserId: "example_id",
+		FirstName:      "unibee",
+		LastName:       "unibee",
+		Address:        "",
+		Phone:          "",
+	}
 }
 
 func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatchTask, row map[string]string) (interface{}, error) {
