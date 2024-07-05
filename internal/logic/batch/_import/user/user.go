@@ -62,7 +62,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 			}
 		}
 		if one.Custom != tag {
-			return target, gerror.New("Error, No Permission to override")
+			return target, gerror.New("Error, no permission to override")
 		}
 		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().ExternalUserId: target.ExternalUserId,
