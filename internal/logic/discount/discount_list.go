@@ -23,6 +23,7 @@ type ListInternalReq struct {
 	Count           int    `json:"count"  dc:"Count Of Per Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	SkipTotal       bool
 }
 
 func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bean.MerchantDiscountCodeSimplify, int) {
@@ -68,13 +69,18 @@ func MerchantDiscountCodeList(ctx context.Context, req *ListInternalReq) ([]*bea
 	if req.CreateTimeEnd > 0 {
 		q = q.WhereLTE(dao.MerchantDiscountCode.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	err := q.
+	var err error
+	q = q.
 		Where(dao.MerchantDiscountCode.Columns().MerchantId, req.MerchantId).
 		Where(dao.MerchantDiscountCode.Columns().Type, 0).
 		Where(dao.MerchantDiscountCode.Columns().IsDeleted, 0).
 		Order(sortKey).
-		Limit(req.Page*req.Count, req.Count).
-		ScanAndCount(&list, &total, true)
+		Limit(req.Page*req.Count, req.Count)
+	if req.SkipTotal {
+		err = q.Scan(&list)
+	} else {
+		err = q.ScanAndCount(&list, &total, true)
+	}
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantDiscountCodeList err:%s", err.Error())
 		return mainList, total

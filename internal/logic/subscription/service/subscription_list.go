@@ -27,6 +27,7 @@ type SubscriptionListInternalReq struct {
 	Count           int    `json:"count" dc:"Count Of Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	SkipTotal       bool
 }
 
 func SubscriptionDetail(ctx context.Context, subscriptionId string) (*detail.SubscriptionDetail, error) {
@@ -106,9 +107,15 @@ func SubscriptionList(ctx context.Context, req *SubscriptionListInternalReq) (li
 	if len(req.Currency) > 0 {
 		baseQuery = baseQuery.Where(dao.Subscription.Columns().Currency, strings.ToUpper(req.Currency))
 	}
-	err := baseQuery.Limit(req.Page*req.Count, req.Count).
+	var err error
+	baseQuery = baseQuery.Limit(req.Page*req.Count, req.Count).
 		Order(sortKey).
-		OmitEmpty().ScanAndCount(&mainList, &total, true)
+		OmitEmpty()
+	if req.SkipTotal {
+		err = baseQuery.Scan(&mainList)
+	} else {
+		err = baseQuery.ScanAndCount(&mainList, &total, true)
+	}
 	if err != nil {
 		return nil, 0
 	}

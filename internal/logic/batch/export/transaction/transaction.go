@@ -81,6 +81,7 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 			req.GatewayIds = export.JsonArrayTypeConvertUint64(ctx, value)
 		}
 	}
+	req.SkipTotal = true
 	result, _ := service.PaymentTimeLineList(ctx, req)
 	if result != nil && result.PaymentTimelines != nil {
 		for _, one := range result.PaymentTimelines {

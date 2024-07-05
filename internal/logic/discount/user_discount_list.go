@@ -20,6 +20,7 @@ type UserDiscountListInternalReq struct {
 	Count           int    `json:"count"  dc:"Count Of Per Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	SkipTotal       bool
 }
 
 func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInternalReq) ([]*detail.MerchantUserDiscountCodeDetail, int) {
@@ -56,14 +57,20 @@ func MerchantUserDiscountCodeList(ctx context.Context, req *UserDiscountListInte
 	if req.CreateTimeEnd > 0 {
 		q = q.WhereLTE(dao.MerchantUserDiscountCode.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	err := q.
+	var err error
+	q = q.
 		Where(dao.MerchantUserDiscountCode.Columns().MerchantId, req.MerchantId).
 		Where(dao.MerchantUserDiscountCode.Columns().IsDeleted, 0).
 		Where(dao.MerchantUserDiscountCode.Columns().Status, 1).
 		Where(dao.MerchantUserDiscountCode.Columns().Code, one.Code).
 		Order(sortKey).
-		Limit(req.Page*req.Count, req.Count).
-		ScanAndCount(&list, &total, true)
+		Limit(req.Page*req.Count, req.Count)
+	if req.SkipTotal {
+		err = q.Scan(&list)
+	} else {
+		err = q.ScanAndCount(&list, &total, true)
+	}
+
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantUserDiscountCodeList err:%s", err.Error())
 		return mainList, total

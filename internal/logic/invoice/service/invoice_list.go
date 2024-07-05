@@ -28,6 +28,7 @@ type InvoiceListInternalReq struct {
 	Count           int    `json:"count"  dc:"Count Of Page"`
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	SkipTotal       bool
 }
 
 type InvoiceListInternalRes struct {
@@ -116,10 +117,15 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	if req.CreateTimeEnd > 0 {
 		query = query.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	err = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
+	query = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 		Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().ScanAndCount(&mainList, &total, true)
+		OmitEmpty()
+	if req.SkipTotal {
+		err = query.Scan(&mainList)
+	} else {
+		err = query.ScanAndCount(&mainList, &total, true)
+	}
 	if err != nil {
 		return nil, err
 	}

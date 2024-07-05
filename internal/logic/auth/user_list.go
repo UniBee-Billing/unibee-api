@@ -31,6 +31,7 @@ type UserListInternalReq struct {
 	Count           int    `json:"count" dc:"Count Of Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	SkipTotal       bool
 }
 
 type UserListInternalRes struct {
@@ -98,9 +99,14 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	if req.CreateTimeEnd > 0 {
 		q = q.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
 	}
-	err = q.Order(sortKey).
+	q = q.Order(sortKey).
 		Limit(req.Page*req.Count, req.Count).
-		OmitEmpty().ScanAndCount(&mainList, &total, true)
+		OmitEmpty()
+	if req.SkipTotal {
+		err = q.Scan(&mainList)
+	} else {
+		err = q.ScanAndCount(&mainList, &total, true)
+	}
 	if err != nil {
 		return nil, err
 	}

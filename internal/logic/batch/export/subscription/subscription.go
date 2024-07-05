@@ -77,6 +77,7 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 			req.CreateTimeEnd = int64(value)
 		}
 	}
+	req.SkipTotal = true
 	result, _ := service.SubscriptionList(ctx, req)
 	if result != nil {
 		for _, one := range result {

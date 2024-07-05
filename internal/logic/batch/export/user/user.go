@@ -89,6 +89,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 			req.CreateTimeEnd = int64(value)
 		}
 	}
+	req.SkipTotal = true
 	result, _ := auth.UserList(ctx, req)
 	if result != nil && result.UserAccounts != nil {
 		for _, one := range result.UserAccounts {
@@ -97,12 +98,11 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 				userGateway = one.Gateway.GatewayName
 			}
 			mainList = append(mainList, &ExportUserEntity{
-				Id:           fmt.Sprintf("%v", one.Id),
-				FirstName:    one.FirstName,
-				LastName:     one.LastName,
-				Email:        one.Email,
-				MerchantName: merchant.Name,
-				//AvatarUrl:          one.AvatarUrl,
+				Id:                 fmt.Sprintf("%v", one.Id),
+				FirstName:          one.FirstName,
+				LastName:           one.LastName,
+				Email:              one.Email,
+				MerchantName:       merchant.Name,
 				Phone:              one.Phone,
 				Address:            one.Address,
 				VATNumber:          one.VATNumber,

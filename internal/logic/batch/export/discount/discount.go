@@ -71,6 +71,7 @@ func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, t
 			req.CreateTimeEnd = int64(value)
 		}
 	}
+	req.SkipTotal = true
 	result, _ := discount.MerchantDiscountCodeList(ctx, req)
 	if result != nil {
 		for _, one := range result {

@@ -87,6 +87,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			req.CreateTimeEnd = int64(value)
 		}
 	}
+	req.SkipTotal = true
 	result, _ := service.InvoiceList(ctx, req)
 	if result != nil && result.Invoices != nil {
 		for _, one := range result.Invoices {
