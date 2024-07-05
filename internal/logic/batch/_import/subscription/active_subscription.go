@@ -69,6 +69,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
 		Features:               fmt.Sprintf("%s", row["Features(Json)"]),
 	}
+	// data prepare
 	if len(target.ExternalUserId) == 0 {
 		return target, gerror.New("Error, ExternalUserId is blank")
 	}
@@ -127,68 +128,23 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		return target, gerror.New("Error, CurrentPeriodStart is blank")
 	}
 	currentPeriodStart := gtime.New(target.CurrentPeriodStart)
-	if currentPeriodStart.Timestamp() > gtime.Now().Timestamp() {
-		return target, gerror.New("Error, CurrentPeriodStart should earlier then now")
-	}
 	if len(target.CurrentPeriodEnd) == 0 {
 		return target, gerror.New("Error, CurrentPeriodEnd is blank")
 	}
 	currentPeriodEnd := gtime.New(target.CurrentPeriodEnd)
-	if currentPeriodEnd.Timestamp() <= gtime.Now().Timestamp() {
-		return target, gerror.New("Error, CurrentPeriodEnd should later then now")
-	}
+
 	if len(target.BillingCycleAnchor) == 0 {
 		return target, gerror.New("Error, BillingCycleAnchor is blank")
 	}
 	billingCycleAnchor := gtime.New(target.BillingCycleAnchor)
-	if billingCycleAnchor.Timestamp() > gtime.Now().Timestamp() {
-		return target, gerror.New("Error,BillingCycleAnchor should earlier then now")
-	}
 	if len(target.FirstPaidTime) == 0 {
 		return target, gerror.New("Error, FirstPaidTime is blank")
 	}
 	firstPaidTime := gtime.New(target.FirstPaidTime)
-	if firstPaidTime.Timestamp() > gtime.Now().Timestamp() {
-		return target, gerror.New("Error,FirstPaidTime should earlier then now")
-	}
 	if len(target.CreateTime) == 0 {
 		return target, gerror.New("Error, CreateTime is blank")
 	}
 	createTime := gtime.New(target.CreateTime)
-	if createTime.Timestamp() > gtime.Now().Timestamp() {
-		return target, gerror.New("Error,CreateTime should earlier then now")
-	}
-	stripeUserId := ""
-	if len(target.StripeUserId) > 0 {
-		stripeUserId = target.StripeUserId
-		if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
-			return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
-		}
-		gatewayUser := query.GetGatewayUser(ctx, user.Id, gatewayId)
-		if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
-			return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
-		}
-		if gatewayUser == nil {
-			stripe.Key = gateway.GatewaySecret
-			stripe.SetAppInfo(&stripe.AppInfo{
-				Name:    "UniBee.api",
-				Version: "1.0.0",
-				URL:     "https://merchant.unibee.dev",
-			})
-			params := &stripe.CustomerParams{}
-			response, err := customer.Get(stripeUserId, params)
-			if err != nil {
-				g.Log().Errorf(ctx, "Get StripeUserId error:%v", err.Error())
-			}
-			if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
-				return target, gerror.New("Error, can't get StripeUserId from stripe")
-			}
-			gatewayUser, err = query.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
-			if err != nil {
-				return target, err
-			}
-		}
-	}
 	// check gatewayPaymentMethod
 	gatewayPaymentMethod := ""
 	if len(target.PaypalVaultId) > 0 && len(target.StripePaymentMethod) > 0 {
@@ -217,6 +173,55 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error, can't found user's paymentMethod provided from stripe ")
 		}
 		gatewayPaymentMethod = target.StripePaymentMethod
+	}
+	stripeUserId := ""
+	// data verify
+	{
+		if currentPeriodStart.Timestamp() > gtime.Now().Timestamp() {
+			return target, gerror.New("Error, CurrentPeriodStart should earlier then now")
+		}
+		if currentPeriodEnd.Timestamp() <= gtime.Now().Timestamp() {
+			return target, gerror.New("Error, CurrentPeriodEnd should later then now")
+		}
+		if billingCycleAnchor.Timestamp() > gtime.Now().Timestamp() {
+			return target, gerror.New("Error,BillingCycleAnchor should earlier then now")
+		}
+		if firstPaidTime.Timestamp() > gtime.Now().Timestamp() {
+			return target, gerror.New("Error,FirstPaidTime should earlier then now")
+		}
+		if createTime.Timestamp() > gtime.Now().Timestamp() {
+			return target, gerror.New("Error,CreateTime should earlier then now")
+		}
+		if len(target.StripeUserId) > 0 {
+			stripeUserId = target.StripeUserId
+			if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
+				return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
+			}
+			gatewayUser := query.GetGatewayUser(ctx, user.Id, gatewayId)
+			if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
+				return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
+			}
+			if gatewayUser == nil {
+				stripe.Key = gateway.GatewaySecret
+				stripe.SetAppInfo(&stripe.AppInfo{
+					Name:    "UniBee.api",
+					Version: "1.0.0",
+					URL:     "https://merchant.unibee.dev",
+				})
+				params := &stripe.CustomerParams{}
+				response, err := customer.Get(stripeUserId, params)
+				if err != nil {
+					g.Log().Errorf(ctx, "Get StripeUserId error:%v", err.Error())
+				}
+				if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
+					return target, gerror.New("Error, can't get StripeUserId from stripe")
+				}
+				gatewayUser, err = query.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
+				if err != nil {
+					return target, err
+				}
+			}
+		}
 	}
 
 	if len(gatewayPaymentMethod) > 0 {
