@@ -21,7 +21,7 @@ type NewReq struct {
 	g.Meta            `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
 	Task              string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
 	Payload           map[string]interface{} `json:"payload" dc:"Payload"`
-	SkipColumnIndexes []int                  `json:"skipColumnIndexes" dc:"SkipColumnIndexes, the column will be skipped in the export file if its index specified"`
+	SkipColumnIndexes []int                  `json:"skipColumnIndexes" dc:"SkipColumnIndexes, the column will be skipped in the export file if its index specified, start from 0"`
 }
 
 type NewRes struct {
