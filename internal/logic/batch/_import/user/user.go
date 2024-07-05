@@ -21,12 +21,12 @@ func (t TaskUserImport) TaskName() string {
 
 func (t TaskUserImport) TemplateHeader() interface{} {
 	return &ImportUserEntity{
-		Email:          "example@unibee.top",
+		Email:          "accounts.unibee@unibee.dev",
 		ExternalUserId: "example_id",
 		FirstName:      "unibee",
 		LastName:       "unibee",
-		Address:        "",
-		Phone:          "",
+		Address:        "Harju maakond, Tallinn, Pirita linnaosa, Supluse pst 1-201a, 11911",
+		Phone:          "5586977",
 	}
 }
 
