@@ -127,22 +127,37 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		return target, gerror.New("Error, CurrentPeriodStart is blank")
 	}
 	currentPeriodStart := gtime.New(target.CurrentPeriodStart)
+	if currentPeriodStart.Timestamp() > gtime.Now().Timestamp() {
+		return target, gerror.New("Error, CurrentPeriodStart should earlier then now")
+	}
 	if len(target.CurrentPeriodEnd) == 0 {
 		return target, gerror.New("Error, CurrentPeriodEnd is blank")
 	}
 	currentPeriodEnd := gtime.New(target.CurrentPeriodEnd)
+	if currentPeriodEnd.Timestamp() <= gtime.Now().Timestamp() {
+		return target, gerror.New("Error, CurrentPeriodEnd should later then now")
+	}
 	if len(target.BillingCycleAnchor) == 0 {
 		return target, gerror.New("Error, BillingCycleAnchor is blank")
 	}
 	billingCycleAnchor := gtime.New(target.BillingCycleAnchor)
+	if billingCycleAnchor.Timestamp() > gtime.Now().Timestamp() {
+		return target, gerror.New("Error,BillingCycleAnchor should earlier then now")
+	}
 	if len(target.FirstPaidTime) == 0 {
 		return target, gerror.New("Error, FirstPaidTime is blank")
 	}
 	firstPaidTime := gtime.New(target.FirstPaidTime)
+	if firstPaidTime.Timestamp() > gtime.Now().Timestamp() {
+		return target, gerror.New("Error,FirstPaidTime should earlier then now")
+	}
 	if len(target.CreateTime) == 0 {
 		return target, gerror.New("Error, CreateTime is blank")
 	}
 	createTime := gtime.New(target.CreateTime)
+	if createTime.Timestamp() > gtime.Now().Timestamp() {
+		return target, gerror.New("Error,CreateTime should earlier then now")
+	}
 	stripeUserId := ""
 	if len(target.StripeUserId) > 0 {
 		stripeUserId = target.StripeUserId
