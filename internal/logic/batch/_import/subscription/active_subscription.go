@@ -4,13 +4,17 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
+	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/stripe/stripe-go/v78"
+	"github.com/stripe/stripe-go/v78/customer"
 	"strconv"
 	"strings"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
+	user2 "unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -138,32 +142,82 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		return target, gerror.New("Error, CreateTime is blank")
 	}
 	createTime := gtime.New(target.CreateTime)
-	// todo mark auto charge fields verification
+	stripeUserId := ""
+	if len(target.StripeUserId) > 0 {
+		stripeUserId = target.StripeUserId
+		if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
+			return target, gerror.New("Error, gateway should be stripe while StripeUserId is not blank ")
+		}
+		gatewayUser := query.GetGatewayUser(ctx, user.Id, gatewayId)
+		if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
+			return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
+		}
+		if gatewayUser == nil {
+			stripe.Key = gateway.GatewaySecret
+			stripe.SetAppInfo(&stripe.AppInfo{
+				Name:    "UniBee.api",
+				Version: "1.0.0",
+				URL:     "https://merchant.unibee.dev",
+			})
+			params := &stripe.CustomerParams{}
+			response, err := customer.Get(stripeUserId, params)
+			if err != nil {
+				g.Log().Errorf(ctx, "Get StripeUserId error:%v", err.Error())
+			}
+			if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
+				return target, gerror.New("Error, can't get StripeUserId from stripe")
+			}
+			gatewayUser, err = query.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
+			if err != nil {
+				return target, err
+			}
+		}
+	}
+	// check gatewayPaymentMethod
+	gatewayPaymentMethod := ""
+	// todo mark paymentMethod verify from gateway
+	if len(target.PaypalVaultId) > 0 && len(target.StripePaymentMethod) > 0 {
+		return target, gerror.New("Error, both PaypalVaultId and StripePaymentMethod provided")
+	}
+	if len(target.PaypalVaultId) > 0 && gateway.GatewayType == consts.GatewayTypePaypal {
+		gatewayPaymentMethod = target.PaypalVaultId
+	} else if len(target.StripePaymentMethod) > 0 && gateway.GatewayType == consts.GatewayTypeCard {
+		if len(target.StripeUserId) == 0 {
+			return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
+		}
+		gatewayPaymentMethod = target.StripePaymentMethod
+	}
+
+	if len(gatewayPaymentMethod) > 0 {
+		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
+	}
+
 	// todo mark features update
 
 	one := &entity.Subscription{
-		SubscriptionId:         utility.CreateSubscriptionId(),
-		UserId:                 user.Id,
-		Amount:                 amount,
-		Currency:               currency,
-		MerchantId:             task.MerchantId,
-		PlanId:                 plan.Id,
-		Quantity:               quantity,
-		GatewayId:              gatewayId,
-		Status:                 consts.SubStatusActive,
-		CurrentPeriodStart:     currentPeriodStart.Timestamp(),
-		CurrentPeriodEnd:       currentPeriodEnd.Timestamp(),
-		CurrentPeriodStartTime: currentPeriodStart,
-		CurrentPeriodEndTime:   currentPeriodEnd,
-		BillingCycleAnchor:     billingCycleAnchor.Timestamp(),
-		FirstPaidTime:          firstPaidTime.Timestamp(),
-		CreateTime:             createTime.Timestamp(),
-		CountryCode:            user.CountryCode,
-		VatNumber:              user.VATNumber,
-		TaxPercentage:          user.TaxPercentage,
-		GatewaySubscriptionId:  target.ExternalSubscriptionId,
-		Data:                   "Imported",
-		CurrentPeriodPaid:      1,
+		SubscriptionId:              utility.CreateSubscriptionId(),
+		UserId:                      user.Id,
+		Amount:                      amount,
+		Currency:                    currency,
+		MerchantId:                  task.MerchantId,
+		PlanId:                      plan.Id,
+		Quantity:                    quantity,
+		GatewayId:                   gatewayId,
+		Status:                      consts.SubStatusActive,
+		CurrentPeriodStart:          currentPeriodStart.Timestamp(),
+		CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
+		CurrentPeriodStartTime:      currentPeriodStart,
+		CurrentPeriodEndTime:        currentPeriodEnd,
+		BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
+		FirstPaidTime:               firstPaidTime.Timestamp(),
+		CreateTime:                  createTime.Timestamp(),
+		CountryCode:                 user.CountryCode,
+		VatNumber:                   user.VATNumber,
+		TaxPercentage:               user.TaxPercentage,
+		GatewaySubscriptionId:       target.ExternalSubscriptionId,
+		Data:                        "Imported",
+		CurrentPeriodPaid:           1,
+		GatewayDefaultPaymentMethod: gatewayPaymentMethod,
 	}
 	_, err = dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
 

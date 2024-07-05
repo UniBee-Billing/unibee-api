@@ -65,3 +65,31 @@ func CreateOrUpdateGatewayUser(ctx context.Context, userId uint64, gatewayId uin
 	}
 	return one, nil
 }
+
+func CreateGatewayUser(ctx context.Context, userId uint64, gatewayId uint64, gatewayUserId string) (*entity.GatewayUser, error) {
+	utility.Assert(userId > 0, "invalid userId")
+	utility.Assert(gatewayId > 0, "invalid gatewayId")
+	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")
+	one := GetGatewayUser(ctx, userId, gatewayId)
+	if one == nil {
+		one = &entity.GatewayUser{
+			UserId:        userId,
+			GatewayId:     gatewayId,
+			GatewayUserId: gatewayUserId,
+			CreateTime:    gtime.Now().Timestamp(),
+		}
+		result, err := dao.GatewayUser.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		if err != nil {
+			err = gerror.Newf(`CreateOrUpdateGatewayUser record insert failure %s`, err)
+			return nil, err
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return nil, err
+		}
+		one.Id = uint64(uint(id))
+		return one, nil
+	} else {
+		return nil, gerror.New("same gatewayUserId exist")
+	}
+}
