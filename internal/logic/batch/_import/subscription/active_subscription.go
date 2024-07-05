@@ -113,5 +113,5 @@ type ImportActiveSubscriptionEntity struct {
 	StripeUserId           string `json:"StripeUserId(Auto-Charge Required)"             `
 	StripePaymentMethod    string `json:"StripePaymentMethod(Auto-Charge Required)"      `
 	PaypalVaultId          string `json:"PaypalVaultId(Auto-Charge Required)"      `
-	Features               string `json:"Features"         `
+	Features               string `json:"Features(Json)"         `
 }
