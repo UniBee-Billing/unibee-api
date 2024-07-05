@@ -35,7 +35,7 @@ type SubscriptionSimplify struct {
 	Status                 int                    `json:"status"                      description:"status，1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing"`                                                    // status，0-Init | 1-Create｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	Link                   string                 `json:"link"                        description:""`                                                                                                                                                               //
 	GatewayStatus          string                 `json:"gatewayStatus"               description:"gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get"` // gateway status，Stripe：https://stripe.com/docs/billing/subscriptions/webhooks  Paypal：https://developer.paypal.com/docs/api/subscriptions/v1/#subscriptions_get
-	GatewayItemData        string                 `json:"gatewayItemData"             description:"gateway_item_data"`                                                                                                                                              // gateway_item_data
+	Features               string                 `json:"features"                    description:"features"`                                                                                                                                                       // gateway_item_data
 	CancelAtPeriodEnd      int                    `json:"cancelAtPeriodEnd"           description:"whether cancel at period end，0-false | 1-true"`                                                                                                                  // whether cancel at period end，0-false | 1-true
 	LastUpdateTime         int64                  `json:"lastUpdateTime"              description:""`                                                                                                                                                               //
 	CurrentPeriodStart     int64                  `json:"currentPeriodStart"          description:"current_period_start, utc time"`                                                                                                                                 // current_period_start, utc time
@@ -85,7 +85,7 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 		Status:                 one.Status,
 		Link:                   one.Link,
 		GatewayStatus:          one.GatewayStatus,
-		GatewayItemData:        one.GatewayItemData,
+		Features:               one.GatewayItemData,
 		CancelAtPeriodEnd:      one.CancelAtPeriodEnd,
 		LastUpdateTime:         one.LastUpdateTime,
 		CurrentPeriodStart:     one.CurrentPeriodStart,

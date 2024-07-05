@@ -14,6 +14,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/gateway/gateway_bean"
 	user2 "unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -175,7 +176,6 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	}
 	// check gatewayPaymentMethod
 	gatewayPaymentMethod := ""
-	// todo mark paymentMethod verify from gateway
 	if len(target.PaypalVaultId) > 0 && len(target.StripePaymentMethod) > 0 {
 		return target, gerror.New("Error, both PaypalVaultId and StripePaymentMethod provided")
 	}
@@ -185,14 +185,28 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		if len(target.StripeUserId) == 0 {
 			return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
 		}
+		listQuery, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
+			UserId: user.Id,
+		})
+		if err != nil {
+			g.Log().Errorf(ctx, "Get StripePayment MethodList error:%v", err.Error())
+			return target, gerror.New("Error, can't get Stripe paymentMethod list from stripe")
+		}
+		found := false
+		for _, method := range listQuery.PaymentMethods {
+			if method.Id == target.StripePaymentMethod {
+				found = true
+			}
+		}
+		if !found {
+			return target, gerror.New("Error, can't found user's paymentMethod provided from stripe ")
+		}
 		gatewayPaymentMethod = target.StripePaymentMethod
 	}
 
 	if len(gatewayPaymentMethod) > 0 {
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
 	}
-
-	// todo mark features update
 
 	one := &entity.Subscription{
 		SubscriptionId:              utility.CreateSubscriptionId(),
@@ -215,6 +229,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		VatNumber:                   user.VATNumber,
 		TaxPercentage:               user.TaxPercentage,
 		GatewaySubscriptionId:       target.ExternalSubscriptionId,
+		GatewayItemData:             target.Features,
 		Data:                        "Imported",
 		CurrentPeriodPaid:           1,
 		GatewayDefaultPaymentMethod: gatewayPaymentMethod,
