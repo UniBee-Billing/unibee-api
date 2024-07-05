@@ -13,8 +13,17 @@ type ListReq struct {
 }
 
 type ListRes struct {
-	Downloads []*bean.MerchantBatchTaskSimplify `json:"downloads" dc:"Merchant Member Download List"`
+	Downloads []*bean.MerchantBatchTaskSimplify `json:"downloads" dc:"Merchant Member Task List"`
 	Total     int                               `json:"total" dc:"Total"`
+}
+
+type ExportColumnListReq struct {
+	g.Meta `path:"/export_column_list" tags:"Task" method:"post" summary:"ExportColumnList" description:""`
+	Task   string `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+}
+
+type ExportColumnListRes struct {
+	Columns []interface{} `json:"columns" dc:"Export Column List"`
 }
 
 type NewReq struct {

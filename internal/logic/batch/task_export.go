@@ -45,6 +45,12 @@ type MerchantBatchExportTaskInternalRequest struct {
 	SkipColumnIndexes []int                  `json:"skipColumnIndexes" dc:"SkipColumnIndexes, the column will be skipped in the export file if its index specified"`
 }
 
+func ExportColumnList(ctx context.Context, task string) []interface{} {
+	one := GetExportTaskImpl(task)
+	utility.Assert(one != nil, "Task not found")
+	return RefactorHeaders(one.Header(), nil)
+}
+
 func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskInternalRequest) error {
 	if len(config.GetConfigInstance().MinioConfig.Endpoint) == 0 ||
 		len(config.GetConfigInstance().MinioConfig.BucketName) == 0 ||
