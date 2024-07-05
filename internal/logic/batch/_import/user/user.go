@@ -45,6 +45,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		//TaxPercentage:  fmt.Sprintf("%s", row["TaxPercentage"]),
 		//Type:           fmt.Sprintf("%s", row["Type"]),
 	}
+	tag := fmt.Sprintf("ImportBy%v", task.MemberId)
 	if len(target.Email) == 0 {
 		return target, gerror.New("Error, Email is blank")
 	}
@@ -59,6 +60,9 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 			if otherOne != nil && one.Id != otherOne.Id {
 				return target, gerror.New("Error, same ExternalUserId user exist")
 			}
+		}
+		if one.Custom != tag {
+			return target, gerror.New("Error, No Permission to override")
 		}
 		_, err = dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().ExternalUserId: target.ExternalUserId,
@@ -83,7 +87,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		LastName:       target.LastName,
 		Address:        target.Address,
 		Phone:          target.Phone,
-		Custom:         "Import",
+		Custom:         tag,
 		MerchantId:     task.MerchantId,
 	})
 	return target, err
