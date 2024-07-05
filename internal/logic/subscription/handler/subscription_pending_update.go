@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -78,6 +79,7 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		dao.Subscription.Columns().MetaData:               one.MetaData,
 		dao.Subscription.Columns().TaxPercentage:          one.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           one.DiscountCode,
+		dao.Subscription.Columns().Data:                   fmt.Sprintf("UpgradedBy-%v", pendingUpdateId),
 	}).Where(dao.Subscription.Columns().SubscriptionId, one.SubscriptionId).OmitNil().Update()
 	if err != nil {
 		return false, err

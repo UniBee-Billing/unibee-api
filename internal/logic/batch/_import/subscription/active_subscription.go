@@ -69,14 +69,11 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
 		Features:               fmt.Sprintf("%s", row["Features(Json)"]),
 	}
-	// todo mark ExternalSubscriptionId verify
+	tag := fmt.Sprintf("ImportBy%v", task.MemberId)
 	if len(target.ExternalSubscriptionId) == 0 {
 		return target, gerror.New("Error, ExternalSubscriptionId is blank")
 	}
-	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
-	if one != nil {
-		return target, gerror.New("Error, same ExternalSubscriptionId exist")
-	}
+
 	// data prepare
 	if len(target.ExternalUserId) == 0 {
 		return target, gerror.New("Error, ExternalUserId is blank")
@@ -231,39 +228,60 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			}
 		}
 	}
-
+	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
+	if one != nil {
+		if one.Data != tag {
+			return target, gerror.New("Error, no permission to override," + one.Data)
+		}
+		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().Amount:                      amount,
+			dao.Subscription.Columns().Currency:                    currency,
+			dao.Subscription.Columns().PlanId:                      plan.Id,
+			dao.Subscription.Columns().Quantity:                    quantity,
+			dao.Subscription.Columns().GatewayId:                   gatewayId,
+			dao.Subscription.Columns().GatewayItemData:             target.Features,
+			dao.Subscription.Columns().GatewayDefaultPaymentMethod: gatewayPaymentMethod,
+			dao.Subscription.Columns().BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
+			dao.Subscription.Columns().CurrentPeriodStart:          currentPeriodStart.Timestamp(),
+			dao.Subscription.Columns().CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
+			dao.Subscription.Columns().CurrentPeriodStartTime:      currentPeriodStart,
+			dao.Subscription.Columns().CurrentPeriodEndTime:        currentPeriodEnd,
+			dao.Subscription.Columns().FirstPaidTime:               firstPaidTime.Timestamp(),
+			dao.Subscription.Columns().CreateTime:                  createTime.Timestamp(),
+		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+	} else {
+		one = &entity.Subscription{
+			SubscriptionId:              utility.CreateSubscriptionId(),
+			ExternalSubscriptionId:      target.ExternalSubscriptionId,
+			UserId:                      user.Id,
+			Amount:                      amount,
+			Currency:                    currency,
+			MerchantId:                  task.MerchantId,
+			PlanId:                      plan.Id,
+			Quantity:                    quantity,
+			GatewayId:                   gatewayId,
+			Status:                      consts.SubStatusActive,
+			CurrentPeriodStart:          currentPeriodStart.Timestamp(),
+			CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
+			CurrentPeriodStartTime:      currentPeriodStart,
+			CurrentPeriodEndTime:        currentPeriodEnd,
+			BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
+			FirstPaidTime:               firstPaidTime.Timestamp(),
+			CreateTime:                  createTime.Timestamp(),
+			CountryCode:                 user.CountryCode,
+			VatNumber:                   user.VATNumber,
+			TaxPercentage:               user.TaxPercentage,
+			GatewaySubscriptionId:       target.ExternalSubscriptionId,
+			GatewayItemData:             target.Features,
+			Data:                        tag,
+			CurrentPeriodPaid:           1,
+			GatewayDefaultPaymentMethod: gatewayPaymentMethod,
+		}
+		_, err = dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
+	}
 	if len(gatewayPaymentMethod) > 0 {
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
 	}
-
-	one = &entity.Subscription{
-		SubscriptionId:              utility.CreateSubscriptionId(),
-		ExternalSubscriptionId:      target.ExternalSubscriptionId,
-		UserId:                      user.Id,
-		Amount:                      amount,
-		Currency:                    currency,
-		MerchantId:                  task.MerchantId,
-		PlanId:                      plan.Id,
-		Quantity:                    quantity,
-		GatewayId:                   gatewayId,
-		Status:                      consts.SubStatusActive,
-		CurrentPeriodStart:          currentPeriodStart.Timestamp(),
-		CurrentPeriodEnd:            currentPeriodEnd.Timestamp(),
-		CurrentPeriodStartTime:      currentPeriodStart,
-		CurrentPeriodEndTime:        currentPeriodEnd,
-		BillingCycleAnchor:          billingCycleAnchor.Timestamp(),
-		FirstPaidTime:               firstPaidTime.Timestamp(),
-		CreateTime:                  createTime.Timestamp(),
-		CountryCode:                 user.CountryCode,
-		VatNumber:                   user.VATNumber,
-		TaxPercentage:               user.TaxPercentage,
-		GatewaySubscriptionId:       target.ExternalSubscriptionId,
-		GatewayItemData:             target.Features,
-		Data:                        "Imported",
-		CurrentPeriodPaid:           1,
-		GatewayDefaultPaymentMethod: gatewayPaymentMethod,
-	}
-	_, err = dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
 
 	return target, err
 }
