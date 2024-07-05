@@ -33,6 +33,15 @@ func GetMerchantCurrencyMap() map[string]*bean.Currency {
 	return currencyMap
 }
 
+func IsCurrencySupport(target string) bool {
+	for _, currency := range GetMerchantCurrencies() {
+		if strings.Compare(currency.Currency, strings.ToUpper(target)) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
 func IsFiatCurrencySupport(currency string) bool {
 	//Fiat Currency Check
 	if len(currency) == 0 {
