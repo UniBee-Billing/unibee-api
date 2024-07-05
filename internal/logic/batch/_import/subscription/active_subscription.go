@@ -138,6 +138,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	}
 	createTime := gtime.New(target.CreateTime)
 	// todo mark auto charge fields verification
+	// todo mark features update
 
 	one := &entity.Subscription{
 		SubscriptionId:         utility.CreateSubscriptionId(),
