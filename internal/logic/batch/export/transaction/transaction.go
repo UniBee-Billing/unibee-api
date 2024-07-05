@@ -146,6 +146,7 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 
 type ExportTransactionEntity struct {
 	TransactionId         string      `json:"TransactionId"      `
+	ExternalTransactionId string      `json:"externalTransactionId"  `
 	UserId                string      `json:"UserId"             `
 	ExternalUserId        string      `json:"ExternalUserId"     `
 	FirstName             string      `json:"FirstName"          `
@@ -163,5 +164,4 @@ type ExportTransactionEntity struct {
 	CreateTime            *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"`
 	RefundId              string      `json:"RefundId"      `
 	FullRefund            string      `json:"FullRefund"     `
-	ExternalTransactionId string      `json:"externalTransactionId"  `
 }

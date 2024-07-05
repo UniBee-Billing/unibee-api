@@ -106,12 +106,12 @@ type ExportUserDiscountEntity struct {
 	Id             string      `json:"Id"                 `
 	UserId         string      `json:"UserId"             `
 	ExternalUserId string      `json:"ExternalUserId"     `
+	PlanId         string      `json:"PlanId"             `
+	ExternalPlanId string      `json:"ExternalPlanId"     `
 	FirstName      string      `json:"FirstName"          `
 	LastName       string      `json:"LastName"           `
 	Email          string      `json:"Email"              `
 	MerchantName   string      `json:"MerchantName"       `
-	PlanId         string      `json:"PlanId"             `
-	ExternalPlanId string      `json:"ExternalPlanId"     `
 	PlanName       string      `json:"PlanName"           `
 	Code           string      `json:"Code"           `
 	SubscriptionId string      `json:"SubscriptionId" `

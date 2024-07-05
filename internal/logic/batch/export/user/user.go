@@ -126,12 +126,12 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 }
 
 type ExportUserEntity struct {
-	Id           string `json:"Id"                 `
-	FirstName    string `json:"FirstName"          `
-	LastName     string `json:"LastName"           `
-	Email        string `json:"Email"              `
-	MerchantName string `json:"MerchantName"       `
-	//AvatarUrl          string      `json:"AvatarUrl"          `
+	Id                 string      `json:"Id"                 `
+	ExternalUserId     string      `json:"ExternalUserId"     `
+	FirstName          string      `json:"FirstName"          `
+	LastName           string      `json:"LastName"           `
+	Email              string      `json:"Email"              `
+	MerchantName       string      `json:"MerchantName"       `
 	Phone              string      `json:"Phone"              `
 	Address            string      `json:"Address"            `
 	VATNumber          string      `json:"VATNumber"          `
@@ -141,7 +141,6 @@ type ExportUserEntity struct {
 	SubscriptionId     string      `json:"SubscriptionId"     `
 	SubscriptionStatus string      `json:"SubscriptionStatus" `
 	CreateTime         *gtime.Time `json:"CreateTime"       layout:"2006-01-02 15:04:05"  `
-	ExternalUserId     string      `json:"ExternalUserId"     `
 	Status             string      `json:"Status"             `
 	TaxPercentage      string      `json:"TaxPercentage"      `
 	Type               string      `json:"Type"               `

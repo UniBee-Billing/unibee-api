@@ -21,6 +21,7 @@ type SubscriptionConfig struct {
 type SubscriptionSimplify struct {
 	Id                     uint64                 `json:"id"                          description:""`                                                                                                                                                               //
 	SubscriptionId         string                 `json:"subscriptionId"              description:"subscription id"`                                                                                                                                                // subscription id
+	ExternalSubscriptionId string                 `json:"externalSubscriptionId"      description:"external_subscription_id"`                                                                                                                                       // external_subscription_id
 	UserId                 uint64                 `json:"userId"                      description:"userId"`                                                                                                                                                         // userId
 	TaskTime               *gtime.Time            `json:"taskTime"                    description:"task_time"`                                                                                                                                                      // task_time
 	Amount                 int64                  `json:"amount"                      description:"amount, cent"`                                                                                                                                                   // amount, cent
@@ -71,6 +72,7 @@ func SimplifySubscription(one *entity.Subscription) *SubscriptionSimplify {
 	return &SubscriptionSimplify{
 		Id:                     one.Id,
 		SubscriptionId:         one.SubscriptionId,
+		ExternalSubscriptionId: one.ExternalSubscriptionId,
 		UserId:                 one.UserId,
 		TaskTime:               one.TaskTime,
 		Amount:                 one.Amount,
