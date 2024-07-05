@@ -70,6 +70,7 @@ type SubscriptionColumns struct {
 	GasPayer                    string // who pay the gas, merchant|user
 	CurrentPeriodPaid           string // current period paid or not, 1-paid, other-the utc time to expire
 	LastTrackTime               string // last subscription track time
+	ExternalSubscriptionId      string // external_subscription_id
 }
 
 // subscriptionColumns holds the columns for table subscription.
@@ -124,6 +125,7 @@ var subscriptionColumns = SubscriptionColumns{
 	GasPayer:                    "gas_payer",
 	CurrentPeriodPaid:           "current_period_paid",
 	LastTrackTime:               "last_track_time",
+	ExternalSubscriptionId:      "external_subscription_id",
 }
 
 // NewSubscriptionDao creates and returns a new DAO object for table data access.

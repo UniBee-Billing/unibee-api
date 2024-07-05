@@ -70,6 +70,13 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		Features:               fmt.Sprintf("%s", row["Features(Json)"]),
 	}
 	// todo mark ExternalSubscriptionId verify
+	if len(target.ExternalSubscriptionId) == 0 {
+		return target, gerror.New("Error, ExternalSubscriptionId is blank")
+	}
+	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
+	if one != nil {
+		return target, gerror.New("Error, same ExternalSubscriptionId exist")
+	}
 	// data prepare
 	if len(target.ExternalUserId) == 0 {
 		return target, gerror.New("Error, ExternalUserId is blank")
@@ -229,8 +236,9 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
 	}
 
-	one := &entity.Subscription{
+	one = &entity.Subscription{
 		SubscriptionId:              utility.CreateSubscriptionId(),
+		ExternalSubscriptionId:      target.ExternalSubscriptionId,
 		UserId:                      user.Id,
 		Amount:                      amount,
 		Currency:                    currency,

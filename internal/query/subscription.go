@@ -7,13 +7,13 @@ import (
 	entity "unibee/internal/model/entity/oversea_pay"
 )
 
-//func GetSubscriptionById(ctx context.Context, id int64) (one *entity.Subscription) {
-//	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{Id: uint64(id)}).OmitEmpty().Scan(&one)
-//	if err != nil {
-//		one = nil
-//	}
-//	return
-//}
+func GetSubscriptionByExternalSubscriptionId(ctx context.Context, externalSubscriptionId string) (one *entity.Subscription) {
+	err := dao.Subscription.Ctx(ctx).Where(entity.Subscription{ExternalSubscriptionId: externalSubscriptionId}).OmitEmpty().Scan(&one)
+	if err != nil {
+		one = nil
+	}
+	return
+}
 
 func GetLatestSubscriptionByUserId(ctx context.Context, userId uint64, merchantId uint64) (one *entity.Subscription) {
 	if userId <= 0 || merchantId <= 0 {
