@@ -6,11 +6,11 @@ import (
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
-	"regexp"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/auth"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 type TaskUserImport struct {
@@ -31,14 +31,6 @@ func (t TaskUserImport) TemplateHeader() interface{} {
 	}
 }
 
-func VerifyEmailFormat(email string) bool {
-	//pattern := `\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*`
-	pattern := `^[0-9a-z][_.0-9a-z-]{0,31}@([0-9a-z][0-9a-z-]{0,30}[0-9a-z]\.){1,4}[a-z]{2,4}$`
-
-	reg := regexp.MustCompile(pattern)
-	return reg.MatchString(email)
-}
-
 func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatchTask, row map[string]string) (interface{}, error) {
 	var err error
 	target := &ImportUserEntity{
@@ -56,7 +48,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 	if len(target.Email) == 0 {
 		return target, gerror.New("Error, Email is blank")
 	}
-	if !VerifyEmailFormat(target.Email) {
+	if !utility.IsEmailValid(target.Email) {
 		return target, gerror.New("Error, invalid Email")
 	}
 	one := query.GetUserAccountByEmail(ctx, task.MerchantId, target.Email)

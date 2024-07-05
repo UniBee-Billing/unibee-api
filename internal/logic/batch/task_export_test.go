@@ -7,6 +7,7 @@ import (
 	"github.com/xuri/excelize/v2"
 	"testing"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 // Document Link: https://blog.csdn.net/qq_23118345/article/details/126706626
@@ -125,5 +126,9 @@ func TestExcelStreamWrite(t *testing.T) {
 				list = append(list, target)
 			}
 		}
+	})
+	t.Run("Test Email Check", func(t *testing.T) {
+		fmt.Println(utility.IsEmailValid("dd"))
+		fmt.Println(utility.IsEmailValid("jack.fu@126.com"))
 	})
 }
