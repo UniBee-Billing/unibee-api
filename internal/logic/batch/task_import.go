@@ -129,7 +129,7 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 		//Set Header
-		resultHeader := RefactorHeaders(taskImpl.TemplateHeader())
+		resultHeader := RefactorHeaders(taskImpl.TemplateHeader(), nil)
 		resultHeader = append(resultHeader, "ImportResult")
 		err = writer.SetRow("A1", resultHeader)
 		if err != nil {
@@ -180,7 +180,7 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 				if importResult != nil {
 					resultMessage = fmt.Sprintf("%s", importResult.Error())
 				}
-				_ = writer.SetRow(cell, append(RefactorData(result, ""), resultMessage))
+				_ = writer.SetRow(cell, append(RefactorData(result, "", nil), resultMessage))
 				if count%10 == 0 {
 					_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 						dao.MerchantBatchTask.Columns().SuccessCount:   fmt.Sprintf("%v", count),

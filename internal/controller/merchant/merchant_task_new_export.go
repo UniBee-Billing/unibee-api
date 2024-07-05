@@ -12,10 +12,11 @@ import (
 func (c *ControllerTask) New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error) {
 	utility.Assert(_interface.Context().Get(ctx).MerchantMember != nil, "no permission")
 	err = batch.NewBatchExportTask(ctx, &batch.MerchantBatchExportTaskInternalRequest{
-		MerchantId: _interface.GetMerchantId(ctx),
-		MemberId:   _interface.Context().Get(ctx).MerchantMember.Id,
-		Task:       req.Task,
-		Payload:    req.Payload,
+		MerchantId:        _interface.GetMerchantId(ctx),
+		MemberId:          _interface.Context().Get(ctx).MerchantMember.Id,
+		Task:              req.Task,
+		Payload:           req.Payload,
+		SkipColumnIndexes: req.SkipColumnIndexes,
 	})
 	if err != nil {
 		return nil, err

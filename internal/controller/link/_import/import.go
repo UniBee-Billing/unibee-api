@@ -51,7 +51,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	//Set Header
-	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader()))
+	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader(), nil))
 	if err != nil {
 		g.Log().Errorf(r.Context(), err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest)
@@ -59,7 +59,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	cell, _ := excelize.CoordinatesToCellName(1, 2)
-	_ = writer.SetRow(cell, batch.RefactorData(taskImpl.TemplateHeader(), ""))
+	_ = writer.SetRow(cell, batch.RefactorData(taskImpl.TemplateHeader(), "", nil))
 
 	err = writer.Flush()
 	if err != nil {

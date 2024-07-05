@@ -70,3 +70,15 @@ func IsUint64InArray(arr []uint64, target uint64) bool {
 	}
 	return false
 }
+
+func IsIntInArray(arr []int, target int) bool {
+	if arr == nil || len(arr) == 0 || target == 0 {
+		return false
+	}
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
+}

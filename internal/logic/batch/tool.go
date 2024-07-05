@@ -11,7 +11,7 @@ import (
 	"unibee/utility"
 )
 
-func RefactorHeaders(obj interface{}) []interface{} {
+func RefactorHeaders(obj interface{}, skipColumnIndexes []int) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
 		return out
@@ -28,6 +28,9 @@ func RefactorHeaders(obj interface{}) []interface{} {
 	// range properties
 	// get Tag named "json" as key
 	for i := 0; i < v.NumField(); i++ {
+		if utility.IsIntInArray(skipColumnIndexes, i) {
+			continue
+		}
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
 			out = append(out, key)
@@ -36,7 +39,7 @@ func RefactorHeaders(obj interface{}) []interface{} {
 	return out
 }
 
-func RefactorData(obj interface{}, timeZone string) []interface{} {
+func RefactorData(obj interface{}, timeZone string, skipColumnIndexes []int) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
 		return out
@@ -53,6 +56,9 @@ func RefactorData(obj interface{}, timeZone string) []interface{} {
 	// range properties
 	// get Tag named "json" as key
 	for i := 0; i < v.NumField(); i++ {
+		if utility.IsIntInArray(skipColumnIndexes, i) {
+			continue
+		}
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
 			value := v.Field(i).Interface()
