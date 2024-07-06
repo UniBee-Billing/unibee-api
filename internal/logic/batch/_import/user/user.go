@@ -94,12 +94,12 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 }
 
 type ImportUserEntity struct {
-	Email          string `json:"Email"              `
-	ExternalUserId string `json:"ExternalUserId"     `
-	FirstName      string `json:"FirstName"          `
-	LastName       string `json:"LastName"           `
-	Address        string `json:"Address"            `
-	Phone          string `json:"Phone"            `
+	Email          string `json:"Email"     comment:"Required, The email of user, Overwrite not supported'"         `
+	ExternalUserId string `json:"ExternalUserId"   comment:"The id of user, need unique"  `
+	FirstName      string `json:"FirstName"    comment:"The first name of user"      `
+	LastName       string `json:"LastName"   comment:"The last name of user"         `
+	Address        string `json:"Address"     comment:"The address of user"        `
+	Phone          string `json:"Phone"      comment:"The phone of user"       `
 	//VATNumber      string `json:"VATNumber"          `
 	//CountryCode    string `json:"CountryCode"        `
 	//TaxPercentage  string `json:"TaxPercentage"      `

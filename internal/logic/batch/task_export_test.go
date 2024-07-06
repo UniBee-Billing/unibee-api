@@ -21,6 +21,7 @@ func TestExcelStreamWrite(t *testing.T) {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
+
 		//Create Stream Writer
 		writer, err := file.NewStreamWriter("Table1")
 		//Update Width Height
@@ -34,6 +35,7 @@ func TestExcelStreamWrite(t *testing.T) {
 			fmt.Println(err)
 			return
 		}
+
 		//Set Header
 		err = writer.SetRow("A1", []interface{}{"TestRow1", "TestRow2", "TestRow3", "TestRow4", "TestRow5", "TestRow6", "TestRow7", "TestRow8", "TestRow9", "TestRow10", "TestRow11", "TestRow12", "TestRow13", "TestRow14", "TestRow15"}, excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
@@ -52,6 +54,14 @@ func TestExcelStreamWrite(t *testing.T) {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
+		err = file.AddComment("Table1", excelize.Comment{
+			Cell:   "A1",
+			Author: "UniBee",
+			Paragraph: []excelize.RichTextRun{
+				{Text: "Excelize: ", Font: &excelize.Font{Bold: true}},
+				{Text: "This is a comment."},
+			},
+		})
 		err = file.SaveAs("test01.xlsx")
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())

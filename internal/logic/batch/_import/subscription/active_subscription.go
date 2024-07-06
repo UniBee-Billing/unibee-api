@@ -58,16 +58,16 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		Amount:                 fmt.Sprintf("%s", row["Amount"]),
 		Currency:               fmt.Sprintf("%s", row["Currency"]),
 		Quantity:               fmt.Sprintf("%s", row["Quantity"]),
-		Gateway:                fmt.Sprintf("%s", row["Gateway(stripe|paypal|wire_transfer|changelly)"]),
-		CurrentPeriodStart:     fmt.Sprintf("%s", row["CurrentPeriodStart(UTC)"]),
-		CurrentPeriodEnd:       fmt.Sprintf("%s", row["CurrentPeriodEnd(UTC)"]),
-		BillingCycleAnchor:     fmt.Sprintf("%s", row["BillingCycleAnchor(UTC)"]),
-		FirstPaidTime:          fmt.Sprintf("%s", row["FirstPaidTime(UTC)"]),
-		CreateTime:             fmt.Sprintf("%s", row["CreateTime(UTC)"]),
+		Gateway:                fmt.Sprintf("%s", row["Gateway"]),
+		CurrentPeriodStart:     fmt.Sprintf("%s", row["CurrentPeriodStart"]),
+		CurrentPeriodEnd:       fmt.Sprintf("%s", row["CurrentPeriodEnd"]),
+		BillingCycleAnchor:     fmt.Sprintf("%s", row["BillingCycleAnchor"]),
+		FirstPaidTime:          fmt.Sprintf("%s", row["FirstPaidTime"]),
+		CreateTime:             fmt.Sprintf("%s", row["CreateTime"]),
 		StripeUserId:           fmt.Sprintf("%s", row["StripeUserId(Auto-Charge Required)"]),
 		StripePaymentMethod:    fmt.Sprintf("%s", row["StripePaymentMethod(Auto-Charge Required)"]),
 		PaypalVaultId:          fmt.Sprintf("%s", row["PaypalVaultId(Auto-Charge Required)"]),
-		Features:               fmt.Sprintf("%s", row["Features(Json)"]),
+		Features:               fmt.Sprintf("%s", row["Features"]),
 	}
 	tag := fmt.Sprintf("ImportBy%v", task.MemberId)
 	if len(target.ExternalSubscriptionId) == 0 {
@@ -287,20 +287,20 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 }
 
 type ImportActiveSubscriptionEntity struct {
-	ExternalSubscriptionId string `json:"ExternalSubscriptionId"     `
-	ExternalUserId         string `json:"ExternalUserId"     `
-	ExternalPlanId         string `json:"ExternalPlanId"     `
-	Amount                 string `json:"Amount"             `
-	Currency               string `json:"Currency"           `
-	Quantity               string `json:"Quantity"           `
-	Gateway                string `json:"Gateway(stripe|paypal|wire_transfer|changelly)"            `
-	CurrentPeriodStart     string `json:"CurrentPeriodStart(UTC)" `
-	CurrentPeriodEnd       string `json:"CurrentPeriodEnd(UTC)"   `
-	BillingCycleAnchor     string `json:"BillingCycleAnchor(UTC)" `
-	FirstPaidTime          string `json:"FirstPaidTime(UTC)"      `
-	CreateTime             string `json:"CreateTime(UTC)"         `
-	StripeUserId           string `json:"StripeUserId(Auto-Charge Required)"             `
-	StripePaymentMethod    string `json:"StripePaymentMethod(Auto-Charge Required)"      `
-	PaypalVaultId          string `json:"PaypalVaultId(Auto-Charge Required)"      `
-	Features               string `json:"Features(Json)"         `
+	ExternalSubscriptionId string `json:"ExternalSubscriptionId"    comment:"Required, The external id of subscription"     `
+	ExternalUserId         string `json:"ExternalUserId"    comment:"Required, The external id of user, user should import at first"    `
+	ExternalPlanId         string `json:"ExternalPlanId"   comment:"Required, The external id of plan, plan should created at first"   `
+	Amount                 string `json:"Amount"        comment:"Required, the recurring amount of subscription, em. 19.99 = 19.99 USD"     `
+	Currency               string `json:"Currency"      comment:"Required, Upper Case, the currency of subscription, USD|EUR "       `
+	Quantity               string `json:"Quantity"      comment:"the quantity of plan, default 1 if not provided "        `
+	Gateway                string `json:"Gateway" comment:"Required, should one of stripe|paypal|wire_transfer|changelly "           `
+	CurrentPeriodStart     string `json:"CurrentPeriodStart" comment:"Required, UTC time, the current period start time of subscription, format '2006-01-02 15:04:05'"`
+	CurrentPeriodEnd       string `json:"CurrentPeriodEnd"   comment:"Required, UTC time, the current period end time of subscription, format '2006-01-02 15:04:05'"`
+	BillingCycleAnchor     string `json:"BillingCycleAnchor"   comment:"Required, UTC time, The reference point that aligns future billing cycle dates. It sets the day of week for week intervals, the day of month for month and year intervals, and the month of year for year intervals, format '2006-01-02 15:04:05'"`
+	FirstPaidTime          string `json:"FirstPaidTime"   comment:"UTC time, the first payment success time of subscription, format '2006-01-02 15:04:05'"   `
+	CreateTime             string `json:"CreateTime"      comment:"Required, UTC time, the creation time of subscription, format '2006-01-02 15:04:05'"   `
+	StripeUserId           string `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
+	StripePaymentMethod    string `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
+	PaypalVaultId          string `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
+	Features               string `json:"Features"    comment:"In json format, additional features data of subscription, will join user's metric data in user api if provided'"     `
 }

@@ -8,8 +8,10 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"reflect"
 	"unibee/internal/logic/batch"
 	"unibee/internal/query"
+	"unibee/utility"
 )
 
 func LinkImportTemplateEntry(r *ghttp.Request) {
@@ -76,6 +78,11 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	fileName := fmt.Sprintf("ImportTemplate_%v.xlsx", task)
+
+	// addComments
+	for _, comment := range refactorHeaderComments(taskImpl.TemplateHeader(), nil) {
+		err = file.AddComment(taskImpl.TaskName(), comment)
+	}
 	err = file.SaveAs(fileName)
 	if err != nil {
 		g.Log().Errorf(r.Context(), err.Error())
@@ -113,4 +120,40 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		r.Response.WriteHeader(http.StatusBadRequest)
 		r.Response.Writeln("Bad request")
 	}
+}
+
+func refactorHeaderComments(obj interface{}, skipColumnIndexes []int) []excelize.Comment {
+	out := make([]excelize.Comment, 0)
+	if obj == nil {
+		return out
+	}
+
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
+
+	t := v.Type()
+	// range properties
+	// get Tag named "json" as key
+	for i := 0; i < v.NumField(); i++ {
+		if utility.IsIntInArray(skipColumnIndexes, i) {
+			continue
+		}
+		fi := t.Field(i)
+		if comment := fi.Tag.Get("comment"); comment != "" {
+			cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+			out = append(out, excelize.Comment{
+				Cell:   cell,
+				Author: "UniBee",
+				Paragraph: []excelize.RichTextRun{
+					{Text: comment, Font: &excelize.Font{Bold: true}},
+				},
+			})
+		}
+	}
+
+	return out
 }
