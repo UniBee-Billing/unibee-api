@@ -13,6 +13,7 @@ type BatchExportTask interface {
 
 type BatchImportTask interface {
 	TaskName() string
+	TemplateVersion() string
 	TemplateHeader() interface{}
 	ImportRow(ctx context.Context, task *entity.MerchantBatchTask, row map[string]string) (interface{}, error)
 }

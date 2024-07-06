@@ -24,6 +24,10 @@ import (
 type TaskActiveSubscriptionImport struct {
 }
 
+func (t TaskActiveSubscriptionImport) TemplateVersion() string {
+	return "v1"
+}
+
 func (t TaskActiveSubscriptionImport) TaskName() string {
 	return "ActiveSubscriptionImport"
 }

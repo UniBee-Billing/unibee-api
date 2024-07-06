@@ -16,6 +16,10 @@ import (
 type TaskUserImport struct {
 }
 
+func (t TaskUserImport) TemplateVersion() string {
+	return "v1"
+}
+
 func (t TaskUserImport) TaskName() string {
 	return "UserImport"
 }
