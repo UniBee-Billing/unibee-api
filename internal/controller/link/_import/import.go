@@ -51,7 +51,14 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	//Set Header
-	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader(), nil))
+	headerStyleID, err := file.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+	if err != nil {
+		g.Log().Errorf(r.Context(), err.Error())
+		r.Response.WriteHeader(http.StatusBadRequest)
+		r.Response.Writeln("Bad request")
+		return
+	}
+	err = writer.SetRow("A1", batch.RefactorHeaders(taskImpl.TemplateHeader(), nil), excelize.RowOpts{StyleID: headerStyleID})
 	if err != nil {
 		g.Log().Errorf(r.Context(), err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest)
