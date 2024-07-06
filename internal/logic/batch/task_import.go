@@ -128,10 +128,16 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			failureTask(ctx, task.Id, err)
 			return
 		}
+		headerStyleID, err := file.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
 		//Set Header
 		resultHeader := RefactorHeaders(taskImpl.TemplateHeader(), nil)
 		resultHeader = append(resultHeader, "ImportResult")
-		err = writer.SetRow("A1", resultHeader)
+		err = writer.SetRow("A1", resultHeader, excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)

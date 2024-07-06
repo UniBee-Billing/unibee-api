@@ -36,6 +36,7 @@ func RefactorHeaders(obj interface{}, skipColumnIndexes []int) []interface{} {
 			out = append(out, key)
 		}
 	}
+
 	return out
 }
 

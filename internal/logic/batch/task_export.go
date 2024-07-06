@@ -141,8 +141,14 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			failureTask(ctx, task.Id, err)
 			return
 		}
-		//Set Header
-		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), skipColumnIndexes))
+		headerStyleID, err := file.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+		if err != nil {
+			g.Log().Errorf(ctx, err.Error())
+			failureTask(ctx, task.Id, err)
+			return
+		}
+
+		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), skipColumnIndexes), excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)

@@ -29,8 +29,13 @@ func TestExcelStreamWrite(t *testing.T) {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
 		}
+		headerStyleID, err := file.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		//Set Header
-		err = writer.SetRow("A1", []interface{}{"TestRow1", "TestRow2", "TestRow3", "TestRow4", "TestRow5", "TestRow6", "TestRow7", "TestRow8", "TestRow9", "TestRow10", "TestRow11", "TestRow12", "TestRow13", "TestRow14", "TestRow15"})
+		err = writer.SetRow("A1", []interface{}{"TestRow1", "TestRow2", "TestRow3", "TestRow4", "TestRow5", "TestRow6", "TestRow7", "TestRow8", "TestRow9", "TestRow10", "TestRow11", "TestRow12", "TestRow13", "TestRow14", "TestRow15"}, excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
 			g.Log().Errorf(context.Background(), err.Error())
 			return
