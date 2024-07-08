@@ -31,6 +31,11 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	g.Log().Debugf(ctx, "SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
+	if sub.Status != consts.SubStatusPending && sub.Status != consts.SubStatusProcessing {
+		// sub enter to next process
+		return redismq.CommitMessage
+	}
+
 	if gtime.Now().Timestamp()-sub.GmtCreate.Timestamp() >= consts.SubPendingTimeout {
 		//should expire sub
 		err := expire.SubscriptionExpire(ctx, sub, "NotPayAfter36Hours")
