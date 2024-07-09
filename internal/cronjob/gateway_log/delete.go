@@ -11,7 +11,7 @@ import (
 func TaskForDeleteChannelLogs(ctx context.Context) {
 	g.Log().Infof(ctx, "TaskForDeleteChannelLogs start")
 	time.Sleep(5 * time.Second)
-	_, err := dao.GatewayHttpLog.Ctx(ctx).WhereLT(dao.GatewayHttpLog.Columns().GmtCreate, gtime.Now().AddDate(0, 0, -7)).Delete()
+	_, err := dao.GatewayHttpLog.Ctx(ctx).WhereLT(dao.GatewayHttpLog.Columns().GmtCreate, gtime.Now().AddDate(0, 0, -15)).Delete()
 	if err != nil {
 		g.Log().Errorf(ctx, "TaskForDeleteChannelLogs error:%s", err.Error())
 	}
@@ -20,7 +20,7 @@ func TaskForDeleteChannelLogs(ctx context.Context) {
 func TaskForDeleteWebhookMessage(ctx context.Context) {
 	g.Log().Infof(ctx, "TaskForDeleteWebhookMessage start")
 	time.Sleep(5 * time.Second)
-	_, err := dao.MerchantWebhookMessage.Ctx(ctx).WhereLT(dao.MerchantWebhookMessage.Columns().GmtCreate, gtime.Now().AddDate(0, 0, -7)).Delete()
+	_, err := dao.MerchantWebhookMessage.Ctx(ctx).WhereLT(dao.MerchantWebhookMessage.Columns().GmtCreate, gtime.Now().AddDate(0, 0, -15)).Delete()
 	if err != nil {
 		g.Log().Errorf(ctx, "TaskForDeleteWebhookMessage error:%s", err.Error())
 	}
