@@ -22,8 +22,14 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 	if sub == nil {
 		return gerror.New("sub not found")
 	}
-	if !(sub.Status == consts.SubStatusPending || sub.Status == consts.SubStatusProcessing) {
-		return gerror.New("sub not pending or processing status")
+	if sub.Status == consts.SubStatusActive {
+		return gerror.New("sub is active")
+	}
+	if sub.Status == consts.SubStatusCancelled {
+		return gerror.New("sub already cancelled")
+	}
+	if sub.Status == consts.SubStatusExpired {
+		return gerror.New("sub already expired")
 	}
 	//Expire SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate

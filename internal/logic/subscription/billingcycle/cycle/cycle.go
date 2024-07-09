@@ -49,7 +49,8 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 			utility.ReleaseLock(ctx, key)
 			g.Log().Debugf(ctx, source, "ReleaseLock", key)
 		}()
-		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		var err error
+		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().TaskTime: gtime.Now(),
 		}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 		if err != nil {

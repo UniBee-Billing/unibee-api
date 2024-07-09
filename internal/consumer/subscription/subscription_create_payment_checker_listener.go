@@ -31,8 +31,13 @@ func (t SubscriptionCreatePaymentCheckListener) Consume(ctx context.Context, mes
 	g.Log().Debugf(ctx, "SubscriptionCreatePaymentCheckListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 
-	if sub.Status != consts.SubStatusPending && sub.Status != consts.SubStatusProcessing {
-		// sub enter to next process
+	if sub.Status == consts.SubStatusActive {
+		return redismq.CommitMessage
+	}
+	if sub.Status == consts.SubStatusCancelled {
+		return redismq.CommitMessage
+	}
+	if sub.Status == consts.SubStatusExpired {
 		return redismq.CommitMessage
 	}
 

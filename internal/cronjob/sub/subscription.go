@@ -48,7 +48,7 @@ func TaskForSubscriptionBillingCycleDunningInvoice(ctx context.Context, taskName
 	for _, sub := range subs {
 		walk, err := cycle.SubPipeBillingCycleWalk(ctx, sub.SubscriptionId, timeNow, taskName)
 		if err != nil {
-			g.Log().Errorf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk error:%s", err.Error())
+			g.Log().Errorf(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk SubId:%s error:%s", sub.SubscriptionId, err.Error())
 		}
 		g.Log().Infof(ctx, "TaskForSubscriptionBillingCycleDunningInvoice SubPipeBillingCycleWalk SubId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
 		time.Sleep(2 * time.Second)
@@ -86,9 +86,9 @@ func TaskForSubscriptionTrackAfterCancelledOrExpired(ctx context.Context, taskNa
 	for _, sub := range subs {
 		walk, err := cycle.SubPipeBillingCycleWalk(ctx, sub.SubscriptionId, timeNow, taskName)
 		if err != nil {
-			g.Log().Errorf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired error:%s", err.Error())
+			g.Log().Errorf(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s error:%s", sub.SubscriptionId, err.Error())
 		}
-		g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired WalkResult:%s", utility.MarshalToJsonString(walk))
+		g.Log().Infof(ctx, "TaskForSubscriptionTrackAfterCancelledOrExpired subId:%s WalkResult:%s", sub.SubscriptionId, utility.MarshalToJsonString(walk))
 		time.Sleep(2 * time.Second)
 	}
 
