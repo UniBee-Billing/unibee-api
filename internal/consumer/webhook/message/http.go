@@ -51,9 +51,9 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 	var response = string(res)
 	if err != nil {
 		response = utility.MarshalToJsonString(err)
-		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s error %s\n", "POST", one.WebhookUrl, response, err.Error())
+		g.Log().Infof(ctx, "ResentWebhook %s %s response: %s error %s\n", "POST", one.WebhookUrl, response, err.Error())
 	} else {
-		g.Log().Debugf(ctx, "Webhook_End %s %s response: %s \n", "POST", one.WebhookUrl, response)
+		g.Log().Infof(ctx, "ResentWebhook %s %s response: %s \n", "POST", one.WebhookUrl, response)
 	}
 	return true
 }
