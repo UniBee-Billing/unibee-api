@@ -47,6 +47,10 @@ func SimplifyPayment(one *entity.Payment) *PaymentSimplify {
 			fmt.Printf("SimplifyPayment Unmarshal Metadata error:%s", err.Error())
 		}
 	}
+	var failureReason = one.LastError
+	if len(failureReason) == 0 {
+		failureReason = one.FailureReason
+	}
 	return &PaymentSimplify{
 		PaymentId:         one.PaymentId,
 		MerchantId:        one.MerchantId,

@@ -62,4 +62,5 @@ type Payment struct {
 	GatewayLink            string      `json:"gatewayLink"            description:""`                                                                       //
 	CryptoAmount           int64       `json:"cryptoAmount"           description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency         string      `json:"cryptoCurrency"         description:"crypto_currency"`                                                        // crypto_currency
+	LastError              string      `json:"lastError"              description:"last error"`                                                             // last error
 }

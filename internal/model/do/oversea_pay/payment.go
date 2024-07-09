@@ -64,4 +64,5 @@ type Payment struct {
 	GatewayLink            interface{} //
 	CryptoAmount           interface{} // crypto_amount, cent
 	CryptoCurrency         interface{} // crypto_currency
+	LastError              interface{} // last error
 }

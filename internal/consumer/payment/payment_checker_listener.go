@@ -43,6 +43,9 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 				if err != nil {
 					g.Log().Errorf(ctx, "PaymentCheckerListener_Rollback paymentId:%s error:%s", message.Body, err.Error())
 				} else {
+					if gatewayPaymentRo != nil && len(gatewayPaymentRo.LastError) > 0 {
+						handler2.UpdatePaymentLastGatewayError(ctx, one.PaymentId, gatewayPaymentRo.LastError)
+					}
 					if gatewayPaymentRo.Status == consts.PaymentSuccess {
 						err = handler2.HandlePaySuccess(ctx, &handler2.HandlePayReq{
 							PaymentId:              one.PaymentId,

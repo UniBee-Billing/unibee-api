@@ -41,6 +41,12 @@ type HandlePayReq struct {
 	PaymentCode            string
 }
 
+func UpdatePaymentLastGatewayError(ctx context.Context, paymentId string, lastErr string) {
+	_, _ = dao.Payment.Ctx(ctx).Data(g.Map{
+		dao.Payment.Columns().LastError: lastErr,
+	}).Where(dao.Payment.Columns().PaymentId, paymentId).OmitNil().Update()
+}
+
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)

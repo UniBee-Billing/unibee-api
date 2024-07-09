@@ -72,6 +72,7 @@ type PaymentColumns struct {
 	GatewayLink            string //
 	CryptoAmount           string // crypto_amount, cent
 	CryptoCurrency         string // crypto_currency
+	LastError              string // last error
 }
 
 // paymentColumns holds the columns for table payment.
@@ -128,6 +129,7 @@ var paymentColumns = PaymentColumns{
 	GatewayLink:            "gateway_link",
 	CryptoAmount:           "crypto_amount",
 	CryptoCurrency:         "crypto_currency",
+	LastError:              "last_error",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.
