@@ -376,6 +376,12 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 	if req.PaidTime != nil {
 		paidAt = req.PaidTime.Timestamp()
 	}
+	if len(req.PaymentCode) == 0 {
+		req.PaymentCode = payment.Code
+	}
+	if len(req.GatewayPaymentMethod) == 0 {
+		req.GatewayPaymentMethod = payment.GatewayPaymentMethod
+	}
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentSuccess, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			_, err = transaction.Update(dao.Payment.Table(), g.Map{

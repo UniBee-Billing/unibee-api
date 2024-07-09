@@ -35,6 +35,8 @@ func ProcessPaymentWebhook(ctx context.Context, metaPaymentId string, gatewayPay
 				Reason:               paymentIntentDetail.Reason,
 				CancelReason:         paymentIntentDetail.CancelReason,
 				PaymentData:          paymentIntentDetail.PaymentData,
+				LastError:            paymentIntentDetail.LastError,
+				PaymentCode:          paymentIntentDetail.PaymentCode,
 				PaidTime:             paymentIntentDetail.PaidTime,
 				CreateTime:           paymentIntentDetail.CreateTime,
 				CancelTime:           paymentIntentDetail.CancelTime,
