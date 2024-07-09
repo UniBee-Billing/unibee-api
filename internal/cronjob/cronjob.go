@@ -27,7 +27,7 @@ func StartCronJobs() {
 		sub.TaskForSubscriptionBillingCycleDunningInvoice(ctx, name)
 	}, name)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", name, err.Error())
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", name, err.Error())
 	}
 	// every 10 second
 	var backName = "SubscriptionCycleBackup"
@@ -35,7 +35,7 @@ func StartCronJobs() {
 		sub.TaskForSubscriptionBillingCycleDunningInvoice(ctx, backName)
 	}, backName)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", backName, err.Error())
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", backName, err.Error())
 	}
 	// every 1 min
 	var other1MinTask = "Other1MinTask"
@@ -45,7 +45,7 @@ func StartCronJobs() {
 		batch.TaskForExpireBatchTasks(ctx)
 	}, other1MinTask)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", other1MinTask, err.Error())
 	}
 
 	// every 10 min
@@ -55,7 +55,7 @@ func StartCronJobs() {
 		sub.TaskForSubscriptionInitFailed(ctx, other10MinTask)
 	}, other10MinTask)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", other10MinTask, err.Error())
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", other10MinTask, err.Error())
 	}
 
 	// every Hour
@@ -66,7 +66,8 @@ func StartCronJobs() {
 		sub.TaskForUserSubCompensate(ctx, hourTask)
 	}, hourTask)
 	if err != nil {
-		g.Log().Printf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
+		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
 	}
+	g.Dump(gcron.Entries())
 	return
 }
