@@ -52,7 +52,7 @@ var (
 			openapi := s.GetOpenApi()
 			openapi.Info.Description = "This is UniBee Api Server"
 			openapi.Info.Title = "OpenAPI UniBee"
-			openapi.Security = &goai.SecurityRequirements{map[string][]string{}}
+			//openapi.Security = &goai.SecurityRequirements{map[string][]string{}}
 			openapi.Info.License = &goai.License{
 				Name: "Apache-2.0",
 				URL:  "https://www.apache.org/licenses/LICENSE-2.0.html",
