@@ -520,6 +520,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 	var authorizeReason = ""
 	var cancelReason = ""
 	var paymentData = ""
+	var paymentCode = ""
+	var lastErr = ""
 	if invoiceDetails.Status == consts.InvoiceStatusPaid {
 		status = consts.PaymentSuccess
 		authorizeStatus = consts.CaptureRequest
@@ -537,6 +539,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 			authorizeReason = paymentIntentDetail.AuthorizeReason
 			cancelReason = paymentIntentDetail.CancelReason
 			paymentData = paymentIntentDetail.PaymentData
+			paymentCode = paymentIntentDetail.PaymentCode
+			lastErr = paymentIntentDetail.LastError
 		}
 	}
 
@@ -558,6 +562,8 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 		CancelTime:           gtime.NewFromTimeStamp(invoiceDetails.CancelTime),
 		GatewayPaymentId:     invoiceDetails.GatewayPaymentId,
 		GatewayPaymentMethod: invoiceDetails.GatewayDefaultPaymentMethod,
+		PaymentCode:          paymentCode,
+		LastError:            lastErr,
 	})
 	if err != nil {
 		return err

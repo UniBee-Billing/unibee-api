@@ -36,6 +36,9 @@ func (t PaymentCheckerListener) Consume(ctx context.Context, message *redismq.Me
 	}
 	one := query.GetPaymentByPaymentId(ctx, message.Body)
 	if one != nil {
+		if len(one.GatewayPaymentId) == 0 {
+			return redismq.ReconsumeLater
+		}
 		if one.Status == consts.PaymentCreated {
 			gateway := query.GetGatewayById(ctx, one.GatewayId)
 			if gateway != nil && gateway.GatewayType != consts.GatewayTypeWireTransfer && len(one.GatewayPaymentId) > 0 {
