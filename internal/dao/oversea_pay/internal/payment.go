@@ -23,7 +23,10 @@ type PaymentColumns struct {
 	Id                     string // id
 	CompanyId              string // company id
 	MerchantId             string // merchant id
-	OpenApiId              string // open api id
+	LastError              string // last error
+	AuthorizeReason        string //
+	Code                   string //
+	GatewayPaymentMethod   string //
 	UserId                 string // user_id
 	SubscriptionId         string // subscription id
 	GmtCreate              string // create time
@@ -40,7 +43,6 @@ type PaymentColumns struct {
 	TerminalIp             string // client ip
 	CountryCode            string // country code
 	AuthorizeStatus        string // authorize status，0-waiting authorize，1-authorized，2-authorized_request
-	AuthorizeReason        string //
 	GatewayId              string // gateway_id
 	GatewayPaymentIntentId string // gateway_payment_intent_id
 	GatewayPaymentId       string // gateway_payment_id
@@ -51,10 +53,10 @@ type PaymentColumns struct {
 	InvoiceId              string // invoice id
 	AppId                  string // app id
 	ReturnUrl              string // return url
+	OpenApiId              string // open api id
 	GatewayEdition         string // gateway edition
 	HidePaymentMethods     string // hide_payment_methods
 	Verify                 string // codeVerify
-	Code                   string //
 	Token                  string //
 	MetaData               string // meta_data (json)
 	Automatic              string // 0-no,1-yes
@@ -66,13 +68,11 @@ type PaymentColumns struct {
 	BalanceStart           string // balance_start, utc time
 	BalanceEnd             string // balance_end, utc time
 	InvoiceData            string //
-	GatewayPaymentMethod   string //
 	GasPayer               string // who pay the gas, merchant|user
 	ExpireTime             string // expire time, utc time
 	GatewayLink            string //
 	CryptoAmount           string // crypto_amount, cent
 	CryptoCurrency         string // crypto_currency
-	LastError              string // last error
 }
 
 // paymentColumns holds the columns for table payment.
@@ -80,7 +80,10 @@ var paymentColumns = PaymentColumns{
 	Id:                     "id",
 	CompanyId:              "company_id",
 	MerchantId:             "merchant_id",
-	OpenApiId:              "open_api_id",
+	LastError:              "last_error",
+	AuthorizeReason:        "authorize_reason",
+	Code:                   "code",
+	GatewayPaymentMethod:   "gateway_payment_method",
 	UserId:                 "user_id",
 	SubscriptionId:         "subscription_id",
 	GmtCreate:              "gmt_create",
@@ -97,7 +100,6 @@ var paymentColumns = PaymentColumns{
 	TerminalIp:             "terminal_ip",
 	CountryCode:            "country_code",
 	AuthorizeStatus:        "authorize_status",
-	AuthorizeReason:        "authorize_reason",
 	GatewayId:              "gateway_id",
 	GatewayPaymentIntentId: "gateway_payment_intent_id",
 	GatewayPaymentId:       "gateway_payment_id",
@@ -108,10 +110,10 @@ var paymentColumns = PaymentColumns{
 	InvoiceId:              "invoice_id",
 	AppId:                  "app_id",
 	ReturnUrl:              "return_url",
+	OpenApiId:              "open_api_id",
 	GatewayEdition:         "gateway_edition",
 	HidePaymentMethods:     "hide_payment_methods",
 	Verify:                 "verify",
-	Code:                   "code",
 	Token:                  "token",
 	MetaData:               "meta_data",
 	Automatic:              "automatic",
@@ -123,13 +125,11 @@ var paymentColumns = PaymentColumns{
 	BalanceStart:           "balance_start",
 	BalanceEnd:             "balance_end",
 	InvoiceData:            "invoice_data",
-	GatewayPaymentMethod:   "gateway_payment_method",
 	GasPayer:               "gas_payer",
 	ExpireTime:             "expire_time",
 	GatewayLink:            "gateway_link",
 	CryptoAmount:           "crypto_amount",
 	CryptoCurrency:         "crypto_currency",
-	LastError:              "last_error",
 }
 
 // NewPaymentDao creates and returns a new DAO object for table data access.

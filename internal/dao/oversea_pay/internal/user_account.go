@@ -70,6 +70,7 @@ type UserAccountColumns struct {
 	Status             string // 0-Active, 2-Suspend
 	City               string // city
 	ZipCode            string // zip_code
+	PlanId             string // PlanId
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -124,6 +125,7 @@ var userAccountColumns = UserAccountColumns{
 	Status:             "status",
 	City:               "city",
 	ZipCode:            "zip_code",
+	PlanId:             "plan_id",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

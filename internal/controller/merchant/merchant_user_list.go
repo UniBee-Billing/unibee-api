@@ -24,6 +24,7 @@ func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user
 		Count:           req.Count,
 		CreateTimeStart: req.CreateTimeStart,
 		CreateTimeEnd:   req.CreateTimeEnd,
+		PlanIds:         req.PlanIds,
 	})
 	if err != nil {
 		return nil, err

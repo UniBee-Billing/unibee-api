@@ -19,6 +19,7 @@ type UserListInternalReq struct {
 	SubscriptionId string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
 	SubStatus      []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
 	Status         []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
+	PlanIds        []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
 	//UserName   int    `json:"userName" dc:"Filter UserName, Default All" `
 	//SubscriptionName   int    `json:"subscriptionName" dc:"Filter SubscriptionName, Default All" `
 	//SubscriptionStatus int    `json:"subscriptionStatus" dc:"Filter SubscriptionStatus, Default All" `
@@ -92,6 +93,9 @@ func UserList(ctx context.Context, req *UserListInternalReq) (res *UserListInter
 	}
 	if req.Status != nil && len(req.Status) > 0 {
 		q = q.WhereIn(dao.UserAccount.Columns().Status, req.Status)
+	}
+	if req.PlanIds != nil && len(req.PlanIds) > 0 {
+		q = q.WhereIn(dao.UserAccount.Columns().PlanId, req.PlanIds)
 	}
 	if req.CreateTimeStart > 0 {
 		q = q.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)

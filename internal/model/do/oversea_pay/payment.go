@@ -15,7 +15,10 @@ type Payment struct {
 	Id                     interface{} // id
 	CompanyId              interface{} // company id
 	MerchantId             interface{} // merchant id
-	OpenApiId              interface{} // open api id
+	LastError              interface{} // last error
+	AuthorizeReason        interface{} //
+	Code                   interface{} //
+	GatewayPaymentMethod   interface{} //
 	UserId                 interface{} // user_id
 	SubscriptionId         interface{} // subscription id
 	GmtCreate              *gtime.Time // create time
@@ -32,7 +35,6 @@ type Payment struct {
 	TerminalIp             interface{} // client ip
 	CountryCode            interface{} // country code
 	AuthorizeStatus        interface{} // authorize status，0-waiting authorize，1-authorized，2-authorized_request
-	AuthorizeReason        interface{} //
 	GatewayId              interface{} // gateway_id
 	GatewayPaymentIntentId interface{} // gateway_payment_intent_id
 	GatewayPaymentId       interface{} // gateway_payment_id
@@ -43,10 +45,10 @@ type Payment struct {
 	InvoiceId              interface{} // invoice id
 	AppId                  interface{} // app id
 	ReturnUrl              interface{} // return url
+	OpenApiId              interface{} // open api id
 	GatewayEdition         interface{} // gateway edition
 	HidePaymentMethods     interface{} // hide_payment_methods
 	Verify                 interface{} // codeVerify
-	Code                   interface{} //
 	Token                  interface{} //
 	MetaData               interface{} // meta_data (json)
 	Automatic              interface{} // 0-no,1-yes
@@ -58,11 +60,9 @@ type Payment struct {
 	BalanceStart           interface{} // balance_start, utc time
 	BalanceEnd             interface{} // balance_end, utc time
 	InvoiceData            interface{} //
-	GatewayPaymentMethod   interface{} //
 	GasPayer               interface{} // who pay the gas, merchant|user
 	ExpireTime             interface{} // expire time, utc time
 	GatewayLink            interface{} //
 	CryptoAmount           interface{} // crypto_amount, cent
 	CryptoCurrency         interface{} // crypto_currency
-	LastError              interface{} // last error
 }

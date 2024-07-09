@@ -13,7 +13,10 @@ type Payment struct {
 	Id                     int64       `json:"id"                     description:"id"`                                                                     // id
 	CompanyId              int64       `json:"companyId"              description:"company id"`                                                             // company id
 	MerchantId             uint64      `json:"merchantId"             description:"merchant id"`                                                            // merchant id
-	OpenApiId              int64       `json:"openApiId"              description:"open api id"`                                                            // open api id
+	LastError              string      `json:"lastError"              description:"last error"`                                                             // last error
+	AuthorizeReason        string      `json:"authorizeReason"        description:""`                                                                       //
+	Code                   string      `json:"code"                   description:""`                                                                       //
+	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
 	UserId                 uint64      `json:"userId"                 description:"user_id"`                                                                // user_id
 	SubscriptionId         string      `json:"subscriptionId"         description:"subscription id"`                                                        // subscription id
 	GmtCreate              *gtime.Time `json:"gmtCreate"              description:"create time"`                                                            // create time
@@ -30,7 +33,6 @@ type Payment struct {
 	TerminalIp             string      `json:"terminalIp"             description:"client ip"`                                                              // client ip
 	CountryCode            string      `json:"countryCode"            description:"country code"`                                                           // country code
 	AuthorizeStatus        int         `json:"authorizeStatus"        description:"authorize status，0-waiting authorize，1-authorized，2-authorized_request"` // authorize status，0-waiting authorize，1-authorized，2-authorized_request
-	AuthorizeReason        string      `json:"authorizeReason"        description:""`                                                                       //
 	GatewayId              uint64      `json:"gatewayId"              description:"gateway_id"`                                                             // gateway_id
 	GatewayPaymentIntentId string      `json:"gatewayPaymentIntentId" description:"gateway_payment_intent_id"`                                              // gateway_payment_intent_id
 	GatewayPaymentId       string      `json:"gatewayPaymentId"       description:"gateway_payment_id"`                                                     // gateway_payment_id
@@ -41,10 +43,10 @@ type Payment struct {
 	InvoiceId              string      `json:"invoiceId"              description:"invoice id"`                                                             // invoice id
 	AppId                  string      `json:"appId"                  description:"app id"`                                                                 // app id
 	ReturnUrl              string      `json:"returnUrl"              description:"return url"`                                                             // return url
+	OpenApiId              int64       `json:"openApiId"              description:"open api id"`                                                            // open api id
 	GatewayEdition         string      `json:"gatewayEdition"         description:"gateway edition"`                                                        // gateway edition
 	HidePaymentMethods     string      `json:"hidePaymentMethods"     description:"hide_payment_methods"`                                                   // hide_payment_methods
 	Verify                 string      `json:"verify"                 description:"codeVerify"`                                                             // codeVerify
-	Code                   string      `json:"code"                   description:""`                                                                       //
 	Token                  string      `json:"token"                  description:""`                                                                       //
 	MetaData               string      `json:"metaData"               description:"meta_data (json)"`                                                       // meta_data (json)
 	Automatic              int         `json:"automatic"              description:"0-no,1-yes"`                                                             // 0-no,1-yes
@@ -56,11 +58,9 @@ type Payment struct {
 	BalanceStart           int64       `json:"balanceStart"           description:"balance_start, utc time"`                                                // balance_start, utc time
 	BalanceEnd             int64       `json:"balanceEnd"             description:"balance_end, utc time"`                                                  // balance_end, utc time
 	InvoiceData            string      `json:"invoiceData"            description:""`                                                                       //
-	GatewayPaymentMethod   string      `json:"gatewayPaymentMethod"   description:""`                                                                       //
 	GasPayer               string      `json:"gasPayer"               description:"who pay the gas, merchant|user"`                                         // who pay the gas, merchant|user
 	ExpireTime             int64       `json:"expireTime"             description:"expire time, utc time"`                                                  // expire time, utc time
 	GatewayLink            string      `json:"gatewayLink"            description:""`                                                                       //
 	CryptoAmount           int64       `json:"cryptoAmount"           description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency         string      `json:"cryptoCurrency"         description:"crypto_currency"`                                                        // crypto_currency
-	LastError              string      `json:"lastError"              description:"last error"`                                                             // last error
 }
