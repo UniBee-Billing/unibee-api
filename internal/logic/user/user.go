@@ -19,6 +19,7 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, 
 				subName = plan.PlanName
 			}
 			_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+				dao.UserAccount.Columns().PlanId:             one.PlanId,
 				dao.UserAccount.Columns().SubscriptionId:     subscriptionId,
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
 				dao.UserAccount.Columns().SubscriptionName:   subName,

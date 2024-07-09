@@ -11,6 +11,7 @@ import (
 	"unibee/internal/logic/subscription/billingcycle/cycle"
 	"unibee/internal/logic/subscription/service"
 	entity "unibee/internal/model/entity/oversea_pay"
+	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -123,5 +124,33 @@ func TaskForSubscriptionInitFailed(ctx context.Context, taskName string) {
 		}
 		time.Sleep(2 * time.Second)
 	}
+}
 
+func TaskForUserSubCompensate(ctx context.Context, taskName string) {
+	g.Log().Debug(ctx, taskName, "TaskForUserSubCompensate Start......")
+
+	var users []*entity.UserAccount
+	// query user who's planId is null but subId is not null
+	q := dao.UserAccount.Ctx(ctx).
+		Where(dao.UserAccount.Columns().IsDeleted, 0).
+		WhereNull(dao.UserAccount.Columns().PlanId).
+		WhereNotNull(dao.UserAccount.Columns().SubscriptionId)
+	err := q.Limit(0, 1000).
+		OmitEmpty().Scan(&users)
+	if err != nil {
+		g.Log().Errorf(ctx, "%s Error:%s", taskName, err.Error())
+		return
+	}
+
+	for _, user := range users {
+		if len(user.SubscriptionId) > 0 {
+			sub := query.GetSubscriptionByExternalSubscriptionId(ctx, user.SubscriptionId)
+			if sub != nil {
+				_, _ = dao.UserAccount.Ctx(ctx).Data(g.Map{
+					dao.UserAccount.Columns().PlanId:    sub.PlanId,
+					dao.UserAccount.Columns().GmtModify: gtime.Now(),
+				}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+			}
+		}
+	}
 }
