@@ -22,8 +22,9 @@ import (
 )
 
 var importTaskMap = map[string]_interface.BatchImportTask{
-	"UserImport":               user2.TaskUserImport{},
-	"ActiveSubscriptionImport": subscription.TaskActiveSubscriptionImport{},
+	"UserImport":                user2.TaskUserImport{},
+	"ActiveSubscriptionImport":  subscription.TaskActiveSubscriptionImport{},
+	"HistorySubscriptionImport": subscription.TaskHistorySubscriptionImport{},
 }
 
 func GetImportTaskImpl(task string) _interface.BatchImportTask {

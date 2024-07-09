@@ -201,6 +201,16 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		if createTime.Timestamp() > gtime.Now().Timestamp() {
 			return target, gerror.New("Error,CreateTime should earlier then now")
 		}
+		if currentPeriodStart.Timestamp() < createTime.Timestamp() || currentPeriodStart.Timestamp() < billingCycleAnchor.Timestamp() {
+			return target, gerror.New("Error,currentPeriodStart should later then createTime and billingCycleAnchor")
+		}
+		if currentPeriodEnd.Timestamp() <= currentPeriodStart.Timestamp() ||
+			currentPeriodEnd.Timestamp() <= billingCycleAnchor.Timestamp() ||
+			currentPeriodEnd.Timestamp() <= firstPaidTime.Timestamp() ||
+			currentPeriodEnd.Timestamp() <= createTime.Timestamp() {
+			return target, gerror.New("Error,currentPeriodEnd should later then currentPeriodStart,firstPaidTime,createTime and billingCycleAnchor")
+		}
+
 		if len(target.StripeUserId) > 0 {
 			stripeUserId = target.StripeUserId
 			if gateway == nil || gateway.GatewayType != consts.GatewayTypeCard {
@@ -238,6 +248,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error, no permission to override," + one.Data)
 		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+			dao.Subscription.Columns().Status:                      consts.SubStatusActive,
 			dao.Subscription.Columns().Amount:                      amount,
 			dao.Subscription.Columns().Currency:                    currency,
 			dao.Subscription.Columns().PlanId:                      plan.Id,

@@ -39,7 +39,7 @@ type NewRes struct {
 type NewImportReq struct {
 	g.Meta `path:"/new_import" method:"post" mime:"multipart/form-data" tags:"Task" summary:"NewImport"`
 	File   *ghttp.UploadFile `json:"file" type:"file" dc:"File To Upload"`
-	Task   string            `json:"task" dc:"Task,UserImport|ActiveSubscriptionImport"`
+	Task   string            `json:"task" dc:"Task,UserImport|ActiveSubscriptionImport|HistorySubscriptionImport"`
 }
 type NewImportRes struct {
 }
