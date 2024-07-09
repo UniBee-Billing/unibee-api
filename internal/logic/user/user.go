@@ -23,6 +23,7 @@ func UpdateUserDefaultSubscriptionForUpdate(ctx context.Context, userId uint64, 
 				dao.UserAccount.Columns().SubscriptionId:     subscriptionId,
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
 				dao.UserAccount.Columns().SubscriptionName:   subName,
+				dao.UserAccount.Columns().BillingType:        1,
 				dao.UserAccount.Columns().GmtModify:          gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, userId).OmitNil().Update()
 			if err != nil {
@@ -43,6 +44,7 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 				subName = plan.PlanName
 			}
 			_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
+				dao.UserAccount.Columns().PlanId:             one.PlanId,
 				dao.UserAccount.Columns().SubscriptionId:     subscriptionId,
 				dao.UserAccount.Columns().SubscriptionStatus: one.Status,
 				dao.UserAccount.Columns().SubscriptionName:   subName,
