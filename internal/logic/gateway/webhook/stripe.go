@@ -541,6 +541,7 @@ func (s StripeWebhook) processInvoiceWebhook(ctx context.Context, eventType stri
 			paymentData = paymentIntentDetail.PaymentData
 			paymentCode = paymentIntentDetail.PaymentCode
 			lastErr = paymentIntentDetail.LastError
+			invoiceDetails.GatewayDefaultPaymentMethod = paymentIntentDetail.GatewayPaymentMethod
 		}
 	}
 
