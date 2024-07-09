@@ -70,7 +70,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 	return HandlePayFailure(ctx, &HandlePayReq{
 		PaymentId:     req.PaymentId,
 		PayStatusEnum: consts.PaymentFailed,
-		Reason:        "system cancel by expired",
+		Reason:        "FailedByExpire",
 	})
 }
 
@@ -221,6 +221,10 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 		return errors.New("payment already success")
 	}
 
+	if len(req.Reason) == 0 {
+		req.Reason = payment.FailureReason
+	}
+
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
 			result, err := transaction.Update(dao.Payment.Table(), g.Map{dao.Payment.Columns().Status: consts.PaymentCancelled, dao.Payment.Columns().CancelTime: gtime.Now().Timestamp(), dao.Payment.Columns().FailureReason: req.Reason},
@@ -288,6 +292,10 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success")
 		return errors.New("payment already success")
+	}
+
+	if len(req.Reason) == 0 {
+		req.Reason = payment.FailureReason
 	}
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentCancel, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {

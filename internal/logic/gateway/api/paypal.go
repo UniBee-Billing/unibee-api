@@ -379,6 +379,10 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 	if item.CreateTime != nil {
 		createTime = gtime.New(item.CreateTime)
 	}
+	var lastError = ""
+	if len(item.FailureReason) > 0 {
+		lastError = item.FailureReason
+	}
 	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.ID,
 		Status:               status,
@@ -396,6 +400,7 @@ func (p Paypal) parsePaypalPayment(ctx context.Context, gateway *entity.Merchant
 		CreateTime:           createTime,
 		CancelTime:           cancelTime,
 		Link:                 approveLink,
+		LastError:            lastError,
 	}, nil
 }
 

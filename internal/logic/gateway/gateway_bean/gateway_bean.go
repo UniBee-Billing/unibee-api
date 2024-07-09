@@ -89,6 +89,7 @@ type GatewayPaymentRo struct {
 	Status               int         `json:"status"`
 	AuthorizeStatus      int         `json:"captureStatus"`
 	AuthorizeReason      string      `json:"authorizeReason" `
+	LastError            string      `json:"lastError" `
 	Currency             string      `json:"currency"              `
 	TotalAmount          int64       `json:"totalAmount"              `
 	PaymentAmount        int64       `json:"paymentAmount"              `

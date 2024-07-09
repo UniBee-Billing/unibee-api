@@ -942,6 +942,7 @@ type (
 	Order struct {
 		ID            string                 `json:"id,omitempty"`
 		Status        string                 `json:"status,omitempty"`
+		FailureReason string                 `json:"failure_reason,omitempty"`
 		Intent        string                 `json:"intent,omitempty"`
 		Payer         *PayerWithNameAndPhone `json:"payer,omitempty"`
 		PaymentSource *PaymentSource         `json:"payment_source,omitempty"`

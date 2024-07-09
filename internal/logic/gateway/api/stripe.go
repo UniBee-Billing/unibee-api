@@ -857,6 +857,10 @@ func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.Merchant
 			}
 		}
 	}
+	var lastError = ""
+	if item.LastPaymentError != nil {
+		lastError = item.LastPaymentError.Msg
+	}
 	return &gateway_bean.GatewayPaymentRo{
 		GatewayPaymentId:     item.ID,
 		Status:               status,
@@ -872,5 +876,6 @@ func (s Stripe) parseStripePayment(ctx context.Context, gateway *entity.Merchant
 		PaidTime:             gtime.NewFromTimeStamp(item.Created),
 		CreateTime:           gtime.NewFromTimeStamp(item.Created),
 		CancelTime:           gtime.NewFromTimeStamp(item.CanceledAt),
+		LastError:            lastError,
 	}
 }
