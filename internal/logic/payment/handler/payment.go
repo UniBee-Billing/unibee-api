@@ -48,7 +48,7 @@ func UpdatePaymentLastGatewayError(ctx context.Context, paymentId string, lastEr
 }
 
 func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
+	g.Log().Infof(ctx, "%s-HandlePayExpired, req=%s", req.PaymentId, utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
@@ -81,7 +81,7 @@ func HandlePayExpired(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "HandlePayExpired, req=%s", utility.MarshalToJsonString(req))
+	g.Log().Infof(ctx, "%s-HandlePayExpired, req=%s", req.PaymentId, utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment is nil, paymentId=%s", req.PaymentId)
@@ -106,11 +106,11 @@ func HandleCaptureFailed(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err error) {
-	g.Log().Infof(ctx, "HandlePayAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
-		g.Log().Infof(ctx, "payment is nil")
+		g.Log().Infof(ctx, "HandlePayAuthorized payment is nil")
 		return errors.New("payment not found")
 	}
+	g.Log().Infof(ctx, "%s-HandlePayAuthorized, payment=%s", payment.PaymentId, utility.MarshalToJsonString(payment))
 	if payment.AuthorizeStatus == consts.Authorized {
 		return nil
 	}
@@ -154,11 +154,11 @@ func HandlePayAuthorized(ctx context.Context, payment *entity.Payment) (err erro
 }
 
 func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, authorizeReason string, paymentData string, paymentCode string) (err error) {
-	g.Log().Infof(ctx, "HandlePayNeedAuthorized, payment=%s", utility.MarshalToJsonString(payment))
 	if payment == nil {
-		g.Log().Infof(ctx, "payment is nil")
+		g.Log().Infof(ctx, "HandlePayNeedAuthorized payment is nil")
 		return errors.New("payment not found")
 	}
+	g.Log().Infof(ctx, "%s-HandlePayNeedAuthorized, payment=%s", payment.PaymentId, utility.MarshalToJsonString(payment))
 
 	_, err = redismq.SendTransaction(redismq.NewRedisMQMessage(redismqcmd.TopicPaymentAuthorized, payment.PaymentId), func(messageToSend *redismq.Message) (redismq.TransactionStatus, error) {
 		err = dao.Payment.DB().Transaction(ctx, func(ctx context.Context, transaction gdb.TX) error {
@@ -211,7 +211,7 @@ func HandlePayNeedAuthorized(ctx context.Context, payment *entity.Payment, autho
 }
 
 func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "HandlePayCancel, req=%s", utility.MarshalToJsonString(req))
+	g.Log().Infof(ctx, "%s-HandlePayCancel, req=%s", req.PaymentId, utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
@@ -284,7 +284,7 @@ func HandlePayCancel(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "handlePayFailure, req=%s", utility.MarshalToJsonString(req))
+	g.Log().Infof(ctx, "%s-handlePayFailure, req=%s", req.PaymentId, utility.MarshalToJsonString(req))
 	payment := query.GetPaymentByPaymentId(ctx, req.PaymentId)
 	if payment == nil {
 		g.Log().Infof(ctx, "payment null, paymentId=%s", req.PaymentId)
@@ -356,7 +356,7 @@ func HandlePayFailure(ctx context.Context, req *HandlePayReq) (err error) {
 }
 
 func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
-	g.Log().Infof(ctx, "handlePaySuccess, req=%s", utility.MarshalToJsonString(req))
+	g.Log().Infof(ctx, "%s-handlePaySuccess, req=%s", req.PaymentId, utility.MarshalToJsonString(req))
 	if len(req.PaymentId) == 0 {
 		return errors.New("invalid param PaymentId is nil")
 	}
@@ -369,6 +369,16 @@ func HandlePaySuccess(ctx context.Context, req *HandlePayReq) (err error) {
 
 	if payment.Status == consts.PaymentSuccess {
 		g.Log().Infof(ctx, "payment already success, paymentId=%s", req.PaymentId)
+		if len(req.PaymentCode) == 0 {
+			req.PaymentCode = payment.Code
+		}
+		if len(req.GatewayPaymentMethod) == 0 {
+			req.GatewayPaymentMethod = payment.GatewayPaymentMethod
+		}
+		_, _ = dao.Payment.Ctx(ctx).Data(g.Map{
+			dao.Payment.Columns().Code:                 req.PaymentCode,
+			dao.Payment.Columns().GatewayPaymentMethod: req.GatewayPaymentMethod,
+		}).Where(dao.Payment.Columns().PaymentId, payment.PaymentId).OmitNil().Update()
 		return nil
 	}
 
