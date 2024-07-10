@@ -28,7 +28,7 @@ func (status InvoiceStatusEnum) Description() string {
 	case InvoiceStatusPending:
 		return "Pending"
 	case InvoiceStatusPaid:
-		return "Active"
+		return "Paid"
 	case InvoiceStatusCancelled:
 		return "Cancelled"
 	case InvoiceStatusFailed:
@@ -36,7 +36,7 @@ func (status InvoiceStatusEnum) Description() string {
 	case InvoiceStatusProcessing:
 		return "Processing"
 	case InvoiceStatusReversed:
-		return "Processing"
+		return "Reversed"
 	default:
 		return "Init"
 	}

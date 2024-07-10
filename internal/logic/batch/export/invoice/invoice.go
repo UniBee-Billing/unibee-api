@@ -108,6 +108,14 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			if one.Subscription == nil {
 				one.Subscription = &bean.SubscriptionSimplify{}
 			}
+			invoiceType := "Invoice"
+			OriginInvoiceId := ""
+			if one.Refund != nil {
+				invoiceType = "Credit Note"
+				if one.Payment != nil {
+					OriginInvoiceId = one.Payment.InvoiceId
+				}
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
@@ -117,6 +125,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				Email:                          email,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
+				Type:                           invoiceType,
 				Gateway:                        invoiceGateway,
 				MerchantName:                   merchant.Name,
 				DiscountCode:                   one.DiscountCode,
@@ -141,6 +150,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor),
 				CreateFrom:                     one.CreateFrom,
 				CountryCode:                    one.CountryCode,
+				OriginInvoiceId:                OriginInvoiceId,
 			})
 		}
 	}
@@ -156,6 +166,7 @@ type ExportInvoiceEntity struct {
 	Email                          string      `json:"Email"              `
 	InvoiceName                    string      `json:"InvoiceName"`
 	ProductName                    string      `json:"ProductName"`
+	Type                           string      `json:"type"`
 	Gateway                        string      `json:"Gateway"            `
 	MerchantName                   string      `json:"MerchantName"       `
 	DiscountCode                   string      `json:"DiscountCode"`
@@ -179,5 +190,6 @@ type ExportInvoiceEntity struct {
 	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"  ` // trial_end, utc time
 	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  ` // billing_cycle_anchor
 	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`      // create from
-	CountryCode                    string      `json:"CountryCode"                    description:""`                 //
+	CountryCode                    string      `json:"CountryCode"                    description:""`
+	OriginInvoiceId                string      `json:"originInvoiceId"                    description:""`
 }
