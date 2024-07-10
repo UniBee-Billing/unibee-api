@@ -3,7 +3,9 @@ package merchant
 import (
 	"context"
 	"unibee/api/bean/detail"
+	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
+	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
 
@@ -16,5 +18,15 @@ func (c *ControllerInvoice) Detail(ctx context.Context, req *invoice.DetailReq) 
 	utility.Assert(in != nil, "invoice not found")
 	utility.Assert(in.MerchantId == _interface.GetMerchantId(ctx), "wrong merchant account")
 
-	return &invoice.DetailRes{Invoice: detail.ConvertInvoiceToDetail(ctx, in)}, nil
+	var creditNoteEntities []*entity.Invoice
+	var creditNotes = make([]*detail.InvoiceDetail, 0)
+	_ = dao.Invoice.Ctx(ctx).
+		Where(dao.Invoice.Columns().MerchantId, in.MerchantId).
+		Where(dao.Invoice.Columns().PaymentId, in.PaymentId).
+		WhereNotNull(dao.Invoice.Columns().RefundId).Scan(&creditNoteEntities)
+	for _, one := range creditNoteEntities {
+		creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))
+	}
+
+	return &invoice.DetailRes{Invoice: detail.ConvertInvoiceToDetail(ctx, in), CreditNotes: creditNotes}, nil
 }

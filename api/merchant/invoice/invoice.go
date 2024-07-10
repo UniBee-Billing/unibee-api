@@ -45,7 +45,8 @@ type DetailReq struct {
 	InvoiceId string `json:"invoiceId" dc:"The unique id of invoice" v:"required"`
 }
 type DetailRes struct {
-	Invoice *detail.InvoiceDetail `json:"invoice" dc:"Invoice Detail Object"`
+	Invoice     *detail.InvoiceDetail   `json:"invoice" dc:"Invoice Detail Object"`
+	CreditNotes []*detail.InvoiceDetail `json:"creditNotes" dc:"CreditNotes Object List Link To Invoice"`
 }
 
 type ListReq struct {
