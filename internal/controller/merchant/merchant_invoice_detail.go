@@ -26,7 +26,9 @@ func (c *ControllerInvoice) Detail(ctx context.Context, req *invoice.DetailReq) 
 			Where(dao.Invoice.Columns().PaymentId, in.PaymentId).
 			WhereNotNull(dao.Invoice.Columns().RefundId).Scan(&creditNoteEntities)
 		for _, one := range creditNoteEntities {
-			creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))
+			if one.Id != in.Id {
+				creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))
+			}
 		}
 	}
 
