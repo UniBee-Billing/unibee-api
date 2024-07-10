@@ -20,12 +20,14 @@ func (c *ControllerInvoice) Detail(ctx context.Context, req *invoice.DetailReq) 
 
 	var creditNoteEntities []*entity.Invoice
 	var creditNotes = make([]*detail.InvoiceDetail, 0)
-	_ = dao.Invoice.Ctx(ctx).
-		Where(dao.Invoice.Columns().MerchantId, in.MerchantId).
-		Where(dao.Invoice.Columns().PaymentId, in.PaymentId).
-		WhereNotNull(dao.Invoice.Columns().RefundId).Scan(&creditNoteEntities)
-	for _, one := range creditNoteEntities {
-		creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))
+	if len(in.RefundId) == 0 {
+		_ = dao.Invoice.Ctx(ctx).
+			Where(dao.Invoice.Columns().MerchantId, in.MerchantId).
+			Where(dao.Invoice.Columns().PaymentId, in.PaymentId).
+			WhereNotNull(dao.Invoice.Columns().RefundId).Scan(&creditNoteEntities)
+		for _, one := range creditNoteEntities {
+			creditNotes = append(creditNotes, detail.ConvertInvoiceToDetail(ctx, one))
+		}
 	}
 
 	return &invoice.DetailRes{Invoice: detail.ConvertInvoiceToDetail(ctx, in), CreditNotes: creditNotes}, nil
