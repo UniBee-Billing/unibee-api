@@ -21,11 +21,11 @@ type TaskHistorySubscriptionImport struct {
 }
 
 func (t TaskHistorySubscriptionImport) TaskName() string {
-	return "v1"
+	return "HistorySubscriptionImport"
 }
 
 func (t TaskHistorySubscriptionImport) TemplateVersion() string {
-	return "HistorySubscriptionImport"
+	return "v1"
 }
 
 func (t TaskHistorySubscriptionImport) TemplateHeader() interface{} {
