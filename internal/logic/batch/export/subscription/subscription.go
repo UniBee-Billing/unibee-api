@@ -82,8 +82,20 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 	if result != nil {
 		for _, one := range result {
 			var subGateway = ""
+			var stripeUserId = ""
+			var stripePaymentMethod = ""
+			var paypalVaultId = ""
 			if one.Gateway != nil {
 				subGateway = one.Gateway.GatewayName
+				if one.Gateway.GatewayType == consts.GatewayTypeCard {
+					gatewayUser := query.GetGatewayUser(ctx, one.Subscription.UserId, one.Gateway.Id)
+					if gatewayUser != nil {
+						stripeUserId = gatewayUser.GatewayUserId
+						stripePaymentMethod = one.Subscription.DefaultPaymentMethodId
+					}
+				} else if one.Gateway.GatewayType == consts.GatewayTypePaypal {
+					paypalVaultId = one.Subscription.DefaultPaymentMethodId
+				}
 			}
 			var canAtPeriodEnd = "No"
 			if one.Subscription.CancelAtPeriodEnd == 1 {
@@ -102,6 +114,7 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 			if one.Plan == nil {
 				one.Plan = &bean.PlanSimplify{}
 			}
+
 			mainList = append(mainList, &ExportSubscriptionEntity{
 				SubscriptionId:         one.Subscription.SubscriptionId,
 				ExternalSubscriptionId: one.Subscription.ExternalSubscriptionId,
@@ -130,6 +143,9 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 				CountryCode:            one.Subscription.CountryCode,
 				TaxPercentage:          utility.ConvertTaxPercentageToPercentageString(one.Subscription.TaxPercentage),
 				CreateTime:             gtime.NewFromTimeStamp(one.Subscription.CreateTime),
+				StripeUserId:           stripeUserId,
+				StripePaymentMethod:    stripePaymentMethod,
+				PaypalVaultId:          paypalVaultId,
 			})
 		}
 	}
@@ -164,4 +180,7 @@ type ExportSubscriptionEntity struct {
 	CountryCode            string      `json:"CountryCode"        `
 	TaxPercentage          string      `json:"TaxPercentage"      `
 	CreateTime             *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"   `
+	StripeUserId           string      `json:"StripeUserId"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
+	StripePaymentMethod    string      `json:"StripePaymentMethod"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
+	PaypalVaultId          string      `json:"PaypalVaultId"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
 }
