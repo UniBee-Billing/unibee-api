@@ -133,10 +133,15 @@ func (s Stripe) GatewayUserPaymentMethodListQuery(ctx context.Context, gateway *
 		}
 	} else {
 		utility.Assert(req.UserId > 0, "userId is nil")
-		gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, req.UserId)
+		gatewayUserId := req.GatewayUserId
+		if len(gatewayUserId) == 0 {
+			gatewayUser := QueryAndCreateGatewayUser(ctx, gateway, req.UserId)
+			utility.Assert(gatewayUser != nil, "stripe create customer error")
+			gatewayUserId = gatewayUser.GatewayUserId
+		}
 
 		params := &stripe.CustomerListPaymentMethodsParams{
-			Customer: stripe.String(gatewayUser.GatewayUserId),
+			Customer: stripe.String(gatewayUserId),
 		}
 		params.Limit = stripe.Int64(10)
 		result := customer.ListPaymentMethods(params)

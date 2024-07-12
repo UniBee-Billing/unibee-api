@@ -166,7 +166,8 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
 		}
 		listQuery, err := api.GetGatewayServiceProvider(ctx, gatewayId).GatewayUserPaymentMethodListQuery(ctx, gateway, &gateway_bean.GatewayUserPaymentMethodReq{
-			UserId: user.Id,
+			UserId:        user.Id,
+			GatewayUserId: target.StripeUserId,
 		})
 		if err != nil {
 			g.Log().Errorf(ctx, "Get StripePayment MethodList error:%v", err.Error())
