@@ -161,6 +161,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	}
 	if len(target.PaypalVaultId) > 0 && gateway.GatewayType == consts.GatewayTypePaypal {
 		gatewayPaymentMethod = target.PaypalVaultId
+		// todo mark check paypal vaultId
 	} else if len(target.StripePaymentMethod) > 0 && gateway.GatewayType == consts.GatewayTypeCard {
 		if len(target.StripeUserId) == 0 {
 			return target, gerror.New("Error, StripeUserId is blank while StripePaymentMethod is not")
