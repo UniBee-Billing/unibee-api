@@ -141,6 +141,9 @@ func (t TaskHistorySubscriptionImport) ImportRow(ctx context.Context, task *enti
 		if one.Data != tag {
 			return target, gerror.New("Error, no permission to override," + one.Data)
 		}
+		if one.UserId != user.Id {
+			return target, gerror.New("Error, user not match")
+		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().Amount:                 amount,
 			dao.Subscription.Columns().Currency:               currency,
