@@ -153,7 +153,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 		dao.Subscription.Columns().TaxPercentage:          invoice.TaxPercentage,
 		dao.Subscription.Columns().DiscountCode:           recurringDiscountCode,
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
-		dao.Subscription.Columns().Data:                   fmt.Sprintf("AutoRenewBy-%v", invoice.InvoiceId),
+		dao.Subscription.Columns().Data:                   fmt.Sprintf("AutoChargeBy-%v", invoice.InvoiceId),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
 		return err
