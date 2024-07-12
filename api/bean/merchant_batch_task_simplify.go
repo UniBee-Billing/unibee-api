@@ -16,7 +16,7 @@ type MerchantBatchTaskSimplify struct {
 	StartTime      int64  `json:"startTime"     description:"task_start_time"`                                   // task_start_time
 	FinishTime     int64  `json:"finishTime"    description:"task_finish_time"`                                  // task_finish_time
 	TaskCost       int    `json:"taskCost"      description:"task cost time(second)"`                            // task cost time(second)
-	FailReason     string `json:"failReason"    description:"reason of failure"`                                 // reason of failure
+	FailureReason  string `json:"failureReason"    description:"reason of failure"`                              // reason of failure
 	TaskType       int    `json:"taskType"      description:"type，0-download，1-upload"`                          // type，0-download，1-upload
 	SuccessCount   int64  `json:"successCount"  description:"success_count"`                                     // success_count
 	UploadFileUrl  string `json:"uploadFileUrl" description:"the file url of upload type task"`                  // the file url of upload type task
@@ -39,7 +39,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		StartTime:      one.StartTime,
 		FinishTime:     one.FinishTime,
 		TaskCost:       one.TaskCost,
-		FailReason:     one.FailReason,
+		FailureReason:  one.FailReason,
 		TaskType:       one.TaskType,
 		SuccessCount:   one.SuccessCount,
 		UploadFileUrl:  one.UploadFileUrl,
