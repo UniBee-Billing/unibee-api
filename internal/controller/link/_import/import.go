@@ -35,7 +35,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	file := excelize.NewFile()
-	err := file.SetSheetName("Sheet1", taskImpl.TaskName())
+	err := file.SetSheetName("Sheet1", batch.GeneralExportImportSheetName)
 	if err != nil {
 		g.Log().Errorf(r.Context(), err.Error())
 		r.Response.WriteHeader(http.StatusBadRequest)
@@ -43,7 +43,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 	//Create Stream Writer
-	writer, err := file.NewStreamWriter(taskImpl.TaskName())
+	writer, err := file.NewStreamWriter(batch.GeneralExportImportSheetName)
 	//Update Width Height
 	err = writer.SetColWidth(1, 15, 12)
 	if err != nil {

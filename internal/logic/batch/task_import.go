@@ -114,14 +114,14 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 		}
 
 		//Set Header
-		err = file.SetSheetName("Sheet1", taskImpl.TaskName())
+		err = file.SetSheetName("Sheet1", GeneralExportImportSheetName)
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)
 			return
 		}
 		//Create Stream Writer
-		writer, err := file.NewStreamWriter(taskImpl.TaskName())
+		writer, err := file.NewStreamWriter(GeneralExportImportSheetName)
 		//Update Width Height
 		err = writer.SetColWidth(1, 15, 12)
 		if err != nil {
@@ -158,7 +158,7 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			failureTask(ctx, task.Id, err)
 			return
 		}
-		readerRows, err := reader.GetRows(taskImpl.TaskName())
+		readerRows, err := reader.GetRows(GeneralExportImportSheetName)
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)

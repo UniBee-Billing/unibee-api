@@ -11,6 +11,8 @@ import (
 	"unibee/utility"
 )
 
+const GeneralExportImportSheetName = "Sheet1"
+
 func RefactorHeaders(obj interface{}, skipColumnIndexes []int) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
