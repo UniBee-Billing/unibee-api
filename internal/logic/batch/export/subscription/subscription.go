@@ -180,7 +180,7 @@ type ExportSubscriptionEntity struct {
 	CountryCode            string      `json:"CountryCode"        `
 	TaxPercentage          string      `json:"TaxPercentage"      `
 	CreateTime             *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"   `
-	StripeUserId           string      `json:"StripeUserId"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
-	StripePaymentMethod    string      `json:"StripePaymentMethod"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
-	PaypalVaultId          string      `json:"PaypalVaultId"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
+	StripeUserId           string      `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
+	StripePaymentMethod    string      `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
+	PaypalVaultId          string      `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `
 }
