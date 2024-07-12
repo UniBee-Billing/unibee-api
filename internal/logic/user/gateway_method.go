@@ -31,6 +31,8 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 		paymentMethod := method.QueryPaymentMethod(ctx, user.MerchantId, user.Id, gatewayId, paymentMethodId)
 		utility.Assert(paymentMethod != nil, "card not found")
 		newPaymentMethodId = paymentMethodId
+	} else if gateway.GatewayType == consts.GatewayTypePaypal && len(paymentMethodId) > 0 {
+		newPaymentMethodId = paymentMethodId
 	}
 	gatewayUser := query.GetGatewayUser(ctx, userId, gatewayId)
 	if len(newPaymentMethodId) == 0 && gatewayUser != nil && len(gatewayUser.GatewayDefaultPaymentMethod) > 0 {
