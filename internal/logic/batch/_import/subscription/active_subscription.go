@@ -235,6 +235,10 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 				if err != nil || response == nil || len(response.ID) == 0 || response.ID != stripeUserId {
 					return target, gerror.New("Error, can't get StripeUserId from stripe")
 				}
+				//// todo mark verify email from stripe
+				//if response.Email != user.Email {
+				//	return target, gerror.New("Error, stripe customer email not equal user's email")
+				//}
 				gatewayUser, err = query.CreateGatewayUser(ctx, user.Id, gatewayId, stripeUserId)
 				if err != nil {
 					return target, err
