@@ -39,6 +39,8 @@ func (status SubscriptionStatusEnum) Description() string {
 		return "Cancelled"
 	case SubStatusExpired:
 		return "Expired"
+	case SubStatusFailed:
+		return "Failed"
 	case SubStatusSuspended:
 		return "Suspended"
 	case SubStatusIncomplete:
@@ -62,6 +64,8 @@ func SubStatusToEnum(status int) SubscriptionStatusEnum {
 		return SubStatusCancelled
 	case SubStatusExpired:
 		return SubStatusExpired
+	case SubStatusFailed:
+		return SubStatusFailed
 	case SubStatusSuspended:
 		return SubStatusSuspended
 	case SubStatusIncomplete:
