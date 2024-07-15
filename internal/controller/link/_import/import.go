@@ -81,7 +81,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 
 	// addComments
 	for _, comment := range refactorHeaderComments(taskImpl.TemplateHeader(), nil) {
-		err = file.AddComment(taskImpl.TaskName(), comment)
+		err = file.AddComment("Sheet1", comment)
 	}
 
 	err = file.SaveAs(fileName)
