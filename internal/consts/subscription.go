@@ -20,6 +20,7 @@ const (
 	SubStatusSuspended        = 6
 	SubStatusIncomplete       = 7
 	SubStatusProcessing       = 8
+	SubStatusFailed           = 9
 	PendingSubStatusInit      = 0
 	PendingSubStatusCreate    = 1
 	PendingSubStatusFinished  = 2
