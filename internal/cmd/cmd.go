@@ -289,15 +289,15 @@ var (
 						system.NewSubscription(),
 					)
 				})
+				group.Group("/payment", func(group *ghttp.RouterGroup) {
+					group.Bind(
+						system.NewPayment(),
+					)
+				})
 				if !config.GetConfigInstance().IsProd() {
 					group.Group("/invoice", func(group *ghttp.RouterGroup) {
 						group.Bind(
 							system.NewInvoice(),
-						)
-					})
-					group.Group("/payment", func(group *ghttp.RouterGroup) {
-						group.Bind(
-							system.NewPayment(),
 						)
 					})
 					group.Group("/refund", func(group *ghttp.RouterGroup) {

@@ -13,7 +13,7 @@ import (
 
 const GeneralExportImportSheetName = "Sheet1"
 
-func RefactorHeaders(obj interface{}, skipColumnIndexes []int) []interface{} {
+func RefactorHeaders(obj interface{}, exportColumns []string) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
 		return out
@@ -29,20 +29,29 @@ func RefactorHeaders(obj interface{}, skipColumnIndexes []int) []interface{} {
 	t := v.Type()
 	// range properties
 	// get Tag named "json" as key
+	var allKeys = make(map[string]string)
 	for i := 0; i < v.NumField(); i++ {
-		if utility.IsIntInArray(skipColumnIndexes, i) {
-			continue
-		}
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
 			out = append(out, key)
+			allKeys[key] = "1"
 		}
 	}
 
-	return out
+	if exportColumns != nil && len(exportColumns) > 0 {
+		out = nil
+		for _, key := range exportColumns {
+			if _, ok := allKeys[key]; ok {
+				out = append(out, key)
+			}
+		}
+		return out
+	} else {
+		return out
+	}
 }
 
-func RefactorData(obj interface{}, timeZone string, skipColumnIndexes []int) []interface{} {
+func RefactorData(obj interface{}, timeZone string, exportColumns []string) []interface{} {
 	out := make([]interface{}, 0)
 	if obj == nil {
 		return out
@@ -58,10 +67,8 @@ func RefactorData(obj interface{}, timeZone string, skipColumnIndexes []int) []i
 	t := v.Type()
 	// range properties
 	// get Tag named "json" as key
+	var allValue = make(map[string]interface{})
 	for i := 0; i < v.NumField(); i++ {
-		if utility.IsIntInArray(skipColumnIndexes, i) {
-			continue
-		}
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
 			value := v.Field(i).Interface()
@@ -79,10 +86,27 @@ func RefactorData(obj interface{}, timeZone string, skipColumnIndexes []int) []i
 					}
 				}
 			}
+			if value == nil {
+				allValue[key] = ""
+			} else {
+				allValue[key] = value
+			}
 			out = append(out, value)
 		}
 	}
-	return out
+
+	if exportColumns != nil && len(exportColumns) > 0 {
+		out = nil
+		for _, key := range exportColumns {
+			if value, ok := allValue[key]; ok {
+				out = append(out, value)
+			}
+		}
+		return out
+	} else {
+		return out
+	}
+
 }
 
 func failureTask(ctx context.Context, taskId int64, err error) {

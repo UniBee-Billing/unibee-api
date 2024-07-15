@@ -38,11 +38,11 @@ func GetExportTaskImpl(task string) _interface.BatchExportTask {
 }
 
 type MerchantBatchExportTaskInternalRequest struct {
-	MerchantId        uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
-	MemberId          uint64                 `json:"memberId" dc:"MemberId" `
-	Task              string                 `json:"task" dc:"Task"`
-	Payload           map[string]interface{} `json:"payload" dc:"Payload"`
-	SkipColumnIndexes []int                  `json:"skipColumnIndexes" dc:"SkipColumnIndexes, the column will be skipped in the export file if its index specified"`
+	MerchantId    uint64                 `json:"merchantId" dc:"MerchantId" v:"MerchantId"`
+	MemberId      uint64                 `json:"memberId" dc:"MemberId" `
+	Task          string                 `json:"task" dc:"Task"`
+	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
+	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list"`
 }
 
 func ExportColumnList(ctx context.Context, task string) []interface{} {
@@ -89,11 +89,11 @@ func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskIn
 	id, _ := result.LastInsertId()
 	one.Id = int64(uint(id))
 	utility.Assert(one.Id > 0, "BatchExportTask record insert failure")
-	startRunExportTaskBackground(one, task, req.SkipColumnIndexes)
+	startRunExportTaskBackground(one, task, req.ExportColumns)
 	return nil
 }
 
-func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask, skipColumnIndexes []int) {
+func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask, exportColumns []string) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -147,7 +147,7 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 
-		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), skipColumnIndexes), excelize.RowOpts{StyleID: headerStyleID})
+		err = writer.SetRow("A1", RefactorHeaders(taskImpl.Header(), exportColumns), excelize.RowOpts{StyleID: headerStyleID})
 		if err != nil {
 			g.Log().Errorf(ctx, err.Error())
 			failureTask(ctx, task.Id, err)
@@ -169,7 +169,7 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 					continue
 				}
 				cell, _ := excelize.CoordinatesToCellName(1, page*count+i+2)
-				_ = writer.SetRow(cell, RefactorData(one, "", skipColumnIndexes))
+				_ = writer.SetRow(cell, RefactorData(one, "", exportColumns))
 			}
 			_, _ = dao.MerchantBatchTask.Ctx(ctx).Data(g.Map{
 				dao.MerchantBatchTask.Columns().SuccessCount:   gdb.Raw(fmt.Sprintf("success_count + %v", len(list))),

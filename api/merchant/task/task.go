@@ -27,10 +27,10 @@ type ExportColumnListRes struct {
 }
 
 type NewReq struct {
-	g.Meta            `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
-	Task              string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
-	Payload           map[string]interface{} `json:"payload" dc:"Payload"`
-	SkipColumnIndexes []int                  `json:"skipColumnIndexes" dc:"SkipColumnIndexes, the column will be skipped in the export file if its index specified, start from 0"`
+	g.Meta        `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
+	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 }
 
 type NewRes struct {
