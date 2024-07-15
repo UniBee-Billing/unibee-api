@@ -79,4 +79,5 @@ const (
 	SubTimeLineStatusFinished   = 2
 	SubTimeLineStatusCancelled  = 3
 	SubTimeLineStatusExpired    = 4
+	SubTimeLineStatusFailed     = 5
 )

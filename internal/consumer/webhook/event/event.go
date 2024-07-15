@@ -13,6 +13,7 @@ const (
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_TRACK_USER_OUTOFSUBSCRIBE = "subscription.track.user.outofsubscribe" // track will cancel at period end
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_INVOICE_TRACK             = "subscription.latest_invoice.track"      // pending every day at 3 days before period end
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_EXPIRED                   = "subscription.expired"
+	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_FAILED                    = "subscription.failed"
 
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_CREATED   = "subscription.onetime_addon.created"
 	UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_ONETIME_ADDON_SUCCESS   = "subscription.onetime_addon.success"
