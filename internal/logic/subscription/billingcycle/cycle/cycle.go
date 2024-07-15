@@ -59,7 +59,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 
 		if len(sub.PendingUpdateId) > 0 {
 			pendingUpdate := query.GetSubscriptionPendingUpdateByPendingUpdateId(ctx, sub.PendingUpdateId)
-			if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished {
+			if pendingUpdate.EffectImmediate == 1 && pendingUpdate.Status < consts.PendingSubStatusFinished && pendingUpdate.CreateTime+3600 < timeNow { // one hour
 				err = pending_update_cancel.SubscriptionPendingUpdateCancel(ctx, pendingUpdate.PendingUpdateId, "EffectTimeout")
 				if err != nil {
 					g.Log().Print(ctx, source, "SubPipeBillingCycleWalk SubscriptionPendingUpdateCancel pendingUpdateId:%s err:", pendingUpdate.PendingUpdateId, err.Error())
