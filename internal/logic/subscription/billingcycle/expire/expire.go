@@ -72,23 +72,35 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		}
 	}
 	//Expire Subscription UnFinished Invoice, May No Need
+	nextStatus := consts.SubStatusExpired
+	if sub.FirstPaidTime == 0 {
+		nextStatus = consts.SubStatusFailed
+	}
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-		dao.Subscription.Columns().Status:         consts.SubStatusExpired,
+		dao.Subscription.Columns().Status:         nextStatus,
 		dao.Subscription.Columns().CancelReason:   reason,
 		dao.Subscription.Columns().TrialEnd:       sub.CurrentPeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:      gtime.Now(),
 		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
 	if err != nil {
-		fmt.Printf("SubscriptionExpire error:%s", err.Error())
+		fmt.Printf("SubscriptionExpireOrFailed error:%s", err.Error())
 		return err
 	}
 
-	_, _ = redismq.Send(&redismq.Message{
-		Topic: redismq2.TopicSubscriptionExpire.Topic,
-		Tag:   redismq2.TopicSubscriptionExpire.Tag,
-		Body:  sub.SubscriptionId,
-	})
+	if nextStatus == consts.SubStatusExpired {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionExpire.Topic,
+			Tag:   redismq2.TopicSubscriptionExpire.Tag,
+			Body:  sub.SubscriptionId,
+		})
+	} else if nextStatus == consts.SubStatusFailed {
+		_, _ = redismq.Send(&redismq.Message{
+			Topic: redismq2.TopicSubscriptionFailed.Topic,
+			Tag:   redismq2.TopicSubscriptionFailed.Tag,
+			Body:  sub.SubscriptionId,
+		})
+	}
 
 	return nil
 }

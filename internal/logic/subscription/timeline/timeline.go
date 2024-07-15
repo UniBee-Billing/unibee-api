@@ -33,6 +33,8 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 		if oldOne.Status == consts.SubTimeLineStatusPending {
 			if endSubStatus == consts.SubStatusExpired {
 				nextStatus = consts.SubTimeLineStatusExpired
+			} else if endSubStatus == consts.SubStatusFailed {
+				nextStatus = consts.SubTimeLineStatusFailed
 			} else {
 				nextStatus = consts.SubTimeLineStatusCancelled
 			}
