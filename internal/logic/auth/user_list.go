@@ -145,7 +145,7 @@ func SearchUser(ctx context.Context, merchantId uint64, searchKey string) (list 
 		//keep go on InvoiceId and PaymentId
 		invoice := query.GetInvoiceByInvoiceId(ctx, searchKey)
 		if invoice != nil && invoice.UserId > 0 && invoice.MerchantId == merchantId {
-			user := query.GetUserAccountById(ctx, uint64(invoice.UserId))
+			user := query.GetUserAccountById(ctx, invoice.UserId)
 			if user != nil && mainMap[user.Id] == nil {
 				mainList = append(mainList, user)
 				mainMap[user.Id] = user
