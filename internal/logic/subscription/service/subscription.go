@@ -1547,6 +1547,7 @@ func SubscriptionCancel(ctx context.Context, subscriptionId string, proration bo
 	if err != nil {
 		return err
 	}
+	service3.TryCancelSubscriptionLatestInvoice(ctx, sub)
 
 	user := query.GetUserAccountById(ctx, sub.UserId)
 	if user != nil {
