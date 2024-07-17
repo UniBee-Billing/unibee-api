@@ -228,7 +228,7 @@ type ExportInvoiceEntity struct {
 	PeriodEnd                      *gtime.Time `json:"PeriodEnd"  layout:"2006-01-02 15:04:05"  `
 	PeriodStart                    *gtime.Time `json:"PeriodStart"  layout:"2006-01-02 15:04:05"  `
 	FinishTime                     *gtime.Time `json:"FinishTime"  layout:"2006-01-02 15:04:05"  `
-	CreateTime                     *gtime.Time `json:"CreateTIme"  layout:"2006-01-02 15:04:05"  `
+	CreateTime                     *gtime.Time `json:"CreateTime"  layout:"2006-01-02 15:04:05"  `
 	DueDate                        *gtime.Time `json:"DueDate"  layout:"2006-01-02 15:04:05"  `
 	PaidTime                       *gtime.Time `json:"PaidTime"  layout:"2006-01-02 15:04:05"  `
 	Status                         string      `json:"Status"                         description:"status，1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
