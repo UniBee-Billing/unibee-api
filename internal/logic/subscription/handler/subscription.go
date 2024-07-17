@@ -121,7 +121,7 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	utility.Assert(sub != nil, "UpdateSubscriptionBillingCycleWithPayment sub not found")
 	invoice := query.GetInvoiceByInvoiceId(ctx, paymentInvoice.InvoiceId)
 	utility.Assert(invoice != nil, "UpdateSubscriptionBillingCycleWithPayment invoice not found payment:"+paymentInvoice.PaymentId)
-	utility.Assert(invoice.Status == consts.InvoiceStatusPaid, fmt.Sprintf("invoice not success:%v", invoice.Status))
+	utility.Assert(invoice.Status == consts.InvoiceStatusPaid || invoice.Status == consts.InvoiceStatusReversed, fmt.Sprintf("invoice not success:%v", invoice.Status))
 	if sub.CurrentPeriodEnd > invoice.PeriodEnd && sub.Status == consts.SubStatusActive {
 		// sub cycle never go back time
 		return nil

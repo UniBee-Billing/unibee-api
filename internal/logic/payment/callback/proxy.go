@@ -142,7 +142,7 @@ func (p proxy) PaymentRefundReverseCallback(ctx context.Context, payment *entity
 		}()
 		startTime := time.Now()
 
-		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_REVERSE)
+		payment2.SendRefundWebhookBackground(refund.RefundId, event.UNIBEE_WEBHOOK_EVENT_REFUND_REVERSED)
 		p.GetCallbackImpl().PaymentRefundReverseCallback(backgroundCtx, payment, refund)
 
 		glog.Infof(backgroundCtx, "MeasurePaymentCallbackFunction:PaymentRefundReverseCallback cost：%s \n", time.Now().Sub(startTime))

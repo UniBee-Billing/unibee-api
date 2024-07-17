@@ -36,6 +36,7 @@ var (
 	TopicInvoicePaid                      = redismq.MQTopicEnum{"unibee_invoice", "invoice_paid", "invoice paid"}
 	TopicInvoiceCancelled                 = redismq.MQTopicEnum{"unibee_invoice", "invoice_cancelled", "invoice cancelled"}
 	TopicInvoiceFailed                    = redismq.MQTopicEnum{"unibee_invoice", "invoice_failed", "invoice failed"}
+	TopicInvoiceReversed                  = redismq.MQTopicEnum{"unibee_invoice", "invoice_reversed", "invoice reversed"}
 )
 
 type SRedisMqConfig struct{}
