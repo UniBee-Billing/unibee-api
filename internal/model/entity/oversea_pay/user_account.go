@@ -50,6 +50,7 @@ type UserAccount struct {
 	Facebook           string      `json:"facebook"           description:"facebook"`                                                                                                  // facebook
 	OtherSocialInfo    string      `json:"otherSocialInfo"    description:""`                                                                                                          //
 	SubscriptionName   string      `json:"subscriptionName"   description:"subscription name"`                                                                                         // subscription name
+	PlanId             uint64      `json:"planId"             description:"PlanId"`                                                                                                    // PlanId
 	SubscriptionId     string      `json:"subscriptionId"     description:"subscription id"`                                                                                           // subscription id
 	SubscriptionStatus int         `json:"subscriptionStatus" description:"sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete"` // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    int64       `json:"recurringAmount"    description:"total recurring amount, cent"`                                                                              // total recurring amount, cent
@@ -60,5 +61,4 @@ type UserAccount struct {
 	Status             int         `json:"status"             description:"0-Active, 2-Suspend"`                                                                                       // 0-Active, 2-Suspend
 	City               string      `json:"city"               description:"city"`                                                                                                      // city
 	ZipCode            string      `json:"zipCode"            description:"zip_code"`                                                                                                  // zip_code
-	PlanId             uint64      `json:"planId"             description:"PlanId"`                                                                                                    // PlanId
 }

@@ -212,6 +212,10 @@ type IMerchantTask interface {
 	ExportColumnList(ctx context.Context, req *task.ExportColumnListReq) (res *task.ExportColumnListRes, err error)
 	New(ctx context.Context, req *task.NewReq) (res *task.NewRes, err error)
 	NewImport(ctx context.Context, req *task.NewImportReq) (res *task.NewImportRes, err error)
+	NewTemplate(ctx context.Context, req *task.NewTemplateReq) (res *task.NewTemplateRes, err error)
+	EditTemplate(ctx context.Context, req *task.EditTemplateReq) (res *task.EditTemplateRes, err error)
+	DeleteTemplate(ctx context.Context, req *task.DeleteTemplateReq) (res *task.DeleteTemplateRes, err error)
+	ExportTemplateList(ctx context.Context, req *task.ExportTemplateListReq) (res *task.ExportTemplateListRes, err error)
 }
 
 type IMerchantTrack interface {

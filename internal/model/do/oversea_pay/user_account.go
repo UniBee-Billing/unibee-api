@@ -52,6 +52,7 @@ type UserAccount struct {
 	Facebook           interface{} // facebook
 	OtherSocialInfo    interface{} //
 	SubscriptionName   interface{} // subscription name
+	PlanId             interface{} // PlanId
 	SubscriptionId     interface{} // subscription id
 	SubscriptionStatus interface{} // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    interface{} // total recurring amount, cent
@@ -62,5 +63,4 @@ type UserAccount struct {
 	Status             interface{} // 0-Active, 2-Suspend
 	City               interface{} // city
 	ZipCode            interface{} // zip_code
-	PlanId             interface{} // PlanId
 }

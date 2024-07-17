@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/gogf/gf/v2/os/gtime"
 	"strings"
 	"unibee/api/bean"
 	"unibee/api/bean/detail"
@@ -28,6 +29,8 @@ type InvoiceListInternalReq struct {
 	Count           int    `json:"count"  dc:"Count Of Page"`
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	ReportTimeStart int64  `json:"reportTimeStart" dc:"ReportTimeStart" `
+	ReportTimeEnd   int64  `json:"reportTimeEnd" dc:"ReportTimeEnd" `
 	SkipTotal       bool
 }
 
@@ -112,10 +115,18 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 
 	}
 	if req.CreateTimeStart > 0 {
-		query = query.WhereGTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeStart)
+		query = query.WhereGTE(dao.Invoice.Columns().CreateTime, req.CreateTimeStart)
 	}
 	if req.CreateTimeEnd > 0 {
-		query = query.WhereLTE(dao.UserAccount.Columns().CreateTime, req.CreateTimeEnd)
+		query = query.WhereLTE(dao.Invoice.Columns().CreateTime, req.CreateTimeEnd)
+	}
+	if req.ReportTimeStart > 0 {
+		query = query.Where(query.Builder().WhereOrGTE(dao.Invoice.Columns().CreateTime, req.ReportTimeStart).
+			WhereOrGTE(dao.Invoice.Columns().GmtModify, gtime.New(req.CreateTimeStart)))
+	}
+	if req.ReportTimeEnd > 0 {
+		query = query.Where(query.Builder().WhereOrLTE(dao.Invoice.Columns().CreateTime, req.ReportTimeEnd).
+			WhereOrLTE(dao.Invoice.Columns().GmtModify, gtime.New(req.ReportTimeEnd)))
 	}
 	query = query.WhereIn(dao.Invoice.Columns().IsDeleted, isDeletes).
 		Order(sortKey).

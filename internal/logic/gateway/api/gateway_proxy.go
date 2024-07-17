@@ -24,6 +24,17 @@ var GatewayNameMapping = map[string]_interface.GatewayInterface{
 	"wire_transfer":   &Wire{},
 }
 
+var GatewayShortNameMapping = map[string]string{
+	"stripe":          "ST",
+	"changelly":       "CT",
+	"paypal":          "PP",
+	"invalid":         "IP",
+	"autotest_crypto": "AC",
+	"autotest":        "AP",
+	"coinbase":        "CP",
+	"wire_transfer":   "WT",
+}
+
 type GatewayProxy struct {
 	Gateway     *entity.MerchantGateway
 	GatewayName string

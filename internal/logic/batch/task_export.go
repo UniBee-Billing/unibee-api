@@ -2,6 +2,7 @@ package batch
 
 import (
 	"context"
+	"encoding/csv"
 	"fmt"
 	"github.com/gogf/gf/v2/database/gdb"
 	"github.com/gogf/gf/v2/errors/gcode"
@@ -9,6 +10,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
+	"os"
 	"strconv"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
@@ -43,6 +45,7 @@ type MerchantBatchExportTaskInternalRequest struct {
 	Task          string                 `json:"task" dc:"Task"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list"`
+	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
 }
 
 func ExportColumnList(ctx context.Context, task string) []interface{} {
@@ -64,6 +67,9 @@ func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskIn
 	utility.Assert(len(req.Task) > 0, "Invalid Task")
 	task := GetExportTaskImpl(req.Task)
 	utility.Assert(task != nil, "Task not found")
+	if len(req.Format) > 0 {
+		utility.Assert(req.Format == "xlsx" || req.Format == "csv", "format should be one of xlsx|csv")
+	}
 	one := &entity.MerchantBatchTask{
 		MerchantId:   req.MerchantId,
 		MemberId:     req.MemberId,
@@ -89,11 +95,11 @@ func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskIn
 	id, _ := result.LastInsertId()
 	one.Id = int64(uint(id))
 	utility.Assert(one.Id > 0, "BatchExportTask record insert failure")
-	startRunExportTaskBackground(one, task, req.ExportColumns)
+	startRunExportTaskBackground(one, task, req.ExportColumns, req.Format)
 	return nil
 }
 
-func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask, exportColumns []string) {
+func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _interface.BatchExportTask, exportColumns []string, format string) {
 	go func() {
 		ctx := context.Background()
 		var err error
@@ -194,6 +200,9 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			failureTask(ctx, task.Id, err)
 			return
 		}
+		if format == "csv" {
+			fileName, err = convertXlsxFileToCSV(fileName, GeneralExportImportSheetName, fmt.Sprintf("Batch_export_task_%v_%v_%v.csv", task.MerchantId, task.MemberId, task.Id))
+		}
 		upload, err := oss.UploadLocalFile(ctx, fileName, "batch_export", fileName, strconv.FormatUint(task.MemberId, 10))
 		if err != nil {
 			g.Log().Errorf(ctx, fmt.Sprintf("startRunExportTaskBackground UploadLocalFile error:%v", err))
@@ -214,4 +223,39 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			return
 		}
 	}()
+}
+
+func convertXlsxFileToCSV(xlsxFileLocalName string, sheetName string, csvFileName string) (string, error) {
+	xlsxFile := xlsxFileLocalName
+	f, err := excelize.OpenFile(xlsxFile)
+	if err != nil {
+		return "", err
+	}
+
+	rows, err := f.GetRows(sheetName)
+	if err != nil {
+		return "", err
+	}
+
+	csvFile := csvFileName
+	csvFileHandle, err := os.Create(csvFile)
+	if err != nil {
+		return "", err
+	}
+	defer func(csvFileHandle *os.File) {
+		err = csvFileHandle.Close()
+		if err != nil {
+
+		}
+	}(csvFileHandle)
+
+	writer := csv.NewWriter(csvFileHandle)
+	defer writer.Flush()
+
+	for _, row := range rows {
+		if err = writer.Write(row); err != nil {
+			return "", err
+		}
+	}
+	return csvFileName, nil
 }

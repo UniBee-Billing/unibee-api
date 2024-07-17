@@ -8,6 +8,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
+	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/invoice/service"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -87,6 +88,12 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 		if value, ok := payload["createTimeEnd"].(float64); ok {
 			req.CreateTimeEnd = int64(value)
 		}
+		if value, ok := payload["reportTimeStart"].(float64); ok {
+			req.ReportTimeStart = int64(value)
+		}
+		if value, ok := payload["reportTimeEnd"].(float64); ok {
+			req.ReportTimeEnd = int64(value)
+		}
 	}
 	req.SkipTotal = true
 	result, _ := service.InvoiceList(ctx, req)
@@ -147,6 +154,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			}
 			mainList = append(mainList, &ExportInvoiceEntity{
 				InvoiceId:                      one.InvoiceId,
+				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
 				UserId:                         fmt.Sprintf("%v", one.UserId),
 				ExternalUserId:                 fmt.Sprintf("%v", one.UserAccount.ExternalUserId),
 				FirstName:                      one.UserAccount.FirstName,
@@ -158,6 +166,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				Address:                        one.UserAccount.Address,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
+				TaxCode:                        one.CountryCode,
 				CountryCode:                    one.CountryCode,
 				CountryName:                    countryName,
 				IsEU:                           IsEu,
@@ -198,6 +207,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 
 type ExportInvoiceEntity struct {
 	InvoiceId                      string      `json:"InvoiceId"`
+	InvoiceNumber                  string      `json:"InvoiceNumber"`
 	UserId                         string      `json:"UserId"             `
 	ExternalUserId                 string      `json:"ExternalUserId"     `
 	FirstName                      string      `json:"FirstName"          `
@@ -211,6 +221,8 @@ type ExportInvoiceEntity struct {
 	Address                        string      `json:"Address"`
 	City                           string      `json:"City"`
 	State                          string      `json:"State"`
+	CountryCode                    string      `json:"CountryCode"                    description:""`
+	TaxCode                        string      `json:"TaxCode"                    description:""`
 	CountryName                    string      `json:"CountryName"`
 	IsEU                           string      `json:"EU/Non-EU"`
 	Gateway                        string      `json:"Gateway"            `
@@ -239,7 +251,7 @@ type ExportInvoiceEntity struct {
 	TrialEnd                       *gtime.Time `json:"TrialEnd"                       layout:"2006-01-02 15:04:05"  ` // trial_end, utc time
 	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  ` // billing_cycle_anchor
 	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`      // create from
-	CountryCode                    string      `json:"CountryCode"                    description:""`
-	OriginInvoiceId                string      `json:"OriginInvoiceId"                description:""`
-	BillingPeriod                  string      `json:"BillingPeriod"     `
+
+	OriginInvoiceId string `json:"OriginInvoiceId"                description:""`
+	BillingPeriod   string `json:"BillingPeriod"     `
 }

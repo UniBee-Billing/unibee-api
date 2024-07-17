@@ -21,6 +21,7 @@ type InvoiceDao struct {
 // InvoiceColumns defines and stores column names for table invoice.
 type InvoiceColumns struct {
 	Id                             string //
+	BizType                        string // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     string // merchant_id
 	UserId                         string // userId
 	SubscriptionId                 string // subscription_id
@@ -59,7 +60,6 @@ type InvoiceColumns struct {
 	PeriodEndTime                  string //
 	RefundId                       string // refundId
 	Data                           string // data (json)
-	BizType                        string // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     string // create utc time
 	CryptoAmount                   string // crypto_amount, cent
 	CryptoCurrency                 string // crypto_currency
@@ -75,11 +75,13 @@ type InvoiceColumns struct {
 	BillingCycleAnchor             string // billing_cycle_anchor
 	CreateFrom                     string // create from
 	MetaData                       string // meta_data(json)
+	VatNumber                      string //
 }
 
 // invoiceColumns holds the columns for table invoice.
 var invoiceColumns = InvoiceColumns{
 	Id:                             "id",
+	BizType:                        "biz_type",
 	MerchantId:                     "merchant_id",
 	UserId:                         "user_id",
 	SubscriptionId:                 "subscription_id",
@@ -118,7 +120,6 @@ var invoiceColumns = InvoiceColumns{
 	PeriodEndTime:                  "period_end_time",
 	RefundId:                       "refund_id",
 	Data:                           "data",
-	BizType:                        "biz_type",
 	CreateTime:                     "create_time",
 	CryptoAmount:                   "crypto_amount",
 	CryptoCurrency:                 "crypto_currency",
@@ -134,6 +135,7 @@ var invoiceColumns = InvoiceColumns{
 	BillingCycleAnchor:             "billing_cycle_anchor",
 	CreateFrom:                     "create_from",
 	MetaData:                       "meta_data",
+	VatNumber:                      "vat_number",
 }
 
 // NewInvoiceDao creates and returns a new DAO object for table data access.

@@ -28,9 +28,10 @@ type ExportColumnListRes struct {
 
 type NewReq struct {
 	g.Meta        `path:"/new_export" tags:"Task" method:"post" summary:"NewExport" description:""`
-	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
+	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
 }
 
 type NewRes struct {
@@ -38,8 +39,55 @@ type NewRes struct {
 
 type NewImportReq struct {
 	g.Meta `path:"/new_import" method:"post" mime:"multipart/form-data" tags:"Task" summary:"NewImport"`
-	File   *ghttp.UploadFile `json:"file" type:"file" dc:"File To Upload"`
-	Task   string            `json:"task" dc:"Task,UserImport|ActiveSubscriptionImport|HistorySubscriptionImport"`
+	File   *ghttp.UploadFile `json:"file" type:"file" dc:"File To Upload" v:"required"`
+	Task   string            `json:"task" dc:"Task,UserImport|ActiveSubscriptionImport|HistorySubscriptionImport" v:"required"`
 }
 type NewImportRes struct {
+}
+
+type NewTemplateReq struct {
+	g.Meta        `path:"/new_export_template" tags:"Task" method:"post" summary:"NewExportTemplate" description:""`
+	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
+	Name          string                 `json:"name"          description:"name"`
+	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
+	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
+	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
+}
+
+type NewTemplateRes struct {
+	Template *bean.MerchantBatchExportTemplateSimplify `json:"template" dc:"Merchant Member Export Template"`
+}
+
+type EditTemplateReq struct {
+	g.Meta        `path:"/edit_export_template" tags:"Task" method:"post" summary:"EditExportTemplate" description:""`
+	TemplateId    int64                   `json:"templateId"    v:"required"      description:"templateId"`
+	Name          *string                 `json:"name"          description:"name"`
+	Task          *string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Payload       *map[string]interface{} `json:"payload" dc:"Payload"`
+	ExportColumns *[]string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
+	Format        *string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
+}
+
+type EditTemplateRes struct {
+	Template *bean.MerchantBatchExportTemplateSimplify `json:"template" dc:"Merchant Member Export Template"`
+}
+
+type DeleteTemplateReq struct {
+	g.Meta     `path:"/delete_export_template" tags:"Task" method:"post" summary:"DeleteExportTemplate" description:""`
+	TemplateId int64 `json:"templateId"     v:"required"       description:"templateId"`
+}
+
+type DeleteTemplateRes struct {
+}
+
+type ExportTemplateListReq struct {
+	g.Meta `path:"/export_template_list" tags:"Task" method:"get,post" summary:"GetExportTemplateList"`
+	Task   string `json:"task" dc:"Filter Task, Optional, InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport"`
+	Page   int    `json:"page"  description:"Page, Start With 0" `
+	Count  int    `json:"count"  description:"Count Of Page"`
+}
+
+type ExportTemplateListRes struct {
+	Templates []*bean.MerchantBatchExportTemplateSimplify `json:"templates" dc:"Merchant Member Export Template List"`
+	Total     int                                         `json:"total" dc:"Total"`
 }

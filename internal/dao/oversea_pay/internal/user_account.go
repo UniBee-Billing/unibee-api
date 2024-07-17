@@ -60,6 +60,7 @@ type UserAccountColumns struct {
 	Facebook           string // facebook
 	OtherSocialInfo    string //
 	SubscriptionName   string // subscription name
+	PlanId             string // PlanId
 	SubscriptionId     string // subscription id
 	SubscriptionStatus string // sub status，0-Init | 1-Pending｜2-Active｜3-PendingInActive | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete
 	RecurringAmount    string // total recurring amount, cent
@@ -70,7 +71,6 @@ type UserAccountColumns struct {
 	Status             string // 0-Active, 2-Suspend
 	City               string // city
 	ZipCode            string // zip_code
-	PlanId             string // PlanId
 }
 
 // userAccountColumns holds the columns for table user_account.
@@ -115,6 +115,7 @@ var userAccountColumns = UserAccountColumns{
 	Facebook:           "Facebook",
 	OtherSocialInfo:    "other_social_info",
 	SubscriptionName:   "subscription_name",
+	PlanId:             "plan_id",
 	SubscriptionId:     "subscription_id",
 	SubscriptionStatus: "subscription_status",
 	RecurringAmount:    "recurring_amount",
@@ -125,7 +126,6 @@ var userAccountColumns = UserAccountColumns{
 	Status:             "status",
 	City:               "city",
 	ZipCode:            "zip_code",
-	PlanId:             "plan_id",
 }
 
 // NewUserAccountDao creates and returns a new DAO object for table data access.

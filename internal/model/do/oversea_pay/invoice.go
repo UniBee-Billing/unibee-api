@@ -13,6 +13,7 @@ import (
 type Invoice struct {
 	g.Meta                         `orm:"table:invoice, do:true"`
 	Id                             interface{} //
+	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     interface{} // merchant_id
 	UserId                         interface{} // userId
 	SubscriptionId                 interface{} // subscription_id
@@ -51,7 +52,6 @@ type Invoice struct {
 	PeriodEndTime                  *gtime.Time //
 	RefundId                       interface{} // refundId
 	Data                           interface{} // data (json)
-	BizType                        interface{} // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     interface{} // create utc time
 	CryptoAmount                   interface{} // crypto_amount, cent
 	CryptoCurrency                 interface{} // crypto_currency
@@ -67,4 +67,5 @@ type Invoice struct {
 	BillingCycleAnchor             interface{} // billing_cycle_anchor
 	CreateFrom                     interface{} // create from
 	MetaData                       interface{} // meta_data(json)
+	VatNumber                      interface{} //
 }

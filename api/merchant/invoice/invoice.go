@@ -67,6 +67,8 @@ type ListReq struct {
 	Count           int    `json:"count"  dc:"Count" dc:"Count By Page" `
 	CreateTimeStart int64  `json:"createTimeStart" dc:"CreateTimeStart" `
 	CreateTimeEnd   int64  `json:"createTimeEnd" dc:"CreateTimeEnd" `
+	ReportTimeStart int64  `json:"reportTimeStart" dc:"ReportTimeStart" `
+	ReportTimeEnd   int64  `json:"reportTimeEnd" dc:"ReportTimeEnd" `
 }
 
 type ListRes struct {

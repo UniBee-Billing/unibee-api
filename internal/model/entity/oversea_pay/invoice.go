@@ -11,6 +11,7 @@ import (
 // Invoice is the golang structure for table invoice.
 type Invoice struct {
 	Id                             uint64      `json:"id"                             description:""`                                                                       //
+	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	MerchantId                     uint64      `json:"merchantId"                     description:"merchant_id"`                                                            // merchant_id
 	UserId                         uint64      `json:"userId"                         description:"userId"`                                                                 // userId
 	SubscriptionId                 string      `json:"subscriptionId"                 description:"subscription_id"`                                                        // subscription_id
@@ -49,7 +50,6 @@ type Invoice struct {
 	PeriodEndTime                  *gtime.Time `json:"periodEndTime"                  description:""`                                                                       //
 	RefundId                       string      `json:"refundId"                       description:"refundId"`                                                               // refundId
 	Data                           string      `json:"data"                           description:"data (json)"`                                                            // data (json)
-	BizType                        int         `json:"bizType"                        description:"biz type from payment 1-single payment, 3-subscription"`                 // biz type from payment 1-single payment, 3-subscription
 	CreateTime                     int64       `json:"createTime"                     description:"create utc time"`                                                        // create utc time
 	CryptoAmount                   int64       `json:"cryptoAmount"                   description:"crypto_amount, cent"`                                                    // crypto_amount, cent
 	CryptoCurrency                 string      `json:"cryptoCurrency"                 description:"crypto_currency"`                                                        // crypto_currency
@@ -65,4 +65,5 @@ type Invoice struct {
 	BillingCycleAnchor             int64       `json:"billingCycleAnchor"             description:"billing_cycle_anchor"`                                                   // billing_cycle_anchor
 	CreateFrom                     string      `json:"createFrom"                     description:"create from"`                                                            // create from
 	MetaData                       string      `json:"metaData"                       description:"meta_data(json)"`                                                        // meta_data(json)
+	VatNumber                      string      `json:"vatNumber"                      description:""`                                                                       //
 }
