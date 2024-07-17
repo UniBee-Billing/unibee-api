@@ -43,11 +43,10 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 	if one.Status == consts.PendingSubStatusFinished {
 		return true, nil
 	}
-	utility.Assert(one.Status == consts.PendingSubStatusCreate, "pendingUpdate not status create")
 	_, err := dao.SubscriptionPendingUpdate.Ctx(ctx).Data(g.Map{
 		dao.SubscriptionPendingUpdate.Columns().Status:    consts.PendingSubStatusFinished,
 		dao.SubscriptionPendingUpdate.Columns().GmtModify: gtime.Now(),
-	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).Where(dao.SubscriptionPendingUpdate.Columns().Status, consts.PendingSubStatusCreate).OmitNil().Update()
+	}).Where(dao.SubscriptionPendingUpdate.Columns().Id, one.Id).OmitNil().Update()
 	if err != nil {
 		return false, err
 	}
@@ -56,15 +55,17 @@ func HandlePendingUpdatePaymentSuccess(ctx context.Context, sub *entity.Subscrip
 		billingCycleAnchor = sub.BillingCycleAnchor
 	}
 
+	periodEnd := utility.MaxInt64(invoice.PeriodEnd, sub.CurrentPeriodEnd)
+
 	var dunningTime = subscription2.GetDunningTimeFromEnd(ctx, utility.MaxInt64(invoice.PeriodEnd, sub.TrialEnd), sub.PlanId)
 	_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().BillingCycleAnchor:     billingCycleAnchor,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
-		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodEnd:       periodEnd,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
-		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(periodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().PlanId:                 one.UpdatePlanId,
 		dao.Subscription.Columns().Quantity:               one.UpdateQuantity,

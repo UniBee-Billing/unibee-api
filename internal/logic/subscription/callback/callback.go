@@ -95,7 +95,7 @@ func (s SubscriptionPaymentCallback) PaymentSuccessCallback(ctx context.Context,
 			utility.Assert(sub != nil, "payment sub not found")
 			_ = handler.UpdateSubscriptionDefaultPaymentMethod(ctx, sub.SubscriptionId, payment.GatewayPaymentMethod)
 			pendingUpdate := query.GetSubscriptionPendingUpdateByInvoiceId(ctx, invoice.InvoiceId)
-			if pendingUpdate != nil && pendingUpdate.Status == consts.PendingSubStatusCreate {
+			if pendingUpdate != nil {
 				// PendingUpdate
 				_, err := handler.HandlePendingUpdatePaymentSuccess(ctx, sub, pendingUpdate.PendingUpdateId, invoice)
 				if err != nil {

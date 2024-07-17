@@ -138,15 +138,16 @@ func HandleSubscriptionNextBillingCyclePaymentSuccess(ctx context.Context, sub *
 	if billingCycleAnchor <= 0 {
 		billingCycleAnchor = sub.BillingCycleAnchor
 	}
+	periodEnd := utility.MaxInt64(invoice.PeriodEnd, sub.CurrentPeriodEnd)
 	_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
 		dao.Subscription.Columns().Status:                 consts.SubStatusActive,
 		dao.Subscription.Columns().BillingCycleAnchor:     billingCycleAnchor,
 		dao.Subscription.Columns().CurrentPeriodStart:     invoice.PeriodStart,
-		dao.Subscription.Columns().CurrentPeriodEnd:       invoice.PeriodEnd,
+		dao.Subscription.Columns().CurrentPeriodEnd:       periodEnd,
 		dao.Subscription.Columns().Amount:                 invoice.TotalAmount,
 		dao.Subscription.Columns().CurrentPeriodPaid:      1,
 		dao.Subscription.Columns().CurrentPeriodStartTime: gtime.NewFromTimeStamp(invoice.PeriodStart),
-		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(invoice.PeriodEnd),
+		dao.Subscription.Columns().CurrentPeriodEndTime:   gtime.NewFromTimeStamp(periodEnd),
 		dao.Subscription.Columns().DunningTime:            dunningTime,
 		dao.Subscription.Columns().TrialEnd:               invoice.PeriodStart - 1,
 		dao.Subscription.Columns().GmtModify:              gtime.Now(),
