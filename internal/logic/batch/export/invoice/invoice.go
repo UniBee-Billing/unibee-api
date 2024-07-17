@@ -95,20 +95,16 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			if one.Gateway != nil {
 				invoiceGateway = one.Gateway.GatewayName
 			}
-			var firstName = ""
-			var lastName = ""
-			var email = ""
-			if one.UserAccount != nil {
-				firstName = one.UserAccount.FirstName
-				lastName = one.UserAccount.LastName
-				email = one.UserAccount.Email
-			} else {
+			if one.UserAccount == nil {
 				one.UserAccount = &bean.UserAccountSimplify{}
 			}
 			if one.Subscription == nil {
 				one.Subscription = &bean.SubscriptionSimplify{}
 			}
-			invoiceType := "Invoice"
+			if one.Payment == nil {
+				one.Payment = &bean.PaymentSimplify{}
+			}
+			invoiceType := "Tax invoice"
 			OriginInvoiceId := ""
 			if one.Refund != nil {
 				invoiceType = "Credit Note"
@@ -116,16 +112,43 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 					OriginInvoiceId = one.Payment.InvoiceId
 				}
 			}
+			userType := "Individual"
+			if one.UserAccount.Type == 2 {
+				userType = "Business"
+			}
+			var dueTime int64 = 0
+			if one.FinishTime > 0 {
+				dueTime = one.FinishTime + one.DayUtilDue*86400
+			}
+			var billingPeriod = ""
+			if one.BizType == consts.BizTypeSubscription {
+				if one.Subscription != nil && one.Subscription.PlanId > 0 {
+					plan := query.GetPlanById(ctx, one.Subscription.PlanId)
+					if plan != nil {
+						billingPeriod = plan.IntervalUnit
+					}
+				}
+			} else {
+				billingPeriod = "one time purchase"
+			}
+
 			mainList = append(mainList, &ExportInvoiceEntity{
+				//CountryCode:                    one.CountryCode,
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
 				ExternalUserId:                 fmt.Sprintf("%v", one.UserAccount.ExternalUserId),
-				FirstName:                      firstName,
-				LastName:                       lastName,
-				Email:                          email,
+				FirstName:                      one.UserAccount.FirstName,
+				LastName:                       one.UserAccount.LastName,
+				FullName:                       fmt.Sprintf("%s %s", one.UserAccount.FirstName, one.UserAccount.LastName),
+				UserType:                       userType,
+				Email:                          one.UserAccount.Email,
+				CountryName:                    one.UserAccount.CountryName,
+				CountryCode:                    one.UserAccount.CountryCode,
+				City:                           one.UserAccount.City,
+				Address:                        one.UserAccount.Address,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
-				Type:                           invoiceType,
+				InvoiceType:                    invoiceType,
 				Gateway:                        invoiceGateway,
 				MerchantName:                   merchant.Name,
 				DiscountCode:                   one.DiscountCode,
@@ -141,6 +164,9 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				PeriodEnd:                      gtime.NewFromTimeStamp(one.PeriodEnd),
 				PeriodStart:                    gtime.NewFromTimeStamp(one.PeriodStart),
 				FinishTime:                     gtime.NewFromTimeStamp(one.FinishTime),
+				DueDate:                        gtime.NewFromTimeStamp(dueTime),
+				CreateTime:                     gtime.NewFromTimeStamp(one.CreateTime),
+				PaidTime:                       gtime.NewFromTimeStamp(one.Payment.PaidTime),
 				Status:                         consts.InvoiceStatusToEnum(one.Status).Description(),
 				PaymentId:                      one.PaymentId,
 				RefundId:                       one.RefundId,
@@ -149,8 +175,8 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				TrialEnd:                       gtime.NewFromTimeStamp(one.TrialEnd),
 				BillingCycleAnchor:             gtime.NewFromTimeStamp(one.BillingCycleAnchor),
 				CreateFrom:                     one.CreateFrom,
-				CountryCode:                    one.CountryCode,
 				OriginInvoiceId:                OriginInvoiceId,
+				BillingPeriod:                  billingPeriod,
 			})
 		}
 	}
@@ -163,10 +189,17 @@ type ExportInvoiceEntity struct {
 	ExternalUserId                 string      `json:"ExternalUserId"     `
 	FirstName                      string      `json:"FirstName"          `
 	LastName                       string      `json:"LastName"           `
+	FullName                       string      `json:"FullName"           `
+	UserType                       string      `json:"UserType"           `
 	Email                          string      `json:"Email"              `
 	InvoiceName                    string      `json:"InvoiceName"`
 	ProductName                    string      `json:"ProductName"`
-	Type                           string      `json:"type"`
+	InvoiceType                    string      `json:"InvoiceType"`
+	Address                        string      `json:"Address"`
+	City                           string      `json:"City"`
+	State                          string      `json:"State"`
+	CountryName                    string      `json:"CountryName"`
+	IsEU                           string      `json:"EU/Non-EU"`
 	Gateway                        string      `json:"Gateway"            `
 	MerchantName                   string      `json:"MerchantName"       `
 	DiscountCode                   string      `json:"DiscountCode"`
@@ -182,6 +215,9 @@ type ExportInvoiceEntity struct {
 	PeriodEnd                      *gtime.Time `json:"PeriodEnd"  layout:"2006-01-02 15:04:05"  `
 	PeriodStart                    *gtime.Time `json:"PeriodStart"  layout:"2006-01-02 15:04:05"  `
 	FinishTime                     *gtime.Time `json:"FinishTime"  layout:"2006-01-02 15:04:05"  `
+	CreateTime                     *gtime.Time `json:"CreateTIme"  layout:"2006-01-02 15:04:05"  `
+	DueDate                        *gtime.Time `json:"DueDate"  layout:"2006-01-02 15:04:05"  `
+	PaidTime                       *gtime.Time `json:"PaidTime"  layout:"2006-01-02 15:04:05"  `
 	Status                         string      `json:"Status"                         description:"status，1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled"` // status，0-Init | 1-pending｜2-processing｜3-paid | 4-failed | 5-cancelled
 	PaymentId                      string      `json:"PaymentId"                      description:"paymentId"`                                                     // paymentId
 	RefundId                       string      `json:"RefundId"                       description:"refundId"`                                                      // refundId
@@ -191,5 +227,6 @@ type ExportInvoiceEntity struct {
 	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  ` // billing_cycle_anchor
 	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`      // create from
 	CountryCode                    string      `json:"CountryCode"                    description:""`
-	OriginInvoiceId                string      `json:"originInvoiceId"                    description:""`
+	OriginInvoiceId                string      `json:"originInvoiceId"                description:""`
+	BillingPeriod                  string      `json:"BillingPeriod"     `
 }

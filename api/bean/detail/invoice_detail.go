@@ -65,6 +65,8 @@ type InvoiceDetail struct {
 	Metadata                       map[string]interface{}             `json:"metadata" dc:"Metadata，Map"`
 	CountryCode                    string                             `json:"countryCode"                    description:""` //
 	FinishTime                     int64                              `json:"finishTime"`
+	CreateTime                     int64                              `json:"createTime"`
+	BizType                        int                                `json:"bizType"`
 	ProrationDate                  int64                              `json:"prorationDate"`
 	TrialEnd                       int64                              `json:"trialEnd"                       description:"trial_end, utc time"` // trial_end, utc time
 }
@@ -136,5 +138,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Metadata:                       metadata,
 		FinishTime:                     invoice.FinishTime,
 		TrialEnd:                       invoice.TrialEnd,
+		CreateTime:                     invoice.CreateTime,
+		BizType:                        invoice.BizType,
 	}
 }
