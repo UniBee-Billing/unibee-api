@@ -240,6 +240,6 @@ type ExportInvoiceEntity struct {
 	BillingCycleAnchor             *gtime.Time `json:"BillingCycleAnchor"             layout:"2006-01-02 15:04:05"  ` // billing_cycle_anchor
 	CreateFrom                     string      `json:"CreateFrom"                     description:"create from"`      // create from
 	CountryCode                    string      `json:"CountryCode"                    description:""`
-	OriginInvoiceId                string      `json:"originInvoiceId"                description:""`
+	OriginInvoiceId                string      `json:"OriginInvoiceId"                description:""`
 	BillingPeriod                  string      `json:"BillingPeriod"     `
 }
