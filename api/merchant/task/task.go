@@ -47,8 +47,8 @@ type NewImportRes struct {
 
 type NewTemplateReq struct {
 	g.Meta        `path:"/new_export_template" tags:"Task" method:"post" summary:"NewExportTemplate" description:""`
+	Name          string                 `json:"name"      v:"required"    description:"name"`
 	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
-	Name          string                 `json:"name"          description:"name"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
 	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
