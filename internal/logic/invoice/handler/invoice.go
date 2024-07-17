@@ -201,7 +201,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 	st := utility.CreateInvoiceSt()
 	one := &entity.Invoice{
 		SubscriptionId:                 payment.SubscriptionId,
-		BizType:                        payment.BizType,
+		BizType:                        invoice.BizType,
 		UserId:                         refund.UserId,
 		MerchantId:                     refund.MerchantId,
 		InvoiceName:                    invoice.InvoiceName,
