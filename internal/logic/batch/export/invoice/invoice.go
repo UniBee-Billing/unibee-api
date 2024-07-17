@@ -9,6 +9,7 @@ import (
 	"unibee/internal/consts"
 	"unibee/internal/logic/batch/export"
 	"unibee/internal/logic/invoice/service"
+	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -131,9 +132,20 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			} else {
 				billingPeriod = "one time purchase"
 			}
-
+			countryName := ""
+			IsEu := ""
+			if vat_gateway.GetDefaultVatGateway(ctx, one.MerchantId) != nil {
+				vatCountryRate, _ := vat_gateway.QueryVatCountryRateByMerchant(ctx, one.MerchantId, one.CountryCode)
+				if vatCountryRate != nil {
+					countryName = vatCountryRate.CountryName
+					if vatCountryRate.IsEU {
+						IsEu = "EU"
+					} else {
+						IsEu = "Non-EU"
+					}
+				}
+			}
 			mainList = append(mainList, &ExportInvoiceEntity{
-				//CountryCode:                    one.CountryCode,
 				InvoiceId:                      one.InvoiceId,
 				UserId:                         fmt.Sprintf("%v", one.UserId),
 				ExternalUserId:                 fmt.Sprintf("%v", one.UserAccount.ExternalUserId),
@@ -142,12 +154,13 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				FullName:                       fmt.Sprintf("%s %s", one.UserAccount.FirstName, one.UserAccount.LastName),
 				UserType:                       userType,
 				Email:                          one.UserAccount.Email,
-				CountryName:                    one.UserAccount.CountryName,
-				CountryCode:                    one.UserAccount.CountryCode,
 				City:                           one.UserAccount.City,
 				Address:                        one.UserAccount.Address,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
+				CountryCode:                    one.CountryCode,
+				CountryName:                    countryName,
+				IsEU:                           IsEu,
 				InvoiceType:                    invoiceType,
 				Gateway:                        invoiceGateway,
 				MerchantName:                   merchant.Name,
