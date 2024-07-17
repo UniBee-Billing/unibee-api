@@ -17,6 +17,7 @@ func (c *ControllerTask) New(ctx context.Context, req *task.NewReq) (res *task.N
 		Task:          req.Task,
 		Payload:       req.Payload,
 		ExportColumns: req.ExportColumns,
+		Format:        req.Format,
 	})
 	if err != nil {
 		return nil, err

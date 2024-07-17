@@ -11,6 +11,7 @@ import (
 	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 	"unibee/utility"
+	"unibee/utility/unibee"
 
 	"unibee/api/merchant/task"
 )
@@ -24,13 +25,20 @@ func (c *ControllerTask) EditTemplate(ctx context.Context, req *task.EditTemplat
 		utility.Assert(one.MemberId == _interface.Context().Get(ctx).MerchantMember.Id, "No Permission")
 	}
 	utility.Assert(one.IsDeleted == 0, "Template Already Deleted")
-
+	var payload *string
+	if req.Payload != nil {
+		payload = unibee.String(utility.MarshalToJsonString(req.Payload))
+	}
+	var exportColumns *string
+	if req.ExportColumns != nil {
+		exportColumns = unibee.String(utility.MarshalToJsonString(req.ExportColumns))
+	}
 	_, err = dao.MerchantBatchExportTemplate.Ctx(ctx).Data(g.Map{
 		dao.MerchantBatchExportTemplate.Columns().Name:          req.Name,
 		dao.MerchantBatchExportTemplate.Columns().Task:          req.Task,
 		dao.MerchantBatchExportTemplate.Columns().Format:        req.Format,
-		dao.MerchantBatchExportTemplate.Columns().Payload:       utility.MarshalToJsonString(req.Payload),
-		dao.MerchantBatchExportTemplate.Columns().ExportColumns: utility.MarshalToJsonString(req.ExportColumns),
+		dao.MerchantBatchExportTemplate.Columns().Payload:       payload,
+		dao.MerchantBatchExportTemplate.Columns().ExportColumns: exportColumns,
 		dao.MerchantBatchExportTemplate.Columns().GmtModify:     gtime.Now(),
 	}).Where(dao.MerchantBatchExportTemplate.Columns().Id, one.Id).Where(dao.MerchantWebhook.Columns().IsDeleted, 0).OmitNil().Update()
 	if err != nil {
