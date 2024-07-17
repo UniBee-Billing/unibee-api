@@ -830,6 +830,14 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		err = handler.HandleSubscriptionFirstInvoicePaid(ctx, one, oneInvoice)
 		one = query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)
 		utility.AssertError(err, "Finish Subscription Error")
+		if prepare.Invoice.TotalAmount == 0 {
+			// zero invoice will not create payment
+			_, _ = redismq.Send(&redismq.Message{
+				Topic: redismq2.TopicSubscriptionPaymentSuccess.Topic,
+				Tag:   redismq2.TopicSubscriptionPaymentSuccess.Tag,
+				Body:  one.SubscriptionId,
+			})
+		}
 	} else if req.StartIncomplete {
 		err = SubscriptionActiveTemporarily(ctx, one.SubscriptionId, one.CurrentPeriodEnd)
 		utility.AssertError(err, "Start Active Temporarily")
