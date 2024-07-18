@@ -29,7 +29,7 @@ type ListReq struct {
 	Email           string `json:"email" dc:"Search Filter Email" `
 	PlanIds         []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
 	SubscriptionId  string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
-	SubStatus       []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
+	SubStatus       []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
 	Status          []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
 	DeleteInclude   bool   `json:"deleteInclude" dc:"Deleted Involved，Need Admin" `
 	SortField       string `json:"sortField" dc:"Sort，user_id|gmt_create|email|user_name|subscription_name|subscription_status|payment_method|recurring_amount|billing_type，Default gmt_create" `

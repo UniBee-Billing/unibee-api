@@ -17,7 +17,7 @@ type UserListInternalReq struct {
 	FirstName      string `json:"firstName" dc:"Search FirstName" `
 	LastName       string `json:"lastName" dc:"Search LastName" `
 	SubscriptionId string `json:"subscriptionId" dc:"Search Filter SubscriptionId" `
-	SubStatus      []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
+	SubStatus      []int  `json:"subStatus" dc:"Filter, Default All，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
 	Status         []int  `json:"status" dc:"Status, 0-Active｜2-Frozen" `
 	PlanIds        []int  `json:"planIds" dc:"PlanIds, Search Filter PlanIds" `
 	//UserName   int    `json:"userName" dc:"Filter UserName, Default All" `
