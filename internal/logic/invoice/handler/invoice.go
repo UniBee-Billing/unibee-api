@@ -128,6 +128,9 @@ func UpdateInvoiceFromPayment(ctx context.Context, payment *entity.Payment) (*en
 				g.Log().Errorf(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s error:%s", one.InvoiceId, payment.PaymentId, err.Error())
 				return one, gerror.New("invoice reverse failed, invoiceId:" + one.InvoiceId + " paymentId:" + payment.PaymentId + " subId:" + payment.SubscriptionId)
 			} else {
+				one.Status = consts.InvoiceStatusReversed
+				one.GatewayPaymentId = payment.GatewayPaymentId
+				one.Link = payment.Link
 				g.Log().Infof(ctx, "UpdateInvoiceFromPayment_Reverse invoiceId:%s paymentId:%s", one.InvoiceId, payment.PaymentId)
 				_, _ = redismq.Send(&redismq.Message{
 					Topic: redismq2.TopicInvoiceReversed.Topic,
