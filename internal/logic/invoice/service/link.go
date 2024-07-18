@@ -72,7 +72,7 @@ func LinkCheck(ctx context.Context, invoiceId string, time int64) *LinkCheckRes 
 		} else {
 			res.Link = one.PaymentLink
 		}
-	} else if one.Status == consts.InvoiceStatusPaid {
+	} else if one.Status == consts.InvoiceStatusPaid || one.Status == consts.InvoiceStatusReversed {
 		res.Link = link.GetInvoicePdfLink(one.InvoiceId, one.SendTerms)
 	}
 	return res
