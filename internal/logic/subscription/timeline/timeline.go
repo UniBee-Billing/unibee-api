@@ -194,7 +194,7 @@ func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 	} else if one.Status != consts.SubTimeLineStatusProcessing {
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(g.Map{
 			dao.SubscriptionTimeline.Columns().Status:    consts.SubTimeLineStatusProcessing,
-			dao.SubscriptionTimeline.Columns().PeriodEnd: "",
+			dao.SubscriptionTimeline.Columns().PeriodEnd: invoice.PeriodEnd,
 		}).Where(dao.SubscriptionTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
 			g.Log().Errorf(ctx, `SubscriptionNewTimeline reversed old one failure %s`, err.Error())
