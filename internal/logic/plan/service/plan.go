@@ -268,7 +268,7 @@ func PlanEdit(ctx context.Context, req *EditInternalReq) (one *entity.Plan, err 
 	utility.Assert(one != nil, fmt.Sprintf("plan not found, id:%d", req.PlanId))
 	utility.Assert(one.MerchantId == req.MerchantId, "Merchant not match")
 
-	if req.ExternalPlanId != nil && len(*req.ExternalPlanId) > 0 {
+	if req.ExternalPlanId != nil && len(*req.ExternalPlanId) > 0 && strings.Compare(one.ExternalPlanId, *req.ExternalPlanId) != 0 {
 		utility.Assert(query.GetPlanByExternalPlanId(ctx, req.MerchantId, *req.ExternalPlanId) == nil, "Same ExternalPlanId Exist")
 	}
 
