@@ -14,6 +14,7 @@ import (
 )
 
 func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSubStatus consts.SubscriptionStatusEnum) {
+	g.Log().Infof(ctx, "SubscriptionTimeLine-FinishOldTimelineBySubEnd-%s status:%v", subscriptionId, endSubStatus)
 	utility.Assert(len(subscriptionId) > 0, "invalid subscriptionId")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "sub not found")
@@ -44,13 +45,13 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 			dao.SubscriptionTimeline.Columns().PeriodEnd: periodEnd,
 		}).Where(dao.SubscriptionTimeline.Columns().Id, oldOne.Id).OmitNil().Update()
 		if err != nil {
-			g.Log().Errorf(ctx, `FinishOldTimelineBySubEnd update old one failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-FinishOldTimelineBySubEnd update old one failure %s`, err.Error())
 		}
 	}
 }
 
 func SubscriptionNewPendingTimeline(ctx context.Context, invoice *entity.Invoice) {
-	g.Log().Infof(ctx, "SubscriptionNewPendingTimeline-%s", invoice.InvoiceId)
+	g.Log().Infof(ctx, "SubscriptionTimeLine-NewPendingTimeline-%s status:%v", invoice.InvoiceId, invoice.Status)
 	utility.Assert(invoice != nil, "invoice is null ")
 	utility.Assert(len(invoice.SubscriptionId) > 0, "not sub invoice")
 	utility.Assert(invoice.PeriodStart > 0, "invalid invoice data")
@@ -82,13 +83,13 @@ func SubscriptionNewPendingTimeline(ctx context.Context, invoice *entity.Invoice
 
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			g.Log().Errorf(ctx, `SubscriptionNewPendingTimeline record insert failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionNewPendingTimeline record insert failure %s`, err.Error())
 		}
 	}
 }
 
 func SubscriptionFirstPaidTimeline(ctx context.Context, invoice *entity.Invoice) {
-	g.Log().Infof(ctx, "SubscriptionFirstPaidTimeline-%s", invoice.InvoiceId)
+	g.Log().Infof(ctx, "SubscriptionTimeLine-FirstPaidTimeline-%s status:%v", invoice.InvoiceId, invoice.Status)
 	utility.Assert(invoice != nil, "invoice is null ")
 	utility.Assert(len(invoice.SubscriptionId) > 0, "not sub invoice")
 	utility.Assert(invoice.Status == consts.InvoiceStatusPaid || invoice.Status == consts.InvoiceStatusReversed, "invoice not paid")
@@ -121,7 +122,7 @@ func SubscriptionFirstPaidTimeline(ctx context.Context, invoice *entity.Invoice)
 
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			g.Log().Errorf(ctx, `SubscriptionFirstPaidTimeline record insert failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionFirstPaidTimeline record insert failure %s`, err.Error())
 		}
 	} else {
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(g.Map{
@@ -129,13 +130,13 @@ func SubscriptionFirstPaidTimeline(ctx context.Context, invoice *entity.Invoice)
 			dao.SubscriptionTimeline.Columns().PeriodEnd: invoice.PeriodEnd,
 		}).Where(dao.SubscriptionTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			g.Log().Errorf(ctx, `SubscriptionFirstPaidTimeline update old one failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionFirstPaidTimeline update old one failure %s`, err.Error())
 		}
 	}
 }
 
 func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
-	g.Log().Infof(ctx, "SubscriptionNewTimeline-%s", invoice.InvoiceId)
+	g.Log().Infof(ctx, "SubscriptionTimeLine-NewTimeline-%s status:%v", invoice.InvoiceId, invoice.Status)
 	utility.Assert(invoice != nil, "invoice is null ")
 	utility.Assert(len(invoice.SubscriptionId) > 0, "not sub invoice")
 	utility.Assert(invoice.Status == consts.InvoiceStatusPaid || invoice.Status == consts.InvoiceStatusReversed, "invoice not paid")
@@ -162,7 +163,7 @@ func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 				dao.SubscriptionTimeline.Columns().PeriodEnd: periodEnd,
 			}).Where(dao.SubscriptionTimeline.Columns().Id, oldOne.Id).OmitNil().Update()
 			if err != nil {
-				g.Log().Errorf(ctx, `SubscriptionNewTimeline update old one failure %s`, err.Error())
+				g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionNewTimeline update old one failure %s`, err.Error())
 			}
 		}
 
@@ -189,7 +190,7 @@ func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(one).OmitNil().Insert(one)
 		if err != nil {
-			g.Log().Errorf(ctx, `SubscriptionNewTimeline record insert failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionNewTimeline record insert failure %s`, err.Error())
 		}
 	} else if one.Status != consts.SubTimeLineStatusProcessing {
 		_, err := dao.SubscriptionTimeline.Ctx(ctx).Data(g.Map{
@@ -197,7 +198,7 @@ func SubscriptionNewTimeline(ctx context.Context, invoice *entity.Invoice) {
 			dao.SubscriptionTimeline.Columns().PeriodEnd: invoice.PeriodEnd,
 		}).Where(dao.SubscriptionTimeline.Columns().Id, one.Id).OmitNil().Update()
 		if err != nil {
-			g.Log().Errorf(ctx, `SubscriptionNewTimeline reversed old one failure %s`, err.Error())
+			g.Log().Errorf(ctx, `SubscriptionTimeLine-SubscriptionNewTimeline reversed old one failure %s`, err.Error())
 		}
 	}
 }

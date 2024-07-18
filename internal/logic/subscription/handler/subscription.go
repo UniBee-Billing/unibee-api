@@ -82,6 +82,7 @@ func HandleSubscriptionFirstInvoicePaid(ctx context.Context, sub *entity.Subscri
 		dao.Subscription.Columns().LastUpdateTime:         gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().Id, sub.Id).OmitNil().Update()
 	if err != nil {
+		g.Log().Errorf(ctx, "HandleSubscriptionFirstInvoicePaid update sub error:%s", err.Error())
 		return err
 	}
 	timeline.SubscriptionFirstPaidTimeline(ctx, invoice)
