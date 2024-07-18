@@ -39,11 +39,18 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	}
 	var memberId uint64 = 0
 	var optAccount = ""
+	var clientType = 0
 	if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).MerchantMember != nil {
 		memberId = _interface.Context().Get(superCtx).MerchantMember.Id
+		clientType = 1
 		optAccount = fmt.Sprintf("Member(%v)", memberId)
+	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).User != nil {
+		memberId = 0
+		clientType = 2
+		optAccount = fmt.Sprintf("User(%v)", _interface.Context().Get(superCtx).User.Id)
 	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).IsOpenApiCall {
 		memberId = 0
+		clientType = 3
 		optAccount = fmt.Sprintf("OpenApi(%v)", _interface.Context().Get(superCtx).OpenApiKey)
 		var targetUserId uint64 = 0
 		if req.UserId > 0 {
@@ -78,7 +85,7 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 		MerchantId:     merchantId,
 		MemberId:       memberId,
 		OptAccount:     optAccount,
-		ClientType:     0,
+		ClientType:     clientType,
 		BizType:        0,
 		OptTarget:      req.Target,
 		OptContent:     req.Content,
