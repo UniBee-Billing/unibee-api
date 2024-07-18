@@ -96,10 +96,10 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	if memberId <= 0 {
 		if optAccount == "System" {
 			g.Log().Debugf(superCtx, "Receive SystemOperationLog:%s", utility.MarshalToJsonString(operationLog))
+			return
 		} else {
-			g.Log().Debugf(superCtx, "Receive OpenApiOperationLog:%s", utility.MarshalToJsonString(operationLog))
+			g.Log().Infof(superCtx, "Receive OpenApiOperation:%s", utility.MarshalToJsonString(operationLog))
 		}
-		return
 	}
 	go func() {
 		ctx := context.Background()
