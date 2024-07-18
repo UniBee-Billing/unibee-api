@@ -18,6 +18,10 @@ func FinishOldTimelineBySubEnd(ctx context.Context, subscriptionId string, endSu
 	utility.Assert(len(subscriptionId) > 0, "invalid subscriptionId")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "sub not found")
+	if consts.SubStatusToEnum(sub.Status) != endSubStatus {
+		g.Log().Errorf(ctx, `SubscriptionTimeLine-FinishOldTimelineBySubEnd sub status already change to another old:%v new:%v`, endSubStatus, sub.Status)
+		return
+	}
 	var oldOne *entity.SubscriptionTimeline
 	_ = dao.SubscriptionTimeline.Ctx(ctx).
 		Where(dao.SubscriptionTimeline.Columns().MerchantId, sub.MerchantId).
