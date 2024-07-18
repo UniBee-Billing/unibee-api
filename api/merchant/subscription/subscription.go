@@ -57,7 +57,7 @@ type UserPendingCryptoSubscriptionDetailRes struct {
 type ListReq struct {
 	g.Meta          `path:"/list" tags:"Subscription" method:"get,post" summary:"SubscriptionList"`
 	UserId          int64  `json:"userId"  dc:"UserId" `
-	Status          []int  `json:"status" dc:"Filter, Default All，Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing" `
+	Status          []int  `json:"status" dc:"Filter, Default All，Status，1-Pending｜2-Active｜3-Suspend | 4-Cancel | 5-Expire | 6- Suspend| 7-Incomplete | 8-Processing | 9-Failed" `
 	Currency        string `json:"currency" dc:"The currency of subscription" `
 	PlanIds         []int  `json:"planIds" dc:"The filter ids of plan" `
 	AmountStart     *int64 `json:"amountStart" dc:"The filter start amount of subscription" `
