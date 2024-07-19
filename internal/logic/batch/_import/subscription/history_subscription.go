@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
-	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"strconv"
 	"strings"
@@ -138,26 +137,26 @@ func (t TaskHistorySubscriptionImport) ImportRow(ctx context.Context, task *enti
 	}
 	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
 	if one != nil {
-		if one.Data != tag {
-			return target, gerror.New("Error, no permission to override," + one.Data)
-		}
 		if one.UserId != user.Id {
 			return target, gerror.New("Error, user not match")
 		}
-		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
-			dao.Subscription.Columns().Amount:                 amount,
-			dao.Subscription.Columns().Currency:               currency,
-			dao.Subscription.Columns().PlanId:                 plan.Id,
-			dao.Subscription.Columns().Quantity:               quantity,
-			dao.Subscription.Columns().GatewayId:              gatewayId,
-			dao.Subscription.Columns().BillingCycleAnchor:     currentPeriodStart.Timestamp(),
-			dao.Subscription.Columns().CurrentPeriodStart:     currentPeriodStart.Timestamp(),
-			dao.Subscription.Columns().CurrentPeriodEnd:       currentPeriodEnd.Timestamp(),
-			dao.Subscription.Columns().CurrentPeriodStartTime: currentPeriodStart,
-			dao.Subscription.Columns().CurrentPeriodEndTime:   currentPeriodEnd,
-			dao.Subscription.Columns().FirstPaidTime:          currentPeriodStart.Timestamp(),
-			dao.Subscription.Columns().CreateTime:             currentPeriodStart.Timestamp(),
-		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+		if one.Data == tag {
+			return target, gerror.New("Error, no permission to override," + one.Data)
+		}
+		//_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
+		//	dao.Subscription.Columns().Amount:                 amount,
+		//	dao.Subscription.Columns().Currency:               currency,
+		//	dao.Subscription.Columns().PlanId:                 plan.Id,
+		//	dao.Subscription.Columns().Quantity:               quantity,
+		//	dao.Subscription.Columns().GatewayId:              gatewayId,
+		//	dao.Subscription.Columns().BillingCycleAnchor:     currentPeriodStart.Timestamp(),
+		//	dao.Subscription.Columns().CurrentPeriodStart:     currentPeriodStart.Timestamp(),
+		//	dao.Subscription.Columns().CurrentPeriodEnd:       currentPeriodEnd.Timestamp(),
+		//	dao.Subscription.Columns().CurrentPeriodStartTime: currentPeriodStart,
+		//	dao.Subscription.Columns().CurrentPeriodEndTime:   currentPeriodEnd,
+		//	dao.Subscription.Columns().FirstPaidTime:          currentPeriodStart.Timestamp(),
+		//	dao.Subscription.Columns().CreateTime:             currentPeriodStart.Timestamp(),
+		//}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 	} else {
 		one = &entity.Subscription{
 			SubscriptionId:         utility.CreateSubscriptionId(),
