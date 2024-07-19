@@ -1,7 +1,6 @@
 package utility
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -14,7 +13,6 @@ type GatewayBank struct {
 }
 
 func TestJsonMarshal(t *testing.T) {
-	fmt.Println(ToFirstCharLowerCase("firstName"))
 	t.Run("test for json marshal", func(t *testing.T) {
 		one := &GatewayBank{
 			AccountHolder: "1",

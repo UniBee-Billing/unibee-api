@@ -51,7 +51,7 @@ type NewTemplateReq struct {
 	Name          string                 `json:"name"      v:"required"    description:"name"`
 	Task          string                 `json:"task" dc:"Task,InvoiceExport|UserExport|SubscriptionExport|TransactionExport|DiscountExport|UserDiscountExport" v:"required"`
 	Payload       map[string]interface{} `json:"payload" dc:"Payload"`
-	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified"`
+	ExportColumns []string               `json:"exportColumns" dc:"ExportColumns, the export file column list, will export all columns if not specified, first char should lower case"`
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
 }
 

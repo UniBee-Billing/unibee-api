@@ -259,23 +259,23 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 	}()
 }
 
-func SupportUpperCasePayload(ctx context.Context, payload string) string {
-	var target map[string]interface{}
-	err := utility.UnmarshalFromJsonString(payload, &target)
-	if err != nil {
-		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
-		return payload
-	}
-	for key, value := range target {
-		if utility.IsStartUpper(key) {
-			lowerKey := utility.ToFirstCharLowerCase(key)
-			if _, ok := target[lowerKey]; !ok {
-				target[lowerKey] = value
-			}
-		}
-	}
-	return utility.MarshalToJsonString(target)
-}
+//func SupportUpperCasePayload(ctx context.Context, payload string) string {
+//	var target map[string]interface{}
+//	err := utility.UnmarshalFromJsonString(payload, &target)
+//	if err != nil {
+//		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
+//		return payload
+//	}
+//	for key, value := range target {
+//		if utility.IsStartUpper(key) {
+//			lowerKey := utility.ToFirstCharLowerCase(key)
+//			if _, ok := target[lowerKey]; !ok {
+//				target[lowerKey] = value
+//			}
+//		}
+//	}
+//	return utility.MarshalToJsonString(target)
+//}
 
 func convertXlsxFileToCSV(xlsxFileLocalName string, sheetName string, csvFileName string) (string, error) {
 	xlsxFile := xlsxFileLocalName

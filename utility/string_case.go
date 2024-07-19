@@ -31,6 +31,10 @@ func IsStartUpper(s string) bool {
 	return unicode.IsUpper([]rune(s)[0])
 }
 
+func IsStartLower(s string) bool {
+	return unicode.IsLower([]rune(s)[0])
+}
+
 func ToFirstCharLowerCase(s string) string {
 	var result string
 	if !IsStartUpper(s) {
@@ -39,6 +43,21 @@ func ToFirstCharLowerCase(s string) string {
 	for i, char := range s {
 		if i == 0 {
 			result += strings.ToLower(string(char))
+		} else {
+			result += string(char)
+		}
+	}
+	return result
+}
+
+func ToFirstCharUpperCase(s string) string {
+	var result string
+	if !IsStartLower(s) {
+		return s
+	}
+	for i, char := range s {
+		if i == 0 {
+			result += strings.ToUpper(string(char))
 		} else {
 			result += string(char)
 		}
