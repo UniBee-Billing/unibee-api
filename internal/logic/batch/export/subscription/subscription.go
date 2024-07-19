@@ -153,33 +153,33 @@ func (t TaskSubscriptionExport) PageData(ctx context.Context, page int, count in
 }
 
 type ExportSubscriptionEntity struct {
-	SubscriptionId         string      `json:"SubscriptionId"     `
-	ExternalSubscriptionId string      `json:"ExternalSubscriptionId"     `
-	UserId                 string      `json:"UserId"             `
-	ExternalUserId         string      `json:"ExternalUserId"     `
-	PlanId                 string      `json:"PlanId"             `
-	ExternalPlanId         string      `json:"ExternalPlanId"     `
-	FirstName              string      `json:"FirstName"          `
-	LastName               string      `json:"LastName"           `
-	Email                  string      `json:"Email"              `
-	MerchantName           string      `json:"MerchantName"       `
-	Amount                 string      `json:"Amount"             `
-	Currency               string      `json:"Currency"           `
-	PlanName               string      `json:"PlanName"           `
-	Quantity               string      `json:"Quantity"           `
-	Gateway                string      `json:"Gateway"            `
-	Status                 string      `json:"Status"             `
-	CancelAtPeriodEnd      string      `json:"CancelAtPeriodEnd"  `
-	CurrentPeriodStart     *gtime.Time `json:"CurrentPeriodStart" layout:"2006-01-02 15:04:05"`
-	CurrentPeriodEnd       *gtime.Time `json:"CurrentPeriodEnd"  layout:"2006-01-02 15:04:05" `
-	BillingCycleAnchor     *gtime.Time `json:"BillingCycleAnchor" layout:"2006-01-02 15:04:05"`
-	DunningTime            *gtime.Time `json:"DunningTime"        layout:"2006-01-02 15:04:05"`
-	TrialEnd               *gtime.Time `json:"TrialEnd"          layout:"2006-01-02 15:04:05" `
-	FirstPaidTime          *gtime.Time `json:"FirstPaidTime"    layout:"2006-01-02 15:04:05"  `
-	CancelReason           string      `json:"CancelReason"       `
-	CountryCode            string      `json:"CountryCode"        `
-	TaxPercentage          string      `json:"TaxPercentage"      `
-	CreateTime             *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"   `
+	SubscriptionId         string      `json:"SubscriptionId"     comment:""`
+	ExternalSubscriptionId string      `json:"ExternalSubscriptionId"     comment:""`
+	UserId                 string      `json:"UserId"             comment:""`
+	ExternalUserId         string      `json:"ExternalUserId"     comment:""`
+	PlanId                 string      `json:"PlanId"             comment:""`
+	ExternalPlanId         string      `json:"ExternalPlanId"     comment:""`
+	FirstName              string      `json:"FirstName"          comment:""`
+	LastName               string      `json:"LastName"           comment:""`
+	Email                  string      `json:"Email"              comment:""`
+	MerchantName           string      `json:"MerchantName"       comment:""`
+	Amount                 string      `json:"Amount"             comment:""`
+	Currency               string      `json:"Currency"           comment:""`
+	PlanName               string      `json:"PlanName"           comment:""`
+	Quantity               string      `json:"Quantity"           comment:""`
+	Gateway                string      `json:"Gateway"            comment:""`
+	Status                 string      `json:"Status"             comment:""`
+	CancelAtPeriodEnd      string      `json:"CancelAtPeriodEnd"  comment:""`
+	CurrentPeriodStart     *gtime.Time `json:"CurrentPeriodStart" layout:"2006-01-02 15:04:05" comment:""`
+	CurrentPeriodEnd       *gtime.Time `json:"CurrentPeriodEnd"  layout:"2006-01-02 15:04:05" comment:""`
+	BillingCycleAnchor     *gtime.Time `json:"BillingCycleAnchor" layout:"2006-01-02 15:04:05" comment:""`
+	DunningTime            *gtime.Time `json:"DunningTime"        layout:"2006-01-02 15:04:05" comment:""`
+	TrialEnd               *gtime.Time `json:"TrialEnd"          layout:"2006-01-02 15:04:05"  comment:""`
+	FirstPaidTime          *gtime.Time `json:"FirstPaidTime"    layout:"2006-01-02 15:04:05"   comment:""`
+	CancelReason           string      `json:"CancelReason"        comment:""`
+	CountryCode            string      `json:"CountryCode"         comment:""`
+	TaxPercentage          string      `json:"TaxPercentage"       comment:""`
+	CreateTime             *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"    comment:""`
 	StripeUserId           string      `json:"StripeUserId(Auto-Charge Required)"      comment:"The id of user get from stripe, required if stripe auto-charge needed"       `
 	StripePaymentMethod    string      `json:"StripePaymentMethod(Auto-Charge Required)"     comment:"The payment method id which user attached, get from stripe, required if stripe auto-charge needed"    `
 	PaypalVaultId          string      `json:"PaypalVaultId(Auto-Charge Required)"    comment:"The vault id of user get from paypal, required if paypal auto-charge needed"   `

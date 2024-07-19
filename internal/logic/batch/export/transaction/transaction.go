@@ -146,23 +146,23 @@ func (t TaskTransactionExport) PageData(ctx context.Context, page int, count int
 }
 
 type ExportTransactionEntity struct {
-	TransactionId         string      `json:"TransactionId"      `
-	ExternalTransactionId string      `json:"externalTransactionId"  `
-	UserId                string      `json:"UserId"             `
-	ExternalUserId        string      `json:"ExternalUserId"     `
-	FirstName             string      `json:"FirstName"          `
-	LastName              string      `json:"LastName"           `
-	Email                 string      `json:"Email"              `
-	MerchantName          string      `json:"MerchantName"       `
-	SubscriptionId        string      `json:"SubscriptionId" `
-	InvoiceId             string      `json:"InvoiceId"      `
-	Currency              string      `json:"Currency"       `
-	TotalAmount           string      `json:"TotalAmount"    `
-	Gateway               string      `json:"Gateway"      `
-	PaymentId             string      `json:"PaymentId"     `
-	Status                string      `json:"Status"         `
-	Type                  string      `json:"Type"   `
-	CreateTime            *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"`
-	RefundId              string      `json:"RefundId"      `
-	FullRefund            string      `json:"FullRefund"     `
+	TransactionId         string      `json:"TransactionId"       comment:""`
+	ExternalTransactionId string      `json:"externalTransactionId"   comment:""`
+	UserId                string      `json:"UserId"              comment:""`
+	ExternalUserId        string      `json:"ExternalUserId"      comment:""`
+	FirstName             string      `json:"FirstName"           comment:""`
+	LastName              string      `json:"LastName"            comment:""`
+	Email                 string      `json:"Email"               comment:""`
+	MerchantName          string      `json:"MerchantName"        comment:""`
+	SubscriptionId        string      `json:"SubscriptionId"  comment:""`
+	InvoiceId             string      `json:"InvoiceId"       comment:""`
+	Currency              string      `json:"Currency"        comment:""`
+	TotalAmount           string      `json:"TotalAmount"     comment:""`
+	Gateway               string      `json:"Gateway"       comment:""`
+	PaymentId             string      `json:"PaymentId"      comment:""`
+	Status                string      `json:"Status"          comment:""`
+	Type                  string      `json:"Type"    comment:""`
+	CreateTime            *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05" comment:""`
+	RefundId              string      `json:"RefundId"       comment:""`
+	FullRefund            string      `json:"FullRefund"      comment:""`
 }

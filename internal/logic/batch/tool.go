@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
+	"github.com/xuri/excelize/v2"
 	"reflect"
 	"time"
 	dao "unibee/internal/dao/oversea_pay"
@@ -100,6 +101,61 @@ func RefactorData(obj interface{}, timeZone string, exportColumns []string) []in
 		for _, key := range exportColumns {
 			if value, ok := allValue[key]; ok {
 				out = append(out, value)
+			}
+		}
+		return out
+	} else {
+		return out
+	}
+
+}
+
+func RefactorHeaderComments(obj interface{}, exportColumns []string) []excelize.Comment {
+	out := make([]excelize.Comment, 0)
+	if obj == nil {
+		return out
+	}
+
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
+
+	t := v.Type()
+	// range properties
+	// get Tag named "json" as key
+	var allKeys = make(map[string]string)
+	for i := 0; i < v.NumField(); i++ {
+		fi := t.Field(i)
+		if key := fi.Tag.Get("json"); key != "" {
+			if comment := fi.Tag.Get("comment"); comment != "" {
+				allKeys[key] = comment
+				cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+				out = append(out, excelize.Comment{
+					Cell:   cell,
+					Author: "UniBee",
+					Paragraph: []excelize.RichTextRun{
+						{Text: comment, Font: &excelize.Font{Bold: true}},
+					},
+				})
+			}
+		}
+	}
+
+	if exportColumns != nil && len(exportColumns) > 0 {
+		out = nil
+		for i, key := range exportColumns {
+			if comment, ok := allKeys[key]; ok {
+				cell, _ := excelize.CoordinatesToCellName(i+1, 1)
+				out = append(out, excelize.Comment{
+					Cell:   cell,
+					Author: "UniBee",
+					Paragraph: []excelize.RichTextRun{
+						{Text: comment, Font: &excelize.Font{Bold: true}},
+					},
+				})
 			}
 		}
 		return out

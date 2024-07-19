@@ -104,21 +104,21 @@ func (t TaskUserDiscountExport) PageData(ctx context.Context, page int, count in
 }
 
 type ExportUserDiscountEntity struct {
-	Id             string      `json:"Id"                 `
-	UserId         string      `json:"UserId"             `
-	ExternalUserId string      `json:"ExternalUserId"     `
-	PlanId         string      `json:"PlanId"             `
-	ExternalPlanId string      `json:"ExternalPlanId"     `
-	FirstName      string      `json:"FirstName"          `
-	LastName       string      `json:"LastName"           `
-	Email          string      `json:"Email"              `
-	MerchantName   string      `json:"MerchantName"       `
-	PlanName       string      `json:"PlanName"           `
-	Code           string      `json:"Code"           `
-	SubscriptionId string      `json:"SubscriptionId" `
-	PaymentId      string      `json:"PaymentId"      `
-	InvoiceId      string      `json:"InvoiceId"      `
-	CreateTime     *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05"`
-	ApplyAmount    string      `json:"ApplyAmount"    `
-	Currency       string      `json:"Currency"       `
+	Id             string      `json:"Id"                  comment:""`
+	UserId         string      `json:"UserId"              comment:""`
+	ExternalUserId string      `json:"ExternalUserId"      comment:""`
+	PlanId         string      `json:"PlanId"              comment:""`
+	ExternalPlanId string      `json:"ExternalPlanId"      comment:""`
+	FirstName      string      `json:"FirstName"           comment:""`
+	LastName       string      `json:"LastName"            comment:""`
+	Email          string      `json:"Email"               comment:""`
+	MerchantName   string      `json:"MerchantName"        comment:""`
+	PlanName       string      `json:"PlanName"            comment:""`
+	Code           string      `json:"Code"            comment:""`
+	SubscriptionId string      `json:"SubscriptionId"  comment:""`
+	PaymentId      string      `json:"PaymentId"       comment:""`
+	InvoiceId      string      `json:"InvoiceId"       comment:""`
+	CreateTime     *gtime.Time `json:"CreateTime"      layout:"2006-01-02 15:04:05" comment:""`
+	ApplyAmount    string      `json:"ApplyAmount"     comment:""`
+	Currency       string      `json:"Currency"        comment:""`
 }

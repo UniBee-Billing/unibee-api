@@ -10,7 +10,6 @@ import (
 	"os"
 	"reflect"
 	"unibee/internal/logic/batch"
-	"unibee/internal/query"
 	"unibee/utility"
 )
 
@@ -29,7 +28,7 @@ func LinkImportTemplateEntry(r *ghttp.Request) {
 		return
 	}
 
-	taskImpl := batch.GetImportTaskImpl(query.Case2Camel(task))
+	taskImpl := batch.GetImportTaskImpl(utility.Case2Camel(task))
 	if taskImpl == nil {
 		r.Response.Writeln("Task not found")
 		return

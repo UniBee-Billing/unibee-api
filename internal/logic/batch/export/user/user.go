@@ -126,25 +126,25 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 }
 
 type ExportUserEntity struct {
-	Id                 string      `json:"Id"                 `
-	ExternalUserId     string      `json:"ExternalUserId"     `
-	FirstName          string      `json:"FirstName"          `
-	LastName           string      `json:"LastName"           `
-	Email              string      `json:"Email"              `
-	MerchantName       string      `json:"MerchantName"       `
-	Phone              string      `json:"Phone"              `
-	Address            string      `json:"Address"            `
-	VATNumber          string      `json:"VATNumber"          `
-	CountryCode        string      `json:"CountryCode"        `
-	CountryName        string      `json:"CountryName"        `
-	SubscriptionName   string      `json:"SubscriptionName"   `
-	SubscriptionId     string      `json:"SubscriptionId"     `
-	SubscriptionStatus string      `json:"SubscriptionStatus" `
-	CreateTime         *gtime.Time `json:"CreateTime"       layout:"2006-01-02 15:04:05"  `
-	Status             string      `json:"Status"             `
-	TaxPercentage      string      `json:"TaxPercentage"      `
-	Type               string      `json:"Type"               `
-	Gateway            string      `json:"Gateway"            `
-	City               string      `json:"City"               `
-	ZipCode            string      `json:"ZipCode"            `
+	Id                 string      `json:"Id"                  comment:""`
+	ExternalUserId     string      `json:"ExternalUserId"      comment:""`
+	FirstName          string      `json:"FirstName"           comment:""`
+	LastName           string      `json:"LastName"            comment:""`
+	Email              string      `json:"Email"               comment:""`
+	MerchantName       string      `json:"MerchantName"        comment:""`
+	Phone              string      `json:"Phone"               comment:""`
+	Address            string      `json:"Address"             comment:""`
+	VATNumber          string      `json:"VATNumber"           comment:""`
+	CountryCode        string      `json:"CountryCode"         comment:""`
+	CountryName        string      `json:"CountryName"         comment:""`
+	SubscriptionName   string      `json:"SubscriptionName"    comment:""`
+	SubscriptionId     string      `json:"SubscriptionId"      comment:""`
+	SubscriptionStatus string      `json:"SubscriptionStatus"  comment:""`
+	CreateTime         *gtime.Time `json:"CreateTime"       layout:"2006-01-02 15:04:05"   comment:""`
+	Status             string      `json:"Status"              comment:""`
+	TaxPercentage      string      `json:"TaxPercentage"       comment:""`
+	Type               string      `json:"Type"                comment:""`
+	Gateway            string      `json:"Gateway"             comment:""`
+	City               string      `json:"City"                comment:""`
+	ZipCode            string      `json:"ZipCode"             comment:""`
 }

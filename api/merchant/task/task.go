@@ -23,7 +23,8 @@ type ExportColumnListReq struct {
 }
 
 type ExportColumnListRes struct {
-	Columns []interface{} `json:"columns" dc:"Export Column List"`
+	Columns        []interface{}     `json:"columns" dc:"Export Column List"`
+	ColumnComments map[string]string `json:"columnComments" dc:"Export Column Comments"`
 }
 
 type NewReq struct {

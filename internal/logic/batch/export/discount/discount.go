@@ -121,20 +121,20 @@ func (t TaskDiscountExport) PageData(ctx context.Context, page int, count int, t
 }
 
 type ExportDiscountEntity struct {
-	Id                 string      `json:"Id"                `
-	MerchantName       string      `json:"MerchantName"          `
-	Name               string      `json:"Name"              `
-	Code               string      `json:"Code"              `
-	Status             string      `json:"Status"            `
-	BillingType        string      `json:"BillingType"       `
-	DiscountType       string      `json:"DiscountType"      `
-	DiscountAmount     string      `json:"DiscountAmount"    `
-	DiscountPercentage string      `json:"DiscountPercentage"`
-	Currency           string      `json:"Currency"          `
-	CycleLimit         string      `json:"CycleLimit"        `
-	StartTime          *gtime.Time `json:"StartTime"         layout:"2006-01-02 15:04:05" `
-	EndTime            *gtime.Time `json:"EndTime"           layout:"2006-01-02 15:04:05" `
-	CreateTime         *gtime.Time `json:"CreateTime"        layout:"2006-01-02 15:04:05" `
-	CreateBy           string      `json:"CreateBy"        `
-	TotalUsed          string      `json:"TotalUsed"        `
+	Id                 string      `json:"Id"                 comment:""`
+	MerchantName       string      `json:"MerchantName"           comment:""`
+	Name               string      `json:"Name"               comment:""`
+	Code               string      `json:"Code"               comment:""`
+	Status             string      `json:"Status"             comment:""`
+	BillingType        string      `json:"BillingType"        comment:""`
+	DiscountType       string      `json:"DiscountType"       comment:""`
+	DiscountAmount     string      `json:"DiscountAmount"     comment:""`
+	DiscountPercentage string      `json:"DiscountPercentage" comment:""`
+	Currency           string      `json:"Currency"           comment:""`
+	CycleLimit         string      `json:"CycleLimit"         comment:""`
+	StartTime          *gtime.Time `json:"StartTime"         layout:"2006-01-02 15:04:05"  comment:""`
+	EndTime            *gtime.Time `json:"EndTime"           layout:"2006-01-02 15:04:05"  comment:""`
+	CreateTime         *gtime.Time `json:"CreateTime"        layout:"2006-01-02 15:04:05"  comment:""`
+	CreateBy           string      `json:"CreateBy"         comment:""`
+	TotalUsed          string      `json:"TotalUsed"         comment:""`
 }

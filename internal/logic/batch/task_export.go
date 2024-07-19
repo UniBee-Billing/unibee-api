@@ -11,6 +11,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
 	"os"
+	"reflect"
 	"strconv"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consumer/webhook/log"
@@ -32,7 +33,6 @@ var exportTaskMap = map[string]_interface.BatchExportTask{
 	"SubscriptionExport": &subscription.TaskSubscriptionExport{},
 	"TransactionExport":  &transaction.TaskTransactionExport{},
 	"DiscountExport":     &discount.TaskDiscountExport{},
-	"UserDiscountExport": &discount.TaskUserDiscountExport{},
 }
 
 func GetExportTaskImpl(task string) _interface.BatchExportTask {
@@ -48,10 +48,37 @@ type MerchantBatchExportTaskInternalRequest struct {
 	Format        string                 `json:"format" dc:"The format of export file, xlsx|csv, will be xlsx if not specified"`
 }
 
-func ExportColumnList(ctx context.Context, task string) []interface{} {
+func refactorHeaderCommentMap(obj interface{}) map[string]string {
+	out := make(map[string]string, 0)
+	if obj == nil {
+		return out
+	}
+
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	utility.Assert(v.Kind() == reflect.Struct, fmt.Sprintf("ReflectTemplateStructToMap only accepts struct or struct pointer; got %T", v))
+
+	t := v.Type()
+	// range properties
+	// get Tag named "json" as key
+	//var allKeys = make(map[string]string)
+	for i := 0; i < v.NumField(); i++ {
+		fi := t.Field(i)
+		if key := fi.Tag.Get("json"); key != "" {
+			out[key] = fi.Tag.Get("comment")
+		}
+	}
+
+	return out
+}
+
+func ExportColumnList(ctx context.Context, task string) ([]interface{}, map[string]string) {
 	one := GetExportTaskImpl(task)
 	utility.Assert(one != nil, "Task not found")
-	return RefactorHeaders(one.Header(), nil)
+	return RefactorHeaders(one.Header(), nil), refactorHeaderCommentMap(one.Header())
 }
 
 func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskInternalRequest) error {
@@ -193,6 +220,11 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			failureTask(ctx, task.Id, err)
 			return
 		}
+		// addComments
+		for _, comment := range RefactorHeaderComments(taskImpl.Header(), exportColumns) {
+			err = file.AddComment(GeneralExportImportSheetName, comment)
+		}
+
 		fileName := fmt.Sprintf("Batch_export_task_%v_%v_%v.xlsx", task.MerchantId, task.MemberId, task.Id)
 		err = file.SaveAs(fileName)
 		if err != nil {
