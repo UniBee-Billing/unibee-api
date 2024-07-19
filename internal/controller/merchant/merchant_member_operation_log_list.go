@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"strings"
 	_interface "unibee/internal/interface"
 	member2 "unibee/internal/logic/operation_log"
 
@@ -16,7 +17,7 @@ func (c *ControllerMember) OperationLogList(ctx context.Context, req *member.Ope
 		MemberEmail:     req.MemberEmail,
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
-		Email:           req.Email,
+		Email:           strings.Trim(req.Email, " "),
 		SubscriptionId:  req.SubscriptionId,
 		InvoiceId:       req.InvoiceId,
 		PlanId:          req.PlanId,
