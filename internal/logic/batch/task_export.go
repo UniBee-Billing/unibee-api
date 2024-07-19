@@ -189,7 +189,7 @@ func startRunExportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 		var page = 0
 		var count = 100
 
-		task.Payload = SupportUpperCasePayload(ctx, task.Payload)
+		//task.Payload = SupportUpperCasePayload(ctx, task.Payload)
 		for {
 			list, pageDataErr := taskImpl.PageData(ctx, page, count, task)
 			if pageDataErr != nil {
