@@ -230,7 +230,7 @@ type ExportInvoiceEntity struct {
 	OriginAmount                   string      `json:"OriginAmount"                 comment:"The original amount of invoice"`
 	TotalAmount                    string      `json:"TotalAmount" comment:"The total amount of invoice"`
 	DiscountAmount                 string      `json:"DiscountAmount" comment:"The discount amount of invoice"`
-	TotalAmountExcludingTax        string      `json:"TotalAmountExcludingTax" comment:""`
+	TotalAmountExcludingTax        string      `json:"TotalAmountExcludingTax" comment:"The total amount of invoice with tax excluded"`
 	Currency                       string      `json:"Currency" comment:"The currency of invoice"`
 	TaxAmount                      string      `json:"TaxAmount" comment:"The tax amount of invoice"`
 	TaxPercentage                  string      `json:"TaxPercentage"            comment:"The tax percentage of invoice applied"`
