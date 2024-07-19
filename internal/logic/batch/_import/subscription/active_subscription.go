@@ -129,7 +129,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		return target, gerror.New("Error, gateway need setup")
 	}
 	gatewayId = gateway.Id
-	quantity, _ := strconv.ParseInt(target.Amount, 10, 64)
+	quantity, _ := strconv.ParseInt(target.Quantity, 10, 64)
 	if quantity == 0 {
 		quantity = 1
 	}
