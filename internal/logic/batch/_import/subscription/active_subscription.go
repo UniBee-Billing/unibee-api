@@ -254,7 +254,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			return target, gerror.New("Error, no permission to override," + one.Data)
 		}
 		if one.UserId != user.Id {
-			return target, gerror.New("Error, user not match")
+			return target, gerror.New("Error, no permission to override, user not match")
 		}
 		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().Status:                      consts.SubStatusActive,
