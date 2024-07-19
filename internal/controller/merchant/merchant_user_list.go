@@ -2,6 +2,7 @@ package merchant
 
 import (
 	"context"
+	"strings"
 	"unibee/api/merchant/user"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/auth"
@@ -11,7 +12,7 @@ func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user
 	result, err := auth.UserList(ctx, &auth.UserListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
 		UserId:          req.UserId,
-		Email:           req.Email,
+		Email:           strings.Trim(req.Email, " "),
 		FirstName:       req.FirstName,
 		LastName:        req.LastName,
 		SubscriptionId:  req.SubscriptionId,
