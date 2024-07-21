@@ -13,6 +13,7 @@ import (
 type UserAccount struct {
 	g.Meta             `orm:"table:user_account, do:true"`
 	Id                 interface{} // userId
+	ExternalUserId     interface{} // external_user_id
 	Email              interface{} // email
 	GatewayId          interface{} // gateway_id
 	PaymentMethod      interface{} //
@@ -59,7 +60,6 @@ type UserAccount struct {
 	BillingType        interface{} // 1-recurring,2-one-time
 	TimeZone           interface{} //
 	CreateTime         interface{} // create utc time
-	ExternalUserId     interface{} // external_user_id
 	Status             interface{} // 0-Active, 2-Suspend
 	City               interface{} // city
 	ZipCode            interface{} // zip_code

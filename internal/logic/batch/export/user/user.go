@@ -6,8 +6,8 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	"unibee/internal/consts"
-	"unibee/internal/logic/auth"
 	"unibee/internal/logic/batch/export"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -36,7 +36,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		g.Log().Errorf(ctx, "Download PageData error:%s", err.Error())
 		return mainList, nil
 	}
-	req := &auth.UserListInternalReq{
+	req := &user.UserListInternalReq{
 		MerchantId: task.MerchantId,
 		//UserId:        0,
 		//Email:         "",
@@ -90,7 +90,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 		}
 	}
 	req.SkipTotal = true
-	result, _ := auth.UserList(ctx, req)
+	result, _ := user.UserList(ctx, req)
 	if result != nil && result.UserAccounts != nil {
 		for _, one := range result.UserAccounts {
 			var userGateway = ""

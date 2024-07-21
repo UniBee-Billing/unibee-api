@@ -26,6 +26,8 @@ type MerchantOperationLogColumns struct {
 	MemberId           string // member_id
 	UserId             string // user_id
 	OptAccount         string // admin account
+	OptAccountType     string // opt_account_type, 0-Member|1-User|2-OpenApi|3-System
+	OptAccountId       string // operation account id
 	ClientType         string // client type
 	BizType            string // biz_type
 	OptTarget          string // operation target
@@ -51,6 +53,8 @@ var merchantOperationLogColumns = MerchantOperationLogColumns{
 	MemberId:           "member_id",
 	UserId:             "user_id",
 	OptAccount:         "opt_account",
+	OptAccountType:     "opt_account_type",
+	OptAccountId:       "opt_account_id",
 	ClientType:         "client_type",
 	BizType:            "biz_type",
 	OptTarget:          "opt_target",

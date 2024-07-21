@@ -65,7 +65,7 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 		MerchantId:     user.MerchantId,
 		Target:         fmt.Sprintf("User(%v)", user.Id),
-		Content:        "ChangeUserGateway",
+		Content:        fmt.Sprintf("ChangeGateway(%s)", gateway.GatewayName),
 		UserId:         user.Id,
 		SubscriptionId: "",
 		InvoiceId:      "",

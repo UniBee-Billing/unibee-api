@@ -21,6 +21,7 @@ type UserAccountDao struct {
 // UserAccountColumns defines and stores column names for table user_account.
 type UserAccountColumns struct {
 	Id                 string // userId
+	ExternalUserId     string // external_user_id
 	Email              string // email
 	GatewayId          string // gateway_id
 	PaymentMethod      string //
@@ -67,7 +68,6 @@ type UserAccountColumns struct {
 	BillingType        string // 1-recurring,2-one-time
 	TimeZone           string //
 	CreateTime         string // create utc time
-	ExternalUserId     string // external_user_id
 	Status             string // 0-Active, 2-Suspend
 	City               string // city
 	ZipCode            string // zip_code
@@ -76,6 +76,7 @@ type UserAccountColumns struct {
 // userAccountColumns holds the columns for table user_account.
 var userAccountColumns = UserAccountColumns{
 	Id:                 "id",
+	ExternalUserId:     "external_user_id",
 	Email:              "email",
 	GatewayId:          "gateway_id",
 	PaymentMethod:      "payment_method",
@@ -122,7 +123,6 @@ var userAccountColumns = UserAccountColumns{
 	BillingType:        "billing_type",
 	TimeZone:           "time_zone",
 	CreateTime:         "create_time",
-	ExternalUserId:     "external_user_id",
 	Status:             "status",
 	City:               "city",
 	ZipCode:            "zip_code",

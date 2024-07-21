@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"unibee/api/merchant/session"
 	"unibee/internal/cmd/config"
-	"unibee/internal/logic/auth"
 	"unibee/internal/logic/jwt"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -34,7 +34,7 @@ func UserSessionTransfer(ctx context.Context, session string) (*entity.UserAccou
 }
 
 func NewUserSession(ctx context.Context, merchantId uint64, req *session.NewReq) (res *session.NewRes, err error) {
-	one, err := auth.QueryOrCreateUser(ctx, &auth.NewReq{
+	one, err := user.QueryOrCreateUser(ctx, &user.NewReq{
 		ExternalUserId: req.ExternalUserId,
 		Email:          req.Email,
 		FirstName:      req.FirstName,

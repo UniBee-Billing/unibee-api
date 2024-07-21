@@ -6,7 +6,7 @@ import (
 	"unibee/api/bean"
 	"unibee/api/user/auth"
 	_interface "unibee/internal/interface"
-	auth2 "unibee/internal/logic/auth"
+	auth2 "unibee/internal/logic/user"
 	"unibee/internal/query"
 	"unibee/utility"
 

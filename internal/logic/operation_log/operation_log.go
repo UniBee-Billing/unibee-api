@@ -40,18 +40,26 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	var memberId uint64 = 0
 	var optAccount = ""
 	var clientType = 0
+	var optAccountId string
+	var optAccountType = 0
 	if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).MerchantMember != nil {
 		memberId = _interface.Context().Get(superCtx).MerchantMember.Id
 		clientType = 1
 		optAccount = fmt.Sprintf("Member(%v)", memberId)
+		optAccountType = 0
+		optAccountId = fmt.Sprintf("%v", memberId)
 	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).User != nil {
 		memberId = 0
 		clientType = 2
 		optAccount = fmt.Sprintf("User(%v)", _interface.Context().Get(superCtx).User.Id)
+		optAccountType = 1
+		optAccountId = fmt.Sprintf("%v", _interface.Context().Get(superCtx).User.Id)
 	} else if _interface.Context().Get(superCtx) != nil && _interface.Context().Get(superCtx).IsOpenApiCall {
 		memberId = 0
 		clientType = 3
 		optAccount = fmt.Sprintf("OpenApi(%v)", _interface.Context().Get(superCtx).OpenApiKey)
+		optAccountType = 2
+		optAccountId = fmt.Sprintf("%s", _interface.Context().Get(superCtx).OpenApiKey)
 		var targetUserId uint64 = 0
 		if req.UserId > 0 {
 			targetUserId = req.UserId
@@ -79,12 +87,16 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	} else {
 		memberId = 0
 		optAccount = fmt.Sprintf("System")
+		optAccountType = 3
+		optAccountId = ""
 	}
 	operationLog := &entity.MerchantOperationLog{
 		CompanyId:      0,
 		MerchantId:     merchantId,
 		MemberId:       memberId,
 		OptAccount:     optAccount,
+		OptAccountId:   optAccountId,
+		OptAccountType: optAccountType,
 		ClientType:     clientType,
 		BizType:        0,
 		OptTarget:      req.Target,
@@ -103,7 +115,6 @@ func AppendOptLog(superCtx context.Context, req *OptLogRequest, optError error) 
 	if memberId <= 0 {
 		if optAccount == "System" {
 			g.Log().Debugf(superCtx, "Receive SystemOperationLog:%s", utility.MarshalToJsonString(operationLog))
-			return
 		} else {
 			g.Log().Infof(superCtx, "Receive OpenApiOperation:%s", utility.MarshalToJsonString(operationLog))
 		}

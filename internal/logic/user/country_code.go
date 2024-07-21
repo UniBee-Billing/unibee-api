@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -27,6 +28,16 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 					dao.UserAccount.Columns().VATNumber: vatNumber,
 					dao.UserAccount.Columns().GmtModify: gtime.Now(),
 				}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+				operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+					MerchantId:     user.MerchantId,
+					Target:         fmt.Sprintf("User(%v)", user.Id),
+					Content:        "Update(VATNumber)",
+					UserId:         user.Id,
+					SubscriptionId: "",
+					InvoiceId:      "",
+					PlanId:         0,
+					DiscountCode:   "",
+				}, nil)
 				if err != nil {
 					g.Log().Errorf(ctx, "UpdateUserVatNumber userId:%d vatNumber:%s, error:%s", userId, vatNumber, err.Error())
 				} else {
@@ -40,6 +51,16 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 			dao.UserAccount.Columns().VATNumber: vatNumber,
 			dao.UserAccount.Columns().GmtModify: gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, user.Id).Update()
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     user.MerchantId,
+			Target:         fmt.Sprintf("User(%v)", user.Id),
+			Content:        "Clear(VATNumber)",
+			UserId:         user.Id,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, nil)
 	}
 }
 
@@ -57,6 +78,16 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 				dao.UserAccount.Columns().TaxPercentage: taxPercentage,
 				dao.UserAccount.Columns().GmtModify:     gtime.Now(),
 			}).Where(dao.UserAccount.Columns().Id, user.Id).OmitNil().Update()
+			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+				MerchantId:     user.MerchantId,
+				Target:         fmt.Sprintf("User(%v)", user.Id),
+				Content:        "Update(CountryCode&TaxPercentage)",
+				UserId:         user.Id,
+				SubscriptionId: "",
+				InvoiceId:      "",
+				PlanId:         0,
+				DiscountCode:   "",
+			}, nil)
 			if err != nil {
 				g.Log().Errorf(ctx, "UpdateUserCountryCode userId:%d CountryCode:%s, error:%s", userId, countryCode, err.Error())
 			} else {
@@ -84,18 +115,4 @@ func GetUserTaxPercentage(ctx context.Context, userId uint64) (taxPercentage int
 	} else {
 		return user.TaxPercentage, user.VATNumber, nil
 	}
-
-	//if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
-	//	vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, user.MerchantId, user.CountryCode)
-	//	var taxPercentage int64 = 0
-	//	if err == nil && vatCountryRate != nil {
-	//		if len(user.VATNumber) > 0 && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, user.CountryCode) {
-	//			taxPercentage = 0
-	//		} else if vatCountryRate.StandardTaxPercentage > 0 {
-	//			taxPercentage = vatCountryRate.StandardTaxPercentage
-	//		}
-	//	}
-	//	return taxPercentage, nil
-	//}
-	//return -1, gerror.New("Default Vat Gateway Need Setup")
 }

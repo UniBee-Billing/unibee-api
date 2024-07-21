@@ -7,7 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
-	"unibee/internal/logic/auth"
+	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -84,7 +84,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 	if one != nil {
 		return target, gerror.New("Error, same ExternalUserId user exist")
 	}
-	_, err = auth.CreateUser(ctx, &auth.NewReq{
+	_, err = user.CreateUser(ctx, &user.NewReq{
 		ExternalUserId: target.ExternalUserId,
 		Email:          target.Email,
 		FirstName:      target.FirstName,

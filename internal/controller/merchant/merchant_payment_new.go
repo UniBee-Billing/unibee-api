@@ -9,7 +9,6 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/auth"
 	"unibee/internal/logic/gateway/gateway_bean"
 	"unibee/internal/logic/payment/service"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -40,7 +39,7 @@ func (c *ControllerPayment) New(ctx context.Context, req *payment.NewReq) (res *
 		if req.UserId == 0 {
 			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil")
 			utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
-			user, err = auth.QueryOrCreateUser(ctx, &auth.NewReq{
+			user, err = user.QueryOrCreateUser(ctx, &user.NewReq{
 				ExternalUserId: req.ExternalUserId,
 				Email:          req.Email,
 				MerchantId:     merchantInfo.Id,

@@ -3,10 +3,10 @@ package merchant
 import (
 	"context"
 	"unibee/api/merchant/user"
-	"unibee/internal/logic/auth"
+	user2 "unibee/internal/logic/user"
 )
 
 func (c *ControllerUser) Release(ctx context.Context, req *user.ReleaseReq) (res *user.ReleaseRes, err error) {
-	auth.ReleaseUser(ctx, req.UserId)
+	user2.ReleaseUser(ctx, req.UserId)
 	return &user.ReleaseRes{}, nil
 }

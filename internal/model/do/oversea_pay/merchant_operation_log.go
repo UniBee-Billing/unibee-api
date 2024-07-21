@@ -18,6 +18,8 @@ type MerchantOperationLog struct {
 	MemberId           interface{} // member_id
 	UserId             interface{} // user_id
 	OptAccount         interface{} // admin account
+	OptAccountType     interface{} // opt_account_type, 0-Member|1-User|2-OpenApi|3-System
+	OptAccountId       interface{} // operation account id
 	ClientType         interface{} // client type
 	BizType            interface{} // biz_type
 	OptTarget          interface{} // operation target

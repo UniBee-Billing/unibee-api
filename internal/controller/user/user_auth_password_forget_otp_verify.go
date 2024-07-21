@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gogf/gf/v2/frame/g"
 	_interface "unibee/internal/interface"
-	auth2 "unibee/internal/logic/auth"
+	auth2 "unibee/internal/logic/user"
 	"unibee/utility"
 
 	"github.com/gogf/gf/v2/errors/gcode"

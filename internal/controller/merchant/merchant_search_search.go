@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unibee/api/merchant/search"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/auth"
 	"unibee/internal/logic/invoice/service"
+	"unibee/internal/logic/user"
 	"unibee/internal/query"
 )
 
@@ -43,7 +43,7 @@ func (c *ControllerSearch) Search(ctx context.Context, req *search.SearchReq) (r
 			}
 		}
 	}
-	searchUser, err := auth.SearchUser(ctx, _interface.GetMerchantId(ctx), req.SearchKey)
+	searchUser, err := user.SearchUser(ctx, _interface.GetMerchantId(ctx), req.SearchKey)
 	if err == nil {
 		searchResult.UserAccounts = searchUser
 	}

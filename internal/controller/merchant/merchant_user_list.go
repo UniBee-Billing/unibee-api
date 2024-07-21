@@ -5,11 +5,11 @@ import (
 	"strings"
 	"unibee/api/merchant/user"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/auth"
+	user2 "unibee/internal/logic/user"
 )
 
 func (c *ControllerUser) List(ctx context.Context, req *user.ListReq) (res *user.ListRes, err error) {
-	result, err := auth.UserList(ctx, &auth.UserListInternalReq{
+	result, err := user2.UserList(ctx, &user2.UserListInternalReq{
 		MerchantId:      _interface.GetMerchantId(ctx),
 		UserId:          req.UserId,
 		Email:           strings.Trim(req.Email, " "),

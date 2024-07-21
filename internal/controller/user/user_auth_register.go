@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"unibee/api/user/auth"
 	_interface "unibee/internal/interface"
-	auth2 "unibee/internal/logic/auth"
 	"unibee/internal/logic/email"
+	auth2 "unibee/internal/logic/user"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/utility"
 
