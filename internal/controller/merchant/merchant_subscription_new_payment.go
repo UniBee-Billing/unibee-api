@@ -11,6 +11,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/payment/service"
+	user2 "unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -32,7 +33,7 @@ func (c *ControllerSubscription) NewPayment(ctx context.Context, req *subscripti
 		if req.UserId == 0 {
 			utility.Assert(len(req.ExternalUserId) > 0, "ExternalUserId|UserId is nil")
 			utility.Assert(len(req.Email) > 0, "Email|UserId is nil")
-			user, err = user.QueryOrCreateUser(ctx, &user.NewReq{
+			user, err = user2.QueryOrCreateUser(ctx, &user2.NewReq{
 				ExternalUserId: req.ExternalUserId,
 				Email:          req.Email,
 				MerchantId:     merchantInfo.Id,

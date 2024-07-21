@@ -26,7 +26,7 @@ import (
 	handler3 "unibee/internal/logic/invoice/handler"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/handler"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -270,7 +270,7 @@ func (s StripeWebhook) GatewayWebhook(r *ghttp.Request, gateway *entity.Merchant
 				} else {
 					g.Log().Errorf(r.Context(), "Webhook Gateway:%s, checkout.session.completed Error GetGatewayUserByGatewayUserId not found: %s\n", gateway.GatewayName, result.Customer.ID)
 				}
-				user.UpdateUserDefaultGatewayPaymentMethod(r.Context(), one.UserId, gateway.Id, result.PaymentMethod.ID)
+				sub_update.UpdateUserDefaultGatewayPaymentMethod(r.Context(), one.UserId, gateway.Id, result.PaymentMethod.ID)
 
 				if stripeCheckoutSession.SetupIntent != nil && len(stripeCheckoutSession.Metadata["SubscriptionId"]) > 0 {
 					//change subscription gateway payment method

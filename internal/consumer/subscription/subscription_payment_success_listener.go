@@ -10,7 +10,7 @@ import (
 	user2 "unibee/internal/consumer/webhook/user"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/subscription/user_sub_plan"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
@@ -33,9 +33,9 @@ func (t SubscriptionPaymentSuccessListener) Consume(ctx context.Context, message
 	g.Log().Debugf(ctx, "SubscriptionPaymentSuccessListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
-		user.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
+		sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, sub.UserId, sub.SubscriptionId)
 		if len(sub.VatNumber) > 0 {
-			user.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
+			sub_update.UpdateUserDefaultVatNumber(ctx, sub.UserId, sub.VatNumber)
 		}
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_UPDATED)

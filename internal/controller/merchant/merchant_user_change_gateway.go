@@ -2,7 +2,7 @@ package merchant
 
 import (
 	"context"
-	user2 "unibee/internal/logic/user"
+	user2 "unibee/internal/logic/user/sub_update"
 
 	"unibee/api/merchant/user"
 )

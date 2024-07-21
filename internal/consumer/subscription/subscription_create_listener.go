@@ -10,7 +10,7 @@ import (
 	subscription3 "unibee/internal/consumer/webhook/subscription"
 	user2 "unibee/internal/consumer/webhook/user"
 	"unibee/internal/logic/subscription/user_sub_plan"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/query"
 	"unibee/redismq"
 	"unibee/utility"
@@ -33,7 +33,7 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 	g.Log().Debugf(ctx, "SubscriptionCreateListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
-		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+		sub_update.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 		user_sub_plan.ReloadUserSubPlanCacheListBackground(sub.MerchantId, sub.UserId)
 	}
 	_, _ = redismq.SendDelay(&redismq.Message{
@@ -45,7 +45,7 @@ func (t SubscriptionCreateListener) Consume(ctx context.Context, message *redism
 		sub.Status = consts.SubStatusPending
 		subscription3.SendMerchantSubscriptionWebhookBackground(sub, -10000, event.UNIBEE_WEBHOOK_EVENT_SUBSCRIPTION_CREATED)
 		user2.SendMerchantUserMetricWebhookBackground(sub.UserId, event.UNIBEE_WEBHOOK_EVENT_USER_METRIC_UPDATED)
-		user.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
+		sub_update.UpdateUserVatNumber(ctx, sub.UserId, sub.VatNumber)
 	}
 	// 3min PaymentChecker
 	return redismq.CommitMessage

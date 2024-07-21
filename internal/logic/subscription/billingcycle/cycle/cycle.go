@@ -22,7 +22,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	service2 "unibee/internal/logic/subscription/service"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -154,7 +154,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 			}
 			var taxPercentage = sub.TaxPercentage
-			percentage, vatNumber, err := user.GetUserTaxPercentage(ctx, sub.UserId)
+			percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 			if err == nil {
 				taxPercentage = percentage
 			}
@@ -225,7 +225,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {
 					invoice.TrialEnd = -2 // mark this invoice is the first invoice after trial
 				}
-				gatewayId, paymentMethodId := user.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+				gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 				if sub != nil && gatewayId > 0 && (gatewayId != sub.GatewayId || paymentMethodId != sub.GatewayDefaultPaymentMethod) {
 					_, _ = dao.Subscription.Ctx(ctx).Data(g.Map{
 						dao.Subscription.Columns().GmtModify:                   gtime.Now(),

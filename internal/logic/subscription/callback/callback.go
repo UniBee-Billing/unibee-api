@@ -11,7 +11,7 @@ import (
 	"unibee/internal/logic/discount"
 	"unibee/internal/logic/email"
 	"unibee/internal/logic/subscription/handler"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -81,7 +81,7 @@ func (s SubscriptionPaymentCallback) PaymentCreateCallback(ctx context.Context, 
 	if consts.ProrationUsingUniBeeCompute {
 		if payment.BizType == consts.BizTypeSubscription {
 			utility.Assert(len(payment.SubscriptionId) > 0, "payment sub biz_type contain no sub_id")
-			user.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, payment.UserId, payment.SubscriptionId)
+			sub_update.UpdateUserDefaultSubscriptionForPaymentSuccess(ctx, payment.UserId, payment.SubscriptionId)
 		}
 	}
 }

@@ -28,7 +28,7 @@ import (
 	"unibee/internal/logic/payment/event"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/subscription/config"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -49,7 +49,7 @@ func GatewayPaymentCreate(ctx context.Context, createPayContext *gateway_bean.Ga
 	createPayContext.Pay.Currency = strings.ToUpper(createPayContext.Pay.Currency)
 	createPayContext.Invoice.Currency = strings.ToUpper(createPayContext.Invoice.Currency)
 	utility.Assert(currency.IsFiatCurrencySupport(createPayContext.Pay.Currency), "currency not support")
-	user.UpdateUserCountryCode(ctx, createPayContext.Pay.UserId, createPayContext.Pay.CountryCode)
+	sub_update.UpdateUserCountryCode(ctx, createPayContext.Pay.UserId, createPayContext.Pay.CountryCode)
 
 	createPayContext.Pay.Status = consts.PaymentCreated
 	createPayContext.Pay.PaymentId = utility.CreatePaymentId()

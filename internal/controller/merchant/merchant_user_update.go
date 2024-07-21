@@ -10,7 +10,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	_interface "unibee/internal/interface"
 	"unibee/internal/logic/operation_log"
-	user2 "unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -23,7 +23,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		if req.PaymentMethodId != nil {
 			paymentMethodId = *req.PaymentMethodId
 		}
-		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, req.UserId, *req.GatewayId, paymentMethodId)
 	}
 	one := query.GetUserAccountById(ctx, req.UserId)
 	var vatNumber = one.VATNumber
@@ -53,7 +53,7 @@ func (c *ControllerUser) Update(ctx context.Context, req *user.UpdateReq) (res *
 		}
 		if one.CountryCode != *req.CountryCode {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			user2.UpdateUserCountryCode(ctx, req.UserId, *req.CountryCode)
+			sub_update.UpdateUserCountryCode(ctx, req.UserId, *req.CountryCode)
 		}
 	}
 

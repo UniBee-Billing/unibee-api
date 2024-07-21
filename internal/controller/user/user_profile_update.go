@@ -7,7 +7,7 @@ import (
 	"unibee/api/bean/detail"
 	"unibee/internal/consts"
 	_interface "unibee/internal/interface"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
 	"unibee/internal/query"
 	"unibee/time"
@@ -48,7 +48,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		if req.PaymentMethodId != nil {
 			paymentMethodId = *req.PaymentMethodId
 		}
-		user.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, _interface.Context().Get(ctx).User.Id, *req.GatewayId, paymentMethodId)
 	}
 	one := query.GetUserAccountById(ctx, _interface.Context().Get(ctx).User.Id)
 	var vatNumber = one.VATNumber
@@ -78,7 +78,7 @@ func (c *ControllerProfile) Update(ctx context.Context, req *profile.UpdateReq) 
 		}
 		if one.CountryCode != *req.CountryCode {
 			utility.Assert(vat_gateway.GetDefaultVatGateway(ctx, _interface.GetMerchantId(ctx)) != nil, "Default Vat Gateway Need Setup")
-			user.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
+			sub_update.UpdateUserCountryCode(ctx, _interface.Context().Get(ctx).User.Id, *req.CountryCode)
 		}
 	}
 

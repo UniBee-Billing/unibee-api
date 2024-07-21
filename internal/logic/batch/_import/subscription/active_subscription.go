@@ -15,7 +15,7 @@ import (
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
-	user2 "unibee/internal/logic/user"
+	user2 "unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"

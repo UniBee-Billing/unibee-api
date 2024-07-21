@@ -1,14 +1,5 @@
 package detail
 
-import (
-	"context"
-	"fmt"
-	"strconv"
-	entity "unibee/internal/model/entity/oversea_pay"
-	"unibee/internal/query"
-	"unibee/utility"
-)
-
 type MerchantOperationLogDetail struct {
 	Id             uint64                `json:"id"                 description:"id"`                                                   // id
 	MerchantId     uint64                `json:"merchantId"         description:"merchant Id"`                                          // merchant Id
@@ -27,51 +18,4 @@ type MerchantOperationLogDetail struct {
 	Member         *MerchantMemberDetail `json:"member"             description:"Member"`
 	//User           *bean.UserAccountSimplify  `json:"user"               description:"User"`
 	//Subscription   *bean.SubscriptionSimplify `json:"subscription"       description:"Subscription"`
-}
-
-func ConvertOperationLogToDetail(ctx context.Context, one *entity.MerchantOperationLog) *MerchantOperationLogDetail {
-	if one == nil {
-		return nil
-	}
-	var optAccount = ""
-	if one.MemberId > 0 {
-		member := query.GetMerchantMemberById(ctx, one.MemberId)
-		if member != nil {
-			optAccount = fmt.Sprintf("%s %s (%s)", member.FirstName, member.LastName, member.Email)
-		}
-	} else if one.OptAccountType == 1 && len(one.OptAccountId) > 0 {
-		id, err := strconv.ParseInt(one.OptAccountId, 10, 64)
-		if err != nil {
-			return nil
-		}
-		user := query.GetUserAccountById(ctx, uint64(id))
-		if user != nil {
-			optAccount = fmt.Sprintf("%s %s (%s)", user.FirstName, user.LastName, user.Email)
-		}
-	} else if one.OptAccountType == 2 {
-		one.OptAccountId = utility.HideStar(one.OptAccountId)
-		optAccount = fmt.Sprintf("OpenApi(%s)", one.OptAccountId)
-	} else {
-		optAccount = one.OptAccount
-	}
-
-	return &MerchantOperationLogDetail{
-		Id:             one.Id,
-		MerchantId:     one.MerchantId,
-		MemberId:       one.MemberId,
-		OptAccount:     optAccount,
-		OptAccountId:   one.OptAccountId,
-		OptAccountType: one.OptAccountType,
-		OptTarget:      one.OptTarget,
-		OptContent:     one.OptContent,
-		CreateTime:     one.CreateTime,
-		SubscriptionId: one.SubscriptionId,
-		UserId:         one.UserId,
-		InvoiceId:      one.InvoiceId,
-		PlanId:         one.PlanId,
-		DiscountCode:   one.DiscountCode,
-		Member:         ConvertMemberToDetail(ctx, query.GetMerchantMemberById(ctx, one.MemberId)),
-		//User:           bean.SimplifyUserAccount(query.GetUserAccountById(ctx, one.UserId)),
-		//Subscription:   bean.SimplifySubscription(query.GetSubscriptionBySubscriptionId(ctx, one.SubscriptionId)),
-	}
 }

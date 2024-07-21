@@ -14,7 +14,7 @@ import (
 	service2 "unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/subscription/timeline"
 	"unibee/internal/logic/subscription/user_sub_plan"
-	"unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -38,7 +38,7 @@ func (t SubscriptionFailedListener) Consume(ctx context.Context, message *redism
 	g.Log().Debugf(ctx, "SubscriptionFailedListener Receive Message:%s", utility.MarshalToJsonString(message))
 	sub := query.GetSubscriptionBySubscriptionId(ctx, message.Body)
 	if sub != nil {
-		user.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
+		sub_update.UpdateUserDefaultSubscriptionForUpdate(ctx, sub.UserId, sub.SubscriptionId)
 	}
 	//Cancelled SubscriptionPendingUpdate
 	var pendingUpdates []*entity.SubscriptionPendingUpdate

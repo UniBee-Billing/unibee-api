@@ -34,7 +34,7 @@ import (
 	"unibee/internal/logic/subscription/handler"
 	"unibee/internal/logic/subscription/pending_update_cancel"
 	"unibee/internal/logic/subscription/timeline"
-	user2 "unibee/internal/logic/user"
+	"unibee/internal/logic/user/sub_update"
 	"unibee/internal/logic/vat_gateway"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -139,7 +139,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, vatNumber, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -157,7 +157,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	//if req.GatewayId != nil {
 	//	gatewayId = *req.GatewayId
 	//}
-	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
+	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, "", sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	var timeNow = gtime.Now().Timestamp()
 	if sub.TestClock > timeNow && !config2.GetConfigInstance().IsProd() {
@@ -367,10 +367,10 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
 	user := query.GetUserAccountById(ctx, req.UserId)
 	utility.Assert(user != nil, "user not found")
-	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
+	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, req.UserId, req.GatewayId, req.PaymentMethodId, "")
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	if !_interface.Context().Get(ctx).IsOpenApiCall {
-		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
+		sub_update.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, paymentMethodId)
 	}
 	gateway := MerchantGatewayCheck(ctx, plan.MerchantId, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -965,7 +965,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	utility.Assert(plan != nil, "invalid planId")
 	utility.Assert(plan.Status == consts.PlanStatusActive, fmt.Sprintf("Plan Id:%v Not Publish status", plan.Id))
 	utility.Assert(plan.Type == consts.PlanTypeMain, fmt.Sprintf("Plan Id:%v Not Main Type", plan.Id))
-	gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
+	gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, req.GatewayId, req.PaymentMethodId, sub.SubscriptionId)
 	utility.Assert(gatewayId > 0, "gateway need specified")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway != nil, "gateway not found")
@@ -980,7 +980,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, vatNumber, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -1858,7 +1858,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			BillingCycleAnchor: nextPeriodStart,
 			VatNumber:          sub.VatNumber,
 		})
-		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
+		gatewayId, paymentMethodId := sub_update.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")
 		one, err := service3.CreateProcessingInvoiceForSub(ctx, invoice, sub, gatewayId, paymentMethodId, true, gtime.Now().Timestamp())
 		if err != nil {
