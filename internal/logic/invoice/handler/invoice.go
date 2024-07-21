@@ -70,6 +70,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		TaxAmount:                      invoice.TaxAmount,
 		TaxPercentage:                  invoice.TaxPercentage,
+		VatNumber:                      invoice.VatNumber,
 		SubscriptionAmount:             invoice.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(invoice.Lines),

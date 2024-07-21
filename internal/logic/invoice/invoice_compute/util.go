@@ -27,6 +27,7 @@ type CalculateInvoiceReq struct {
 	PeriodEnd          int64                  `json:"periodEnd"`
 	FinishTime         int64                  `json:"finishTime"`
 	InvoiceName        string                 `json:"invoiceName"`
+	VatNumber          string                 `json:"vatNumber"`
 	ProductData        *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom         string                 `json:"createFrom"                     description:"create from"`          // create from
@@ -144,6 +145,7 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SendNote:                       fmt.Sprintf("%s (%s)", originalInvoice.InvoiceId, refundType),
 		PaymentId:                      payment.PaymentId,
 		RefundId:                       refund.RefundId,
+		VatNumber:                      originalInvoice.VatNumber,
 	}
 }
 
@@ -290,6 +292,7 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
 		CreateFrom:                     req.CreateFrom,
+		VatNumber:                      req.VatNumber,
 	}
 }
 
@@ -311,6 +314,7 @@ type CalculateProrationInvoiceReq struct {
 	NewProrationPlans  []*ProrationPlanParam  `json:"newPlans"`
 	InvoiceName        string                 `json:"invoiceName"`
 	ProductName        string                 `json:"productName"`
+	VatNumber          string                 `json:"vatNumber"`
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
@@ -455,6 +459,7 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
+		VatNumber:                      req.VatNumber,
 	}
 }
 
@@ -565,5 +570,6 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
+		VatNumber:                      req.VatNumber,
 	}
 }

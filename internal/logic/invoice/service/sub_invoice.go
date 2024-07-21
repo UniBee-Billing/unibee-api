@@ -26,10 +26,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		TryCancelSubscriptionLatestInvoice(ctx, sub)
 	}
 	var sendEmail = ""
-	var vatNumber = ""
 	if user != nil {
 		sendEmail = user.Email
-		vatNumber = user.VATNumber
 	}
 	var currentTime = gtime.Now().Timestamp()
 	if timeNow > currentTime {
@@ -73,10 +71,10 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		DiscountAmount:                 simplify.DiscountAmount,
 		DiscountCode:                   simplify.DiscountCode,
 		TrialEnd:                       simplify.TrialEnd,
-		CountryCode:                    sub.CountryCode,
+		CountryCode:                    simplify.CountryCode,
 		BillingCycleAnchor:             simplify.BillingCycleAnchor,
 		CreateFrom:                     simplify.CreateFrom,
-		VatNumber:                      vatNumber,
+		VatNumber:                      simplify.VatNumber,
 		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
 	}
 

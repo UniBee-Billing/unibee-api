@@ -139,7 +139,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, vatNumber, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -219,6 +219,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: timeNow,
 		Metadata:           req.Metadata,
+		VatNumber:          vatNumber,
 	})
 
 	// createAndPayNewProrationInvoice
@@ -423,28 +424,17 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 		}
 	}
 
+	var validVatNumber = ""
+	if vatNumberValidate != nil && vatNumberValidate.Valid {
+		validVatNumber = vatNumberValidate.VatNumber
+	}
 	if req.TaxPercentage != nil {
 		utility.Assert(_interface.Context().Get(ctx).IsOpenApiCall, "External TaxPercentage only available for api call")
 		utility.Assert(*req.TaxPercentage >= 0 && *req.TaxPercentage < 10000, "invalid taxPercentage")
 		subscriptionTaxPercentage = *req.TaxPercentage
 	} else if len(vatCountryCode) > 0 {
-		var validVatNumber = ""
-		if vatNumberValidate != nil && vatNumberValidate.Valid {
-			validVatNumber = vatNumberValidate.VatNumber
-		}
 		taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, vatCountryCode, gatewayId, validVatNumber)
 		subscriptionTaxPercentage = taxPercentage
-		//if vat_gateway.GetDefaultVatGateway(ctx, merchantInfo.Id) != nil {
-		//	vatCountryRate, err = vat_gateway.QueryVatCountryRateByMerchant(ctx, merchantInfo.Id, vatCountryCode)
-		//	if err == nil && vatCountryRate != nil {
-		//		vatCountryName = vatCountryRate.CountryName
-		//		if vatNumberValidate != nil && !strings.Contains(config2.GetConfigInstance().VatConfig.NumberUnExemptionCountryCodes, vatCountryCode) {
-		//			subscriptionTaxPercentage = 0
-		//		} else if vatCountryRate.StandardTaxPercentage > 0 {
-		//			subscriptionTaxPercentage = vatCountryRate.StandardTaxPercentage
-		//		}
-		//	}
-		//}
 	}
 
 	var currency = plan.Currency
@@ -552,6 +542,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			BillingCycleAnchor: currentTimeStart.Timestamp(),
 			FinishTime:         currentTimeStart.Timestamp(),
 			Metadata:           req.Metadata,
+			VatNumber:          validVatNumber,
 		}
 		return &CreatePreviewInternalRes{
 			Plan:                     plan,
@@ -598,6 +589,7 @@ func SubscriptionCreatePreview(ctx context.Context, req *CreatePreviewInternalRe
 			ProductData:        req.ProductData,
 			BillingCycleAnchor: currentTimeStart.Timestamp(),
 			Metadata:           req.Metadata,
+			VatNumber:          validVatNumber,
 		})
 
 		return &CreatePreviewInternalRes{
@@ -988,7 +980,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, vatNumber, err := user2.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -1094,6 +1086,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
 				Metadata:           req.Metadata,
+				VatNumber:          vatNumber,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -1114,6 +1107,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
 				Metadata:                       req.Metadata,
+				VatNumber:                      vatNumber,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
@@ -1132,6 +1126,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
 				Metadata:           req.Metadata,
+				VatNumber:          vatNumber,
 			})
 		} else {
 			// currentInvoice
@@ -1174,6 +1169,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodStart:       sub.CurrentPeriodStart,
 					PeriodEnd:         sub.CurrentPeriodEnd,
 					Metadata:          req.Metadata,
+					VatNumber:         vatNumber,
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
@@ -1190,6 +1186,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodEnd:          sub.CurrentPeriodEnd,
 					BillingCycleAnchor: prorationDate,
 					Metadata:           req.Metadata,
+					VatNumber:          vatNumber,
 				})
 			}
 		}
@@ -1213,6 +1210,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			PeriodStart:                    sub.CurrentPeriodStart,
 			PeriodEnd:                      sub.CurrentPeriodEnd,
 			Metadata:                       req.Metadata,
+			VatNumber:                      vatNumber,
 		}
 	}
 
@@ -1231,6 +1229,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: prorationDate,
 		Metadata:           req.Metadata,
+		VatNumber:          vatNumber,
 	})
 
 	if currentInvoice.TotalAmount <= 0 {
@@ -1857,6 +1856,7 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 			InvoiceName:        "SubscriptionCycle",
 			FinishTime:         nextPeriodStart,
 			BillingCycleAnchor: nextPeriodStart,
+			VatNumber:          sub.VatNumber,
 		})
 		gatewayId, paymentMethodId := user2.VerifyPaymentGatewayMethod(ctx, sub.UserId, nil, "", sub.SubscriptionId)
 		utility.Assert(gatewayId > 0, "gateway need specified")

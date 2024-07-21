@@ -47,6 +47,7 @@ type InvoiceSimplify struct {
 	CreateFrom                     string                        `json:"createFrom"                     description:"create from"`          // create from
 	Metadata                       map[string]interface{}        `json:"metadata" dc:"Metadata，Map"`
 	CountryCode                    string                        `json:"countryCode"                    description:""` //
+	VatNumber                      string                        `json:"vatNumber"                      description:""` //
 }
 
 type InvoiceItemSimplify struct {
@@ -127,5 +128,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		CreateFrom:                     one.CreateFrom,
 		CountryCode:                    one.CountryCode,
 		Metadata:                       metadata,
+		VatNumber:                      one.VatNumber,
 	}
 }

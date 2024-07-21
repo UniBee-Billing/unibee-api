@@ -73,13 +73,18 @@ func GetUserCountryCode(ctx context.Context, userId uint64) (countryCode string,
 	return user.CountryCode, user.CountryName
 }
 
-func GetUserTaxPercentage(ctx context.Context, userId uint64) (int64, error) {
+func GetUserTaxPercentage(ctx context.Context, userId uint64) (taxPercentage int64, vatNumber string, err error) {
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, fmt.Sprintf("GetUserCountryCode user not found:%v", userId))
 	gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)
-	taxPercentage, _ := vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, user.CountryCode, gatewayId, user.VATNumber)
-	return taxPercentage, nil
+	if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
+		taxPercentage, _ = vat_gateway.ComputeMerchantVatPercentage(ctx, user.MerchantId, user.CountryCode, gatewayId, user.VATNumber)
+		return taxPercentage, user.VATNumber, nil
+	} else {
+		return user.TaxPercentage, user.VATNumber, nil
+	}
+
 	//if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
 	//	vatCountryRate, err := vat_gateway.QueryVatCountryRateByMerchant(ctx, user.MerchantId, user.CountryCode)
 	//	var taxPercentage int64 = 0
