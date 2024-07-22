@@ -232,7 +232,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				MerchantId:     one.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", one.Id),
-				Content:        "Update(Email)",
+				Content:        fmt.Sprintf("UpdateEmail(%s)", req.Email),
 				UserId:         one.Id,
 				SubscriptionId: "",
 				InvoiceId:      "",
@@ -252,7 +252,7 @@ func QueryOrCreateUser(ctx context.Context, req *NewReq) (one *entity.UserAccoun
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				MerchantId:     one.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", one.Id),
-				Content:        "Update(ExternalUserId)",
+				Content:        fmt.Sprintf("UpdateExternalUserId(%s)", req.ExternalUserId),
 				UserId:         one.Id,
 				SubscriptionId: "",
 				InvoiceId:      "",

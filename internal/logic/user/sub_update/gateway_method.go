@@ -26,6 +26,9 @@ func UpdateUserDefaultGatewayPaymentMethod(ctx context.Context, userId uint64, g
 	utility.Assert(user != nil, "UpdateUserDefaultGatewayPaymentMethod user not found")
 	gateway := query.GetGatewayById(ctx, gatewayId)
 	utility.Assert(gateway.MerchantId == user.MerchantId, "merchant not match:"+strconv.FormatUint(gatewayId, 10))
+	if user.GatewayId == fmt.Sprintf("%v", gatewayId) && user.PaymentMethod == paymentMethodId {
+		return
+	}
 	var newPaymentMethodId = ""
 	if gateway.GatewayType == consts.GatewayTypeCard && len(paymentMethodId) > 0 {
 		paymentMethod := method.QueryPaymentMethod(ctx, user.MerchantId, user.Id, gatewayId, paymentMethodId)

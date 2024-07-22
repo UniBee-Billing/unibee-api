@@ -9,6 +9,7 @@ import (
 	redismq2 "unibee/internal/cmd/redismq"
 	"unibee/internal/consts"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/operation_log"
 	handler2 "unibee/internal/logic/payment/handler"
 	"unibee/internal/logic/payment/service"
 	service2 "unibee/internal/logic/subscription/pending_update_cancel"
@@ -83,6 +84,16 @@ func SubscriptionExpire(ctx context.Context, sub *entity.Subscription, reason st
 		dao.Subscription.Columns().GmtModify:      gtime.Now(),
 		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, sub.SubscriptionId).OmitNil().Update()
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+		Content:        consts.SubStatusToEnum(nextStatus).Description(),
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		fmt.Printf("SubscriptionExpireOrFailed error:%s", err.Error())
 		return err

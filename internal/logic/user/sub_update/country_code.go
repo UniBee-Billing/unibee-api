@@ -34,7 +34,7 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 				operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 					MerchantId:     user.MerchantId,
 					Target:         fmt.Sprintf("User(%v)", user.Id),
-					Content:        "Update(VATNumber)",
+					Content:        fmt.Sprintf("UpdateVATNumber(%s)", vatNumber),
 					UserId:         user.Id,
 					SubscriptionId: "",
 					InvoiceId:      "",
@@ -87,7 +87,7 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 			operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
 				MerchantId:     user.MerchantId,
 				Target:         fmt.Sprintf("User(%v)", user.Id),
-				Content:        "Update(CountryCode&TaxPercentage)",
+				Content:        fmt.Sprintf("UpdateCountryCode(%s-%v)", countryCode, taxPercentage),
 				UserId:         user.Id,
 				SubscriptionId: "",
 				InvoiceId:      "",

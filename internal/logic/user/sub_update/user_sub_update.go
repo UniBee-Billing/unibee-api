@@ -2,9 +2,11 @@ package sub_update
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/query"
 )
 
@@ -61,6 +63,10 @@ func UpdateUserDefaultSubscriptionForPaymentSuccess(ctx context.Context, userId 
 
 func UpdateUserDefaultVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 	if userId > 0 && len(vatNumber) > 0 {
+		user := query.GetUserAccountById(ctx, userId)
+		if user == nil {
+			return
+		}
 		_, err := dao.UserAccount.Ctx(ctx).Data(g.Map{
 			dao.UserAccount.Columns().VATNumber: vatNumber,
 			dao.UserAccount.Columns().GmtModify: gtime.Now(),
@@ -68,5 +74,16 @@ func UpdateUserDefaultVatNumber(ctx context.Context, userId uint64, vatNumber st
 		if err != nil {
 			g.Log().Errorf(ctx, "UpdateUserDefaultVatNumber err:%s", err.Error())
 		}
+
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     user.MerchantId,
+			Target:         fmt.Sprintf("User(%v)", user.Id),
+			Content:        fmt.Sprintf("UpdateVATNumber(%s)", vatNumber),
+			UserId:         user.Id,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, nil)
 	}
 }
