@@ -41,23 +41,22 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 	}
 	var resultList = make([]*detail.MerchantOperationLogDetail, 0)
 	var mainList = make([]*entity.MerchantOperationLog, 0)
-	query := dao.MerchantOperationLog.Ctx(ctx).
+	q := dao.MerchantOperationLog.Ctx(ctx).
 		Where(dao.MerchantOperationLog.Columns().MerchantId, req.MerchantId).
-		WhereGT(dao.MerchantOperationLog.Columns().MemberId, 0).
 		Where(dao.MerchantOperationLog.Columns().IsDelete, 0).
 		Limit(req.Page*req.Count, req.Count).
 		OrderDesc(dao.MerchantOperationLog.Columns().CreateTime)
 	if len(req.SubscriptionId) > 0 {
-		query = query.Where(dao.MerchantOperationLog.Columns().SubscriptionId, req.SubscriptionId)
+		q = q.Where(dao.MerchantOperationLog.Columns().SubscriptionId, req.SubscriptionId)
 	}
 	if len(req.InvoiceId) > 0 {
-		query = query.Where(dao.MerchantOperationLog.Columns().InvoiceId, req.InvoiceId)
+		q = q.Where(dao.MerchantOperationLog.Columns().InvoiceId, req.InvoiceId)
 	}
 	if req.PlanId > 0 {
-		query = query.Where(dao.MerchantOperationLog.Columns().PlanId, req.PlanId)
+		q = q.Where(dao.MerchantOperationLog.Columns().PlanId, req.PlanId)
 	}
 	if len(req.DiscountCode) > 0 {
-		query = query.Where(dao.MerchantOperationLog.Columns().DiscountCode, req.DiscountCode)
+		q = q.Where(dao.MerchantOperationLog.Columns().DiscountCode, req.DiscountCode)
 	}
 	if len(req.FirstName) > 0 || len(req.LastName) > 0 || len(req.Email) > 0 {
 		var userIdList = make([]uint64, 0)
@@ -79,7 +78,7 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		if len(userIdList) == 0 {
 			return make([]*detail.MerchantOperationLogDetail, 0), 0
 		}
-		query = query.WhereIn(dao.MerchantOperationLog.Columns().UserId, userIdList)
+		q = q.WhereIn(dao.MerchantOperationLog.Columns().UserId, userIdList)
 	}
 
 	if len(req.MemberLastName) > 0 || len(req.MemberFirstName) > 0 || len(req.MemberEmail) > 0 {
@@ -102,10 +101,10 @@ func MerchantOperationLogList(ctx context.Context, req *OperationLogListInternal
 		if len(memberIdList) == 0 {
 			return make([]*detail.MerchantOperationLogDetail, 0), 0
 		}
-		query = query.WhereIn(dao.MerchantOperationLog.Columns().MemberId, memberIdList)
+		q = q.WhereIn(dao.MerchantOperationLog.Columns().MemberId, memberIdList)
 	}
 
-	err := query.ScanAndCount(&mainList, &total, true)
+	err := q.ScanAndCount(&mainList, &total, true)
 	if err != nil {
 		g.Log().Errorf(ctx, "MerchantOperationLogList err:%s", err.Error())
 		return resultList, len(resultList)
@@ -124,7 +123,7 @@ func convertOperationLogToDetail(ctx context.Context, one *entity.MerchantOperat
 	if one.MemberId > 0 {
 		member := query.GetMerchantMemberById(ctx, one.MemberId)
 		if member != nil {
-			optAccount = fmt.Sprintf("%s %s (%s)", member.FirstName, member.LastName, member.Email)
+			optAccount = fmt.Sprintf("Member (%s)", member.Email)
 		}
 	} else if one.OptAccountType == 1 && len(one.OptAccountId) > 0 {
 		id, err := strconv.ParseInt(one.OptAccountId, 10, 64)
@@ -137,7 +136,7 @@ func convertOperationLogToDetail(ctx context.Context, one *entity.MerchantOperat
 		}
 	} else if one.OptAccountType == 2 {
 		one.OptAccountId = utility.HideStar(one.OptAccountId)
-		optAccount = fmt.Sprintf("OpenApi(%s)", one.OptAccountId)
+		optAccount = fmt.Sprintf("OpenApi (%s)", one.OptAccountId)
 	} else {
 		optAccount = one.OptAccount
 	}

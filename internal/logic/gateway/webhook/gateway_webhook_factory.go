@@ -38,16 +38,18 @@ func CheckAndSetupGatewayWebhooks(ctx context.Context, gatewayId uint64) {
 		g.Log().Infof(ctx, "CheckAndSetupGatewayWebhooks GatewayName:%s Success", gateway.GatewayName)
 	}
 	utility.AssertError(err, "CheckAndSetupGatewayWebhooks Error")
-	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
-		MerchantId:     gateway.MerchantId,
-		Target:         fmt.Sprintf("Gateway(%v-%s)", gateway.Id, gateway.GatewayName),
-		Content:        "CheckAndSetupWebhook",
-		UserId:         0,
-		SubscriptionId: "",
-		InvoiceId:      "",
-		PlanId:         0,
-		DiscountCode:   "",
-	}, err)
+	if _interface.Context().Get(ctx).MerchantMember != nil || _interface.Context().Get(ctx).IsOpenApiCall {
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     gateway.MerchantId,
+			Target:         fmt.Sprintf("Gateway(%v-%s)", gateway.Id, gateway.GatewayName),
+			Content:        "SetupWebhook",
+			UserId:         0,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+	}
 }
 
 func SetupAllWebhooksBackground() {
