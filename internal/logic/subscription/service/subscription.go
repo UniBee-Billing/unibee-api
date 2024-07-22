@@ -252,7 +252,16 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 			PaymentCode:            "",
 		}
 	}
-
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+		Content:        "Renew",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      invoice.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	// need cancel payment、 invoice and send invoice email
 	pending_update_cancel.CancelOtherUnfinishedPendingUpdatesBackground(sub.SubscriptionId, sub.SubscriptionId, "CancelByRenewSubscription-"+sub.SubscriptionId)
 
@@ -816,6 +825,16 @@ func SubscriptionCreate(ctx context.Context, req *CreateInternalReq) (*CreateInt
 		Tag:   redismq2.TopicSubscriptionCreate.Tag,
 		Body:  one.SubscriptionId,
 	})
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+		Content:        "New",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      invoice.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if createRes.Paid {
 		utility.Assert(invoice.Id > 0, "Server Error")
 		oneInvoice := query.GetInvoiceByInvoiceId(ctx, invoice.InvoiceId)
@@ -1424,6 +1443,17 @@ func SubscriptionUpdate(ctx context.Context, req *UpdateInternalReq, merchantMem
 		}
 	}
 
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+		Content:        "Update",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+
 	if err != nil {
 		return nil, err
 	}
@@ -1829,7 +1859,7 @@ func SubscriptionEndTrial(ctx context.Context, subscriptionId string) error {
 	return nil
 }
 
-func EndTrialManual(ctx context.Context, subscriptionId string) error {
+func EndTrialManual(ctx context.Context, subscriptionId string) (err error) {
 	utility.Assert(len(subscriptionId) > 0, "subscriptionId is nil")
 	sub := query.GetSubscriptionBySubscriptionId(ctx, subscriptionId)
 	utility.Assert(sub != nil, "subscription not found")
@@ -1881,21 +1911,29 @@ func EndTrialManual(ctx context.Context, subscriptionId string) error {
 		}
 		g.Log().Print(ctx, "EndTrialManual CreateSubInvoicePaymentDefaultAutomatic:", utility.MarshalToJsonString(createRes))
 		err = handler.HandleSubscriptionIncomplete(ctx, sub.SubscriptionId, gtime.Now().Timestamp())
-		if err != nil {
-			g.Log().Print(ctx, "EndTrialManual HandleSubscriptionIncomplete err:", err.Error())
-			return err
-		}
+
 	} else {
-		_, err := dao.Subscription.Ctx(ctx).Data(g.Map{
+		_, err = dao.Subscription.Ctx(ctx).Data(g.Map{
 			dao.Subscription.Columns().Status:         newStatus,
 			dao.Subscription.Columns().TrialEnd:       newTrialEnd,
 			dao.Subscription.Columns().DunningTime:    dunningTime,
 			dao.Subscription.Columns().GmtModify:      gtime.Now(),
 			dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 		}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
-		if err != nil {
-			return err
-		}
+	}
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     sub.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", sub.SubscriptionId),
+		Content:        "EndTrial",
+		UserId:         sub.UserId,
+		SubscriptionId: sub.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
+	if err != nil {
+		g.Log().Print(ctx, "EndTrialManual err:", err.Error())
+		return err
 	}
 	return nil
 }
@@ -1913,6 +1951,16 @@ func MarkSubscriptionProcessed(ctx context.Context, subscriptionId string) error
 		dao.Subscription.Columns().GmtModify:      gtime.Now(),
 		dao.Subscription.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 	}).Where(dao.Subscription.Columns().SubscriptionId, subscriptionId).OmitNil().Update()
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+		Content:        "MarkSubscriptionProcessed",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	if err != nil {
 		return err
 	}

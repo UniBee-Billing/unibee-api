@@ -18,6 +18,9 @@ func UpdateUserVatNumber(ctx context.Context, userId uint64, vatNumber string) {
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, "UpdateUserCountryCode user not found")
+	if user.VATNumber == vatNumber {
+		return
+	}
 	if len(vatNumber) > 0 {
 		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
 			gateway := vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId)
@@ -68,6 +71,9 @@ func UpdateUserCountryCode(ctx context.Context, userId uint64, countryCode strin
 	utility.Assert(userId > 0, "userId is nil")
 	user := query.GetUserAccountById(ctx, userId)
 	utility.Assert(user != nil, "UpdateUserCountryCode user not found")
+	if user.CountryCode == countryCode {
+		return
+	}
 	if len(countryCode) > 0 && strings.Compare(user.CountryCode, countryCode) != 0 {
 		if vat_gateway.GetDefaultVatGateway(ctx, user.MerchantId) != nil {
 			gatewayId, _ := strconv.ParseUint(user.GatewayId, 10, 64)

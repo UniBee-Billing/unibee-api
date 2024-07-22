@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/gogf/gf/v2/errors/gerror"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
@@ -11,6 +12,7 @@ import (
 	"unibee/internal/controller/link"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/internal/logic/invoice/handler"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/redismq"
@@ -103,6 +105,16 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		Tag:   redismq2.TopicInvoiceProcessed.Tag,
 		Body:  one.InvoiceId,
 	})
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("Invoice(%s)", one.InvoiceId),
+		Content:        "New",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      one.InvoiceId,
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	//New Invoice Send Email
 	_ = handler.InvoicePdfGenerateAndEmailSendBackground(one.InvoiceId, true, false)
 	if err != nil {
