@@ -28,11 +28,10 @@ func ResentWebhook(ctx context.Context, logId uint64) bool {
 		return false
 	}
 	datetime := getCurrentDateTime()
-	msgId := generateMsgId()
 	g.Log().Debugf(ctx, "Webhook_Start %s %s %s\n", "POST", one.WebhookUrl, one.Body)
 	headers := map[string]string{
 		"Content-Gateway": "application/json",
-		"Msg-id":          msgId,
+		"Msg-id":          one.RequestId,
 		"Datetime":        datetime,
 		"Authorization":   fmt.Sprintf("Bearer %s", merchant.ApiKey),
 	}
