@@ -34,7 +34,7 @@ func TestWebhook(t *testing.T) {
 		require.Equal(t, "subscription.created", one.WebhookEvents)
 
 		//log list
-		logList := MerchantWebhookEndpointLogList(ctx, &EndpointLogListInternalReq{
+		logList, _ := MerchantWebhookEndpointLogList(ctx, &EndpointLogListInternalReq{
 			MerchantId: one.MerchantId,
 			EndpointId: one.Id,
 			Page:       -1,
