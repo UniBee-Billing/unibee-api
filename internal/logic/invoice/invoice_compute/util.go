@@ -22,12 +22,13 @@ type CalculateInvoiceReq struct {
 	PlanId             uint64                 `json:"planId"`
 	Quantity           int64                  `json:"quantity"`
 	AddonJsonData      string                 `json:"addonJsonData"`
+	CountryCode        string                 `json:"CountryCode"`
+	VatNumber          string                 `json:"vatNumber"`
 	TaxPercentage      int64                  `json:"taxPercentage"`
 	PeriodStart        int64                  `json:"periodStart"`
 	PeriodEnd          int64                  `json:"periodEnd"`
 	FinishTime         int64                  `json:"finishTime"`
 	InvoiceName        string                 `json:"invoiceName"`
-	VatNumber          string                 `json:"vatNumber"`
 	ProductData        *bean.PlanProductParam `json:"productData"  dc:"ProductData"  `
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom         string                 `json:"createFrom"                     description:"create from"`          // create from
@@ -137,6 +138,8 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SubscriptionAmount:             -refund.RefundAmount,
 		SubscriptionAmountExcludingTax: -refund.RefundAmount,
 		TaxAmount:                      -int64(float64(refund.RefundAmount) * utility.ConvertTaxPercentageToInternalFloat(originalInvoice.TaxPercentage)),
+		CountryCode:                    originalInvoice.CountryCode,
+		VatNumber:                      originalInvoice.VatNumber,
 		TaxPercentage:                  originalInvoice.TaxPercentage,
 		DiscountAmount:                 0,
 		SendStatus:                     consts.InvoiceSendStatusUnSend,
@@ -145,7 +148,6 @@ func CreateInvoiceSimplifyForRefund(ctx context.Context, payment *entity.Payment
 		SendNote:                       fmt.Sprintf("%s (%s)", originalInvoice.InvoiceId, refundType),
 		PaymentId:                      payment.PaymentId,
 		RefundId:                       refund.RefundId,
-		VatNumber:                      originalInvoice.VatNumber,
 	}
 }
 
@@ -280,6 +282,8 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		DiscountCode:                   req.DiscountCode,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
+		CountryCode:                    req.CountryCode,
+		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
 		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
@@ -292,7 +296,6 @@ func ComputeSubscriptionBillingCycleInvoiceDetailSimplify(ctx context.Context, r
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
 		CreateFrom:                     req.CreateFrom,
-		VatNumber:                      req.VatNumber,
 	}
 }
 
@@ -305,6 +308,8 @@ type CalculateProrationInvoiceReq struct {
 	Currency           string                 `json:"currency"`
 	DiscountCode       string                 `json:"discountCode"`
 	TimeNow            int64                  `json:"TimeNow"`
+	CountryCode        string                 `json:"countryCode"`
+	VatNumber          string                 `json:"vatNumber"`
 	TaxPercentage      int64                  `json:"taxPercentage"`
 	ProrationDate      int64                  `json:"prorationStart"`
 	PeriodStart        int64                  `json:"periodStart"`
@@ -314,7 +319,6 @@ type CalculateProrationInvoiceReq struct {
 	NewProrationPlans  []*ProrationPlanParam  `json:"newPlans"`
 	InvoiceName        string                 `json:"invoiceName"`
 	ProductName        string                 `json:"productName"`
-	VatNumber          string                 `json:"vatNumber"`
 	BillingCycleAnchor int64                  `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	Metadata           map[string]interface{} `json:"metadata" dc:"Metadata，Map"`
 }
@@ -446,6 +450,8 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		DiscountCode:                   req.DiscountCode,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
+		CountryCode:                    req.CountryCode,
+		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
 		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
@@ -459,7 +465,6 @@ func ComputeSubscriptionProrationToFixedEndInvoiceDetailSimplify(ctx context.Con
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
-		VatNumber:                      req.VatNumber,
 	}
 }
 
@@ -557,6 +562,8 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		DiscountCode:                   req.DiscountCode,
 		TaxAmount:                      taxAmount,
 		Currency:                       req.Currency,
+		CountryCode:                    req.CountryCode,
+		VatNumber:                      req.VatNumber,
 		TaxPercentage:                  req.TaxPercentage,
 		SubscriptionAmount:             totalAmountExcludingTax + discountAmount + taxAmount,
 		SubscriptionAmountExcludingTax: totalAmountExcludingTax + discountAmount,
@@ -570,6 +577,5 @@ func ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx co
 		DayUtilDue:                     3,
 		BillingCycleAnchor:             req.BillingCycleAnchor,
 		Metadata:                       req.Metadata,
-		VatNumber:                      req.VatNumber,
 	}
 }

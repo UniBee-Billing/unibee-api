@@ -154,7 +154,7 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 				}
 			}
 			var taxPercentage = sub.TaxPercentage
-			percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+			percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 			if err == nil {
 				taxPercentage = percentage
 			}
@@ -191,13 +191,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PlanId:        pendingUpdate.UpdatePlanId,
 						Quantity:      pendingUpdate.UpdateQuantity,
 						AddonJsonData: pendingUpdate.UpdateAddonData,
+						VatNumber:     vatNumber,
+						CountryCode:   countryCode,
 						TaxPercentage: taxPercentage,
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionDowngrade",
 						FinishTime:    timeNow,
 						CreateFrom:    "AutoRenew",
-						VatNumber:     vatNumber,
 					})
 				} else {
 					//generate cycle invoice from sub
@@ -213,13 +214,14 @@ func SubPipeBillingCycleWalk(ctx context.Context, subId string, timeNow int64, s
 						PlanId:        sub.PlanId,
 						Quantity:      sub.Quantity,
 						AddonJsonData: sub.AddonData,
+						VatNumber:     vatNumber,
+						CountryCode:   countryCode,
 						TaxPercentage: taxPercentage,
 						PeriodStart:   nextPeriodStart,
 						PeriodEnd:     nextPeriodEnd,
 						InvoiceName:   "SubscriptionCycle",
 						FinishTime:    timeNow,
 						CreateFrom:    "AutoRenew",
-						VatNumber:     vatNumber,
 					})
 				}
 				if sub.TrialEnd > 0 && sub.TrialEnd == sub.CurrentPeriodEnd {

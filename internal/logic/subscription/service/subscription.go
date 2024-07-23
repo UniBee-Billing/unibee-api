@@ -139,7 +139,7 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 	// todo mark renew for all status
 	//utility.Assert(sub.Status == consts.SubStatusExpired || sub.Status == consts.SubStatusCancelled, "subscription not cancel or expire status")
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -212,6 +212,8 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		PlanId:             sub.PlanId,
 		Quantity:           sub.Quantity,
 		AddonJsonData:      utility.MarshalToJsonString(addonParams),
+		CountryCode:        countryCode,
+		VatNumber:          vatNumber,
 		TaxPercentage:      subscriptionTaxPercentage,
 		PeriodStart:        timeNow,
 		PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, timeNow, timeNow, sub.PlanId),
@@ -219,7 +221,6 @@ func SubscriptionRenew(ctx context.Context, req *RenewInternalReq) (*CreateInter
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: timeNow,
 		Metadata:           req.Metadata,
-		VatNumber:          vatNumber,
 	})
 
 	// createAndPayNewProrationInvoice
@@ -999,7 +1000,7 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 	}
 	addons := checkAndListAddonsFromParams(ctx, req.AddonParams)
 	var subscriptionTaxPercentage = sub.TaxPercentage
-	percentage, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
+	percentage, countryCode, vatNumber, err := sub_update.GetUserTaxPercentage(ctx, sub.UserId)
 	if err == nil {
 		subscriptionTaxPercentage = percentage
 	}
@@ -1098,6 +1099,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PlanId:             req.NewPlanId,
 				Quantity:           req.Quantity,
 				AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+				CountryCode:        countryCode,
+				VatNumber:          vatNumber,
 				TaxPercentage:      subscriptionTaxPercentage,
 				PeriodStart:        prorationDate,
 				PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, prorationDate, prorationDate, req.NewPlanId),
@@ -1105,7 +1108,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
 				Metadata:           req.Metadata,
-				VatNumber:          vatNumber,
 			})
 		} else if prorationDate < sub.CurrentPeriodStart {
 			// after period end before trial end, also or sub data not sync or use testClock in stage env
@@ -1126,7 +1128,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PeriodStart:                    sub.CurrentPeriodStart,
 				PeriodEnd:                      sub.CurrentPeriodEnd,
 				Metadata:                       req.Metadata,
+				CountryCode:                    countryCode,
 				VatNumber:                      vatNumber,
+				TaxPercentage:                  subscriptionTaxPercentage,
 			}
 		} else if prorationDate > sub.CurrentPeriodEnd {
 			// after periodEnd, is not a currentInvoice, just use it
@@ -1138,6 +1142,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				PlanId:             req.NewPlanId,
 				Quantity:           req.Quantity,
 				AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+				CountryCode:        countryCode,
+				VatNumber:          vatNumber,
 				TaxPercentage:      subscriptionTaxPercentage,
 				PeriodStart:        prorationDate,
 				PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, prorationDate, prorationDate, req.NewPlanId),
@@ -1145,7 +1151,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 				ProductData:        req.ProductData,
 				BillingCycleAnchor: prorationDate,
 				Metadata:           req.Metadata,
-				VatNumber:          vatNumber,
 			})
 		} else {
 			// currentInvoice
@@ -1181,6 +1186,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					Currency:          sub.Currency,
 					DiscountCode:      req.DiscountCode,
 					TimeNow:           prorationDate,
+					CountryCode:       countryCode,
+					VatNumber:         vatNumber,
 					TaxPercentage:     subscriptionTaxPercentage,
 					ProrationDate:     prorationDate,
 					OldProrationPlans: oldProrationPlanParams,
@@ -1188,7 +1195,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodStart:       sub.CurrentPeriodStart,
 					PeriodEnd:         sub.CurrentPeriodEnd,
 					Metadata:          req.Metadata,
-					VatNumber:         vatNumber,
 				})
 			} else {
 				currentInvoice = invoice_compute.ComputeSubscriptionProrationToDifferentIntervalInvoiceDetailSimplify(ctx, &invoice_compute.CalculateProrationInvoiceReq{
@@ -1197,6 +1203,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					Currency:           sub.Currency,
 					DiscountCode:       req.DiscountCode,
 					TimeNow:            prorationDate,
+					CountryCode:        countryCode,
+					VatNumber:          vatNumber,
 					TaxPercentage:      subscriptionTaxPercentage,
 					ProrationDate:      prorationDate,
 					OldProrationPlans:  oldProrationPlanParams,
@@ -1205,7 +1213,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 					PeriodEnd:          sub.CurrentPeriodEnd,
 					BillingCycleAnchor: prorationDate,
 					Metadata:           req.Metadata,
-					VatNumber:          vatNumber,
 				})
 			}
 		}
@@ -1229,7 +1236,9 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 			PeriodStart:                    sub.CurrentPeriodStart,
 			PeriodEnd:                      sub.CurrentPeriodEnd,
 			Metadata:                       req.Metadata,
+			CountryCode:                    countryCode,
 			VatNumber:                      vatNumber,
+			TaxPercentage:                  subscriptionTaxPercentage,
 		}
 	}
 
@@ -1241,6 +1250,8 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		PlanId:             req.NewPlanId,
 		Quantity:           req.Quantity,
 		AddonJsonData:      utility.MarshalToJsonString(req.AddonParams),
+		CountryCode:        countryCode,
+		VatNumber:          vatNumber,
 		TaxPercentage:      subscriptionTaxPercentage,
 		PeriodStart:        utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd),
 		PeriodEnd:          subscription2.GetPeriodEndFromStart(ctx, utility.MaxInt64(currentInvoice.PeriodEnd, sub.TrialEnd), prorationDate, req.NewPlanId),
@@ -1248,7 +1259,6 @@ func SubscriptionUpdatePreview(ctx context.Context, req *UpdatePreviewInternalRe
 		ProductData:        req.ProductData,
 		BillingCycleAnchor: prorationDate,
 		Metadata:           req.Metadata,
-		VatNumber:          vatNumber,
 	})
 
 	if currentInvoice.TotalAmount <= 0 {

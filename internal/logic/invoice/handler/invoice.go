@@ -69,8 +69,9 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		CryptoAmount:                   payment.CryptoAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		TaxAmount:                      invoice.TaxAmount,
-		TaxPercentage:                  invoice.TaxPercentage,
+		CountryCode:                    payment.CountryCode,
 		VatNumber:                      invoice.VatNumber,
+		TaxPercentage:                  invoice.TaxPercentage,
 		SubscriptionAmount:             invoice.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
 		Lines:                          utility.MarshalToJsonString(invoice.Lines),
@@ -80,7 +81,6 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		DayUtilDue:                     invoice.DayUtilDue,
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
-		CountryCode:                    payment.CountryCode,
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 		MetaData:                       utility.MarshalToJsonString(invoice.Metadata),
 		CreateFrom:                     invoice.CreateFrom,
@@ -236,6 +236,8 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		CryptoAmount:                   payment.CryptoAmount,
 		TotalAmountExcludingTax:        invoice.TotalAmountExcludingTax,
 		TaxAmount:                      invoice.TaxAmount,
+		CountryCode:                    invoice.CountryCode,
+		VatNumber:                      invoice.VatNumber,
 		TaxPercentage:                  invoice.TaxPercentage,
 		SubscriptionAmount:             invoice.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: invoice.SubscriptionAmountExcludingTax,
@@ -245,7 +247,6 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		DayUtilDue:                     invoice.DayUtilDue,
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
-		CountryCode:                    payment.CountryCode,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

@@ -66,7 +66,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	})
 
 	doc.SetFooter(&generator2.HeaderFooter{
-		Text:       fmt.Sprintf("PDF Generated on %s", time.Now().Format(time.RFC850)),
+		Text:       fmt.Sprintf("PDF Generated on %s %s", time.Now().Format(time.RFC850), one.CountryCode),
 		Pagination: true,
 	})
 

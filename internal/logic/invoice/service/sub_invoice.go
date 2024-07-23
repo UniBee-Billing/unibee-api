@@ -62,6 +62,8 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		TotalAmount:                    simplify.TotalAmount,
 		TotalAmountExcludingTax:        simplify.TotalAmountExcludingTax,
 		TaxAmount:                      simplify.TaxAmount,
+		CountryCode:                    simplify.CountryCode,
+		VatNumber:                      simplify.VatNumber,
 		TaxPercentage:                  simplify.TaxPercentage,
 		SubscriptionAmount:             simplify.SubscriptionAmount,
 		SubscriptionAmountExcludingTax: simplify.SubscriptionAmountExcludingTax,
@@ -73,11 +75,10 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		DiscountAmount:                 simplify.DiscountAmount,
 		DiscountCode:                   simplify.DiscountCode,
 		TrialEnd:                       simplify.TrialEnd,
-		CountryCode:                    simplify.CountryCode,
 		BillingCycleAnchor:             simplify.BillingCycleAnchor,
 		CreateFrom:                     simplify.CreateFrom,
-		VatNumber:                      simplify.VatNumber,
-		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
+
+		MetaData: utility.MarshalToJsonString(simplify.Metadata),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)
