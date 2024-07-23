@@ -13,7 +13,11 @@ import (
 func GetGatewayUser(ctx context.Context, userId uint64, gatewayId uint64) (one *entity.GatewayUser) {
 	utility.Assert(userId > 0, "invalid userId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
-	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{UserId: userId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
+	err := dao.GatewayUser.Ctx(ctx).
+		Where(dao.GatewayUser.Columns().UserId, userId).
+		Where(dao.GatewayUser.Columns().GatewayId, gatewayId).
+		Where(dao.GatewayUser.Columns().IsDeleted, 0).
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}
@@ -23,7 +27,11 @@ func GetGatewayUser(ctx context.Context, userId uint64, gatewayId uint64) (one *
 func GetGatewayUserByGatewayUserId(ctx context.Context, gatewayUserId string, gatewayId uint64) (one *entity.GatewayUser) {
 	utility.Assert(len(gatewayUserId) > 0, "invalid gatewayUserId")
 	utility.Assert(gatewayId > 0, "invalid gatewayId")
-	err := dao.GatewayUser.Ctx(ctx).Where(entity.GatewayUser{GatewayUserId: gatewayUserId, GatewayId: gatewayId}).OmitEmpty().Scan(&one)
+	err := dao.GatewayUser.Ctx(ctx).
+		Where(dao.GatewayUser.Columns().GatewayUserId, gatewayUserId).
+		Where(dao.GatewayUser.Columns().GatewayId, gatewayId).
+		Where(dao.GatewayUser.Columns().IsDeleted, 0).
+		OmitEmpty().Scan(&one)
 	if err != nil {
 		one = nil
 	}

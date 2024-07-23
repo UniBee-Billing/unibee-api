@@ -221,6 +221,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			}
 			gatewayUser := query.GetGatewayUser(ctx, user.Id, gatewayId)
 			if gatewayUser != nil && gatewayUser.GatewayUserId != stripeUserId {
+				// todo mark may delete the old one
 				return target, gerror.New("Error, There's another StripeUserId binding :" + gatewayUser.GatewayUserId)
 			}
 			if gatewayUser == nil {
