@@ -122,7 +122,7 @@ func InvoiceList(ctx context.Context, req *InvoiceListInternalReq) (res *Invoice
 	}
 	if req.ReportTimeStart > 0 {
 		query = query.Where(query.Builder().WhereOrGTE(dao.Invoice.Columns().CreateTime, req.ReportTimeStart).
-			WhereOrGTE(dao.Invoice.Columns().GmtModify, gtime.New(req.CreateTimeStart)))
+			WhereOrGTE(dao.Invoice.Columns().GmtModify, gtime.New(req.ReportTimeStart)))
 	}
 	if req.ReportTimeEnd > 0 {
 		query = query.Where(query.Builder().WhereOrLTE(dao.Invoice.Columns().CreateTime, req.ReportTimeEnd).

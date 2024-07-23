@@ -19,7 +19,7 @@ func (c *ControllerTask) DeleteTemplate(ctx context.Context, req *task.DeleteTem
 	one := query.GetMerchantTaskExportTemplateById(ctx, req.TemplateId)
 	utility.Assert(one != nil, "invalid templateId")
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "No Permission")
-	if _interface.Context().Get(ctx).MerchantMember != nil {
+	if _interface.Context().Get(ctx) != nil && _interface.Context().Get(ctx).MerchantMember != nil {
 		utility.Assert(one.MemberId == _interface.Context().Get(ctx).MerchantMember.Id, "No Permission")
 	}
 	if one.IsDeleted != 0 {

@@ -21,7 +21,7 @@ func (c *ControllerTask) EditTemplate(ctx context.Context, req *task.EditTemplat
 	one := query.GetMerchantTaskExportTemplateById(ctx, req.TemplateId)
 	utility.Assert(one != nil, "invalid templateId")
 	utility.Assert(one.MerchantId == _interface.GetMerchantId(ctx), "No Permission")
-	if _interface.Context().Get(ctx).MerchantMember != nil {
+	if _interface.Context().Get(ctx) != nil && _interface.Context().Get(ctx).MerchantMember != nil {
 		utility.Assert(one.MemberId == _interface.Context().Get(ctx).MerchantMember.Id, "No Permission")
 	}
 	utility.Assert(one.IsDeleted == 0, "Template Already Deleted")

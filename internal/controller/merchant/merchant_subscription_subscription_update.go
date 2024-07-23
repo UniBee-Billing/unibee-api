@@ -19,7 +19,7 @@ func (c *ControllerSubscription) Update(ctx context.Context, req *subscription.U
 		req.SubscriptionId = one.SubscriptionId
 	}
 	var memberMemberId int64 = 0
-	if _interface.Context().Get(ctx).MerchantMember != nil {
+	if _interface.Context().Get(ctx) != nil && _interface.Context().Get(ctx).MerchantMember != nil {
 		memberMemberId = int64(_interface.Context().Get(ctx).MerchantMember.Id)
 	}
 	update, err := service.SubscriptionUpdate(ctx, &service.UpdateInternalReq{

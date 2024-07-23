@@ -68,6 +68,5 @@ func StartCronJobs() {
 	if err != nil {
 		g.Log().Errorf(ctx, "StartCronJobs Name:%s Err:%s\n", hourTask, err.Error())
 	}
-	g.Dump(gcron.Entries())
 	return
 }
