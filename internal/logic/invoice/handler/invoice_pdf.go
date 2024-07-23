@@ -157,6 +157,9 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 
 	if len(one.RefundId) > 0 {
 		doc.Title = "TAX CREDIT NOTE"
+		if len(one.VatNumber) > 0 {
+			doc.Customer.AdditionalInfo = []string{"VAT reverse charge"}
+		}
 		doc.SetIsRefund(true)
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
@@ -168,6 +171,9 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 	} else {
 		doc.Title = "TAX INVOICE"
+		if len(one.VatNumber) > 0 {
+			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
+		}
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),

@@ -1,14 +1,14 @@
 package generator
 
-// Contact contact a company informations
+// Contact a company information
 type Contact struct {
 	//Name    string   `json:"name,omitempty" validate:"required,min=1,max=256"`
 	Name string `json:"name,omitempty"`
 	//Logo    []byte   `json:"logo,omitempty"` // Logo byte array
 	Address *Address `json:"address,omitempty"`
 
-	// AddtionnalInfo to append after contact informations. You can use basic html here (bold, italic tags).
-	AddtionnalInfo []string `json:"additional_info,omitempty"`
+	// AdditionalInfo to append after contact information. You can use basic html here (bold, italic tags).
+	AdditionalInfo []string `json:"additional_info,omitempty"`
 }
 
 // appendContactTODoc append the contact to the document
@@ -89,13 +89,13 @@ func (c *Contact) appendContactTODoc(
 		doc.pdf.MultiCell(70, 5, doc.encodeString(c.Address.ToString()), "0", "L", false)
 	}
 
-	// Addtionnal info
-	if c.AddtionnalInfo != nil {
+	// Additional info
+	if c.AdditionalInfo != nil {
 		doc.pdf.SetXY(x, doc.pdf.GetY())
-		doc.pdf.SetFontSize(SmallTextFontSize)
+		//doc.pdf.SetFontSize(SmallTextFontSize)
 		doc.pdf.SetXY(x, doc.pdf.GetY()+2)
 
-		for _, line := range c.AddtionnalInfo {
+		for _, line := range c.AdditionalInfo {
 			doc.pdf.SetXY(x, doc.pdf.GetY())
 			doc.pdf.MultiCell(70, 3, doc.encodeString(line), "0", "L", false)
 		}
