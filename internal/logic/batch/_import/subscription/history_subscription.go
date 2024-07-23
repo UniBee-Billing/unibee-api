@@ -11,6 +11,7 @@ import (
 	dao "unibee/internal/dao/oversea_pay"
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
+	"unibee/internal/logic/operation_log"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
 	"unibee/utility"
@@ -212,10 +213,24 @@ func (t TaskHistorySubscriptionImport) ImportRow(ctx context.Context, task *enti
 		CreateTime:      gtime.Now().Timestamp(),
 	}
 
-	_, err = dao.SubscriptionTimeline.Ctx(ctx).Data(timeline).OmitNil().Insert(timeline)
+	result, err := dao.SubscriptionTimeline.Ctx(ctx).Data(timeline).OmitNil().Insert(timeline)
 	if err != nil {
 		return target, gerror.Newf("Save history,error:", err.Error())
 	}
+	id, err := result.LastInsertId()
+	utility.AssertError(err, "Save history error")
+	timeline.Id = uint64(id)
+
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("SubscriptionHistory(%v)", timeline.Id),
+		Content:        "ImportNew",
+		UserId:         one.UserId,
+		SubscriptionId: one.SubscriptionId,
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 
 	return target, err
 }

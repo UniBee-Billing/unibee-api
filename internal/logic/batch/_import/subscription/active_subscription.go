@@ -15,6 +15,7 @@ import (
 	currency2 "unibee/internal/logic/currency"
 	"unibee/internal/logic/gateway/api"
 	"unibee/internal/logic/gateway/gateway_bean"
+	"unibee/internal/logic/operation_log"
 	user2 "unibee/internal/logic/user/sub_update"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -275,6 +276,17 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			dao.Subscription.Columns().CreateTime:                  createTime.Timestamp(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
 		override = true
+
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+			Content:        "ImportOverride",
+			UserId:         one.UserId,
+			SubscriptionId: one.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 	} else {
 		one = &entity.Subscription{
 			SubscriptionId:              utility.CreateSubscriptionId(),
@@ -303,7 +315,20 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			CurrentPeriodPaid:           1,
 			GatewayDefaultPaymentMethod: gatewayPaymentMethod,
 		}
-		_, err = dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		result, err := dao.Subscription.Ctx(ctx).Data(one).OmitNil().Insert(one)
+		id, err := result.LastInsertId()
+		utility.AssertError(err, "Save history error")
+		one.Id = uint64(id)
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("Subscription(%s)", one.SubscriptionId),
+			Content:        "ImportNew",
+			UserId:         one.UserId,
+			SubscriptionId: one.SubscriptionId,
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
 	}
 	if len(gatewayPaymentMethod) > 0 {
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)

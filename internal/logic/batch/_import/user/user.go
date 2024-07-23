@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/gogf/gf/v2/os/gtime"
 	dao "unibee/internal/dao/oversea_pay"
+	"unibee/internal/logic/operation_log"
 	"unibee/internal/logic/user"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
@@ -76,6 +77,18 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 			dao.UserAccount.Columns().Phone:          target.Phone,
 			dao.UserAccount.Columns().GmtModify:      gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+
+		operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+			MerchantId:     one.MerchantId,
+			Target:         fmt.Sprintf("User(%v)", one.Id),
+			Content:        "ImportOverride",
+			UserId:         one.Id,
+			SubscriptionId: "",
+			InvoiceId:      "",
+			PlanId:         0,
+			DiscountCode:   "",
+		}, err)
+
 		if err == nil {
 			err = gerror.New("override success")
 		}
@@ -87,7 +100,7 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 	if one != nil {
 		return target, gerror.New("Error, same ExternalUserId user exist")
 	}
-	_, err = user.CreateUser(ctx, &user.NewReq{
+	one, err = user.CreateUser(ctx, &user.NewReq{
 		ExternalUserId: target.ExternalUserId,
 		Email:          target.Email,
 		FirstName:      target.FirstName,
@@ -97,6 +110,17 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 		Custom:         tag,
 		MerchantId:     task.MerchantId,
 	})
+
+	operation_log.AppendOptLog(ctx, &operation_log.OptLogRequest{
+		MerchantId:     one.MerchantId,
+		Target:         fmt.Sprintf("User(%v)", one.Id),
+		Content:        "ImportNew",
+		UserId:         one.Id,
+		SubscriptionId: "",
+		InvoiceId:      "",
+		PlanId:         0,
+		DiscountCode:   "",
+	}, err)
 	return target, err
 }
 
