@@ -32,4 +32,5 @@ type MerchantBatchTask struct {
 	UploadFileUrl  interface{} // the file url of upload type task
 	GmtModify      *gtime.Time // update time
 	CreateTime     interface{} // create utc time
+	Format         interface{} // format
 }

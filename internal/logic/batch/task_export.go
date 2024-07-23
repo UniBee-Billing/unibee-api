@@ -96,6 +96,8 @@ func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskIn
 	utility.Assert(task != nil, "Task not found")
 	if len(req.Format) > 0 {
 		utility.Assert(req.Format == "xlsx" || req.Format == "csv", "format should be one of xlsx|csv")
+	} else {
+		req.Format = "xlsx"
 	}
 	one := &entity.MerchantBatchTask{
 		MerchantId:   req.MerchantId,
@@ -113,6 +115,7 @@ func NewBatchExportTask(superCtx context.Context, req *MerchantBatchExportTaskIn
 		TaskType:     0,
 		SuccessCount: 0,
 		CreateTime:   gtime.Now().Timestamp(),
+		Format:       req.Format,
 	}
 	result, err := dao.MerchantBatchTask.Ctx(superCtx).Data(one).OmitNil().Insert(one)
 	if err != nil {

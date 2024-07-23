@@ -30,4 +30,5 @@ type MerchantBatchTask struct {
 	UploadFileUrl  string      `json:"uploadFileUrl"  description:"the file url of upload type task"`                  // the file url of upload type task
 	GmtModify      *gtime.Time `json:"gmtModify"      description:"update time"`                                       // update time
 	CreateTime     int64       `json:"createTime"     description:"create utc time"`                                   // create utc time
+	Format         string      `json:"format"         description:"format"`                                            // format
 }

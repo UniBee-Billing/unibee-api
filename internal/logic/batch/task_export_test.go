@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gogf/gf/v2/frame/g"
 	"github.com/xuri/excelize/v2"
+	"net/url"
+	"path/filepath"
 	"testing"
 	"unibee/utility"
 )
@@ -144,5 +146,18 @@ func TestExcelStreamWrite(t *testing.T) {
 	t.Run("Test Email Check", func(t *testing.T) {
 		fmt.Println(utility.IsEmailValid("dd"))
 		fmt.Println(utility.IsEmailValid("jack.fu@126.com"))
+		extension, _ := getFileExtensionFromURL("http://unibee.top/files/invoice/batch_export/Batch_export_task_15656_42_10507.csv")
+		fmt.Println(extension)
 	})
+}
+
+func getFileExtensionFromURL(downloadURL string) (string, error) {
+	parsedURL, err := url.Parse(downloadURL)
+	if err != nil {
+		return "", err
+	}
+	filePath := parsedURL.Path
+	extension := filepath.Ext(filePath)
+
+	return extension, nil
 }

@@ -1,6 +1,9 @@
 package bean
 
 import (
+	"net/url"
+	"path/filepath"
+	"strings"
 	"unibee/internal/controller/link"
 	entity "unibee/internal/model/entity/oversea_pay"
 )
@@ -22,11 +25,24 @@ type MerchantBatchTaskSimplify struct {
 	UploadFileUrl  string `json:"uploadFileUrl" description:"the file url of upload type task"`                  // the file url of upload type task
 	CreateTime     int64  `json:"createTime"     description:"create utc time"`                                  // create utc time
 	LastUpdateTime int64  `json:"lastUpdateTime" description:"last update utc time"`                             // last update utc time
+	Format         string `json:"format"    description:"format of file"`                                        // format of file
 }
 
 func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTaskSimplify {
 	if one == nil {
 		return nil
+	}
+	if len(one.Format) == 0 {
+		if len(one.DownloadUrl) > 0 {
+			extension, _ := getFileExtensionFromURL("http://unibee.top/files/invoice/batch_export/Batch_export_task_15656_42_10507.csv")
+			if strings.Contains(extension, "csv") {
+				one.Format = "csv"
+			} else {
+				one.Format = "xlsx"
+			}
+		} else {
+			one.Format = "xlsx"
+		}
 	}
 	return &MerchantBatchTaskSimplify{
 		Id:             one.Id,
@@ -45,5 +61,17 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 		UploadFileUrl:  one.UploadFileUrl,
 		CreateTime:     one.CreateTime,
 		LastUpdateTime: one.LastUpdateTime,
+		Format:         one.Format,
 	}
+}
+
+func getFileExtensionFromURL(downloadURL string) (string, error) {
+	parsedURL, err := url.Parse(downloadURL)
+	if err != nil {
+		return "", err
+	}
+	filePath := parsedURL.Path
+	extension := filepath.Ext(filePath)
+
+	return extension, nil
 }

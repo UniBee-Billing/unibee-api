@@ -40,6 +40,7 @@ type MerchantBatchTaskColumns struct {
 	UploadFileUrl  string // the file url of upload type task
 	GmtModify      string // update time
 	CreateTime     string // create utc time
+	Format         string // format
 }
 
 // merchantBatchTaskColumns holds the columns for table merchant_batch_task.
@@ -64,6 +65,7 @@ var merchantBatchTaskColumns = MerchantBatchTaskColumns{
 	UploadFileUrl:  "upload_file_url",
 	GmtModify:      "gmt_modify",
 	CreateTime:     "create_time",
+	Format:         "format",
 }
 
 // NewMerchantBatchTaskDao creates and returns a new DAO object for table data access.
