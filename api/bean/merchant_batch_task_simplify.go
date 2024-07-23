@@ -34,7 +34,7 @@ func SimplifyMerchantBatchTask(one *entity.MerchantBatchTask) *MerchantBatchTask
 	}
 	if len(one.Format) == 0 {
 		if len(one.DownloadUrl) > 0 {
-			extension, _ := getFileExtensionFromURL("http://unibee.top/files/invoice/batch_export/Batch_export_task_15656_42_10507.csv")
+			extension, _ := getFileExtensionFromURL(one.DownloadUrl)
 			if strings.Contains(extension, "csv") {
 				one.Format = "csv"
 			} else {
