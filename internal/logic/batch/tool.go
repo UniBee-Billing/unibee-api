@@ -7,6 +7,7 @@ import (
 	"github.com/gogf/gf/v2/os/gtime"
 	"github.com/xuri/excelize/v2"
 	"reflect"
+	"regexp"
 	"time"
 	dao "unibee/internal/dao/oversea_pay"
 	"unibee/utility"
@@ -34,6 +35,7 @@ func RefactorHeaders(obj interface{}, exportColumns []string) []interface{} {
 	for i := 0; i < v.NumField(); i++ {
 		fi := t.Field(i)
 		if key := fi.Tag.Get("json"); key != "" {
+			key = addSpaceBeforeUpperCaseExceptFirst(key)
 			out = append(out, key)
 			allKeys[key] = "1"
 		}
@@ -172,4 +174,15 @@ func failureTask(ctx context.Context, taskId int64, err error) {
 		dao.MerchantBatchTask.Columns().LastUpdateTime: gtime.Now().Timestamp(),
 		dao.MerchantBatchTask.Columns().GmtModify:      gtime.Now(),
 	}).Where(dao.MerchantBatchTask.Columns().Id, taskId).OmitNil().Update()
+}
+
+func addSpaceBeforeUpperCaseExceptFirst(str string) string {
+	if len(str) == 0 {
+		return str
+	}
+	re := regexp.MustCompile(`([A-Z])`)
+	result := re.ReplaceAllStringFunc(str[1:], func(s string) string {
+		return " " + s
+	})
+	return str[:1] + result
 }

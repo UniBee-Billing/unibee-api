@@ -170,7 +170,7 @@ func startRunImportTaskBackground(task *entity.MerchantBatchTask, taskImpl _inte
 			count = i
 			if i == 0 {
 				for j, colCell := range row {
-					headers[j] = strings.TrimSpace(colCell)
+					headers[j] = strings.Replace(colCell, " ", "", -1)
 				}
 			} else {
 				target := make(map[string]string)
