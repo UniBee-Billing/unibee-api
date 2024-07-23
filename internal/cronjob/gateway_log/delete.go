@@ -25,3 +25,12 @@ func TaskForDeleteWebhookMessage(ctx context.Context) {
 		g.Log().Errorf(ctx, "TaskForDeleteWebhookMessage error:%s", err.Error())
 	}
 }
+
+func TaskForDeleteWebhookLog(ctx context.Context) {
+	g.Log().Infof(ctx, "TaskForDeleteWebhookLog start")
+	time.Sleep(5 * time.Second)
+	_, err := dao.MerchantWebhookLog.Ctx(ctx).WhereLT(dao.MerchantWebhookLog.Columns().GmtCreate, gtime.Now().AddDate(0, 0, -90)).Delete()
+	if err != nil {
+		g.Log().Errorf(ctx, "TaskForDeleteWebhookLog error:%s", err.Error())
+	}
+}
