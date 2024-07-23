@@ -249,6 +249,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 		}
 	}
 	one := query.GetSubscriptionByExternalSubscriptionId(ctx, target.ExternalSubscriptionId)
+	override := false
 	if one != nil {
 		if one.Data != tag {
 			return target, gerror.New("Error, no permission to override," + one.Data)
@@ -273,6 +274,7 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 			dao.Subscription.Columns().FirstPaidTime:               firstPaidTime.Timestamp(),
 			dao.Subscription.Columns().CreateTime:                  createTime.Timestamp(),
 		}).Where(dao.Subscription.Columns().Id, one.Id).OmitNil().Update()
+		override = true
 	} else {
 		one = &entity.Subscription{
 			SubscriptionId:              utility.CreateSubscriptionId(),
@@ -306,7 +308,9 @@ func (t TaskActiveSubscriptionImport) ImportRow(ctx context.Context, task *entit
 	if len(gatewayPaymentMethod) > 0 {
 		user2.UpdateUserDefaultGatewayPaymentMethod(ctx, user.Id, gatewayId, gatewayPaymentMethod)
 	}
-
+	if err == nil && override {
+		err = gerror.New("override success")
+	}
 	return target, err
 }
 

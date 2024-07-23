@@ -64,6 +64,7 @@ type InvoiceDetail struct {
 	CreateFrom                     string                             `json:"createFrom"                     description:"create from"`               // create from
 	Metadata                       map[string]interface{}             `json:"metadata" dc:"Metadata，Map"`
 	CountryCode                    string                             `json:"countryCode"                    description:""` //
+	VatNumber                      string                             `json:"vatNumber"                    description:""`   //
 	FinishTime                     int64                              `json:"finishTime"`
 	CreateTime                     int64                              `json:"createTime"`
 	BizType                        int                                `json:"bizType"`
@@ -135,6 +136,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
 		CreateFrom:                     invoice.CreateFrom,
 		CountryCode:                    invoice.CountryCode,
+		VatNumber:                      invoice.VatNumber,
 		Metadata:                       metadata,
 		FinishTime:                     invoice.FinishTime,
 		TrialEnd:                       invoice.TrialEnd,

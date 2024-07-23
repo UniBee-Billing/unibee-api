@@ -105,7 +105,7 @@ func (t TaskUserExport) PageData(ctx context.Context, page int, count int, task 
 				MerchantName:       merchant.Name,
 				Phone:              one.Phone,
 				Address:            one.Address,
-				VATNumber:          one.VATNumber,
+				VatNumber:          one.VATNumber,
 				CountryCode:        one.CountryCode,
 				CountryName:        one.CountryName,
 				SubscriptionName:   one.SubscriptionName,
@@ -134,7 +134,7 @@ type ExportUserEntity struct {
 	MerchantName       string      `json:"MerchantName"        comment:""`
 	Phone              string      `json:"Phone"               comment:""`
 	Address            string      `json:"Address"             comment:""`
-	VATNumber          string      `json:"VATNumber"           comment:""`
+	VatNumber          string      `json:"VatNumber"           comment:""`
 	CountryCode        string      `json:"CountryCode"         comment:""`
 	CountryName        string      `json:"CountryName"         comment:""`
 	SubscriptionName   string      `json:"SubscriptionName"    comment:""`

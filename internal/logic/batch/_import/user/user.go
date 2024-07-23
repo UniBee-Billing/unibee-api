@@ -76,6 +76,9 @@ func (t TaskUserImport) ImportRow(ctx context.Context, task *entity.MerchantBatc
 			dao.UserAccount.Columns().Phone:          target.Phone,
 			dao.UserAccount.Columns().GmtModify:      gtime.Now(),
 		}).Where(dao.UserAccount.Columns().Id, one.Id).OmitEmpty().Update()
+		if err == nil {
+			err = gerror.New("override success")
+		}
 		return target, err
 	}
 	if len(target.ExternalUserId) > 0 {

@@ -168,6 +168,7 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				ProductName:                    one.ProductName,
 				TaxCode:                        one.CountryCode,
 				CountryCode:                    one.CountryCode,
+				VatNumber:                      one.VatNumber,
 				CountryName:                    countryName,
 				IsEU:                           IsEu,
 				InvoiceType:                    invoiceType,
@@ -221,6 +222,7 @@ type ExportInvoiceEntity struct {
 	City                           string      `json:"City" comment:"The city of user"`
 	State                          string      `json:"State" comment:"The state of user"`
 	CountryCode                    string      `json:"CountryCode"                    comment:"The country code of invoice"`
+	VatNumber                      string      `json:"VatNumber"                    comment:"The vat number of invoice"`
 	TaxCode                        string      `json:"TaxCode"                    comment:"The tax code of invoice"`
 	CountryName                    string      `json:"CountryName" comment:"The country name of invoice"`
 	IsEU                           string      `json:"EU/Non-EU" comment:"Is eu country or not"`
