@@ -34,8 +34,27 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 	utility.Assert(len(payment.InvoiceId) > 0, "payment InvoiceId is nil")
 	user := query.GetUserAccountById(ctx, payment.UserId)
 	var sendEmail = ""
+	var userSnapshot *entity.UserAccount
 	if user != nil {
 		sendEmail = user.Email
+		userSnapshot = &entity.UserAccount{
+			Email:         user.Email,
+			CountryCode:   user.CountryCode,
+			CountryName:   user.CountryName,
+			VATNumber:     user.VATNumber,
+			TaxPercentage: user.TaxPercentage,
+			GatewayId:     user.GatewayId,
+			Type:          user.Type,
+			UserName:      user.UserName,
+			Mobile:        user.Mobile,
+			Phone:         user.Phone,
+			Address:       user.Address,
+			FirstName:     user.FirstName,
+			LastName:      user.LastName,
+			CompanyName:   user.CompanyName,
+			City:          user.City,
+			ZipCode:       user.ZipCode,
+		}
 	}
 	st := utility.CreateInvoiceSt()
 	var name = invoice.InvoiceName
@@ -82,6 +101,7 @@ func CreateProcessInvoiceForNewPayment(ctx context.Context, invoice *bean.Invoic
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
 		BillingCycleAnchor:             invoice.BillingCycleAnchor,
+		Data:                           utility.MarshalToJsonString(userSnapshot),
 		MetaData:                       utility.MarshalToJsonString(invoice.Metadata),
 		CreateFrom:                     invoice.CreateFrom,
 	}
@@ -247,6 +267,7 @@ func CreateProcessInvoiceForNewPaymentRefund(ctx context.Context, invoice *bean.
 		DayUtilDue:                     invoice.DayUtilDue,
 		DiscountAmount:                 invoice.DiscountAmount,
 		DiscountCode:                   invoice.DiscountCode,
+		CreateFrom:                     refund.RefundComment,
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

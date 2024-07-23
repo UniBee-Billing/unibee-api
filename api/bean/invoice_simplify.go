@@ -46,8 +46,9 @@ type InvoiceSimplify struct {
 	BillingCycleAnchor             int64                         `json:"billingCycleAnchor"             description:"billing_cycle_anchor"` // billing_cycle_anchor
 	CreateFrom                     string                        `json:"createFrom"                     description:"create from"`          // create from
 	Metadata                       map[string]interface{}        `json:"metadata" dc:"Metadata，Map"`
-	CountryCode                    string                        `json:"countryCode"                    description:""` //
-	VatNumber                      string                        `json:"vatNumber"                      description:""` //
+	CountryCode                    string                        `json:"countryCode"                    description:""`
+	VatNumber                      string                        `json:"vatNumber"                      description:""`
+	Data                           string                        `json:"data"                      description:""`
 }
 
 type InvoiceItemSimplify struct {
@@ -129,5 +130,6 @@ func SimplifyInvoice(one *entity.Invoice) *InvoiceSimplify {
 		CountryCode:                    one.CountryCode,
 		Metadata:                       metadata,
 		VatNumber:                      one.VatNumber,
+		Data:                           one.Data,
 	}
 }

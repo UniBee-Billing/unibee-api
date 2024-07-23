@@ -79,11 +79,6 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.SetInvoiceId(one.InvoiceId)
 	doc.SetInvoiceNumber(fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId))
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
-	//doc.Description = "Test Description"
-	if len(one.RefundId) > 0 {
-		doc.IsRefund = true
-		doc.SetOriginInvoiceNumber(one.SendNote)
-	}
 
 	if one.Status == consts.InvoiceStatusProcessing {
 		doc.SetStatus("Process")
@@ -156,7 +151,10 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
 	if len(one.RefundId) > 0 {
+		doc.IsRefund = true
+		doc.SetOriginInvoiceNumber(one.SendNote)
 		doc.Title = "TAX CREDIT NOTE"
+		doc.Notes = one.CreateFrom
 		if len(one.VatNumber) > 0 {
 			doc.Customer.AdditionalInfo = []string{"VAT reverse charge"}
 		}
@@ -189,7 +187,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.SubTotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.SubscriptionAmountExcludingTax, one.Currency))
 	if one.DiscountAmount > 0 {
 		if len(one.DiscountCode) > 0 {
-			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(%s)", one.DiscountCode)
+			doc.DiscountTitle = fmt.Sprintf("TOTAL DISCOUNTED(code: %s)", one.DiscountCode)
 		}
 		doc.DiscountTotalString = fmt.Sprintf("%s -%s", symbol, utility.ConvertCentToDollarStr(one.DiscountAmount, one.Currency))
 	}

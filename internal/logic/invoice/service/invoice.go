@@ -447,10 +447,14 @@ func CreateInvoiceRefund(ctx context.Context, req *invoice.RefundReq) (*entity.R
 	} else if gateway.GatewayType == consts.GatewayTypeWireTransfer || gateway.GatewayType == consts.GatewayTypeCrypto {
 		utility.Assert(len(req.Reason) > 0, "reason is need for crypto|wire transfer refund")
 	}
+	var reason = "Refund Requested"
+	if len(req.Reason) > 0 {
+		reason = fmt.Sprintf("%s: %s", reason, req.Reason)
+	}
 	refund, err := service.GatewayPaymentRefundCreate(ctx, &service.NewPaymentRefundInternalReq{
 		PaymentId:        one.PaymentId,
 		ExternalRefundId: fmt.Sprintf("%s-%s", one.PaymentId, req.RefundNo),
-		Reason:           req.Reason,
+		Reason:           reason,
 		RefundAmount:     req.RefundAmount,
 		Currency:         one.Currency,
 	})

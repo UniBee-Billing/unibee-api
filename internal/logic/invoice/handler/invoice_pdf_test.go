@@ -44,6 +44,7 @@ func TestGenerate(t *testing.T) {
 		TotalAmount:                    20000,
 		TaxAmount:                      2000,
 		DiscountAmount:                 2000,
+		DiscountCode:                   "code11",
 		VatNumber:                      "xxxxxVat",
 		CountryCode:                    "EE",
 		SubscriptionAmountExcludingTax: 20000,
@@ -53,6 +54,8 @@ func TestGenerate(t *testing.T) {
 		GmtModify:                      gtime.Now(),
 		Link:                           "http://unibee.top",
 		TaxPercentage:                  2000,
+		RefundId:                       "dddd",
+		CreateFrom:                     "Refund Requested: xxxxxxxxx",
 		MetaData:                       utility.MarshalToJsonString(map[string]string{"IssueVatNumber": " EE101775690", "IssueRegNumber": "12660871", "IssueCompanyName": "Multilogin Software OÜ", "IssueAddress": "Supluse pst 1 - 201A, Tallinn Harju maakond, 119112 Harju maakond, 11911  Harju maakond, 11911"}),
 	}, &entity.Merchant{
 		CompanyName: "Multilogin OÜ",

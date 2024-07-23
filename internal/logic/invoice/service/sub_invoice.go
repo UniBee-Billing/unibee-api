@@ -28,13 +28,33 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		TryCancelSubscriptionLatestInvoice(ctx, sub)
 	}
 	var sendEmail = ""
+	var userSnapshot *entity.UserAccount
 	if user != nil {
 		sendEmail = user.Email
+		userSnapshot = &entity.UserAccount{
+			Email:         user.Email,
+			CountryCode:   user.CountryCode,
+			CountryName:   user.CountryName,
+			VATNumber:     user.VATNumber,
+			TaxPercentage: user.TaxPercentage,
+			GatewayId:     user.GatewayId,
+			Type:          user.Type,
+			UserName:      user.UserName,
+			Mobile:        user.Mobile,
+			Phone:         user.Phone,
+			Address:       user.Address,
+			FirstName:     user.FirstName,
+			LastName:      user.LastName,
+			CompanyName:   user.CompanyName,
+			City:          user.City,
+			ZipCode:       user.ZipCode,
+		}
 	}
 	var currentTime = gtime.Now().Timestamp()
 	if timeNow > currentTime {
 		currentTime = timeNow
 	}
+
 	status := consts.InvoiceStatusProcessing
 	invoiceId := utility.CreateInvoiceId()
 	st := utility.CreateInvoiceSt()
@@ -76,9 +96,9 @@ func CreateProcessingInvoiceForSub(ctx context.Context, simplify *bean.InvoiceSi
 		DiscountCode:                   simplify.DiscountCode,
 		TrialEnd:                       simplify.TrialEnd,
 		BillingCycleAnchor:             simplify.BillingCycleAnchor,
+		Data:                           utility.MarshalToJsonString(userSnapshot),
+		MetaData:                       utility.MarshalToJsonString(simplify.Metadata),
 		CreateFrom:                     simplify.CreateFrom,
-
-		MetaData: utility.MarshalToJsonString(simplify.Metadata),
 	}
 
 	result, err := dao.Invoice.Ctx(ctx).Data(one).OmitNil().Insert(one)

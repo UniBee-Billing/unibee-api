@@ -106,6 +106,9 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 			if one.UserAccount == nil {
 				one.UserAccount = &bean.UserAccountSimplify{}
 			}
+			if one.UserSnapshot == nil {
+				one.UserSnapshot = one.UserAccount
+			}
 			if one.Subscription == nil {
 				one.Subscription = &bean.SubscriptionSimplify{}
 			}
@@ -157,13 +160,13 @@ func (t TaskInvoiceExport) PageData(ctx context.Context, page int, count int, ta
 				InvoiceNumber:                  fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId),
 				UserId:                         fmt.Sprintf("%v", one.UserId),
 				ExternalUserId:                 fmt.Sprintf("%v", one.UserAccount.ExternalUserId),
-				FirstName:                      one.UserAccount.FirstName,
-				LastName:                       one.UserAccount.LastName,
-				FullName:                       fmt.Sprintf("%s %s", one.UserAccount.FirstName, one.UserAccount.LastName),
+				FirstName:                      one.UserSnapshot.FirstName,
+				LastName:                       one.UserSnapshot.LastName,
+				FullName:                       fmt.Sprintf("%s %s", one.UserSnapshot.FirstName, one.UserSnapshot.LastName),
 				UserType:                       userType,
-				Email:                          one.UserAccount.Email,
-				City:                           one.UserAccount.City,
-				Address:                        one.UserAccount.Address,
+				Email:                          one.UserSnapshot.Email,
+				City:                           one.UserSnapshot.City,
+				Address:                        one.UserSnapshot.Address,
 				InvoiceName:                    one.InvoiceName,
 				ProductName:                    one.ProductName,
 				TaxCode:                        one.CountryCode,

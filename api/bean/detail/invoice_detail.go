@@ -53,6 +53,7 @@ type InvoiceDetail struct {
 	Gateway                        *bean.GatewaySimplify              `json:"gateway"                        description:"Gateway"`
 	Merchant                       *bean.MerchantSimplify             `json:"merchant"                       description:"Merchant"`
 	UserAccount                    *bean.UserAccountSimplify          `json:"userAccount"                    description:"UserAccount"`
+	UserSnapshot                   *bean.UserAccountSimplify          `json:"userSnapshot"                   description:"UserSnapshot"`
 	Subscription                   *bean.SubscriptionSimplify         `json:"subscription"                   description:"Subscription"`
 	Payment                        *bean.PaymentSimplify              `json:"payment"                        description:"Payment"`
 	Refund                         *bean.RefundSimplify               `json:"refund"                         description:"Refund"`
@@ -87,6 +88,13 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		err = gjson.Unmarshal([]byte(invoice.MetaData), &metadata)
 		if err != nil {
 			fmt.Printf("SimplifySubscription Unmarshal Metadata error:%s", err.Error())
+		}
+	}
+	var userSnapShot *entity.UserAccount
+	if len(invoice.Data) > 0 {
+		err = gjson.Unmarshal([]byte(invoice.Data), &userSnapShot)
+		if err != nil {
+			fmt.Printf("UserSnapshot Unmarshal Metadata error:%s", err.Error())
 		}
 	}
 	return &InvoiceDetail{
@@ -126,6 +134,7 @@ func ConvertInvoiceToDetail(ctx context.Context, invoice *entity.Invoice) *Invoi
 		Gateway:                        bean.SimplifyGateway(query.GetGatewayById(ctx, invoice.GatewayId)),
 		Merchant:                       bean.SimplifyMerchant(query.GetMerchantById(ctx, invoice.MerchantId)),
 		UserAccount:                    bean.SimplifyUserAccount(query.GetUserAccountById(ctx, invoice.UserId)),
+		UserSnapshot:                   bean.SimplifyUserAccount(userSnapShot),
 		Subscription:                   bean.SimplifySubscription(query.GetSubscriptionBySubscriptionId(ctx, invoice.SubscriptionId)),
 		Payment:                        bean.SimplifyPayment(query.GetPaymentByPaymentId(ctx, invoice.PaymentId)),
 		Refund:                         bean.SimplifyRefund(query.GetRefundByRefundId(ctx, invoice.RefundId)),
