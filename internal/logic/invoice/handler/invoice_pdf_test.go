@@ -83,6 +83,7 @@ func TestGenerate(t *testing.T) {
 	//if err != nil {
 	//	return
 	//}
+	//fmt.Println(fmt.Sprintf("%v ", currency.NarrowSymbol(currency.ParseISO(strings.ToUpper("DD")))))
 }
 
 func TestTimeFormat(t *testing.T) {

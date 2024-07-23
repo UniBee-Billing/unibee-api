@@ -108,6 +108,27 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		doc.SetLogo(logoBytes)
 	}
 
+	//Localized currency
+	localizedCurrency := metadata["LocalizedCurrency"]
+	localizedCurrencyRate := metadata["LocalizedCurrencyRate"]
+	localizedSymbol := ""
+	localizedCurrencyStr := ""
+	var localizedRate float64
+	localized := false
+	if localizedCurrencyRate != nil && localizedCurrency != nil {
+		if rate, ok := localizedCurrencyRate.(float64); ok {
+			localizedCurrencyStr = strings.ToUpper(fmt.Sprintf("%v", localizedCurrency))
+			iso, err := currency.ParseISO(strings.ToUpper(localizedCurrencyStr))
+			if err == nil {
+				localizedRate = rate
+				localized = true
+				localizedSymbol = fmt.Sprintf("%v ", currency.NarrowSymbol(iso))
+			} else {
+				fmt.Printf("Invoice PDF Localized failed %s\n", err.Error())
+			}
+		}
+	}
+
 	var vatNumber = metadata["IssueVatNumber"]
 	var regNumber = metadata["IssueRegNumber"]
 	var companyName = metadata["IssueCompanyName"]
@@ -160,11 +181,15 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 		}
 		doc.SetIsRefund(true)
 		for i, line := range lines {
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency))
+			if localized {
+				amountString = fmt.Sprintf("%s | %s%s", amountString, symbol, utility.ConvertCentToDollarStr(int64(float64(line.AmountExcludingTax)*localizedRate), localizedCurrencyStr))
+			}
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
-				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.AmountExcludingTax, one.Currency)),
+				AmountString: amountString,
 			})
 		}
 	} else {
@@ -173,11 +198,15 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			doc.Customer.AdditionalInfo = []string{fmt.Sprintf("VAT Number:%s", one.VatNumber)}
 		}
 		for i, line := range lines {
+			amountString := fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency))
+			if localized {
+				amountString = fmt.Sprintf("%s | %s%s", amountString, symbol, utility.ConvertCentToDollarStr(int64(float64(line.UnitAmountExcludingTax*line.Quantity)*localizedRate), localizedCurrencyStr))
+			}
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),
 				UnitCost:     fmt.Sprintf("%f", float64(line.UnitAmountExcludingTax)/100.0),
 				Quantity:     strconv.FormatInt(line.Quantity, 10),
-				AmountString: fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(line.UnitAmountExcludingTax*line.Quantity, one.Currency)),
+				AmountString: amountString,
 			})
 		}
 	}
@@ -194,6 +223,12 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	doc.TotalString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TotalAmount, one.Currency))
 	doc.TaxString = fmt.Sprintf("%s%s", symbol, utility.ConvertCentToDollarStr(one.TaxAmount, one.Currency))
 	doc.TaxPercentageString = fmt.Sprintf("%s%s", utility.ConvertTaxPercentageToPercentageString(one.TaxPercentage), "%")
+
+	if localized {
+		doc.SubTotalString = fmt.Sprintf("%s | %s%s", doc.SubTotalString, symbol, utility.ConvertCentToDollarStr(int64(float64(one.SubscriptionAmountExcludingTax)*localizedRate), localizedCurrencyStr))
+		doc.TotalString = fmt.Sprintf("%s | %s%s", doc.TotalString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TotalAmount)*localizedRate), localizedCurrencyStr))
+		doc.TaxString = fmt.Sprintf("%s | %s%s", doc.TaxString, localizedSymbol, utility.ConvertCentToDollarStr(int64(float64(one.TaxAmount)*localizedRate), localizedCurrencyStr))
+	}
 
 	pdf, err := doc.Build()
 	if err != nil {
