@@ -15,6 +15,7 @@ import (
 	"unibee/api/bean"
 	"unibee/internal/cmd/config"
 	"unibee/internal/consts"
+	"unibee/internal/logic/gateway/api"
 	generator2 "unibee/internal/logic/invoice/handler/generator"
 	"unibee/internal/logic/oss"
 	entity "unibee/internal/model/entity/oversea_pay"
@@ -29,7 +30,8 @@ func GenerateInvoicePdf(ctx context.Context, unibInvoice *entity.Invoice) string
 	//utility.Assert(len(merchantInfo.CompanyLogo) > 0, "invalid CompanyLogo")
 	user := query.GetUserAccountById(ctx, unibInvoice.UserId)
 	var savePath = fmt.Sprintf("%s.pdf", unibInvoice.InvoiceId)
-	err := createInvoicePdf(unibInvoice, merchantInfo, user, savePath)
+
+	err := createInvoicePdf(unibInvoice, merchantInfo, user, query.GetGatewayById(ctx, unibInvoice.GatewayId), savePath)
 	utility.Assert(err == nil, fmt.Sprintf("createInvoicePdf error:%v", err))
 	return savePath
 }
@@ -50,7 +52,7 @@ func UploadInvoicePdf(ctx context.Context, invoiceId string, filePath string) (s
 	return upload.Url, nil
 }
 
-func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, savePath string) error {
+func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *entity.UserAccount, gateway *entity.MerchantGateway, savePath string) error {
 	var metadata = make(map[string]interface{})
 	if len(one.MetaData) > 0 {
 		err := gjson.Unmarshal([]byte(one.MetaData), &metadata)
@@ -66,11 +68,16 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	})
 
 	doc.SetFooter(&generator2.HeaderFooter{
-		Text:       fmt.Sprintf("PDF Generated on %s %s", time.Now().Format(time.RFC850), one.CountryCode),
+		Text:       fmt.Sprintf("PDF Generated on %s                                                    -%s-", time.Now().Format(time.RFC850), one.CountryCode),
 		Pagination: true,
 	})
 
-	doc.SetInvoiceNumber(one.InvoiceId)
+	var invoiceGateway = ""
+	if gateway != nil {
+		invoiceGateway = gateway.GatewayName
+	}
+	doc.SetInvoiceId(one.InvoiceId)
+	doc.SetInvoiceNumber(fmt.Sprintf("%s%s", api.GatewayShortNameMapping[invoiceGateway], one.InvoiceId))
 	doc.SetInvoiceDate(one.GmtCreate.Layout("2006-01-02"))
 	//doc.Description = "Test Description"
 	if len(one.RefundId) > 0 {
@@ -149,6 +156,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 	utility.Assert(err == nil, fmt.Sprintf("UnmarshalFromJsonString error:%v", err))
 
 	if len(one.RefundId) > 0 {
+		doc.Title = "TAX CREDIT NOTE"
 		doc.SetIsRefund(true)
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
@@ -159,6 +167,7 @@ func createInvoicePdf(one *entity.Invoice, merchantInfo *entity.Merchant, user *
 			})
 		}
 	} else {
+		doc.Title = "TAX INVOICE"
 		for i, line := range lines {
 			doc.AppendItem(&generator2.Item{
 				Name:         fmt.Sprintf("%s #%d", line.Description, i),

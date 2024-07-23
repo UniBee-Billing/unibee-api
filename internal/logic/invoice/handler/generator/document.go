@@ -15,7 +15,9 @@ type Document struct {
 	Header              *HeaderFooter `json:"header,omitempty"`
 	Footer              *HeaderFooter `json:"footer,omitempty"`
 	Type                string        `json:"type,omitempty" validate:"required,oneof=INVOICE DELIVERY_NOTE QUOTATION"`
-	InvoiceNumber       string        `json:"ref,omitempty" validate:"required,min=1,max=32"`
+	Title               string        `json:"title,omitempty"`
+	InvoiceId           string        `json:"invoiceId,omitempty" validate:"required,min=1,max=32"`
+	InvoiceNumber       string        `json:"invoiceNumber,omitempty" validate:"required,min=1,max=32"`
 	Logo                []byte        `json:"logo,omitempty"` // Logo byte array
 	InvoiceDate         string        `json:"invoiceDate,omitempty" validate:"max=32"`
 	InvoiceOriginNumber string        `json:"invoiceOriginNumber,omitempty"`

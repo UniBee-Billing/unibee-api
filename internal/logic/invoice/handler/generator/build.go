@@ -45,14 +45,19 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	doc.pdf.SetFont(doc.Options.Font, "", 12)
 
 	//// Append document title
-	//doc.appendTitle()
+	x := doc.pdf.GetX()
+	y := doc.pdf.GetY()
+
+	doc.appendTitle()
+
+	doc.pdf.SetXY(x, y)
 
 	doc.appendLogo()
 
 	// Append document metas (ref & version)
 	doc.appendMetas()
 
-	y := doc.pdf.GetY()
+	y = doc.pdf.GetY()
 	// Append company contact to doc
 	companyBottom := doc.Company.appendCompanyContactToDoc(doc, y)
 
@@ -89,7 +94,7 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 	// Append payment term
 	doc.appendPaymentTerm()
 
-	// Append js to autoprint if AutoPrint == true
+	// Append js to auto print if AutoPrint == true
 	if doc.Options.AutoPrint {
 		doc.pdf.SetJavascript("print(true);")
 	}
@@ -99,8 +104,13 @@ func (doc *Document) Build() (*fpdf.Fpdf, error) {
 
 // appendTitle to document
 func (doc *Document) appendTitle() {
-	title := doc.typeAsString()
+	title := doc.Title
 
+	doc.pdf.SetTextColor(
+		doc.Options.BaseTextColor[0],
+		doc.Options.BaseTextColor[1],
+		doc.Options.BaseTextColor[2],
+	)
 	// Set x y
 	doc.pdf.SetXY(120, BaseMarginTop)
 
@@ -109,7 +119,7 @@ func (doc *Document) appendTitle() {
 	doc.pdf.Rect(120, BaseMarginTop, 80, 10, "F")
 
 	// Draw text
-	doc.pdf.SetFont(doc.Options.Font, "", 14)
+	doc.pdf.SetFont(doc.Options.BoldFont, "B", 14)
 	doc.pdf.CellFormat(80, 10, doc.encodeString(title), "0", 0, "C", false, 0, "")
 }
 
@@ -142,14 +152,19 @@ func (doc *Document) appendLogo() float64 {
 }
 
 func (doc *Document) appendMetas() {
-	// Append ref
 	x, _, _, _ := doc.pdf.GetMargins()
-	refString := fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceNumberTitle), doc.InvoiceNumber)
-	//y := doc.pdf.GetY()
 	startY := doc.pdf.GetY() + 8
-	doc.pdf.SetXY(x, startY)
-	doc.pdf.SetFont(doc.Options.BoldFont, "B", 10)
-	doc.pdf.CellFormat(80, 12, doc.encodeString(refString), "0", 0, "L", false, 0, "")
+	// Append InvoiceOriginNumber
+	if len(doc.InvoiceId) > 0 {
+		doc.pdf.SetXY(x, startY)
+		doc.pdf.SetFont(doc.Options.Font, "", 10)
+		doc.pdf.CellFormat(80, 12, doc.encodeString(fmt.Sprintf("%s: %s", doc.Options.TextInvoiceIdTitle, doc.InvoiceId)), "0", 0, "L", false, 0, "")
+	}
+
+	// Append InvoiceNumber
+	doc.pdf.SetXY(x, doc.pdf.GetY()+8)
+	doc.pdf.SetFont(doc.Options.BoldFont, "", 10)
+	doc.pdf.CellFormat(80, 12, doc.encodeString(fmt.Sprintf("%s: %s", doc.FitRefundString(doc.Options.TextInvoiceNumberTitle), doc.InvoiceNumber)), "0", 0, "L", false, 0, "")
 
 	// Append InvoiceOriginNumber
 	if len(doc.InvoiceOriginNumber) > 0 {
@@ -188,7 +203,7 @@ func (doc *Document) appendMetas() {
 	returnY := doc.pdf.GetY() + 15
 
 	doc.pdf.SetXY(130, startY)
-	doc.pdf.SetFont(doc.Options.BoldFont, "", 10)
+	doc.pdf.SetFont(doc.Options.BoldFont, "B", 10)
 	doc.pdf.CellFormat(80, 12, doc.encodeFitRefundString("Invoice Status:"), "0", 0, "L", false, 0, "")
 
 	doc.pdf.SetXY(130, startY+10)
@@ -394,7 +409,7 @@ func (doc *Document) appendNotes() {
 	doc.pdf.SetY(currentY)
 }
 
-var moneyX = 180.0
+var moneyX = 165.0
 
 // appendTotal to document
 func (doc *Document) appendTotal() {

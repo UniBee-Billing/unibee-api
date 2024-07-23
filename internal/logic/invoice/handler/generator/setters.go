@@ -6,6 +6,12 @@ func (d *Document) SetType(docType string) *Document {
 	return d
 }
 
+// SetTitle set title of document
+func (d *Document) SetTitle(title string) *Document {
+	d.Title = title
+	return d
+}
+
 // SetHeader set header of document
 func (d *Document) SetHeader(header *HeaderFooter) *Document {
 	d.Header = header
@@ -15,6 +21,12 @@ func (d *Document) SetHeader(header *HeaderFooter) *Document {
 // SetFooter set footer of document
 func (d *Document) SetFooter(footer *HeaderFooter) *Document {
 	d.Footer = footer
+	return d
+}
+
+// SetInvoiceId of document
+func (d *Document) SetInvoiceId(InvoiceId string) *Document {
+	d.InvoiceId = InvoiceId
 	return d
 }
 

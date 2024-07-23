@@ -20,7 +20,7 @@ func TestGenerateInvoicePdf(t *testing.T) {
 	one.RefundId = "refundId"
 	one.SendNote = "iv20240202ERExKnb6OhMfyyY"
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
-	err := createInvoicePdf(one, query.GetMerchantById(ctx, one.MerchantId), query.GetUserAccountById(ctx, one.UserId), savePath)
+	err := createInvoicePdf(one, query.GetMerchantById(ctx, one.MerchantId), query.GetUserAccountById(ctx, one.UserId), query.GetGatewayById(ctx, one.GatewayId), savePath)
 	utility.AssertError(err, "Pdf Generator Error")
 	err = os.Remove("f18f4fce-802b-471c-9418-9640384594f6.jpg")
 	if err != nil {
@@ -39,11 +39,13 @@ func TestInvoicePdfGenerateAndEmailSendBackground(t *testing.T) {
 func TestGenerate(t *testing.T) {
 	var savePath = fmt.Sprintf("%s.pdf", "pdf_test")
 	err := createInvoicePdf(&entity.Invoice{
-		InvoiceId:                      "in20240111j91EsJ8qGR9gBjI",
+		InvoiceId:                      "81720768257606",
 		GmtCreate:                      gtime.Now(),
 		TotalAmount:                    20000,
 		TaxAmount:                      2000,
 		DiscountAmount:                 2000,
+		VatNumber:                      "xxxxxVat",
+		CountryCode:                    "EE",
 		SubscriptionAmountExcludingTax: 20000,
 		Currency:                       "USD",
 		Lines:                          "[{\"currency\":\"USD\",\"amount\":100,\"amountExcludingTax\":100,\"tax\":0,\"unitAmountExcludingTax\":100,\"description\":\"1 × 1美金计划(测试专用) (at $1.00 / day)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":0,\"amountExcludingTax\":0,\"tax\":0,\"unitAmountExcludingTax\":0,\"description\":\"0 × 3美金Addon(测试专用) (at $3.00 / day)\",\"proration\":false,\"quantity\":0,\"periodEnd\":1705108316,\"periodStart\":1705021916},{\"currency\":\"USD\",\"amount\":350,\"amountExcludingTax\":350,\"tax\":0,\"unitAmountExcludingTax\":350,\"description\":\"1 × testUpgrade (at $3.50 / day)\",\"proration\":false,\"quantity\":1,\"periodEnd\":1705108316,\"periodStart\":1705021916}]",
@@ -66,7 +68,7 @@ func TestGenerate(t *testing.T) {
 		Address:   "Best Billing Team Ltd Dubai Hills, Duai, UAE 12345",
 		FirstName: "Yvonne",
 		LastName:  "Wang",
-	}, savePath)
+	}, nil, savePath)
 	if err != nil {
 		fmt.Printf("err :%s", err.Error())
 	}

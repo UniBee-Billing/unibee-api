@@ -29,8 +29,12 @@ var TestCryptoGateway *entity.MerchantGateway
 var TestWireTransferGateway *entity.MerchantGateway
 var MysqlConfigFileName = "test_mysql_config.yaml"
 var PostgresConfigFileName = "test_postgres_config.yaml"
+var EnableAutomaticTest = false
 
 func init() {
+	if !EnableAutomaticTest {
+		return
+	}
 	ctx := context.Background()
 	err := g.Cfg().GetAdapter().(*gcfg.AdapterFile).SetPath("/test/config")
 	if err != nil {
