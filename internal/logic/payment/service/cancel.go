@@ -9,17 +9,28 @@ import (
 	"unibee/internal/logic/payment/handler"
 	entity "unibee/internal/model/entity/oversea_pay"
 	"unibee/internal/query"
-	"unibee/utility"
 )
 
 func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err error) {
-	utility.Assert(payment != nil, "payment not found")
+	if payment == nil {
+		return gerror.New("payment is nil")
+	}
+	//utility.Assert(payment != nil, "payment not found")
 	g.Log().Infof(ctx, "PaymentGatewayCancel:%s", payment.PaymentId)
-	utility.Assert(payment.Status != consts.PaymentFailed, "payment already failure")
-	utility.Assert(payment.Status != consts.PaymentCancelled, "payment already cancelled")
-	utility.Assert(payment.AuthorizeStatus < consts.CaptureRequest, "payment has capture request")
+	if payment.Status == consts.PaymentFailed {
+		return gerror.New("payment already failed")
+	}
+	if payment.Status == consts.PaymentCancelled {
+		return gerror.New("payment already cancelled")
+	}
+	if payment.AuthorizeStatus >= consts.CaptureRequest {
+		return gerror.New("payment has capture request")
+	}
+	//utility.Assert(payment.Status != consts.PaymentFailed, "payment already failure")
+	//utility.Assert(payment.Status != consts.PaymentCancelled, "payment already cancelled")
+	//utility.Assert(payment.AuthorizeStatus < consts.CaptureRequest, "payment has capture request")
 	if payment.Status != consts.PaymentCreated {
-		return gerror.New("payment not created status or alread success")
+		return gerror.New("payment not created status or already success")
 	}
 	res, err := api.GetGatewayServiceProvider(ctx, payment.GatewayId).GatewayCancel(ctx, payment)
 	if err != nil {
@@ -39,13 +50,26 @@ func PaymentGatewayCancel(ctx context.Context, payment *entity.Payment) (err err
 }
 
 func PaymentRefundGatewayCancel(ctx context.Context, refund *entity.Refund) (err error) {
-	utility.Assert(refund != nil, "refund not found")
+	if refund == nil {
+		return gerror.New("refund is nil")
+	}
 	g.Log().Infof(ctx, "PaymentRefundGatewayCancel:%s", refund.RefundId)
-	utility.Assert(refund.Status != consts.RefundFailed, "refund already failure")
-	utility.Assert(refund.Status != consts.RefundCancelled, "refund already cancelled")
-	utility.Assert(refund.Status == consts.RefundCreated, "refund not created status")
+	if refund.Status == consts.RefundFailed {
+		return gerror.New("refund already failure")
+	}
+	if refund.Status == consts.RefundCancelled {
+		return gerror.New("refund already cancelled")
+	}
+	if refund.Status != consts.RefundCreated {
+		return gerror.New("refund not created status")
+	}
+	//utility.Assert(refund.Status != consts.RefundFailed, "refund already failure")
+	//utility.Assert(refund.Status != consts.RefundCancelled, "refund already cancelled")
+	//utility.Assert(refund.Status == consts.RefundCreated, "refund not created status")
 	payment := query.GetPaymentByPaymentId(ctx, refund.PaymentId)
-	utility.Assert(payment != nil, "payment not found")
+	if payment == nil {
+		return gerror.New("payment not found")
+	}
 	if refund.Status != consts.RefundCreated {
 		return gerror.New("refund not create status or already success")
 	}
