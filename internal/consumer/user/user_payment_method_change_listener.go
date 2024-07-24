@@ -47,7 +47,7 @@ func (t UserPaymentMethodChangeListener) Consume(ctx context.Context, message *r
 					sub.GatewayId = userGatewayId
 					sub.GatewayDefaultPaymentMethod = userPaymentMethod
 				}
-				if len(sub.LatestInvoiceId) > 0 {
+				if sub != nil && len(sub.LatestInvoiceId) > 0 {
 					invoice := query.GetInvoiceByInvoiceId(ctx, sub.LatestInvoiceId)
 					if invoice != nil && invoice.Status == consts.InvoiceStatusProcessing && (userGatewayId != invoice.GatewayId || userPaymentMethod != invoice.GatewayPaymentMethod) {
 						if len(invoice.PaymentId) == 0 && len(invoice.PaymentLink) == 0 {
